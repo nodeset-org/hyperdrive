@@ -1,16 +1,11 @@
 # Hyperdrive testing image
 
-FROM debian
-# FROM golang
+FROM mcr.microsoft.com/devcontainers/go
 
-# RUN useradd -ms /bin/bash nodeop
-# USER nodeop
-# WORKDIR /home/nodeop
+RUN useradd -ms /bin/bash nodeop
+USER nodeop
+WORKDIR /home/nodeop
 
 # add RP
-# ADD https://github.com/rocket-pool/smartnode-install/releases/latest/download/rocketpool-cli-linux-amd64 ~/bin/rocketpool
-#RUN chmod +x ~/bin/rocketpool
-
-# add Hyperdrive
-# COPY hyperdrive ~/bin/hyperdrive 
-# RUN chmod +x ~/bin/hyperdrive
+ADD https://github.com/rocket-pool/smartnode-install/releases/latest/download/rocketpool-cli-linux-amd64 /home/nodeop/bin/rocketpool
+# RUN chmod +x ~/bin/rocketpool

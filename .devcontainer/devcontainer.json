@@ -1,28 +1,16 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/go
+// For format details, see https://aka.ms/devcontainer.json
 {
-	"name": "Go",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"name": "Hyperdrive",
 	"build": {
-        // Path is relataive to the devcontainer.json file.
         "dockerfile": "Dockerfile"
-    }//,
-	// "features": {
-	// 	"ghcr.io/devcontainers/features/docker-in-docker:2": {}
-	// }
+    },
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+	"remoteUser": "nodeop",	
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "go version",
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+	// Use a different mount and starting point inside the container
+	"workspaceMount": "source=${localWorkspaceFolder},target=/home/nodeop/bin/hyperdrive,type=bind,consistency=cached",
+	"workspaceFolder": "/home/nodeop/bin/hyperdrive"
 }
