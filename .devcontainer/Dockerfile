@@ -11,10 +11,12 @@ WORKDIR /home/nodeop
 # install RP
 USER nodeop
 ADD https://github.com/rocket-pool/smartnode-install/releases/latest/download/rocketpool-cli-linux-amd64 bin/rocketpool
-# TODO: rocketpool installation is supposed to create these directories but does not...
-# RUN mkdir .rocketpool .rocketpool/templates .rocketpool/override
+
 USER root
-RUN chmod +x bin/rocketpool
+RUN groupadd docker \
+    && usermod -aG docker root \
+    && chmod +x bin/rocketpool
+ENV USER root
 RUN bin/rocketpool --allow-root service install -y -p .rocketpool
 
 USER nodeop

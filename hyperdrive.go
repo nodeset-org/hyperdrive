@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	fmt.Println("Hyperdrive initializing...");
 	rpServiceStatus := exec.Command("bash", "rocketpool service status");
 	out,err := rpServiceStatus.Output();
 	if err != nil {
