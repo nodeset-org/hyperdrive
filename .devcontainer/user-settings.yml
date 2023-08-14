@@ -102,10 +102,10 @@ mevBoost:
   bloxRouteRegulatedEnabled: "false"
   containerTag: flashbots/mev-boost:1.6
   edenEnabled: "false"
-  enableRegulatedAllMev: "false"
-  enableRegulatedNoSandwich: "false"
-  enableUnregulatedAllMev: "false"
-  enableUnregulatedNoSandwich: "false"
+  enableRegulatedAllMev: "true"
+  enableRegulatedNoSandwich: "true"
+  enableUnregulatedAllMev: "true"
+  enableUnregulatedNoSandwich: "true"
   externalUrl: ""
   flashbotsEnabled: "false"
   mode: local
