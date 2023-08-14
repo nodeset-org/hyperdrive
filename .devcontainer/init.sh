@@ -1,10 +1,11 @@
-rocketpool service install -y -p .rocketpool \
-    # I'm a cowboy pew pew
-    && chmod -R 777 .rocketpool
+#/bin/sh
+cd ~/bin
+rocketpool --debug service install -y -p .rocketpool \
 
 # dockerd &
 # containerd & 
-rocketpool service start
+cd ~
+rocketpool --debug service start
 cp user-settings.yml .rocketpool/user-settings.yml
 
 echo "Hyperdrive development environment enabled"

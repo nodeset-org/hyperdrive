@@ -6,27 +6,21 @@
 
 FROM mcr.microsoft.com/devcontainers/go
 
-RUN useradd -ms /bin/bash nodeop \
-    && echo "nodeop:nodeop" | chpasswd \
-    && usermod -aG sudo nodeop
-WORKDIR /home/nodeop
+WORKDIR /home/vscode
 
-# install RP
-USER nodeop
-ADD https://github.com/rocket-pool/smartnode-install/releases/latest/download/rocketpool-cli-linux-amd64 bin/rocketpool
+# RUN passwd -d vscode
+
+ADD --chown=vscode:vscode https://github.com/rocket-pool/smartnode-install/releases/latest/download/rocketpool-cli-linux-amd64 bin/rocketpool
 
 USER root
 RUN groupadd docker \
-    && usermod -aG docker nodeop \
+    && usermod -aG docker vscode \
     && chmod +x bin/rocketpool
 
-# RP requires this var to be set, but the noninteractive shell
-# that docker uses doesn't set it by default
-# RUN sudo -u nodeop -i
-# ENV USER root
-# RUN bin/rocketpool --allow-root service install -y -p .rocketpool \
-#     # I'm a cowboy pew pew
-#     && chmod -R 777 .rocketpool
+USER vscode
+#echo devpwd | sudo -S sh 
+# CMD [ "/bin/sh", "-c", "init.sh >> init.log" ]
 
-USER nodeop
-CMD [ "sh", "-c", "init.sh" ]
+WORKDIR /tmp
+COPY init.sh init.sh
+# RUN /bin/sh init.sh >> init.log
