@@ -12,7 +12,7 @@
 
 	// Use a different mount and starting point inside the container
 	"workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/bin/hyperdrive,type=bind,consistency=cached",
-	"workspaceFolder": "/home/vscode/bin/hyperdrive"//,
+	"workspaceFolder": "/home/vscode/bin/hyperdrive",
 
-	//"postCreateCommand": ".devcontainer/init.sh"
+	"overrideCommand": false
 }
