@@ -1,11 +1,11 @@
 #/bin/sh
-cd ~/bin
-rocketpool --debug service install -y -p .rocketpool \
+cd ~
+sudo chown vscode:vscode .rocketpool 
+rocketpool --debug service install -y -p .rocketpool
 
 # dockerd &
-# containerd & 
-cd ~
-rocketpool --debug service start
-cp user-settings.yml .rocketpool/user-settings.yml
+# containerd &
+cp ~/bin/hyperdrive/.devcontainer/user-settings.yml ~/.rocketpool/user-settings.yml
+rocketpool --debug service start -y --ignore-slash-timer
 
-echo "Hyperdrive development environment enabled"
+echo "{::} Hyperdrive development environment enabled! {::}\n"
