@@ -5,10 +5,7 @@ ADD --chown=vscode:vscode https://github.com/rocket-pool/smartnode-install/relea
 
 RUN groupadd docker \
     && usermod -aG docker vscode \
-    && chmod +x bin/rocketpool \
-    && chmod +x .devcontainer/init.sh
+    && chmod +x bin/rocketpool
 
-RUN sh setup.sh
-
-ENTRYPOINT [ "startup.sh" ]
-CMD [ "sleep", "infinity" ]
+# ENTRYPOINT [ "sudo", "-u", "vscode", "sh -c startup.sh" ]
+# CMD [ "sleep", "infinity" ]

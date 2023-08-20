@@ -5,7 +5,6 @@
         "dockerfile": "Dockerfile"
     },
 
-	// this isn't working? Docker isn't starting
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker": {}
 	},
@@ -14,5 +13,7 @@
 	"workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/bin/hyperdrive,type=bind,consistency=cached",
 	"workspaceFolder": "/home/vscode/bin/hyperdrive",
 
-	"overrideCommand": false
+	"postStartCommand": "chmod +x .devcontainer/setup.sh && sh -c .devcontainer/setup.sh >> /home/vscode/setup.log"
+
+	//"overrideCommand": false
 }

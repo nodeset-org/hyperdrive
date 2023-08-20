@@ -1,9 +1,16 @@
 #/bin/sh
 
-## Installs dependencies only when the container is built
+## Runs as a user via postStartCommand from devcontainer.json
 
-su vscode
 cd ~
-sudo chown vscode:vscode .rocketpool 
+
 rocketpool --debug service install -y -p .rocketpool
-cp ~/bin/hyperdrive/.devcontainer/user-settings.yml ~/.rocketpool/user-settings.yml
+cp bin/hyperdrive/.devcontainer/user-settings.yml .rocketpool/user-settings.yml
+
+#sudo dockerd && containerd
+
+rocketpool --debug service start -y --ignore-slash-timer
+
+rocketpool --debug wallet init -p thisisabigtest --confirm-mnemonic
+
+echo "{::} Hyperdrive development environment enabled! {::}\n"
