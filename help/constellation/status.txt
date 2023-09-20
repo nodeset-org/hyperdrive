@@ -1,0 +1,16 @@
+NAME:
+    nodeset constellation status - Show the status of Constellation and the local node
+
+AUTHORS:
+    Mike Leach (mike@nodeset.io)
+    John Mahaswaran (john@nodeset.io)
+
+USAGE:
+    nodeset constellation status [OPTIONS]...
+
+DESCRIPTION:
+Display a summary status of Constellation and the local node, including total earnings (claimed and unclaimed), the address of the node wallet, number of validators running out of the maximum number allowed, and whether Pyxis is reachable.
+
+OPTIONS:
+    --help, -h
+        Display this information

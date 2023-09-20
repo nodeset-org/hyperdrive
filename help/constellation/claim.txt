@@ -1,0 +1,23 @@
+NAME:
+    nodeset constellation claim - Submit a reward claim
+
+AUTHORS:
+    Mike Leach (mike@nodeset.io)
+    John Mahaswaran (john@nodeset.io)
+
+USAGE:
+    nodeset constellation claim [OPTIONS]...
+
+DESCRIPTION:
+Submit a claim for any outstanding rewards accrued from participating in Constellation. 
+
+Claims are transactions, so the node wallet must have enough Ether to pay gas costs.
+
+By default, a claim is made for all unclaimed intervals.
+
+OPTIONS:
+    --help, -h
+        displays this information
+
+    -p, --period=START[:END]    
+        Specify claim period(s) to use. Specify claim period(s) to use. START must be less than or equal to END, if supplied.
