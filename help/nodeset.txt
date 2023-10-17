@@ -13,8 +13,12 @@ VERSION:
     1.0.0
 
 AUTHORS:
-    Mike Leach (mike@nodeset.io)
-    John Mahaswaran (john@nodeset.io)
+    Mike Leach
+    Teddy Clapp
+
+CONTRIBUTE:
+    info@nodeset.io
+    https://github.com/nodeset-org/hyperdrive
 
 USAGE:
     nodeset COMMAND [OPTIONS]...
