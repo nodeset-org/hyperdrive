@@ -1,13 +1,5 @@
 NAME:
     nodeset constellation claim - Submit a reward claim
-
-AUTHORS:
-    Mike Leach
-    Teddy Clapp
-
-CONTRIBUTIONS & BUG REPORTS:
-    info@nodeset.io    
-    https://github.com/nodeset-org/hyperdrive
     
 USAGE:
     nodeset constellation claim [OPTIONS]...
