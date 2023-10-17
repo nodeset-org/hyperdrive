@@ -3,7 +3,11 @@ NAME:
 
 AUTHORS:
     Mike Leach (mike@nodeset.io)
-    John Mahaswaran (john@nodeset.io)
+    Teddy Clapp
+
+CONTRIBUTIONS & BUG REPORTS:
+    info@nodeset.io    
+    https://github.com/nodeset-org/hyperdrive
 
 USAGE:
     nodeset constellation COMMAND [OPTIONS]...
