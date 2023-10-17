@@ -1,14 +1,6 @@
 NAME:
     nodeset constellation initialize - Create or import a connection to Constellation
 
-AUTHORS:
-    Mike Leach (mike@nodeset.io)
-    Teddy Clapp
-
-CONTRIBUTIONS & BUG REPORTS:
-    info@nodeset.io    
-    https://github.com/nodeset-org/hyperdrive
-
 USAGE:
     nodeset constellation initialize [OPTIONS]...
 
