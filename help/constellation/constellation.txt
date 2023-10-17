@@ -1,0 +1,15 @@
+NAME:
+    nodeset constellation - Interact with the Constellation network
+
+USAGE:
+    nodeset constellation COMMAND [OPTIONS]...
+
+COMMANDS:
+    claim       Submit a reward claim
+    exit        Exit Constellation validators
+    initialize  Create or import a connection to Constellation
+    status      Display Constellation network and node status
+
+OPTIONS:
+    --help, -h
+        Display this information

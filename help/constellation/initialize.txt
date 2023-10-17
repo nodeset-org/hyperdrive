@@ -1,0 +1,12 @@
+NAME:
+    nodeset constellation initialize - Create or import a connection to Constellation
+
+USAGE:
+    nodeset constellation initialize [OPTIONS]...
+
+DESCRIPTION:
+Initialize a new connection to Constellation, either via existing node and validator keys or deploying a new a new node. Initialization requires multiple transactions, so the node wallet must have enough ETH to pay gas costs. Once properly initialized, the Constellation service will automatically create validators and continues to validate until explicitly stopped.
+
+OPTIONS:
+    --help, -h
+        displays this information

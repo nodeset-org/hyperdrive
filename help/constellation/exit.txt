@@ -1,0 +1,15 @@
+NAME:
+    nodeset constellation exit - Exit Constellation validators
+
+USAGE:
+    nodeset constellation exit [OPTIONS]...
+
+DESCRIPTION:
+Exits all validators from the Constellation network gracefully. NOs earn rewards for each validator they run, so you should always run as many as possible. Generally, it's only advisable to exit if you plan to exit the system entirely, and by default the command will exit all validators.
+
+OPTIONS:
+    --help, -h
+        displays this information
+
+    -v, --validator=ID    
+        Exit individual validators. This adds liquidity to the system, which is useful to engage in xrETH arbitrage in cases where a discount appears on secondary markets. Note that unless the discount and/or arbitrage size is significant, this is unlikely to be profitable due to the exit queue and the gas fees involved.
