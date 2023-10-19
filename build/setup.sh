@@ -1,6 +1,6 @@
 #/bin/sh
 
-## Runs as a user via postStartCommand from devcontainer.json
+## Runs as a user
 
 cd ~
 
