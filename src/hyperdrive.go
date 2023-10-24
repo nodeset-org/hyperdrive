@@ -23,7 +23,13 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(helloCmd)
+	var startCmd = &cobra.Command{
+		Use:   "start",
+		Short: "Starts the Rocketpool service",
+		Run:   runRocketpoolStart,
+	}
+
+	rootCmd.AddCommand(helloCmd, startCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println("Error:", err)
@@ -37,6 +43,17 @@ func runHyperdrive(cmd *cobra.Command, args []string) {
 	out, err := rpServiceStatus.Output()
 	if err != nil {
 		fmt.Println("Error checking rp service status:", err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+func runRocketpoolStart(cmd *cobra.Command, args []string) {
+	fmt.Println("Starting Rocketpool service...")
+	rpServiceStart := exec.Command("rocketpool", "service", "start")
+	out, err := rpServiceStart.CombinedOutput()
+	if err != nil {
+		fmt.Println("Error starting rp service:", err)
 		return
 	}
 	fmt.Println(string(out))

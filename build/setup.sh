@@ -7,7 +7,7 @@ cd ~
 echo Installing RP service...
 rocketpool --debug service install -y -p .rocketpool
 
-cp bin/hyperdrive/.devcontainer/user-settings.yml .rocketpool/user-settings.yml
+cp bin/hyperdrive/.devcontainer/user-settings.yml ~/.rocketpool/user-settings.yml
 
 echo Starting RP service...
 rocketpool --debug service start -y --ignore-slash-timer
