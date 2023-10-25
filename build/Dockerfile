@@ -41,5 +41,8 @@ COPY build/setup.sh /home/$USERNAME/setup.sh
 RUN chmod +x /home/$USERNAME/setup.sh \
     && sh -c /home/$USERNAME/setup.sh >> /home/$USERNAME/setup.log
 
+#TODO: Make sure the user-settings.yml file is copied over to the correct location
+COPY build/user-settings.yml ~/user-settings.yml
+
 # Switch back to the defined user for any further operations
 USER $USERNAME
