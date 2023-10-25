@@ -7,6 +7,9 @@ ARG USERNAME=testuser
 # Create a new user using the username variable
 RUN useradd -m $USERNAME
 
+# Set password for the created user (e.g., "password123")
+RUN echo "$USERNAME:password" | chpasswd
+
 # Change to the created user
 USER $USERNAME
 
