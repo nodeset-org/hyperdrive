@@ -29,12 +29,23 @@ func main() {
 		Run:   runRocketpoolStart,
 	}
 
-	rootCmd.AddCommand(helloCmd, startCmd)
+	var netstatusCmd = &cobra.Command{
+		Use:   "netstatus",
+		Short: "Check the Rocketpool network status",
+		Run:   runNetStatus,
+	}
+
+	rootCmd.AddCommand(helloCmd, startCmd, netstatusCmd) // Add the netstatusCmd here
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
+}
+
+func runNetStatus(cmd *cobra.Command, args []string) {
+	// Create a new Rocketpool instance
+
 }
 
 func runHyperdrive(cmd *cobra.Command, args []string) {
