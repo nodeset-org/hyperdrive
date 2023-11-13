@@ -7,8 +7,12 @@ ARG USERNAME=testuser
 # Create a new user using the username variable
 RUN useradd -m $USERNAME
 
+# TODO: Env var
 # Set password for the created user (e.g., "password123")
 RUN echo "$USERNAME:password" | chpasswd
+
+RUN echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$USERNAME && \
+    chmod 0440 /etc/sudoers.d/$USERNAME
 
 # Change to the created user
 USER $USERNAME
@@ -34,15 +38,20 @@ RUN go build -o ../bin/hyperdrive hyperdrive.go
 
 # Return to the root user to set permissions
 USER root
-RUN chmod +x /home/$USERNAME/bin/rocketpool
 
 # Add and execute the setup script
 COPY build/setup.sh /home/$USERNAME/setup.sh
-RUN chmod +x /home/$USERNAME/setup.sh \
-    && sh -c /home/$USERNAME/setup.sh >> /home/$USERNAME/setup.log
+
+RUN mkdir -p /home/$USERNAME/.rocketpool && \
+    chmod +x /home/$USERNAME/bin/rocketpool && \
+    chown -R $USERNAME:$USERNAME /etc/apt && \
+    chown -R $USERNAME:$USERNAME /var && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.rocketpool && \
+    chmod +x /home/$USERNAME/setup.sh  && \
+    sh -c /home/$USERNAME/setup.sh >> /home/$USERNAME/setup.log
 
 #TODO: Make sure the user-settings.yml file is copied over to the correct location
-COPY build/user-settings.yml /home/testuser/.rocketpool/user-settings.yml
+COPY build/user-settings.yml /home/$USERNAME/.rocketpool/user-settings.yml
 
 
 # Switch back to the defined user for any further operations

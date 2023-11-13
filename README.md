@@ -7,3 +7,7 @@ brew install ethereum
 
 # Create local Node on goerli for example
 geth --goerli
+
+# Start containers
+./build.sh
+rocketpool service install
