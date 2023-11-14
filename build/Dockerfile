@@ -34,7 +34,7 @@ COPY ./src ./src
 WORKDIR /go/src
 
 # Build the Go application
-RUN go build -o ../bin/hyperdrive hyperdrive.go
+RUN go build -o ../bin/hyperdrive main.go
 
 # Return to the root user to set permissions
 USER root
