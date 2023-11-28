@@ -1,24 +1,45 @@
 package constellation
 
 import (
-    "fmt"
-    "github.com/spf13/cobra"
-    "github.com/nodeset-org/hyperdrive/clients"
+	"fmt"
+	"math/big"
+
+	"github.com/nodeset-org/hyperdrive/services"
+	"github.com/nodeset-org/hyperdrive/validator"
+
+	"github.com/spf13/cobra"
 )
 
+var InitCmd = &cobra.Command{
+	Use:   "init",
+	Short: "todo",
+	Run: func(cmd *cobra.Command, args []string) {
+		// TODO: Fetch URL from user-settings.yml
+		// TODO: Setup Proteus to get Beacon Client node
+		beaconClientManager, error := services.NewBeaconClientManager("https://eth.llamarpc.com")
+		if error != nil {
+			fmt.Printf("Error: %s\n", error)
+		}
 
-var ConstellationCmd = &cobra.Command{
-    Use:   "constellation initialize",
-    Short: "todo",
-    Run: func(cmd *cobra.Command, args []string) {
-        // TODO: Fetch URL from user-settings.yml
-        status, error := eth2_client.CheckStatus("https://eth.llamarpc.com")
+		// EC Manager
+		// ecManager, err := NewExecutionClientManager(cfg)
+		// if err != nil {
+		// 	return nil, fmt.Errorf("error creating executon client manager: %w", err)
+		// }
 
-        if !status {
-            fmt.Printf("Could not connect to ETH2 Client: %s\n", error)
-            return
-        }
+		// Rocket Pool
+		// rp, err := rocketpool.NewRocketPool(
+		// 	ecManager,
+		// 	common.HexToAddress(cfg.Smartnode.GetStorageAddress()),
+		// 	common.HexToAddress(cfg.Smartnode.GetMulticallAddress()),
+		// 	common.HexToAddress(cfg.Smartnode.GetBalanceBatcherAddress()),
+		// )
 
-        fmt.Println("Hyperdrive Constellation successfully initialized.")
-  },
+		depositContext := &validator.DepositContext{}
+		depositContext.Bc = beaconClientManager.PrimaryBc
+		depositContext.Salt = big.NewInt(0)
+
+		fmt.Printf("depositContext: %v\n", depositContext)
+		depositContext.SubmitInitDeposit()
+	},
 }
