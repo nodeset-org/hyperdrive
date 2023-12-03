@@ -10,6 +10,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gorilla/mux"
+	"github.com/rocket-pool/smartnode/rocketpool/common/log"
+	"github.com/rocket-pool/smartnode/rocketpool/common/services"
 )
 
 const (
@@ -39,7 +41,6 @@ func NewApiManager(sp *services.ServiceProvider) *ApiManager {
 		log: log.NewColorLogger(ApiLogColor),
 		handlers: []IHandler{
 			example.NewExampleHandler(sp),
-
 		},
 		socketPath: cfg.Smartnode.GetSocketPath(),
 		router:     router,
@@ -55,7 +56,6 @@ func NewApiManager(sp *services.ServiceProvider) *ApiManager {
 
 	return mgr
 }
-
 
 // Starts listening for incoming HTTP requests
 func (m *ApiManager) Start() error {
@@ -93,4 +93,3 @@ func (m *ApiManager) Stop() error {
 
 	return nil
 }
-
