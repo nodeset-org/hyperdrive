@@ -28,17 +28,17 @@ ADD --chown=$USERNAME:$USERNAME https://github.com/rocket-pool/smartnode-install
 # ADD --chown=$USERNAME:$USERNAME ../bin/* /home/$USERNAME/hyperdrive/
 
 # Only copy over necessary go related files
+COPY ./hyperdrive-daemon ./hyperdrive-daemon
 COPY ./hyperdrive ./hyperdrive
-COPY ./hyperdrive-cli ./hyperdrive-cli
 
-COPY ./go.mod ./hyperdrive-cli/go.mod
-COPY ./go.sum ./hyperdrive-cli/go.sum
+COPY ./go.mod ./hyperdrive/go.mod
+COPY ./go.sum ./hyperdrive/go.sum
 
 # Set working directory
-WORKDIR /go/hyperdrive-cli
+WORKDIR /go/hyperdrive
 
 # Build the Go application
-RUN go build -o ../bin/hyperdrive-cli main.go
+RUN go build -o ../bin/hyperdrive main.go
 
 # Return to the root user to set permissions
 USER root
