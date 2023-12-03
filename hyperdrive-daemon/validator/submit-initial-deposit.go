@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/nodeset-org/hyperdrive/services"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
 	"github.com/rocket-pool/rocketpool-go/node"
 )
 

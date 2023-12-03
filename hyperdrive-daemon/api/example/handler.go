@@ -2,7 +2,7 @@ package example
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/services"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
 )
 
 // Context factories can implement this generally so they can register themselves with an HTTP router.
