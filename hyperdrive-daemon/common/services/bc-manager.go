@@ -2,11 +2,6 @@
 package services
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-
 	"golang.org/x/sync/errgroup"
 )
 
@@ -78,73 +73,72 @@ type SimpleBeaconClient struct {
 	providerAddress string
 }
 
-// TODO: Ask Joe - I'm not sure what this comment means
 // Make a GET request but do not read its body yet (allows buffered decoding)
-func (sbc *SimpleBeaconClient) getRequestReader(requestPath string) (io.ReadCloser, int, error) {
-	fmt.Printf("RequestUrlFormat: %s\n", RequestUrlFormat)
-	fmt.Printf("sbc.providerAddress: %s\n", sbc.providerAddress)
-	fmt.Printf("requestPath: %s\n", requestPath)
-	// Send request
-	response, err := http.Get(fmt.Sprintf(RequestUrlFormat, sbc.providerAddress, requestPath))
-	if err != nil {
-		return nil, 0, err
-	}
+// func (sbc *SimpleBeaconClient) getRequestReader(requestPath string) (io.ReadCloser, int, error) {
+// 	fmt.Printf("RequestUrlFormat: %s\n", RequestUrlFormat)
+// 	fmt.Printf("sbc.providerAddress: %s\n", sbc.providerAddress)
+// 	fmt.Printf("requestPath: %s\n", requestPath)
+// 	// Send request
+// 	response, err := http.Get(fmt.Sprintf(RequestUrlFormat, sbc.providerAddress, requestPath))
+// 	if err != nil {
+// 		return nil, 0, err
+// 	}
 
-	return response.Body, response.StatusCode, nil
-}
+// 	return response.Body, response.StatusCode, nil
+// }
 
-// Make a GET request to the beacon node and read the body of the response
-func (sbc *SimpleBeaconClient) getRequest(requestPath string) ([]byte, int, error) {
+// // Make a GET request to the beacon node and read the body of the response
+// func (sbc *SimpleBeaconClient) getRequest(requestPath string) ([]byte, int, error) {
 
-	// Send request
-	reader, status, err := sbc.getRequestReader(requestPath)
-	if err != nil {
-		return []byte{}, 0, err
-	}
-	defer func() {
-		_ = reader.Close()
-	}()
+// 	// Send request
+// 	reader, status, err := sbc.getRequestReader(requestPath)
+// 	if err != nil {
+// 		return []byte{}, 0, err
+// 	}
+// 	defer func() {
+// 		_ = reader.Close()
+// 	}()
 
-	// Get response
-	body, err := io.ReadAll(reader)
-	if err != nil {
-		return []byte{}, 0, err
-	}
+// 	// Get response
+// 	body, err := io.ReadAll(reader)
+// 	if err != nil {
+// 		return []byte{}, 0, err
+// 	}
 
-	// Return
-	return body, status, nil
-}
+// 	// Return
+// 	return body, status, nil
+// }
 
-func (sbc *SimpleBeaconClient) getEth2Config() (Eth2ConfigResponse, error) {
+// func (sbc *SimpleBeaconClient) getEth2Config() (Eth2ConfigResponse, error) {
 
-	responseBody, status, err := sbc.getRequest(RequestEth2ConfigPath)
-	if err != nil {
-		return Eth2ConfigResponse{}, fmt.Errorf("could not get eth2 config: %w", err)
-	}
-	if status != http.StatusOK {
-		return Eth2ConfigResponse{}, fmt.Errorf("could not get eth2 config: HTTP status %d; response body: '%s'", status, string(responseBody))
-	}
-	var eth2Config Eth2ConfigResponse
-	if err := json.Unmarshal(responseBody, &eth2Config); err != nil {
-		return Eth2ConfigResponse{}, fmt.Errorf("could not decode eth2 config: %w", err)
-	}
-	return eth2Config, nil
-}
+// 	responseBody, status, err := sbc.getRequest(RequestEth2ConfigPath)
+// 	if err != nil {
+// 		return Eth2ConfigResponse{}, fmt.Errorf("could not get eth2 config: %w", err)
+// 	}
+// 	if status != http.StatusOK {
+// 		return Eth2ConfigResponse{}, fmt.Errorf("could not get eth2 config: HTTP status %d; response body: '%s'", status, string(responseBody))
+// 	}
+// 	var eth2Config Eth2ConfigResponse
+// 	if err := json.Unmarshal(responseBody, &eth2Config); err != nil {
+// 		return Eth2ConfigResponse{}, fmt.Errorf("could not decode eth2 config: %w", err)
+// 	}
+// 	return eth2Config, nil
+// }
 
-func (sbc *SimpleBeaconClient) getGenesis() (GenesisResponse, error) {
-	responseBody, status, err := sbc.getRequest(RequestGenesisPath)
-	if err != nil {
-		return GenesisResponse{}, fmt.Errorf("could not get genesis data: %w", err)
-	}
-	if status != http.StatusOK {
-		return GenesisResponse{}, fmt.Errorf("could not get genesis data: HTTP status %d; response body: '%s'", status, string(responseBody))
-	}
-	var genesis GenesisResponse
-	if err := json.Unmarshal(responseBody, &genesis); err != nil {
-		return GenesisResponse{}, fmt.Errorf("could not decode genesis: %w", err)
-	}
-	return genesis, nil
-}
+// func (sbc *SimpleBeaconClient) getGenesis() (GenesisResponse, error) {
+// 	responseBody, status, err := sbc.getRequest(RequestGenesisPath)
+// 	if err != nil {
+// 		return GenesisResponse{}, fmt.Errorf("could not get genesis data: %w", err)
+// 	}
+// 	if status != http.StatusOK {
+// 		return GenesisResponse{}, fmt.Errorf("could not get genesis data: HTTP status %d; response body: '%s'", status, string(responseBody))
+// 	}
+// 	var genesis GenesisResponse
+// 	if err := json.Unmarshal(responseBody, &genesis); err != nil {
+// 		return GenesisResponse{}, fmt.Errorf("could not decode genesis: %w", err)
+// 	}
+// 	return genesis, nil
+// }
 
 // This is a signature for a wrapped Beacon client function that returns 1 var and an error
 // type bcFunction1 func(BeaconClientInterface) (interface{}, error)
