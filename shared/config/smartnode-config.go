@@ -1,11 +1,43 @@
 package config
 
+import (
+	"path/filepath"
+)
+
+// Constants
+const (
+	// smartnodeTag                       string = "rocketpool/smartnode:v" + shared.RocketPoolVersion
+	// pruneProvisionerTag                string = "rocketpool/eth1-prune-provision:v0.0.1"
+	// ecMigratorTag                      string = "rocketpool/ec-migrator:v1.0.0"
+	// NetworkID                          string = "network"
+	// ProjectNameID                      string = "projectName"
+	// SnapshotID                         string = "rocketpool-dao.eth"
+	// RewardsTreeFilenameFormat          string = "rp-rewards-%s-%d.json"
+	// MinipoolPerformanceFilenameFormat  string = "rp-minipool-performance-%s-%d.json"
+	// RewardsTreeIpfsExtension           string = ".zst"
+	// RewardsTreesFolder                 string = "rewards-trees"
+	DaemonDataPath string = "/.rocketpool/data"
+	// WatchtowerFolder                   string = "watchtower"
+	// WatchtowerStateFile                string = "state.yml"
+	// RegenerateRewardsTreeRequestSuffix string = ".request"
+	// RegenerateRewardsTreeRequestFormat string = "%d" + RegenerateRewardsTreeRequestSuffix
+	// PrimaryRewardsFileUrl              string = "https://%s.ipfs.dweb.link/%s"
+	// SecondaryRewardsFileUrl            string = "https://ipfs.io/ipfs/%s/%s"
+	// GithubRewardsFileUrl               string = "https://github.com/rocket-pool/rewards-trees/raw/main/%s/%s"
+	// FeeRecipientFilename               string = "rp-fee-recipient.txt"
+	// NativeFeeRecipientFilename         string = "rp-fee-recipient-env.txt"
+	SocketFilename string = "smartnode.sock"
+	// NodeAddressFilename                string = "address"
+	// WalletKeystoreFilename             string = "wallet"
+	// WalletPasswordFilename             string = "password"
+)
+
 // Configuration for the Smartnode
 type SmartnodeConfig struct {
 	Title string `yaml:"-"`
 
 	// The parent config
-	// parent *RocketPoolConfig
+	parent *RocketPoolConfig
 
 	////////////////////////////
 	// User-editable settings //
@@ -150,4 +182,12 @@ type SmartnodeConfig struct {
 
 	// // The FlashBots Protect RPC endpoint
 	// flashbotsProtectUrl map[Network]string `yaml:"-"`
+}
+
+func (cfg *SmartnodeConfig) GetSocketPath() string {
+	if !cfg.parent.IsNativeMode {
+		return filepath.Join(DaemonDataPath, SocketFilename)
+	}
+
+	return filepath.Join(cfg.DataPath.Value.(string), SocketFilename)
 }
