@@ -10,8 +10,9 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gorilla/mux"
-	"github.com/rocket-pool/smartnode/rocketpool/common/log"
-	"github.com/rocket-pool/smartnode/rocketpool/common/services"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/example"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/log"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
 )
 
 const (

@@ -15,7 +15,7 @@ type ExampleHandler struct {
 	factories       []IContextFactory
 }
 
-func NewAuctionHandler(serviceProvider *services.ServiceProvider) *ExampleHandler {
+func NewExampleHandler(serviceProvider *services.ServiceProvider) *ExampleHandler {
 	h := &ExampleHandler{
 		serviceProvider: serviceProvider,
 	}
