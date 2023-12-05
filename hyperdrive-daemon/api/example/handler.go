@@ -50,7 +50,7 @@ func (f *exampleContextFactory) Create(vars map[string]string) (*exampleContext,
 
 func (f *exampleContextFactory) RegisterRoute(router *mux.Router) {
 	RegisterSingleStageRoute(
-		router, "example-function-name",
+		router, "blah",
 	)
 }
 

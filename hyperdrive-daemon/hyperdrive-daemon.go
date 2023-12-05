@@ -8,10 +8,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	// Use:   "hyperdrive",
-	Short: "Hyperdrive initialization and Rocketpool service status check",
+	Short: "Hyperdrive daemon init",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("hyperdrive")
+		fmt.Println("hyperdrive daemon")
 	},
 }
 
@@ -19,7 +18,7 @@ var InitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "todo",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print("hello world\n")
+		fmt.Print("daemon init\n")
 	},
 }
 

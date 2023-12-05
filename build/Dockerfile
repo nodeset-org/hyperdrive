@@ -34,10 +34,16 @@ COPY ./hyperdrive ./hyperdrive
 COPY ./go.mod ./hyperdrive/go.mod
 COPY ./go.sum ./hyperdrive/go.sum
 
-# Set working directory
-WORKDIR /go/hyperdrive
+COPY ./go.mod ./hyperdrive-daemon/go.mod
+COPY ./go.sum ./hyperdrive-daemon/go.sum
 
-# Build the Go application
+# Set working directory and build the Go application
+WORKDIR /go/hyperdrive-daemon
+RUN go build -o ../bin/hyperdrive-daemon hyperdrive-daemon.go
+
+
+# Set working directory and build the Go application
+WORKDIR /go/hyperdrive
 RUN go build -o ../bin/hyperdrive main.go
 
 # Return to the root user to set permissions
