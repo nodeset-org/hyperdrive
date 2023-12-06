@@ -50,3 +50,5 @@ require (
 	golang.org/x/tools v0.14.0 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
+
+// replace github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api => ./hyperdrive-daemon/api

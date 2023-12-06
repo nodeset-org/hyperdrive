@@ -24,9 +24,6 @@ RUN mkdir -p /home/$USERNAME/bin && \
 # Add rocketpool
 ADD --chown=$USERNAME:$USERNAME https://github.com/rocket-pool/smartnode-install/releases/latest/download/rocketpool-cli-linux-amd64 /home/$USERNAME/bin/rocketpool
 
-# Add compiled Go files
-# ADD --chown=$USERNAME:$USERNAME ../bin/* /home/$USERNAME/hyperdrive/
-
 # Only copy over necessary go related files
 COPY ./hyperdrive-daemon ./hyperdrive-daemon
 COPY ./hyperdrive ./hyperdrive
@@ -43,7 +40,7 @@ RUN go build -o ../bin/hyperdrive main.go
 
 # Set working directory and build the Go application
 WORKDIR /go/hyperdrive-daemon
-RUN go build -o ../bin/hyperdrive-daemon hyperdrive-daemon.go
+RUN go build -o ../bin/hyperdrive-daemon main.go
 
 # # Return to the root user to set permissions
 # USER root
