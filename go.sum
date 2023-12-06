@@ -90,6 +90,8 @@ github.com/rocket-pool/batch-query v1.0.0 h1:5HejmT1n1fIdLIqUhTNwbkG2PGOPl3IVjCp
 github.com/rocket-pool/batch-query v1.0.0/go.mod h1:d1CmxShzk0fioJ4yX0eFGhz2an1odnW/LZ2cp3eDGIQ=
 github.com/rocket-pool/rocketpool-go v1.10.1-0.20231107170400-396c46e5d7ea h1:D6EbMKWhq8zqGVcTyRA2guXxXnuTPKttjWhR/QvJ+kc=
 github.com/rocket-pool/rocketpool-go v1.10.1-0.20231107170400-396c46e5d7ea/go.mod h1:PsaLdIQVAktBtd6iQj3ueCe9OgDuDdf/jvSgKFIHIyM=
+github.com/rocket-pool/smartnode v1.11.0 h1:H6/QaEUTVQ1sXK+p8VXOZDOYMlSVlKvqyYhfa+C61dY=
+github.com/rocket-pool/smartnode v1.11.0/go.mod h1:Y7Uh3lAymKA/lxgqMwHCwiegs7dJPG5OuSFvNXvCeW8=
 github.com/rogpeppe/go-internal v1.11.0 h1:cWPaGQEPrBb5/AsnsZesgZZ9yb1OQ+GOISoDNXVBh4M=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/shirou/gopsutil v3.21.11+incompatible h1:+1+c1VGhc88SSonWP6foOcLhvnKlUeu/erjjvaPEYiI=

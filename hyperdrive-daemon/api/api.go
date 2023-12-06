@@ -10,9 +10,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/example"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/log"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
 )
 
 const (
@@ -32,18 +30,19 @@ type ApiManager struct {
 	router     *mux.Router
 }
 
-func NewApiManager(sp *services.ServiceProvider) *ApiManager {
+// parameter: sp *services.ServiceProvider
+func NewApiManager() *ApiManager {
 	// Create the router
 	router := mux.NewRouter()
 
 	// Create the manager
-	cfg := sp.GetConfig()
+	// cfg := sp.GetConfig()
 	mgr := &ApiManager{
 		log: log.NewColorLogger(ApiLogColor),
-		handlers: []IHandler{
-			example.NewExampleHandler(sp),
-		},
-		socketPath: cfg.Smartnode.GetSocketPath(),
+		// handlers: []IHandler{
+		// 	example.NewExampleHandler(sp),
+		// },
+		socketPath: "some-path-for-now", //cfg.Smartnode.GetSocketPath(),
 		router:     router,
 		server: http.Server{
 			Handler: router,
