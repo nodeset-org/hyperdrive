@@ -38,30 +38,29 @@ COPY ./go.mod ./hyperdrive-daemon/go.mod
 COPY ./go.sum ./hyperdrive-daemon/go.sum
 
 # Set working directory and build the Go application
-WORKDIR /go/hyperdrive-daemon
-RUN go build -o ../bin/hyperdrive-daemon hyperdrive-daemon.go
-
-
-# Set working directory and build the Go application
 WORKDIR /go/hyperdrive
 RUN go build -o ../bin/hyperdrive main.go
 
-# Return to the root user to set permissions
-USER root
+# Set working directory and build the Go application
+WORKDIR /go/hyperdrive-daemon
+RUN go build -o ../bin/hyperdrive-daemon hyperdrive-daemon.go
 
-# Add and execute the setup script
-COPY build/setup.sh /home/$USERNAME/setup.sh
+# # Return to the root user to set permissions
+# USER root
 
-RUN mkdir -p /home/$USERNAME/.rocketpool && \
-    chmod +x /home/$USERNAME/bin/rocketpool && \
-    chown -R $USERNAME:$USERNAME /etc/apt && \
-    chown -R $USERNAME:$USERNAME /var && \
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.rocketpool && \
-    chmod +x /home/$USERNAME/setup.sh  && \
-    sh -c /home/$USERNAME/setup.sh >> /home/$USERNAME/setup.log
+# # Add and execute the setup script
+# COPY build/setup.sh /home/$USERNAME/setup.sh
 
-#TODO: Make sure the user-settings.yml file is copied over to the correct location
-COPY build/user-settings.yml /home/$USERNAME/.rocketpool/user-settings.yml
+# RUN mkdir -p /home/$USERNAME/.rocketpool && \
+#     chmod +x /home/$USERNAME/bin/rocketpool && \
+#     chown -R $USERNAME:$USERNAME /etc/apt && \
+#     chown -R $USERNAME:$USERNAME /var && \
+#     chown -R $USERNAME:$USERNAME /home/$USERNAME/.rocketpool && \
+#     chmod +x /home/$USERNAME/setup.sh  && \
+#     sh -c /home/$USERNAME/setup.sh >> /home/$USERNAME/setup.log
 
-# Switch back to the defined user for any further operations
-USER $USERNAME
+# #TODO: Make sure the user-settings.yml file is copied over to the correct location
+# COPY build/user-settings.yml /home/$USERNAME/.rocketpool/user-settings.yml
+
+# # Switch back to the defined user for any further operations
+# USER $USERNAME
