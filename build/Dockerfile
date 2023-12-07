@@ -44,22 +44,22 @@ COPY ./go.sum ./hyperdrive/go.sum
 WORKDIR /go/hyperdrive-daemon
 RUN go build -o ../bin/hyperdrive-daemon main.go
 
-# # Return to the root user to set permissions
-# USER root
+# Return to the root user to set permissions
+USER root
 
-# # Add and execute the setup script
-# COPY build/setup.sh /home/$USERNAME/setup.sh
+# Add and execute the setup script
+COPY build/setup.sh /home/$USERNAME/setup.sh
 
-# RUN mkdir -p /home/$USERNAME/.rocketpool && \
-#     chmod +x /home/$USERNAME/bin/rocketpool && \
-#     chown -R $USERNAME:$USERNAME /etc/apt && \
-#     chown -R $USERNAME:$USERNAME /var && \
-#     chown -R $USERNAME:$USERNAME /home/$USERNAME/.rocketpool && \
-#     chmod +x /home/$USERNAME/setup.sh  && \
-#     sh -c /home/$USERNAME/setup.sh >> /home/$USERNAME/setup.log
+RUN mkdir -p /home/$USERNAME/.rocketpool && \
+    chmod +x /home/$USERNAME/bin/rocketpool && \
+    chown -R $USERNAME:$USERNAME /etc/apt && \
+    chown -R $USERNAME:$USERNAME /var && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.rocketpool && \
+    chmod +x /home/$USERNAME/setup.sh  && \
+    sh -c /home/$USERNAME/setup.sh >> /home/$USERNAME/setup.log
 
-# #TODO: Make sure the user-settings.yml file is copied over to the correct location
-# COPY build/user-settings.yml /home/$USERNAME/.rocketpool/user-settings.yml
+#TODO: Make sure the user-settings.yml file is copied over to the correct location
+COPY build/user-settings.yml /home/$USERNAME/.rocketpool/user-settings.yml
 
-# # Switch back to the defined user for any further operations
-# USER $USERNAME
+# Switch back to the defined user for any further operations
+USER $USERNAME
