@@ -1,6 +1,5 @@
 # Hyperdrive testing image
 FROM mcr.microsoft.com/devcontainers/go
-
 # Declare username variable
 ARG USERNAME=testuser
 
@@ -26,21 +25,21 @@ ADD --chown=$USERNAME:$USERNAME https://github.com/rocket-pool/smartnode-install
 
 # Only copy over necessary go related files
 COPY ./hyperdrive-daemon ./hyperdrive-daemon
-COPY ./hyperdrive ./hyperdrive
+# COPY ./hyperdrive ./hyperdrive
 
-COPY ./go.mod ./hyperdrive/go.mod
-COPY ./go.sum ./hyperdrive/go.sum
+# COPY ./go.mod ./hyperdrive/go.mod
+# COPY ./go.sum ./hyperdrive/go.sum
 
 COPY ./go.mod ./hyperdrive-daemon/go.mod
 COPY ./go.sum ./hyperdrive-daemon/go.sum
 
 # Set working directory and build the Go application
-WORKDIR /go/hyperdrive
-RUN go build -o ../bin/hyperdrive main.go
+# WORKDIR /go/hyperdrive
+# RUN go build -o ../bin/hyperdrive main.go
 
 # Set working directory and build the Go application
 WORKDIR /go/hyperdrive-daemon
-RUN go build -o ../bin/hyperdrive-daemon main.go
+# RUN go build -o ../bin/hyperdrive-daemon main.go
 
 # # Return to the root user to set permissions
 # USER root
