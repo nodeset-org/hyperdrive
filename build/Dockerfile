@@ -26,14 +26,12 @@ ADD --chown=$USERNAME:$USERNAME https://github.com/rocket-pool/smartnode-install
 # Only copy over necessary go related files
 RUN mkdir -p ./hyperdrive-daemon
 COPY ./hyperdrive-daemon/main.go ./hyperdrive-daemon
-# Hack because of how go.mod works
 COPY ./hyperdrive-daemon ./hyperdrive-daemon/hyperdrive-daemon
 COPY ./go.mod ./hyperdrive-daemon/go.mod
 COPY ./go.sum ./hyperdrive-daemon/go.sum
 
 RUN mkdir -p ./hyperdrive
 COPY ./hyperdrive/main.go ./hyperdrive
-# Hack because of how go.mod works
 COPY ./hyperdrive ./hyperdrive/hyperdrive
 COPY ./go.mod ./hyperdrive/go.mod
 COPY ./go.sum ./hyperdrive/go.sum
