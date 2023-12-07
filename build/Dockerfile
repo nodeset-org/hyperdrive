@@ -24,16 +24,19 @@ RUN mkdir -p /home/$USERNAME/bin && \
 ADD --chown=$USERNAME:$USERNAME https://github.com/rocket-pool/smartnode-install/releases/latest/download/rocketpool-cli-linux-amd64 /home/$USERNAME/bin/rocketpool
 
 # Only copy over necessary go related files
-COPY ./hyperdrive-daemon ./hyperdrive-daemon
+RUN mkdir -p ./hyperdrive-daemon
+COPY ./hyperdrive-daemon/main.go ./hyperdrive-daemon
 # Hack because of how go.mod works
 COPY ./hyperdrive-daemon ./hyperdrive-daemon/hyperdrive-daemon
-# COPY ./hyperdrive ./hyperdrive
-
-# COPY ./go.mod ./hyperdrive/go.mod
-# COPY ./go.sum ./hyperdrive/go.sum
-
 COPY ./go.mod ./hyperdrive-daemon/go.mod
 COPY ./go.sum ./hyperdrive-daemon/go.sum
+
+RUN mkdir -p ./hyperdrive
+COPY ./hyperdrive/main.go ./hyperdrive
+# Hack because of how go.mod works
+COPY ./hyperdrive ./hyperdrive/hyperdrive
+COPY ./go.mod ./hyperdrive/go.mod
+COPY ./go.sum ./hyperdrive/go.sum
 
 # Set working directory and build the Go application
 # WORKDIR /go/hyperdrive
@@ -41,7 +44,7 @@ COPY ./go.sum ./hyperdrive-daemon/go.sum
 
 # Set working directory and build the Go application
 WORKDIR /go/hyperdrive-daemon
-# RUN go build -o ../bin/hyperdrive-daemon main.go
+RUN go build -o ../bin/hyperdrive-daemon main.go
 
 # # Return to the root user to set permissions
 # USER root
