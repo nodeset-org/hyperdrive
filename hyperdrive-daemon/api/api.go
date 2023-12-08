@@ -60,6 +60,7 @@ func NewApiManager() *ApiManager {
 // Starts listening for incoming HTTP requests
 func (m *ApiManager) Start() error {
 	// Create the socket
+	fmt.Print("creating socket!!!\n")
 	socket, err := net.Listen("unix", m.socketPath)
 	if err != nil {
 		return fmt.Errorf("error creating socket: %w", err)
@@ -68,6 +69,7 @@ func (m *ApiManager) Start() error {
 
 	// Start listening
 	go func() {
+		fmt.Print("starting server!!!\n")
 		err := m.server.Serve(socket)
 		if !errors.Is(err, http.ErrServerClosed) {
 			m.log.Printlnf("error while listening for HTTP requests: %s", err.Error())
