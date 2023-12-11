@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/services/beacon"
 	"github.com/rocket-pool/rocketpool-go/node"
 )
 
 type DepositContext struct {
 	// cfg *config.RocketPoolConfig
 	// rp *rocketpool.RocketPool
-	Bc services.BeaconClientInterface
+	Bc beacon.Client
 	// w   *wallet.LocalWallet
 
 	// amount     *big.Int
