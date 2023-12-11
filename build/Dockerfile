@@ -1,6 +1,5 @@
 # Hyperdrive testing image
 FROM mcr.microsoft.com/devcontainers/go
-
 # Declare username variable
 ARG USERNAME=testuser
 
@@ -24,17 +23,26 @@ RUN mkdir -p /home/$USERNAME/bin && \
 # Add rocketpool
 ADD --chown=$USERNAME:$USERNAME https://github.com/rocket-pool/smartnode-install/releases/latest/download/rocketpool-cli-linux-amd64 /home/$USERNAME/bin/rocketpool
 
-# Add compiled Go files
-# ADD --chown=$USERNAME:$USERNAME ../bin/* /home/$USERNAME/hyperdrive/
-
 # Only copy over necessary go related files
-COPY ./src ./src
+RUN mkdir -p ./hyperdrive-daemon
+COPY ./hyperdrive-daemon/main.go ./hyperdrive-daemon
+COPY ./hyperdrive-daemon ./hyperdrive-daemon/hyperdrive-daemon
+COPY ./go.mod ./hyperdrive-daemon/go.mod
+COPY ./go.sum ./hyperdrive-daemon/go.sum
 
-# Set working directory
-WORKDIR /go/src
+RUN mkdir -p ./hyperdrive
+COPY ./hyperdrive/main.go ./hyperdrive
+COPY ./hyperdrive ./hyperdrive/hyperdrive
+COPY ./go.mod ./hyperdrive/go.mod
+COPY ./go.sum ./hyperdrive/go.sum
 
-# Build the Go application
-RUN go build -o ../bin/hyperdrive main.go
+# Set working directory and build the Go application
+# WORKDIR /go/hyperdrive
+# RUN go build -o ../bin/hyperdrive main.go
+
+# Set working directory and build the Go application
+WORKDIR /go/hyperdrive-daemon
+RUN go build -o ../bin/hyperdrive-daemon main.go
 
 # Return to the root user to set permissions
 USER root
@@ -52,7 +60,6 @@ RUN mkdir -p /home/$USERNAME/.rocketpool && \
 
 #TODO: Make sure the user-settings.yml file is copied over to the correct location
 COPY build/user-settings.yml /home/$USERNAME/.rocketpool/user-settings.yml
-
 
 # Switch back to the defined user for any further operations
 USER $USERNAME
