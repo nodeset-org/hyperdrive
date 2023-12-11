@@ -1,3 +1,11 @@
+# The builder for building the daemon
+FROM golang:1.21-bookworm AS builder
+COPY . /hyperdrive
+ENV CGO_ENABLED=1
+ENV CGO_CFLAGS="-O -D__BLST_PORTABLE__"
+RUN cd /hyperdrive/hyperdrive-daemon && go build
+
+# The actual image
 FROM debian:bookworm-slim
 RUN apt update && \
 	# Install dependencies
@@ -15,4 +23,6 @@ RUN apt update && \
 	apt clean && \
         rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT ["sh", "-c"]
+# Grab the daemon from the builder
+COPY --from=builder /hyperdrive/hyperdrive-daemon/hyperdrive-daemon /usr/local/bin/hyperdrive-daemon
+ENTRYPOINT ["hyperdrive-daemon"]
