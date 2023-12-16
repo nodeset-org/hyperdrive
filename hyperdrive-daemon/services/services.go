@@ -5,33 +5,50 @@ import (
 	"os"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/rocketpool-go/rocketpool"
-
-	"github.com/rocket-pool/smartnode/shared/services/config"
 )
 
 // A container for all of the various services used by the Smartnode
 type ServiceProvider struct {
-	cfg        *config.RocketPoolConfig
+	cfg        *config.HyperdriveConfig
 	rocketPool *rocketpool.RocketPool
 	ecManager  *ExecutionClientManager
 	bcManager  *BeaconClientManager
 }
 
 // Creates a new ServiceProvider instance
-func NewServiceProvider(settingsPath string) (*ServiceProvider, error) {
+func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
 	// Config
-	settingsFile := os.ExpandEnv(settingsPath)
-	cfg, err := loadRpConfigFromFile(settingsFile)
+	cfg, err := loadConfigFromFile(os.ExpandEnv(cfgPath))
 	if err != nil {
-		return nil, fmt.Errorf("error loading Smartnode config: %w", err)
+		return nil, fmt.Errorf("error loading hyperdrive config: %w", err)
 	}
 	if cfg == nil {
-		return nil, fmt.Errorf("Smartnode config settings file [%s] not found", settingsFile)
+		return nil, fmt.Errorf("hyperdrive config settings file [%s] not found", cfgPath)
+	}
+
+	// Return an "empty" config if the Smartnode config doesn't exist
+	smartnodeCfg := cfg.SmartnodeConfig
+	if smartnodeCfg == nil {
+		var err error
+		switch cfg.SmartnodeStatus {
+		case config.SmartnodeStatus_EmptyDir:
+			err = fmt.Errorf("smartnode config directory has not been set yet")
+		case config.SmartnodeStatus_InvalidConfig:
+			err = fmt.Errorf("invalid smartnode config file: %s", cfg.SmartnodeConfigLoadErrorMessage)
+		case config.SmartnodeStatus_InvalidDir:
+			err = fmt.Errorf("invalid smartnode path: %s", cfg.SmartnodeConfigLoadErrorMessage)
+		case config.SmartnodeStatus_MissingCfg:
+			err = fmt.Errorf("the smartnode config file does not exist in the provided path")
+		case config.SmartnodeStatus_Unknown:
+			err = fmt.Errorf("unknown error")
+		}
+		return nil, fmt.Errorf("smartnode could not be loaded: %w", err)
 	}
 
 	// EC Manager
-	ecManager, err := NewExecutionClientManager(cfg)
+	ecManager, err := NewExecutionClientManager(cfg.SmartnodeConfig)
 	if err != nil {
 		return nil, fmt.Errorf("error creating executon client manager: %w", err)
 	}
@@ -39,16 +56,16 @@ func NewServiceProvider(settingsPath string) (*ServiceProvider, error) {
 	// Rocket Pool
 	rp, err := rocketpool.NewRocketPool(
 		ecManager,
-		common.HexToAddress(cfg.Smartnode.GetStorageAddress()),
-		common.HexToAddress(cfg.Smartnode.GetMulticallAddress()),
-		common.HexToAddress(cfg.Smartnode.GetBalanceBatcherAddress()),
+		common.HexToAddress(smartnodeCfg.Smartnode.GetStorageAddress()),
+		common.HexToAddress(smartnodeCfg.Smartnode.GetMulticallAddress()),
+		common.HexToAddress(smartnodeCfg.Smartnode.GetBalanceBatcherAddress()),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error creating Rocket Pool binding: %w", err)
 	}
 
 	// Beacon manager
-	bcManager, err := NewBeaconClientManager(cfg)
+	bcManager, err := NewBeaconClientManager(smartnodeCfg)
 	if err != nil {
 		return nil, fmt.Errorf("error creating Beacon client manager: %w", err)
 	}
@@ -67,7 +84,7 @@ func NewServiceProvider(settingsPath string) (*ServiceProvider, error) {
 // === Getters ===
 // ===============
 
-func (p *ServiceProvider) GetSmartnodeConfig() *config.RocketPoolConfig {
+func (p *ServiceProvider) GetConfig() *config.HyperdriveConfig {
 	return p.cfg
 }
 
@@ -87,8 +104,8 @@ func (p *ServiceProvider) GetBeaconClient() *BeaconClientManager {
 // === Utils ===
 // =============
 
-// Loads a Smartnode config without updating it if it exists
-func loadRpConfigFromFile(path string) (*config.RocketPoolConfig, error) {
+// Loads a Hyperdrive config without updating it if it exists
+func loadConfigFromFile(path string) (*config.HyperdriveConfig, error) {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		return nil, nil

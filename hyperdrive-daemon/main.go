@@ -21,11 +21,10 @@ func main() {
 			fmt.Println("hyperdrive daemon")
 		},
 	}
-	debugFlag := rootCmd.PersistentFlags().BoolP("debug", "d", false, "enable debug-mode, where the command is simply echo'd instead of executed")
 
 	initCmd := &cobra.Command{
-		Use:   "init smartnode-settings-path socket-path",
-		Short: "todo",
+		Use:   "run hyperdrive-config-path",
+		Short: "Run the Daemon",
 		Args: func(cmd *cobra.Command, args []string) error {
 			err := cobra.MinimumNArgs(2)(cmd, args)
 			if err != nil {
@@ -33,20 +32,12 @@ func main() {
 			}
 			snSettingsPath := args[0]
 			if !strings.HasPrefix(snSettingsPath, "/") {
-				return fmt.Errorf("smartnode settings path must be an absolute path")
-			}
-			socketPath := args[1]
-			if !strings.HasPrefix(socketPath, "/") {
-				return fmt.Errorf("socket path must be an absolute path")
+				return fmt.Errorf("hyperdrive settings path must be an absolute path")
 			}
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			debug := false
-			if debugFlag != nil {
-				debug = *debugFlag
-			}
-			handleError("init", runDaemonApi(args[0], args[1], debug))
+			handleError("init", runDaemonApi(args[0]))
 		},
 	}
 	rootCmd.AddCommand(initCmd)
@@ -65,18 +56,21 @@ func handleError(command string, err error) {
 	}
 }
 
-func runDaemonApi(snSettingsPath string, socketPath string, debug bool) error {
+func runDaemonApi(cfgPath string) error {
 	// Wait group to handle the daemon
 	wg := new(sync.WaitGroup)
 	wg.Add(1)
 
 	// Create the service provider
-	sp, err := services.NewServiceProvider(snSettingsPath)
+	sp, err := services.NewServiceProvider(cfgPath)
 	if err != nil {
 		return fmt.Errorf("error creating service provider: %w", err)
 	}
 
 	// Start the watchtower relayer
+	cfg := sp.GetConfig()
+	socketPath := cfg.DaemonSocketPath.Value
+	debug := cfg.DebugMode.Value
 	manager := api.NewApiManager(sp, socketPath, debug)
 	err = manager.Start(wg)
 	if err != nil {

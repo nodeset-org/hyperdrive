@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server"
-	rpcfg "github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
@@ -53,7 +53,7 @@ func (f *callDaemonContextFactory) RegisterRoute(router *mux.Router) {
 
 type callDaemonContext struct {
 	handler *ExampleHandler
-	rpcfg   *rpcfg.RocketPoolConfig
+	cfg     *config.HyperdriveConfig
 	// rp      *rocketpool.RocketPool
 
 	cmd string
@@ -65,7 +65,7 @@ type callDaemonContext struct {
 func (c *callDaemonContext) PrepareData(data *api.CallDaemonData) error {
 	// Get the container name for the Smartnode daemon
 	sp := c.handler.serviceProvider
-	sncfg := sp.GetSmartnodeConfig()
+	sncfg := sp.GetConfig().SmartnodeConfig
 	projectName := sncfg.Smartnode.ProjectName.Value.(string)
 	containerName := fmt.Sprintf("%s_%s", projectName, apiContainerName)
 
