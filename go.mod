@@ -3,15 +3,16 @@ module github.com/nodeset-org/hyperdrive
 go 1.20
 
 require (
+	github.com/alessio/shellescape v1.4.1
 	github.com/prysmaticlabs/go-bitfield v0.0.0-20210809151128-385d8c5e3fb7
 	github.com/rocket-pool/rocketpool-go v1.10.1-0.20231107170400-396c46e5d7ea
 	github.com/rocket-pool/smartnode v1.11.0
 	github.com/spf13/cobra v1.7.0
 	golang.org/x/sync v0.4.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
-	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/ferranbt/fastssz v0.1.3 // indirect
@@ -35,11 +36,11 @@ require (
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/thomaso-mirodin/intmath v0.0.0-20160323211736-5dc6d854e46e // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
 require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
+	github.com/a8m/envsubst v1.4.2
 	github.com/bits-and-blooms/bitset v1.10.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect

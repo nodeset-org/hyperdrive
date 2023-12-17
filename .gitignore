@@ -23,6 +23,7 @@ go.work
 
 # Built binaries
 /bin
-
-
 /pkg
+
+# Hyperdrive binaries
+hyperdrive-cli/hyperdrive-cli

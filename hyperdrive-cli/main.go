@@ -3,37 +3,42 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/example"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Short: "Hyperdrive initialization and Rocketpool service status check",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("hyperdrive")
-	},
-}
+func main() {
+	// Master command for the binary
+	rootCmd := &cobra.Command{
+		Short: "Hyperdrive initialization and Rocketpool service status check",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("hyperdrive")
+		},
+		SilenceUsage: true,
+	}
 
-var InitCmd = &cobra.Command{
-	Use:   "init",
-	Short: "todo",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Print("hello world\n")
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(InitCmd)
-}
-
-// This function is executed prior to any Cobra command
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+	// Set up flags
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		handleError(fmt.Errorf("error getting user's home directory for default installation path: %w", err))
 		os.Exit(1)
 	}
+	installPath := rootCmd.Flags().StringP("install-path", "p", filepath.Join(homeDir, ".hyperdrive"), "Location of the Hyperdrive install folder")
+
+	// Register the subcommands
+	example.RegisterCommands(rootCmd, *installPath)
+	service.RegisterCommands(rootCmd, *installPath)
+
+	// Run - this automatically prints errors with the help text
+	rootCmd.Execute()
 }
 
-func main() {
-	Execute()
+func handleError(err error) {
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 }

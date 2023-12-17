@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"sync"
 
 	"github.com/fatih/color"
@@ -83,6 +84,7 @@ func (m *ApiManager) Start(wg *sync.WaitGroup) error {
 		if !errors.Is(err, http.ErrServerClosed) {
 			m.log.Printlnf("error while listening for HTTP requests: %s", err.Error())
 		}
+		os.Chmod(m.socketPath, 0666) // Make it so anyone can write to the socket
 		wg.Done()
 	}()
 

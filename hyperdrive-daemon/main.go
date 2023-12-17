@@ -16,7 +16,7 @@ import (
 func main() {
 	// Root command
 	rootCmd := &cobra.Command{
-		Short: "Hyperdrive daemon init",
+		Short: "Hyperdrive daemon",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("hyperdrive daemon")
 		},
@@ -26,7 +26,7 @@ func main() {
 		Use:   "run hyperdrive-config-path",
 		Short: "Run the Daemon",
 		Args: func(cmd *cobra.Command, args []string) error {
-			err := cobra.MinimumNArgs(2)(cmd, args)
+			err := cobra.MinimumNArgs(1)(cmd, args)
 			if err != nil {
 				return err
 			}

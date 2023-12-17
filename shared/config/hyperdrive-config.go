@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/alessio/shellescape"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types/config"
 	rpcfg "github.com/rocket-pool/smartnode/shared/services/config"
 	rptypes "github.com/rocket-pool/smartnode/shared/types/config"
@@ -37,6 +38,7 @@ const (
 // =========================
 
 const (
+	hyperdriveTag              string = "nodeset/hyperdrive:v" + shared.HyperdriveVersion
 	SmartnodeSettingsFilename  string = "user-settings.yml"
 	HyperdriveDaemonSocketPath string = "data/sockets/daemon.sock"
 )
@@ -183,7 +185,6 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]string) error {
 
 func (cfg *HyperdriveConfig) parseSmartnodeConfig() {
 	smartnodeDir := cfg.SmartnodeDirectory.Value
-
 	if smartnodeDir == "" {
 		cfg.SmartnodeStatus = SmartnodeStatus_EmptyDir
 		return
@@ -196,7 +197,7 @@ func (cfg *HyperdriveConfig) parseSmartnodeConfig() {
 		cfg.SmartnodeConfigLoadErrorMessage = "Directory does not exist."
 		return
 	}
-	if err != nil {
+	if !os.IsExist(err) && err != nil {
 		cfg.SmartnodeStatus = SmartnodeStatus_InvalidDir
 		cfg.SmartnodeConfigLoadErrorMessage = err.Error()
 		return
@@ -214,7 +215,7 @@ func (cfg *HyperdriveConfig) parseSmartnodeConfig() {
 		cfg.SmartnodeStatus = SmartnodeStatus_MissingCfg
 		return
 	}
-	if err != nil {
+	if !os.IsExist(err) && err != nil {
 		cfg.SmartnodeStatus = SmartnodeStatus_InvalidConfig
 		cfg.SmartnodeConfigLoadErrorMessage = err.Error()
 		return
@@ -257,6 +258,16 @@ func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 		cfg.SmartnodeDirectory,
 		cfg.DebugMode,
 	}
+}
+
+// Generates a collection of environment variables based on this config's settings
+func (cfg *HyperdriveConfig) GenerateEnvironmentVariables() map[string]string {
+	envVars := map[string]string{}
+
+	// Basic variables and root parameters
+	envVars["HYPERDRIVE_IMAGE"] = hyperdriveTag
+	envVars["HD_INSTALL_PATH"] = cfg.HyperdriveDirectory
+	return envVars
 }
 
 // Get all of the changed settings between an old and new config
