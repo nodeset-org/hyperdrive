@@ -27,3 +27,4 @@ go.work
 
 # Hyperdrive binaries
 hyperdrive-cli/hyperdrive-cli
+hyperdrive-daemon/hyperdrive-daemon
