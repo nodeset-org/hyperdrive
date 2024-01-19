@@ -9,10 +9,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/alessio/shellescape"
 	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared"
 	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/types"
+	"github.com/pbnjay/memory"
 
 	"gopkg.in/yaml.v2"
 )
@@ -22,7 +24,18 @@ import (
 // =========================
 
 const (
-	HyperdriveTag              string = "nodeset/hyperdrive-stakewise-daemon:v" + shared.HyperdriveStakewiseDaemonVersion
+	// Param IDs
+	HyperdriveDebugModeID          string = "debugMode"
+	HyperdriveNetworkID            string = "network"
+	HyperdriveClientModeID         string = "clientMode"
+	HyperdriveUseFallbackClientsID string = "useFallbackClients"
+	HyperdriveExecutionClientID    string = "executionClient"
+	HyperdriveConsensusClientID    string = "consensusClient"
+
+	// Tags
+	HyperdriveTag string = "nodeset/hyperdrive-stakewise-daemon:v" + shared.HyperdriveStakewiseDaemonVersion
+
+	// Internal settings
 	HyperdriveDaemonSocketPath string = "data/sockets/daemon.sock"
 )
 
@@ -96,9 +109,10 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg := &HyperdriveConfig{
 		HyperdriveDirectory: hdDir,
 
+		// Parameters
 		DebugMode: types.Parameter[bool]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                   "debugMode",
+				ID:                   HyperdriveDebugModeID,
 				Name:                 "Debug Mode",
 				Description:          "True to enable debug mode, which at some point will print extra stuff but doesn't right now.",
 				AffectsContainers:    []types.ContainerID{types.ContainerID_Daemon},
@@ -110,7 +124,137 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				types.Network_All: false,
 			},
 		},
+
+		Network: types.Parameter[types.Network]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 HyperdriveNetworkID,
+				Name:               "Network",
+				Description:        "The Ethereum network you want to use - select Prater Testnet or Holesky Testnet to practice with fake ETH, or Mainnet to stake on the real network using real ETH.",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ExecutionClient, types.ContainerID_BeaconNode, types.ContainerID_ValidatorClient},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Options: getNetworkOptions(),
+			Default: map[types.Network]types.Network{
+				types.Network_All: types.Network_Mainnet,
+			},
+		},
+
+		ClientMode: types.Parameter[types.ClientMode]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 HyperdriveClientModeID,
+				Name:               "Client Mode",
+				Description:        "Choose which mode to use for your Execution and Consensus clients - locally managed (Docker Mode), or externally managed (Hybrid Mode).",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ExecutionClient, types.ContainerID_BeaconNode},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Options: []*types.ParameterOption[types.ClientMode]{
+				{
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Locally Managed",
+						Description: "Allow the Smartnode to manage the Execution and Consensus clients for you (Docker Mode)",
+					},
+					Value: types.ClientMode_Local,
+				}, {
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Externally Managed",
+						Description: "Use existing Execution and Consensus clients that you manage on your own (Hybrid Mode)",
+					},
+					Value: types.ClientMode_External,
+				}},
+			Default: map[types.Network]types.ClientMode{
+				types.Network_All: types.ClientMode_Local,
+			},
+		},
+
+		UseFallbackClients: types.Parameter[bool]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 HyperdriveUseFallbackClientsID,
+				Name:               "Use Fallback Clients",
+				Description:        "Enable this if you would like to specify a fallback Execution and Consensus Client, which will temporarily be used by the Smartnode and your Validator Client if your primary Execution / Consensus client pair ever go offline (e.g. if you switch, prune, or resync your clients).",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ValidatorClient},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[types.Network]bool{
+				types.Network_All: false,
+			},
+		},
+
+		ExecutionClient: types.Parameter[types.ExecutionClient]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 HyperdriveExecutionClientID,
+				Name:               "Execution Client",
+				Description:        "Select which Execution client you would like to run.",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient, types.ContainerID_ValidatorClient},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Options: []*types.ParameterOption[types.ExecutionClient]{
+				{
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Geth",
+						Description: "Geth is one of the three original implementations of the Ethereum protocol. It is written in Go, fully open source and licensed under the GNU LGPL v3.",
+					},
+					Value: types.ExecutionClient_Geth,
+				}, {
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Nethermind",
+						Description: getAugmentedEcDescription(types.ExecutionClient_Nethermind, "Nethermind is a high-performance full Ethereum protocol client with very fast sync speeds. Nethermind is built with proven industrial technologies such as .NET 6 and the Kestrel web server. It is fully open source."),
+					},
+					Value: types.ExecutionClient_Nethermind,
+				}},
+			Default: map[types.Network]types.ExecutionClient{
+				types.Network_All: types.ExecutionClient_Geth},
+		},
+
+		ConsensusClient: types.Parameter[types.ConsensusClient]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 HyperdriveConsensusClientID,
+				Name:               "Consensus Client",
+				Description:        "Select which Consensus client you would like to use.",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_BeaconNode, types.ContainerID_ValidatorClient},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Options: []*types.ParameterOption[types.ConsensusClient]{
+				{
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Nimbus",
+						Description: "Nimbus is a Consensus client implementation that strives to be as lightweight as possible in terms of resources used. This allows it to perform well on embedded systems, resource-restricted devices -- including Raspberry Pis and mobile devices -- and multi-purpose servers.",
+					},
+					Value: types.ConsensusClient_Nimbus,
+				}, {
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Teku",
+						Description: "PegaSys Teku (formerly known as Artemis) is a Java-based Ethereum 2.0 client designed & built to meet institutional needs and security requirements. PegaSys is an arm of ConsenSys dedicated to building enterprise-ready clients and tools for interacting with the core Ethereum platform. Teku is Apache 2 licensed and written in Java, a language notable for its maturity & ubiquity.",
+					},
+					Value: types.ConsensusClient_Teku,
+				}},
+			Default: map[types.Network]types.ConsensusClient{
+				types.Network_All: types.ConsensusClient_Nimbus,
+			},
+		},
+
+		// Internal fields
+		chainID: map[types.Network]uint{
+			types.Network_Mainnet:    1,     // Mainnet
+			types.Network_HoleskyDev: 17000, // Holesky
+			types.Network_Holesky:    17000, // Holesky
+		},
 	}
+
+	// Create the subconfigs
+	cfg.Fallback = NewFallbackConfig(cfg)
+	cfg.ExecutionCommon = NewExecutionCommonConfig(cfg)
+	cfg.Geth = NewGethConfig(cfg)
+	cfg.Nethermind = NewNethermindConfig(cfg)
+	cfg.ExternalExecutionConfig = NewExternalExecutionConfig(cfg)
+	cfg.ConsensusCommon = NewConsensusCommonConfig(cfg)
+	cfg.Nimbus = NewNimbusConfig(cfg)
+	cfg.Teku = NewTekuConfig(cfg)
+	cfg.ExternalConsensusConfig = NewExternalBeaconConfig(cfg)
 
 	// Apply the default values for mainnet
 	cfg.applyAllDefaults()
@@ -267,4 +411,48 @@ func getPortModes(warningOverride string) []*types.ParameterOption[types.RpcPort
 			Value: types.RpcPortMode_OpenExternal,
 		},
 	}
+}
+
+func getNetworkOptions() []*types.ParameterOption[types.Network] {
+	options := []*types.ParameterOption[types.Network]{
+		{
+			ParameterOptionCommon: &types.ParameterOptionCommon{
+				Name:        "Ethereum Mainnet",
+				Description: "This is the real Ethereum main network, using real ETH and real RPL to make real validators.",
+			},
+			Value: types.Network_Mainnet,
+		},
+		{
+			ParameterOptionCommon: &types.ParameterOptionCommon{
+				Name:        "Holesky Testnet",
+				Description: "This is the Holešky (Holešovice) test network, which is the next generation of long-lived testnets for Ethereum. It uses free fake ETH and free fake RPL to make fake validators.\nUse this if you want to practice running the Smartnode in a free, safe environment before moving to Mainnet.",
+			},
+			Value: types.Network_Holesky,
+		},
+	}
+
+	if strings.HasSuffix(shared.HyperdriveStakewiseDaemonVersion, "-dev") {
+		options = append(options, &types.ParameterOption[types.Network]{
+			ParameterOptionCommon: &types.ParameterOptionCommon{
+				Name:        "Devnet",
+				Description: "This is a development network used by Rocket Pool engineers to test new features and contract upgrades before they are promoted to Holesky for staging. You should not use this network unless invited to do so by the developers.",
+			},
+			Value: types.Network_HoleskyDev,
+		})
+	}
+
+	return options
+}
+
+// Get a more verbose client description, including warnings
+func getAugmentedEcDescription(client types.ExecutionClient, originalDescription string) string {
+	switch client {
+	case types.ExecutionClient_Nethermind:
+		totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
+		if totalMemoryGB < 9 {
+			return fmt.Sprintf("%s\n\n[red]WARNING: Nethermind currently requires over 8 GB of RAM to run smoothly. We do not recommend it for your system. This may be improved in a future release.", originalDescription)
+		}
+	}
+
+	return originalDescription
 }
