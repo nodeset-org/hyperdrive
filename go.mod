@@ -74,6 +74,7 @@ require (
 )
 
 require (
+	github.com/a8m/envsubst v1.4.2
 	github.com/alessio/shellescape v1.4.2
 	github.com/btcsuite/btcd/btcutil v1.1.5
 	github.com/docker/docker v24.0.7+incompatible
