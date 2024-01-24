@@ -3,7 +3,7 @@ package routes
 import (
 	"net/http"
 
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/types/api"
+	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
 type NodeRequester struct {

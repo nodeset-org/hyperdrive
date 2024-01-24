@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/services"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/utils/log"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
 // Config

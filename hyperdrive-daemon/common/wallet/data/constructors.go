@@ -4,7 +4,7 @@ import (
 	"io/fs"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/wallet/keystore"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore"
 )
 
 const (

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 )
 
 func uploadDepositData(client *client.Client, cmd string) error {

@@ -1,7 +1,7 @@
 package stakewise
 
 import (
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-cli/commands/stakewise/node"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/node"
 	"github.com/spf13/cobra"
 )
 

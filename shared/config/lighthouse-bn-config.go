@@ -1,0 +1,132 @@
+package config
+
+import (
+	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/utils/sys"
+)
+
+const (
+	// Param IDs
+	LhQuicPortID string = "p2pQuicPort"
+
+	// Tags
+	lighthouseBnTagPortableTest string = "sigp/lighthouse:v4.5.0"
+	lighthouseBnTagPortableProd string = "sigp/lighthouse:v4.5.0"
+	lighthouseBnTagModernTest   string = "sigp/lighthouse:v4.5.0-modern"
+	lighthouseBnTagModernProd   string = "sigp/lighthouse:v4.5.0-modern"
+)
+
+// Configuration for the Lighthouse BN
+type LighthouseBnConfig struct {
+	Title string
+
+	// The port to use for gossip traffic using the QUIC protocol
+	P2pQuicPort types.Parameter[uint16]
+
+	// The max number of P2P peers to connect to
+	MaxPeers types.Parameter[uint16]
+
+	// The Docker Hub tag for Lighthouse BN
+	ContainerTag types.Parameter[string]
+
+	// Custom command line flags for the BN
+	AdditionalFlags types.Parameter[string]
+}
+
+// Generates a new Lighthouse BN configuration
+func NewLighthouseBnConfig(cfg *HyperdriveConfig) *LighthouseBnConfig {
+	return &LighthouseBnConfig{
+		Title: "Lighthouse Settings",
+
+		P2pQuicPort: types.Parameter[uint16]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 LhQuicPortID,
+				Name:               "P2P QUIC Port",
+				Description:        "The port to use for P2P (blockchain) traffic using the QUIC protocol.",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[types.Network]uint16{
+				types.Network_All: 8001,
+			},
+		},
+
+		MaxPeers: types.Parameter[uint16]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 MaxPeersID,
+				Name:               "Max Peers",
+				Description:        "The maximum number of peers your client should try to maintain. You can try lowering this if you have a low-resource system or a constrained network.",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[types.Network]uint16{
+				types.Network_All: 80,
+			},
+		},
+
+		ContainerTag: types.Parameter[string]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 ContainerTagID,
+				Name:               "Container Tag",
+				Description:        "The tag name of the Lighthouse container from Docker Hub you want to use for the Beacon Node.",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: true,
+			},
+			Default: map[types.Network]string{
+				types.Network_Mainnet:    getLighthouseBnTagProd(),
+				types.Network_HoleskyDev: getLighthouseBnTagTest(),
+				types.Network_Holesky:    getLighthouseBnTagTest(),
+			},
+		},
+
+		AdditionalFlags: types.Parameter[string]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 AdditionalFlagsID,
+				Name:               "Additional Flags",
+				Description:        "Additional custom command line flags you want to pass Lighthouse's Beacon Node, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				CanBeBlank:         true,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[types.Network]string{
+				types.Network_All: "",
+			},
+		},
+	}
+}
+
+// Get the parameters for this config
+func (cfg *LighthouseBnConfig) GetParameters() []types.IParameter {
+	return []types.IParameter{
+		&cfg.MaxPeers,
+		&cfg.P2pQuicPort,
+		&cfg.ContainerTag,
+		&cfg.AdditionalFlags,
+	}
+}
+
+// The the title for the config
+func (cfg *LighthouseBnConfig) GetConfigTitle() string {
+	return cfg.Title
+}
+
+// Get the appropriate LH default tag for production
+func getLighthouseBnTagProd() string {
+	missingFeatures := sys.GetMissingModernCpuFeatures()
+	if len(missingFeatures) > 0 {
+		return lighthouseBnTagPortableProd
+	}
+	return lighthouseBnTagModernProd
+}
+
+// Get the appropriate LH default tag for testnets
+func getLighthouseBnTagTest() string {
+	missingFeatures := sys.GetMissingModernCpuFeatures()
+	if len(missingFeatures) > 0 {
+		return lighthouseBnTagPortableTest
+	}
+	return lighthouseBnTagModernTest
+}

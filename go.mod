@@ -1,4 +1,4 @@
-module github.com/nodeset-org/hyperdrive-stakewise-daemon
+module github.com/nodeset-org/hyperdrive
 
 go 1.21
 
@@ -19,8 +19,10 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/consensys/bavard v0.1.13 // indirect
 	github.com/consensys/gnark-crypto v0.12.1 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect
 	github.com/crate-crypto/go-kzg-4844 v0.7.0 // indirect
 	github.com/deckarep/golang-set/v2 v2.1.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
@@ -56,6 +58,7 @@ require (
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44 // indirect
 	github.com/prysmaticlabs/gohashtree v0.0.3-alpha // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
@@ -63,9 +66,11 @@ require (
 	github.com/thomaso-mirodin/intmath v0.0.0-20160323211736-5dc6d854e46e // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
+	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611 // indirect
 	golang.org/x/mod v0.14.0 // indirect
+	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.16.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
@@ -76,18 +81,22 @@ require (
 require (
 	github.com/a8m/envsubst v1.4.2
 	github.com/alessio/shellescape v1.4.2
+	github.com/briandowns/spinner v1.23.0
 	github.com/btcsuite/btcd/btcutil v1.1.5
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/fatih/color v1.16.0
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/mux v1.8.1
 	github.com/holiman/uint256 v1.2.4 // indirect
+	github.com/manifoldco/promptui v0.9.0
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/prysmaticlabs/go-bitfield v0.0.0-20210809151128-385d8c5e3fb7
 	github.com/prysmaticlabs/prysm/v4 v4.2.0
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/cobra v1.8.0
 	github.com/tyler-smith/go-bip39 v1.1.0
+	github.com/urfave/cli/v2 v2.27.1
 	github.com/wealdtech/go-eth2-types/v2 v2.8.2
 	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.4.1
 	golang.org/x/crypto v0.17.0 // indirect

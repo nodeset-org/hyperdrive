@@ -3,6 +3,7 @@
 # This script will build all of the artifacts involved in a new Hyperdrive release.
 # NOTE: You MUST put this in a directory that has the `hyperdrive` repository cloned as a subdirectory.
 
+PROJECT_NAME="hyperdrive"
 
 # =================
 # === Functions ===
@@ -20,7 +21,7 @@ fail() {
 
 # Builds all of the CLI binaries
 build_cli() {
-    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
+    cd $PROJECT_NAME || fail "Directory ${PWD}/$PROJECT_NAME does not exist or you don't have permissions to access it."
 
     echo -n "Building CLI binaries... "
     docker buildx build --rm -f docker/cli.dockerfile --output ../$VERSION --target cli . || fail "Error building CLI binaries."
@@ -33,7 +34,7 @@ build_cli() {
 
 # Builds the .tar.xz file packages with the RP configuration files
 build_install_packages() {
-    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
+    cd $PROJECT_NAME || fail "Directory ${PWD}/$PROJECT_NAME does not exist or you don't have permissions to access it."
     rm -f hyperdrive-install.tar.xz
 
     echo -n "Building Hyperdrive installer packages... "
@@ -50,16 +51,16 @@ build_install_packages() {
 # Builds the daemon binaries and Docker Hyperdrive images, and pushes them to Docker Hub
 # NOTE: You must install qemu first; e.g. sudo apt-get install -y qemu qemu-user-static
 build_daemon() {
-    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
+    cd $PROJECT_NAME || fail "Directory ${PWD}/$PROJECT_NAME does not exist or you don't have permissions to access it."
 
     echo "Building Docker Hyperdrive image..."
-    docker buildx build --platform=linux/amd64 -t nodeset/hyperdrive:$VERSION-amd64 -f docker/daemon.dockerfile --load . || fail "Error building amd64 Docker Hyperdrive image."
-    docker buildx build --platform=linux/arm64 -t nodeset/hyperdrive:$VERSION-arm64 -f docker/daemon.dockerfile --load . || fail "Error building arm64 Docker Hyperdrive image."
+    docker buildx build --platform=linux/amd64 -t nodeset/$PROJECT_NAME:$VERSION-amd64 -f docker/daemon.dockerfile --load . || fail "Error building amd64 Docker Hyperdrive image."
+    docker buildx build --platform=linux/arm64 -t nodeset/$PROJECT_NAME:$VERSION-arm64 -f docker/daemon.dockerfile --load . || fail "Error building arm64 Docker Hyperdrive image."
     echo "done!"
 
     echo -n "Pushing to Docker Hub... "
-    docker push nodeset/hyperdrive:$VERSION-amd64 || fail "Error pushing amd64 Docker Hyperdrive image to Docker Hub."
-    docker push nodeset/hyperdrive:$VERSION-arm64 || fail "Error pushing arm Docker Hyperdrive image to Docker Hub."
+    docker push nodeset/$PROJECT_NAME:$VERSION-amd64 || fail "Error pushing amd64 Docker Hyperdrive image to Docker Hub."
+    docker push nodeset/$PROJECT_NAME:$VERSION-arm64 || fail "Error pushing arm Docker Hyperdrive image to Docker Hub."
     echo "done!"
 
     cd ..
@@ -69,12 +70,12 @@ build_daemon() {
 # Builds the Docker Manifests and pushes them to Docker Hub
 build_docker_manifest() {
     echo -n "Building Docker manifest... "
-    rm -f ~/.docker/manifests/docker.io_nodeset_hyperdrive-$VERSION
-    docker manifest create nodeset/hyperdrive:$VERSION --amend nodeset/hyperdrive:$VERSION-amd64 --amend nodeset/hyperdrive:$VERSION-arm64
+    rm -f ~/.docker/manifests/docker.io_nodeset_$PROJECT_NAME-$VERSION
+    docker manifest create nodeset/$PROJECT_NAME:$VERSION --amend nodeset/$PROJECT_NAME:$VERSION-amd64 --amend nodeset/$PROJECT_NAME:$VERSION-arm64
     echo "done!"
 
     echo -n "Pushing to Docker Hub... "
-    docker manifest push --purge nodeset/hyperdrive:$VERSION
+    docker manifest push --purge nodeset/$PROJECT_NAME:$VERSION
     echo "done!"
 }
 
@@ -82,12 +83,12 @@ build_docker_manifest() {
 # Builds the 'latest' Docker Manifests and pushes them to Docker Hub
 build_latest_docker_manifest() {
     echo -n "Building 'latest' Docker manifest... "
-    rm -f ~/.docker/manifests/docker.io_nodeset_hyperdrive-latest
-    docker manifest create nodeset/hyperdrive:latest --amend nodeset/hyperdrive:$VERSION-amd64 --amend nodeset/hyperdrive:$VERSION-arm64
+    rm -f ~/.docker/manifests/docker.io_nodeset_$PROJECT_NAME-latest
+    docker manifest create nodeset/$PROJECT_NAME:latest --amend nodeset/$PROJECT_NAME:$VERSION-amd64 --amend nodeset/$PROJECT_NAME:$VERSION-arm64
     echo "done!"
 
     echo -n "Pushing to Docker Hub... "
-    docker manifest push --purge nodeset/hyperdrive:latest
+    docker manifest push --purge nodeset/$PROJECT_NAME:latest
     echo "done!"
 }
 

@@ -8,12 +8,12 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/wallet/keystore"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/utils"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 )
 
 // Config

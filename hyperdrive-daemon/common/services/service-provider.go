@@ -5,10 +5,13 @@ import (
 	"os"
 
 	"github.com/docker/docker/client"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/wallet"
-	nmkeystore "github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/wallet/keystore/nimbus"
-	tkkeystore "github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/wallet/keystore/teku"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/config"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet"
+	lhkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/lighthouse"
+	lskeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/lodestar"
+	nmkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/nimbus"
+	prkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/prysm"
+	tkkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/teku"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 // A container for all of the various services used by the Smartnode
@@ -43,9 +46,15 @@ func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
 
 	// Keystores
 	validatorKeychainPath := "" //os.ExpandEnv(cfg.Smartnode.GetValidatorKeychainPath())
+	lighthouseKeystore := lhkeystore.NewKeystore(validatorKeychainPath)
+	lodestarKeystore := lskeystore.NewKeystore(validatorKeychainPath)
 	nimbusKeystore := nmkeystore.NewKeystore(validatorKeychainPath)
+	prysmKeystore := prkeystore.NewKeystore(validatorKeychainPath)
 	tekuKeystore := tkkeystore.NewKeystore(validatorKeychainPath)
+	nodeWallet.AddValidatorKeystore("lighthouse", lighthouseKeystore)
+	nodeWallet.AddValidatorKeystore("lodestar", lodestarKeystore)
 	nodeWallet.AddValidatorKeystore("nimbus", nimbusKeystore)
+	nodeWallet.AddValidatorKeystore("prysm", prysmKeystore)
 	nodeWallet.AddValidatorKeystore("teku", tekuKeystore)
 
 	// EC Manager

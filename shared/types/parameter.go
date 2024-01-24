@@ -107,13 +107,16 @@ type IParameter interface {
 	GetCommon() *ParameterCommon
 
 	// Get the common fields from each ParameterOption (returns nil if this isn't a choice parameter)
-	GetOptions() []*ParameterOptionCommon
+	GetOptions() []IParameterOption
 
 	// Set the parameter to the default value
 	SetToDefault(network Network) error
 
 	// Get the parameter's value as a string
 	GetValueAsString() string
+
+	// Get the parameter's default value for the supplied network as a string
+	GetDefaultAsString(network Network) string
 
 	// Deserializes a string into this parameter's value
 	Deserialize(serializedParam string, network Network) error
@@ -125,13 +128,13 @@ func (p *Parameter[_]) GetCommon() *ParameterCommon {
 }
 
 // Get the common fields from each ParameterOption (returns nil if this isn't a choice parameter)
-func (p *Parameter[_]) GetOptions() []*ParameterOptionCommon {
+func (p *Parameter[_]) GetOptions() []IParameterOption {
 	if len(p.Options) == 0 {
 		return nil
 	}
-	opts := make([]*ParameterOptionCommon, len(p.Options))
+	opts := make([]IParameterOption, len(p.Options))
 	for i, param := range p.Options {
-		opts[i] = param.ParameterOptionCommon
+		opts[i] = param
 	}
 	return opts
 }
@@ -163,6 +166,15 @@ func (p *Parameter[Type]) GetDefault(network Network) (Type, error) {
 // Get the parameter's value as a string
 func (p *Parameter[_]) GetValueAsString() string {
 	return fmt.Sprint(p.Value)
+}
+
+// Get the parameter's value as a string
+func (p *Parameter[_]) GetDefaultAsString(network Network) string {
+	defaultSetting, err := p.GetDefault(network)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprint(defaultSetting)
 }
 
 // Deserializes a string into this parameter's value

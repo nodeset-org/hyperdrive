@@ -6,10 +6,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/color"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/beacon"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/config"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/types"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/utils/log"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/beacon"
+	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
 // This is a proxy for multiple Beacon clients, providing natural fallback support if one of them fails.
@@ -46,7 +46,7 @@ func NewBeaconClientManager(cfg *config.HyperdriveConfig) (*BeaconClientManager,
 	// Fallback CC
 	var fallbackProvider string
 	if cfg.UseFallbackClients.Value == true {
-		fallbackProvider = cfg.Fallback.CcHttpUrl.Value
+		fallbackProvider = cfg.Fallback.BnHttpUrl.Value
 	}
 
 	var primaryBc types.IBeaconClient

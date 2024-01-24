@@ -8,9 +8,9 @@ import (
 
 	"github.com/a8m/envsubst"
 	"github.com/alessio/shellescape"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-cli/client/routes"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/config"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/types"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/routes"
+	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 const (

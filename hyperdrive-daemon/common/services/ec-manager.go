@@ -13,9 +13,9 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/fatih/color"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/config"
-	sharedtypes "github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/types"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/utils/log"
+	"github.com/nodeset-org/hyperdrive/shared/config"
+	sharedtypes "github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
 var ethClientRecentBlockThreshold, _ = time.ParseDuration("5m")

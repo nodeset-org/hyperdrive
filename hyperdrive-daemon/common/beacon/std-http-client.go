@@ -12,8 +12,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/types"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/utils"
+	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/prysmaticlabs/prysm/v4/crypto/bls"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	"golang.org/x/sync/errgroup"

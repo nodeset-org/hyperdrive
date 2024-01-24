@@ -1,7 +1,7 @@
 package node
 
 import (
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/spf13/cobra"
 )
 

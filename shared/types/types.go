@@ -40,8 +40,8 @@ const (
 	// The Beacon node (Consensus client)
 	ContainerID_BeaconNode ContainerID = "bn"
 
-	// The validator client
-	ContainerID_ValidatorClient ContainerID = "vc"
+	// The Validator clients owned by Hyperdrive
+	ContainerID_ValidatorClients ContainerID = "vcs"
 
 	// MEV-Boost
 	ContainerID_MevBoost ContainerID = "mev-boost"
@@ -69,21 +69,33 @@ const (
 
 	// Nethermind
 	ExecutionClient_Nethermind ExecutionClient = "nethermind"
+
+	// Besu
+	ExecutionClient_Besu ExecutionClient = "besu"
 )
 
 // A Consensus client (Beacon Node)
-type ConsensusClient string
+type BeaconNode string
 
 // Enum to describe the Consensus clients
 const (
 	// Unknown
-	ConsensusClient_Unknown ConsensusClient = ""
+	ConsensusClient_Unknown BeaconNode = ""
+
+	// Lighthouse
+	ConsensusClient_Lighthouse BeaconNode = "lighthouse"
+
+	// Lodestar
+	ConsensusClient_Lodestar BeaconNode = "lodestar"
 
 	// Nimbus
-	ConsensusClient_Nimbus ConsensusClient = "nimbus"
+	ConsensusClient_Nimbus BeaconNode = "nimbus"
+
+	// Prysm
+	ConsensusClient_Prysm BeaconNode = "prysm"
 
 	// Teku
-	ConsensusClient_Teku ConsensusClient = "teku"
+	ConsensusClient_Teku BeaconNode = "teku"
 )
 
 // A client ownership mode

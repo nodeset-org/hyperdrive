@@ -9,7 +9,7 @@ import (
 	"github.com/goccy/go-json"
 
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
 )
 
 type ApiResponse[Data any] struct {

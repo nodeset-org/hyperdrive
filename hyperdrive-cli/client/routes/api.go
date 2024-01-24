@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-json"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/types/api"
+	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
 const (

@@ -1,5 +1,5 @@
 package shared
 
 const (
-	HyperdriveStakewiseDaemonVersion string = "0.0.3-dev"
+	HyperdriveVersion string = "0.0.3-dev"
 )

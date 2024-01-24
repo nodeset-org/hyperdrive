@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
 
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/utils"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 )
 
 // Request types

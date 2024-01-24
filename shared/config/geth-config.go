@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 // Constants

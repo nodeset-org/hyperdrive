@@ -11,9 +11,9 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gorilla/mux"
-	example "github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/api/node"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/services"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/utils/log"
+	example "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/node"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
 const (

@@ -2,8 +2,8 @@ package example
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/api/server"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/server"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
 )
 
 type NodeHandler struct {

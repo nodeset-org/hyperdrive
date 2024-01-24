@@ -8,8 +8,8 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/api"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
 	"github.com/spf13/cobra"
 )
 

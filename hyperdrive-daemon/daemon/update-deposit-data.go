@@ -2,10 +2,10 @@ package daemon
 
 import (
 	"github.com/docker/docker/client"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/hyperdrive-daemon/common/services"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/config"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/types"
-	"github.com/nodeset-org/hyperdrive-stakewise-daemon/shared/utils/log"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
 // Update deposit data task
