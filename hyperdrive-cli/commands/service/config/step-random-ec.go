@@ -3,15 +3,14 @@ package config
 import (
 	"fmt"
 
-	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 const randomEcID string = "step-random-ec"
 
-func createRandomECStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []cfgtypes.ParameterOption) *choiceWizardStep {
-
+func createRandomEcStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []*types.ParameterOption[types.ExecutionClient]) *choiceWizardStep {
 	var selectedClientName string
-	selectedClient := wiz.md.Config.ExecutionClient.Value
+	selectedClient := wiz.md.Config.LocalExecutionConfig.ExecutionClient.Value
 	for _, clientOption := range goodOptions {
 		if clientOption.Value == selectedClient {
 			selectedClientName = clientOption.Name
@@ -27,15 +26,11 @@ func createRandomECStep(wiz *wizard, currentStep int, totalSteps int, goodOption
 	}
 
 	done := func(buttonIndex int, buttonLabel string) {
-		if wiz.md.Config.ConsensusClientMode.Value.(cfgtypes.Mode) == cfgtypes.Mode_Local {
-			wiz.consensusLocalModal.show()
-		} else {
-			wiz.consensusExternalSelectModal.show()
-		}
+		wiz.bnLocalModal.show()
 	}
 
 	back := func() {
-		wiz.executionLocalModal.show()
+		wiz.ecLocalModal.show()
 	}
 
 	return newChoiceStep(
@@ -53,5 +48,4 @@ func createRandomECStep(wiz *wizard, currentStep int, totalSteps int, goodOption
 		back,
 		randomEcID,
 	)
-
 }

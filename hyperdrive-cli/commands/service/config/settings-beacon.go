@@ -171,7 +171,24 @@ func (configPage *BeaconConfigPage) handleExternalBnChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.clientModeDropdown.item)
 	configPage.layout.form.AddFormItem(configPage.externalBnDropdown.item)
-	configPage.layout.addFormItems(configPage.externalBnItems)
+
+	// Split into Prysm and non-Prysm
+	commonSettings := []*parameterizedFormItem{}
+	prysmSettings := []*parameterizedFormItem{}
+	for _, item := range configPage.externalBnItems {
+		if item.parameter.GetCommon().ID == config.PrysmRpcUrlID {
+			prysmSettings = append(prysmSettings, item)
+		} else {
+			commonSettings = append(commonSettings, item)
+		}
+	}
+
+	// Show items based on the client selection
+	configPage.layout.addFormItems(commonSettings)
+	if configPage.masterConfig.ExternalBeaconConfig.BeaconNode.Value == types.BeaconNode_Prysm {
+		configPage.layout.addFormItems(prysmSettings)
+	}
+
 	configPage.layout.refresh()
 }
 

@@ -92,8 +92,8 @@ func NewExternalBeaconConfig(parent *HyperdriveConfig) *ExternalBeaconConfig {
 		PrysmRpcUrl: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 PrysmRpcUrlID,
-				Name:               "RPC URL (Prysm Only)",
-				Description:        "**Only used if you have Prysm selected as a Validator Client in one of Hyperdrive's modules.**\n\nThe URL of Prysm's gRPC API endpoint for your external Beacon Node. Prysm's Validator Client will need this in order to connect to it.\nNOTE: If you are running it on the same machine as Hyperdrive, addresses like `localhost` and `127.0.0.1` will not work due to Docker limitations. Enter your machine's LAN IP address instead.",
+				Name:               "Prysm RPC URL",
+				Description:        "The URL of Prysm's gRPC API endpoint for your external Beacon Node. Prysm's Validator Client will need this in order to connect to it.\nNOTE: If you are running it on the same machine as Hyperdrive, addresses like `localhost` and `127.0.0.1` will not work due to Docker limitations. Enter your machine's LAN IP address instead.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,

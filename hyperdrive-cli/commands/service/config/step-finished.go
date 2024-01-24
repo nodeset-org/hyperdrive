@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rivo/tview"
-	"github.com/rocket-pool/smartnode/shared/types/config"
-	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 func createFinishedStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
-
-	helperText := "All done! You're ready to run.\n\nIf you'd like, you can review and change all of the Smartnode and client settings next or just save and exit."
+	helperText := "All done! You're ready to run.\n\nIf you'd like, you can review and change all of the Hyperdrive and client settings next or just save and exit."
 
 	show := func(modal *choiceModalLayout) {
 		wiz.md.setPage(modal.page)
@@ -34,12 +32,7 @@ func createFinishedStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiz
 	}
 
 	back := func() {
-		if wiz.md.Config.Smartnode.Network.Value == config.Network_Holesky || wiz.md.Config.Smartnode.Network.Value == config.Network_Devnet {
-			// Skip MEV for Holesky
-			wiz.metricsModal.show()
-		} else {
-			wiz.mevModeModal.show()
-		}
+		wiz.metricsModal.show()
 	}
 
 	return newChoiceStep(
@@ -60,7 +53,6 @@ func createFinishedStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiz
 		back,
 		"step-finished",
 	)
-
 }
 
 // Processes a configuration after saving and exiting without looking at the review screen
@@ -94,12 +86,10 @@ func processConfigAfterQuit(md *mainDisplay) {
 		_, totalAffectedContainers, changeNetworks := md.Config.GetChanges(md.PreviousConfig)
 
 		if md.isUpdate {
-			totalAffectedContainers[cfgtypes.ContainerID_Api] = true
-			totalAffectedContainers[cfgtypes.ContainerID_Node] = true
-			totalAffectedContainers[cfgtypes.ContainerID_Watchtower] = true
+			totalAffectedContainers[types.ContainerID_Daemon] = true
 		}
 
-		var containersToRestart []cfgtypes.ContainerID
+		var containersToRestart []types.ContainerID
 		for container := range totalAffectedContainers {
 			containersToRestart = append(containersToRestart, container)
 		}
