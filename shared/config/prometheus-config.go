@@ -11,8 +11,6 @@ const (
 
 // Configuration for Prometheus
 type PrometheusConfig struct {
-	Title string
-
 	// The port to serve metrics on
 	Port types.Parameter[uint16]
 
@@ -24,12 +22,15 @@ type PrometheusConfig struct {
 
 	// Custom command line flags
 	AdditionalFlags types.Parameter[string]
+
+	// Internal Fields
+	parent *MetricsConfig
 }
 
 // Generates a new Prometheus config
-func NewPrometheusConfig(cfg *HyperdriveConfig) *PrometheusConfig {
+func NewPrometheusConfig(parent *MetricsConfig) *PrometheusConfig {
 	return &PrometheusConfig{
-		Title: "Prometheus Settings",
+		parent: parent,
 
 		Port: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
@@ -90,6 +91,11 @@ func NewPrometheusConfig(cfg *HyperdriveConfig) *PrometheusConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *PrometheusConfig) GetTitle() string {
+	return "Prometheus Settings"
+}
+
 // Get the parameters for this config
 func (cfg *PrometheusConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -100,7 +106,7 @@ func (cfg *PrometheusConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *PrometheusConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *PrometheusConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

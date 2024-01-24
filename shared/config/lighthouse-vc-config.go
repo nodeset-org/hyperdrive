@@ -70,7 +70,7 @@ func (cfg *LighthouseVcConfig) GetParameters() []types.IParameter {
 }
 
 // The the title for the config
-func (cfg *LighthouseVcConfig) GetConfigTitle() string {
+func (cfg *LighthouseVcConfig) GetTitle() string {
 	return cfg.Title
 }
 

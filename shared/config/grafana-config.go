@@ -10,24 +10,22 @@ const (
 	grafanaTag string = "grafana/grafana:9.4.15"
 )
 
-// Defaults
-const defaultGrafanaPort uint16 = 3100
-
 // Configuration for Grafana
 type GrafanaConfig struct {
-	Title string
-
 	// The HTTP port to serve on
 	Port types.Parameter[uint16]
 
 	// The Docker Hub tag for Grafana
 	ContainerTag types.Parameter[string]
+
+	// Internal Fields
+	parent *MetricsConfig
 }
 
 // Generates a new Grafana config
-func NewGrafanaConfig(cfg *HyperdriveConfig) *GrafanaConfig {
+func NewGrafanaConfig(parent *MetricsConfig) *GrafanaConfig {
 	return &GrafanaConfig{
-		Title: "Grafana Settings",
+		parent: parent,
 
 		Port: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
@@ -59,6 +57,11 @@ func NewGrafanaConfig(cfg *HyperdriveConfig) *GrafanaConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *GrafanaConfig) GetTitle() string {
+	return "Grafana Settings"
+}
+
 // Get the parameters for this config
 func (cfg *GrafanaConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -67,7 +70,7 @@ func (cfg *GrafanaConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *GrafanaConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *GrafanaConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

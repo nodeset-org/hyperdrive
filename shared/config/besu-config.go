@@ -18,8 +18,6 @@ const (
 
 // Configuration for Besu
 type BesuConfig struct {
-	Title string
-
 	// Max number of P2P peers to connect to
 	JvmHeapSize types.Parameter[uint64]
 
@@ -34,12 +32,15 @@ type BesuConfig struct {
 
 	// Custom command line flags
 	AdditionalFlags types.Parameter[string]
+
+	// Internal Fields
+	parent *LocalExecutionConfig
 }
 
 // Generates a new Besu configuration
-func NewBesuConfig(cfg *HyperdriveConfig) *BesuConfig {
+func NewBesuConfig(parent *LocalExecutionConfig) *BesuConfig {
 	return &BesuConfig{
-		Title: "Besu Settings",
+		parent: parent,
 
 		JvmHeapSize: types.Parameter[uint64]{
 			ParameterCommon: &types.ParameterCommon{
@@ -115,6 +116,11 @@ func NewBesuConfig(cfg *HyperdriveConfig) *BesuConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *BesuConfig) GetTitle() string {
+	return "Besu Settings"
+}
+
 // Get the parameters for this config
 func (cfg *BesuConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -126,7 +132,7 @@ func (cfg *BesuConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *BesuConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *BesuConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

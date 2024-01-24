@@ -66,6 +66,6 @@ func (cfg *LodestarVcConfig) GetParameters() []types.IParameter {
 }
 
 // The the title for the config
-func (cfg *LodestarVcConfig) GetConfigTitle() string {
+func (cfg *LodestarVcConfig) GetTitle() string {
 	return cfg.Title
 }

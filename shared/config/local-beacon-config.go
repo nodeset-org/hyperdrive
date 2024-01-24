@@ -10,9 +10,7 @@ const (
 )
 
 // Common parameters shared by all of the Beacon Clients
-type ConsensusCommonConfig struct {
-	Title string
-
+type LocalBeaconConfig struct {
 	// The checkpoint sync URL if used
 	CheckpointSyncProvider types.Parameter[string]
 
@@ -23,13 +21,23 @@ type ConsensusCommonConfig struct {
 	HttpPort types.Parameter[uint16]
 
 	// Toggle for forwarding the HTTP API port outside of Docker
-	OpenRpcPort types.Parameter[types.RpcPortMode]
+	OpenHttpPort types.Parameter[types.RpcPortMode]
+
+	// Subconfigs
+	Lighthouse *LighthouseBnConfig
+	Lodestar   *LodestarBnConfig
+	Nimbus     *NimbusBnConfig
+	Prysm      *PrysmBnConfig
+	Teku       *TekuBnConfig
+
+	// Internal Fields
+	parent *HyperdriveConfig
 }
 
-// Create a new ConsensusCommonParams struct
-func NewConsensusCommonConfig(cfg *HyperdriveConfig) *ConsensusCommonConfig {
-	return &ConsensusCommonConfig{
-		Title: "Common Consensus Client Settings",
+// Create a new LocalBeaconConfig struct
+func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
+	cfg := &LocalBeaconConfig{
+		parent: parent,
 
 		CheckpointSyncProvider: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
@@ -75,9 +83,9 @@ func NewConsensusCommonConfig(cfg *HyperdriveConfig) *ConsensusCommonConfig {
 			},
 		},
 
-		OpenRpcPort: types.Parameter[types.RpcPortMode]{
+		OpenHttpPort: types.Parameter[types.RpcPortMode]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 OpenRpcPortID,
+				ID:                 OpenHttpPortID,
 				Name:               "Expose API Port",
 				Description:        "Select an option to expose your Consensus client's API port to your localhost or external hosts on the network, so other machines can access it too.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
@@ -90,19 +98,38 @@ func NewConsensusCommonConfig(cfg *HyperdriveConfig) *ConsensusCommonConfig {
 			},
 		},
 	}
+
+	cfg.Lighthouse = NewLighthouseBnConfig(cfg)
+	cfg.Lodestar = NewLodestarBnConfig(cfg)
+	cfg.Nimbus = NewNimbusBnConfig(cfg)
+	cfg.Prysm = NewPrysmBnConfig(cfg)
+	cfg.Teku = NewTekuBnConfig(cfg)
+
+	return cfg
+}
+
+// The the title for the config
+func (cfg *LocalBeaconConfig) GetTitle() string {
+	return "Local Beacon Node Settings"
 }
 
 // Get the parameters for this config
-func (cfg *ConsensusCommonConfig) GetParameters() []types.IParameter {
+func (cfg *LocalBeaconConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
 		&cfg.CheckpointSyncProvider,
 		&cfg.P2pPort,
 		&cfg.HttpPort,
-		&cfg.OpenRpcPort,
+		&cfg.OpenHttpPort,
 	}
 }
 
-// The the title for the config
-func (cfg *ConsensusCommonConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *LocalBeaconConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{
+		"lighthouse": cfg.Lighthouse,
+		"lodestar":   cfg.Lodestar,
+		"nimbus":     cfg.Nimbus,
+		"prysm":      cfg.Prysm,
+		"teku":       cfg.Teku,
+	}
 }

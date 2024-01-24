@@ -58,7 +58,7 @@ func NewExecutionClientManager(cfg *config.HyperdriveConfig) (*ExecutionClientMa
 
 	// Get the primary EC url
 	if cfg.ClientMode.Value == sharedtypes.ClientMode_Local {
-		primaryEcUrl = fmt.Sprintf("http://%s:%d", sharedtypes.ContainerID_ExecutionClient, cfg.ExecutionCommon.HttpPort.Value)
+		primaryEcUrl = fmt.Sprintf("http://%s:%d", sharedtypes.ContainerID_ExecutionClient, cfg.LocalExecutionConfig.HttpPort.Value)
 	} else {
 		primaryEcUrl = cfg.ExternalExecutionConfig.HttpUrl.Value
 	}

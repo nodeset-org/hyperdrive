@@ -67,6 +67,6 @@ func (cfg *TekuVcConfig) GetParameters() []types.IParameter {
 }
 
 // Get the title for the config
-func (cfg *TekuVcConfig) GetConfigTitle() string {
+func (cfg *TekuVcConfig) GetTitle() string {
 	return cfg.Title
 }

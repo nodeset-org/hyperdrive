@@ -13,19 +13,20 @@ const (
 
 // Configuration for Bitfly Node Metrics
 type BitflyNodeMetricsConfig struct {
-	Title string
-
 	Secret types.Parameter[string]
 
 	Endpoint types.Parameter[string]
 
 	MachineName types.Parameter[string]
+
+	// Internal Fields
+	parent *MetricsConfig
 }
 
 // Generates a new Bitfly Node Metrics config
-func NewBitflyNodeMetricsConfig(cfg *HyperdriveConfig) *BitflyNodeMetricsConfig {
+func NewBitflyNodeMetricsConfig(parent *MetricsConfig) *BitflyNodeMetricsConfig {
 	return &BitflyNodeMetricsConfig{
-		Title: "Bitfly Node Metrics Settings",
+		parent: parent,
 
 		Secret: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
@@ -73,6 +74,11 @@ func NewBitflyNodeMetricsConfig(cfg *HyperdriveConfig) *BitflyNodeMetricsConfig 
 	}
 }
 
+// The the title for the config
+func (cfg *BitflyNodeMetricsConfig) GetTitle() string {
+	return "Bitfly Node Metrics Settings"
+}
+
 // Get the parameters for this config
 func (cfg *BitflyNodeMetricsConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -82,7 +88,7 @@ func (cfg *BitflyNodeMetricsConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *BitflyNodeMetricsConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *BitflyNodeMetricsConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

@@ -73,6 +73,11 @@ func NewFallbackConfig(cfg *HyperdriveConfig) *FallbackConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *FallbackConfig) GetTitle() string {
+	return cfg.Title
+}
+
 // Get the types.Parameters for this config
 func (cfg *FallbackConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -82,7 +87,7 @@ func (cfg *FallbackConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *FallbackConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *FallbackConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

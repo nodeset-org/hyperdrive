@@ -67,6 +67,6 @@ func (cfg *PrysmVcConfig) GetParameters() []types.IParameter {
 }
 
 // The the title for the config
-func (cfg *PrysmVcConfig) GetConfigTitle() string {
+func (cfg *PrysmVcConfig) GetTitle() string {
 	return cfg.Title
 }

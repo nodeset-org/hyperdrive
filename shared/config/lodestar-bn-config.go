@@ -11,8 +11,6 @@ const (
 
 // Configuration for the Lodestar BN
 type LodestarBnConfig struct {
-	Title string
-
 	// The max number of P2P peers to connect to
 	MaxPeers types.Parameter[uint16]
 
@@ -21,12 +19,15 @@ type LodestarBnConfig struct {
 
 	// Custom command line flags for the BN
 	AdditionalFlags types.Parameter[string]
+
+	// Internal Fields
+	parent *LocalBeaconConfig
 }
 
 // Generates a new Lodestar BN configuration
-func NewLodestarBnConfig(cfg *HyperdriveConfig) *LodestarBnConfig {
+func NewLodestarBnConfig(parent *LocalBeaconConfig) *LodestarBnConfig {
 	return &LodestarBnConfig{
-		Title: "Lodestar Settings",
+		parent: parent,
 
 		MaxPeers: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
@@ -74,6 +75,11 @@ func NewLodestarBnConfig(cfg *HyperdriveConfig) *LodestarBnConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *LodestarBnConfig) GetTitle() string {
+	return "Lodestar Settings"
+}
+
 // Get the parameters for this config
 func (cfg *LodestarBnConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -83,7 +89,7 @@ func (cfg *LodestarBnConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *LodestarBnConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *LodestarBnConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

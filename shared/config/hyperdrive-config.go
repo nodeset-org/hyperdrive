@@ -13,6 +13,8 @@ import (
 
 	"github.com/alessio/shellescape"
 	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
+	"github.com/nodeset-org/hyperdrive/shared/config/migration"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/pbnjay/memory"
 
@@ -31,12 +33,10 @@ const (
 	HyperdriveUseFallbackClientsID string = "useFallbackClients"
 	HyperdriveExecutionClientID    string = "executionClient"
 	HyperdriveBeaconNodeID         string = "beaconNode"
+	HyperdriveDirectoryID          string = "hdDir"
 
 	// Tags
 	HyperdriveTag string = "nodeset/hyperdrive:v" + shared.HyperdriveVersion
-
-	// Internal settings
-	HyperdriveDaemonSocketPath string = "data/sockets/daemon.sock"
 )
 
 // The master configuration struct
@@ -50,27 +50,16 @@ type HyperdriveConfig struct {
 
 	// Execution client settings
 	ExecutionClient         types.Parameter[types.ExecutionClient]
-	ExecutionCommon         *ExecutionCommonConfig
-	Geth                    *GethConfig
-	Nethermind              *NethermindConfig
-	Besu                    *BesuConfig
+	LocalExecutionConfig    *LocalExecutionConfig
 	ExternalExecutionConfig *ExternalExecutionConfig
 
 	// Beacon node settings
-	BeaconNode              types.Parameter[types.BeaconNode]
-	ConsensusCommon         *ConsensusCommonConfig
-	Lighthouse              *LighthouseBnConfig
-	Lodestar                *LodestarBnConfig
-	Nimbus                  *NimbusBnConfig
-	Prysm                   *PrysmBnConfig
-	Teku                    *TekuBnConfig
-	ExternalConsensusConfig *ExternalBeaconConfig
+	BeaconNode           types.Parameter[types.BeaconNode]
+	LocalBeaconConfig    *LocalBeaconConfig
+	ExternalBeaconConfig *ExternalBeaconConfig
 
 	// Metrics
-	Grafana           *GrafanaConfig
-	Prometheus        *PrometheusConfig
-	Exporter          *ExporterConfig
-	BitflyNodeMetrics *BitflyNodeMetricsConfig
+	Metrics *MetricsConfig
 
 	// Internal fields
 	Version             string
@@ -79,7 +68,7 @@ type HyperdriveConfig struct {
 }
 
 // Load configuration settings from a file
-func LoadFromFile(path string, isDaemon bool) (*HyperdriveConfig, error) {
+func LoadFromFile(path string) (*HyperdriveConfig, error) {
 	// Return nil if the file doesn't exist
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -93,14 +82,14 @@ func LoadFromFile(path string, isDaemon bool) (*HyperdriveConfig, error) {
 	}
 
 	// Attempt to parse it out into a settings map
-	var settings map[string]string
+	var settings map[string]any
 	if err := yaml.Unmarshal(configBytes, &settings); err != nil {
 		return nil, fmt.Errorf("could not parse settings file: %w", err)
 	}
 
 	// Deserialize it into a config object
 	cfg := NewHyperdriveConfig(filepath.Dir(path))
-	err = cfg.Deserialize(settings, isDaemon)
+	err = cfg.Deserialize(settings)
 	if err != nil {
 		return nil, fmt.Errorf("could not deserialize settings file: %w", err)
 	}
@@ -281,22 +270,11 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 
 	// Create the subconfigs
 	cfg.Fallback = NewFallbackConfig(cfg)
-	cfg.ExecutionCommon = NewExecutionCommonConfig(cfg)
-	cfg.Geth = NewGethConfig(cfg)
-	cfg.Nethermind = NewNethermindConfig(cfg)
-	cfg.Besu = NewBesuConfig(cfg)
+	cfg.LocalExecutionConfig = NewExecutionCommonConfig(cfg)
 	cfg.ExternalExecutionConfig = NewExternalExecutionConfig(cfg)
-	cfg.ConsensusCommon = NewConsensusCommonConfig(cfg)
-	cfg.Lighthouse = NewLighthouseBnConfig(cfg)
-	cfg.Lodestar = NewLodestarBnConfig(cfg)
-	cfg.Nimbus = NewNimbusBnConfig(cfg)
-	cfg.Prysm = NewPrysmBnConfig(cfg)
-	cfg.Teku = NewTekuBnConfig(cfg)
-	cfg.ExternalConsensusConfig = NewExternalBeaconConfig(cfg)
-	cfg.Grafana = NewGrafanaConfig(cfg)
-	cfg.Prometheus = NewPrometheusConfig(cfg)
-	cfg.Exporter = NewExporterConfig(cfg)
-	cfg.BitflyNodeMetrics = NewBitflyNodeMetricsConfig(cfg)
+	cfg.LocalBeaconConfig = NewLocalBeaconConfig(cfg)
+	cfg.ExternalBeaconConfig = NewExternalBeaconConfig(cfg)
+	cfg.Metrics = NewMetricsConfig(cfg)
 
 	// Apply the default values for mainnet
 	cfg.applyAllDefaults()
@@ -304,39 +282,84 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	return cfg
 }
 
-// Serializes the configuration into a map of maps, compatible with a settings file
-func (cfg *HyperdriveConfig) Serialize() map[string]string {
-	masterMap := map[string]string{}
-	for _, param := range cfg.GetParameters() {
-		masterMap[param.GetCommon().ID] = param.GetValueAsString()
+// Get the title for this config
+func (cfg *HyperdriveConfig) GetTitle() string {
+	return "Hyperdrive Settings"
+}
+
+// Get the parameters for this config
+func (cfg *HyperdriveConfig) GetParameters() []types.IParameter {
+	return []types.IParameter{
+		&cfg.DebugMode,
+		&cfg.Network,
+		&cfg.ClientMode,
+		&cfg.UseFallbackClients,
+		&cfg.ExecutionClient,
+		&cfg.BeaconNode,
 	}
-	masterMap["hdDir"] = cfg.HyperdriveDirectory
-	masterMap["version"] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
+}
+
+// Get the subconfigurations for this config
+func (cfg *HyperdriveConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{
+		"fallback":          cfg.Fallback,
+		"localExecution":    cfg.LocalExecutionConfig,
+		"externalExecution": cfg.ExternalExecutionConfig,
+		"localBeacon":       cfg.LocalBeaconConfig,
+		"externalBeacon":    cfg.ExternalBeaconConfig,
+		"metrics":           cfg.Metrics,
+	}
+}
+
+// Serializes the configuration into a map of maps, compatible with a settings file
+func (cfg *HyperdriveConfig) Serialize() map[string]any {
+	masterMap := map[string]any{}
+
+	hdMap := Serialize(cfg)
+	masterMap[HyperdriveDirectoryID] = cfg.HyperdriveDirectory
+	masterMap[ids.VersionID] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
+	masterMap[ids.RootConfigID] = hdMap
 
 	return masterMap
 }
 
 // Deserializes a settings file into this config
-func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]string, isDaemon bool) error {
-	// Get the network
-	network := cfg.Network.Value
-	// Deserialize root params
-	for _, param := range cfg.GetParameters() {
-		id := param.GetCommon().ID
-		serializedValue, exists := masterMap[id]
-		if !exists {
-			fmt.Printf("WARN: Parameter [%s] was not found in the config, setting it to the network default.\n", id)
-			param.SetToDefault(network)
-		} else {
-			err := param.Deserialize(serializedValue, network)
-			if err != nil {
-				return fmt.Errorf("error deserializing parameter [%s]: %w", id, err)
-			}
-		}
+func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
+	// Upgrade the config to the latest version
+	err := migration.UpdateConfig(masterMap)
+	if err != nil {
+		return fmt.Errorf("error upgrading configuration to v%s: %w", shared.HyperdriveVersion, err)
 	}
 
-	cfg.HyperdriveDirectory = masterMap["hdDir"]
-	cfg.Version = masterMap["version"]
+	// Get the network
+	network := types.Network_Mainnet
+	hyperdriveParams, exists := masterMap[ids.RootConfigID]
+	if !exists {
+		return fmt.Errorf("config is missing the [%s] section", ids.RootConfigID)
+	}
+	hdMap, isMap := hyperdriveParams.(map[string]any)
+	if !isMap {
+		return fmt.Errorf("config has an entry named [%s] but it is not a map", ids.RootConfigID)
+	}
+	networkVal, exists := hdMap[cfg.Network.ID]
+	if exists {
+		networkString, isString := networkVal.(string)
+		if !isString {
+			return fmt.Errorf("expected [%s - %s] to be a string but it is not", ids.RootConfigID, cfg.Network.ID)
+		}
+		network = types.Network(networkString)
+	}
+
+	// Deserialize the params and subconfigs
+	err = Deserialize(cfg, hdMap, network)
+	if err != nil {
+		return fmt.Errorf("error deserializing [%s]: %w", ids.RootConfigID, err)
+	}
+
+	// Get the special fields
+	cfg.HyperdriveDirectory = masterMap[HyperdriveDirectoryID].(string)
+	cfg.Version = masterMap[ids.VersionID].(string)
+
 	return nil
 }
 
@@ -351,13 +374,6 @@ func (cfg *HyperdriveConfig) applyAllDefaults() error {
 	}
 
 	return nil
-}
-
-// Get the parameters for this config
-func (cfg *HyperdriveConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
-		&cfg.DebugMode,
-	}
 }
 
 // Generates a collection of environment variables based on this config's settings
@@ -379,82 +395,19 @@ func (cfg *HyperdriveConfig) GenerateEnvironmentVariables() map[string]string {
 	return envVars
 }
 
+// ===============
+// === Getters ===
+// ===============
+
 func (cfg *HyperdriveConfig) GetChainID() uint {
 	return cfg.chainID[cfg.Network.Value]
 }
 
-// Get all of the changed settings between an old and new config
-func getChangedSettingsMap(oldConfig *HyperdriveConfig, newConfig *HyperdriveConfig) []types.ChangedSetting {
-	changedSettings := []types.ChangedSetting{}
+// =====================
+// === Field Helpers ===
+// =====================
 
-	// Root settings
-	oldRootParams := oldConfig.GetParameters()
-	newRootParams := newConfig.GetParameters()
-	changedSettings = getChangedSettings(oldRootParams, newRootParams, newConfig)
-
-	return changedSettings
-}
-
-// Get all of the settings that have changed between the given parameter lists.
-// Assumes the parameter lists represent identical parameters (e.g. they have the same number of elements and
-// each element has the same ID).
-func getChangedSettings(oldParams []types.IParameter, newParams []types.IParameter, newConfig *HyperdriveConfig) []types.ChangedSetting {
-	changedSettings := []types.ChangedSetting{}
-
-	for i, param := range newParams {
-		oldValString := oldParams[i].GetValueAsString()
-		newValString := param.GetValueAsString()
-		if oldValString != newValString {
-			changedSettings = append(changedSettings, types.ChangedSetting{
-				Name:               param.GetCommon().Name,
-				OldValue:           oldValString,
-				NewValue:           newValString,
-				AffectedContainers: getAffectedContainers(param, newConfig),
-			})
-		}
-	}
-
-	return changedSettings
-}
-
-// Get a list of containers that will be need to be restarted after this change is applied
-func getAffectedContainers(param types.IParameter, cfg *HyperdriveConfig) map[types.ContainerID]bool {
-	affectedContainers := map[types.ContainerID]bool{}
-	for _, container := range param.GetCommon().AffectsContainers {
-		affectedContainers[container] = true
-	}
-	return affectedContainers
-}
-
-// Get the possible RPC port mode options
-func getPortModes(warningOverride string) []*types.ParameterOption[types.RpcPortMode] {
-	if warningOverride == "" {
-		warningOverride = "Allow connections from external hosts. This is safe if you're running your node on your local network. If you're a VPS user, this would expose your node to the internet"
-	}
-
-	return []*types.ParameterOption[types.RpcPortMode]{
-		{
-			ParameterOptionCommon: &types.ParameterOptionCommon{
-				Name:        "Closed",
-				Description: "Do not allow connections to the port",
-			},
-			Value: types.RpcPortMode_Closed,
-		}, {
-			ParameterOptionCommon: &types.ParameterOptionCommon{
-				Name:        "Open to Localhost",
-				Description: "Allow connections from this host only",
-			},
-			Value: types.RpcPortMode_OpenLocalhost,
-		}, {
-			ParameterOptionCommon: &types.ParameterOptionCommon{
-				Name:        "Open to External hosts",
-				Description: warningOverride,
-			},
-			Value: types.RpcPortMode_OpenExternal,
-		},
-	}
-}
-
+// Get the list of options for networks to run on
 func getNetworkOptions() []*types.ParameterOption[types.Network] {
 	options := []*types.ParameterOption[types.Network]{
 		{

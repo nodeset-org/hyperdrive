@@ -17,8 +17,6 @@ const (
 
 // Configuration for Teku
 type TekuBnConfig struct {
-	Title string
-
 	// Max number of P2P peers to connect to
 	JvmHeapSize types.Parameter[uint64]
 
@@ -33,12 +31,15 @@ type TekuBnConfig struct {
 
 	// Custom command line flags for the BN
 	AdditionalFlags types.Parameter[string]
+
+	// Internal Fields
+	parent *LocalBeaconConfig
 }
 
 // Generates a new Teku BN configuration
-func NewTekuBnConfig(cfg *HyperdriveConfig) *TekuBnConfig {
+func NewTekuBnConfig(parent *LocalBeaconConfig) *TekuBnConfig {
 	return &TekuBnConfig{
-		Title: "Teku Settings",
+		parent: parent,
 
 		JvmHeapSize: types.Parameter[uint64]{
 			ParameterCommon: &types.ParameterCommon{
@@ -114,6 +115,11 @@ func NewTekuBnConfig(cfg *HyperdriveConfig) *TekuBnConfig {
 	}
 }
 
+// Get the title for the config
+func (cfg *TekuBnConfig) GetTitle() string {
+	return "Teku Settings"
+}
+
 // Get the parameters for this config
 func (cfg *TekuBnConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -125,9 +131,9 @@ func (cfg *TekuBnConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// Get the title for the config
-func (cfg *TekuBnConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *TekuBnConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }
 
 // Get the recommended heap size for Teku

@@ -26,8 +26,6 @@ const (
 
 // Configuration for Nimbus
 type NimbusBnConfig struct {
-	Title string
-
 	// The max number of P2P peers to connect to
 	MaxPeers types.Parameter[uint16]
 
@@ -39,12 +37,15 @@ type NimbusBnConfig struct {
 
 	// Custom command line flags for the BN
 	AdditionalFlags types.Parameter[string]
+
+	// Internal Fields
+	parent *LocalBeaconConfig
 }
 
 // Generates a new Nimbus configuration
-func NewNimbusBnConfig(cfg *HyperdriveConfig) *NimbusBnConfig {
+func NewNimbusBnConfig(parent *LocalBeaconConfig) *NimbusBnConfig {
 	return &NimbusBnConfig{
-		Title: "Nimbus Settings",
+		parent: parent,
 
 		MaxPeers: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
@@ -121,6 +122,11 @@ func NewNimbusBnConfig(cfg *HyperdriveConfig) *NimbusBnConfig {
 	}
 }
 
+// Get the title for the config
+func (cfg *NimbusBnConfig) GetTitle() string {
+	return "Nimbus Settings"
+}
+
 // Get the parameters for this config
 func (cfg *NimbusBnConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -131,9 +137,9 @@ func (cfg *NimbusBnConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// Get the title for the config
-func (cfg *NimbusBnConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *NimbusBnConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }
 
 // Get the default number of peers

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -44,7 +45,7 @@ func (m *ConfigManager) LoadOrCreateConfig(isDaemon bool) (*HyperdriveConfig, bo
 		}
 
 		// Load it
-		cfg, err := LoadFromFile(configFilepath, isDaemon)
+		cfg, err := LoadFromFile(configFilepath)
 		return cfg, true, err
 	}
 	if !os.IsNotExist(err) && err != nil {
@@ -70,4 +71,47 @@ func (m *ConfigManager) SaveConfig(cfg *HyperdriveConfig) error {
 		return fmt.Errorf("error saving config file: %w", err)
 	}
 	return nil
+}
+
+// Get all of the changed settings between an old and new config
+func getChangedSettingsMap(oldConfig *HyperdriveConfig, newConfig *HyperdriveConfig) []types.ChangedSetting {
+	changedSettings := []types.ChangedSetting{}
+
+	// Root settings
+	oldRootParams := oldConfig.GetParameters()
+	newRootParams := newConfig.GetParameters()
+	changedSettings = getChangedSettings(oldRootParams, newRootParams, newConfig)
+
+	return changedSettings
+}
+
+// Get all of the settings that have changed between the given parameter lists.
+// Assumes the parameter lists represent identical parameters (e.g. they have the same number of elements and
+// each element has the same ID).
+func getChangedSettings(oldParams []types.IParameter, newParams []types.IParameter, newConfig *HyperdriveConfig) []types.ChangedSetting {
+	changedSettings := []types.ChangedSetting{}
+
+	for i, param := range newParams {
+		oldValString := oldParams[i].GetValueAsString()
+		newValString := param.GetValueAsString()
+		if oldValString != newValString {
+			changedSettings = append(changedSettings, types.ChangedSetting{
+				Name:               param.GetCommon().Name,
+				OldValue:           oldValString,
+				NewValue:           newValString,
+				AffectedContainers: getAffectedContainers(param, newConfig),
+			})
+		}
+	}
+
+	return changedSettings
+}
+
+// Get a list of containers that will be need to be restarted after this change is applied
+func getAffectedContainers(param types.IParameter, cfg *HyperdriveConfig) map[types.ContainerID]bool {
+	affectedContainers := map[types.ContainerID]bool{}
+	for _, container := range param.GetCommon().AffectsContainers {
+		affectedContainers[container] = true
+	}
+	return affectedContainers
 }

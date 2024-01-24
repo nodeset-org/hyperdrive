@@ -36,9 +36,9 @@ func NewBeaconClientManager(cfg *config.HyperdriveConfig) (*BeaconClientManager,
 	// Primary CC
 	var primaryProvider string
 	if cfg.ClientMode.Value == types.ClientMode_Local {
-		primaryProvider = fmt.Sprintf("http://%s:%d", types.ContainerID_BeaconNode, cfg.ConsensusCommon.HttpPort.Value)
+		primaryProvider = fmt.Sprintf("http://%s:%d", types.ContainerID_BeaconNode, cfg.LocalBeaconConfig.HttpPort.Value)
 	} else if cfg.ClientMode.Value == types.ClientMode_External {
-		primaryProvider = cfg.ExternalConsensusConfig.HttpUrl.Value
+		primaryProvider = cfg.ExternalBeaconConfig.HttpUrl.Value
 	} else {
 		return nil, fmt.Errorf("unknown client mode '%v'", cfg.ClientMode.Value)
 	}

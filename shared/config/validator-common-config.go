@@ -66,6 +66,6 @@ func (cfg *ValidatorCommonConfig) GetParameters() []types.IParameter {
 }
 
 // The the title for the config
-func (cfg *ValidatorCommonConfig) GetConfigTitle() string {
+func (cfg *ValidatorCommonConfig) GetTitle() string {
 	return cfg.Title
 }

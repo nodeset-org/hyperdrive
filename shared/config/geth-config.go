@@ -19,8 +19,6 @@ const (
 
 // Configuration for Geth
 type GethConfig struct {
-	Title string
-
 	// The flag for enabling PBSS
 	EnablePbss types.Parameter[bool]
 
@@ -32,12 +30,15 @@ type GethConfig struct {
 
 	// Custom command line flags
 	AdditionalFlags types.Parameter[string]
+
+	// Internal Fields
+	parent *LocalExecutionConfig
 }
 
 // Generates a new Geth configuration
-func NewGethConfig(cfg *HyperdriveConfig) *GethConfig {
+func NewGethConfig(parent *LocalExecutionConfig) *GethConfig {
 	return &GethConfig{
-		Title: "Geth Settings",
+		parent: parent,
 
 		EnablePbss: types.Parameter[bool]{
 			ParameterCommon: &types.ParameterCommon{
@@ -97,16 +98,9 @@ func NewGethConfig(cfg *HyperdriveConfig) *GethConfig {
 	}
 }
 
-// Calculate the default number of Geth peers
-func calculateGethPeers() uint16 {
-	switch runtime.GOARCH {
-	case "arm64":
-		return 25
-	case "amd64":
-		return 50
-	default:
-		panic(fmt.Sprintf("unsupported architecture %s", runtime.GOARCH))
-	}
+// Get the title for the config
+func (cfg *GethConfig) GetTitle() string {
+	return "Geth Settings"
 }
 
 // Get the parameters for this config
@@ -119,7 +113,19 @@ func (cfg *GethConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// Get the title for the config
-func (cfg *GethConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *GethConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
+}
+
+// Calculate the default number of Geth peers
+func calculateGethPeers() uint16 {
+	switch runtime.GOARCH {
+	case "arm64":
+		return 25
+	case "amd64":
+		return 50
+	default:
+		panic(fmt.Sprintf("unsupported architecture %s", runtime.GOARCH))
+	}
 }

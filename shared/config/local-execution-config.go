@@ -10,9 +10,7 @@ const (
 )
 
 // Configuration for the Execution client
-type ExecutionCommonConfig struct {
-	Title string
-
+type LocalExecutionConfig struct {
 	// The HTTP API port
 	HttpPort types.Parameter[uint16]
 
@@ -24,12 +22,20 @@ type ExecutionCommonConfig struct {
 
 	// P2P traffic port
 	P2pPort types.Parameter[uint16]
+
+	// Subconfigs
+	Geth       *GethConfig
+	Nethermind *NethermindConfig
+	Besu       *BesuConfig
+
+	// Internal Fields
+	parent *HyperdriveConfig
 }
 
-// Create a new ExecutionCommonConfig struct
-func NewExecutionCommonConfig(cfg *HyperdriveConfig) *ExecutionCommonConfig {
-	return &ExecutionCommonConfig{
-		Title: "Common Execution Client Settings",
+// Create a new LocalExecutionConfig struct
+func NewExecutionCommonConfig(parent *HyperdriveConfig) *LocalExecutionConfig {
+	cfg := &LocalExecutionConfig{
+		parent: parent,
 
 		HttpPort: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
@@ -61,7 +67,7 @@ func NewExecutionCommonConfig(cfg *HyperdriveConfig) *ExecutionCommonConfig {
 
 		OpenRpcPort: types.Parameter[types.RpcPortMode]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 OpenRpcPortID,
+				ID:                 OpenHttpPortID,
 				Name:               "Expose RPC Ports",
 				Description:        "Expose the HTTP and Websocket RPC ports to other processes on your machine, or to your local network so other machines can access your Execution Client's RPC endpoint.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient},
@@ -88,10 +94,22 @@ func NewExecutionCommonConfig(cfg *HyperdriveConfig) *ExecutionCommonConfig {
 			},
 		},
 	}
+
+	// Create the subconfigs
+	cfg.Geth = NewGethConfig(cfg)
+	cfg.Nethermind = NewNethermindConfig(cfg)
+	cfg.Besu = NewBesuConfig(cfg)
+
+	return cfg
+}
+
+// Get the title for the config
+func (cfg *LocalExecutionConfig) GetTitle() string {
+	return "Local Execution Client Settings"
 }
 
 // Get the parameters for this config
-func (cfg *ExecutionCommonConfig) GetParameters() []types.IParameter {
+func (cfg *LocalExecutionConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
 		&cfg.HttpPort,
 		&cfg.EnginePort,
@@ -100,7 +118,11 @@ func (cfg *ExecutionCommonConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// Get the title for the config
-func (cfg *ExecutionCommonConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *LocalExecutionConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{
+		"besu":       cfg.Besu,
+		"geth":       cfg.Geth,
+		"nethermind": cfg.Nethermind,
+	}
 }

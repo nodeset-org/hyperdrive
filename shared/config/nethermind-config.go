@@ -23,8 +23,6 @@ const (
 
 // Configuration for Nethermind
 type NethermindConfig struct {
-	Title string
-
 	// Nethermind's cache memory hint
 	CacheSize types.Parameter[uint64]
 
@@ -45,12 +43,15 @@ type NethermindConfig struct {
 
 	// Custom command line flags
 	AdditionalFlags types.Parameter[string]
+
+	// Internal Fields
+	parent *LocalExecutionConfig
 }
 
 // Generates a new Nethermind configuration
-func NewNethermindConfig(cfg *HyperdriveConfig) *NethermindConfig {
+func NewNethermindConfig(parent *LocalExecutionConfig) *NethermindConfig {
 	return &NethermindConfig{
-		Title: "Nethermind Settings",
+		parent: parent,
 
 		CacheSize: types.Parameter[uint64]{
 			ParameterCommon: &types.ParameterCommon{
@@ -154,6 +155,29 @@ func NewNethermindConfig(cfg *HyperdriveConfig) *NethermindConfig {
 	}
 }
 
+// Get the title for the config
+func (cfg *NethermindConfig) GetTitle() string {
+	return "Nethermind Settings"
+}
+
+// Get the parameters for this config
+func (cfg *NethermindConfig) GetParameters() []types.IParameter {
+	return []types.IParameter{
+		&cfg.CacheSize,
+		&cfg.MaxPeers,
+		&cfg.PruneMemSize,
+		&cfg.AdditionalModules,
+		&cfg.AdditionalUrls,
+		&cfg.ContainerTag,
+		&cfg.AdditionalFlags,
+	}
+}
+
+// Get the sections underneath this one
+func (cfg *NethermindConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
+}
+
 // Calculate the recommended size for Nethermind's cache based on the amount of system RAM
 func calculateNethermindCache() uint64 {
 	totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
@@ -206,22 +230,4 @@ func calculateNethermindPeers() uint16 {
 	default:
 		panic(fmt.Sprintf("unsupported architecture %s", runtime.GOARCH))
 	}
-}
-
-// Get the parameters for this config
-func (cfg *NethermindConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
-		&cfg.CacheSize,
-		&cfg.MaxPeers,
-		&cfg.PruneMemSize,
-		&cfg.AdditionalModules,
-		&cfg.AdditionalUrls,
-		&cfg.ContainerTag,
-		&cfg.AdditionalFlags,
-	}
-}
-
-// Get the title for the config
-func (cfg *NethermindConfig) GetConfigTitle() string {
-	return cfg.Title
 }

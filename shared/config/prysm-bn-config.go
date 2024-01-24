@@ -16,8 +16,6 @@ const (
 
 // Configuration for the Prysm BN
 type PrysmBnConfig struct {
-	Title string
-
 	// The max number of P2P peers to connect to
 	MaxPeers types.Parameter[uint16]
 
@@ -32,12 +30,15 @@ type PrysmBnConfig struct {
 
 	// Custom command line flags for the BN
 	AdditionalFlags types.Parameter[string]
+
+	// Internal Fields
+	parent *LocalBeaconConfig
 }
 
 // Generates a new Prysm BN configuration
-func NewPrysmBnConfig(cfg *HyperdriveConfig) *PrysmBnConfig {
+func NewPrysmBnConfig(parent *LocalBeaconConfig) *PrysmBnConfig {
 	return &PrysmBnConfig{
-		Title: "Prysm Settings",
+		parent: parent,
 
 		MaxPeers: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
@@ -114,6 +115,11 @@ func NewPrysmBnConfig(cfg *HyperdriveConfig) *PrysmBnConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *PrysmBnConfig) GetTitle() string {
+	return "Prysm Settings"
+}
+
 // Get the parameters for this config
 func (cfg *PrysmBnConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -125,7 +131,7 @@ func (cfg *PrysmBnConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *PrysmBnConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *PrysmBnConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

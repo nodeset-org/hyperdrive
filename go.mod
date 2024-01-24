@@ -87,6 +87,7 @@ require (
 	github.com/fatih/color v1.16.0
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/mux v1.8.1
+	github.com/hashicorp/go-version v1.6.0
 	github.com/holiman/uint256 v1.2.4 // indirect
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mitchellh/go-homedir v1.1.0

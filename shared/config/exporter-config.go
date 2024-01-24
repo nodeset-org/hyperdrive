@@ -14,8 +14,6 @@ const (
 
 // Configuration for Exporter
 type ExporterConfig struct {
-	Title string
-
 	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
 	RootFs types.Parameter[bool]
 
@@ -24,12 +22,15 @@ type ExporterConfig struct {
 
 	// Custom command line flags
 	AdditionalFlags types.Parameter[string]
+
+	// Internal Fields
+	parent *MetricsConfig
 }
 
 // Generates a new Exporter config
-func NewExporterConfig(cfg *HyperdriveConfig) *ExporterConfig {
+func NewExporterConfig(parent *MetricsConfig) *ExporterConfig {
 	return &ExporterConfig{
-		Title: "Node Exporter Settings",
+		parent: parent,
 
 		RootFs: types.Parameter[bool]{
 			ParameterCommon: &types.ParameterCommon{
@@ -75,6 +76,11 @@ func NewExporterConfig(cfg *HyperdriveConfig) *ExporterConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *ExporterConfig) GetTitle() string {
+	return "Node Exporter Settings"
+}
+
 // Get the parameters for this config
 func (cfg *ExporterConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -84,7 +90,7 @@ func (cfg *ExporterConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *ExporterConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *ExporterConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

@@ -67,6 +67,6 @@ func (cfg *NimbusVcConfig) GetParameters() []types.IParameter {
 }
 
 // Get the title for the config
-func (cfg *NimbusVcConfig) GetConfigTitle() string {
+func (cfg *NimbusVcConfig) GetTitle() string {
 	return cfg.Title
 }

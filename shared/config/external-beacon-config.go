@@ -6,17 +6,8 @@ import (
 
 const (
 	// Param IDs
-	HttpUrlID     string = "httpUrl"
 	PrysmRpcUrlID string = "prysmRpcUrl"
 )
-
-// Configuration for external Execution clients
-type ExternalExecutionConfig struct {
-	Title string
-
-	// The URL of the HTTP endpoint
-	HttpUrl types.Parameter[string]
-}
 
 // Configuration for external Consensus clients
 type ExternalBeaconConfig struct {
@@ -27,33 +18,15 @@ type ExternalBeaconConfig struct {
 
 	// The URL of the Prysm gRPC endpoint (only needed if using Prysm VCs)
 	PrysmRpcUrl types.Parameter[string]
-}
 
-// Generates a new ExternalExecutionConfig configuration
-func NewExternalExecutionConfig(cfg *HyperdriveConfig) *ExternalExecutionConfig {
-	return &ExternalExecutionConfig{
-		Title: "External Execution Client Settings",
-
-		HttpUrl: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
-				ID:                 HttpUrlID,
-				Name:               "HTTP URL",
-				Description:        "The URL of the HTTP RPC endpoint for your external Execution client.\nNOTE: If you are running it on the same machine as Hyperdrive, addresses like `localhost` and `127.0.0.1` will not work due to Docker limitations. Enter your machine's LAN IP address instead, for example 'http://192.168.1.100:8545'.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon},
-				CanBeBlank:         false,
-				OverwriteOnUpgrade: false,
-			},
-			Default: map[types.Network]string{
-				types.Network_All: "",
-			},
-		},
-	}
+	// Internal Fields
+	parent *HyperdriveConfig
 }
 
 // Generates a new ExternalBeaconConfig configuration
-func NewExternalBeaconConfig(cfg *HyperdriveConfig) *ExternalBeaconConfig {
+func NewExternalBeaconConfig(parent *HyperdriveConfig) *ExternalBeaconConfig {
 	return &ExternalBeaconConfig{
-		Title: "External Beacon Node Settings",
+		parent: parent,
 
 		HttpUrl: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
@@ -85,11 +58,9 @@ func NewExternalBeaconConfig(cfg *HyperdriveConfig) *ExternalBeaconConfig {
 	}
 }
 
-// Get the parameters for this config
-func (cfg *ExternalExecutionConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
-		&cfg.HttpUrl,
-	}
+// The the title for the config
+func (cfg *ExternalBeaconConfig) GetTitle() string {
+	return "External Beacon Node Settings"
 }
 
 // Get the parameters for this config
@@ -100,12 +71,7 @@ func (cfg *ExternalBeaconConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *ExternalExecutionConfig) GetConfigTitle() string {
-	return cfg.Title
-}
-
-// The the title for the config
-func (cfg *ExternalBeaconConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *ExternalBeaconConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

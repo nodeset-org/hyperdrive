@@ -18,8 +18,6 @@ const (
 
 // Configuration for the Lighthouse BN
 type LighthouseBnConfig struct {
-	Title string
-
 	// The port to use for gossip traffic using the QUIC protocol
 	P2pQuicPort types.Parameter[uint16]
 
@@ -31,12 +29,15 @@ type LighthouseBnConfig struct {
 
 	// Custom command line flags for the BN
 	AdditionalFlags types.Parameter[string]
+
+	// Internal Flags
+	parent *LocalBeaconConfig
 }
 
 // Generates a new Lighthouse BN configuration
-func NewLighthouseBnConfig(cfg *HyperdriveConfig) *LighthouseBnConfig {
+func NewLighthouseBnConfig(parent *LocalBeaconConfig) *LighthouseBnConfig {
 	return &LighthouseBnConfig{
-		Title: "Lighthouse Settings",
+		parent: parent,
 
 		P2pQuicPort: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
@@ -98,6 +99,11 @@ func NewLighthouseBnConfig(cfg *HyperdriveConfig) *LighthouseBnConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *LighthouseBnConfig) GetTitle() string {
+	return "Lighthouse Settings"
+}
+
 // Get the parameters for this config
 func (cfg *LighthouseBnConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -108,9 +114,9 @@ func (cfg *LighthouseBnConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *LighthouseBnConfig) GetConfigTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *LighthouseBnConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }
 
 // Get the appropriate LH default tag for production
