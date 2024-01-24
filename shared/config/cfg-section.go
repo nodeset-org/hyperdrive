@@ -97,3 +97,33 @@ func clone(source IConfigSection, target IConfigSection, network types.Network) 
 		clone(sourceSubconfig, targetSubconfigs[i], network)
 	}
 }
+
+// Change the active network for an entire configuration
+func changeNetwork(cfg IConfigSection, oldNetwork types.Network, newNetwork types.Network) {
+	// Update the master parameters
+	params := cfg.GetParameters()
+	for _, param := range params {
+		param.ChangeNetwork(oldNetwork, newNetwork)
+	}
+
+	// Update all of the child config objects
+	subconfigs := cfg.GetSubconfigs()
+	for _, subconfig := range subconfigs {
+		changeNetwork(subconfig, oldNetwork, newNetwork)
+	}
+}
+
+// Update the default settings after a network change
+func updateDefaults(cfg IConfigSection, newNetwork types.Network) {
+	// Update the parameters
+	for _, param := range cfg.GetParameters() {
+		if param.GetCommon().OverwriteOnUpgrade {
+			param.Deserialize(param.GetDefaultAsString(newNetwork), newNetwork)
+		}
+	}
+
+	// Update the subconfigs
+	for _, subconfig := range cfg.GetSubconfigs() {
+		updateDefaults(subconfig, newNetwork)
+	}
+}

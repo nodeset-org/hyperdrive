@@ -85,6 +85,7 @@ require (
 	github.com/btcsuite/btcd/btcutil v1.1.5
 	github.com/docker/docker v24.0.7+incompatible
 	github.com/fatih/color v1.16.0
+	github.com/glendc/go-external-ip v0.1.0
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0

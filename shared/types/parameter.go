@@ -6,14 +6,6 @@ import (
 	"strconv"
 )
 
-// A setting that has changed
-type ChangedSetting struct {
-	Name               string
-	OldValue           string
-	NewValue           string
-	AffectedContainers map[ContainerID]bool
-}
-
 // =========================
 // === Parameter Options ===
 // =========================
@@ -130,6 +122,9 @@ type IParameter interface {
 
 	// Deserializes a string into this parameter's value
 	Deserialize(serializedParam string, network Network) error
+
+	// Change the current network
+	ChangeNetwork(oldNetwork Network, newNetwork Network)
 }
 
 // Get the parameter's common fields

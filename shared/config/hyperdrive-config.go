@@ -27,12 +27,10 @@ import (
 
 const (
 	// Param IDs
-	HyperdriveDebugModeID       string = "debugMode"
-	HyperdriveNetworkID         string = "network"
-	HyperdriveClientModeID      string = "clientMode"
-	HyperdriveExecutionClientID string = "executionClient"
-	HyperdriveBeaconNodeID      string = "beaconNode"
-	HyperdriveDirectoryID       string = "hdDir"
+	HyperdriveDebugModeID  string = "debugMode"
+	HyperdriveNetworkID    string = "network"
+	HyperdriveClientModeID string = "clientMode"
+	HyperdriveDirectoryID  string = "hdDir"
 
 	// Tags
 	HyperdriveTag string = "nodeset/hyperdrive:v" + shared.HyperdriveVersion
@@ -44,17 +42,17 @@ type HyperdriveConfig struct {
 	DebugMode  types.Parameter[bool]
 	Network    types.Parameter[types.Network]
 	ClientMode types.Parameter[types.ClientMode]
-	Fallback   *FallbackConfig
 
 	// Execution client settings
-	ExecutionClient         types.Parameter[types.ExecutionClient]
 	LocalExecutionConfig    *LocalExecutionConfig
 	ExternalExecutionConfig *ExternalExecutionConfig
 
 	// Beacon node settings
-	BeaconNode           types.Parameter[types.BeaconNode]
 	LocalBeaconConfig    *LocalBeaconConfig
 	ExternalBeaconConfig *ExternalBeaconConfig
+
+	// Fallback clients
+	Fallback *FallbackConfig
 
 	// Metrics
 	Metrics *MetricsConfig
@@ -159,85 +157,6 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 			},
 		},
 
-		ExecutionClient: types.Parameter[types.ExecutionClient]{
-			ParameterCommon: &types.ParameterCommon{
-				ID:                 HyperdriveExecutionClientID,
-				Name:               "Execution Client",
-				Description:        "Select which Execution client you would like to run.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient, types.ContainerID_ValidatorClients},
-				CanBeBlank:         false,
-				OverwriteOnUpgrade: false,
-			},
-			Options: []*types.ParameterOption[types.ExecutionClient]{
-				{
-					ParameterOptionCommon: &types.ParameterOptionCommon{
-						Name:        "Geth",
-						Description: "Geth is one of the three original implementations of the Ethereum protocol. It is written in Go, fully open source and licensed under the GNU LGPL v3.",
-					},
-					Value: types.ExecutionClient_Geth,
-				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
-						Name:        "Nethermind",
-						Description: getAugmentedEcDescription(types.ExecutionClient_Nethermind, "Nethermind is a high-performance full Ethereum protocol client with very fast sync speeds. Nethermind is built with proven industrial technologies such as .NET 6 and the Kestrel web server. It is fully open source."),
-					},
-					Value: types.ExecutionClient_Nethermind,
-				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
-						Name:        "Besu",
-						Description: getAugmentedEcDescription(types.ExecutionClient_Besu, "Hyperledger Besu is a robust full Ethereum protocol client. It uses a novel system called \"Bonsai Trees\" to store its chain data efficiently, which allows it to access block states from the past and does not require pruning. Besu is fully open source and written in Java."),
-					},
-					Value: types.ExecutionClient_Besu,
-				}},
-			Default: map[types.Network]types.ExecutionClient{
-				types.Network_All: types.ExecutionClient_Geth},
-		},
-
-		BeaconNode: types.Parameter[types.BeaconNode]{
-			ParameterCommon: &types.ParameterCommon{
-				ID:                 HyperdriveBeaconNodeID,
-				Name:               "Consensus Client",
-				Description:        "Select which Consensus client you would like to use.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_BeaconNode, types.ContainerID_ValidatorClients},
-				CanBeBlank:         false,
-				OverwriteOnUpgrade: false,
-			},
-			Options: []*types.ParameterOption[types.BeaconNode]{
-				{
-					ParameterOptionCommon: &types.ParameterOptionCommon{
-						Name:        "Lighthouse",
-						Description: "Lighthouse is a Consensus client with a heavy focus on speed and security. The team behind it, Sigma Prime, is an information security and software engineering firm who have funded Lighthouse along with the Ethereum Foundation, Consensys, and private individuals. Lighthouse is built in Rust and offered under an Apache 2.0 License.",
-					},
-					Value: types.ConsensusClient_Lighthouse,
-				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
-						Name:        "Lodestar",
-						Description: "Lodestar is the fifth open-source Ethereum consensus client. It is written in Typescript maintained by ChainSafe Systems. Lodestar, their flagship product, is a production-capable Beacon Chain and Validator Client uniquely situated as the go-to for researchers and developers for rapid prototyping and browser usage.",
-					},
-					Value: types.ConsensusClient_Lodestar,
-				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
-						Name:        "Nimbus",
-						Description: "Nimbus is a Consensus client implementation that strives to be as lightweight as possible in terms of resources used. This allows it to perform well on embedded systems, resource-restricted devices -- including Raspberry Pis and mobile devices -- and multi-purpose servers.",
-					},
-					Value: types.ConsensusClient_Nimbus,
-				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
-						Name:        "Prysm",
-						Description: "Prysm is a Go implementation of Ethereum Consensus protocol with a focus on usability, security, and reliability. Prysm is developed by Prysmatic Labs, a company with the sole focus on the development of their client. Prysm is written in Go and released under a GPL-3.0 license.",
-					},
-					Value: types.ConsensusClient_Prysm,
-				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
-						Name:        "Teku",
-						Description: "PegaSys Teku (formerly known as Artemis) is a Java-based Ethereum 2.0 client designed & built to meet institutional needs and security requirements. PegaSys is an arm of ConsenSys dedicated to building enterprise-ready clients and tools for interacting with the core Ethereum platform. Teku is Apache 2 licensed and written in Java, a language notable for its maturity & ubiquity.",
-					},
-					Value: types.ConsensusClient_Teku,
-				}},
-			Default: map[types.Network]types.BeaconNode{
-				types.Network_All: types.ConsensusClient_Nimbus,
-			},
-		},
-
 		// Internal fields
 		chainID: map[types.Network]uint{
 			types.Network_Mainnet:    1,     // Mainnet
@@ -271,8 +190,6 @@ func (cfg *HyperdriveConfig) GetParameters() []types.IParameter {
 		&cfg.DebugMode,
 		&cfg.Network,
 		&cfg.ClientMode,
-		&cfg.ExecutionClient,
-		&cfg.BeaconNode,
 	}
 }
 
@@ -348,23 +265,83 @@ func (cfg *HyperdriveConfig) CreateCopy() *HyperdriveConfig {
 	return cfgCopy
 }
 
-// Generates a collection of environment variables based on this config's settings
-func (cfg *HyperdriveConfig) GenerateEnvironmentVariables() map[string]string {
-	envVars := map[string]string{}
+// Handle a network change on all of the parameters
+func (cfg *HyperdriveConfig) ChangeNetwork(newNetwork types.Network) {
+	// Get the current network
+	oldNetwork := cfg.Network.Value
+	if oldNetwork == newNetwork {
+		return
+	}
+	cfg.Network.Value = newNetwork
+	changeNetwork(cfg, oldNetwork, newNetwork)
+}
 
-	// Basic variables
-	envVars["HYPERDRIVE_IMAGE"] = HyperdriveTag
-	envVars["HD_INSTALL_PATH"] = cfg.HyperdriveDirectory
+// Update the default settings for all overwrite-on-upgrade parameters
+func (cfg *HyperdriveConfig) UpdateDefaults() {
+	updateDefaults(cfg, cfg.Network.Value)
+}
 
-	// Settings
-	for _, param := range cfg.GetParameters() {
-		vars := param.GetCommon().EnvironmentVariables
-		for _, envVar := range vars {
-			envVars[envVar] = param.GetValueAsString()
+// Get all of the settings that have changed between an old config and this config, and get all of the containers that are affected by those changes - also returns whether or not the selected network was changed
+func (cfg *HyperdriveConfig) GetChanges(oldConfig *HyperdriveConfig) (*types.ChangedSection, map[types.ContainerID]bool, bool) {
+	// Get the changed parameters
+	section, changeCount := getChangedSettings(oldConfig, cfg)
+	if changeCount == 0 {
+		return nil, nil, false
+	}
+	section.Name = cfg.GetTitle()
+
+	// Get the affected containers
+	containers := map[types.ContainerID]bool{}
+	getAffectedContainers(section, containers)
+
+	// Check if the network has changed
+	changeNetworks := false
+	if oldConfig.Network.Value != cfg.Network.Value {
+		changeNetworks = true
+	}
+
+	// Return everything
+	return section, containers, changeNetworks
+}
+
+// Checks to see if the current configuration is valid; if not, returns a list of errors
+func (cfg *HyperdriveConfig) Validate() []string {
+	errors := []string{}
+
+	// Check for illegal blank strings
+	/* TODO - this needs to be smarter and ignore irrelevant settings
+	for _, param := range config.GetParameters() {
+		if param.Type == ParameterType_String && !param.CanBeBlank && param.Value == "" {
+			errors = append(errors, fmt.Sprintf("[%s] cannot be blank.", param.Name))
 		}
 	}
 
-	return envVars
+	for name, subconfig := range config.GetSubconfigs() {
+		for _, param := range subconfig.GetParameters() {
+			if param.Type == ParameterType_String && !param.CanBeBlank && param.Value == "" {
+				errors = append(errors, fmt.Sprintf("[%s - %s] cannot be blank.", name, param.Name))
+			}
+		}
+	}
+	*/
+
+	// Ensure the selected port numbers are unique. Keeps track of all the errors
+	portMap := make(map[uint16]bool)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalBeaconConfig.HttpPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalBeaconConfig.P2pPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalExecutionConfig.HttpPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalExecutionConfig.WebsocketPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalExecutionConfig.EnginePort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalExecutionConfig.P2pPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.EcMetricsPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.BnMetricsPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.Prometheus.Port, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.ExporterMetricsPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.Grafana.Port, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.DaemonMetricsPort, errors)
+	_, errors = addAndCheckForDuplicate(portMap, cfg.LocalBeaconConfig.Lighthouse.P2pQuicPort, errors)
+
+	return errors
 }
 
 // ===============

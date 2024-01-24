@@ -80,22 +80,22 @@ type BeaconNode string
 // Enum to describe the Consensus clients
 const (
 	// Unknown
-	ConsensusClient_Unknown BeaconNode = ""
+	BeaconNode_Unknown BeaconNode = ""
 
 	// Lighthouse
-	ConsensusClient_Lighthouse BeaconNode = "lighthouse"
+	BeaconNode_Lighthouse BeaconNode = "lighthouse"
 
 	// Lodestar
-	ConsensusClient_Lodestar BeaconNode = "lodestar"
+	BeaconNode_Lodestar BeaconNode = "lodestar"
 
 	// Nimbus
-	ConsensusClient_Nimbus BeaconNode = "nimbus"
+	BeaconNode_Nimbus BeaconNode = "nimbus"
 
 	// Prysm
-	ConsensusClient_Prysm BeaconNode = "prysm"
+	BeaconNode_Prysm BeaconNode = "prysm"
 
 	// Teku
-	ConsensusClient_Teku BeaconNode = "teku"
+	BeaconNode_Teku BeaconNode = "teku"
 )
 
 // A client ownership mode
