@@ -5,7 +5,6 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 const settingsHomeID string = "settings-home"
@@ -15,13 +14,11 @@ type settingsHome struct {
 	homePage         *page
 	saveButton       *tview.Button
 	wizardButton     *tview.Button
-	smartnodePage    *SmartnodeConfigPage
+	hyperdrivePage   *HyperdriveConfigPage
 	ecPage           *ExecutionConfigPage
 	fallbackPage     *FallbackConfigPage
-	ccPage           *ConsensusConfigPage
-	mevBoostPage     *MevBoostConfigPage
+	ccPage           *BeaconConfigPage
 	metricsPage      *MetricsConfigPage
-	addonsPage       *AddonsPage
 	categoryList     *tview.List
 	settingsSubpages []settingsPage
 	content          tview.Primitive
@@ -40,21 +37,17 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 	}
 
 	// Create the settings subpages
-	home.smartnodePage = NewSmartnodeConfigPage(home)
+	home.hyperdrivePage = NewHyperdriveConfigPage(home)
 	home.ecPage = NewExecutionConfigPage(home)
-	home.ccPage = NewConsensusConfigPage(home)
+	home.ccPage = NewBeaconConfigPage(home)
 	home.fallbackPage = NewFallbackConfigPage(home)
-	home.mevBoostPage = NewMevBoostConfigPage(home)
 	home.metricsPage = NewMetricsConfigPage(home)
-	home.addonsPage = NewAddonsPage(home)
 	settingsSubpages := []settingsPage{
-		home.smartnodePage,
+		home.hyperdrivePage,
 		home.ecPage,
 		home.ccPage,
 		home.fallbackPage,
-		home.mevBoostPage,
 		home.metricsPage,
-		home.addonsPage,
 	}
 	home.settingsSubpages = settingsSubpages
 
@@ -77,12 +70,7 @@ func (home *settingsHome) createContent() {
 	// Create the category list
 	categoryList := tview.NewList().
 		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
-			if (home.md.Config.Smartnode.Network.Value == config.Network_Holesky || home.md.Config.Smartnode.Network.Value == config.Network_Devnet) && home.settingsSubpages[index].getPage().id == "settings-mev-boost" {
-				// Disable MEV-Boost for Holesky
-				layout.descriptionBox.SetText("MEV-Boost is currently disabled for the Holesky test network.")
-			} else {
-				layout.descriptionBox.SetText(home.settingsSubpages[index].getPage().description)
-			}
+			layout.descriptionBox.SetText(home.settingsSubpages[index].getPage().description)
 		})
 	categoryList.SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
 	categoryList.SetBorderPadding(0, 0, 1, 1)
@@ -102,13 +90,8 @@ func (home *settingsHome) createContent() {
 		categoryList.AddItem(subpage.getPage().title, "", 0, nil)
 	}
 	categoryList.SetSelectedFunc(func(i int, s1, s2 string, r rune) {
-		if (home.md.Config.Smartnode.Network.Value == config.Network_Holesky || home.md.Config.Smartnode.Network.Value == config.Network_Devnet) && home.settingsSubpages[i].getPage().id == "settings-mev-boost" {
-			// Disable MEV-Boost for Holesky
-			return
-		} else {
-			home.settingsSubpages[i].handleLayoutChanged()
-			home.md.setPage(home.settingsSubpages[i].getPage())
-		}
+		home.settingsSubpages[i].handleLayoutChanged()
+		home.md.setPage(home.settingsSubpages[i].getPage())
 	})
 
 	// Make it the content of the layout and set the default description text
@@ -192,7 +175,7 @@ func (home *settingsHome) createFooter() (tview.Primitive, int) {
 		return event
 	})
 	wizardButton.SetSelectedFunc(func() {
-		home.md.dockerWizard.welcomeModal.show()
+		home.md.wizard.welcomeModal.show()
 	})
 	wizardButton.SetBackgroundColorActivated(tcell.Color46)
 	wizardButton.SetLabelColorActivated(tcell.ColorBlack)
@@ -236,10 +219,6 @@ func (home *settingsHome) refresh() {
 
 	if home.fallbackPage != nil {
 		home.fallbackPage.layout.refresh()
-	}
-
-	if home.mevBoostPage != nil {
-		home.mevBoostPage.layout.refresh()
 	}
 
 	if home.metricsPage != nil {

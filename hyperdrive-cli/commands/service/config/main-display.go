@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rivo/tview"
-	"github.com/rocket-pool/smartnode/shared"
-	"github.com/rocket-pool/smartnode/shared/config"
-	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 // This represents the primary TUI for the configuration command
@@ -17,24 +17,22 @@ type mainDisplay struct {
 	app                 *tview.Application
 	content             *tview.Box
 	mainGrid            *tview.Grid
-	dockerWizard        *wizard
+	wizard              *wizard
 	settingsHome        *settingsHome
-	settingsNativeHome  *settingsNativeHome
 	isNew               bool
 	isUpdate            bool
 	isNative            bool
 	previousWidth       int
 	previousHeight      int
-	PreviousConfig      *config.RocketPoolConfig
-	Config              *config.RocketPoolConfig
+	PreviousConfig      *config.HyperdriveConfig
+	Config              *config.HyperdriveConfig
 	ShouldSave          bool
-	ContainersToRestart []cfgtypes.ContainerID
+	ContainersToRestart []types.ContainerID
 	ChangeNetworks      bool
 }
 
 // Creates a new MainDisplay instance.
-func NewMainDisplay(app *tview.Application, previousConfig *config.RocketPoolConfig, config *config.RocketPoolConfig, isNew bool, isUpdate bool, isNative bool) *mainDisplay {
-
+func NewMainDisplay(app *tview.Application, previousConfig *config.HyperdriveConfig, config *config.HyperdriveConfig, isNew bool, isUpdate bool, isNative bool) *mainDisplay {
 	// Create a copy of the original config for comparison purposes
 	if previousConfig == nil {
 		previousConfig = config.CreateCopy()
@@ -46,7 +44,7 @@ func NewMainDisplay(app *tview.Application, previousConfig *config.RocketPoolCon
 		SetRows(1, 1, 1, 0, 1) // Also 1-unit border
 
 	grid.SetBorder(true).
-		SetTitle(fmt.Sprintf(" Rocket Pool Smartnode %s Configuration ", shared.RocketPoolVersion)).
+		SetTitle(fmt.Sprintf(" Rocket Pool Smartnode %s Configuration ", shared.HyperdriveVersion)).
 		SetBorderColor(tcell.ColorOrange).
 		SetTitleColor(tcell.ColorOrange).
 		SetBackgroundColor(tcell.ColorBlack)
@@ -87,8 +85,7 @@ func NewMainDisplay(app *tview.Application, previousConfig *config.RocketPoolCon
 
 	// Create all of the child elements
 	md.settingsHome = newSettingsHome(md)
-	md.settingsNativeHome = newSettingsNativeHome(md)
-	md.dockerWizard = newWizard(md)
+	md.wizard = newWizard(md)
 
 	// Set up the resize warning
 	md.app.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
@@ -110,21 +107,12 @@ func NewMainDisplay(app *tview.Application, previousConfig *config.RocketPoolCon
 	})
 
 	if isNew {
-		if isNative {
-			md.dockerWizard.nativeWelcomeModal.show()
-		} else {
-			md.dockerWizard.welcomeModal.show()
-		}
+		md.wizard.welcomeModal.show()
 	} else {
-		if isNative {
-			md.setPage(md.settingsNativeHome.homePage)
-		} else {
-			md.setPage(md.settingsHome.homePage)
-		}
+		md.setPage(md.settingsHome.homePage)
 	}
 	app.SetRoot(grid, true)
 	return md
-
 }
 
 // Sets the current page that is on display.

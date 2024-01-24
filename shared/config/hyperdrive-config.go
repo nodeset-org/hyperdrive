@@ -286,7 +286,7 @@ func (cfg *HyperdriveConfig) GetChanges(oldConfig *HyperdriveConfig) (*types.Cha
 	// Get the changed parameters
 	section, changeCount := getChangedSettings(oldConfig, cfg)
 	if changeCount == 0 {
-		return nil, nil, false
+		return nil, map[types.ContainerID]bool{}, false
 	}
 	section.Name = cfg.GetTitle()
 
@@ -360,10 +360,7 @@ func (cfg *HyperdriveConfig) GetChainID() uint {
 func (cfg *HyperdriveConfig) applyAllDefaults() error {
 	network := cfg.Network.Value
 	for _, param := range cfg.GetParameters() {
-		err := param.SetToDefault(network)
-		if err != nil {
-			return fmt.Errorf("error setting parameter default: %w", err)
-		}
+		param.SetToDefault(network)
 	}
 
 	return nil

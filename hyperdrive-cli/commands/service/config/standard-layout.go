@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rivo/tview"
-	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
 // A layout container with the standard elements and design
@@ -16,7 +16,6 @@ type standardLayout struct {
 	footer         tview.Primitive
 	form           *Form
 	parameters     map[tview.FormItem]*parameterizedFormItem
-	cfg            cfgtypes.Config
 }
 
 // Creates a new StandardLayout instance, which includes the grid and description box preconstructed.
@@ -75,7 +74,7 @@ func (layout *standardLayout) setFooter(footer tview.Primitive, height int) {
 }
 
 // Create a standard form for this layout (for settings pages)
-func (layout *standardLayout) createForm(networkParam *cfgtypes.Parameter, title string) {
+func (layout *standardLayout) createForm(networkParam *types.Parameter[types.Network], title string) {
 
 	layout.parameters = map[tview.FormItem]*parameterizedFormItem{}
 
@@ -91,8 +90,8 @@ func (layout *standardLayout) createForm(networkParam *cfgtypes.Parameter, title
 		if index < form.GetFormItemCount() {
 			formItem := form.GetFormItem(index)
 			param := layout.parameters[formItem].parameter
-			defaultValue, _ := param.GetDefault(networkParam.Value.(cfgtypes.Network))
-			descriptionText := fmt.Sprintf("Default: %v\n\n%s", defaultValue, param.Description)
+			defaultValue := param.GetDefaultAsAny(networkParam.Value)
+			descriptionText := fmt.Sprintf("Default: %v\n\n%s", defaultValue, param.GetCommon().Description)
 			layout.descriptionBox.SetText(descriptionText)
 			layout.descriptionBox.ScrollToBeginning()
 		}
@@ -111,19 +110,19 @@ func (layout *standardLayout) refresh() {
 		param := layout.parameters[formItem].parameter
 
 		// Set the form item to the current value
-		switch param.Type {
-		case cfgtypes.ParameterType_Bool:
-			formItem.(*tview.Checkbox).SetChecked(param.Value == true)
-
-		case cfgtypes.ParameterType_Int, cfgtypes.ParameterType_Uint, cfgtypes.ParameterType_Uint16, cfgtypes.ParameterType_String, cfgtypes.ParameterType_Float:
-			formItem.(*tview.InputField).SetText(fmt.Sprint(param.Value))
-
-		case cfgtypes.ParameterType_Choice:
-			for i := 0; i < len(param.Options); i++ {
-				if param.Options[i].Value == param.Value {
+		if boolParam, ok := param.(*types.Parameter[bool]); ok {
+			// Bool
+			formItem.(*tview.Checkbox).SetChecked(boolParam.Value)
+		} else if len(param.GetOptions()) > 0 {
+			// Choice
+			for i, option := range param.GetOptions() {
+				if option.GetValueAsString() == param.GetValueAsString() {
 					formItem.(*DropDown).SetCurrentOption(i)
 				}
 			}
+		} else {
+			// Everything else
+			formItem.(*tview.InputField).SetText(param.GetValueAsString())
 		}
 	}
 
@@ -181,10 +180,12 @@ func (layout *standardLayout) addFormItemsWithCommonParams(commonParams []*param
 	// Add the common params if they aren't in the unsupported list
 	for _, commonParam := range commonParams {
 		isSupported := true
-		for _, unsupportedParam := range unsupportedCommonParams {
-			if commonParam.parameter.ID == unsupportedParam {
-				isSupported = false
-				break
+		if len(unsupportedCommonParams) > 0 {
+			for _, unsupportedParam := range unsupportedCommonParams {
+				if commonParam.parameter.GetCommon().ID == unsupportedParam {
+					isSupported = false
+					break
+				}
 			}
 		}
 

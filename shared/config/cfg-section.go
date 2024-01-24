@@ -46,10 +46,7 @@ func deserialize(cfg IConfigSection, serializedParams map[string]any, network ty
 		id := param.GetCommon().ID
 		val, exists := serializedParams[id]
 		if !exists {
-			err := param.SetToDefault(network)
-			if err != nil {
-				return fmt.Errorf("parameter [%s] didn't exist and setting it to the default failed: %w", id, err)
-			}
+			param.SetToDefault(network)
 		} else {
 			valString, isString := val.(string)
 			if !isString {
@@ -86,8 +83,7 @@ func clone(source IConfigSection, target IConfigSection, network types.Network) 
 	// Handle the parameters
 	targetParams := target.GetParameters()
 	for i, sourceParam := range source.GetParameters() {
-		// TODO: make direct accessors instead of round tripping via string
-		targetParams[i].Deserialize(sourceParam.GetValueAsString(), network)
+		targetParams[i].SetValue(sourceParam.GetValueAsAny())
 		targetParams[i].GetCommon().UpdateDescription(network)
 	}
 
@@ -118,7 +114,7 @@ func updateDefaults(cfg IConfigSection, newNetwork types.Network) {
 	// Update the parameters
 	for _, param := range cfg.GetParameters() {
 		if param.GetCommon().OverwriteOnUpgrade {
-			param.Deserialize(param.GetDefaultAsString(newNetwork), newNetwork)
+			param.SetToDefault(newNetwork)
 		}
 	}
 

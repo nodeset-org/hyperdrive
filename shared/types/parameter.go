@@ -6,48 +6,6 @@ import (
 	"strconv"
 )
 
-// =========================
-// === Parameter Options ===
-// =========================
-
-// Common fields across all ParameterOption instances
-type ParameterOptionCommon struct {
-	// The option's human-readable name, to be used in config displays
-	Name string
-
-	// A description signifying what this option means
-	Description string
-}
-
-// A single option in a choice parameter
-type ParameterOption[Type any] struct {
-	*ParameterOptionCommon
-
-	// The underlying value for this option
-	Value Type
-}
-
-// An interface for typed ParameterOption structs, to get common fields from them
-type IParameterOption interface {
-	// Get the parameter option's common fields
-	Common() *ParameterOptionCommon
-	GetValueAsString() string
-}
-
-// Get the parameter option's common fields
-func (p *ParameterOption[_]) Common() *ParameterOptionCommon {
-	return p.ParameterOptionCommon
-}
-
-// Get the parameter option's value as a string
-func (p *ParameterOption[_]) GetValueAsString() string {
-	return fmt.Sprint(p.Value)
-}
-
-// ==================
-// === Parameters ===
-// ==================
-
 // Common fields across all Parameter instances
 type ParameterCommon struct {
 	// The parameter's ID, used for serialization and deserialization
@@ -112,16 +70,22 @@ type IParameter interface {
 	GetOptions() []IParameterOption
 
 	// Set the parameter to the default value
-	SetToDefault(network Network) error
+	SetToDefault(network Network)
+
+	// Get the parameter's value
+	GetValueAsAny() any
 
 	// Get the parameter's value as a string
 	GetValueAsString() string
 
 	// Get the parameter's default value for the supplied network as a string
-	GetDefaultAsString(network Network) string
+	GetDefaultAsAny(network Network) any
 
 	// Deserializes a string into this parameter's value
 	Deserialize(serializedParam string, network Network) error
+
+	// Set the parameter's value explicitly; panics if it's the wrong type
+	SetValue(value any)
 
 	// Change the current network
 	ChangeNetwork(oldNetwork Network, newNetwork Network)
@@ -145,27 +109,26 @@ func (p *Parameter[_]) GetOptions() []IParameterOption {
 }
 
 // Set the value to the default for the provided config's network
-func (p *Parameter[_]) SetToDefault(network Network) error {
-	defaultSetting, err := p.GetDefault(network)
-	if err != nil {
-		return err
-	}
-	p.Value = defaultSetting
-	return nil
+func (p *Parameter[Type]) SetToDefault(network Network) {
+	p.Value = p.GetDefault(network)
 }
 
 // Get the default value for the provided network
-func (p *Parameter[Type]) GetDefault(network Network) (Type, error) {
-	var empty Type
+func (p *Parameter[Type]) GetDefault(network Network) Type {
 	defaultSetting, exists := p.Default[network]
 	if !exists {
 		defaultSetting, exists = p.Default[Network_All]
 		if !exists {
-			return empty, fmt.Errorf("parameter [%s] doesn't have a default for network %s or all networks", p.ID, network)
+			panic(fmt.Sprintf("parameter [%s] doesn't have a default for network %s or all networks", p.Name, network))
 		}
 	}
 
-	return defaultSetting, nil
+	return defaultSetting
+}
+
+// Get the parameter's value
+func (p *Parameter[_]) GetValueAsAny() any {
+	return p.Value
 }
 
 // Get the parameter's value as a string
@@ -173,13 +136,9 @@ func (p *Parameter[_]) GetValueAsString() string {
 	return fmt.Sprint(p.Value)
 }
 
-// Get the parameter's value as a string
-func (p *Parameter[_]) GetDefaultAsString(network Network) string {
-	defaultSetting, err := p.GetDefault(network)
-	if err != nil {
-		return ""
-	}
-	return fmt.Sprint(defaultSetting)
+// Get the default value for the provided network
+func (p *Parameter[_]) GetDefaultAsAny(network Network) any {
+	return p.GetDefault(network)
 }
 
 // Deserializes a string into this parameter's value
@@ -192,7 +151,8 @@ func (p *Parameter[_]) Deserialize(serializedParam string, network Network) erro
 				return nil
 			}
 		}
-		return p.SetToDefault(network)
+		p.SetToDefault(network)
+		return nil
 	}
 
 	var err error
@@ -224,7 +184,8 @@ func (p *Parameter[_]) Deserialize(serializedParam string, network Network) erro
 			}
 		}
 		if !p.CanBeBlank && serializedParam == "" {
-			return p.SetToDefault(network)
+			p.SetToDefault(network)
+			return nil
 		}
 		*value = serializedParam
 	}
@@ -234,6 +195,15 @@ func (p *Parameter[_]) Deserialize(serializedParam string, network Network) erro
 	}
 
 	return nil
+}
+
+// Set the parameter's value
+func (p *Parameter[Type]) SetValue(value any) {
+	typedVal, ok := value.(Type)
+	if !ok {
+		panic(fmt.Sprintf("attempted to set param [%s] to [%v] but it was the wrong type", p.Name, value))
+	}
+	p.Value = typedVal
 }
 
 // Apply a network change to a parameter

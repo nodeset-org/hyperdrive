@@ -11,7 +11,8 @@ const (
 
 // Configuration for external Consensus clients
 type ExternalBeaconConfig struct {
-	Title string
+	// The selected BN
+	BeaconNode types.Parameter[types.BeaconNode]
 
 	// The URL of the HTTP endpoint
 	HttpUrl types.Parameter[string]
@@ -27,6 +28,52 @@ type ExternalBeaconConfig struct {
 func NewExternalBeaconConfig(parent *HyperdriveConfig) *ExternalBeaconConfig {
 	return &ExternalBeaconConfig{
 		parent: parent,
+
+		BeaconNode: types.Parameter[types.BeaconNode]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 BnID,
+				Name:               "Beacon Node",
+				Description:        "Select which Beacon Node your external client is.",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Options: []*types.ParameterOption[types.BeaconNode]{
+				{
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Lighthouse",
+						Description: "Select if your external client is Lighthouse.",
+					},
+					Value: types.BeaconNode_Lighthouse,
+				}, {
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Lodestar",
+						Description: "Select if your external client is Lodestar.",
+					},
+					Value: types.BeaconNode_Lodestar,
+				}, {
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Nimbus",
+						Description: "Select if your external client is Nimbus.",
+					},
+					Value: types.BeaconNode_Nimbus,
+				}, {
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Prysm",
+						Description: "Select if your external client is Prysm.",
+					},
+					Value: types.BeaconNode_Prysm,
+				}, {
+					ParameterOptionCommon: &types.ParameterOptionCommon{
+						Name:        "Teku",
+						Description: "Select if your external client is Teku.",
+					},
+					Value: types.BeaconNode_Teku,
+				}},
+			Default: map[types.Network]types.BeaconNode{
+				types.Network_All: types.BeaconNode_Nimbus,
+			},
+		},
 
 		HttpUrl: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
@@ -66,6 +113,7 @@ func (cfg *ExternalBeaconConfig) GetTitle() string {
 // Get the parameters for this config
 func (cfg *ExternalBeaconConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
+		&cfg.BeaconNode,
 		&cfg.HttpUrl,
 		&cfg.PrysmRpcUrl,
 	}
