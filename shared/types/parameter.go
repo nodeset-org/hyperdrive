@@ -93,8 +93,18 @@ type ParameterCommon struct {
 	DescriptionsByNetwork map[Network]string
 }
 
+// Set the network-specific description of the parameter
+func (p *ParameterCommon) UpdateDescription(network Network) {
+	if p.DescriptionsByNetwork != nil {
+		newDesc, exists := p.DescriptionsByNetwork[network]
+		if exists {
+			p.Description = newDesc
+		}
+	}
+}
+
 // A parameter that can be configured by the user
-type Parameter[Type any] struct {
+type Parameter[Type comparable] struct {
 	*ParameterCommon
 	Default map[Network]Type
 	Value   Type
@@ -178,7 +188,7 @@ func (p *Parameter[_]) GetDefaultAsString(network Network) string {
 }
 
 // Deserializes a string into this parameter's value
-func (p *Parameter[Type]) Deserialize(serializedParam string, network Network) error {
+func (p *Parameter[_]) Deserialize(serializedParam string, network Network) error {
 	if len(p.Options) > 0 {
 		for _, option := range p.Options {
 			optionVal := option.GetValueAsString()
@@ -229,4 +239,27 @@ func (p *Parameter[Type]) Deserialize(serializedParam string, network Network) e
 	}
 
 	return nil
+}
+
+// Apply a network change to a parameter
+func (p *Parameter[_]) ChangeNetwork(oldNetwork Network, newNetwork Network) {
+
+	// Get the current value and the defaults per-network
+	currentValue := p.Value
+	oldDefault, exists := p.Default[oldNetwork]
+	if !exists {
+		oldDefault = p.Default[Network_All]
+	}
+	newDefault, exists := p.Default[newNetwork]
+	if !exists {
+		newDefault = p.Default[Network_All]
+	}
+
+	// If the old value matches the old default, replace it with the new default
+	if currentValue == oldDefault {
+		p.Value = newDefault
+	}
+
+	// Update the description, if applicable
+	p.UpdateDescription(newNetwork)
 }

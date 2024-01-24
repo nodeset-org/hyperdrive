@@ -27,13 +27,12 @@ import (
 
 const (
 	// Param IDs
-	HyperdriveDebugModeID          string = "debugMode"
-	HyperdriveNetworkID            string = "network"
-	HyperdriveClientModeID         string = "clientMode"
-	HyperdriveUseFallbackClientsID string = "useFallbackClients"
-	HyperdriveExecutionClientID    string = "executionClient"
-	HyperdriveBeaconNodeID         string = "beaconNode"
-	HyperdriveDirectoryID          string = "hdDir"
+	HyperdriveDebugModeID       string = "debugMode"
+	HyperdriveNetworkID         string = "network"
+	HyperdriveClientModeID      string = "clientMode"
+	HyperdriveExecutionClientID string = "executionClient"
+	HyperdriveBeaconNodeID      string = "beaconNode"
+	HyperdriveDirectoryID       string = "hdDir"
 
 	// Tags
 	HyperdriveTag string = "nodeset/hyperdrive:v" + shared.HyperdriveVersion
@@ -42,11 +41,10 @@ const (
 // The master configuration struct
 type HyperdriveConfig struct {
 	// General settings
-	DebugMode          types.Parameter[bool]
-	Network            types.Parameter[types.Network]
-	ClientMode         types.Parameter[types.ClientMode]
-	UseFallbackClients types.Parameter[bool]
-	Fallback           *FallbackConfig
+	DebugMode  types.Parameter[bool]
+	Network    types.Parameter[types.Network]
+	ClientMode types.Parameter[types.ClientMode]
+	Fallback   *FallbackConfig
 
 	// Execution client settings
 	ExecutionClient         types.Parameter[types.ExecutionClient]
@@ -99,12 +97,6 @@ func LoadFromFile(path string) (*HyperdriveConfig, error) {
 
 // Creates a new Hyperdrive configuration instance
 func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
-	/*
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			homeDir = "~"
-		}
-	*/
 	cfg := &HyperdriveConfig{
 		HyperdriveDirectory: hdDir,
 
@@ -164,20 +156,6 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				}},
 			Default: map[types.Network]types.ClientMode{
 				types.Network_All: types.ClientMode_Local,
-			},
-		},
-
-		UseFallbackClients: types.Parameter[bool]{
-			ParameterCommon: &types.ParameterCommon{
-				ID:                 HyperdriveUseFallbackClientsID,
-				Name:               "Use Fallback Clients",
-				Description:        "Enable this if you would like to specify a fallback Execution and Consensus Client, which will temporarily be used by the Smartnode and your Validator Client if your primary Execution / Consensus client pair ever go offline (e.g. if you switch, prune, or resync your clients).",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ValidatorClients},
-				CanBeBlank:         false,
-				OverwriteOnUpgrade: false,
-			},
-			Default: map[types.Network]bool{
-				types.Network_All: false,
 			},
 		},
 
@@ -293,7 +271,6 @@ func (cfg *HyperdriveConfig) GetParameters() []types.IParameter {
 		&cfg.DebugMode,
 		&cfg.Network,
 		&cfg.ClientMode,
-		&cfg.UseFallbackClients,
 		&cfg.ExecutionClient,
 		&cfg.BeaconNode,
 	}
@@ -315,7 +292,7 @@ func (cfg *HyperdriveConfig) GetSubconfigs() map[string]IConfigSection {
 func (cfg *HyperdriveConfig) Serialize() map[string]any {
 	masterMap := map[string]any{}
 
-	hdMap := Serialize(cfg)
+	hdMap := serialize(cfg)
 	masterMap[HyperdriveDirectoryID] = cfg.HyperdriveDirectory
 	masterMap[ids.VersionID] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	masterMap[ids.RootConfigID] = hdMap
@@ -351,7 +328,7 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	}
 
 	// Deserialize the params and subconfigs
-	err = Deserialize(cfg, hdMap, network)
+	err = deserialize(cfg, hdMap, network)
 	if err != nil {
 		return fmt.Errorf("error deserializing [%s]: %w", ids.RootConfigID, err)
 	}
@@ -363,17 +340,12 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	return nil
 }
 
-// Applies all of the defaults to all of the settings that have them defined
-func (cfg *HyperdriveConfig) applyAllDefaults() error {
+// Create a copy of this configuration
+func (cfg *HyperdriveConfig) CreateCopy() *HyperdriveConfig {
+	cfgCopy := NewHyperdriveConfig(cfg.HyperdriveDirectory)
 	network := cfg.Network.Value
-	for _, param := range cfg.GetParameters() {
-		err := param.SetToDefault(network)
-		if err != nil {
-			return fmt.Errorf("error setting parameter default: %w", err)
-		}
-	}
-
-	return nil
+	clone(cfg, cfgCopy, network)
+	return cfgCopy
 }
 
 // Generates a collection of environment variables based on this config's settings
@@ -406,6 +378,19 @@ func (cfg *HyperdriveConfig) GetChainID() uint {
 // =====================
 // === Field Helpers ===
 // =====================
+
+// Applies all of the defaults to all of the settings that have them defined
+func (cfg *HyperdriveConfig) applyAllDefaults() error {
+	network := cfg.Network.Value
+	for _, param := range cfg.GetParameters() {
+		err := param.SetToDefault(network)
+		if err != nil {
+			return fmt.Errorf("error setting parameter default: %w", err)
+		}
+	}
+
+	return nil
+}
 
 // Get the list of options for networks to run on
 func getNetworkOptions() []*types.ParameterOption[types.Network] {

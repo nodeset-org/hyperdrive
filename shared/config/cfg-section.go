@@ -19,7 +19,7 @@ type IConfigSection interface {
 }
 
 // Serialize a config section into a map
-func Serialize(cfg IConfigSection) map[string]any {
+func serialize(cfg IConfigSection) map[string]any {
 	masterMap := map[string]any{}
 
 	// Serialize parameters
@@ -32,14 +32,14 @@ func Serialize(cfg IConfigSection) map[string]any {
 	// Serialize subconfigs
 	subConfigs := cfg.GetSubconfigs()
 	for name, subconfig := range subConfigs {
-		masterMap[name] = Serialize(subconfig)
+		masterMap[name] = serialize(subconfig)
 	}
 
 	return masterMap
 }
 
 // Deserialize a config section
-func Deserialize(cfg IConfigSection, serializedParams map[string]any, network types.Network) error {
+func deserialize(cfg IConfigSection, serializedParams map[string]any, network types.Network) error {
 	// Handle the parameters
 	params := cfg.GetParameters()
 	for _, param := range params {
@@ -71,7 +71,7 @@ func Deserialize(cfg IConfigSection, serializedParams map[string]any, network ty
 			if !isMap {
 				return fmt.Errorf("subsection [%s] is not a map", name)
 			}
-			err := Deserialize(subconfig, submap, network)
+			err := deserialize(subconfig, submap, network)
 			if err != nil {
 				return fmt.Errorf("error deserializing subsection [%s]: %w", name, err)
 			}
@@ -79,4 +79,21 @@ func Deserialize(cfg IConfigSection, serializedParams map[string]any, network ty
 	}
 
 	return nil
+}
+
+// Copy a section's settings into the corresponding section of a new config
+func clone(source IConfigSection, target IConfigSection, network types.Network) {
+	// Handle the parameters
+	targetParams := target.GetParameters()
+	for i, sourceParam := range source.GetParameters() {
+		// TODO: make direct accessors instead of round tripping via string
+		targetParams[i].Deserialize(sourceParam.GetValueAsString(), network)
+		targetParams[i].GetCommon().UpdateDescription(network)
+	}
+
+	// Handle the subconfigs
+	targetSubconfigs := target.GetSubconfigs()
+	for i, sourceSubconfig := range source.GetSubconfigs() {
+		clone(sourceSubconfig, targetSubconfigs[i], network)
+	}
 }

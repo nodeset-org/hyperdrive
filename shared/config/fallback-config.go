@@ -6,13 +6,15 @@ import (
 
 const (
 	// Param IDs
-	EcHttpUrl string = "ecHttpUrl"
-	BnHttpUrl string = "bnHttpUrl"
+	UseFallbackClientsID string = "useFallbackClients"
+	EcHttpUrl            string = "ecHttpUrl"
+	BnHttpUrl            string = "bnHttpUrl"
 )
 
 // Fallback configuration
 type FallbackConfig struct {
-	Title string
+	// Flag for enabling fallback clients
+	UseFallbackClients types.Parameter[bool]
 
 	// The URL of the Execution Client HTTP endpoint
 	EcHttpUrl types.Parameter[string]
@@ -22,12 +24,29 @@ type FallbackConfig struct {
 
 	// The URL of the Prysm gRPC endpoint (only needed if using Prysm VCs)
 	PrysmRpcUrl types.Parameter[string]
+
+	// Internal Fields
+	parent *HyperdriveConfig
 }
 
 // Generates a new FallbackConfig configuration
-func NewFallbackConfig(cfg *HyperdriveConfig) *FallbackConfig {
+func NewFallbackConfig(parent *HyperdriveConfig) *FallbackConfig {
 	return &FallbackConfig{
-		Title: "Fallback Client Settings",
+		parent: parent,
+
+		UseFallbackClients: types.Parameter[bool]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 UseFallbackClientsID,
+				Name:               "Use Fallback Clients",
+				Description:        "Enable this if you would like to specify a fallback Execution and Consensus Client, which will temporarily be used by the Smartnode and your Validator Client if your primary Execution / Consensus client pair ever go offline (e.g. if you switch, prune, or resync your clients).",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ValidatorClients},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[types.Network]bool{
+				types.Network_All: false,
+			},
+		},
 
 		EcHttpUrl: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
@@ -75,12 +94,13 @@ func NewFallbackConfig(cfg *HyperdriveConfig) *FallbackConfig {
 
 // The the title for the config
 func (cfg *FallbackConfig) GetTitle() string {
-	return cfg.Title
+	return "Fallback Client Settings"
 }
 
 // Get the types.Parameters for this config
 func (cfg *FallbackConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
+		&cfg.UseFallbackClients,
 		&cfg.EcHttpUrl,
 		&cfg.BnHttpUrl,
 		&cfg.PrysmRpcUrl,
