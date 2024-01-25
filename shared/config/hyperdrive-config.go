@@ -197,8 +197,9 @@ func (cfg *HyperdriveConfig) GetTitle() string {
 // Get the parameters for this config
 func (cfg *HyperdriveConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
-		&cfg.DebugMode,
+		&cfg.ProjectName,
 		&cfg.Network,
+		&cfg.DebugMode,
 		&cfg.ClientMode,
 	}
 }

@@ -14,7 +14,7 @@ func createWelcomeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 		intro = "You've already configured Hyperdrive, so we'll highlight all of the settings you're already using for convenience. You're welcome to make changes as you go through the wizard."
 	}
 
-	helperText := fmt.Sprintf("%s\n\nWelcome to the Hyperdrive configuration wizard!\n\n%s\n\n", shared.Logo, intro)
+	helperText := fmt.Sprintf("%s\n\nWelcome to the Hyperdrive configuration wizard!\n\n%s\n\n", shared.LogoForCentering, intro)
 
 	show := func(modal *choiceModalLayout) {
 		wiz.md.setPage(modal.page)
@@ -39,7 +39,7 @@ func createWelcomeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 		helperText,
 		[]string{"Quit", "Next"},
 		nil,
-		60,
+		90,
 		"Welcome",
 		DirectionalModalHorizontal,
 		show,
