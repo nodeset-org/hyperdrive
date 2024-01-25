@@ -53,28 +53,17 @@ type ecFunction func(*ethclient.Client) (interface{}, error)
 
 // Creates a new ExecutionClientManager instance based on the Hyperdrive config
 func NewExecutionClientManager(cfg *config.HyperdriveConfig) (*ExecutionClientManager, error) {
-	var primaryEcUrl string
-	var fallbackEcUrl string
-
-	// Get the primary EC url
-	if cfg.ClientMode.Value == sharedtypes.ClientMode_Local {
-		primaryEcUrl = fmt.Sprintf("http://%s:%d", sharedtypes.ContainerID_ExecutionClient, cfg.LocalExecutionConfig.HttpPort.Value)
-	} else {
-		primaryEcUrl = cfg.ExternalExecutionConfig.HttpUrl.Value
-	}
-
-	// Get the fallback EC url, if applicable
-	if cfg.UseFallbackClients.Value == true {
-		fallbackEcUrl = cfg.Fallback.EcHttpUrl.Value
-	}
-
+	primaryEcUrl := cfg.GetEcHttpEndpoint()
 	primaryEc, err := ethclient.Dial(primaryEcUrl)
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to primary EC at [%s]: %w", primaryEcUrl, err)
 	}
 
+	// Get the fallback EC url, if applicable
 	var fallbackEc *ethclient.Client
-	if fallbackEcUrl != "" {
+	var fallbackEcUrl string
+	if cfg.Fallback.UseFallbackClients.Value {
+		fallbackEcUrl = cfg.Fallback.EcHttpUrl.Value
 		fallbackEc, err = ethclient.Dial(fallbackEcUrl)
 		if err != nil {
 			return nil, fmt.Errorf("error connecting to fallback EC at [%s]: %w", fallbackEcUrl, err)

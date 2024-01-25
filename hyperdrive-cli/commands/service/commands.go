@@ -40,7 +40,7 @@ func createFlagsFromConfigParams(sectionName string, params []types.IParameter, 
 		if len(options) > 0 {
 			optionStrings := []string{}
 			for _, option := range options {
-				optionStrings = append(optionStrings, fmt.Sprint(option.GetValueAsString()))
+				optionStrings = append(optionStrings, fmt.Sprint(option.String()))
 			}
 			usage = fmt.Sprintf("%s\nOptions: %s\n", common.Description, strings.Join(optionStrings, ", "))
 		}

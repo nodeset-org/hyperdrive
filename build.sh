@@ -3,8 +3,6 @@
 # This script will build all of the artifacts involved in a new Hyperdrive release.
 # NOTE: You MUST put this in a directory that has the `hyperdrive` repository cloned as a subdirectory.
 
-PROJECT_NAME="hyperdrive"
-
 # =================
 # === Functions ===
 # =================
@@ -21,74 +19,54 @@ fail() {
 
 # Builds all of the CLI binaries
 build_cli() {
-    cd $PROJECT_NAME || fail "Directory ${PWD}/$PROJECT_NAME does not exist or you don't have permissions to access it."
+    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
 
     echo -n "Building CLI binaries... "
     docker buildx build --rm -f docker/cli.dockerfile --output ../$VERSION --target cli . || fail "Error building CLI binaries."
-    rm -rf hyperdrive-cli/build
     echo "done!"
 
     cd ..
 }
 
 
-# Builds the .tar.xz file packages with the RP configuration files
+# Builds the .tar.xz file packages with the HD configuration files
 build_install_packages() {
-    cd $PROJECT_NAME || fail "Directory ${PWD}/$PROJECT_NAME does not exist or you don't have permissions to access it."
+    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
     rm -f hyperdrive-install.tar.xz
 
     echo -n "Building Hyperdrive installer packages... "
     tar cfJ hyperdrive-install.tar.xz install || fail "Error building installer package."
-    #tar cfJ hyperdrive-install.tar.xz install/deploy || fail "Error building installer package."
     mv hyperdrive-install.tar.xz ../$VERSION
-    #cp install/install.sh ../$VERSION
     echo "done!"
 
     cd ..
 }
 
 
-# Builds the daemon binaries and Docker Hyperdrive images, and pushes them to Docker Hub
+# Builds the Hyperdrive image and pushes it to Docker Hub
 # NOTE: You must install qemu first; e.g. sudo apt-get install -y qemu qemu-user-static
 build_daemon() {
-    cd $PROJECT_NAME || fail "Directory ${PWD}/$PROJECT_NAME does not exist or you don't have permissions to access it."
+    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
 
-    echo "Building Docker Hyperdrive image..."
-    docker buildx build --platform=linux/amd64 -t nodeset/$PROJECT_NAME:$VERSION-amd64 -f docker/daemon.dockerfile --load . || fail "Error building amd64 Docker Hyperdrive image."
-    docker buildx build --platform=linux/arm64 -t nodeset/$PROJECT_NAME:$VERSION-arm64 -f docker/daemon.dockerfile --load . || fail "Error building arm64 Docker Hyperdrive image."
-    echo "done!"
+    # Make a multiarch builder, ignore if it's already there
+    docker buildx create --name multiarch-builder --driver docker-container --use > /dev/null 2>&1
 
-    echo -n "Pushing to Docker Hub... "
-    docker push nodeset/$PROJECT_NAME:$VERSION-amd64 || fail "Error pushing amd64 Docker Hyperdrive image to Docker Hub."
-    docker push nodeset/$PROJECT_NAME:$VERSION-arm64 || fail "Error pushing arm Docker Hyperdrive image to Docker Hub."
+    echo "Building and pushing Docker Hyperdrive image..."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile --push . || fail "Error building Hyperdrive daemon image."
     echo "done!"
 
     cd ..
 }
 
 
-# Builds the Docker Manifests and pushes them to Docker Hub
-build_docker_manifest() {
-    echo -n "Building Docker manifest... "
-    rm -f ~/.docker/manifests/docker.io_nodeset_$PROJECT_NAME-$VERSION
-    docker manifest create nodeset/$PROJECT_NAME:$VERSION --amend nodeset/$PROJECT_NAME:$VERSION-amd64 --amend nodeset/$PROJECT_NAME:$VERSION-arm64
+# Tags the 'latest' Docker Hub image
+tag_latest() {
+    echo -n "Tagging 'latest' Docker image... "
+    docker tag nodeset/hyperdrive:$VERSION nodeset/hyperdrive:latest
     echo "done!"
 
     echo -n "Pushing to Docker Hub... "
-    docker manifest push --purge nodeset/$PROJECT_NAME:$VERSION
-    echo "done!"
-}
-
-
-# Builds the 'latest' Docker Manifests and pushes them to Docker Hub
-build_latest_docker_manifest() {
-    echo -n "Building 'latest' Docker manifest... "
-    rm -f ~/.docker/manifests/docker.io_nodeset_$PROJECT_NAME-latest
-    docker manifest create nodeset/$PROJECT_NAME:latest --amend nodeset/$PROJECT_NAME:$VERSION-amd64 --amend nodeset/$PROJECT_NAME:$VERSION-arm64
-    echo "done!"
-
-    echo -n "Pushing to Docker Hub... "
-    docker manifest push --purge nodeset/$PROJECT_NAME:latest
+    docker push nodeset/hyperdrive:latest
     echo "done!"
 }
 
@@ -102,7 +80,7 @@ usage() {
     echo $'\t-c\tBuild the CLI binaries for all platforms'
     echo $'\t-p\tBuild the Hyperdrive installer packages'
     echo $'\t-d\tBuild the Daemon Hyperdrive images, and push them to Docker Hub'
-    echo $'\t-n\tBuild the Daemon manifests, and push them to Docker Hub'
+    echo $'\t-l\tTag the given version as "latest" on Docker Hub'
     exit 0
 }
 
@@ -112,14 +90,13 @@ usage() {
 # =================
 
 # Parse arguments
-while getopts "acpdnlrfv:" FLAG; do
+while getopts "acpdlv:" FLAG; do
     case "$FLAG" in
-        a) CLI=true PACKAGES=true DAEMON=true MANIFEST=true LATEST_MANIFEST=true ;;
+        a) CLI=true PACKAGES=true DAEMON=true MANIFEST=true LATEST=true ;;
         c) CLI=true ;;
         p) PACKAGES=true ;;
         d) DAEMON=true ;;
-        n) MANIFEST=true ;;
-        l) LATEST_MANIFEST=true ;;
+        l) LATEST=true ;;
         v) VERSION="$OPTARG" ;;
         *) usage ;;
     esac
@@ -142,9 +119,6 @@ fi
 if [ "$DAEMON" = true ]; then
     build_daemon
 fi
-if [ "$MANIFEST" = true ]; then
-    build_docker_manifest
-fi
-if [ "$LATEST_MANIFEST" = true ]; then
-    build_latest_docker_manifest
+if [ "$LATEST" = true ]; then
+    tag_latest
 fi

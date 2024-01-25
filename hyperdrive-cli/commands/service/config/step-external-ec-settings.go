@@ -13,7 +13,7 @@ func createExternalEcSettingsStep(wiz *wizard, currentStep int, totalSteps int) 
 		for label, box := range modal.textboxes {
 			for _, param := range wiz.md.Config.ExternalExecutionConfig.GetParameters() {
 				if param.GetCommon().Name == label {
-					box.SetText(param.GetValueAsString())
+					box.SetText(param.String())
 				}
 			}
 		}

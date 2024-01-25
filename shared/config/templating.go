@@ -8,6 +8,15 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
+// ===============
+// === General ===
+// ===============
+
+// Used by text/template to format bn.yml
+func (cfg *HyperdriveConfig) IsLocalMode() bool {
+	return cfg.ClientMode.Value == types.ClientMode_Local
+}
+
 // ========================
 // === Execution Client ===
 // ========================

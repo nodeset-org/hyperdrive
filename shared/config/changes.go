@@ -15,8 +15,8 @@ func getChangedSettings(old IConfigSection, new IConfigSection) (*types.ChangedS
 	newParams := new.GetParameters()
 	for i, oldParam := range old.GetParameters() {
 		newParam := newParams[i]
-		oldVal := oldParam.GetValueAsString()
-		newVal := newParam.GetValueAsString()
+		oldVal := oldParam.String()
+		newVal := newParam.String()
 		if oldVal != newVal {
 			changedSection.Settings = append(changedSection.Settings, &types.ChangedSetting{
 				Name:               oldParam.GetCommon().Name,

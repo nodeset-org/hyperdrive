@@ -116,13 +116,13 @@ func (layout *standardLayout) refresh() {
 		} else if len(param.GetOptions()) > 0 {
 			// Choice
 			for i, option := range param.GetOptions() {
-				if option.GetValueAsString() == param.GetValueAsString() {
+				if option.String() == param.String() {
 					formItem.(*DropDown).SetCurrentOption(i)
 				}
 			}
 		} else {
 			// Everything else
-			formItem.(*tview.InputField).SetText(param.GetValueAsString())
+			formItem.(*tview.InputField).SetText(param.String())
 		}
 	}
 

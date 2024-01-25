@@ -13,7 +13,7 @@ func createFallbackNormalStep(wiz *wizard, currentStep int, totalSteps int) *tex
 		for label, box := range modal.textboxes {
 			for _, param := range wiz.md.Config.Fallback.GetParameters() {
 				if param.GetCommon().Name == label {
-					box.SetText(param.GetValueAsString())
+					box.SetText(param.String())
 				}
 			}
 		}

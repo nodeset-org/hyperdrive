@@ -14,7 +14,7 @@ func createFallbackPrysmStep(wiz *wizard, currentStep int, totalSteps int) *text
 		for label, box := range modal.textboxes {
 			for _, param := range wiz.md.Config.Fallback.GetParameters() {
 				if param.GetCommon().Name == label {
-					box.SetText(param.GetValueAsString())
+					box.SetText(param.String())
 				}
 			}
 		}

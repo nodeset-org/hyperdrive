@@ -76,7 +76,7 @@ type IParameter interface {
 	GetValueAsAny() any
 
 	// Get the parameter's value as a string
-	GetValueAsString() string
+	String() string
 
 	// Get the parameter's default value for the supplied network as a string
 	GetDefaultAsAny(network Network) any
@@ -132,7 +132,7 @@ func (p *Parameter[_]) GetValueAsAny() any {
 }
 
 // Get the parameter's value as a string
-func (p *Parameter[_]) GetValueAsString() string {
+func (p *Parameter[_]) String() string {
 	return fmt.Sprint(p.Value)
 }
 
@@ -145,7 +145,7 @@ func (p *Parameter[_]) GetDefaultAsAny(network Network) any {
 func (p *Parameter[_]) Deserialize(serializedParam string, network Network) error {
 	if len(p.Options) > 0 {
 		for _, option := range p.Options {
-			optionVal := option.GetValueAsString()
+			optionVal := option.String()
 			if optionVal == serializedParam {
 				p.Value = option.Value
 				return nil

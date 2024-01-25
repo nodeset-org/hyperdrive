@@ -28,7 +28,7 @@ type IParameterOption interface {
 	GetValueAsAny() any
 
 	// Ge the option's value as a string
-	GetValueAsString() string
+	String() string
 }
 
 // Get the parameter option's common fields
@@ -42,6 +42,6 @@ func (p *ParameterOption[_]) GetValueAsAny() any {
 }
 
 // Get the parameter option's value as a string
-func (p *ParameterOption[_]) GetValueAsString() string {
+func (p *ParameterOption[_]) String() string {
 	return fmt.Sprint(p.Value)
 }

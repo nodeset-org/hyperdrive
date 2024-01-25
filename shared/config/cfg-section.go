@@ -26,7 +26,7 @@ func serialize(cfg IConfigSection) map[string]any {
 	params := cfg.GetParameters()
 	for _, param := range params {
 		id := param.GetCommon().ID
-		masterMap[id] = param.GetValueAsString()
+		masterMap[id] = param.String()
 	}
 
 	// Serialize subconfigs
