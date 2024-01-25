@@ -2,6 +2,14 @@ package api
 
 import "github.com/ethereum/go-ethereum/common"
 
+type ServiceTerminateDataFolderData struct {
+	FolderExisted bool `json:"folderExisted"`
+}
+
+type ServiceCreateFeeRecipientFileData struct {
+	Distributor common.Address `json:"distributor"`
+}
+
 // This is a wrapper for the EC status report
 type ClientStatus struct {
 	IsWorking    bool    `json:"isWorking"`
@@ -18,8 +26,11 @@ type ClientManagerStatus struct {
 	FallbackClientStatus ClientStatus `json:"fallbackEcStatus"`
 }
 
-type ConfirmNodePrimaryWithdrawalAddressResponse struct {
-	Status string      `json:"status"`
-	Error  string      `json:"error"`
-	TxHash common.Hash `json:"txHash"`
+type ServiceClientStatusData struct {
+	EcManagerStatus ClientManagerStatus `json:"ecManagerStatus"`
+	BcManagerStatus ClientManagerStatus `json:"bcManagerStatus"`
+}
+
+type ServiceVersionData struct {
+	Version string `json:"version"`
 }

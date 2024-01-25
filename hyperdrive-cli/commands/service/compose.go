@@ -1,15 +1,15 @@
 package service
 
 import (
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/urfave/cli/v2"
 )
 
-// View the Rocket Pool service compose config
+// View the Hyperdrive service compose config
 func serviceCompose(c *cli.Context) error {
 	// Get RP client
-	rp := client.NewClientFromCtx(c)
+	hd := client.NewClientFromCtx(c)
 
 	// Print service compose config
-	return rp.PrintServiceCompose(getComposeFiles(c))
+	return hd.PrintServiceCompose(getComposeFiles(c))
 }

@@ -1,11 +1,11 @@
 package service
 
 import (
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/urfave/cli/v2"
 )
 
-// View the Rocket Pool service logs
+// View the Hyperdrive service logs
 func serviceLogs(c *cli.Context, aliasedNames ...string) error {
 	// Handle name aliasing
 	serviceNames := []string{}

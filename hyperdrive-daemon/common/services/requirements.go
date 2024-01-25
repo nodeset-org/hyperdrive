@@ -85,9 +85,9 @@ func (sp *ServiceProvider) checkBeaconClientStatus() (bool, error) {
 	// If the primary isn't synced but there's a fallback and it is, return true
 	if bcMgr.fallbackReady {
 		if mgrStatus.PrimaryClientStatus.Error != "" {
-			log.Printf("Primary consensus client is unavailable (%s), using fallback consensus client...\n", mgrStatus.PrimaryClientStatus.Error)
+			log.Printf("Primary Beacon Node is unavailable (%s), using fallback Beacon Node...\n", mgrStatus.PrimaryClientStatus.Error)
 		} else {
-			log.Printf("Primary consensus client is still syncing (%.2f%%), using fallback consensus client...\n", mgrStatus.PrimaryClientStatus.SyncProgress*100)
+			log.Printf("Primary Beacon Node is still syncing (%.2f%%), using fallback Beacon Node...\n", mgrStatus.PrimaryClientStatus.SyncProgress*100)
 		}
 		return true, nil
 	}
@@ -96,22 +96,22 @@ func (sp *ServiceProvider) checkBeaconClientStatus() (bool, error) {
 
 	// Is the primary working and syncing? If so, wait for it
 	if mgrStatus.PrimaryClientStatus.IsWorking && mgrStatus.PrimaryClientStatus.Error == "" {
-		log.Printf("Fallback consensus client is not configured or unavailable, waiting for primary consensus client to finish syncing (%.2f%%)\n", mgrStatus.PrimaryClientStatus.SyncProgress*100)
+		log.Printf("Fallback Beacon Node is not configured or unavailable, waiting for primary Beacon Node to finish syncing (%.2f%%)\n", mgrStatus.PrimaryClientStatus.SyncProgress*100)
 		return false, nil
 	}
 
 	// Is the fallback working and syncing? If so, wait for it
 	if mgrStatus.FallbackEnabled && mgrStatus.FallbackClientStatus.IsWorking && mgrStatus.FallbackClientStatus.Error == "" {
-		log.Printf("Primary cosnensus client is unavailable (%s), waiting for the fallback consensus client to finish syncing (%.2f%%)\n", mgrStatus.PrimaryClientStatus.Error, mgrStatus.FallbackClientStatus.SyncProgress*100)
+		log.Printf("Primary cosnensus client is unavailable (%s), waiting for the fallback Beacon Node to finish syncing (%.2f%%)\n", mgrStatus.PrimaryClientStatus.Error, mgrStatus.FallbackClientStatus.SyncProgress*100)
 		return false, nil
 	}
 
 	// If neither client is working, report the errors
 	if mgrStatus.FallbackEnabled {
-		return false, fmt.Errorf("Primary consensus client is unavailable (%s) and fallback consensus client is unavailable (%s), no consensus clients are ready.", mgrStatus.PrimaryClientStatus.Error, mgrStatus.FallbackClientStatus.Error)
+		return false, fmt.Errorf("Primary Beacon Node is unavailable (%s) and fallback Beacon Node is unavailable (%s), no Beacon Nodes are ready.", mgrStatus.PrimaryClientStatus.Error, mgrStatus.FallbackClientStatus.Error)
 	}
 
-	return false, fmt.Errorf("Primary consensus client is unavailable (%s) and no fallback consensus client is configured.", mgrStatus.PrimaryClientStatus.Error)
+	return false, fmt.Errorf("Primary Beacon Node is unavailable (%s) and no fallback Beacon Node is configured.", mgrStatus.PrimaryClientStatus.Error)
 }
 
 // Wait for the primary or fallback Execution client to be synced
@@ -217,7 +217,7 @@ func (sp *ServiceProvider) waitBeaconClientSynced(verbose bool, timeout int64) (
 
 		// Check if the BC status needs to be refreshed
 		if time.Since(bcRefreshTime) > ethClientStatusRefreshInterval {
-			log.Println("Refreshing primary / fallback consensus client status...")
+			log.Println("Refreshing primary / fallback Beacon Node status...")
 			bcRefreshTime = time.Now()
 			synced, err = sp.checkBeaconClientStatus()
 			if err != nil {

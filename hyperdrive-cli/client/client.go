@@ -2,194 +2,123 @@ package client
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"path/filepath"
 
-	"github.com/a8m/envsubst"
-	"github.com/alessio/shellescape"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/routes"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/api"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/urfave/cli/v2"
 )
 
+// Config
 const (
-	runtimeDir        string = "runtime"
-	templatesDir      string = "templates"
-	overrideDir       string = "override"
+	InstallerURL     string = "https://github.com/nodeset-org/hyperdrive/releases/download/%s/install.sh"
+	UpdateTrackerURL string = "https://github.com/nodeset-org/hyperdrive/releases/download/%s/install-update-tracker.sh"
+
+	SettingsFile             string = "user-settings.yml"
+	BackupSettingsFile       string = "user-settings-backup.yml"
+	PrometheusConfigTemplate string = "prometheus.tmpl"
+	PrometheusFile           string = "prometheus.yml"
+
+	templatesDir                  string = "templates"
+	overrideDir                   string = "override"
+	runtimeDir                    string = "runtime"
+	defaultFeeRecipientFile       string = "fr-default.tmpl"
+	defaultNativeFeeRecipientFile string = "fr-default-env.tmpl"
+
 	templateSuffix    string = ".tmpl"
 	composeFileSuffix string = ".yml"
-	daemonSocketPath  string = "data/sockets/daemon.sock"
+
+	nethermindAdminUrl string = "http://127.0.0.1:7434"
 )
 
-// Rocket Pool client
+// Hyperdrive client
 type Client struct {
-	HyperdriveDir string
-	Cfg           *config.HyperdriveConfig
-	Api           *routes.ApiRequester
+	Api     *api.ApiRequester
+	Context *context.HyperdriveContext
 }
 
-// Create a new Hyperdrive client
-func NewClient(installDir string) (*Client, error) {
-	mgr := config.NewConfigManager(installDir)
-	cfg, isNew, err := mgr.LoadOrCreateConfig(false)
-	if err != nil {
-		return nil, fmt.Errorf("error getting Hyperdrive config: %w", err)
-	}
-	if isNew {
-		return nil, fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive before starting it.")
-	}
+// Create new Hyperdrive client from CLI context without checking for sync status
+// Only use this function from commands that may work if the Daemon service doesn't exist
+// Most users should call NewClientFromCtx(c).WithStatus() or NewClientFromCtx(c).WithReady()
+func NewClientFromCtx(c *cli.Context) *Client {
+	snCtx := context.GetHyperdriveContext(c)
 
-	socketPath := filepath.Join(cfg.HyperdriveDirectory, daemonSocketPath)
+	// Set up the default API socket file if it's not specified
+	socketPath := filepath.Join(snCtx.ConfigPath, "data", config.SocketFilename)
+
 	client := &Client{
-		HyperdriveDir: installDir,
-		Cfg:           cfg,
-		Api:           routes.NewApiRequester(socketPath),
+		Api:     api.NewApiRequester(socketPath),
+		Context: snCtx,
 	}
-
-	return client, nil
+	return client
 }
 
-// Start the Rocket Pool service
-func (c *Client) StartService(composeFiles []string) error {
-	// Start all of the containers
-	cmdArgs, err := c.compose(composeFiles, "up", "-d", "--remove-orphans", "--quiet-pull")
+// Check the status of a newly created client and return it
+// Only use this function from commands that may work without the clients being synced-
+// most users should use WithReady instead
+func (c *Client) WithStatus() (*Client, bool, error) {
+	ready, err := c.checkClientStatus()
 	if err != nil {
-		return err
+		return nil, false, err
 	}
-	cmd := exec.Command("docker", cmdArgs...)
-	return c.printOutput(cmd)
+
+	return c, ready, nil
 }
 
-// Pause the Rocket Pool service
-func (c *Client) PauseService(composeFiles []string) error {
-	cmdArgs, err := c.compose(composeFiles, "stop")
+// Check the status of a newly created client and ensure the eth clients are synced and ready
+func (c *Client) WithReady() (*Client, error) {
+	_, ready, err := c.WithStatus()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	cmd := exec.Command("docker", cmdArgs...)
-	return c.printOutput(cmd)
+
+	if !ready {
+		return nil, fmt.Errorf("clients not ready")
+	}
+
+	return c, nil
 }
 
-// Stop the Rocket Pool service
-func (c *Client) StopService(composeFiles []string) error {
-	cmdArgs, err := c.compose(composeFiles, "down", "-v")
+// Check the status of the Execution and Beacon Node(s) and provision the API with them
+func (c *Client) checkClientStatus() (bool, error) {
+	// Check if the primary clients are up, synced, and able to respond to requests - if not, forces the use of the fallbacks for this command
+	response, err := c.Api.Service.ClientStatus()
 	if err != nil {
-		return err
-	}
-	cmd := exec.Command("docker", cmdArgs...)
-	return c.printOutput(cmd)
-}
-
-// Build a docker compose command
-func (c *Client) compose(composeFiles []string, args ...string) ([]string, error) {
-	cmdArgs := []string{
-		"compose",
-		"--project-directory",
-		shellescape.Quote(c.HyperdriveDir),
+		return false, fmt.Errorf("error checking client status: %w", err)
 	}
 
-	// Set up environment variables and deploy the template config files
-	settings := c.Cfg.GenerateEnvironmentVariables()
+	ecMgrStatus := response.Data.EcManagerStatus
+	bcMgrStatus := response.Data.BcManagerStatus
 
-	// Deploy the templates and run environment variable substitution on them
-	deployedContainers, err := c.deployTemplates(settings)
-	if err != nil {
-		return nil, fmt.Errorf("error deploying Docker templates: %w", err)
-	}
-
-	// Include all of the relevant docker compose definition files
-	for _, container := range deployedContainers {
-		cmdArgs = append(cmdArgs, "-f", shellescape.Quote(container))
-	}
-	for _, container := range composeFiles {
-		cmdArgs = append(cmdArgs, "-f", shellescape.Quote(container))
+	// Primary EC and CC are good
+	if ecMgrStatus.PrimaryClientStatus.IsSynced && bcMgrStatus.PrimaryClientStatus.IsSynced {
+		//c.SetClientStatusFlags(true, false)
+		return true, nil
 	}
 
-	cmdArgs = append(cmdArgs, args...)
-	return cmdArgs, nil
-}
+	// Get the status messages
+	primaryEcStatus := getClientStatusString(ecMgrStatus.PrimaryClientStatus)
+	primaryBcStatus := getClientStatusString(bcMgrStatus.PrimaryClientStatus)
+	fallbackEcStatus := getClientStatusString(ecMgrStatus.FallbackClientStatus)
+	fallbackBcStatus := getClientStatusString(bcMgrStatus.FallbackClientStatus)
 
-// Deploys all of the appropriate docker compose template files and provisions them based on the provided configuration
-func (c *Client) deployTemplates(settings map[string]string) ([]string, error) {
-
-	// Check for the folders
-	runtimeFolder := filepath.Join(c.HyperdriveDir, runtimeDir)
-	templatesFolder := filepath.Join(c.HyperdriveDir, templatesDir)
-	_, err := os.Stat(templatesFolder)
-	if os.IsNotExist(err) {
-		return []string{}, fmt.Errorf("templates folder [%s] does not exist", templatesFolder)
-	}
-	overrideFolder := filepath.Join(c.HyperdriveDir, overrideDir)
-	_, err = os.Stat(overrideFolder)
-	if os.IsNotExist(err) {
-		return []string{}, fmt.Errorf("override folder [%s] does not exist", overrideFolder)
-	}
-
-	// Clear out the runtime folder and remake it
-	err = os.RemoveAll(runtimeFolder)
-	if err != nil {
-		return []string{}, fmt.Errorf("error deleting runtime folder [%s]: %w", runtimeFolder, err)
-	}
-	err = os.Mkdir(runtimeFolder, 0775)
-	if err != nil {
-		return []string{}, fmt.Errorf("error creating runtime folder [%s]: %w", runtimeFolder, err)
-	}
-
-	// Set the environment variables for substitution
-	oldValues := map[string]string{}
-	for varName, varValue := range settings {
-		oldValues[varName] = os.Getenv(varName)
-		os.Setenv(varName, varValue)
-	}
-	defer func() {
-		// Unset the env vars
-		for name, value := range oldValues {
-			os.Setenv(name, value)
+	// Check the fallbacks if enabled
+	if ecMgrStatus.FallbackEnabled && bcMgrStatus.FallbackEnabled {
+		// Fallback EC and CC are good
+		if ecMgrStatus.FallbackClientStatus.IsSynced && bcMgrStatus.FallbackClientStatus.IsSynced {
+			fmt.Printf("%sNOTE: primary clients are not ready, using fallback clients...\n\tPrimary EC status: %s\n\tPrimary CC status: %s%s\n\n", terminal.ColorYellow, primaryEcStatus, primaryBcStatus, terminal.ColorReset)
+			//c.SetClientStatusFlags(true, true)
+			return true, nil
 		}
-	}()
 
-	// Read and substitute the templates
-	deployedContainers := []string{}
-
-	// Node
-	contents, err := envsubst.ReadFile(filepath.Join(templatesFolder, string(types.ContainerID_Daemon)+templateSuffix))
-	if err != nil {
-		return []string{}, fmt.Errorf("error reading and substituting node container template: %w", err)
-	}
-	nodeComposePath := filepath.Join(runtimeFolder, string(types.ContainerID_Daemon)+composeFileSuffix)
-	err = os.WriteFile(nodeComposePath, contents, 0664)
-	if err != nil {
-		return []string{}, fmt.Errorf("could not write node container file to %s: %w", nodeComposePath, err)
-	}
-	deployedContainers = append(deployedContainers, nodeComposePath)
-	deployedContainers = append(deployedContainers, filepath.Join(overrideFolder, string(types.ContainerID_Daemon)+composeFileSuffix))
-
-	return deployedContainers, nil
-}
-
-func (c *Client) printOutput(cmd *exec.Cmd) error {
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	// Start the command
-	if err := cmd.Start(); err != nil {
-		return err
+		// Both pairs aren't ready
+		fmt.Printf("Error: neither primary nor fallback client pairs are ready.\n\tPrimary EC status: %s\n\tFallback EC status: %s\n\tPrimary CC status: %s\n\tFallback CC status: %s\n", primaryEcStatus, fallbackEcStatus, primaryBcStatus, fallbackBcStatus)
+		return false, nil
 	}
 
-	// Wait for the command to exit
-	return cmd.Wait()
-
-	/*
-		output, err := cmd.Output()
-		if err != nil {
-			exitErr, isExitErr := err.(*exec.ExitError)
-			if isExitErr {
-				return fmt.Errorf("exit code %d, message: %s", exitErr.ExitCode(), string(exitErr.Stderr))
-			}
-			return err
-		}
-		fmt.Println(output)
-		return nil
-	*/
+	// Primary isn't ready and fallback isn't enabled
+	fmt.Printf("Error: primary client pair isn't ready and fallback clients aren't enabled.\n\tPrimary EC status: %s\n\tPrimary CC status: %s\n", primaryEcStatus, primaryBcStatus)
+	return false, nil
 }

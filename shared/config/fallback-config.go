@@ -38,7 +38,7 @@ func NewFallbackConfig(parent *HyperdriveConfig) *FallbackConfig {
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 UseFallbackClientsID,
 				Name:               "Use Fallback Clients",
-				Description:        "Enable this if you would like to specify a fallback Execution and Consensus Client, which will temporarily be used by the Smartnode and your Validator Client if your primary Execution / Consensus client pair ever go offline (e.g. if you switch, prune, or resync your clients).",
+				Description:        "Enable this if you would like to specify a fallback Execution and Beacon Node, which will temporarily be used by Hyperdrive and your Validator Client if your primary Execution / Beacon Node pair ever go offline (e.g. if you switch, prune, or resync your clients).",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ValidatorClients},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,

@@ -85,7 +85,7 @@ func NewMetricsConfig(parent *HyperdriveConfig) *MetricsConfig {
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 MetricsBnPortID,
 				Name:               "Beacon Node Metrics Port",
-				Description:        "The port your Consensus client's Beacon Node should expose its metrics on.",
+				Description:        "The port your Beacon Node's Beacon Node should expose its metrics on.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode, types.ContainerID_Prometheus},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,

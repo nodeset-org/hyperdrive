@@ -37,7 +37,7 @@ const (
 	// The Execution client
 	ContainerID_ExecutionClient ContainerID = "ec"
 
-	// The Beacon node (Consensus client)
+	// The Beacon node (Beacon Node)
 	ContainerID_BeaconNode ContainerID = "bn"
 
 	// The Validator clients owned by Hyperdrive
@@ -74,10 +74,10 @@ const (
 	ExecutionClient_Besu ExecutionClient = "besu"
 )
 
-// A Consensus client (Beacon Node)
+// A Beacon Node (Beacon Node)
 type BeaconNode string
 
-// Enum to describe the Consensus clients
+// Enum to describe the Beacon Nodes
 const (
 	// Unknown
 	BeaconNode_Unknown BeaconNode = ""

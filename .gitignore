@@ -22,3 +22,7 @@ go.work
 
 # VS Code metafiles
 .vscode-ctags
+
+# Binaries
+hyperdrive-cli
+hyperdrive-daemon

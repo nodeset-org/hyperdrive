@@ -57,19 +57,19 @@ func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
 				{
 					ParameterOptionCommon: &types.ParameterOptionCommon{
 						Name:        "Lighthouse",
-						Description: "Lighthouse is a Consensus client with a heavy focus on speed and security. The team behind it, Sigma Prime, is an information security and software engineering firm who have funded Lighthouse along with the Ethereum Foundation, Consensys, and private individuals. Lighthouse is built in Rust and offered under an Apache 2.0 License.",
+						Description: "Lighthouse is a Beacon Node with a heavy focus on speed and security. The team behind it, Sigma Prime, is an information security and software engineering firm who have funded Lighthouse along with the Ethereum Foundation, Consensys, and private individuals. Lighthouse is built in Rust and offered under an Apache 2.0 License.",
 					},
 					Value: types.BeaconNode_Lighthouse,
 				}, {
 					ParameterOptionCommon: &types.ParameterOptionCommon{
 						Name:        "Lodestar",
-						Description: "Lodestar is the fifth open-source Ethereum consensus client. It is written in Typescript maintained by ChainSafe Systems. Lodestar, their flagship product, is a production-capable Beacon Chain and Validator Client uniquely situated as the go-to for researchers and developers for rapid prototyping and browser usage.",
+						Description: "Lodestar is the fifth open-source Ethereum Beacon Node. It is written in Typescript maintained by ChainSafe Systems. Lodestar, their flagship product, is a production-capable Beacon Chain and Validator Client uniquely situated as the go-to for researchers and developers for rapid prototyping and browser usage.",
 					},
 					Value: types.BeaconNode_Lodestar,
 				}, {
 					ParameterOptionCommon: &types.ParameterOptionCommon{
 						Name:        "Nimbus",
-						Description: "Nimbus is a Consensus client implementation that strives to be as lightweight as possible in terms of resources used. This allows it to perform well on embedded systems, resource-restricted devices -- including Raspberry Pis and mobile devices -- and multi-purpose servers.",
+						Description: "Nimbus is a Beacon Node implementation that strives to be as lightweight as possible in terms of resources used. This allows it to perform well on embedded systems, resource-restricted devices -- including Raspberry Pis and mobile devices -- and multi-purpose servers.",
 					},
 					Value: types.BeaconNode_Nimbus,
 				}, {
@@ -124,7 +124,7 @@ func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 HttpPortID,
 				Name:               "HTTP API Port",
-				Description:        "The port your Consensus client should run its HTTP API on.",
+				Description:        "The port your Beacon Node should run its HTTP API on.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_BeaconNode, types.ContainerID_ValidatorClients, types.ContainerID_Prometheus},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
@@ -138,7 +138,7 @@ func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 OpenHttpPortsID,
 				Name:               "Expose API Port",
-				Description:        "Select an option to expose your Consensus client's API port to your localhost or external hosts on the network, so other machines can access it too.",
+				Description:        "Select an option to expose your Beacon Node's API port to your localhost or external hosts on the network, so other machines can access it too.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,

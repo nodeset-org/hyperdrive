@@ -3,12 +3,12 @@ package service
 import (
 	"fmt"
 
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils"
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/urfave/cli/v2"
 )
 
-// View the Rocket Pool service status
+// View the Hyperdrive service status
 func serviceStatus(c *cli.Context) error {
 	// Get RP client
 	rp := client.NewClientFromCtx(c)
@@ -20,7 +20,7 @@ func serviceStatus(c *cli.Context) error {
 	}
 
 	// Print what network we're on
-	err = utils.PrintNetwork(cfg.GetNetwork(), isNew)
+	err = utils.PrintNetwork(cfg.Network.Value, isNew)
 	if err != nil {
 		return err
 	}

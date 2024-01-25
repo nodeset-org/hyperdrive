@@ -14,7 +14,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
-// A container for all of the various services used by the Smartnode
+// A container for all of the various services used by Hyperdrive
 type ServiceProvider struct {
 	cfg        *config.HyperdriveConfig
 	nodeWallet *wallet.LocalWallet
@@ -36,16 +36,16 @@ func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
 
 	// Wallet
 	chainID := cfg.GetChainID()
-	nodeAddressPath := "" // os.ExpandEnv(cfg.Smartnode.GetNodeAddressPath())
-	keystorePath := ""    //os.ExpandEnv(cfg.Smartnode.GetWalletPath())
-	passwordPath := ""    //os.ExpandEnv(cfg.Smartnode.GetPasswordPath())
+	nodeAddressPath := "" // os.ExpandEnv(cfg.Hyperdrive.GetNodeAddressPath())
+	keystorePath := ""    //os.ExpandEnv(cfg.Hyperdrive.GetWalletPath())
+	passwordPath := ""    //os.ExpandEnv(cfg.Hyperdrive.GetPasswordPath())
 	nodeWallet, err := wallet.NewLocalWallet(nodeAddressPath, keystorePath, passwordPath, chainID, true)
 	if err != nil {
 		return nil, fmt.Errorf("error creating node wallet: %w", err)
 	}
 
 	// Keystores
-	validatorKeychainPath := "" //os.ExpandEnv(cfg.Smartnode.GetValidatorKeychainPath())
+	validatorKeychainPath := "" //os.ExpandEnv(cfg.Hyperdrive.GetValidatorKeychainPath())
 	lighthouseKeystore := lhkeystore.NewKeystore(validatorKeychainPath)
 	lodestarKeystore := lskeystore.NewKeystore(validatorKeychainPath)
 	nimbusKeystore := nmkeystore.NewKeystore(validatorKeychainPath)

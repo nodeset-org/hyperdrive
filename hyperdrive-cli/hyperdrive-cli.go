@@ -8,13 +8,9 @@ import (
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/rocketpool"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/rocket-pool/smartnode/rocketpool-cli/wallet"
-	"github.com/spf13/cobra"
 	"github.com/urfave/cli/v2"
 )
 
@@ -27,12 +23,12 @@ var (
 	allowRootFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name:    "allow-root",
 		Aliases: []string{"r"},
-		Usage:   "Allow rocketpool to be run as the root user",
+		Usage:   "Allow hyperdrive to be run as the root user",
 	}
 	configPathFlag *cli.StringFlag = &cli.StringFlag{
 		Name:    "config-path",
 		Aliases: []string{"c"},
-		Usage:   "Directory to install and save all of Rocket Pool's configuration and data to",
+		Usage:   "Directory to install and save all of Hyperdrive's configuration and data to",
 	}
 	maxFeeFlag *cli.Float64Flag = &cli.Float64Flag{
 		Name:    "max-fee",
@@ -63,32 +59,24 @@ var (
 
 // Run
 func main() {
+	// Add logo and attribution to application help template
+	attribution := "ATTRIBUTION:\n   Adapted from the Rocket Pool Smart Node (https://github.com/rocketpool/smartnode) with love."
+	cli.AppHelpTemplate = fmt.Sprintf("\n%s\n\n%s\n%s\n", shared.Logo, cli.AppHelpTemplate, attribution)
+
 	// Initialize application
 	app := cli.NewApp()
 
 	// Set application info
-	app.Name = "rocketpool"
-	app.Usage = "Smart Node CLI for Rocket Pool"
+	app.Name = "hyperdrive"
+	app.Usage = "Hyperdrive CLI for NodeSet Node Operator Management"
 	app.Version = shared.HyperdriveVersion
 	app.Authors = []*cli.Author{
 		{
-			Name:  "David Rugendyke",
-			Email: "david@rocketpool.net",
-		},
-		{
-			Name:  "Jake Pospischil",
-			Email: "jake@rocketpool.net",
-		},
-		{
 			Name:  "Joe Clapis",
-			Email: "joe@rocketpool.net",
-		},
-		{
-			Name:  "Kane Wallmann",
-			Email: "kane@rocketpool.net",
+			Email: "joe@nodeset.io",
 		},
 	}
-	app.Copyright = "(c) 2024 Rocket Pool Pty Ltd"
+	app.Copyright = "(c) 2024 NodeSet LLC"
 
 	// Initialize app metadata
 	app.Metadata = make(map[string]interface{})
@@ -109,7 +97,7 @@ func main() {
 
 	// Register commands
 	service.RegisterCommands(app, "service", []string{"s"})
-	wallet.RegisterCommands(app, "wallet", []string{"w"})
+	//wallet.RegisterCommands(app, "wallet", []string{"w"})
 
 	app.Before = func(c *cli.Context) error {
 		// Check user ID
@@ -179,38 +167,4 @@ func validateFlags(c *cli.Context) error {
 	// TODO: more here
 	context.SetHyperdriveContext(c, hdCtx)
 	return nil
-}
-
-func main() {
-	// Master command for the binary
-	rootCmd := &cobra.Command{
-		Short: "Hyperdrive initialization and Rocketpool service status check",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("hyperdrive")
-		},
-		SilenceUsage: true,
-	}
-
-	// Set up flags
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		handleError(fmt.Errorf("error getting user's home directory for default installation path: %w", err))
-		os.Exit(1)
-	}
-	installPath := rootCmd.Flags().StringP("install-path", "p", filepath.Join(homeDir, ".hyperdrive"), "Location of the Hyperdrive install folder")
-
-	// Register the subcommands
-	rocketpool.RegisterCommands(rootCmd, *installPath)
-	service.RegisterCommands(rootCmd, *installPath)
-	stakewise.RegisterCommands(rootCmd, *installPath)
-
-	// Run - this automatically prints errors with the help text
-	rootCmd.Execute()
-}
-
-func handleError(err error) {
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
 }

@@ -1,8 +1,3 @@
-/*
-Derived from the Rocket Pool Smartnode source code:
-https://github.com/rocket-pool/smartnode
-*/
-
 package config
 
 import (
@@ -27,10 +22,11 @@ import (
 
 const (
 	// Param IDs
-	HyperdriveDebugModeID  string = "debugMode"
-	HyperdriveNetworkID    string = "network"
-	HyperdriveClientModeID string = "clientMode"
-	HyperdriveDirectoryID  string = "hdDir"
+	HyperdriveDebugModeID   string = "debugMode"
+	HyperdriveNetworkID     string = "network"
+	HyperdriveClientModeID  string = "clientMode"
+	HyperdriveDirectoryID   string = "hdDir"
+	HyperdriveProjectNameID string = "projectName"
 
 	// Tags
 	HyperdriveTag string = "nodeset/hyperdrive:v" + shared.HyperdriveVersion
@@ -39,9 +35,10 @@ const (
 // The master configuration struct
 type HyperdriveConfig struct {
 	// General settings
-	DebugMode  types.Parameter[bool]
-	Network    types.Parameter[types.Network]
-	ClientMode types.Parameter[types.ClientMode]
+	DebugMode   types.Parameter[bool]
+	Network     types.Parameter[types.Network]
+	ClientMode  types.Parameter[types.ClientMode]
+	ProjectName types.Parameter[string]
 
 	// Execution client settings
 	LocalExecutionConfig    *LocalExecutionConfig
@@ -98,22 +95,21 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg := &HyperdriveConfig{
 		HyperdriveDirectory: hdDir,
 
-		// Parameters
-		DebugMode: types.Parameter[bool]{
+		ProjectName: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                   HyperdriveDebugModeID,
-				Name:                 "Debug Mode",
-				Description:          "True to enable debug mode, which at some point will print extra stuff but doesn't right now.",
-				AffectsContainers:    []types.ContainerID{types.ContainerID_Daemon},
-				EnvironmentVariables: []string{"HD_DEBUG_MODE"},
-				CanBeBlank:           false,
-				OverwriteOnUpgrade:   false,
+				ID:                 HyperdriveProjectNameID,
+				Name:               "Project Name",
+				Description:        "This is the prefix that will be attached to all of the Docker containers managed by Hyperdrive.",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode, types.ContainerID_Daemon, types.ContainerID_ExecutionClient, types.ContainerID_Exporter, types.ContainerID_Grafana, types.ContainerID_Prometheus},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]bool{
-				types.Network_All: false,
+			Default: map[types.Network]string{
+				types.Network_All: "hyperdrive",
 			},
 		},
 
+		// Parameters
 		Network: types.Parameter[types.Network]{
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 HyperdriveNetworkID,
@@ -133,7 +129,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 HyperdriveClientModeID,
 				Name:               "Client Mode",
-				Description:        "Choose which mode to use for your Execution and Consensus clients - locally managed (Docker Mode), or externally managed (Hybrid Mode).",
+				Description:        "Choose which mode to use for your Execution Client and Beacon Node - locally managed (Docker Mode), or externally managed (Hybrid Mode).",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ExecutionClient, types.ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
@@ -142,18 +138,32 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				{
 					ParameterOptionCommon: &types.ParameterOptionCommon{
 						Name:        "Locally Managed",
-						Description: "Allow the Smartnode to manage the Execution and Consensus clients for you (Docker Mode)",
+						Description: "Allow Hyperdrive to manage the Execution Client and Beacon Node for you (Docker Mode)",
 					},
 					Value: types.ClientMode_Local,
 				}, {
 					ParameterOptionCommon: &types.ParameterOptionCommon{
 						Name:        "Externally Managed",
-						Description: "Use existing Execution and Consensus clients that you manage on your own (Hybrid Mode)",
+						Description: "Use an existing Execution Client and Beacon Node that you manage on your own (Hybrid Mode)",
 					},
 					Value: types.ClientMode_External,
 				}},
 			Default: map[types.Network]types.ClientMode{
 				types.Network_All: types.ClientMode_Local,
+			},
+		},
+
+		DebugMode: types.Parameter[bool]{
+			ParameterCommon: &types.ParameterCommon{
+				ID:                 HyperdriveDebugModeID,
+				Name:               "Debug Mode",
+				Description:        "True to enable debug mode, which at some point will print extra stuff but doesn't right now.",
+				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[types.Network]bool{
+				types.Network_All: false,
 			},
 		},
 
@@ -379,7 +389,7 @@ func getNetworkOptions() []*types.ParameterOption[types.Network] {
 		{
 			ParameterOptionCommon: &types.ParameterOptionCommon{
 				Name:        "Holesky Testnet",
-				Description: "This is the Holešky (Holešovice) test network, which is the next generation of long-lived testnets for Ethereum. It uses free fake ETH and free fake RPL to make fake validators.\nUse this if you want to practice running the Smartnode in a free, safe environment before moving to Mainnet.",
+				Description: "This is the Holešky (Holešovice) test network, which is the next generation of long-lived testnets for Ethereum. It uses free fake ETH and free fake RPL to make fake validators.\nUse this if you want to practice running Hyperdrive in a free, safe environment before moving to Mainnet.",
 			},
 			Value: types.Network_Holesky,
 		},
@@ -389,7 +399,7 @@ func getNetworkOptions() []*types.ParameterOption[types.Network] {
 		options = append(options, &types.ParameterOption[types.Network]{
 			ParameterOptionCommon: &types.ParameterOptionCommon{
 				Name:        "Devnet",
-				Description: "This is a development network used by Rocket Pool engineers to test new features and contract upgrades before they are promoted to Holesky for staging. You should not use this network unless invited to do so by the developers.",
+				Description: "This is a development network used by Hyperdrive engineers to test new features and contract upgrades before they are promoted to Holesky for staging. You should not use this network unless invited to do so by the developers.",
 			},
 			Value: types.Network_HoleskyDev,
 		})

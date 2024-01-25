@@ -6,12 +6,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/urfave/cli/v2"
-
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils"
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils/client"
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils/terminal"
-	"github.com/rocket-pool/smartnode/shared/types/api"
 )
 
 // When printing sync percents, we should avoid printing 100%.
@@ -70,29 +68,9 @@ func getSyncProgress(c *cli.Context) error {
 	}
 
 	// Print what network we're on
-	err = utils.PrintNetwork(cfg.GetNetwork(), isNew)
+	err = utils.PrintNetwork(cfg.Network.Value, isNew)
 	if err != nil {
 		return err
-	}
-
-	// Make sure ETH2 is on the correct chain
-	depositContractInfo, err := rp.Api.Network.GetDepositContractInfo()
-	if err != nil {
-		return err
-	}
-	if !depositContractInfo.Data.SufficientSync {
-		fmt.Printf("%sYour execution client hasn't synced enough to determine if your execution and consensus clients are on the same network.\n", terminal.ColorYellow)
-		fmt.Printf("To run this safety check, try again later when the execution client has made more sync progress.%s\n\n", terminal.ColorReset)
-	} else if depositContractInfo.Data.RPNetwork != depositContractInfo.Data.BeaconNetwork ||
-		depositContractInfo.Data.RPDepositContract != depositContractInfo.Data.BeaconDepositContract {
-		utils.PrintDepositMismatchError(
-			depositContractInfo.Data.RPNetwork,
-			depositContractInfo.Data.BeaconNetwork,
-			depositContractInfo.Data.RPDepositContract,
-			depositContractInfo.Data.BeaconDepositContract)
-		return nil
-	} else {
-		fmt.Println("Your consensus client is on the correct network.\n")
 	}
 
 	// Get node status
@@ -105,7 +83,7 @@ func getSyncProgress(c *cli.Context) error {
 	printSyncProgress(&status.Data.EcManagerStatus, "execution")
 
 	// Print CC status
-	printSyncProgress(&status.Data.BcManagerStatus, "consensus")
+	printSyncProgress(&status.Data.BcManagerStatus, "beacon")
 
 	// Return
 	return nil

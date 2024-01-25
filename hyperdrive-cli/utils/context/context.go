@@ -32,8 +32,8 @@ type HyperdriveContext struct {
 }
 
 // Add the Hyperdrive context into a CLI context
-func SetHyperdriveContext(c *cli.Context, hdCtx *HyperdriveContext) {
-	c.App.Metadata[contextMetadataName] = hdCtx
+func SetHyperdriveContext(c *cli.Context, hd *HyperdriveContext) {
+	c.App.Metadata[contextMetadataName] = hd
 }
 
 // Get the Hyperdrive context from a CLI context

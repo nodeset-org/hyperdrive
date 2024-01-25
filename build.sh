@@ -101,7 +101,7 @@ usage() {
     echo $'\t-a\tBuild all of the artifacts'
     echo $'\t-c\tBuild the CLI binaries for all platforms'
     echo $'\t-p\tBuild the Hyperdrive installer packages'
-    echo $'\t-d\tBuild the Daemon Smartnode images, and push them to Docker Hub'
+    echo $'\t-d\tBuild the Daemon Hyperdrive images, and push them to Docker Hub'
     echo $'\t-n\tBuild the Daemon manifests, and push them to Docker Hub'
     exit 0
 }

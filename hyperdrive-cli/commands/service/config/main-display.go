@@ -21,7 +21,6 @@ type mainDisplay struct {
 	settingsHome        *settingsHome
 	isNew               bool
 	isUpdate            bool
-	isNative            bool
 	previousWidth       int
 	previousHeight      int
 	PreviousConfig      *config.HyperdriveConfig
@@ -32,7 +31,7 @@ type mainDisplay struct {
 }
 
 // Creates a new MainDisplay instance.
-func NewMainDisplay(app *tview.Application, previousConfig *config.HyperdriveConfig, config *config.HyperdriveConfig, isNew bool, isUpdate bool, isNative bool) *mainDisplay {
+func NewMainDisplay(app *tview.Application, previousConfig *config.HyperdriveConfig, config *config.HyperdriveConfig, isNew bool, isUpdate bool) *mainDisplay {
 	// Create a copy of the original config for comparison purposes
 	if previousConfig == nil {
 		previousConfig = config.CreateCopy()
@@ -44,7 +43,7 @@ func NewMainDisplay(app *tview.Application, previousConfig *config.HyperdriveCon
 		SetRows(1, 1, 1, 0, 1) // Also 1-unit border
 
 	grid.SetBorder(true).
-		SetTitle(fmt.Sprintf(" Rocket Pool Smartnode %s Configuration ", shared.HyperdriveVersion)).
+		SetTitle(fmt.Sprintf(" Hyperdrive %s Configuration ", shared.HyperdriveVersion)).
 		SetBorderColor(tcell.ColorOrange).
 		SetTitleColor(tcell.ColorOrange).
 		SetBackgroundColor(tcell.ColorBlack)
@@ -78,7 +77,6 @@ func NewMainDisplay(app *tview.Application, previousConfig *config.HyperdriveCon
 		mainGrid:       grid,
 		isNew:          isNew,
 		isUpdate:       isUpdate,
-		isNative:       isNative,
 		PreviousConfig: previousConfig,
 		Config:         config,
 	}

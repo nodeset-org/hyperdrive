@@ -5,7 +5,7 @@ func createFallbackNormalStep(wiz *wizard, currentStep int, totalSteps int) *tex
 	ecHttpLabel := wiz.md.Config.Fallback.EcHttpUrl.Name
 	ccHttpLabel := wiz.md.Config.Fallback.BnHttpUrl.Name
 
-	helperText := "You can use any Execution Client and Beacon Node pair as a fallback.\n\nPlease enter the URLs of the HTTP APIs for your fallback clients.\n\nFor example: `http://192.168.1.45:8545` for your Execution client and `http://192.168.1.45:5052` for your Consensus client."
+	helperText := "You can use any Execution Client and Beacon Node pair as a fallback.\n\nPlease enter the URLs of the HTTP APIs for your fallback clients.\n\nFor example: `http://192.168.1.45:8545` for your Execution client and `http://192.168.1.45:5052` for your Beacon Node."
 
 	show := func(modal *textBoxModalLayout) {
 		wiz.md.setPage(modal.page)

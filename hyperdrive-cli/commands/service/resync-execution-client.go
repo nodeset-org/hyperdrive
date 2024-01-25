@@ -3,9 +3,10 @@ package service
 import (
 	"fmt"
 
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils"
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils/client"
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils/terminal"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/urfave/cli/v2"
 )
 
@@ -20,7 +21,7 @@ func resyncExecutionClient(c *cli.Context) error {
 		return err
 	}
 	if isNew {
-		return fmt.Errorf("Settings file not found. Please run `rocketpool service config` to set up your Smartnode.")
+		return fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
 	}
 
 	fmt.Println("This will delete the chain data of your primary Execution client and resync it from scratch.")
@@ -39,7 +40,7 @@ func resyncExecutionClient(c *cli.Context) error {
 	}
 
 	// Stop Execution
-	executionContainerName := prefix + ExecutionContainerSuffix
+	executionContainerName := fmt.Sprintf("%s_%s", prefix, types.ContainerID_ExecutionClient)
 	fmt.Printf("Stopping %s...\n", executionContainerName)
 	result, err := rp.StopContainer(executionContainerName)
 	if err != nil {
@@ -75,13 +76,13 @@ func resyncExecutionClient(c *cli.Context) error {
 		return fmt.Errorf("Unexpected output while deleting volume: %s", result)
 	}
 
-	// Restart Rocket Pool
-	fmt.Printf("Rebuilding %s and restarting Rocket Pool...\n", executionContainerName)
+	// Restart Hyperdrive
+	fmt.Printf("Rebuilding %s and restarting Hyperdrive...\n", executionContainerName)
 	err = startService(c, true)
 	if err != nil {
-		return fmt.Errorf("Error starting Rocket Pool: %s", err)
+		return fmt.Errorf("Error starting Hyperdrive: %s", err)
 	}
 
-	fmt.Printf("\nDone! Your main Execution client is now resyncing. You can follow its progress with `rocketpool service logs ec`.\n")
+	fmt.Printf("\nDone! Your main Execution client is now resyncing. You can follow its progress with `hyperdrive service logs ec`.\n")
 	return nil
 }

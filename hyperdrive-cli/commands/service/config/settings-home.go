@@ -201,8 +201,8 @@ func (home *settingsHome) createFooter() (tview.Primitive, int) {
 // Refreshes the settings on all of the config pages to match the config's values
 func (home *settingsHome) refresh() {
 	/*
-		if home.smartnodePage != nil {
-			home.smartnodePage.layout.refresh()
+		if home.hyperdrivePage != nil {
+			home.hyperdrivePage.layout.refresh()
 		}*/
 
 	if home.ecPage != nil {

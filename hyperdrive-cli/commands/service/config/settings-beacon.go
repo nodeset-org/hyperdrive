@@ -50,7 +50,7 @@ func (configPage *BeaconConfigPage) getPage() *page {
 	return configPage.page
 }
 
-// Creates the content for the Consensus client settings page
+// Creates the content for the Beacon Node settings page
 func (configPage *BeaconConfigPage) createContent() {
 
 	// Create the layout

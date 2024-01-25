@@ -14,7 +14,7 @@ import (
 
 const (
 	apiContainerName string = "api"
-	binaryPath       string = "/go/bin/rocketpool"
+	binaryPath       string = "/go/bin/hyperdrive"
 )
 
 // ===============

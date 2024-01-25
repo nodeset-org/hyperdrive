@@ -9,7 +9,7 @@ const (
 	PrysmRpcUrlID string = "prysmRpcUrl"
 )
 
-// Configuration for external Consensus clients
+// Configuration for external Beacon Nodes
 type ExternalBeaconConfig struct {
 	// The selected BN
 	BeaconNode types.Parameter[types.BeaconNode]

@@ -5,14 +5,14 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
-// The page wrapper for the Smartnode config
+// The page wrapper for the Hyperdrive config
 type HyperdriveConfigPage struct {
 	home   *settingsHome
 	page   *page
 	layout *standardLayout
 }
 
-// Creates a new page for the Smartnode settings
+// Creates a new page for the Hyperdrive settings
 func NewHyperdriveConfigPage(home *settingsHome) *HyperdriveConfigPage {
 
 	configPage := &HyperdriveConfigPage{
@@ -37,7 +37,7 @@ func (configPage *HyperdriveConfigPage) getPage() *page {
 	return configPage.page
 }
 
-// Creates the content for the Smartnode settings page
+// Creates the content for the Hyperdrive settings page
 func (configPage *HyperdriveConfigPage) createContent() {
 
 	// Create the layout
@@ -68,6 +68,12 @@ func (configPage *HyperdriveConfigPage) createContent() {
 	// Set up the form items
 	formItems := createParameterizedFormItems(masterConfig.GetParameters(), layout.descriptionBox)
 	for _, formItem := range formItems {
+		// Ignore the client mode item since it's presented in the EC / BN sections
+		if formItem.parameter.GetCommon().ID == config.HyperdriveClientModeID {
+			continue
+		}
+
+		// Handle the rest
 		layout.form.AddFormItem(formItem.item)
 		layout.parameters[formItem.item] = formItem
 		if formItem.parameter.GetCommon().ID == config.HyperdriveNetworkID {

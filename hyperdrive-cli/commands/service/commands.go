@@ -4,14 +4,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
-
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils"
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils/terminal"
-	"github.com/rocket-pool/smartnode/shared/config"
-	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
-	"github.com/rocket-pool/smartnode/shared/utils/input"
 )
 
 var (
@@ -28,7 +25,7 @@ var (
 )
 
 // Creates CLI argument flags from the parameters of the configuration struct
-func createFlagsFromConfigParams(sectionName string, params []types.IParameter, configFlags []cli.Flag, network cfgtypes.Network) []cli.Flag {
+func createFlagsFromConfigParams(sectionName string, params []types.IParameter, configFlags []cli.Flag, network types.Network) []cli.Flag {
 	for _, param := range params {
 		common := param.GetCommon()
 		var paramName string
@@ -48,11 +45,11 @@ func createFlagsFromConfigParams(sectionName string, params []types.IParameter, 
 			usage = fmt.Sprintf("%s\nOptions: %s\n", common.Description, strings.Join(optionStrings, ", "))
 		}
 
-		defaultVal := param.GetDefaultAsString(network)
+		defaultVal := param.GetDefaultAsAny(network)
 		configFlags = append(configFlags, &cli.StringFlag{
 			Name:  paramName,
 			Usage: usage,
-			Value: defaultVal,
+			Value: fmt.Sprint(defaultVal),
 		})
 	}
 
@@ -61,18 +58,20 @@ func createFlagsFromConfigParams(sectionName string, params []types.IParameter, 
 
 // Register commands
 func RegisterCommands(app *cli.App, name string, aliases []string) {
-
 	configFlags := []cli.Flag{}
-	cfgTemplate := config.NewRocketPoolConfig("", false)
-	network := cfgTemplate.Smartnode.Network.Value.(cfgtypes.Network)
 
-	// Root params
-	configFlags = createFlagsFromConfigParams("", cfgTemplate.GetParameters(), configFlags, network)
+	// TODO: HEADLESS MODE
+	/*
+		cfgTemplate := config.NewHyperdriveConfig("")
+		network := cfgTemplate.Network.Value
+		// Root params
+		configFlags = createFlagsFromConfigParams("", cfgTemplate.GetParameters(), configFlags, network)
 
-	// Subconfigs
-	for sectionName, subconfig := range cfgTemplate.GetSubconfigs() {
-		configFlags = createFlagsFromConfigParams(sectionName, subconfig.GetParameters(), configFlags, network)
-	}
+		// Subconfigs
+		for sectionName, subconfig := range cfgTemplate.GetSubconfigs() {
+			configFlags = createFlagsFromConfigParams(sectionName, subconfig.GetParameters(), configFlags, network)
+		}
+	*/
 
 	app.Commands = append(app.Commands, &cli.Command{
 		Name:    name,
@@ -107,7 +106,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			{
 				Name:    "config",
 				Aliases: []string{"c"},
-				Usage:   "Configure the Rocket Pool service",
+				Usage:   "Configure the Hyperdrive service",
 				Flags:   configFlags,
 				Action: func(c *cli.Context) error {
 					// Validate args
@@ -123,7 +122,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			{
 				Name:    "sync",
 				Aliases: []string{"y"},
-				Usage:   "Get the sync progress of the Execution and Consensus clients",
+				Usage:   "Get the sync progress of the Execution and Beacon Nodes",
 				Action: func(c *cli.Context) error {
 					// Validate args
 					if err := input.ValidateArgCount(c, 0); err != nil {
@@ -138,7 +137,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			{
 				Name:    "status",
 				Aliases: []string{"u"},
-				Usage:   "View the Rocket Pool service status",
+				Usage:   "View the Hyperdrive service status",
 				Action: func(c *cli.Context) error {
 					// Validate args
 					if err := input.ValidateArgCount(c, 0); err != nil {
@@ -153,7 +152,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			{
 				Name:    "start",
 				Aliases: []string{"s"},
-				Usage:   "Start the Rocket Pool service",
+				Usage:   "Start the Hyperdrive service",
 				Flags: []cli.Flag{
 					ignoreSlashTimerFlag,
 					utils.YesFlag,
@@ -170,10 +169,9 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			},
 
 			{
-				Name:      "stop",
-				Aliases:   []string{"pause", "p"},
-				Usage:     "Pause the Rocket Pool service",
-				UsageText: "rocketpool service pause [options]",
+				Name:    "stop",
+				Aliases: []string{"pause", "p"},
+				Usage:   "Pause the Hyperdrive service",
 				Flags: []cli.Flag{
 					utils.YesFlag,
 				},
@@ -191,7 +189,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			{
 				Name:      "logs",
 				Aliases:   []string{"l"},
-				Usage:     "View the Rocket Pool service logs",
+				Usage:     "View the Hyperdrive service logs",
 				ArgsUsage: "[service names]",
 				Flags: []cli.Flag{
 					tailFlag,
@@ -205,7 +203,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			{
 				Name:    "stats",
 				Aliases: []string{"a"},
-				Usage:   "View the Rocket Pool service stats",
+				Usage:   "View the Hyperdrive service stats",
 				Action: func(c *cli.Context) error {
 					// Validate args
 					if err := input.ValidateArgCount(c, 0); err != nil {
@@ -219,7 +217,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 
 			{
 				Name:  "compose",
-				Usage: "View the Rocket Pool service docker compose config",
+				Usage: "View the Hyperdrive service docker compose config",
 				Action: func(c *cli.Context) error {
 					// Validate args
 					if err := input.ValidateArgCount(c, 0); err != nil {
@@ -234,7 +232,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			{
 				Name:    "version",
 				Aliases: []string{"v"},
-				Usage:   "View the Rocket Pool service version information",
+				Usage:   "View the Hyperdrive service version information",
 				Action: func(c *cli.Context) error {
 					// Validate args
 					if err := input.ValidateArgCount(c, 0); err != nil {
@@ -246,41 +244,42 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				},
 			},
 
-			{
-				Name:    "prune-ec",
-				Aliases: []string{"prune-eth1", "n"},
-				Usage:   "Shuts down the main ETH1 client and prunes its database, freeing up disk space, then restarts it when it's done.",
-				Action: func(c *cli.Context) error {
-					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
-						return err
-					}
+			/*
+				{
+					Name:    "prune-ec",
+					Aliases: []string{"prune-eth1", "n"},
+					Usage:   "Shuts down the main ETH1 client and prunes its database, freeing up disk space, then restarts it when it's done.",
+					Action: func(c *cli.Context) error {
+						// Validate args
+						if err := input.ValidateArgCount(c, 0); err != nil {
+							return err
+						}
 
-					// Run command
-					return pruneExecutionClient(c)
+						// Run command
+						return pruneExecutionClient(c)
+					},
 				},
-			},
 
-			{
-				Name:    "install-update-tracker",
-				Aliases: []string{"d"},
-				Usage:   "Install the update tracker that provides the available system update count to the metrics dashboard",
-				Flags: []cli.Flag{
-					utils.YesFlag,
-					installUpdateTrackerVerboseFlag,
-					installUpdateTrackerVersionFlag,
+				{
+					Name:    "install-update-tracker",
+					Aliases: []string{"d"},
+					Usage:   "Install the update tracker that provides the available system update count to the metrics dashboard",
+					Flags: []cli.Flag{
+						utils.YesFlag,
+						installUpdateTrackerVerboseFlag,
+						installUpdateTrackerVersionFlag,
+					},
+					Action: func(c *cli.Context) error {
+						// Validate args
+						if err := input.ValidateArgCount(c, 0); err != nil {
+							return err
+						}
+
+						// Run command
+						return installUpdateTracker(c)
+					},
 				},
-				Action: func(c *cli.Context) error {
-					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
-						return err
-					}
-
-					// Run command
-					return installUpdateTracker(c)
-				},
-			},
-
+			*/
 			{
 				Name:    "check-cpu-features",
 				Aliases: []string{"ccf"},
@@ -309,46 +308,46 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					return getConfigYaml(c)
 				},
 			},
+			/*
+				{
+					Name:      "export-ec-data",
+					Aliases:   []string{"export-eth1-data"},
+					Usage:     "Exports the execution client (eth1) chain data to an external folder. Use this if you want to back up your chain data before switching execution clients.",
+					ArgsUsage: "target-folder",
+					Flags: []cli.Flag{
+						exportEcDataForceFlag,
+						exportEcDataDirtyFlag,
+						utils.YesFlag,
+					},
+					Action: func(c *cli.Context) error {
+						// Validate args
+						if err := input.ValidateArgCount(c, 1); err != nil {
+							return err
+						}
+						targetDir := c.Args().Get(0)
 
-			{
-				Name:      "export-ec-data",
-				Aliases:   []string{"export-eth1-data"},
-				Usage:     "Exports the execution client (eth1) chain data to an external folder. Use this if you want to back up your chain data before switching execution clients.",
-				ArgsUsage: "target-folder",
-				Flags: []cli.Flag{
-					exportEcDataForceFlag,
-					exportEcDataDirtyFlag,
-					utils.YesFlag,
+						// Run command
+						return exportEcData(c, targetDir)
+					},
 				},
-				Action: func(c *cli.Context) error {
-					// Validate args
-					if err := input.ValidateArgCount(c, 1); err != nil {
-						return err
-					}
-					targetDir := c.Args().Get(0)
 
-					// Run command
-					return exportEcData(c, targetDir)
+				{
+					Name:      "import-ec-data",
+					Aliases:   []string{"import-eth1-data"},
+					Usage:     "Imports execution client (eth1) chain data from an external folder. Use this if you want to restore the data from an execution client that you previously backed up.",
+					ArgsUsage: "source-folder",
+					Action: func(c *cli.Context) error {
+						// Validate args
+						if err := input.ValidateArgCount(c, 1); err != nil {
+							return err
+						}
+						sourceDir := c.Args().Get(0)
+
+						// Run command
+						return importEcData(c, sourceDir)
+					},
 				},
-			},
-
-			{
-				Name:      "import-ec-data",
-				Aliases:   []string{"import-eth1-data"},
-				Usage:     "Imports execution client (eth1) chain data from an external folder. Use this if you want to restore the data from an execution client that you previously backed up.",
-				ArgsUsage: "source-folder",
-				Action: func(c *cli.Context) error {
-					// Validate args
-					if err := input.ValidateArgCount(c, 1); err != nil {
-						return err
-					}
-					sourceDir := c.Args().Get(0)
-
-					// Run command
-					return importEcData(c, sourceDir)
-				},
-			},
-
+			*/
 			{
 				Name:    "resync-ec",
 				Aliases: []string{"resync-eth1"},
@@ -367,7 +366,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			{
 				Name:    "resync-cc",
 				Aliases: []string{"resync-eth2"},
-				Usage:   fmt.Sprintf("%sDeletes the Consensus client's chain data and resyncs it from scratch. Only use this as a last resort!%s", terminal.ColorRed, terminal.ColorReset),
+				Usage:   fmt.Sprintf("%sDeletes the Beacon Node's chain data and resyncs it from scratch. Only use this as a last resort!%s", terminal.ColorRed, terminal.ColorReset),
 				Action: func(c *cli.Context) error {
 					// Validate args
 					if err := input.ValidateArgCount(c, 0); err != nil {
@@ -375,14 +374,14 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					}
 
 					// Run command
-					return resyncConsensusClient(c)
+					return resyncBeaconNode(c)
 				},
 			},
 
 			{
 				Name:    "terminate",
 				Aliases: []string{"t"},
-				Usage:   fmt.Sprintf("%sDeletes all of the Rocket Pool Docker containers and volumes, including your ETH1 and ETH2 chain data and your Prometheus database (if metrics are enabled). Also removes your entire `.rocketpool` configuration folder, including your wallet, password, and validator keys. Only use this if you are cleaning up the Smartnode and want to start over!%s", terminal.ColorRed, terminal.ColorReset),
+				Usage:   fmt.Sprintf("%sDeletes all of the Hyperdrive Docker containers and volumes, including your Execution Client and Beacon Node chain data and your Prometheus database (if metrics are enabled). Also removes your entire `.hyperdrive` configuration folder, including your wallet, password, and validator keys. Only use this if you are cleaning up Hyperdrive and want to start over!%s", terminal.ColorRed, terminal.ColorReset),
 				Flags: []cli.Flag{
 					utils.YesFlag,
 				},

@@ -49,7 +49,7 @@ func UpdateConfig(serializedConfig map[string]any) error {
 
 }
 
-// Get the Smartnode version that the given config was built with
+// Get the Hyperdrive version that the given config was built with
 func getVersionFromConfig(serializedConfig map[string]any) (*version.Version, error) {
 	configVersionString, exists := serializedConfig[ids.VersionID].(string)
 	if !exists {

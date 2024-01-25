@@ -51,7 +51,7 @@ type ExecutionClientManager struct {
 // This is a signature for a wrapped ethclient.Client function
 type ecFunction func(*ethclient.Client) (interface{}, error)
 
-// Creates a new ExecutionClientManager instance based on the Rocket Pool config
+// Creates a new ExecutionClientManager instance based on the Hyperdrive config
 func NewExecutionClientManager(cfg *config.HyperdriveConfig) (*ExecutionClientManager, error) {
 	var primaryEcUrl string
 	var fallbackEcUrl string

@@ -104,7 +104,7 @@ func NewBesuConfig(parent *LocalExecutionConfig) *BesuConfig {
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 AdditionalFlagsID,
 				Name:               "Additional Flags",
-				Description:        "Additional custom command line flags you want to pass to Besu, to take advantage of other settings that the Smartnode's configuration doesn't cover.",
+				Description:        "Additional custom command line flags you want to pass to Besu, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,

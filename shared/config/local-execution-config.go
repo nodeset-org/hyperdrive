@@ -112,7 +112,7 @@ func NewExecutionCommonConfig(parent *HyperdriveConfig) *LocalExecutionConfig {
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 EcEnginePortID,
 				Name:               "Engine API Port",
-				Description:        "The port your Execution client should use for its Engine API endpoint (the endpoint the Consensus client will connect to post-merge).",
+				Description:        "The port your Execution client should use for its Engine API endpoint (the endpoint the Beacon Node will connect to post-merge).",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient, types.ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,

@@ -31,7 +31,7 @@ type bcFunction1 func(types.IBeaconClient) (interface{}, error)
 // This is a signature for a wrapped Beacon client function that returns 2 vars and an error
 type bcFunction2 func(types.IBeaconClient) (interface{}, interface{}, error)
 
-// Creates a new BeaconClientManager instance based on the Rocket Pool config
+// Creates a new BeaconClientManager instance based on the Hyperdrive config
 func NewBeaconClientManager(cfg *config.HyperdriveConfig) (*BeaconClientManager, error) {
 	// Primary CC
 	var primaryProvider string

@@ -3,13 +3,13 @@ package service
 import (
 	"fmt"
 
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils"
-	"github.com/rocket-pool/smartnode/rocketpool-cli/utils/client"
-	cfgtypes "github.com/rocket-pool/smartnode/shared/types/config"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/urfave/cli/v2"
 )
 
-// View the Rocket Pool service version information
+// View the Hyperdrive service version information
 func serviceVersion(c *cli.Context) error {
 	// Get RP client
 	rp := client.NewClientFromCtx(c)
@@ -21,7 +21,7 @@ func serviceVersion(c *cli.Context) error {
 	}
 
 	// Print what network we're on
-	err = utils.PrintNetwork(cfg.GetNetwork(), isNew)
+	err = utils.PrintNetwork(cfg.Network.Value, isNew)
 	if err != nil {
 		return err
 	}
@@ -32,87 +32,85 @@ func serviceVersion(c *cli.Context) error {
 		return err
 	}
 
-	// Handle native mode
-	if cfg.IsNativeMode {
-		fmt.Printf("Rocket Pool client version: %s\n", c.App.Version)
-		fmt.Printf("Rocket Pool service version: %s\n", serviceVersion)
-		fmt.Println("Configured for Native Mode")
-		return nil
-	}
-
 	// Get the execution client string
-	var eth1ClientString string
-	eth1ClientMode := cfg.ExecutionClientMode.Value.(cfgtypes.Mode)
-	switch eth1ClientMode {
-	case cfgtypes.Mode_Local:
-		eth1Client := cfg.ExecutionClient.Value.(cfgtypes.ExecutionClient)
+	var executionClientString string
+	var beaconNodeString string
+	clientMode := cfg.ClientMode.Value
+	switch clientMode {
+	case types.ClientMode_Local:
 		format := "%s (Locally managed)\n\tImage: %s"
-		switch eth1Client {
-		case cfgtypes.ExecutionClient_Geth:
-			eth1ClientString = fmt.Sprintf(format, "Geth", cfg.Geth.ContainerTag.Value.(string))
-		case cfgtypes.ExecutionClient_Nethermind:
-			eth1ClientString = fmt.Sprintf(format, "Nethermind", cfg.Nethermind.ContainerTag.Value.(string))
-		case cfgtypes.ExecutionClient_Besu:
-			eth1ClientString = fmt.Sprintf(format, "Besu", cfg.Besu.ContainerTag.Value.(string))
+
+		// Execution client
+		ec := cfg.LocalExecutionConfig.ExecutionClient.Value
+		switch ec {
+		case types.ExecutionClient_Geth:
+			executionClientString = fmt.Sprintf(format, "Geth", cfg.LocalExecutionConfig.Geth.ContainerTag.Value)
+		case types.ExecutionClient_Nethermind:
+			executionClientString = fmt.Sprintf(format, "Nethermind", cfg.LocalExecutionConfig.Nethermind.ContainerTag.Value)
+		case types.ExecutionClient_Besu:
+			executionClientString = fmt.Sprintf(format, "Besu", cfg.LocalExecutionConfig.Besu.ContainerTag.Value)
 		default:
-			return fmt.Errorf("unknown local execution client [%v]", eth1Client)
+			return fmt.Errorf("unknown local execution client [%v]", ec)
 		}
 
-	case cfgtypes.Mode_External:
-		eth1ClientString = "Externally managed"
+		// Beacon node
+		bn := cfg.LocalBeaconConfig.BeaconNode.Value
+		switch bn {
+		case types.BeaconNode_Lighthouse:
+			beaconNodeString = fmt.Sprintf(format, "Lighthouse", cfg.LocalBeaconConfig.Lighthouse.ContainerTag.Value)
+		case types.BeaconNode_Lodestar:
+			beaconNodeString = fmt.Sprintf(format, "Lodestar", cfg.LocalBeaconConfig.Lodestar.ContainerTag.Value)
+		case types.BeaconNode_Nimbus:
+			beaconNodeString = fmt.Sprintf(format, "Nimbus", cfg.LocalBeaconConfig.Nimbus.ContainerTag.Value)
+		case types.BeaconNode_Prysm:
+			beaconNodeString = fmt.Sprintf(format, "Prysm", cfg.LocalBeaconConfig.Prysm.ContainerTag.Value)
+		case types.BeaconNode_Teku:
+			beaconNodeString = fmt.Sprintf(format, "Teku", cfg.LocalBeaconConfig.Teku.ContainerTag.Value)
+		default:
+			return fmt.Errorf("unknown local Beacon Node [%v]", bn)
+		}
+
+	case types.ClientMode_External:
+		format := "Externally managed (%s)"
+
+		// Execution client
+		ec := cfg.ExternalExecutionConfig.ExecutionClient.Value
+		switch ec {
+		case types.ExecutionClient_Geth:
+			executionClientString = fmt.Sprintf(format, "Geth")
+		case types.ExecutionClient_Nethermind:
+			executionClientString = fmt.Sprintf(format, "Nethermind")
+		case types.ExecutionClient_Besu:
+			executionClientString = fmt.Sprintf(format, "Besu")
+		default:
+			return fmt.Errorf("unknown external Execution Client [%v]", ec)
+		}
+
+		// Beacon node
+		bn := cfg.ExternalBeaconConfig.BeaconNode.Value
+		switch bn {
+		case types.BeaconNode_Lighthouse:
+			beaconNodeString = fmt.Sprintf(format, "Lighthouse")
+		case types.BeaconNode_Lodestar:
+			beaconNodeString = fmt.Sprintf(format, "Lodestar")
+		case types.BeaconNode_Nimbus:
+			beaconNodeString = fmt.Sprintf(format, "Nimbus")
+		case types.BeaconNode_Prysm:
+			beaconNodeString = fmt.Sprintf(format, "Prysm")
+		case types.BeaconNode_Teku:
+			beaconNodeString = fmt.Sprintf(format, "Teku")
+		default:
+			return fmt.Errorf("unknown external Beacon Node [%v]", bn)
+		}
 
 	default:
-		return fmt.Errorf("unknown execution client mode [%v]", eth1ClientMode)
-	}
-
-	// Get the consensus client string
-	var eth2ClientString string
-	eth2ClientMode := cfg.ConsensusClientMode.Value.(cfgtypes.Mode)
-	switch eth2ClientMode {
-	case cfgtypes.Mode_Local:
-		eth2Client := cfg.ConsensusClient.Value.(cfgtypes.ConsensusClient)
-		format := "%s (Locally managed)\n\tImage: %s"
-		switch eth2Client {
-		case cfgtypes.ConsensusClient_Lighthouse:
-			eth2ClientString = fmt.Sprintf(format, "Lighthouse", cfg.Lighthouse.ContainerTag.Value.(string))
-		case cfgtypes.ConsensusClient_Lodestar:
-			eth2ClientString = fmt.Sprintf(format, "Lodestar", cfg.Lodestar.ContainerTag.Value.(string))
-		case cfgtypes.ConsensusClient_Nimbus:
-			eth2ClientString = fmt.Sprintf(format+"\n\tVC image: %s", "Nimbus", cfg.Nimbus.BnContainerTag.Value.(string), cfg.Nimbus.VcContainerTag.Value.(string))
-		case cfgtypes.ConsensusClient_Prysm:
-			eth2ClientString = fmt.Sprintf(format+"\n\tVC image: %s", "Prysm", cfg.Prysm.BnContainerTag.Value.(string), cfg.Prysm.VcContainerTag.Value.(string))
-		case cfgtypes.ConsensusClient_Teku:
-			eth2ClientString = fmt.Sprintf(format, "Teku", cfg.Teku.ContainerTag.Value.(string))
-		default:
-			return fmt.Errorf("unknown local consensus client [%v]", eth2Client)
-		}
-
-	case cfgtypes.Mode_External:
-		eth2Client := cfg.ExternalConsensusClient.Value.(cfgtypes.ConsensusClient)
-		format := "%s (Externally managed)\n\tVC Image: %s"
-		switch eth2Client {
-		case cfgtypes.ConsensusClient_Lighthouse:
-			eth2ClientString = fmt.Sprintf(format, "Lighthouse", cfg.ExternalLighthouse.ContainerTag.Value.(string))
-		case cfgtypes.ConsensusClient_Lodestar:
-			eth2ClientString = fmt.Sprintf(format, "Lodestar", cfg.ExternalLodestar.ContainerTag.Value.(string))
-		case cfgtypes.ConsensusClient_Nimbus:
-			eth2ClientString = fmt.Sprintf(format, "Nimbus", cfg.ExternalNimbus.ContainerTag.Value.(string))
-		case cfgtypes.ConsensusClient_Prysm:
-			eth2ClientString = fmt.Sprintf(format, "Prysm", cfg.ExternalPrysm.ContainerTag.Value.(string))
-		case cfgtypes.ConsensusClient_Teku:
-			eth2ClientString = fmt.Sprintf(format, "Teku", cfg.ExternalTeku.ContainerTag.Value.(string))
-		default:
-			return fmt.Errorf("unknown external consensus client [%v]", eth2Client)
-		}
-
-	default:
-		return fmt.Errorf("unknown consensus client mode [%v]", eth2ClientMode)
+		return fmt.Errorf("unknown client mode [%v]", clientMode)
 	}
 
 	// Print version info
-	fmt.Printf("Rocket Pool client version: %s\n", c.App.Version)
-	fmt.Printf("Rocket Pool service version: %s\n", serviceVersion)
-	fmt.Printf("Selected Execution client: %s\n", eth1ClientString)
-	fmt.Printf("Selected Consensus client: %s\n", eth2ClientString)
+	fmt.Printf("Hyperdrive client version: %s\n", c.App.Version)
+	fmt.Printf("Hyperdrive daemon version: %s\n", serviceVersion)
+	fmt.Printf("Selected Execution Client: %s\n", executionClientString)
+	fmt.Printf("Selected Beacon Node: %s\n", beaconNodeString)
 	return nil
 }

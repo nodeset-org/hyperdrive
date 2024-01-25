@@ -62,7 +62,7 @@ func NewBitflyNodeMetricsConfig(parent *MetricsConfig) *BitflyNodeMetricsConfig 
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 BitflyMachineNameID,
 				Name:               "Node Metrics Machine Name",
-				Description:        "The name of the machine you are running on. This is used to identify your machine in the mobile app.\nChange this if you are running multiple Smartnodes with the same Secret.",
+				Description:        "The name of the machine you are running on. This is used to identify your machine in the mobile app.\nChange this if you are running multiple Hyperdrives with the same Secret.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient, types.ContainerID_ValidatorClients},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
