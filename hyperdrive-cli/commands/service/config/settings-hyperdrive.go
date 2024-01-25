@@ -69,14 +69,14 @@ func (configPage *HyperdriveConfigPage) createContent() {
 	formItems := createParameterizedFormItems(masterConfig.GetParameters(), layout.descriptionBox)
 	for _, formItem := range formItems {
 		// Ignore the client mode item since it's presented in the EC / BN sections
-		if formItem.parameter.GetCommon().ID == config.HyperdriveClientModeID {
+		if formItem.parameter.GetCommon().ID == config.ClientModeID {
 			continue
 		}
 
 		// Handle the rest
 		layout.form.AddFormItem(formItem.item)
 		layout.parameters[formItem.item] = formItem
-		if formItem.parameter.GetCommon().ID == config.HyperdriveNetworkID {
+		if formItem.parameter.GetCommon().ID == config.NetworkID {
 			dropDown := formItem.item.(*DropDown)
 			dropDown.SetSelectedFunc(func(text string, index int) {
 				newNetwork := configPage.home.md.Config.Network.Options[index].Value

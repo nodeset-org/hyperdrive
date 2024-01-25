@@ -9,6 +9,13 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
+const (
+	prometheusConfigTemplate string = "prometheus-cfg.tmpl"
+	prometheusConfigTarget   string = "prometheus.yml"
+	grafanaConfigTemplate    string = "grafana-prometheus-datasource.tmpl"
+	grafanaConfigTarget      string = "grafana-prometheus-datasource.yml"
+)
+
 // Load the config
 // Returns the RocketPoolConfig and whether or not it was newly generated
 func (c *Client) LoadConfig() (*config.HyperdriveConfig, bool, error) {
@@ -70,21 +77,41 @@ func (c *Client) IsFirstRun() (bool, error) {
 	return IsFirstRun(expandedPath), nil
 }
 
-// Load the Prometheus template, do a template variable substitution, and save it
+// Load the Prometheus config template, do a template variable substitution, and save it
 func (c *Client) UpdatePrometheusConfiguration(config *config.HyperdriveConfig) error {
-	prometheusTemplatePath, err := homedir.Expand(fmt.Sprintf("%s/%s", c.Context.ConfigPath, PrometheusConfigTemplate))
+	prometheusConfigTemplatePath, err := homedir.Expand(filepath.Join(c.Context.ConfigPath, templatesDir, prometheusConfigTemplate))
 	if err != nil {
-		return fmt.Errorf("Error expanding Prometheus template path: %w", err)
+		return fmt.Errorf("Error expanding Prometheus config template path: %w", err)
 	}
 
-	prometheusConfigPath, err := homedir.Expand(fmt.Sprintf("%s/%s", c.Context.ConfigPath, PrometheusFile))
+	prometheusConfigTargetPath, err := homedir.Expand(filepath.Join(c.Context.ConfigPath, prometheusConfigTarget))
 	if err != nil {
-		return fmt.Errorf("Error expanding Prometheus config file path: %w", err)
+		return fmt.Errorf("Error expanding Prometheus config target path: %w", err)
 	}
 
 	t := template.Template{
-		Src: prometheusTemplatePath,
-		Dst: prometheusConfigPath,
+		Src: prometheusConfigTemplatePath,
+		Dst: prometheusConfigTargetPath,
+	}
+
+	return t.Write(config)
+}
+
+// Load the Grafana config template, do a template variable substitution, and save it
+func (c *Client) UpdateGrafanaDatabaseConfiguration(config *config.HyperdriveConfig) error {
+	grafanaConfigTemplatePath, err := homedir.Expand(filepath.Join(c.Context.ConfigPath, templatesDir, grafanaConfigTemplate))
+	if err != nil {
+		return fmt.Errorf("Error expanding Grafana config template path: %w", err)
+	}
+
+	grafanaConfigTargetPath, err := homedir.Expand(filepath.Join(c.Context.ConfigPath, grafanaConfigTarget))
+	if err != nil {
+		return fmt.Errorf("Error expanding Grafana config target path: %w", err)
+	}
+
+	t := template.Template{
+		Src: grafanaConfigTemplatePath,
+		Dst: grafanaConfigTargetPath,
 	}
 
 	return t.Write(config)

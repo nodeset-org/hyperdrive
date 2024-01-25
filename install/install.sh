@@ -388,7 +388,6 @@ progress 8 "Copying package files to Hyperdrive user data directory..."
 { cp -r -n "$PACKAGE_FILES_PATH/override" "$HD_PATH" || rsync -r --ignore-existing "$PACKAGE_FILES_PATH/override" "$HD_PATH" || fail "Could not copy new override files to the Hyperdrive user data directory."; } >&2
 { cp -r "$PACKAGE_FILES_PATH/scripts" "$HD_PATH" || fail "Could not copy scripts folder to the Hyperdrive user data directory."; } >&2
 { cp -r "$PACKAGE_FILES_PATH/templates" "$HD_PATH" || fail "Could not copy templates folder to the Hyperdrive user data directory."; } >&2
-{ cp "$PACKAGE_FILES_PATH/grafana-prometheus-datasource.yml" "$PACKAGE_FILES_PATH/prometheus.tmpl" "$HD_PATH" || fail "Could not copy base files to the Hyperdrive user data directory."; } >&2
 { find "$HD_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
 { touch -a "$HD_PATH/.firstrun" || fail "Could not create the first-run flag file."; } >&2
 

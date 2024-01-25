@@ -121,7 +121,7 @@ func loadConfigFromFile(path string) (*config.HyperdriveConfig, error) {
 		return nil, nil
 	}
 
-	cfg, err := config.LoadFromFile(path, true)
+	cfg, err := config.LoadFromFile(path)
 	if err != nil {
 		return nil, err
 	}

@@ -41,10 +41,14 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		}
 	}
 
-	// Update the Prometheus template with the assigned ports
+	// Update the Prometheus and Grafana config templates with the assigned ports
 	metricsEnabled := cfg.Metrics.EnableMetrics.Value
 	if metricsEnabled {
 		err := hd.UpdatePrometheusConfiguration(cfg)
+		if err != nil {
+			return err
+		}
+		err = hd.UpdateGrafanaDatabaseConfiguration(cfg)
 		if err != nil {
 			return err
 		}
