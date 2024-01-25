@@ -84,6 +84,25 @@ func (configPage *ExecutionConfigPage) createContent() {
 	configPage.besuItems = createParameterizedFormItems(configPage.masterConfig.LocalExecutionConfig.Besu.GetParameters(), configPage.layout.descriptionBox)
 	configPage.externalEcItems = createParameterizedFormItems(configPage.masterConfig.ExternalExecutionConfig.GetParameters(), configPage.layout.descriptionBox)
 
+	// Take the client selections out since they're done explicitly
+	localEcItems := []*parameterizedFormItem{}
+	for _, item := range configPage.localEcItems {
+		if item.parameter.GetCommon().ID == config.EcID {
+			continue
+		}
+		localEcItems = append(localEcItems, item)
+	}
+	configPage.localEcItems = localEcItems
+
+	externalEcItems := []*parameterizedFormItem{}
+	for _, item := range configPage.externalEcItems {
+		if item.parameter.GetCommon().ID == config.EcID {
+			continue
+		}
+		externalEcItems = append(externalEcItems, item)
+	}
+	configPage.externalEcItems = externalEcItems
+
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.clientModeDropdown, configPage.localEcDropdown, configPage.externalEcDropdown)
 	configPage.layout.mapParameterizedFormItems(configPage.localEcItems...)
@@ -160,6 +179,7 @@ func (configPage *ExecutionConfigPage) handleLocalEcChanged() {
 func (configPage *ExecutionConfigPage) handleExternalEcChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.clientModeDropdown.item)
+	configPage.layout.form.AddFormItem(configPage.externalEcDropdown.item)
 	for _, param := range configPage.externalEcItems {
 		configPage.layout.form.AddFormItem(param.item)
 	}

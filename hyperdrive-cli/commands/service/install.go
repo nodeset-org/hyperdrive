@@ -46,10 +46,10 @@ func installService(c *cli.Context) error {
 	}
 
 	// Get RP client
-	rp := client.NewClientFromCtx(c)
+	hd := client.NewClientFromCtx(c)
 
 	// Install service
-	err := rp.InstallService(c.Bool("verbose"), c.Bool("no-deps"), c.String("version"), c.String("path"))
+	err := hd.InstallService(c.Bool("verbose"), c.Bool("no-deps"), c.String("version"), c.String("path"))
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,7 @@ func installService(c *cli.Context) error {
 	printPatchNotes(c)
 
 	// Reload the config after installation
-	_, isNew, err := rp.LoadConfig()
+	_, isNew, err := hd.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("error loading new configuration: %w", err)
 	}

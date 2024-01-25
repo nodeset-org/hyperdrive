@@ -23,8 +23,8 @@ func serviceLogs(c *cli.Context, aliasedNames ...string) error {
 	}
 
 	// Get RP client
-	rp := client.NewClientFromCtx(c)
+	hd := client.NewClientFromCtx(c)
 
 	// Print service logs
-	return rp.PrintServiceLogs(getComposeFiles(c), c.String("tail"), serviceNames...)
+	return hd.PrintServiceLogs(getComposeFiles(c), c.String("tail"), serviceNames...)
 }

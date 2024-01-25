@@ -123,3 +123,16 @@ func updateDefaults(cfg IConfigSection, newNetwork types.Network) {
 		updateDefaults(subconfig, newNetwork)
 	}
 }
+
+// Apply the default settings for each parameter and subparameter
+func applyDefaults(cfg IConfigSection, network types.Network) {
+	// Update the parameters
+	for _, param := range cfg.GetParameters() {
+		param.SetToDefault(network)
+	}
+
+	// Update the subconfigs
+	for _, subconfig := range cfg.GetSubconfigs() {
+		applyDefaults(subconfig, network)
+	}
+}

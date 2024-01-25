@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	cliconfig "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service/config"
@@ -16,6 +17,14 @@ import (
 func configureService(c *cli.Context) error {
 	// Get RP client
 	hd := client.NewClientFromCtx(c)
+
+	// Make sure the config directory exists first
+	configPath := hd.Context.ConfigPath
+	_, err := os.Stat(configPath)
+	if os.IsNotExist(err) {
+		fmt.Printf("%sYour configured Hyperdrive directory of [%s] does not exist.\nPlease install Hyperdrive before attempting to configure it.%s\n", terminal.ColorYellow, configPath, terminal.ColorReset)
+		return nil
+	}
 
 	// Load the config, checking to see if it's new (hasn't been installed before)
 	var oldCfg *config.HyperdriveConfig

@@ -13,10 +13,10 @@ import (
 // Start the Hyperdrive service
 func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	// Get RP client
-	rp := client.NewClientFromCtx(c)
+	hd := client.NewClientFromCtx(c)
 
 	// Update the Prometheus template with the assigned ports
-	cfg, isNew, err := rp.LoadConfig()
+	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("Error loading user settings: %w", err)
 	}
@@ -26,14 +26,14 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Check if this is a new install
-	isUpdate, err := rp.IsFirstRun()
+	isUpdate, err := hd.IsFirstRun()
 	if err != nil {
 		return fmt.Errorf("error checking for first-run status: %w", err)
 	}
 	if isUpdate && !ignoreConfigSuggestion {
 		if c.Bool(utils.YesFlag.Name) || utils.Confirm("Hyperdrive upgrade detected - starting will overwrite certain settings with the latest defaults (such as container versions).\nYou may want to run `hyperdrive service config` first to see what's changed.\n\nWould you like to continue starting the service?") {
 			cfg.UpdateDefaults()
-			rp.SaveConfig(cfg)
+			hd.SaveConfig(cfg)
 			fmt.Printf("%sUpdated settings successfully.%s\n", terminal.ColorGreen, terminal.ColorReset)
 		} else {
 			fmt.Println("Cancelled.")
@@ -44,7 +44,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	// Update the Prometheus template with the assigned ports
 	metricsEnabled := cfg.Metrics.EnableMetrics.Value
 	if metricsEnabled {
-		err := rp.UpdatePrometheusConfiguration(cfg)
+		err := hd.UpdatePrometheusConfiguration(cfg)
 		if err != nil {
 			return err
 		}
@@ -62,13 +62,13 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Start service
-	err = rp.StartService(getComposeFiles(c))
+	err = hd.StartService(getComposeFiles(c))
 	if err != nil {
 		return err
 	}
 
 	// Remove the upgrade flag if it's there
-	return rp.RemoveUpgradeFlagFile()
+	return hd.RemoveUpgradeFlagFile()
 }
 
 // Extract the image name from a Docker image string

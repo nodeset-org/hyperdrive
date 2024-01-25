@@ -88,6 +88,25 @@ func (configPage *BeaconConfigPage) createContent() {
 	configPage.tekuItems = createParameterizedFormItems(configPage.masterConfig.LocalBeaconConfig.Teku.GetParameters(), configPage.layout.descriptionBox)
 	configPage.externalBnItems = createParameterizedFormItems(configPage.masterConfig.ExternalBeaconConfig.GetParameters(), configPage.layout.descriptionBox)
 
+	// Take the client selections out since they're done explicitly
+	localBnItems := []*parameterizedFormItem{}
+	for _, item := range configPage.localBnItems {
+		if item.parameter.GetCommon().ID == config.BnID {
+			continue
+		}
+		localBnItems = append(localBnItems, item)
+	}
+	configPage.localBnItems = localBnItems
+
+	externalBnItems := []*parameterizedFormItem{}
+	for _, item := range configPage.externalBnItems {
+		if item.parameter.GetCommon().ID == config.BnID {
+			continue
+		}
+		externalBnItems = append(externalBnItems, item)
+	}
+	configPage.externalBnItems = externalBnItems
+
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.clientModeDropdown, configPage.localBnDropdown, configPage.externalBnDropdown)
 	configPage.layout.mapParameterizedFormItems(configPage.localBnItems...)

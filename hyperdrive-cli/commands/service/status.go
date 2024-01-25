@@ -11,10 +11,10 @@ import (
 // View the Hyperdrive service status
 func serviceStatus(c *cli.Context) error {
 	// Get RP client
-	rp := client.NewClientFromCtx(c)
+	hd := client.NewClientFromCtx(c)
 
 	// Get the config
-	cfg, isNew, err := rp.LoadConfig()
+	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("Error loading configuration: %w", err)
 	}
@@ -26,5 +26,5 @@ func serviceStatus(c *cli.Context) error {
 	}
 
 	// Print service status
-	return rp.PrintServiceStatus(getComposeFiles(c))
+	return hd.PrintServiceStatus(getComposeFiles(c))
 }

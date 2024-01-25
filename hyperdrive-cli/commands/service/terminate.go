@@ -18,8 +18,8 @@ func terminateService(c *cli.Context) error {
 	}
 
 	// Get RP client
-	rp := client.NewClientFromCtx(c)
+	hd := client.NewClientFromCtx(c)
 
 	// Stop service
-	return rp.TerminateService(getComposeFiles(c), rp.Context.ConfigPath)
+	return hd.TerminateService(getComposeFiles(c), hd.Context.ConfigPath)
 }

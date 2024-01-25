@@ -13,10 +13,10 @@ import (
 // Destroy and resync the Execution client from scratch
 func resyncExecutionClient(c *cli.Context) error {
 	// Get RP client
-	rp := client.NewClientFromCtx(c)
+	hd := client.NewClientFromCtx(c)
 
 	// Get the config
-	_, isNew, err := rp.LoadConfig()
+	_, isNew, err := hd.LoadConfig()
 	if err != nil {
 		return err
 	}
@@ -28,7 +28,7 @@ func resyncExecutionClient(c *cli.Context) error {
 	fmt.Printf("%sYou should only do this if your Execution client has failed and can no longer start or sync properly.\nThis is meant to be a last resort.%s\n", terminal.ColorYellow, terminal.ColorReset)
 
 	// Get the container prefix
-	prefix, err := getContainerPrefix(rp)
+	prefix, err := getContainerPrefix(hd)
 	if err != nil {
 		return fmt.Errorf("Error getting container prefix: %w", err)
 	}
@@ -42,7 +42,7 @@ func resyncExecutionClient(c *cli.Context) error {
 	// Stop Execution
 	executionContainerName := fmt.Sprintf("%s_%s", prefix, types.ContainerID_ExecutionClient)
 	fmt.Printf("Stopping %s...\n", executionContainerName)
-	result, err := rp.StopContainer(executionContainerName)
+	result, err := hd.StopContainer(executionContainerName)
 	if err != nil {
 		fmt.Printf("%sWARNING: Stopping main Execution container failed: %s%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
 	}
@@ -51,14 +51,14 @@ func resyncExecutionClient(c *cli.Context) error {
 	}
 
 	// Get Execution volume name
-	volume, err := rp.GetClientVolumeName(executionContainerName, clientDataVolumeName)
+	volume, err := hd.GetClientVolumeName(executionContainerName, clientDataVolumeName)
 	if err != nil {
 		return fmt.Errorf("Error getting Execution client volume name: %w", err)
 	}
 
 	// Remove ETH1
 	fmt.Printf("Deleting %s...\n", executionContainerName)
-	result, err = rp.RemoveContainer(executionContainerName)
+	result, err = hd.RemoveContainer(executionContainerName)
 	if err != nil {
 		return fmt.Errorf("Error deleting main Execution client container: %w", err)
 	}
@@ -68,7 +68,7 @@ func resyncExecutionClient(c *cli.Context) error {
 
 	// Delete the ETH1 volume
 	fmt.Printf("Deleting volume %s...\n", volume)
-	result, err = rp.DeleteVolume(volume)
+	result, err = hd.DeleteVolume(volume)
 	if err != nil {
 		return fmt.Errorf("Error deleting volume: %w", err)
 	}

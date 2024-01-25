@@ -11,7 +11,7 @@ import (
 // Pause the Hyperdrive service
 func stopService(c *cli.Context) error {
 	// Get RP client
-	rp := client.NewClientFromCtx(c)
+	hd := client.NewClientFromCtx(c)
 
 	// Prompt for confirmation
 	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Are you sure you want to pause the Hyperdrive service?")) {
@@ -20,5 +20,5 @@ func stopService(c *cli.Context) error {
 	}
 
 	// Pause service
-	return rp.PauseService(getComposeFiles(c))
+	return hd.PauseService(getComposeFiles(c))
 }

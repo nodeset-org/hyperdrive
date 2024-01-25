@@ -72,6 +72,16 @@ func (configPage *FallbackConfigPage) createContent() {
 	configPage.useFallbackBox = createParameterizedCheckbox(&configPage.masterConfig.Fallback.UseFallbackClients)
 	configPage.fallbackItems = createParameterizedFormItems(configPage.masterConfig.Fallback.GetParameters(), configPage.layout.descriptionBox)
 
+	// Take the enable out since it's done explicitly
+	fallbackItems := []*parameterizedFormItem{}
+	for _, item := range configPage.fallbackItems {
+		if item.parameter.GetCommon().ID == config.UseFallbackClientsID {
+			continue
+		}
+		fallbackItems = append(fallbackItems, item)
+	}
+	configPage.fallbackItems = fallbackItems
+
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.useFallbackBox)
 	configPage.layout.mapParameterizedFormItems(configPage.fallbackItems...)

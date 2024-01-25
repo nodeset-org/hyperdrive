@@ -73,7 +73,7 @@ func getExternalIP() (net.IP, error) {
 func addAndCheckForDuplicate(portMap map[uint16]bool, param types.Parameter[uint16], errors []string) (map[uint16]bool, []string) {
 	port := param.Value
 	if portMap[port] {
-		return portMap, append(errors, fmt.Sprintf("Port %s for %s is already in use", port, param.GetCommon().Name))
+		return portMap, append(errors, fmt.Sprintf("Port %d for %s is already in use", port, param.GetCommon().Name))
 	} else {
 		portMap[port] = true
 	}

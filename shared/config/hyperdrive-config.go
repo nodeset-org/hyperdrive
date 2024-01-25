@@ -184,6 +184,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg.Metrics = NewMetricsConfig(cfg)
 
 	// Apply the default values for mainnet
+	cfg.Network.Value = types.Network_Mainnet
 	cfg.applyAllDefaults()
 
 	return cfg
@@ -368,13 +369,9 @@ func (cfg *HyperdriveConfig) GetChainID() uint {
 // =====================
 
 // Applies all of the defaults to all of the settings that have them defined
-func (cfg *HyperdriveConfig) applyAllDefaults() error {
+func (cfg *HyperdriveConfig) applyAllDefaults() {
 	network := cfg.Network.Value
-	for _, param := range cfg.GetParameters() {
-		param.SetToDefault(network)
-	}
-
-	return nil
+	applyDefaults(cfg, network)
 }
 
 // Get the list of options for networks to run on
