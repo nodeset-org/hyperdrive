@@ -39,7 +39,7 @@ func serialize(cfg IConfigSection) map[string]any {
 }
 
 // Deserialize a config section
-func deserialize(cfg IConfigSection, serializedParams map[string]any, network types.Network) error {
+func deserialize(cfg IConfigSection, serializedParams map[any]any, network types.Network) error {
 	// Handle the parameters
 	params := cfg.GetParameters()
 	for _, param := range params {
@@ -64,7 +64,7 @@ func deserialize(cfg IConfigSection, serializedParams map[string]any, network ty
 	for name, subconfig := range subconfigs {
 		subParams, exists := serializedParams[name]
 		if exists {
-			submap, isMap := subParams.(map[string]any)
+			submap, isMap := subParams.(map[any]any)
 			if !isMap {
 				return fmt.Errorf("subsection [%s] is not a map", name)
 			}

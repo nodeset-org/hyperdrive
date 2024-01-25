@@ -36,7 +36,7 @@ func NewBitflyNodeMetricsConfig(parent *MetricsConfig) *BitflyNodeMetricsConfig 
 				AffectsContainers: []types.ContainerID{types.ContainerID_BeaconNode, types.ContainerID_ValidatorClients},
 				// ensures the string is 28 characters of Base64
 				Regex:              "^[A-Za-z0-9+/]{28}$",
-				CanBeBlank:         false,
+				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
 			Default: map[types.Network]string{
@@ -50,7 +50,7 @@ func NewBitflyNodeMetricsConfig(parent *MetricsConfig) *BitflyNodeMetricsConfig 
 				Name:               "Node Metrics Endpoint",
 				Description:        "The endpoint to send your Beaconcha.in Node Metrics data to. Should be left as the default.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode, types.ContainerID_ValidatorClients},
-				CanBeBlank:         false,
+				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
 			Default: map[types.Network]string{
@@ -64,7 +64,7 @@ func NewBitflyNodeMetricsConfig(parent *MetricsConfig) *BitflyNodeMetricsConfig 
 				Name:               "Node Metrics Machine Name",
 				Description:        "The name of the machine you are running on. This is used to identify your machine in the mobile app.\nChange this if you are running multiple Hyperdrives with the same Secret.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient, types.ContainerID_ValidatorClients},
-				CanBeBlank:         false,
+				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
 			Default: map[types.Network]string{

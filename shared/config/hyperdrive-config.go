@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/alessio/shellescape"
@@ -243,9 +244,9 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	if !exists {
 		return fmt.Errorf("config is missing the [%s] section", ids.RootConfigID)
 	}
-	hdMap, isMap := hyperdriveParams.(map[string]any)
+	hdMap, isMap := hyperdriveParams.(map[any]any)
 	if !isMap {
-		return fmt.Errorf("config has an entry named [%s] but it is not a map", ids.RootConfigID)
+		return fmt.Errorf("config has an entry named [%s] but it is not a map, it's a %s", ids.RootConfigID, reflect.TypeOf(hyperdriveParams))
 	}
 	networkVal, exists := hdMap[cfg.Network.ID]
 	if exists {
