@@ -12,6 +12,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gorilla/mux"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/service"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
@@ -22,11 +23,10 @@ const (
 )
 
 type IHandler interface {
-	RegisterRoutes(router *mux.Router, debugMode bool)
+	RegisterRoutes(router *mux.Router)
 }
 
 type ApiManager struct {
-	debugMode  bool
 	log        log.ColorLogger
 	handlers   []IHandler
 	socketPath string
@@ -41,12 +41,10 @@ func NewApiManager(sp *services.ServiceProvider) *ApiManager {
 	router := mux.NewRouter()
 
 	// Create the manager
-	cfg := sp.GetConfig()
 	mgr := &ApiManager{
-		debugMode: cfg.DebugMode.Value,
-		log:       log.NewColorLogger(ApiLogColor),
-		handlers:  []IHandler{
-			// example.NewNodeHandler(sp, debugMode),
+		log: log.NewColorLogger(ApiLogColor),
+		handlers: []IHandler{
+			service.NewServiceHandler(sp),
 		},
 		socketPath: config.DaemonSocketPath,
 		router:     router,
@@ -55,14 +53,10 @@ func NewApiManager(sp *services.ServiceProvider) *ApiManager {
 		},
 	}
 
-	if mgr.debugMode {
-		fmt.Println("Debug mode active; printing commands without execution.")
-	}
-
 	// Register each route
 	hyperdriveRouter := router.Host("hyperdrive").Subrouter() // The host will be accessible at http://hyperdrive/...
 	for _, handler := range mgr.handlers {
-		handler.RegisterRoutes(hyperdriveRouter, mgr.debugMode)
+		handler.RegisterRoutes(hyperdriveRouter)
 	}
 
 	return mgr
