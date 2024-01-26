@@ -15,7 +15,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - {{.HyperdriveUserDirectory}}:{{.GetDaemonUserDirPath}}
       - {{.UserDataPath}}:{{.GetDaemonUserDataPath}}
-      - /var/lib/hyperdrive/scripts:{{.GetDaemonScriptsPath}}
+      - /usr/local/lib/hyperdrive/scripts:{{.GetDaemonScriptsPath}}
       - /var/lib/hyperdrive/global:{{.GetDaemonGlobalDataPath}}
       - /var/lib/hyperdrive/data/{{.ProjectName}}:{{.GetDaemonProjectDataPath}}
     networks:

@@ -323,14 +323,15 @@ install() {
     fi
 
     # Create hyperdrive dir & files
-    HD_PATH=/var/lib/hyperdrive
+    HD_USR_PATH=/usr/local/lib/hyperdrive
+    HD_VAR_PATH=/var/lib/hyperdrive
 
     progress 4 "Creating Hyperdrive directory structure..."
-    { mkdir -p "$HD_PATH" || fail "Could not create the Hyperdrive system directory."; } >&2
-    { mkdir -p "$HD_PATH/data" || fail "Could not create the Hyperdrive system data directory."; } >&2
-    { mkdir -p "$HD_PATH/global" || fail "Could not create the Hyperdrive system global directory."; } >&2
-    { chmod 0700 "$HD_PATH/data" || fail "Could not set the Hyperdrive data directory permissions."; } >&2
-    { chmod 0700 "$HD_PATH/global" || fail "Could not set the Hyperdrive global directory permissions."; } >&2
+    { mkdir -p "$HD_USR_PATH" || fail "Could not create the Hyperdrive lib directory."; } >&2
+    { mkdir -p "$HD_VAR_PATH/data" || fail "Could not create the Hyperdrive system data directory."; } >&2
+    { mkdir -p "$HD_VAR_PATH/global" || fail "Could not create the Hyperdrive system global directory."; } >&2
+    { chmod 0700 "$HD_VAR_PATH/data" || fail "Could not set the Hyperdrive data directory permissions."; } >&2
+    { chmod 0700 "$HD_VAR_PATH/global" || fail "Could not set the Hyperdrive global directory permissions."; } >&2
 
     # Download and extract package files
     progress 5 "Downloading Hyperdrive package files..."
@@ -339,10 +340,10 @@ install() {
 
     # Copy package files
     progress 6 "Copying package files to Hyperdrive user data directory..."
-    { cp -r "$PACKAGE_FILES_PATH/override" "$HD_PATH" || fail "Could not copy override folder to the Hyperdrive system directory."; } >&2
-    { cp -r "$PACKAGE_FILES_PATH/scripts" "$HD_PATH" || fail "Could not copy scripts folder to the Hyperdrive system directory."; } >&2
-    { cp -r "$PACKAGE_FILES_PATH/templates" "$HD_PATH" || fail "Could not copy templates folder to the Hyperdrive system directory."; } >&2
-    { find "$HD_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
+    { cp -r "$PACKAGE_FILES_PATH/override" "$HD_USR_PATH" || fail "Could not copy override folder to the Hyperdrive system directory."; } >&2
+    { cp -r "$PACKAGE_FILES_PATH/scripts" "$HD_USR_PATH" || fail "Could not copy scripts folder to the Hyperdrive system directory."; } >&2
+    { cp -r "$PACKAGE_FILES_PATH/templates" "$HD_USR_PATH" || fail "Could not copy templates folder to the Hyperdrive system directory."; } >&2
+    { find "$HD_USR_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
 
     # Clean up unnecessary files from old installations
     progress 7 "Cleaning up obsolete files from previous installs..."
