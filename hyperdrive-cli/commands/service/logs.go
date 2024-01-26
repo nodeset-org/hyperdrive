@@ -12,10 +12,10 @@ func serviceLogs(c *cli.Context, aliasedNames ...string) error {
 	for _, name := range aliasedNames {
 		trueName := name
 		switch name {
-		case "ec", "el", "execution":
-			trueName = "eth1"
-		case "cc", "cl", "bc", "bn", "beacon", "consensus":
-			trueName = "eth2"
+		case "eth1", "el", "execution":
+			trueName = "ec"
+		case "cc", "cl", "bc", "eth2", "beacon", "consensus":
+			trueName = "bn"
 		case "vc":
 			trueName = "validator"
 		}

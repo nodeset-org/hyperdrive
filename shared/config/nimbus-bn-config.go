@@ -21,7 +21,7 @@ type Nimbus_PruningMode string
 
 const (
 	Nimbus_PruningMode_Archive Nimbus_PruningMode = "archive"
-	Nimbus_PruningMode_Pruned  Nimbus_PruningMode = "pruned"
+	Nimbus_PruningMode_Pruned  Nimbus_PruningMode = "prune"
 )
 
 // Configuration for Nimbus
