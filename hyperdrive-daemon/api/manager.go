@@ -69,7 +69,7 @@ func NewApiManager(sp *services.ServiceProvider) *ApiManager {
 }
 
 // Starts listening for incoming HTTP requests
-func (m *ApiManager) Start(wg *sync.WaitGroup) error {
+func (m *ApiManager) Start(wg *sync.WaitGroup, socketOwnerUid uint32, socketOwnerGid uint32) error {
 	// Remove the socket if it's already there
 	_, err := os.Stat(m.socketPath)
 	if !errors.Is(err, fs.ErrNotExist) {
@@ -86,8 +86,14 @@ func (m *ApiManager) Start(wg *sync.WaitGroup) error {
 	}
 	m.socket = socket
 
-	// Make it so anyone can write to the socket
-	err = os.Chmod(m.socketPath, 0766)
+	// Set the socket owner to the config file user
+	err = os.Chown(m.socketPath, int(socketOwnerUid), int(socketOwnerGid))
+	if err != nil {
+		return fmt.Errorf("error setting socket owner: %w", err)
+	}
+
+	// Make it so only the user can write to the socket
+	err = os.Chmod(m.socketPath, 0600)
 	if err != nil {
 		return fmt.Errorf("error relaxing permissions on socket: %w", err)
 	}

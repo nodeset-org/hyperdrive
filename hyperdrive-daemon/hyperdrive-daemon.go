@@ -53,9 +53,16 @@ func main() {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}
 
-		// Start the API apiMgr
+		// Get the owner of the config file
+		var cfgFileStat syscall.Stat_t
+		err = syscall.Stat(config.DaemonConfigPath, &cfgFileStat)
+		if err != nil {
+			return fmt.Errorf("error getting config file [%s] info: %w", config.DaemonConfigPath, err)
+		}
+
+		// Start the API manager
 		apiMgr := api.NewApiManager(sp)
-		err = apiMgr.Start(apiWg)
+		err = apiMgr.Start(apiWg, cfgFileStat.Uid, cfgFileStat.Gid)
 		if err != nil {
 			return fmt.Errorf("error starting API manager: %w", err)
 		}
