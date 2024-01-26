@@ -3,10 +3,12 @@ package service
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,10 +28,9 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Check if this is a new install
-	isUpdate, err := hd.IsFirstRun()
-	if err != nil {
-		return fmt.Errorf("error checking for first-run status: %w", err)
-	}
+	oldVersion := strings.TrimPrefix(cfg.Version, "v")
+	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
+	isUpdate := oldVersion != currentVersion
 	if isUpdate && !ignoreConfigSuggestion {
 		if c.Bool(utils.YesFlag.Name) || utils.Confirm("Hyperdrive upgrade detected - starting will overwrite certain settings with the latest defaults (such as container versions).\nYou may want to run `hyperdrive service config` first to see what's changed.\n\nWould you like to continue starting the service?") {
 			cfg.UpdateDefaults()
@@ -70,9 +71,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	if err != nil {
 		return err
 	}
-
-	// Remove the upgrade flag if it's there
-	return hd.RemoveUpgradeFlagFile()
+	return nil
 }
 
 // Extract the image name from a Docker image string

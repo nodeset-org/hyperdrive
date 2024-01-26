@@ -25,10 +25,11 @@ const (
 	debugColor                    color.Attribute = color.FgYellow
 	nethermindPruneStarterCommand string          = "DELETE_ME"
 
-	templatesDir      string = "/var/lib/hyperdrive/templates"
-	overrideSourceDir string = "/var/lib/hyperdrive/override"
-	overrideDir       string = "override"
-	runtimeDir        string = "runtime"
+	templatesDir       string = "/var/lib/hyperdrive/templates"
+	overrideSourceDir  string = "/var/lib/hyperdrive/override"
+	overrideDir        string = "override"
+	runtimeDir         string = "runtime"
+	extraScrapeJobsDir string = "extra-scrape-jobs"
 )
 
 // Install Hyperdrive
@@ -64,8 +65,14 @@ func (c *Client) InstallService(verbose, noDeps bool, version, path string) erro
 		return fmt.Errorf("downloaded script length %d did not match content-length header %s", len(script), resp.Header.Get("content-length"))
 	}
 
+	// Get the escalation command
+	escalationCmd, err := c.getEscalationCommand()
+	if err != nil {
+		return fmt.Errorf("error getting escalation command: %w", err)
+	}
+
 	// Initialize installation command
-	cmd := c.newCommand(fmt.Sprintf("sh -s -- %s", strings.Join(flags, " ")))
+	cmd := c.newCommand(fmt.Sprintf("%s sh -s -- %s", escalationCmd, strings.Join(flags, " ")))
 
 	// Pass the script to sh via its stdin fd
 	cmd.SetStdin(bytes.NewReader(script))
@@ -357,6 +364,13 @@ func (c *Client) deployTemplates(cfg *config.HyperdriveConfig, hyperdriveDir str
 	err = os.Mkdir(runtimeFolder, 0775)
 	if err != nil {
 		return []string{}, fmt.Errorf("error creating runtime folder [%s]: %w", runtimeFolder, err)
+	}
+
+	// Make the extra scrape jobs folder
+	extraScrapeJobsFolder := filepath.Join(hyperdriveDir, extraScrapeJobsDir)
+	err = os.MkdirAll(extraScrapeJobsFolder, 0755)
+	if err != nil {
+		return []string{}, fmt.Errorf("error creating extra-scrape-jobs folder: %w", err)
 	}
 
 	composePaths := template.ComposePaths{

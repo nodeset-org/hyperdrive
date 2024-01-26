@@ -59,24 +59,6 @@ func (c *Client) SaveConfig(cfg *config.HyperdriveConfig) error {
 	return SaveConfig(cfg, settingsFileDirectoryPath, SettingsFile)
 }
 
-// Remove the upgrade flag file
-func (c *Client) RemoveUpgradeFlagFile() error {
-	expandedPath, err := homedir.Expand(c.Context.ConfigPath)
-	if err != nil {
-		return err
-	}
-	return RemoveUpgradeFlagFile(expandedPath)
-}
-
-// Returns whether or not this is the first run of the configurator since a previous installation
-func (c *Client) IsFirstRun() (bool, error) {
-	expandedPath, err := homedir.Expand(c.Context.ConfigPath)
-	if err != nil {
-		return false, fmt.Errorf("error expanding settings file path: %w", err)
-	}
-	return IsFirstRun(expandedPath), nil
-}
-
 // Load the Prometheus config template, do a template variable substitution, and save it
 func (c *Client) UpdatePrometheusConfiguration(config *config.HyperdriveConfig) error {
 	prometheusConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, prometheusConfigTemplate))

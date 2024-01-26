@@ -91,6 +91,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					installNoDepsFlag,
 					installPathFlag,
 					installVersionFlag,
+					installUpdateDefaultsFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
@@ -257,26 +258,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 
 						// Run command
 						return pruneExecutionClient(c)
-					},
-				},
-
-				{
-					Name:    "install-update-tracker",
-					Aliases: []string{"d"},
-					Usage:   "Install the update tracker that provides the available system update count to the metrics dashboard",
-					Flags: []cli.Flag{
-						utils.YesFlag,
-						installUpdateTrackerVerboseFlag,
-						installUpdateTrackerVersionFlag,
-					},
-					Action: func(c *cli.Context) error {
-						// Validate args
-						if err := input.ValidateArgCount(c, 0); err != nil {
-							return err
-						}
-
-						// Run command
-						return installUpdateTracker(c)
 					},
 				},
 			*/

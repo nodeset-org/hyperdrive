@@ -16,10 +16,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	upgradeFlagFile string = ".firstrun"
-)
-
 // When printing sync percents, we should avoid printing 100%.
 // This function is only called if we're still syncing,
 // and the `%0.2f` token will round up if we're above 99.99%.
@@ -104,37 +100,6 @@ func SaveConfig(cfg *config.HyperdriveConfig, directory, filename string) error 
 
 	return nil
 
-}
-
-// Checks if this is the first run of the configurator after an install
-func IsFirstRun(configDir string) bool {
-	upgradeFilePath := filepath.Join(configDir, upgradeFlagFile)
-
-	// Load the config normally if the upgrade flag file isn't there
-	_, err := os.Stat(upgradeFilePath)
-	if os.IsNotExist(err) {
-		return false
-	}
-
-	return true
-}
-
-// Remove the upgrade flag file
-func RemoveUpgradeFlagFile(configDir string) error {
-	// Check for the upgrade flag file
-	upgradeFilePath := filepath.Join(configDir, upgradeFlagFile)
-	_, err := os.Stat(upgradeFilePath)
-	if os.IsNotExist(err) {
-		return nil
-	}
-
-	// Delete the upgrade flag file
-	err = os.Remove(upgradeFilePath)
-	if err != nil {
-		return fmt.Errorf("error removing upgrade flag file: %w", err)
-	}
-
-	return nil
 }
 
 // Get the external IP address. Try finding an IPv4 address first to:

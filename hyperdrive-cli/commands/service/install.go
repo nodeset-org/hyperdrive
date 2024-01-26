@@ -32,6 +32,11 @@ var (
 		Usage:   "The Hyperdrive package version to install",
 		Value:   fmt.Sprintf("v%s", shared.HyperdriveVersion),
 	}
+	installUpdateDefaultsFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "update-defaults",
+		Aliases: []string{"u"},
+		Usage:   "Certain configuration values are reset when Hyperdrive is updated, such as Docker container tags; use this flag to force that reset, even if Hyperdrive hasn't been updated",
+	}
 )
 
 // Install the Hyperdrive service

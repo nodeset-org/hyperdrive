@@ -3,11 +3,13 @@ package service
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	cliconfig "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 	"github.com/urfave/cli/v2"
@@ -19,10 +21,9 @@ func configureService(c *cli.Context) error {
 	hd := client.NewClientFromCtx(c)
 
 	// Make sure the config directory exists first
-	configPath := hd.Context.ConfigPath
-	_, err := os.Stat(configPath)
-	if os.IsNotExist(err) {
-		fmt.Printf("%sYour configured Hyperdrive directory of [%s] does not exist.\nPlease install Hyperdrive before attempting to configure it.%s\n", terminal.ColorYellow, configPath, terminal.ColorReset)
+	err := os.MkdirAll(hd.Context.ConfigPath, 0700)
+	if err != nil {
+		fmt.Printf("%sYour Hyperdrive user configuration directory of [%s] could not be created:%s.%s\n", terminal.ColorYellow, hd.Context.ConfigPath, err.Error(), terminal.ColorReset)
 		return nil
 	}
 
@@ -34,9 +35,11 @@ func configureService(c *cli.Context) error {
 	}
 
 	// Check if this is a new install
-	isUpdate, err := hd.IsFirstRun()
-	if err != nil {
-		return fmt.Errorf("error checking for first-run status: %w", err)
+	isUpdate := isNew
+	if !isNew {
+		oldVersion := strings.TrimPrefix(oldCfg.Version, "v")
+		currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
+		isUpdate = c.Bool(installUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
 	}
 
 	// For upgrades, move the config to the old one and create a new upgraded copy
