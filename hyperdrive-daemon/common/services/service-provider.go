@@ -3,8 +3,10 @@ package services
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/docker/docker/client"
+	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet"
 	lhkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/lighthouse"
 	lskeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/lodestar"
@@ -12,6 +14,7 @@ import (
 	prkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/prysm"
 	tkkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/teku"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 )
 
 // A container for all of the various services used by Hyperdrive
@@ -21,6 +24,9 @@ type ServiceProvider struct {
 	ecManager  *ExecutionClientManager
 	bcManager  *BeaconClientManager
 	docker     *client.Client
+	txMgr      *eth.TransactionManager
+	queryMgr   *eth.QueryManager
+	resources  *utils.Resources
 }
 
 // Creates a new ServiceProvider instance
@@ -75,6 +81,22 @@ func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
 		return nil, fmt.Errorf("error creating Docker client: %w", err)
 	}
 
+	// Resources
+	resources := utils.NewResources(cfg.Network.Value)
+
+	// TX Manager
+	txMgr, err := eth.NewTransactionManager(ecManager, eth.DefaultSafeGasBuffer, eth.DefaultSafeGasMultiplier)
+	if err != nil {
+		return nil, fmt.Errorf("error creating transaction manager: %w", err)
+	}
+
+	// Query Manager - set the default concurrent run limit to half the CPUs so the EC doesn't get overwhelmed
+	concurrentCallLimit := runtime.NumCPU()
+	if concurrentCallLimit < 1 {
+		concurrentCallLimit = 1
+	}
+	queryMgr := eth.NewQueryManager(ecManager, resources.GetMulticallAddress(), concurrentCallLimit)
+
 	// Create the provider
 	provider := &ServiceProvider{
 		cfg:        cfg,
@@ -82,6 +104,9 @@ func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
 		ecManager:  ecManager,
 		bcManager:  bcManager,
 		docker:     dockerClient,
+		resources:  resources,
+		txMgr:      txMgr,
+		queryMgr:   queryMgr,
 	}
 	return provider, nil
 }
@@ -108,6 +133,18 @@ func (p *ServiceProvider) GetBeaconClient() *BeaconClientManager {
 
 func (p *ServiceProvider) GetDocker() *client.Client {
 	return p.docker
+}
+
+func (p *ServiceProvider) GetResources() *utils.Resources {
+	return p.resources
+}
+
+func (p *ServiceProvider) GetTransactionManager() *eth.TransactionManager {
+	return p.txMgr
+}
+
+func (p *ServiceProvider) GetQueryManager() *eth.QueryManager {
+	return p.queryMgr
 }
 
 // =============

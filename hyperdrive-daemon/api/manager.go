@@ -11,7 +11,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gorilla/mux"
-	example "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/node"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
@@ -44,8 +43,8 @@ func NewApiManager(sp *services.ServiceProvider, socketPath string, debugMode bo
 	mgr := &ApiManager{
 		debugMode: debugMode,
 		log:       log.NewColorLogger(ApiLogColor),
-		handlers: []IHandler{
-			example.NewNodeHandler(sp, debugMode),
+		handlers:  []IHandler{
+			// example.NewNodeHandler(sp, debugMode),
 		},
 		socketPath: socketPath,
 		router:     router,
