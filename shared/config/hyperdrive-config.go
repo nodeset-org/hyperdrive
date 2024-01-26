@@ -326,8 +326,17 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	}
 
 	// Get the special fields
-	cfg.HyperdriveUserDirectory = masterMap[userDirectoryKey].(string)
-	cfg.Version = masterMap[ids.VersionID].(string)
+	udKey, exists := masterMap[userDirectoryKey]
+	if !exists {
+		return fmt.Errorf("expected a user directory parameter named [%s] but it was not found", userDirectoryKey)
+	}
+	cfg.HyperdriveUserDirectory = udKey.(string)
+
+	version, exists := masterMap[ids.VersionID]
+	if !exists {
+		return fmt.Errorf("expected a version parameter named [%s] but it was not found", ids.VersionID)
+	}
+	cfg.Version = version.(string)
 
 	return nil
 }

@@ -70,11 +70,7 @@ func (home *settingsHome) createContent() {
 	// Create the category list
 	categoryList := tview.NewList().
 		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
-			if index >= len(home.settingsSubpages) {
-				layout.descriptionBox.SetText("Coming soon!")
-			} else {
-				layout.descriptionBox.SetText(home.settingsSubpages[index].getPage().description)
-			}
+			layout.descriptionBox.SetText(home.settingsSubpages[index].getPage().description)
 		})
 	categoryList.SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
 	categoryList.SetBorderPadding(0, 0, 1, 1)
@@ -93,14 +89,7 @@ func (home *settingsHome) createContent() {
 	for _, subpage := range home.settingsSubpages {
 		categoryList.AddItem(subpage.getPage().title, "", 0, nil)
 	}
-	categoryList.AddItem("Solo Staking", "", 0, nil)
-	categoryList.AddItem("Rocket Pool", "", 0, nil)
-	categoryList.AddItem("Constellation", "", 0, nil)
-	categoryList.AddItem("Stakewise", "", 0, nil)
 	categoryList.SetSelectedFunc(func(i int, s1, s2 string, r rune) {
-		if i >= len(home.settingsSubpages) {
-			return
-		}
 		home.settingsSubpages[i].handleLayoutChanged()
 		home.md.setPage(home.settingsSubpages[i].getPage())
 	})

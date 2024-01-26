@@ -34,13 +34,10 @@ func configureService(c *cli.Context) error {
 		return fmt.Errorf("error loading user settings: %w", err)
 	}
 
-	// Check if this is a new install
-	isUpdate := isNew
-	if !isNew {
-		oldVersion := strings.TrimPrefix(oldCfg.Version, "v")
-		currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
-		isUpdate = c.Bool(installUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
-	}
+	// Check if this is an update
+	oldVersion := strings.TrimPrefix(cfg.Version, "v")
+	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
+	isUpdate := c.Bool(installUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
 
 	// For upgrades, move the config to the old one and create a new upgraded copy
 	if isUpdate {
