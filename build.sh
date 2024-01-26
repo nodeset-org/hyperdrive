@@ -37,6 +37,7 @@ build_install_packages() {
     echo -n "Building Hyperdrive installer packages... "
     tar cfJ hyperdrive-install.tar.xz install || fail "Error building installer package."
     mv hyperdrive-install.tar.xz ../$VERSION
+    cp install/install.sh ../$VERSION
     echo "done!"
 
     cd ..
