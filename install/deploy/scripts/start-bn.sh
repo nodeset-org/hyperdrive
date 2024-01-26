@@ -54,12 +54,6 @@ if [ ! -f "/secrets/jwtsecret" ]; then
     exit 1
 fi
 
-# Report a missing fee recipient file
-if [ ! -f "/validators/$FEE_RECIPIENT_FILE" ]; then
-    echo "Fee recipient file not found, please wait for the rocketpool_node process to create one."
-    exit 1
-fi
-
 # Lighthouse startup
 if [ "$CC_CLIENT" = "lighthouse" ]; then
 
@@ -285,7 +279,6 @@ if [ "$CC_CLIENT" = "teku" ]; then
         --log-destination=CONSOLE \
         --ee-jwt-secret-file=/secrets/jwtsecret \
         --beacon-liveness-tracking-enabled \
-        --validators-proposer-default-fee-recipient=$RETH_ADDRESS \
         $BN_ADDITIONAL_FLAGS"
 
     if [ "$TEKU_ARCHIVE_MODE" = "true" ]; then

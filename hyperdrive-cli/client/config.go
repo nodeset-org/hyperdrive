@@ -79,7 +79,7 @@ func (c *Client) IsFirstRun() (bool, error) {
 
 // Load the Prometheus config template, do a template variable substitution, and save it
 func (c *Client) UpdatePrometheusConfiguration(config *config.HyperdriveConfig) error {
-	prometheusConfigTemplatePath, err := homedir.Expand(filepath.Join(c.Context.ConfigPath, templatesDir, prometheusConfigTemplate))
+	prometheusConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, prometheusConfigTemplate))
 	if err != nil {
 		return fmt.Errorf("Error expanding Prometheus config template path: %w", err)
 	}
@@ -99,7 +99,7 @@ func (c *Client) UpdatePrometheusConfiguration(config *config.HyperdriveConfig) 
 
 // Load the Grafana config template, do a template variable substitution, and save it
 func (c *Client) UpdateGrafanaDatabaseConfiguration(config *config.HyperdriveConfig) error {
-	grafanaConfigTemplatePath, err := homedir.Expand(filepath.Join(c.Context.ConfigPath, templatesDir, grafanaConfigTemplate))
+	grafanaConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, grafanaConfigTemplate))
 	if err != nil {
 		return fmt.Errorf("Error expanding Grafana config template path: %w", err)
 	}

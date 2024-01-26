@@ -1,4 +1,4 @@
-# Default Prometheus configuration for Rocket Pool
+# Default Prometheus configuration for Hyperdrive
 
 global:
   scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
@@ -18,7 +18,7 @@ scrape_configs:
 
   - job_name: '{{if (eq .LocalExecutionConfig.ExecutionClient.String "geth")}}geth{{else}}ec{{end}}'
     static_configs:
-      - targets: ['{{.GetExecutionHostname}}:{{or .EcMetricsPort.Value "9105"}}']
+      - targets: ['{{.GetExecutionHostname}}:{{or .Metrics.EcMetricsPort.Value "9105"}}']
     {{- if (eq .LocalExecutionConfig.ExecutionClient.String "geth")}}
     metrics_path: /debug/metrics/prometheus
     {{- end}}

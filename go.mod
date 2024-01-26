@@ -11,7 +11,7 @@ require (
 	github.com/gdamore/tcell/v2 v2.7.0
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/cpuid/v2 v2.2.5
-	github.com/nodeset-org/eth-utils v0.0.0-20240125051058-98c836244021
+	github.com/nodeset-org/eth-utils v0.0.0-20240126020652-f8596149764b
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/shirou/gopsutil/v3 v3.23.12

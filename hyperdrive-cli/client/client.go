@@ -13,17 +13,10 @@ import (
 
 // Config
 const (
-	InstallerURL     string = "https://github.com/nodeset-org/hyperdrive/releases/download/%s/install.sh"
-	UpdateTrackerURL string = "https://github.com/nodeset-org/hyperdrive/releases/download/%s/install-update-tracker.sh"
+	InstallerURL string = "https://github.com/nodeset-org/hyperdrive/releases/download/%s/install.sh"
 
 	SettingsFile       string = "user-settings.yml"
 	BackupSettingsFile string = "user-settings-backup.yml"
-
-	templatesDir                  string = "templates"
-	overrideDir                   string = "override"
-	runtimeDir                    string = "runtime"
-	defaultFeeRecipientFile       string = "fr-default.tmpl"
-	defaultNativeFeeRecipientFile string = "fr-default-env.tmpl"
 
 	templateSuffix    string = ".tmpl"
 	composeFileSuffix string = ".yml"

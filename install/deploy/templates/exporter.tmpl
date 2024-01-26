@@ -8,7 +8,7 @@
 version: "3.7"
 services:
   exporter:
-    image: {{.Exporter.ContainerTag}}
+    image: {{.Metrics.Exporter.ContainerTag}}
     container_name: {{.ProjectName}}_exporter
     cap_drop:
       - ALL

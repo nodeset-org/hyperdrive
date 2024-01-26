@@ -24,6 +24,11 @@ import (
 const (
 	debugColor                    color.Attribute = color.FgYellow
 	nethermindPruneStarterCommand string          = "DELETE_ME"
+
+	templatesDir      string = "/var/lib/hyperdrive/templates"
+	overrideSourceDir string = "/var/lib/hyperdrive/override"
+	overrideDir       string = "override"
+	runtimeDir        string = "runtime"
 )
 
 // Install Hyperdrive
@@ -100,78 +105,6 @@ func (c *Client) InstallService(verbose, noDeps bool, version, path string) erro
 	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("Could not install Hyperdrive service: %s", errMessage)
-	}
-	return nil
-}
-
-// Install the update tracker
-func (c *Client) InstallUpdateTracker(verbose bool, version string) error {
-	// Get installation script flags
-	flags := []string{
-		"-v", fmt.Sprintf("%s", shellescape.Quote(version)),
-	}
-
-	// Download the installer package
-	url := fmt.Sprintf(UpdateTrackerURL, version)
-	resp, err := http.Get(url)
-	if err != nil {
-		return fmt.Errorf("error downloading installer package: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("downloading installer package failed with code %d - [%s]", resp.StatusCode, resp.Status)
-	}
-
-	// Create a temp file for it
-	path := filepath.Join(os.TempDir(), "install-update-tracker.sh")
-	tempFile, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0755)
-	if err != nil {
-		return fmt.Errorf("error creating temporary file for installer script: %w", err)
-	}
-	defer tempFile.Close()
-	defer os.Remove(tempFile.Name())
-	_, err = io.Copy(tempFile, resp.Body)
-	if err != nil {
-		return fmt.Errorf("error writing installer package to disk: %w", err)
-	}
-	tempFile.Close()
-
-	// Initialize installation command
-	cmd := c.newCommand(fmt.Sprintf("sh -c \"%s %s\"", path, strings.Join(flags, " ")))
-	cmdOut, err := cmd.StdoutPipe()
-	if err != nil {
-		return err
-	}
-	cmdErr, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-
-	// Print progress from stdout
-	go (func() {
-		scanner := bufio.NewScanner(cmdOut)
-		for scanner.Scan() {
-			fmt.Println(scanner.Text())
-		}
-	})()
-
-	// Read command & error output from stderr; render in verbose mode
-	var errMessage string
-	go (func() {
-		c := color.New(debugColor)
-		scanner := bufio.NewScanner(cmdErr)
-		for scanner.Scan() {
-			errMessage = scanner.Text()
-			if verbose {
-				_, _ = c.Println(scanner.Text())
-			}
-		}
-	})()
-
-	// Run command and return error output
-	err = cmd.Run()
-	if err != nil {
-		return fmt.Errorf("Could not install Hyperdrive update tracker: %s", errMessage)
 	}
 	return nil
 }
@@ -411,21 +344,13 @@ func (c *Client) compose(composeFiles []string, args string) (string, error) {
 
 // Deploys all of the appropriate docker compose template files and provisions them based on the provided configuration
 func (c *Client) deployTemplates(cfg *config.HyperdriveConfig, hyperdriveDir string) ([]string, error) {
-	// Check for the folders
-	runtimeFolder := filepath.Join(hyperdriveDir, runtimeDir)
-	templatesFolder := filepath.Join(hyperdriveDir, templatesDir)
-	_, err := os.Stat(templatesFolder)
-	if os.IsNotExist(err) {
-		return []string{}, fmt.Errorf("templates folder [%s] does not exist", templatesFolder)
-	}
+	// Prep the override folder
 	overrideFolder := filepath.Join(hyperdriveDir, overrideDir)
-	_, err = os.Stat(overrideFolder)
-	if os.IsNotExist(err) {
-		return []string{}, fmt.Errorf("override folder [%s] does not exist", overrideFolder)
-	}
+	copyOverrideFiles(overrideFolder)
 
 	// Clear out the runtime folder and remake it
-	err = os.RemoveAll(runtimeFolder)
+	runtimeFolder := filepath.Join(hyperdriveDir, runtimeDir)
+	err := os.RemoveAll(runtimeFolder)
 	if err != nil {
 		return []string{}, fmt.Errorf("error deleting runtime folder [%s]: %w", runtimeFolder, err)
 	}
@@ -436,7 +361,7 @@ func (c *Client) deployTemplates(cfg *config.HyperdriveConfig, hyperdriveDir str
 
 	composePaths := template.ComposePaths{
 		RuntimePath:  runtimeFolder,
-		TemplatePath: templatesFolder,
+		TemplatePath: templatesDir,
 		OverridePath: overrideFolder,
 	}
 
@@ -472,4 +397,42 @@ func (c *Client) deployTemplates(cfg *config.HyperdriveConfig, hyperdriveDir str
 	}
 
 	return deployedContainers, nil
+}
+
+// Make sure the override files have all been copied to the local user dir
+func copyOverrideFiles(targetPath string) error {
+	err := os.MkdirAll(targetPath, 0755)
+	if err != nil {
+		return fmt.Errorf("error creating override folder: %w", err)
+	}
+
+	files, err := os.ReadDir(overrideSourceDir)
+	if err != nil {
+		return fmt.Errorf("error enumerating override source folder: %w", err)
+	}
+
+	// Copy any override files that don't exist in the local user directory
+	for _, file := range files {
+		filename := file.Name()
+		targetFilePath := filepath.Join(targetPath, filename)
+		_, err := os.Stat(targetFilePath)
+		if !os.IsNotExist(err) {
+			// Ignore files that already exist
+			continue
+		}
+
+		// Read the source
+		srcPath := filepath.Join(overrideSourceDir, filename)
+		contents, err := os.ReadFile(srcPath)
+		if err != nil {
+			return fmt.Errorf("error reading override file [%s]: %w", srcPath, err)
+		}
+
+		// Write a copy to the user dir
+		err = os.WriteFile(targetFilePath, contents, 0644)
+		if err != nil {
+			return fmt.Errorf("error writing local override file [%s]: %w", targetFilePath, err)
+		}
+	}
+	return nil
 }
