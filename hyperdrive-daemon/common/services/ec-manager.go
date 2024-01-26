@@ -13,29 +13,11 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/fatih/color"
-	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
-
-var ethClientRecentBlockThreshold, _ = time.ParseDuration("5m")
-
-// This is a wrapper for the EC status report
-type ClientStatus struct {
-	IsWorking    bool    `json:"isWorking"`
-	IsSynced     bool    `json:"isSynced"`
-	SyncProgress float64 `json:"syncProgress"`
-	NetworkId    uint    `json:"networkId"`
-	Error        string  `json:"error"`
-}
-
-// This is a wrapper for the manager's overall status report
-type ClientManagerStatus struct {
-	PrimaryClientStatus  ClientStatus `json:"primaryEcStatus"`
-	FallbackEnabled      bool         `json:"fallbackEnabled"`
-	FallbackClientStatus ClientStatus `json:"fallbackEcStatus"`
-}
 
 // This is a proxy for multiple ETH clients, providing natural fallback support if one of them fails.
 type ExecutionClientManager struct {
@@ -332,9 +314,9 @@ func (m *ExecutionClientManager) SyncProgress(ctx context.Context) (*ethereum.Sy
 /// Internal functions
 /// ==================
 
-func (m *ExecutionClientManager) CheckStatus() *ClientManagerStatus {
+func (m *ExecutionClientManager) CheckStatus() *api.ClientManagerStatus {
 
-	status := &ClientManagerStatus{
+	status := &api.ClientManagerStatus{
 		FallbackEnabled: m.fallbackEc != nil,
 	}
 
@@ -388,9 +370,9 @@ func getNetworkNameFromId(networkId uint) string {
 }
 
 // Check the client status
-func checkEcStatus(client *ethclient.Client) ClientStatus {
+func checkEcStatus(client *ethclient.Client) api.ClientStatus {
 
-	status := ClientStatus{}
+	status := api.ClientStatus{}
 
 	// Get the NetworkId
 	networkId, err := client.NetworkID(context.Background())
@@ -504,31 +486,4 @@ func (m *ExecutionClientManager) runFunction(function ecFunction) (interface{}, 
 // Returns true if the error was a connection failure and a backup client is available
 func (m *ExecutionClientManager) isDisconnected(err error) bool {
 	return strings.Contains(err.Error(), "dial tcp")
-}
-
-// Confirm the EC's latest block is within the threshold of the current system clock
-func IsSyncWithinThreshold(ec eth.IExecutionClient) (bool, time.Time, error) {
-	timestamp, err := GetEthClientLatestBlockTimestamp(ec)
-	if err != nil {
-		return false, time.Time{}, err
-	}
-
-	// Return true if the latest block is under the threshold
-	blockTime := time.Unix(int64(timestamp), 0)
-	if time.Since(blockTime) < ethClientRecentBlockThreshold {
-		return true, blockTime, nil
-	}
-
-	return false, blockTime, nil
-}
-
-func GetEthClientLatestBlockTimestamp(ec eth.IExecutionClient) (uint64, error) {
-	// Get latest block
-	header, err := ec.HeaderByNumber(context.Background(), nil)
-	if err != nil {
-		return 0, err
-	}
-
-	// Return block timestamp
-	return header.Time, nil
 }

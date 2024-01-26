@@ -9,6 +9,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/beacon"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
@@ -255,9 +256,9 @@ func (m *BeaconClientManager) ChangeWithdrawalCredentials(validatorIndex string,
 /// Internal Functions
 /// ==================
 
-func (m *BeaconClientManager) CheckStatus() *ClientManagerStatus {
+func (m *BeaconClientManager) CheckStatus() *api.ClientManagerStatus {
 
-	status := &ClientManagerStatus{
+	status := &api.ClientManagerStatus{
 		FallbackEnabled: m.fallbackBc != nil,
 	}
 
@@ -289,9 +290,9 @@ func (m *BeaconClientManager) CheckStatus() *ClientManagerStatus {
 }
 
 // Check the client status
-func checkBcStatus(client types.IBeaconClient) ClientStatus {
+func checkBcStatus(client types.IBeaconClient) api.ClientStatus {
 
-	status := ClientStatus{}
+	status := api.ClientStatus{}
 
 	// Get the fallback's sync progress
 	syncStatus, err := client.GetSyncStatus()

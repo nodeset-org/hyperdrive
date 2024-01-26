@@ -6,10 +6,12 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/goccy/go-json"
 
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
+	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
 )
 
 type ApiResponse[Data any] struct {
@@ -27,7 +29,7 @@ type SuccessData struct {
 type IQuerylessCallContext[DataType any] interface {
 	// Prepare the response data in whatever way the context needs to do
 	//PrepareData(data *DataType, opts *bind.TransactOpts) error
-	PrepareData(data *DataType) error
+	PrepareData(data *DataType, opts *bind.TransactOpts) error
 }
 
 // Interface for queryless call context factories that handle GET calls.
@@ -117,24 +119,31 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 // Run a route registered with no structured chain query pattern
 func runQuerylessRoute[DataType any](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider) (*ApiResponse[DataType], error) {
 	// Get the services
-	//w := serviceProvider.GetWallet()
+	w := serviceProvider.GetWallet()
 
 	// Get the transact opts if this node is ready for transaction
-	// TODO: LATER WHEN THE NODE WALLET CAN BE RETRIEVED
-	//var opts *bind.TransactOpts
+	var opts *bind.TransactOpts
+	walletStatus := w.GetStatus()
+	if sharedutils.IsWalletReady(walletStatus) {
+		var err error
+		opts, err = w.GetTransactor()
+		if err != nil {
+			return nil, fmt.Errorf("error getting node account transactor: %w", err)
+		}
+	}
 
 	// Create the response and data
 	data := new(DataType)
 	response := &ApiResponse[DataType]{
 		Data: data,
 	}
-	fmt.Printf("Running queryless route with data: %+v\n", data)
+
 	// Prep the data with the context-specific behavior
-	err := ctx.PrepareData(data)
+	err := ctx.PrepareData(data, opts)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("Response: %+v\n", response)
+
 	// Return
 	return response, nil
 }

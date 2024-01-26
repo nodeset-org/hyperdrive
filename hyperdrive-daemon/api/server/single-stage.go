@@ -115,9 +115,6 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 // Run a route registered with the common single-stage querying pattern
 func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider) (*api.ApiResponse[DataType], error) {
 	// Get the services
-	/*
-		rp := serviceProvider.()
-	*/
 	w := serviceProvider.GetWallet()
 	q := serviceProvider.GetQueryManager()
 
