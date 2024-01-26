@@ -18,9 +18,6 @@ const (
 	SettingsFile       string = "user-settings.yml"
 	BackupSettingsFile string = "user-settings-backup.yml"
 
-	templateSuffix    string = ".tmpl"
-	composeFileSuffix string = ".yml"
-
 	nethermindAdminUrl string = "http://127.0.0.1:7434"
 )
 
@@ -37,7 +34,7 @@ func NewClientFromCtx(c *cli.Context) *Client {
 	snCtx := context.GetHyperdriveContext(c)
 
 	// Set up the default API socket file if it's not specified
-	socketPath := filepath.Join(snCtx.ConfigPath, "data", config.SocketFilename)
+	socketPath := filepath.Join(snCtx.ConfigPath, config.SocketFilename)
 
 	client := &Client{
 		Api:     api.NewApiRequester(socketPath),

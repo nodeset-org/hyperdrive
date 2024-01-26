@@ -11,7 +11,7 @@ COLOR_YELLOW='\033[33m'
 COLOR_RESET='\033[0m'
 
 # Require root access for installation
-if [[ "$(id -u)" -ne "0" ]]; then
+if [ "$(id -u)" -ne "0" ]; then
      echo "This script requires root."
      exit 1
 fi
@@ -323,7 +323,7 @@ install() {
     fi
 
     # Create hyperdrive dir & files
-    $HD_PATH=/var/lib/hyperdrive
+    HD_PATH=/var/lib/hyperdrive
 
     progress 4 "Creating Hyperdrive directory structure..."
     { mkdir -p "$HD_PATH" || fail "Could not create the Hyperdrive system directory."; } >&2
