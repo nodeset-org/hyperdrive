@@ -118,7 +118,7 @@ func (cfg *HyperdriveConfig) GetBnOpenPorts() []string {
 
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) GetEcHttpEndpoint() string {
-	if cfg.ClientMode.Value != types.ClientMode_Local {
+	if cfg.ClientMode.Value == types.ClientMode_Local {
 		return fmt.Sprintf("http://%s:%d", types.ContainerID_ExecutionClient, cfg.LocalExecutionConfig.HttpPort.Value)
 	}
 
@@ -127,7 +127,7 @@ func (cfg *HyperdriveConfig) GetEcHttpEndpoint() string {
 
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) GetEcWsEndpoint() string {
-	if cfg.ClientMode.Value != types.ClientMode_Local {
+	if cfg.ClientMode.Value == types.ClientMode_Local {
 		return fmt.Sprintf("ws://%s:%d", types.ContainerID_ExecutionClient, cfg.LocalExecutionConfig.WebsocketPort.Value)
 	}
 
