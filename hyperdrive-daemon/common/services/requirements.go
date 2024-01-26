@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/eth-utils/eth"
 )
 
 var (
@@ -32,11 +32,10 @@ func (sp *ServiceProvider) WaitBeaconClientSynced(verbose bool) error {
 }
 
 // Check if the primary and fallback Execution clients are synced
-func (sp *ServiceProvider) checkExecutionClientStatus() (bool, types.IExecutionClient, error) {
+func (sp *ServiceProvider) checkExecutionClientStatus() (bool, eth.IExecutionClient, error) {
 	// Check the EC status
 	ecMgr := sp.ecManager
-	cfg := sp.cfg
-	mgrStatus := ecMgr.CheckStatus(cfg)
+	mgrStatus := ecMgr.CheckStatus()
 	if ecMgr.primaryReady {
 		return true, nil, nil
 	}

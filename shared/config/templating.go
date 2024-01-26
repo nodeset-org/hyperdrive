@@ -17,6 +17,34 @@ func (cfg *HyperdriveConfig) IsLocalMode() bool {
 	return cfg.ClientMode.Value == types.ClientMode_Local
 }
 
+// ==============
+// === Daemon ===
+// ==============
+
+func (cfg *HyperdriveConfig) GetDaemonContainerTag() string {
+	return HyperdriveTag
+}
+
+func (cfg *HyperdriveConfig) GetDaemonUserDirPath() string {
+	return DaemonUserDirPath
+}
+
+func (cfg *HyperdriveConfig) GetDaemonUserDataPath() string {
+	return DaemonUserDataPath
+}
+
+func (cfg *HyperdriveConfig) GetDaemonScriptsPath() string {
+	return DaemonScriptsPath
+}
+
+func (cfg *HyperdriveConfig) GetDaemonGlobalDataPath() string {
+	return DaemonGlobalDataPath
+}
+
+func (cfg *HyperdriveConfig) GetDaemonProjectDataPath() string {
+	return DaemonProjectDataPath
+}
+
 // ========================
 // === Execution Client ===
 // ========================

@@ -8,16 +8,18 @@
 version: "3.7"
 services:
   daemon:
-    image: ${HYPERDRIVE_IMAGE}
-    container_name: hyperdrive_daemon
+    image: {{.GetContainerTag}}
+    container_name: {{.ProjectName}}_daemon
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${HD_INSTALL_PATH}:/.hyperdrive
-      - ${HD_SMARTNODE_DIR}:/.rocketpool
+      - {{.HyperdriveUserDirectory}}:{{.GetDaemonUserDirPath}}
+      - {{.UserDataPath}}:{{.GetDaemonUserDataPath}}
+      - /var/lib/hyperdrive/scripts:{{.GetDaemonScriptsPath}}
+      - /var/lib/hyperdrive/global:{{.GetDaemonGlobalDataPath}}
+      - /var/lib/hyperdrive/data/{{.ProjectName}}:{{.GetDaemonProjectDataPath}}
     networks:
-      - ${HD_SMARTNODE_PROJECT_NAME}_net
-    entrypoint: "hyperdrive-daemon run /.hyperdrive/user-settings.yml"
+      - net
     cap_drop:
       - all
     cap_add:
@@ -25,5 +27,4 @@ services:
     security_opt:
       - no-new-privileges
 networks:
-  ${HD_SMARTNODE_PROJECT_NAME}_net:
-    external: true
+  net:

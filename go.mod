@@ -7,13 +7,13 @@ toolchain go1.21.1
 require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/btcsuite/btcd v0.23.5-0.20231215221805-96c9fd8078fd
-	github.com/dustin/go-humanize v1.0.0
 	github.com/ethereum/go-ethereum v1.13.11
 	github.com/gdamore/tcell/v2 v2.7.0
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/cpuid/v2 v2.2.5
 	github.com/nodeset-org/eth-utils v0.0.0-20240125051058-98c836244021
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854
+	github.com/rocket-pool/batch-query v1.0.0
 	github.com/shirou/gopsutil/v3 v3.23.12
 	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.16.0
@@ -46,7 +46,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/herumi/bls-eth-go-binary v1.31.0 // indirect
-	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -69,11 +68,9 @@ require (
 	github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44 // indirect
 	github.com/prysmaticlabs/gohashtree v0.0.3-alpha // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/rocket-pool/batch-query v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/supranational/blst v0.3.11 // indirect
 	github.com/thomaso-mirodin/intmath v0.0.0-20160323211736-5dc6d854e46e // indirect
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
@@ -106,7 +103,6 @@ require (
 	github.com/prysmaticlabs/go-bitfield v0.0.0-20210809151128-385d8c5e3fb7
 	github.com/prysmaticlabs/prysm/v4 v4.2.0
 	github.com/sethvargo/go-password v0.2.0
-	github.com/spf13/cobra v1.8.0
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/wealdtech/go-eth2-types/v2 v2.8.2
@@ -114,3 +110,5 @@ require (
 	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 )
+
+replace github.com/nodeset-org/eth-utils v0.0.0-20240125051058-98c836244021 => ../eth-utils

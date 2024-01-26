@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
 	"net"
 	"net/http"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
@@ -34,33 +36,33 @@ type ApiManager struct {
 }
 
 // parameter: sp *services.ServiceProvider
-func NewApiManager(sp *services.ServiceProvider, socketPath string, debugMode bool) *ApiManager {
+func NewApiManager(sp *services.ServiceProvider) *ApiManager {
 	// Create the router
 	router := mux.NewRouter()
 
 	// Create the manager
-	// cfg := sp.GetConfig()
+	cfg := sp.GetConfig()
 	mgr := &ApiManager{
-		debugMode: debugMode,
+		debugMode: cfg.DebugMode.Value,
 		log:       log.NewColorLogger(ApiLogColor),
 		handlers:  []IHandler{
 			// example.NewNodeHandler(sp, debugMode),
 		},
-		socketPath: socketPath,
+		socketPath: config.DaemonSocketPath,
 		router:     router,
 		server: http.Server{
 			Handler: router,
 		},
 	}
 
-	if debugMode {
+	if mgr.debugMode {
 		fmt.Println("Debug mode active; printing commands without execution.")
 	}
 
 	// Register each route
 	hyperdriveRouter := router.Host("hyperdrive").Subrouter() // The host will be accessible at http://hyperdrive/...
 	for _, handler := range mgr.handlers {
-		handler.RegisterRoutes(hyperdriveRouter, debugMode)
+		handler.RegisterRoutes(hyperdriveRouter, mgr.debugMode)
 	}
 
 	return mgr
@@ -68,6 +70,15 @@ func NewApiManager(sp *services.ServiceProvider, socketPath string, debugMode bo
 
 // Starts listening for incoming HTTP requests
 func (m *ApiManager) Start(wg *sync.WaitGroup) error {
+	// Remove the socket if it's already there
+	_, err := os.Stat(m.socketPath)
+	if !errors.Is(err, fs.ErrNotExist) {
+		err = os.Remove(m.socketPath)
+		if err != nil {
+			return fmt.Errorf("error removing socket file: %w", err)
+		}
+	}
+
 	// Create the socket
 	socket, err := net.Listen("unix", m.socketPath)
 	if err != nil {

@@ -40,12 +40,14 @@ func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
 		return nil, fmt.Errorf("hyperdrive config settings file [%s] not found", cfgPath)
 	}
 
+	// Resources
+	resources := utils.NewResources(cfg.Network.Value)
+
 	// Wallet
-	chainID := cfg.GetChainID()
 	nodeAddressPath := "" // os.ExpandEnv(cfg.Hyperdrive.GetNodeAddressPath())
 	keystorePath := ""    //os.ExpandEnv(cfg.Hyperdrive.GetWalletPath())
 	passwordPath := ""    //os.ExpandEnv(cfg.Hyperdrive.GetPasswordPath())
-	nodeWallet, err := wallet.NewLocalWallet(nodeAddressPath, keystorePath, passwordPath, chainID, true)
+	nodeWallet, err := wallet.NewLocalWallet(nodeAddressPath, keystorePath, passwordPath, resources.ChainID, true)
 	if err != nil {
 		return nil, fmt.Errorf("error creating node wallet: %w", err)
 	}
@@ -81,9 +83,6 @@ func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
 		return nil, fmt.Errorf("error creating Docker client: %w", err)
 	}
 
-	// Resources
-	resources := utils.NewResources(cfg.Network.Value)
-
 	// TX Manager
 	txMgr, err := eth.NewTransactionManager(ecManager, eth.DefaultSafeGasBuffer, eth.DefaultSafeGasMultiplier)
 	if err != nil {
@@ -95,7 +94,7 @@ func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
 	if concurrentCallLimit < 1 {
 		concurrentCallLimit = 1
 	}
-	queryMgr := eth.NewQueryManager(ecManager, resources.GetMulticallAddress(), concurrentCallLimit)
+	queryMgr := eth.NewQueryManager(ecManager, resources.MulticallAddress, concurrentCallLimit)
 
 	// Create the provider
 	provider := &ServiceProvider{

@@ -232,13 +232,6 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				types.Network_All: false,
 			},
 		},
-
-		// Internal fields
-		chainID: map[types.Network]uint{
-			types.Network_Mainnet:    1,     // Mainnet
-			types.Network_HoleskyDev: 17000, // Holesky
-			types.Network_Holesky:    17000, // Holesky
-		},
 	}
 
 	// Create the subconfigs
@@ -424,14 +417,6 @@ func (cfg *HyperdriveConfig) Validate() []string {
 	_, errors = addAndCheckForDuplicate(portMap, cfg.LocalBeaconConfig.Lighthouse.P2pQuicPort, errors)
 
 	return errors
-}
-
-// ===============
-// === Getters ===
-// ===============
-
-func (cfg *HyperdriveConfig) GetChainID() uint {
-	return cfg.chainID[cfg.Network.Value]
 }
 
 // =====================
