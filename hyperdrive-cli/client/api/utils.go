@@ -1,19 +1,17 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
 type UtilsRequester struct {
-	client *http.Client
+	context *RequesterContext
 }
 
-func NewUtilsRequester(client *http.Client) *UtilsRequester {
+func NewUtilsRequester(context *RequesterContext) *UtilsRequester {
 	return &UtilsRequester{
-		client: client,
+		context: context,
 	}
 }
 
@@ -23,8 +21,8 @@ func (r *UtilsRequester) GetName() string {
 func (r *UtilsRequester) GetRoute() string {
 	return "utils"
 }
-func (r *UtilsRequester) GetClient() *http.Client {
-	return r.client
+func (r *UtilsRequester) GetContext() *RequesterContext {
+	return r.context
 }
 
 // Resolves an ENS name or reserve resolves an address

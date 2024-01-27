@@ -1,18 +1,16 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
 type ServiceRequester struct {
-	client *http.Client
+	context *RequesterContext
 }
 
-func NewServiceRequester(client *http.Client) *ServiceRequester {
+func NewServiceRequester(context *RequesterContext) *ServiceRequester {
 	return &ServiceRequester{
-		client: client,
+		context: context,
 	}
 }
 
@@ -22,8 +20,8 @@ func (r *ServiceRequester) GetName() string {
 func (r *ServiceRequester) GetRoute() string {
 	return "service"
 }
-func (r *ServiceRequester) GetClient() *http.Client {
-	return r.client
+func (r *ServiceRequester) GetContext() *RequesterContext {
+	return r.context
 }
 
 // Gets the status of the configured Execution and Beacon clients

@@ -2,11 +2,14 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
@@ -20,10 +23,15 @@ const (
 	jsonContentType string = "application/json"
 )
 
+type RequesterContext struct {
+	socketPath string
+	client     *http.Client
+}
+
 type IRequester interface {
 	GetName() string
 	GetRoute() string
-	GetClient() *http.Client
+	GetContext() *RequesterContext
 }
 
 // Binder for the Hyperdrive daemon API server
@@ -33,16 +41,17 @@ type ApiRequester struct {
 	Utils   *UtilsRequester
 	Wallet  *WalletRequester
 
-	socketPath string
-	client     *http.Client
+	context *RequesterContext
 }
 
 // Creates a new API requester instance
 func NewApiRequester(socketPath string) *ApiRequester {
 	apiRequester := &ApiRequester{
-		socketPath: socketPath,
+		context: &RequesterContext{
+			socketPath: socketPath,
+		},
 	}
-	apiRequester.client = &http.Client{
+	apiRequester.context.client = &http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 				return net.Dial("unix", socketPath)
@@ -50,10 +59,10 @@ func NewApiRequester(socketPath string) *ApiRequester {
 		},
 	}
 
-	apiRequester.Service = NewServiceRequester(apiRequester.client)
-	apiRequester.Tx = NewTxRequester(apiRequester.client)
-	apiRequester.Utils = NewUtilsRequester(apiRequester.client)
-	apiRequester.Wallet = NewWalletRequester(apiRequester.client)
+	apiRequester.Service = NewServiceRequester(apiRequester.context)
+	apiRequester.Tx = NewTxRequester(apiRequester.context)
+	apiRequester.Utils = NewUtilsRequester(apiRequester.context)
+	apiRequester.Wallet = NewWalletRequester(apiRequester.context)
 	return apiRequester
 }
 
@@ -62,7 +71,7 @@ func sendGetRequest[DataType any](r IRequester, method string, requestName strin
 	if args == nil {
 		args = map[string]string{}
 	}
-	response, err := rawGetRequest[DataType](r.GetClient(), fmt.Sprintf("%s/%s", r.GetRoute(), method), args)
+	response, err := rawGetRequest[DataType](r.GetContext(), fmt.Sprintf("%s/%s", r.GetRoute(), method), args)
 	if err != nil {
 		return nil, fmt.Errorf("error during %s %s request: %w", r.GetName(), requestName, err)
 	}
@@ -70,7 +79,13 @@ func sendGetRequest[DataType any](r IRequester, method string, requestName strin
 }
 
 // Submit a GET request to the API server
-func rawGetRequest[DataType any](client *http.Client, path string, params map[string]string) (*api.ApiResponse[DataType], error) {
+func rawGetRequest[DataType any](context *RequesterContext, path string, params map[string]string) (*api.ApiResponse[DataType], error) {
+	// Make sure the socket exists
+	_, err := os.Stat(context.socketPath)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, fmt.Errorf("the socket at [%s] does not exist - please start the Hyperdrive daemon and try again", context.socketPath)
+	}
+
 	// Create the request
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(baseUrl, path), nil)
 	if err != nil {
@@ -85,7 +100,7 @@ func rawGetRequest[DataType any](client *http.Client, path string, params map[st
 	req.URL.RawQuery = values.Encode()
 
 	// Run the request
-	resp, err := client.Do(req)
+	resp, err := context.client.Do(req)
 	return handleResponse[DataType](resp, path, err)
 }
 
@@ -97,7 +112,7 @@ func sendPostRequest[DataType any](r IRequester, method string, requestName stri
 		return nil, fmt.Errorf("error serializing request body for %s %s: %w", r.GetName(), requestName, err)
 	}
 
-	response, err := rawPostRequest[DataType](r.GetClient(), fmt.Sprintf("%s/%s", r.GetRoute(), method), string(bytes))
+	response, err := rawPostRequest[DataType](r.GetContext(), fmt.Sprintf("%s/%s", r.GetRoute(), method), string(bytes))
 	if err != nil {
 		return nil, fmt.Errorf("error during %s %s request: %w", r.GetName(), requestName, err)
 	}
@@ -105,8 +120,14 @@ func sendPostRequest[DataType any](r IRequester, method string, requestName stri
 }
 
 // Submit a POST request to the API server
-func rawPostRequest[DataType any](client *http.Client, path string, body string) (*api.ApiResponse[DataType], error) {
-	resp, err := client.Post(fmt.Sprintf(baseUrl, path), jsonContentType, strings.NewReader(body))
+func rawPostRequest[DataType any](context *RequesterContext, path string, body string) (*api.ApiResponse[DataType], error) {
+	// Make sure the socket exists
+	_, err := os.Stat(context.socketPath)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, fmt.Errorf("the socket at [%s] does not exist - please start the Hyperdrive daemon and try again", context.socketPath)
+	}
+
+	resp, err := context.client.Post(fmt.Sprintf(baseUrl, path), jsonContentType, strings.NewReader(body))
 	return handleResponse[DataType](resp, path, err)
 }
 

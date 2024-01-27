@@ -2,7 +2,6 @@ package api
 
 import (
 	"math/big"
-	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/eth-utils/eth"
@@ -10,12 +9,12 @@ import (
 )
 
 type TxRequester struct {
-	client *http.Client
+	context *RequesterContext
 }
 
-func NewTxRequester(client *http.Client) *TxRequester {
+func NewTxRequester(context *RequesterContext) *TxRequester {
 	return &TxRequester{
-		client: client,
+		context: context,
 	}
 }
 
@@ -25,8 +24,8 @@ func (r *TxRequester) GetName() string {
 func (r *TxRequester) GetRoute() string {
 	return "tx"
 }
-func (r *TxRequester) GetClient() *http.Client {
-	return r.client
+func (r *TxRequester) GetContext() *RequesterContext {
+	return r.context
 }
 
 // Use the node private key to sign a transaction without submitting it

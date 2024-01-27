@@ -3,19 +3,18 @@ package api
 import (
 	"encoding/hex"
 	"fmt"
-	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
 type WalletRequester struct {
-	client *http.Client
+	context *RequesterContext
 }
 
-func NewWalletRequester(client *http.Client) *WalletRequester {
+func NewWalletRequester(context *RequesterContext) *WalletRequester {
 	return &WalletRequester{
-		client: client,
+		context: context,
 	}
 }
 
@@ -25,8 +24,8 @@ func (r *WalletRequester) GetName() string {
 func (r *WalletRequester) GetRoute() string {
 	return "wallet"
 }
-func (r *WalletRequester) GetClient() *http.Client {
-	return r.client
+func (r *WalletRequester) GetContext() *RequesterContext {
+	return r.context
 }
 
 // Delete the wallet keystore's password from disk

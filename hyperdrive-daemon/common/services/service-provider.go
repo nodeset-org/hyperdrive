@@ -7,6 +7,7 @@ import (
 	"runtime"
 
 	"github.com/docker/docker/client"
+	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet"
 	lhkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/lighthouse"
@@ -50,9 +51,13 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	resources := utils.NewResources(cfg.Network.Value)
 
 	// Wallet
-	nodeAddressPath := "" // os.ExpandEnv(cfg.Hyperdrive.GetNodeAddressPath())
-	keystorePath := ""    //os.ExpandEnv(cfg.Hyperdrive.GetWalletPath())
-	passwordPath := ""    //os.ExpandEnv(cfg.Hyperdrive.GetPasswordPath())
+	userDataPath, err := homedir.Expand(cfg.UserDataPath.Value)
+	if err != nil {
+		return nil, fmt.Errorf("error expanding user data path [%s]: %w", cfg.UserDataPath.Value, err)
+	}
+	nodeAddressPath := filepath.Join(userDataPath, config.UserAddressFilename)
+	keystorePath := filepath.Join(userDataPath, config.UserWalletFilename)
+	passwordPath := filepath.Join(userDataPath, config.UserPasswordFilename)
 	nodeWallet, err := wallet.NewLocalWallet(nodeAddressPath, keystorePath, passwordPath, resources.ChainID, true)
 	if err != nil {
 		return nil, fmt.Errorf("error creating node wallet: %w", err)

@@ -9,6 +9,7 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/urfave/cli/v2"
@@ -99,7 +100,7 @@ func main() {
 
 	// Register commands
 	service.RegisterCommands(app, "service", []string{"s"})
-	//wallet.RegisterCommands(app, "wallet", []string{"w"})
+	wallet.RegisterCommands(app, "wallet", []string{"w"})
 
 	app.Before = func(c *cli.Context) error {
 		// Check user ID
