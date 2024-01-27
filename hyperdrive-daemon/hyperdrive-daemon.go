@@ -75,6 +75,13 @@ func main() {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}
 
+		// Create the data dir
+		dataDir := sp.GetConfig().UserDataPath.Value
+		err = os.MkdirAll(dataDir, 0700)
+		if err != nil {
+			return fmt.Errorf("error creating user data directory [%s]: %w", dataDir, err)
+		}
+
 		// Get the owner of the config file
 		var cfgFileStat syscall.Stat_t
 		err = syscall.Stat(cfgPath, &cfgFileStat)
