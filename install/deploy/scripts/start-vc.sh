@@ -29,7 +29,7 @@ fi
 
 # Report a missing fee recipient file
 if [ ! -f "/validators/$FEE_RECIPIENT_FILE" ]; then
-    echo "Fee recipient file not found, please wait for the rocketpool_node process to create one."
+    echo "Fee recipient file not found, please wait for the hyperdrive_daemon process to create one."
     exit 1
 fi
 

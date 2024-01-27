@@ -4,7 +4,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/google/uuid"
 	"github.com/nodeset-org/eth-utils/beacon"
-	al "github.com/nodeset-org/eth-utils/eth"
+	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -29,20 +29,20 @@ type WalletInitializeData struct {
 }
 
 type WalletRecoverData struct {
-	AccountAddress common.Address          `json:"accountAddress"`
-	ValidatorKeys  []types.ValidatorPubkey `json:"validatorKeys"`
+	AccountAddress common.Address           `json:"accountAddress"`
+	ValidatorKeys  []beacon.ValidatorPubkey `json:"validatorKeys"`
 }
 
 type WalletSearchAndRecoverData struct {
-	FoundWallet    bool                    `json:"foundWallet"`
-	AccountAddress common.Address          `json:"accountAddress"`
-	DerivationPath string                  `json:"derivationPath"`
-	Index          uint                    `json:"index"`
-	ValidatorKeys  []types.ValidatorPubkey `json:"validatorKeys"`
+	FoundWallet    bool                     `json:"foundWallet"`
+	AccountAddress common.Address           `json:"accountAddress"`
+	DerivationPath string                   `json:"derivationPath"`
+	Index          uint                     `json:"index"`
+	ValidatorKeys  []beacon.ValidatorPubkey `json:"validatorKeys"`
 }
 
 type WalletRebuildData struct {
-	ValidatorKeys []types.ValidatorPubkey `json:"validatorKeys"`
+	ValidatorKeys []beacon.ValidatorPubkey `json:"validatorKeys"`
 }
 
 type WalletExportData struct {
@@ -52,9 +52,9 @@ type WalletExportData struct {
 }
 
 type WalletSetEnsNameData struct {
-	Address common.Address      `json:"address"`
-	EnsName string              `json:"ensName"`
-	TxInfo  *al.TransactionInfo `json:"txInfo"`
+	Address common.Address       `json:"address"`
+	EnsName string               `json:"ensName"`
+	TxInfo  *eth.TransactionInfo `json:"txInfo"`
 }
 
 type WalletTestMnemonicData struct {

@@ -1,55 +1,10 @@
 package types
 
 import (
-	"encoding/hex"
-
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/prysmaticlabs/go-bitfield"
 )
-
-// Validator pubkey
-const ValidatorPubkeyLength = 48 // bytes
-type ValidatorPubkey [ValidatorPubkeyLength]byte
-
-// Validator signature
-const ValidatorSignatureLength = 96 // bytes
-type ValidatorSignature [ValidatorSignatureLength]byte
-
-// Bytes conversion
-func (v ValidatorPubkey) Bytes() []byte {
-	return v[:]
-}
-func BytesToValidatorPubkey(value []byte) ValidatorPubkey {
-	var pubkey ValidatorPubkey
-	copy(pubkey[:], value)
-	return pubkey
-}
-
-// String conversion
-func (v ValidatorPubkey) Hex() string {
-	return hex.EncodeToString(v.Bytes())
-}
-func (v ValidatorPubkey) String() string {
-	return v.Hex()
-}
-
-// Bytes conversion
-func (v ValidatorSignature) Bytes() []byte {
-	return v[:]
-}
-func BytesToValidatorSignature(value []byte) ValidatorSignature {
-	var signature ValidatorSignature
-	copy(signature[:], value)
-	return signature
-}
-
-// String conversion
-func (v ValidatorSignature) Hex() string {
-	return hex.EncodeToString(v.Bytes())
-}
-func (v ValidatorSignature) String() string {
-	return v.Hex()
-}
 
 // API request options
 type ValidatorStatusOptions struct {
@@ -83,7 +38,7 @@ type BeaconHead struct {
 	PreviousJustifiedEpoch uint64
 }
 type ValidatorStatus struct {
-	Pubkey                     ValidatorPubkey
+	Pubkey                     beacon.ValidatorPubkey
 	Index                      string
 	WithdrawalCredentials      common.Hash
 	Balance                    uint64
@@ -138,14 +93,14 @@ type IBeaconClient interface {
 	GetBeaconBlock(blockId string) (BeaconBlock, bool, error)
 	GetBeaconHead() (BeaconHead, error)
 	GetValidatorStatusByIndex(index string, opts *ValidatorStatusOptions) (ValidatorStatus, error)
-	GetValidatorStatus(pubkey ValidatorPubkey, opts *ValidatorStatusOptions) (ValidatorStatus, error)
-	GetValidatorStatuses(pubkeys []ValidatorPubkey, opts *ValidatorStatusOptions) (map[ValidatorPubkey]ValidatorStatus, error)
-	GetValidatorIndex(pubkey ValidatorPubkey) (string, error)
+	GetValidatorStatus(pubkey beacon.ValidatorPubkey, opts *ValidatorStatusOptions) (ValidatorStatus, error)
+	GetValidatorStatuses(pubkeys []beacon.ValidatorPubkey, opts *ValidatorStatusOptions) (map[beacon.ValidatorPubkey]ValidatorStatus, error)
+	GetValidatorIndex(pubkey beacon.ValidatorPubkey) (string, error)
 	GetValidatorSyncDuties(indices []string, epoch uint64) (map[string]bool, error)
 	GetValidatorProposerDuties(indices []string, epoch uint64) (map[string]uint64, error)
 	GetDomainData(domainType []byte, epoch uint64, useGenesisFork bool) ([]byte, error)
-	ExitValidator(validatorIndex string, epoch uint64, signature ValidatorSignature) error
+	ExitValidator(validatorIndex string, epoch uint64, signature beacon.ValidatorSignature) error
 	Close() error
 	GetEth1DataForEth2Block(blockId string) (Eth1Data, bool, error)
-	ChangeWithdrawalCredentials(validatorIndex string, fromBlsPubkey ValidatorPubkey, toExecutionAddress common.Address, signature ValidatorSignature) error
+	ChangeWithdrawalCredentials(validatorIndex string, fromBlsPubkey beacon.ValidatorPubkey, toExecutionAddress common.Address, signature beacon.ValidatorSignature) error
 }

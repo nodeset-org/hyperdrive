@@ -10,8 +10,8 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
+	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
@@ -233,7 +233,7 @@ func (ks *Keystore) initialize() error {
 }
 
 // Load a private key
-func (ks *Keystore) LoadValidatorKey(pubkey types.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
+func (ks *Keystore) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 
 	// Initialize the account store
 	err := ks.initialize()
@@ -243,7 +243,7 @@ func (ks *Keystore) LoadValidatorKey(pubkey types.ValidatorPubkey) (*eth2types.B
 
 	// Find the validator key in the account store
 	for ki := 0; ki < len(ks.as.PrivateKeys); ki++ {
-		if bytes.Equal(pubkey.Bytes(), ks.as.PublicKeys[ki]) {
+		if bytes.Equal(pubkey[:], ks.as.PublicKeys[ki]) {
 			decryptedKey := ks.as.PrivateKeys[ki]
 			privateKey, err := eth2types.BLSPrivateKeyFromBytes(decryptedKey)
 			if err != nil {
@@ -251,7 +251,7 @@ func (ks *Keystore) LoadValidatorKey(pubkey types.ValidatorPubkey) (*eth2types.B
 			}
 
 			// Verify the private key matches the public key
-			reconstructedPubkey := types.BytesToValidatorPubkey(privateKey.PublicKey().Marshal())
+			reconstructedPubkey := beacon.ValidatorPubkey(privateKey.PublicKey().Marshal())
 			if reconstructedPubkey != pubkey {
 				return nil, fmt.Errorf("Prysm's keystore has a key that claims to be for validator %s but it's for validator %s", pubkey.Hex(), reconstructedPubkey.Hex())
 			}

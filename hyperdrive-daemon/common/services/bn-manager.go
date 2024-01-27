@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/color"
+	beaconutils "github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/beacon"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
@@ -149,7 +150,7 @@ func (m *BeaconClientManager) GetValidatorStatusByIndex(index string, opts *type
 }
 
 // Get a validator's status by its pubkey
-func (m *BeaconClientManager) GetValidatorStatus(pubkey types.ValidatorPubkey, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
+func (m *BeaconClientManager) GetValidatorStatus(pubkey beaconutils.ValidatorPubkey, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
 		return client.GetValidatorStatus(pubkey, opts)
 	})
@@ -160,18 +161,18 @@ func (m *BeaconClientManager) GetValidatorStatus(pubkey types.ValidatorPubkey, o
 }
 
 // Get the statuses of multiple validators by their pubkeys
-func (m *BeaconClientManager) GetValidatorStatuses(pubkeys []types.ValidatorPubkey, opts *types.ValidatorStatusOptions) (map[types.ValidatorPubkey]types.ValidatorStatus, error) {
+func (m *BeaconClientManager) GetValidatorStatuses(pubkeys []beaconutils.ValidatorPubkey, opts *types.ValidatorStatusOptions) (map[beaconutils.ValidatorPubkey]types.ValidatorStatus, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
 		return client.GetValidatorStatuses(pubkeys, opts)
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(map[types.ValidatorPubkey]types.ValidatorStatus), nil
+	return result.(map[beaconutils.ValidatorPubkey]types.ValidatorStatus), nil
 }
 
 // Get a validator's index
-func (m *BeaconClientManager) GetValidatorIndex(pubkey types.ValidatorPubkey) (string, error) {
+func (m *BeaconClientManager) GetValidatorIndex(pubkey beaconutils.ValidatorPubkey) (string, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
 		return client.GetValidatorIndex(pubkey)
 	})
@@ -215,7 +216,7 @@ func (m *BeaconClientManager) GetDomainData(domainType []byte, epoch uint64, use
 }
 
 // Voluntarily exit a validator
-func (m *BeaconClientManager) ExitValidator(validatorIndex string, epoch uint64, signature types.ValidatorSignature) error {
+func (m *BeaconClientManager) ExitValidator(validatorIndex string, epoch uint64, signature beaconutils.ValidatorSignature) error {
 	err := m.runFunction0(func(client types.IBeaconClient) error {
 		return client.ExitValidator(validatorIndex, epoch, signature)
 	})
@@ -242,7 +243,7 @@ func (m *BeaconClientManager) GetEth1DataForEth2Block(blockId string) (types.Eth
 }
 
 // Change the withdrawal credentials for a validator
-func (m *BeaconClientManager) ChangeWithdrawalCredentials(validatorIndex string, fromBlsPubkey types.ValidatorPubkey, toExecutionAddress common.Address, signature types.ValidatorSignature) error {
+func (m *BeaconClientManager) ChangeWithdrawalCredentials(validatorIndex string, fromBlsPubkey beaconutils.ValidatorPubkey, toExecutionAddress common.Address, signature beaconutils.ValidatorSignature) error {
 	err := m.runFunction0(func(client types.IBeaconClient) error {
 		return client.ChangeWithdrawalCredentials(validatorIndex, fromBlsPubkey, toExecutionAddress, signature)
 	})

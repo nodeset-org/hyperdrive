@@ -12,6 +12,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
+	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/prysmaticlabs/prysm/v4/crypto/bls"
@@ -174,7 +175,7 @@ func (c *StandardHttpClient) GetBeaconHead() (types.BeaconHead, error) {
 }
 
 // Get a validator's status
-func (c *StandardHttpClient) GetValidatorStatus(pubkey types.ValidatorPubkey, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
+func (c *StandardHttpClient) GetValidatorStatus(pubkey beacon.ValidatorPubkey, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
 
 	return c.getValidatorStatus(utils.AddPrefix(pubkey.Hex()), opts)
 
@@ -204,7 +205,7 @@ func (c *StandardHttpClient) getValidatorStatus(pubkeyOrIndex string, opts *type
 
 	// Return response
 	return types.ValidatorStatus{
-		Pubkey:                     types.BytesToValidatorPubkey(validator.Validator.Pubkey),
+		Pubkey:                     beacon.ValidatorPubkey(validator.Validator.Pubkey),
 		Index:                      validator.Index,
 		WithdrawalCredentials:      common.BytesToHash(validator.Validator.WithdrawalCredentials),
 		Balance:                    uint64(validator.Balance),
@@ -221,17 +222,17 @@ func (c *StandardHttpClient) getValidatorStatus(pubkeyOrIndex string, opts *type
 }
 
 // Get multiple validators' statuses
-func (c *StandardHttpClient) GetValidatorStatuses(pubkeys []types.ValidatorPubkey, opts *types.ValidatorStatusOptions) (map[types.ValidatorPubkey]types.ValidatorStatus, error) {
+func (c *StandardHttpClient) GetValidatorStatuses(pubkeys []beacon.ValidatorPubkey, opts *types.ValidatorStatusOptions) (map[beacon.ValidatorPubkey]types.ValidatorStatus, error) {
 
 	// The null validator pubkey
-	nullPubkey := types.ValidatorPubkey{}
+	nullPubkey := beacon.ValidatorPubkey{}
 
 	// Filter out null pubkeys
-	realPubkeys := []types.ValidatorPubkey{}
+	realPubkeys := []beacon.ValidatorPubkey{}
 	for _, pubkey := range pubkeys {
-		if !bytes.Equal(pubkey.Bytes(), nullPubkey.Bytes()) {
+		if !bytes.Equal(pubkey[:], nullPubkey[:]) {
 			// Teku doesn't like invalid pubkeys, so filter them out to make it consistent with other clients
-			_, err := bls.PublicKeyFromBytes(pubkey.Bytes())
+			_, err := bls.PublicKeyFromBytes(pubkey[:])
 
 			if err == nil {
 				realPubkeys = append(realPubkeys, pubkey)
@@ -252,7 +253,7 @@ func (c *StandardHttpClient) GetValidatorStatuses(pubkeys []types.ValidatorPubke
 	}
 
 	// Build validator status map
-	statuses := make(map[types.ValidatorPubkey]types.ValidatorStatus)
+	statuses := make(map[beacon.ValidatorPubkey]types.ValidatorStatus)
 	for _, validator := range validators.Data {
 
 		// Ignore empty pubkeys
@@ -261,11 +262,11 @@ func (c *StandardHttpClient) GetValidatorStatuses(pubkeys []types.ValidatorPubke
 		}
 
 		// Get validator pubkey
-		pubkey := types.BytesToValidatorPubkey(validator.Validator.Pubkey)
+		pubkey := beacon.ValidatorPubkey(validator.Validator.Pubkey)
 
 		// Add status
 		statuses[pubkey] = types.ValidatorStatus{
-			Pubkey:                     types.BytesToValidatorPubkey(validator.Validator.Pubkey),
+			Pubkey:                     beacon.ValidatorPubkey(validator.Validator.Pubkey),
 			Index:                      validator.Index,
 			WithdrawalCredentials:      common.BytesToHash(validator.Validator.WithdrawalCredentials),
 			Balance:                    uint64(validator.Balance),
@@ -358,7 +359,7 @@ func (c *StandardHttpClient) GetValidatorProposerDuties(indices []string, epoch 
 }
 
 // Get a validator's index
-func (c *StandardHttpClient) GetValidatorIndex(pubkey types.ValidatorPubkey) (string, error) {
+func (c *StandardHttpClient) GetValidatorIndex(pubkey beacon.ValidatorPubkey) (string, error) {
 
 	// Get validator
 	pubkeyString := utils.AddPrefix(pubkey.Hex())
@@ -421,13 +422,13 @@ func (c *StandardHttpClient) GetDomainData(domainType []byte, epoch uint64, useG
 }
 
 // Perform a voluntary exit on a validator
-func (c *StandardHttpClient) ExitValidator(validatorIndex string, epoch uint64, signature types.ValidatorSignature) error {
+func (c *StandardHttpClient) ExitValidator(validatorIndex string, epoch uint64, signature beacon.ValidatorSignature) error {
 	return c.postVoluntaryExit(VoluntaryExitRequest{
 		Message: VoluntaryExitMessage{
 			Epoch:          uinteger(epoch),
 			ValidatorIndex: validatorIndex,
 		},
-		Signature: signature.Bytes(),
+		Signature: signature[:],
 	})
 }
 
@@ -517,14 +518,14 @@ func (c *StandardHttpClient) GetBeaconBlock(blockId string) (types.BeaconBlock, 
 }
 
 // Perform a withdrawal credentials change on a validator
-func (c *StandardHttpClient) ChangeWithdrawalCredentials(validatorIndex string, fromBlsPubkey types.ValidatorPubkey, toExecutionAddress common.Address, signature types.ValidatorSignature) error {
+func (c *StandardHttpClient) ChangeWithdrawalCredentials(validatorIndex string, fromBlsPubkey beacon.ValidatorPubkey, toExecutionAddress common.Address, signature beacon.ValidatorSignature) error {
 	return c.postWithdrawalCredentialsChange(BLSToExecutionChangeRequest{
 		Message: BLSToExecutionChangeMessage{
 			ValidatorIndex:     validatorIndex,
 			FromBLSPubkey:      fromBlsPubkey[:],
 			ToExecutionAddress: toExecutionAddress[:],
 		},
-		Signature: signature.Bytes(),
+		Signature: signature[:],
 	})
 }
 

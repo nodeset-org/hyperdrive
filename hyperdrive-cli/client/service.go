@@ -245,6 +245,50 @@ func (c *Client) GetServiceVersion() (string, error) {
 	return version.String(), nil
 }
 
+// Deletes the data directory, including the node wallet and all validator keys, and restarts the Docker containers
+func (c *Client) PurgeData(composeFiles []string) error {
+	// Get the command to run with root privileges
+	rootCmd, err := c.getEscalationCommand()
+	if err != nil {
+		return fmt.Errorf("could not get privilege escalation command: %w", err)
+	}
+
+	// Get the config
+	cfg, _, err := c.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("error loading user settings: %w", err)
+	}
+
+	// Shut down the containers
+	fmt.Println("Stopping containers...")
+	err = c.PauseService(composeFiles)
+	if err != nil {
+		return fmt.Errorf("error stopping Docker containers: %w", err)
+	}
+
+	// Delete the user's data directory
+	dataPath, err := homedir.Expand(cfg.UserDataPath.Value)
+	if err != nil {
+		return fmt.Errorf("error loading data path: %w", err)
+	}
+	fmt.Println("Deleting data...")
+	cmd := fmt.Sprintf("%s rm -f %s", rootCmd, dataPath)
+	_, err = c.readOutput(cmd)
+	if err != nil {
+		return fmt.Errorf("error deleting data: %w", err)
+	}
+
+	// Start the containers
+	fmt.Println("Starting containers...")
+	err = c.StartService(composeFiles)
+	if err != nil {
+		return fmt.Errorf("error starting Docker containers: %w", err)
+	}
+
+	fmt.Println("Purge complete.")
+	return nil
+}
+
 // Runs the prune provisioner
 func (c *Client) RunPruneProvisioner(container string, volume string, image string) error {
 

@@ -1,21 +1,26 @@
 package utils
 
-import "github.com/nodeset-org/hyperdrive/shared/types"
+import (
+	"strings"
+
+	"github.com/nodeset-org/hyperdrive/shared/types"
+)
+
+const (
+	hexPrefix string = "0x"
+)
 
 // Add a prefix to a hex string if not present
 func AddPrefix(value string) string {
-	if len(value) < 2 || value[0:2] != "0x" {
-		return "0x" + value
+	if !strings.HasPrefix(value, hexPrefix) {
+		return hexPrefix + value
 	}
 	return value
 }
 
 // Remove a prefix from a hex string if present
 func RemovePrefix(value string) string {
-	if len(value) >= 2 && value[0:2] == "0x" {
-		return value[2:]
-	}
-	return value
+	return strings.TrimPrefix(value, hexPrefix)
 }
 
 // Check if the node wallet is ready for transacting

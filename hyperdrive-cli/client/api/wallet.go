@@ -68,16 +68,13 @@ func (r *WalletRequester) Rebuild() (*api.ApiResponse[api.WalletRebuildData], er
 }
 
 // Recover wallet
-func (r *WalletRequester) Recover(derivationPath *string, mnemonic *string, skipValidatorKeyRecovery *bool, index *uint64, password *string, save *bool) (*api.ApiResponse[api.WalletRecoverData], error) {
+func (r *WalletRequester) Recover(derivationPath *string, mnemonic *string, index *uint64, password *string, save *bool) (*api.ApiResponse[api.WalletRecoverData], error) {
 	args := map[string]string{}
 	if derivationPath != nil {
 		args["derivation-path"] = *derivationPath
 	}
 	if mnemonic != nil {
 		args["mnemonic"] = *mnemonic
-	}
-	if skipValidatorKeyRecovery != nil {
-		args["skip-validator-key-recovery"] = fmt.Sprint(*skipValidatorKeyRecovery)
 	}
 	if index != nil {
 		args["index"] = fmt.Sprint(*index)
@@ -92,13 +89,10 @@ func (r *WalletRequester) Recover(derivationPath *string, mnemonic *string, skip
 }
 
 // Search and recover wallet
-func (r *WalletRequester) SearchAndRecover(mnemonic string, address common.Address, skipValidatorKeyRecovery *bool, password []byte, save *bool) (*api.ApiResponse[api.WalletSearchAndRecoverData], error) {
+func (r *WalletRequester) SearchAndRecover(mnemonic string, address common.Address, password []byte, save *bool) (*api.ApiResponse[api.WalletSearchAndRecoverData], error) {
 	args := map[string]string{
 		"mnemonic": mnemonic,
 		"address":  address.Hex(),
-	}
-	if skipValidatorKeyRecovery != nil {
-		args["skip-validator-key-recovery"] = fmt.Sprint(*skipValidatorKeyRecovery)
 	}
 	if password != nil {
 		args["password"] = hex.EncodeToString(password)
@@ -132,27 +126,21 @@ func (r *WalletRequester) Status() (*api.ApiResponse[api.WalletStatusData], erro
 }
 
 // Search for and recover the wallet in test-mode so none of the artifacts are saved
-func (r *WalletRequester) TestSearchAndRecover(mnemonic string, address common.Address, skipValidatorKeyRecovery *bool) (*api.ApiResponse[api.WalletSearchAndRecoverData], error) {
+func (r *WalletRequester) TestSearchAndRecover(mnemonic string, address common.Address) (*api.ApiResponse[api.WalletSearchAndRecoverData], error) {
 	args := map[string]string{
 		"mnemonic": mnemonic,
 		"address":  address.Hex(),
-	}
-	if skipValidatorKeyRecovery != nil {
-		args["skip-validator-key-recovery"] = fmt.Sprint(*skipValidatorKeyRecovery)
 	}
 	return sendGetRequest[api.WalletSearchAndRecoverData](r, "test-search-and-recover", "TestSearchAndRecover", args)
 }
 
 // Recover wallet in test-mode so none of the artifacts are saved
-func (r *WalletRequester) TestRecover(derivationPath *string, mnemonic string, skipValidatorKeyRecovery *bool, index *uint64) (*api.ApiResponse[api.WalletRecoverData], error) {
+func (r *WalletRequester) TestRecover(derivationPath *string, mnemonic string, index *uint64) (*api.ApiResponse[api.WalletRecoverData], error) {
 	args := map[string]string{
 		"mnemonic": mnemonic,
 	}
 	if derivationPath != nil {
 		args["derivation-path"] = *derivationPath
-	}
-	if skipValidatorKeyRecovery != nil {
-		args["skip-validator-key-recovery"] = fmt.Sprint(*skipValidatorKeyRecovery)
 	}
 	if index != nil {
 		args["index"] = fmt.Sprint(*index)

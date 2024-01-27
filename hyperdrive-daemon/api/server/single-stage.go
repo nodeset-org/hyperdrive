@@ -22,7 +22,7 @@ type ISingleStageCallContext[DataType any] interface {
 	// Initialize the context with any bootstrapping, requirements checks, or bindings it needs to set up
 	Initialize() error
 
-	// Used to get any supplemental state required during initialization - anything in here will be fed into an rp.Query() multicall
+	// Used to get any supplemental state required during initialization - anything in here will be fed into an hd.Query() multicall
 	GetState(mc *batch.MultiCaller)
 
 	// Prepare the response data in whatever way the context needs to do

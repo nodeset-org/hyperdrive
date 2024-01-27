@@ -8,8 +8,8 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
+	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
@@ -37,7 +37,7 @@ type validatorKey struct {
 	Version uint                   `json:"version"`
 	UUID    uuid.UUID              `json:"uuid"`
 	Path    string                 `json:"path"`
-	Pubkey  types.ValidatorPubkey  `json:"pubkey"`
+	Pubkey  beacon.ValidatorPubkey `json:"pubkey"`
 }
 
 // Create new lighthouse keystore
@@ -57,7 +57,7 @@ func (ks *Keystore) GetKeystoreDir() string {
 func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPath string) error {
 
 	// Get validator pubkey
-	pubkey := types.BytesToValidatorPubkey(key.PublicKey().Marshal())
+	pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
 
 	// Create a new password
 	password, err := keystore.GenerateRandomPassword()
@@ -118,7 +118,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 }
 
 // Load a private key
-func (ks *Keystore) LoadValidatorKey(pubkey types.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
+func (ks *Keystore) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 
 	// Get key file path
 	keyFilePath := filepath.Join(ks.keystorePath, KeystoreDir, ValidatorsDir, utils.AddPrefix(pubkey.Hex()), KeyFileName)
@@ -169,7 +169,7 @@ func (ks *Keystore) LoadValidatorKey(pubkey types.ValidatorPubkey) (*eth2types.B
 	}
 
 	// Verify the private key matches the public key
-	reconstructedPubkey := types.BytesToValidatorPubkey(privateKey.PublicKey().Marshal())
+	reconstructedPubkey := beacon.ValidatorPubkey(privateKey.PublicKey().Marshal())
 	if reconstructedPubkey != pubkey {
 		return nil, fmt.Errorf("private keystore file %s claims to be for validator %s but it's for validator %s", keyFilePath, pubkey.Hex(), reconstructedPubkey.Hex())
 	}

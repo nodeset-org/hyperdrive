@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"sync"
@@ -10,14 +11,41 @@ import (
 	"github.com/nodeset-org/eth-utils/eth"
 )
 
-var (
-	ethClientStatusRefreshInterval, _ = time.ParseDuration("60s")
-	ethClientSyncPollInterval, _      = time.ParseDuration("5s")
-	beaconClientSyncPollInterval, _   = time.ParseDuration("5s")
+const (
+	ethClientStatusRefreshInterval time.Duration = 60 * time.Second
+	ethClientSyncPollInterval      time.Duration = 5 * time.Second
+	beaconClientSyncPollInterval   time.Duration = 5 * time.Second
+)
 
+var (
 	ethClientSyncLock    sync.Mutex
 	beaconClientSyncLock sync.Mutex
 )
+
+func (sp *ServiceProvider) RequireNodeAddress() error {
+	status := sp.nodeWallet.GetStatus()
+	if !status.HasAddress {
+		return errors.New("The node currently does not have an address set. Please run 'hyperdrive wallet init' and try again.")
+	}
+	return nil
+}
+
+func (sp *ServiceProvider) RequireWalletReady() error {
+	status := sp.nodeWallet.GetStatus()
+	if !status.HasAddress {
+		return errors.New("The node currently does not have an address set. Please run 'hyperdrive wallet init' and try again.")
+	}
+	if !status.HasKeystore {
+		return errors.New("The node currently does not have a node wallet keystore. Please run 'hyperdrive wallet init' and try again.")
+	}
+	if !status.HasPassword {
+		return errors.New("The node's wallet password has not been set. Please run 'hyperdrive wallet set-password' first.")
+	}
+	if status.KeystoreAddress != status.NodeAddress {
+		return errors.New("The node's wallet keystore does not match the node address. This node is currently in read-only mode.")
+	}
+	return nil
+}
 
 // Wait for the Executon client to sync; timeout of 0 indicates no timeout
 func (sp *ServiceProvider) WaitEthClientSynced(verbose bool) error {
