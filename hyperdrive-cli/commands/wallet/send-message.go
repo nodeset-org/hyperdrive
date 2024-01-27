@@ -22,7 +22,7 @@ func sendMessage(c *cli.Context, toAddressOrEns string, message []byte) error {
 	var toAddress common.Address
 	var toAddressString string
 	if strings.Contains(toAddressOrEns, ".") {
-		response, err := hd.Api.Node.ResolveEns(common.Address{}, toAddressOrEns)
+		response, err := hd.Api.Utils.ResolveEns(common.Address{}, toAddressOrEns)
 		if err != nil {
 			return err
 		}

@@ -30,6 +30,7 @@ type IRequester interface {
 type ApiRequester struct {
 	Service *ServiceRequester
 	Tx      *TxRequester
+	Utils   *UtilsRequester
 	Wallet  *WalletRequester
 
 	socketPath string
@@ -51,6 +52,7 @@ func NewApiRequester(socketPath string) *ApiRequester {
 
 	apiRequester.Service = NewServiceRequester(apiRequester.client)
 	apiRequester.Tx = NewTxRequester(apiRequester.client)
+	apiRequester.Utils = NewUtilsRequester(apiRequester.client)
 	apiRequester.Wallet = NewWalletRequester(apiRequester.client)
 	return apiRequester
 }
