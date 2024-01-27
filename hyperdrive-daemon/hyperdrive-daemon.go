@@ -1,9 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"syscall"
 
@@ -37,8 +40,27 @@ func main() {
 		},
 	}
 	app.Copyright = "(C) 2024 NodeSet LLC"
-	app.Flags = []cli.Flag{}
-	app.Action = func(ctx *cli.Context) error {
+
+	userDirFlag := &cli.StringFlag{
+		Name:     "user-dir",
+		Aliases:  []string{"u"},
+		Usage:    "The path of the user data directory, which contains the configuration file to load and all of the user's runtime data",
+		Required: true,
+	}
+
+	app.Flags = []cli.Flag{
+		userDirFlag,
+	}
+	app.Action = func(c *cli.Context) error {
+		// Get the config file
+		userDir := c.String(userDirFlag.Name)
+		cfgPath := filepath.Join(userDir, config.ConfigFilename)
+		_, err := os.Stat(cfgPath)
+		if errors.Is(err, fs.ErrNotExist) {
+			fmt.Printf("Configuration file not found at [%s].", cfgPath)
+			os.Exit(1)
+		}
+
 		// Wait group to handle the API server (separate because of error handling)
 		apiWg := new(sync.WaitGroup)
 		apiWg.Add(1)
@@ -48,16 +70,16 @@ func main() {
 		taskWg.Add(1)
 
 		// Create the service provider
-		sp, err := services.NewServiceProvider(config.DaemonConfigPath)
+		sp, err := services.NewServiceProvider(userDir)
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}
 
 		// Get the owner of the config file
 		var cfgFileStat syscall.Stat_t
-		err = syscall.Stat(config.DaemonConfigPath, &cfgFileStat)
+		err = syscall.Stat(cfgPath, &cfgFileStat)
 		if err != nil {
-			return fmt.Errorf("error getting config file [%s] info: %w", config.DaemonConfigPath, err)
+			return fmt.Errorf("error getting config file [%s] info: %w", cfgPath, err)
 		}
 
 		// Start the API manager
@@ -91,7 +113,8 @@ func main() {
 		}()
 
 		// Run the daemon until closed
-		fmt.Printf("Started daemon on %s.\n", config.DaemonSocketPath)
+		socketPath := filepath.Join(userDir, config.SocketFilename)
+		fmt.Printf("Started daemon on %s.\n", socketPath)
 		apiWg.Wait()
 		taskWg.Wait()
 		fmt.Println("Daemon stopped.")

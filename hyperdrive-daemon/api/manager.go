@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/fatih/color"
@@ -46,7 +47,7 @@ func NewApiManager(sp *services.ServiceProvider) *ApiManager {
 		handlers: []IHandler{
 			service.NewServiceHandler(sp),
 		},
-		socketPath: config.DaemonSocketPath,
+		socketPath: filepath.Join(sp.GetUserDir(), config.SocketFilename),
 		router:     router,
 		server: http.Server{
 			Handler: router,

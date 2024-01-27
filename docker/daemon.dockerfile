@@ -9,7 +9,7 @@ RUN cd /hyperdrive/hyperdrive-daemon && go build -o build/hyperdrive-daemon-linu
 # The daemon image
 FROM debian:bookworm-slim
 ARG TARGETARCH
-COPY --from=builder /hyperdrive/hyperdrive-daemon/build/hyperdrive-daemon-linux-${TARGETARCH} /usr/local/bin/hyperdrive-daemon
+COPY --from=builder /hyperdrive/hyperdrive-daemon/build/hyperdrive-daemon-linux-${TARGETARCH} /usr/bin/hyperdrive-daemon
 RUN apt update && \
     apt install ca-certificates -y && \
 	# Cleanup
@@ -17,4 +17,4 @@ RUN apt update && \
         rm -rf /var/lib/apt/lists/*
 
 # Container entry point
-ENTRYPOINT ["/usr/local/bin/hyperdrive-daemon"]
+ENTRYPOINT ["/usr/bin/hyperdrive-daemon"]

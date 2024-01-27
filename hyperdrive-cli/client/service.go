@@ -25,8 +25,8 @@ const (
 	debugColor                    color.Attribute = color.FgYellow
 	nethermindPruneStarterCommand string          = "DELETE_ME"
 
-	templatesDir       string = "/usr/local/lib/hyperdrive/templates"
-	overrideSourceDir  string = "/usr/local/lib/hyperdrive/override"
+	templatesDir       string = "/usr/share/hyperdrive/templates"
+	overrideSourceDir  string = "/usr/share/hyperdrive/override"
 	overrideDir        string = "override"
 	runtimeDir         string = "runtime"
 	extraScrapeJobsDir string = "extra-scrape-jobs"

@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 
 	"github.com/docker/docker/client"
@@ -19,6 +20,7 @@ import (
 
 // A container for all of the various services used by Hyperdrive
 type ServiceProvider struct {
+	// Services
 	cfg        *config.HyperdriveConfig
 	nodeWallet *wallet.LocalWallet
 	ecManager  *ExecutionClientManager
@@ -27,11 +29,15 @@ type ServiceProvider struct {
 	txMgr      *eth.TransactionManager
 	queryMgr   *eth.QueryManager
 	resources  *utils.Resources
+
+	// Path info
+	userDir string
 }
 
 // Creates a new ServiceProvider instance
-func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
+func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	// Config
+	cfgPath := filepath.Join(userDir, config.ConfigFilename)
 	cfg, err := loadConfigFromFile(os.ExpandEnv(cfgPath))
 	if err != nil {
 		return nil, fmt.Errorf("error loading hyperdrive config: %w", err)
@@ -98,6 +104,7 @@ func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
 
 	// Create the provider
 	provider := &ServiceProvider{
+		userDir:    userDir,
 		cfg:        cfg,
 		nodeWallet: nodeWallet,
 		ecManager:  ecManager,
@@ -113,6 +120,10 @@ func NewServiceProvider(cfgPath string) (*ServiceProvider, error) {
 // ===============
 // === Getters ===
 // ===============
+
+func (p *ServiceProvider) GetUserDir() string {
+	return p.userDir
+}
 
 func (p *ServiceProvider) GetConfig() *config.HyperdriveConfig {
 	return p.cfg

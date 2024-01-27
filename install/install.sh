@@ -323,11 +323,12 @@ install() {
     fi
 
     # Create hyperdrive dir & files
-    HD_USR_PATH=/usr/local/lib/hyperdrive
+    HD_BIN_PATH=/usr/bin/hyperdrive
+    HD_SHARE_PATH=/usr/share/hyperdrive
     HD_VAR_PATH=/var/lib/hyperdrive
 
     progress 4 "Creating Hyperdrive directory structure..."
-    { mkdir -p "$HD_USR_PATH" || fail "Could not create the Hyperdrive lib directory."; } >&2
+    { mkdir -p "$HD_SHARE_PATH" || fail "Could not create the Hyperdrive resources directory."; } >&2
     { mkdir -p "$HD_VAR_PATH/data" || fail "Could not create the Hyperdrive system data directory."; } >&2
     { mkdir -p "$HD_VAR_PATH/global" || fail "Could not create the Hyperdrive system global directory."; } >&2
     { chmod 0700 "$HD_VAR_PATH/data" || fail "Could not set the Hyperdrive data directory permissions."; } >&2
@@ -340,9 +341,9 @@ install() {
 
     # Copy package files
     progress 6 "Copying package files to Hyperdrive user data directory..."
-    { cp -r "$PACKAGE_FILES_PATH/override" "$HD_USR_PATH" || fail "Could not copy override folder to the Hyperdrive system directory."; } >&2
-    { cp -r "$PACKAGE_FILES_PATH/scripts" "$HD_USR_PATH" || fail "Could not copy scripts folder to the Hyperdrive system directory."; } >&2
-    { cp -r "$PACKAGE_FILES_PATH/templates" "$HD_USR_PATH" || fail "Could not copy templates folder to the Hyperdrive system directory."; } >&2
+    { cp -r "$PACKAGE_FILES_PATH/override" "$HD_SHARE_PATH" || fail "Could not copy override folder to the Hyperdrive system directory."; } >&2
+    { cp -r "$PACKAGE_FILES_PATH/scripts" "$HD_SHARE_PATH" || fail "Could not copy scripts folder to the Hyperdrive system directory."; } >&2
+    { cp -r "$PACKAGE_FILES_PATH/templates" "$HD_SHARE_PATH" || fail "Could not copy templates folder to the Hyperdrive system directory."; } >&2
     { find "$HD_USR_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
 
     # Clean up unnecessary files from old installations

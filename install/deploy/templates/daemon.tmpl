@@ -13,11 +13,14 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - {{.HyperdriveUserDirectory}}:{{.GetDaemonUserDirPath}}
-      - {{.UserDataPath}}:{{.GetDaemonUserDataPath}}
-      - /usr/local/lib/hyperdrive/scripts:{{.GetDaemonScriptsPath}}
-      - /var/lib/hyperdrive/global:{{.GetDaemonGlobalDataPath}}
-      - /var/lib/hyperdrive/data/{{.ProjectName}}:{{.GetDaemonProjectDataPath}}
+      - {{.HyperdriveUserDirectory}}:{{.HyperdriveUserDirectory}}
+      - {{.UserDataPath}}:{{.UserDataPath}}
+      - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts
+      - /var/lib/hyperdrive/global:/var/lib/hyperdrive/global
+      - /var/lib/hyperdrive/data/{{.ProjectName}}:/var/lib/hyperdrive/data/{{.ProjectName}}
+    command:
+      - "--user-dir"
+      - "{{.HyperdriveUserDirectory}}"
     networks:
       - net
     cap_drop:

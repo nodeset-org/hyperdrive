@@ -17,7 +17,7 @@ services:
     ports: [ "{{$p2p}}:{{$p2p}}/udp", "{{$p2p}}:{{$p2p}}/tcp"{{.GetEcOpenApiPorts}} ]
     volumes:
       - ecdata:/ethclient
-      - /usr/local/lib/hyperdrive/scripts:/setup:ro
+      - /usr/share/hyperdrive/scripts:/setup:ro
       - /var/lib/hyperdrive/data/{{.ProjectName}}:/secrets
     networks:
       - net

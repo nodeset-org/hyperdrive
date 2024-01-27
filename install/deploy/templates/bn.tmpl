@@ -25,7 +25,7 @@ services:
       {{- end}}
     volumes:
       - bndata:/ethclient
-      - /usr/local/lib/hyperdrive/scripts:/setup:ro
+      - /usr/share/hyperdrive/scripts:/setup:ro
       - /var/lib/hyperdrive/data/{{.ProjectName}}:/secrets:ro
     networks:
       - net
