@@ -30,8 +30,8 @@ func (f *walletRecoverContextFactory) Create(args url.Values) (*walletRecoverCon
 	inputErrs := []error{
 		server.ValidateArg("mnemonic", args, input.ValidateWalletMnemonic, &c.mnemonic),
 		server.ValidateOptionalArg("index", args, input.ValidateUint, &c.index, nil),
-		server.ValidateOptionalArg("password", args, input.ValidateNodePassword, &c.password, &c.passwordExists),
-		server.ValidateOptionalArg("save-password", args, input.ValidateBool, &c.savePassword, nil),
+		server.ValidateArg("password", args, input.ValidateNodePassword, &c.password),
+		server.ValidateArg("save-password", args, input.ValidateBool, &c.savePassword),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -51,8 +51,7 @@ type walletRecoverContext struct {
 	mnemonic       string
 	derivationPath string
 	index          uint64
-	password       []byte
-	passwordExists bool
+	password       string
 	savePassword   bool
 }
 
@@ -61,25 +60,12 @@ func (c *walletRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bi
 	w := sp.GetWallet()
 
 	// Requirements
-	status := w.GetStatus()
-	if status.HasKeystore {
-		return fmt.Errorf("a wallet is already present")
+	status, err := w.GetStatus()
+	if err != nil {
+		return fmt.Errorf("error getting wallet status: %w", err)
 	}
-
-	// Use the provided password if there is one
-	if c.passwordExists {
-		w.RememberPassword(c.password)
-		if c.savePassword {
-			err := w.SavePassword()
-			if err != nil {
-				return fmt.Errorf("error saving wallet password to disk: %w", err)
-			}
-		}
-	} else {
-		_, hasPassword := w.GetPassword()
-		if !hasPassword {
-			return fmt.Errorf("you must set a password before recovering a wallet, or provide one in this call")
-		}
+	if status.Wallet.IsOnDisk {
+		return fmt.Errorf("a wallet is already present")
 	}
 
 	// Parse the derivation path
@@ -97,7 +83,7 @@ func (c *walletRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bi
 	}
 
 	// Recover the wallet
-	err := w.Recover(path, uint(c.index), c.mnemonic)
+	err = w.Recover(path, uint(c.index), c.mnemonic, c.password, c.savePassword, false)
 	if err != nil {
 		return fmt.Errorf("error recovering wallet: %w", err)
 	}

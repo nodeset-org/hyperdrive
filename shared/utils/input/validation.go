@@ -197,11 +197,11 @@ func ValidatePositiveEthAmount(name, value string) (float64, error) {
 }
 
 // Validate a node password
-func ValidateNodePassword(name string, value string) ([]byte, error) {
+func ValidateNodePassword(name string, value string) (string, error) {
 	if len(value) < MinPasswordLength {
-		return nil, fmt.Errorf("Invalid %s '%s' - must be at least %d characters long", name, value, MinPasswordLength)
+		return "", fmt.Errorf("Invalid %s '%s' - must be at least %d characters long", name, value, MinPasswordLength)
 	}
-	return []byte(value), nil
+	return value, nil
 }
 
 // Validate a wallet mnemonic phrase

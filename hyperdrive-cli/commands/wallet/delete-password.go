@@ -20,7 +20,7 @@ func deletePassword(c *cli.Context) error {
 	status := statusResponse.Data.WalletStatus
 
 	// Check if it's already set
-	if !status.IsPasswordSaved {
+	if !status.Password.IsPasswordSaved {
 		fmt.Println("The node wallet password is not saved to disk.")
 		return nil
 	}

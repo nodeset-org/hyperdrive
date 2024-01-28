@@ -11,7 +11,6 @@ type ApiResponse[Data any] struct {
 }
 
 type SuccessData struct {
-	Success bool `json:"success"`
 }
 
 type DataBatch[DataType any] struct {

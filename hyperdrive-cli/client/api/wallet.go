@@ -44,19 +44,16 @@ func (r *WalletRequester) ExportEthKey() (*api.ApiResponse[api.WalletExportEthKe
 }
 
 // Initialize the wallet with a new key
-func (r *WalletRequester) Initialize(derivationPath *string, index *uint64, password *string, save *bool) (*api.ApiResponse[api.WalletInitializeData], error) {
-	args := map[string]string{}
+func (r *WalletRequester) Initialize(derivationPath *string, index *uint64, password string, save bool) (*api.ApiResponse[api.WalletInitializeData], error) {
+	args := map[string]string{
+		"password":      password,
+		"save-password": fmt.Sprint(save),
+	}
 	if derivationPath != nil {
 		args["derivation-path"] = *derivationPath
 	}
 	if index != nil {
 		args["index"] = fmt.Sprint(*index)
-	}
-	if password != nil {
-		args["password"] = *password
-	}
-	if save != nil {
-		args["save"] = fmt.Sprint(*save)
 	}
 	return sendGetRequest[api.WalletInitializeData](r, "initialize", "Initialize", args)
 }
@@ -67,8 +64,11 @@ func (r *WalletRequester) Rebuild() (*api.ApiResponse[api.WalletRebuildData], er
 }
 
 // Recover wallet
-func (r *WalletRequester) Recover(derivationPath *string, mnemonic *string, index *uint64, password *string, save *bool) (*api.ApiResponse[api.WalletRecoverData], error) {
-	args := map[string]string{}
+func (r *WalletRequester) Recover(derivationPath *string, mnemonic *string, index *uint64, password string, save bool) (*api.ApiResponse[api.WalletRecoverData], error) {
+	args := map[string]string{
+		"password":      password,
+		"save-password": fmt.Sprint(save),
+	}
 	if derivationPath != nil {
 		args["derivation-path"] = *derivationPath
 	}
@@ -78,26 +78,16 @@ func (r *WalletRequester) Recover(derivationPath *string, mnemonic *string, inde
 	if index != nil {
 		args["index"] = fmt.Sprint(*index)
 	}
-	if password != nil {
-		args["password"] = *password
-	}
-	if save != nil {
-		args["save-password"] = fmt.Sprint(*save)
-	}
 	return sendGetRequest[api.WalletRecoverData](r, "recover", "Recover", args)
 }
 
 // Search and recover wallet
-func (r *WalletRequester) SearchAndRecover(mnemonic string, address common.Address, password []byte, save *bool) (*api.ApiResponse[api.WalletSearchAndRecoverData], error) {
+func (r *WalletRequester) SearchAndRecover(mnemonic string, address common.Address, password string, save bool) (*api.ApiResponse[api.WalletSearchAndRecoverData], error) {
 	args := map[string]string{
-		"mnemonic": mnemonic,
-		"address":  address.Hex(),
-	}
-	if password != nil {
-		args["password"] = hex.EncodeToString(password)
-	}
-	if save != nil {
-		args["save"] = fmt.Sprint(*save)
+		"mnemonic":      mnemonic,
+		"address":       address.Hex(),
+		"password":      password,
+		"save-password": fmt.Sprint(save),
 	}
 	return sendGetRequest[api.WalletSearchAndRecoverData](r, "search-and-recover", "SearchAndRecover", args)
 }
@@ -111,9 +101,9 @@ func (r *WalletRequester) SetEnsName(name string) (*api.ApiResponse[api.WalletSe
 }
 
 // Sets the wallet keystore's password
-func (r *WalletRequester) SetPassword(password []byte, save bool) (*api.ApiResponse[api.SuccessData], error) {
+func (r *WalletRequester) SetPassword(password string, save bool) (*api.ApiResponse[api.SuccessData], error) {
 	args := map[string]string{
-		"password": hex.EncodeToString(password),
+		"password": password,
 		"save":     fmt.Sprint(save),
 	}
 	return sendGetRequest[api.SuccessData](r, "set-password", "SetPassword", args)

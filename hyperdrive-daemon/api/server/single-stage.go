@@ -135,7 +135,10 @@ func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], se
 
 	// Get the transact opts if this node is ready for transaction
 	var opts *bind.TransactOpts
-	walletStatus := w.GetStatus()
+	walletStatus, err := w.GetStatus()
+	if err != nil {
+		return nil, fmt.Errorf("error getting wallet status: %w", err)
+	}
 	if sharedutils.IsWalletReady(walletStatus) {
 		var err error
 		opts, err = w.GetTransactor()

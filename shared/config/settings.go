@@ -6,7 +6,8 @@ const (
 	SocketFilename   string = "daemon.sock"
 
 	// Wallet
-	UserAddressFilename  = "address"
-	UserWalletFilename   = "wallet"
-	UserPasswordFilename = "password"
+	UserAddressFilename      = "address"
+	UserWalletDataFilename   = "wallet.json"
+	UserLegacyWalletFilename = "wallet-v3"
+	UserPasswordFilename     = "password"
 )

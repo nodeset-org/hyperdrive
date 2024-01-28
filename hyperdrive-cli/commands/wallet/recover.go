@@ -21,7 +21,7 @@ func recoverWallet(c *cli.Context) error {
 		return err
 	}
 	status := statusResponse.Data.WalletStatus
-	if status.HasKeystore {
+	if status.Wallet.IsOnDisk {
 		fmt.Println("The node wallet is already initialized.")
 		return nil
 	}
@@ -32,16 +32,14 @@ func recoverWallet(c *cli.Context) error {
 	// Set password if not set
 	var password string
 	var savePassword bool
-	if !status.HasPassword {
-		if c.String(passwordFlag.Name) != "" {
-			password = c.String(passwordFlag.Name)
-		} else {
-			password = promptPassword()
-		}
-
-		// Ask about saving
-		savePassword = utils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to manually enter the password after each restart with <placeholder>.")
+	if c.String(passwordFlag.Name) != "" {
+		password = c.String(passwordFlag.Name)
+	} else {
+		password = promptNewPassword()
 	}
+
+	// Ask about saving
+	savePassword = utils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to manually enter the password after each restart with `hyperdrive wallet set-password`.")
 
 	// Prompt for mnemonic
 	var mnemonic string
@@ -60,7 +58,7 @@ func recoverWallet(c *cli.Context) error {
 		fmt.Printf("Searching for the derivation path and index for wallet %s...\nNOTE: this may take several minutes depending on how large your wallet's index is.\n", address.Hex())
 
 		// Recover wallet
-		response, err := hd.Api.Wallet.SearchAndRecover(mnemonic, address, []byte(password), &savePassword)
+		response, err := hd.Api.Wallet.SearchAndRecover(mnemonic, address, password, savePassword)
 		if err != nil {
 			return err
 		}
@@ -91,7 +89,7 @@ func recoverWallet(c *cli.Context) error {
 		fmt.Println("Recovering node wallet...")
 
 		// Recover wallet
-		response, err := hd.Api.Wallet.Recover(derivationPath, &mnemonic, walletIndex, &password, &savePassword)
+		response, err := hd.Api.Wallet.Recover(derivationPath, &mnemonic, walletIndex, password, savePassword)
 		if err != nil {
 			return err
 		}

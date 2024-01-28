@@ -28,7 +28,7 @@ func initWallet(c *cli.Context) error {
 		return err
 	}
 	status := statusResponse.Data.WalletStatus
-	if status.HasKeystore {
+	if status.Wallet.IsOnDisk {
 		fmt.Println("The node wallet is already initialized.")
 		return nil
 	}
@@ -41,17 +41,14 @@ func initWallet(c *cli.Context) error {
 
 	// Set password if not set
 	var password string
-	var savePassword bool
-	if !status.HasPassword {
-		if c.String(passwordFlag.Name) != "" {
-			password = c.String(passwordFlag.Name)
-		} else {
-			password = promptPassword()
-		}
-
-		// Ask about saving
-		savePassword = utils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to manually enter the password after each restart with <placeholder>.")
+	if c.String(passwordFlag.Name) != "" {
+		password = c.String(passwordFlag.Name)
+	} else {
+		password = promptNewPassword()
 	}
+
+	// Ask about saving
+	savePassword := utils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to manually enter the password after each restart with `hyperdrive wallet set-password`.")
 
 	// Get the derivation path
 	derivationPathString := c.String(derivationPathFlag.Name)
@@ -70,7 +67,7 @@ func initWallet(c *cli.Context) error {
 	}
 
 	// Initialize wallet
-	response, err := hd.Api.Wallet.Initialize(derivationPath, walletIndex, &password, &savePassword)
+	response, err := hd.Api.Wallet.Initialize(derivationPath, walletIndex, password, savePassword)
 	if err != nil {
 		return fmt.Errorf("error initializing wallet: %w", err)
 	}

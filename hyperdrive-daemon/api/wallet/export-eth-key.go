@@ -5,9 +5,6 @@ import (
 	"net/url"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/server"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
@@ -52,27 +49,9 @@ func (c *walletExportEthKeyContext) PrepareData(data *api.WalletExportEthKeyData
 		return err
 	}
 
-	// Get password
-	pw, isSet := w.GetPassword()
-	if !isSet {
-		return fmt.Errorf("password has not been set; cannot decrypt wallet keystore without it")
-	}
-
-	privateKeyBytes := w.GetNodePrivateKeyBytes()
-	privateKey, err := crypto.ToECDSA(privateKeyBytes)
+	ethkey, err := w.GetEthKeystore()
 	if err != nil {
-		return fmt.Errorf("error decoding wallet private key: %w", err)
-	}
-
-	// Create an ETH key from the data
-	key := &keystore.Key{
-		Address:    crypto.PubkeyToAddress(privateKey.PublicKey),
-		PrivateKey: privateKey,
-		Id:         uuid.UUID(w.GetWalletUuidBytes()),
-	}
-	ethkey, err := keystore.EncryptKey(key, string(pw), keystore.StandardScryptN, keystore.StandardScryptP)
-	if err != nil {
-		return fmt.Errorf("error converting wallet private key: %w", err)
+		return fmt.Errorf("error getting eth-style keystore: %w", err)
 	}
 	data.EthKeyJson = ethkey
 	return nil

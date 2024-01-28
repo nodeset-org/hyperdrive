@@ -56,8 +56,8 @@ var (
 	}
 )
 
-// Prompt for a wallet password
-func promptPassword() string {
+// Prompt for a new wallet password
+func promptNewPassword() string {
 	for {
 		password := utils.PromptPassword(
 			"Please enter a password to secure your wallet with:",
@@ -70,6 +70,18 @@ func promptPassword() string {
 		}
 		fmt.Println("Password confirmation does not match.")
 		fmt.Println("")
+	}
+}
+
+// Prompt for the password to a wallet that already exists
+func promptExistingPassword() string {
+	for {
+		password := utils.PromptPassword(
+			"Please enter the password your wallet was originally secured with:",
+			fmt.Sprintf("^.{%d,}$", input.MinPasswordLength),
+			fmt.Sprintf("Your password must be at least %d characters long. Please try again:", input.MinPasswordLength),
+		)
+		return password
 	}
 }
 

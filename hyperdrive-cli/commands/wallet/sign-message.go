@@ -40,7 +40,7 @@ func signMessage(c *cli.Context) error {
 		return err
 	}
 	if !sharedutils.IsWalletReady(status.Data.WalletStatus) {
-		fmt.Println("The node wallet is not initialized.")
+		fmt.Println("The node wallet is not loaded or your node is in read-only mode. Please run `hyperdrive wallet status` for more details.")
 		return nil
 	}
 
@@ -58,7 +58,7 @@ func signMessage(c *cli.Context) error {
 
 	// Print the signature
 	formattedSignature := PersonalSignature{
-		Address:   status.Data.AccountAddress,
+		Address:   status.WalletStatus.Wallet.WalletAddress,
 		Message:   message,
 		Signature: response.Data.SignedMessage,
 		Version:   fmt.Sprint(signatureVersion),

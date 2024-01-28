@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore"
@@ -120,9 +121,33 @@ func (w *Wallet) GetStatus() (sharedtypes.WalletStatus, error) {
 	return status, nil
 }
 
-// Get the wallet's address, if one is loaded
+// Get the node address, if one is loaded
 func (w *Wallet) GetAddress() (common.Address, bool) {
 	return w.addressManager.GetAddress()
+}
+
+// Get the transactor that can sign transactions
+func (w *Wallet) GetTransactor() (*bind.TransactOpts, error) {
+	if w.walletManager == nil {
+		return nil, fmt.Errorf("wallet is not loaded")
+	}
+	return w.walletManager.GetTransactor()
+}
+
+// Sign a message with the wallet's private key
+func (w *Wallet) SignMessage(message []byte) ([]byte, error) {
+	if w.walletManager == nil {
+		return nil, fmt.Errorf("wallet is not loaded")
+	}
+	return w.walletManager.SignMessage(message)
+}
+
+// Sign a transaction with the wallet's private key
+func (w *Wallet) SignTransaction(serializedTx []byte) ([]byte, error) {
+	if w.walletManager == nil {
+		return nil, fmt.Errorf("wallet is not loaded")
+	}
+	return w.walletManager.SignTransaction(serializedTx)
 }
 
 // Masquerade as another node address, running all node functions as that address (in read only moe)
@@ -150,7 +175,7 @@ func (w *Wallet) AddValidatorKeystore(name string, ks keystore.Keystore) {
 }
 
 // Initialize the wallet from a random seed
-func (w *Wallet) CreateNewLocalWallet(derivationPath string, walletIndex uint, password string) (string, error) {
+func (w *Wallet) CreateNewLocalWallet(derivationPath string, walletIndex uint, password string, savePassword bool) (string, error) {
 	if w.walletManager != nil {
 		return "", fmt.Errorf("wallet keystore is already present - please delete it before creating a new wallet")
 	}
@@ -168,7 +193,7 @@ func (w *Wallet) CreateNewLocalWallet(derivationPath string, walletIndex uint, p
 	}
 
 	// Initialize the wallet with it
-	err = w.buildLocalWallet(derivationPath, walletIndex, mnemonic, password)
+	err = w.buildLocalWallet(derivationPath, walletIndex, mnemonic, password, savePassword, false)
 	if err != nil {
 		return "", fmt.Errorf("error initializing new wallet keystore: %w", err)
 	}
@@ -176,7 +201,7 @@ func (w *Wallet) CreateNewLocalWallet(derivationPath string, walletIndex uint, p
 }
 
 // Recover a local wallet from a mnemonic
-func (w *Wallet) Recover(derivationPath string, walletIndex uint, mnemonic string, password string) error {
+func (w *Wallet) Recover(derivationPath string, walletIndex uint, mnemonic string, password string, savePassword bool, testMode bool) error {
 	if w.walletManager != nil {
 		return fmt.Errorf("wallet keystore is already present - please delete it before recovering an existing wallet")
 	}
@@ -186,7 +211,7 @@ func (w *Wallet) Recover(derivationPath string, walletIndex uint, mnemonic strin
 		return fmt.Errorf("invalid mnemonic '%s'", mnemonic)
 	}
 
-	return w.buildLocalWallet(derivationPath, walletIndex, mnemonic, password)
+	return w.buildLocalWallet(derivationPath, walletIndex, mnemonic, password, savePassword, testMode)
 }
 
 // Attempts to load the wallet keystore with the provided password if not set
@@ -258,7 +283,7 @@ func (w *Wallet) DeletePassword() error {
 // Get the node account private key bytes
 func (w *Wallet) GetNodePrivateKeyBytes() ([]byte, error) {
 	if w.walletManager == nil {
-		return nil, fmt.Errorf("wallet is not initialized")
+		return nil, fmt.Errorf("wallet is not loaded")
 	}
 
 	switch w.walletManager.GetType() {
@@ -273,7 +298,7 @@ func (w *Wallet) GetNodePrivateKeyBytes() ([]byte, error) {
 // Get the node account private key bytes
 func (w *Wallet) GetEthKeystore() ([]byte, error) {
 	if w.walletManager == nil {
-		return nil, fmt.Errorf("wallet is not initialized")
+		return nil, fmt.Errorf("wallet is not loaded")
 	}
 
 	switch w.walletManager.GetType() {
@@ -285,8 +310,16 @@ func (w *Wallet) GetEthKeystore() ([]byte, error) {
 	}
 }
 
+// Serialize the wallet data as JSON
+func (w *Wallet) SerializeData() (string, error) {
+	if w.walletManager == nil {
+		return "", fmt.Errorf("wallet is not loaded")
+	}
+	return w.walletManager.SerializeData()
+}
+
 // Builds a local wallet keystore and saves its artifacts to disk
-func (w *Wallet) buildLocalWallet(derivationPath string, walletIndex uint, mnemonic string, password string) error {
+func (w *Wallet) buildLocalWallet(derivationPath string, walletIndex uint, mnemonic string, password string, savePassword bool, testMode bool) error {
 	// Initialize the wallet with it
 	localMgr := NewLocalWalletManager(w.legacyWalletKeystorePath, w.chainID)
 	localData, err := localMgr.InitializeKeystore(derivationPath, walletIndex, mnemonic, password)
@@ -294,34 +327,42 @@ func (w *Wallet) buildLocalWallet(derivationPath string, walletIndex uint, mnemo
 		return fmt.Errorf("error initializing wallet keystore with recovered data: %w", err)
 	}
 
-	// Create data
-	data := &sharedtypes.WalletData{
-		Type:      sharedtypes.WalletType_Local,
-		LocalData: *localData,
+	if !testMode {
+		// Create data
+		data := &sharedtypes.WalletData{
+			Type:      sharedtypes.WalletType_Local,
+			LocalData: *localData,
+		}
+
+		// Save the wallet data
+		err = w.saveWalletData(data)
+		if err != nil {
+			return fmt.Errorf("error saving wallet data: %w", err)
+		}
+
+		// Save the legacy key
+		err = localMgr.SaveKeystore()
+		if err != nil {
+			return fmt.Errorf("error saving legacy wallet keystore: %w", err)
+		}
+
+		// Get the wallet address
+		walletAddress, _ := localMgr.GetAddress()
+
+		// Update the address file
+		err = w.addressManager.SetAndSaveAddress(walletAddress)
+		if err != nil {
+			return fmt.Errorf("error saving wallet address to node address file: %w", err)
+		}
+
+		if savePassword {
+			err := w.passwordManager.SavePassword(password)
+			if err != nil {
+				return fmt.Errorf("error saving password: %w", err)
+			}
+		}
 	}
 
-	// Save the wallet data
-	err = w.saveWalletData(data)
-	if err != nil {
-		return fmt.Errorf("error saving wallet data: %w", err)
-	}
-
-	// Save the legacy key
-	err = localMgr.SaveKeystore()
-	if err != nil {
-		return fmt.Errorf("error saving legacy wallet keystore: %w", err)
-	}
-
-	// Get the wallet address
-	walletAddress, _ := localMgr.GetAddress()
-
-	// Update the address file
-	err = w.addressManager.SetAndSaveAddress(walletAddress)
-	if err != nil {
-		return fmt.Errorf("error saving wallet address to node address file: %w", err)
-	}
-
-	// Update the cache
 	w.walletManager = localMgr
 	return nil
 }

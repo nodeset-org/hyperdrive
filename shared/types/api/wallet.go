@@ -19,8 +19,7 @@ type ValidatorKeystore struct {
 }
 
 type WalletStatusData struct {
-	AccountAddress common.Address     `json:"accountAddress"`
-	WalletStatus   types.WalletStatus `json:"walletStatus"`
+	WalletStatus types.WalletStatus `json:"walletStatus"`
 }
 
 type WalletInitializeData struct {
@@ -46,7 +45,7 @@ type WalletRebuildData struct {
 }
 
 type WalletExportData struct {
-	Password          []byte `json:"password"`
+	Password          string `json:"password"`
 	Wallet            string `json:"wallet"`
 	AccountPrivateKey []byte `json:"accountPrivateKey"`
 }

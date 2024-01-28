@@ -25,7 +25,7 @@ func RemovePrefix(value string) string {
 
 // Check if the node wallet is ready for transacting
 func IsWalletReady(status types.WalletStatus) bool {
-	return status.HasAddress &&
-		status.IsLoaded &&
-		status.NodeAddress == status.KeystoreAddress
+	return status.Address.HasAddress &&
+		status.Wallet.IsLoaded &&
+		status.Address.NodeAddress == status.Wallet.WalletAddress
 }

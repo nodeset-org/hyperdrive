@@ -49,7 +49,5 @@ func (c *walletDeletePasswordContext) PrepareData(data *api.SuccessData, opts *b
 	if err != nil {
 		return fmt.Errorf("error deleting wallet password from disk: %w", err)
 	}
-
-	data.Success = true
 	return nil
 }

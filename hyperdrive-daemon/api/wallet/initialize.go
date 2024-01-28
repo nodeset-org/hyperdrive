@@ -29,8 +29,8 @@ func (f *walletInitializeContextFactory) Create(args url.Values) (*walletInitial
 	server.GetOptionalStringFromVars("derivation-path", args, &c.derivationPath)
 	inputErrs := []error{
 		server.ValidateOptionalArg("index", args, input.ValidateUint, &c.index, nil),
-		server.ValidateOptionalArg("password", args, input.ValidateNodePassword, &c.password, &c.passwordExists),
-		server.ValidateOptionalArg("save-password", args, input.ValidateBool, &c.savePassword, nil),
+		server.ValidateArg("password", args, input.ValidateNodePassword, &c.password),
+		server.ValidateArg("save-password", args, input.ValidateBool, &c.savePassword),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -49,7 +49,7 @@ type walletInitializeContext struct {
 	handler        *WalletHandler
 	derivationPath string
 	index          uint64
-	password       []byte
+	password       string
 	passwordExists bool
 	savePassword   bool
 }
@@ -59,25 +59,12 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 	w := sp.GetWallet()
 
 	// Requirements
-	status := w.GetStatus()
-	if status.HasKeystore {
-		return fmt.Errorf("a wallet is already present")
+	status, err := w.GetStatus()
+	if err != nil {
+		return fmt.Errorf("error getting wallet status: %w", err)
 	}
-
-	// Use the provided password if there is one
-	if c.passwordExists {
-		w.RememberPassword(c.password)
-		if c.savePassword {
-			err := w.SavePassword()
-			if err != nil {
-				return fmt.Errorf("error saving wallet password to disk: %w", err)
-			}
-		}
-	} else {
-		_, hasPassword := w.GetPassword()
-		if !hasPassword {
-			return fmt.Errorf("you must set a password before recovering a wallet, or provide one in this call")
-		}
+	if status.Wallet.IsOnDisk {
+		return fmt.Errorf("a wallet is already present")
 	}
 
 	// Parse the derivation path
@@ -95,7 +82,7 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 	}
 
 	// Create the new wallet
-	mnemonic, err := w.CreateNewWallet(path, uint(c.index))
+	mnemonic, err := w.CreateNewLocalWallet(path, uint(c.index), c.password, c.savePassword)
 	if err != nil {
 		return fmt.Errorf("error initializing new wallet: %w", err)
 	}

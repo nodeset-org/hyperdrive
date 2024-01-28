@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/ecdsa"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"os"
@@ -248,6 +249,19 @@ func (m *LocalWalletManager) SignTransaction(serializedTx []byte) ([]byte, error
 	}
 
 	return signedData, nil
+}
+
+// Serialize the wallet data as JSON
+func (m *LocalWalletManager) SerializeData() (string, error) {
+	if m.data == nil {
+		return "", fmt.Errorf("wallet is not initialized")
+	}
+
+	bytes, err := json.Marshal(m.data)
+	if err != nil {
+		return "", fmt.Errorf("error serializing wallet data: %w", err)
+	}
+	return string(bytes), nil
 }
 
 // Get the derived key & derivation path for the account at the index
