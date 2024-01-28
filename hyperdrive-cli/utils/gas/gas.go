@@ -81,16 +81,13 @@ func GetMaxFees(c *cli.Context, hd *client.Client, simResult eth.SimulationResul
 
 	// Verify the node has enough ETH to use this max fee
 	maxFee := eth.GweiToWei(maxFeeGwei)
-	return nil, nil, fmt.Errorf("NYI")
-	/*
-		ethRequired := big.NewInt(0).Mul(maxFee, big.NewInt(int64(simResult.SafeGasLimit)))
-		response, err := hd.Api.Node.Balance()
-		if err != nil {
-			fmt.Printf("%sWARNING: couldn't check the ETH balance of the node (%s)\nPlease ensure your node wallet has enough ETH to pay for this transaction.%s\n\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
-		} else if response.Data.Balance.Cmp(ethRequired) < 0 {
-			return nil, nil, fmt.Errorf("Your node has %.6f ETH in its wallet, which is not enough to pay for this transaction with a max fee of %.4f gwei; you require at least %.6f more ETH.", eth.WeiToEth(response.Data.Balance), maxFeeGwei, eth.WeiToEth(big.NewInt(0).Sub(ethRequired, response.Data.Balance)))
-		}
-	*/
+	ethRequired := big.NewInt(0).Mul(maxFee, big.NewInt(int64(simResult.SafeGasLimit)))
+	response, err := hd.Api.Utils.Balance()
+	if err != nil {
+		fmt.Printf("%sWARNING: couldn't check the ETH balance of the node (%s)\nPlease ensure your node wallet has enough ETH to pay for this transaction.%s\n\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
+	} else if response.Data.Balance.Cmp(ethRequired) < 0 {
+		return nil, nil, fmt.Errorf("Your node has %.6f ETH in its wallet, which is not enough to pay for this transaction with a max fee of %.4f gwei; you require at least %.6f more ETH.", eth.WeiToEth(response.Data.Balance), maxFeeGwei, eth.WeiToEth(big.NewInt(0).Sub(ethRequired, response.Data.Balance)))
+	}
 	maxPriorityFee := eth.GweiToWei(maxPriorityFeeGwei)
 
 	return maxFee, maxPriorityFee, nil

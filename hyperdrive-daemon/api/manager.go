@@ -14,6 +14,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/service"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/tx"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
@@ -48,6 +49,7 @@ func NewApiManager(sp *services.ServiceProvider) *ApiManager {
 		log: log.NewColorLogger(ApiLogColor),
 		handlers: []IHandler{
 			service.NewServiceHandler(sp),
+			tx.NewTxHandler(sp),
 			utils.NewUtilsHandler(sp),
 			wallet.NewWalletHandler(sp),
 		},

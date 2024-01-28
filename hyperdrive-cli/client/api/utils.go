@@ -33,3 +33,8 @@ func (r *UtilsRequester) ResolveEns(address common.Address, name string) (*api.A
 	}
 	return sendGetRequest[api.UtilsResolveEnsData](r, "resolve-ens", "ResolveEns", args)
 }
+
+// Get the node's ETH balance
+func (r *UtilsRequester) Balance() (*api.ApiResponse[api.UtilsBalanceData], error) {
+	return sendGetRequest[api.UtilsBalanceData](r, "balance", "Balance", nil)
+}

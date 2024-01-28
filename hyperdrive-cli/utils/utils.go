@@ -12,6 +12,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
 )
@@ -76,20 +77,18 @@ func printTransactionHashImpl(hd *client.Client, hash common.Hash, finalMessage 
 
 // Get the URL for watching the transaction in a block explorer
 func getTxWatchUrl(hd *client.Client) string {
-	/*
-		cfg, isNew, err := hd.LoadConfig()
-		if err != nil {
-			fmt.Printf("Warning: couldn't read config file so the transaction URL will be unavailable (%s).\n", err)
-			return ""
-		}
+	cfg, isNew, err := hd.LoadConfig()
+	if err != nil {
+		fmt.Printf("Warning: couldn't read config file so the transaction URL will be unavailable (%s).\n", err)
+		return ""
+	}
 
-		if isNew {
-			fmt.Print("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
-			return ""
-		}
-		return cfg.Hyperdrive.GetTxWatchUrl()
-	*/
-	return "NYI"
+	if isNew {
+		fmt.Print("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
+		return ""
+	}
+	resources := utils.NewResources(cfg.Network.Value)
+	return resources.TxWatchUrl
 }
 
 // Convert a Unix datetime to a string, or `---` if it's zero

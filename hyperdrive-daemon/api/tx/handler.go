@@ -1,4 +1,4 @@
-package utils
+package tx
 
 import (
 	"github.com/gorilla/mux"
@@ -6,24 +6,27 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
 )
 
-type UtilsHandler struct {
+type TxHandler struct {
 	serviceProvider *services.ServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewUtilsHandler(serviceProvider *services.ServiceProvider) *UtilsHandler {
-	h := &UtilsHandler{
+func NewTxHandler(serviceProvider *services.ServiceProvider) *TxHandler {
+	h := &TxHandler{
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{
-		&utilsBalanceContextFactory{h},
-		&utilsResolveEnsContextFactory{h},
+		&txBatchSignTxsContextFactory{h},
+		&txBatchSubmitTxsContextFactory{h},
+		&txSignTxContextFactory{h},
+		&txSubmitTxContextFactory{h},
+		&txWaitContextFactory{h},
 	}
 	return h
 }
 
-func (h *UtilsHandler) RegisterRoutes(router *mux.Router) {
-	subrouter := router.PathPrefix("/utils").Subrouter()
+func (h *TxHandler) RegisterRoutes(router *mux.Router) {
+	subrouter := router.PathPrefix("/tx").Subrouter()
 	for _, factory := range h.factories {
 		factory.RegisterRoute(subrouter)
 	}
