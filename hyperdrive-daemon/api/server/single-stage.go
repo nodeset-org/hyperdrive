@@ -52,21 +52,32 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
+		// Log
+		args := r.URL.Query()
+		log := serviceProvider.GetApiLogger()
+		isDebug := serviceProvider.IsDebugMode()
+		if isDebug {
+			log.Printlnf("[%s] => %s", r.Method, r.URL.String())
+		} else {
+			log.Printlnf("[%s] => %s", r.Method, r.URL.Path)
+		}
+
+		// Check the method
 		if r.Method != http.MethodGet {
-			handleInvalidMethod(w)
+			handleInvalidMethod(log, w)
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
-		context, err := factory.Create(r.URL.Query())
+		context, err := factory.Create(args)
 		if err != nil {
-			handleInputError(w, err)
+			handleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runSingleStageRoute[DataType](context, serviceProvider)
-		handleResponse(w, response, err)
+		handleResponse(log, w, response, err, isDebug)
 	})
 }
 
@@ -79,36 +90,45 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
+		// Log
+		log := serviceProvider.GetApiLogger()
+		isDebug := serviceProvider.IsDebugMode()
+		log.Printlnf("[%s] => %s", r.Method, r.URL.Path)
+
+		// Check the method
 		if r.Method != http.MethodPost {
-			handleInvalidMethod(w)
+			handleInvalidMethod(log, w)
 			return
 		}
 
 		// Read the body
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			handleInputError(w, fmt.Errorf("error reading request body: %w", err))
+			handleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
 			return
+		}
+		if isDebug {
+			log.Println(string(bodyBytes))
 		}
 
 		// Deserialize the body
 		var body BodyType
 		err = json.Unmarshal(bodyBytes, &body)
 		if err != nil {
-			handleInputError(w, fmt.Errorf("error deserializing request body: %w", err))
+			handleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(body)
 		if err != nil {
-			handleInputError(w, err)
+			handleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runSingleStageRoute[DataType](context, serviceProvider)
-		handleResponse(w, response, err)
+		handleResponse(log, w, response, err, isDebug)
 	})
 }
 

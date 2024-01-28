@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
 // Function for validating an argument (wraps the old CLI validators)
@@ -107,26 +108,29 @@ func GetOptionalStringFromVars(name string, args url.Values, result_Out *string)
 }
 
 // Handles an error related to parsing the input parameters of a request
-func handleInputError(w http.ResponseWriter, err error) {
+func handleInputError(log *log.ColorLogger, w http.ResponseWriter, err error) {
 	// Write out any errors
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
+		log.Printlnf("[%d BAD_REQUEST] <= %s", http.StatusBadRequest, err.Error())
 	}
 }
 
 // Handle routes called with an invalid method
-func handleInvalidMethod(w http.ResponseWriter) {
+func handleInvalidMethod(log *log.ColorLogger, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	w.Write([]byte{})
+	log.Printlnf("[%d METHOD_NOT_ALLOWED]", http.StatusMethodNotAllowed)
 }
 
 // Handles a Node daemon response
-func handleResponse(w http.ResponseWriter, response any, err error) {
+func handleResponse(log *log.ColorLogger, w http.ResponseWriter, response any, err error, debug bool) {
 	// Write out any errors
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+		log.Printlnf("[%d INTERNAL_SERVER_ERROR] <= %s", http.StatusInternalServerError, err.Error())
 	}
 
 	// Write the serialized response
@@ -135,8 +139,14 @@ func handleResponse(w http.ResponseWriter, response any, err error) {
 		err = fmt.Errorf("error serializing response: %w", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
+		log.Printlnf("[%d INTERNAL_SERVER_ERROR] <= %s", http.StatusInternalServerError, err.Error())
 	} else {
 		w.Header().Add("Content-Type", "application/json")
 		w.Write(bytes)
+		if debug {
+			log.Printlnf("[%d OK] <= %s", http.StatusOK, string(bytes))
+		} else {
+			log.Printlnf("[%d OK]", http.StatusOK)
+		}
 	}
 }

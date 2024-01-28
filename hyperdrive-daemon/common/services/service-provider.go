@@ -7,6 +7,7 @@ import (
 	"runtime"
 
 	"github.com/docker/docker/client"
+	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet"
@@ -17,6 +18,11 @@ import (
 	tkkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/teku"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
+	"github.com/nodeset-org/hyperdrive/shared/utils/log"
+)
+
+const (
+	apiLogColor color.Attribute = color.FgHiCyan
 )
 
 // A container for all of the various services used by Hyperdrive
@@ -30,6 +36,9 @@ type ServiceProvider struct {
 	txMgr      *eth.TransactionManager
 	queryMgr   *eth.QueryManager
 	resources  *utils.Resources
+
+	// TODO: find a better place for this than the common service provider
+	apiLogger *log.ColorLogger
 
 	// Path info
 	userDir string
@@ -46,6 +55,9 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("hyperdrive config settings file [%s] not found", cfgPath)
 	}
+
+	// Logger
+	apiLogger := log.NewColorLogger(apiLogColor)
 
 	// Resources
 	resources := utils.NewResources(cfg.Network.Value)
@@ -119,6 +131,7 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 		resources:  resources,
 		txMgr:      txMgr,
 		queryMgr:   queryMgr,
+		apiLogger:  &apiLogger,
 	}
 	return provider, nil
 }
@@ -161,6 +174,14 @@ func (p *ServiceProvider) GetTransactionManager() *eth.TransactionManager {
 
 func (p *ServiceProvider) GetQueryManager() *eth.QueryManager {
 	return p.queryMgr
+}
+
+func (p *ServiceProvider) GetApiLogger() *log.ColorLogger {
+	return p.apiLogger
+}
+
+func (p *ServiceProvider) IsDebugMode() bool {
+	return p.cfg.DebugMode.Value
 }
 
 // =============

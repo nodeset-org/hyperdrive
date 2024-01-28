@@ -223,7 +223,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 DebugModeID,
 				Name:               "Debug Mode",
-				Description:        "True to enable debug mode, which at some point will print extra stuff but doesn't right now.",
+				Description:        "Enable debug log printing in the daemon.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,

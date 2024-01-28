@@ -14,18 +14,23 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/fatih/color"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
 const (
-	baseUrl         string = "http://hyperdrive/%s"
-	jsonContentType string = "application/json"
+	baseUrl         string          = "http://hyperdrive/%s"
+	jsonContentType string          = "application/json"
+	apiColor        color.Attribute = color.FgHiCyan
 )
 
 type RequesterContext struct {
 	socketPath string
 	client     *http.Client
+	debugMode  bool
+	log        *log.ColorLogger
 }
 
 type IRequester interface {
@@ -45,12 +50,14 @@ type ApiRequester struct {
 }
 
 // Creates a new API requester instance
-func NewApiRequester(socketPath string) *ApiRequester {
+func NewApiRequester(socketPath string, debugMode bool) *ApiRequester {
 	apiRequester := &ApiRequester{
 		context: &RequesterContext{
 			socketPath: socketPath,
+			debugMode:  debugMode,
 		},
 	}
+
 	apiRequester.context.client = &http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
@@ -58,6 +65,9 @@ func NewApiRequester(socketPath string) *ApiRequester {
 			},
 		},
 	}
+
+	log := log.NewColorLogger(apiColor)
+	apiRequester.context.log = &log
 
 	apiRequester.Service = NewServiceRequester(apiRequester.context)
 	apiRequester.Tx = NewTxRequester(apiRequester.context)
@@ -99,9 +109,14 @@ func rawGetRequest[DataType any](context *RequesterContext, path string, params 
 	}
 	req.URL.RawQuery = values.Encode()
 
+	// Debug log
+	if context.debugMode {
+		context.log.Printlnf("[DEBUG] Query: GET %s", req.URL.String())
+	}
+
 	// Run the request
 	resp, err := context.client.Do(req)
-	return handleResponse[DataType](resp, path, err)
+	return handleResponse[DataType](context, resp, path, err)
 }
 
 // Submit a POST request to the API server
@@ -127,12 +142,18 @@ func rawPostRequest[DataType any](context *RequesterContext, path string, body s
 		return nil, fmt.Errorf("the socket at [%s] does not exist - please start the Hyperdrive daemon and try again", context.socketPath)
 	}
 
+	// Debug log
+	if context.debugMode {
+		context.log.Printlnf("[DEBUG] Query: POST %s", path)
+		context.log.Printlnf("[DEBUG] Body: %s", body)
+	}
+
 	resp, err := context.client.Post(fmt.Sprintf(baseUrl, path), jsonContentType, strings.NewReader(body))
-	return handleResponse[DataType](resp, path, err)
+	return handleResponse[DataType](context, resp, path, err)
 }
 
 // Processes a response to a request
-func handleResponse[DataType any](resp *http.Response, path string, err error) (*api.ApiResponse[DataType], error) {
+func handleResponse[DataType any](context *RequesterContext, resp *http.Response, path string, err error) (*api.ApiResponse[DataType], error) {
 	if err != nil {
 		return nil, fmt.Errorf("error requesting %s: %w", path, err)
 	}
@@ -151,6 +172,11 @@ func handleResponse[DataType any](resp *http.Response, path string, err error) (
 	}
 	if err != nil {
 		return nil, fmt.Errorf("error reading the response body for %s: %w", path, err)
+	}
+
+	// Debug log
+	if context.debugMode {
+		context.log.Printlnf("[DEBUG] Response: %s", string(bytes))
 	}
 
 	// Deserialize the response into the provided type

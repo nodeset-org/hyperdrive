@@ -37,7 +37,7 @@ func NewClientFromCtx(c *cli.Context) *Client {
 	socketPath := filepath.Join(snCtx.ConfigPath, config.SocketFilename)
 
 	client := &Client{
-		Api:     api.NewApiRequester(socketPath),
+		Api:     api.NewApiRequester(socketPath, snCtx.DebugEnabled),
 		Context: snCtx,
 	}
 	return client
