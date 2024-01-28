@@ -254,6 +254,44 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					return sendMessage(c, c.Args().Get(0), message)
 				},
 			},
+
+			{
+				Name:    "masquerade",
+				Aliases: []string{"m"},
+				Usage:   "Change your node's effective address to a different one, so your daemon will act as though you were that address. Your node will be in read-only mode while masquerading since you don't have the corresponding wallet's private key.",
+				Flags: []cli.Flag{
+					utils.YesFlag,
+					masqueradeAddressFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					if err := input.ValidateArgCount(c, 0); err != nil {
+						return err
+					}
+
+					// Run
+					return masquerade(c)
+				},
+			},
+
+			{
+				Name:      "restore-address",
+				Aliases:   []string{"ra"},
+				Usage:     "Restore your node's effective address back to your wallet address, ending a masquerade if you have one active. This will take it out of read-only mode.",
+				ArgsUsage: "to-address hex-message",
+				Flags: []cli.Flag{
+					utils.YesFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					if err := input.ValidateArgCount(c, 0); err != nil {
+						return err
+					}
+
+					// Run
+					return restoreAddress(c)
+				},
+			},
 		},
 	})
 }

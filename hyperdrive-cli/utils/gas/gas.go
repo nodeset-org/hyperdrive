@@ -81,6 +81,7 @@ func GetMaxFees(c *cli.Context, hd *client.Client, simResult eth.SimulationResul
 
 	// Verify the node has enough ETH to use this max fee
 	maxFee := eth.GweiToWei(maxFeeGwei)
+	return nil, nil, fmt.Errorf("NYI")
 	/*
 		ethRequired := big.NewInt(0).Mul(maxFee, big.NewInt(int64(simResult.SafeGasLimit)))
 		response, err := hd.Api.Node.Balance()

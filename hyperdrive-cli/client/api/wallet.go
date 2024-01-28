@@ -58,6 +58,14 @@ func (r *WalletRequester) Initialize(derivationPath *string, index *uint64, pass
 	return sendGetRequest[api.WalletInitializeData](r, "initialize", "Initialize", args)
 }
 
+// Set the node address to an arbitrary address
+func (r *WalletRequester) Masquerade(address common.Address) (*api.ApiResponse[api.SuccessData], error) {
+	args := map[string]string{
+		"address": address.Hex(),
+	}
+	return sendGetRequest[api.SuccessData](r, "masquerade", "Masquerade", args)
+}
+
 // Rebuild the validator keys associated with the wallet
 func (r *WalletRequester) Rebuild() (*api.ApiResponse[api.WalletRebuildData], error) {
 	return sendGetRequest[api.WalletRebuildData](r, "rebuild", "Rebuild", nil)
@@ -79,6 +87,11 @@ func (r *WalletRequester) Recover(derivationPath *string, mnemonic *string, inde
 		args["index"] = fmt.Sprint(*index)
 	}
 	return sendGetRequest[api.WalletRecoverData](r, "recover", "Recover", args)
+}
+
+// Set the node address back to the wallet address
+func (r *WalletRequester) RestoreAddress() (*api.ApiResponse[api.SuccessData], error) {
+	return sendGetRequest[api.SuccessData](r, "restore-address", "RestoreAddress", nil)
 }
 
 // Search and recover wallet
