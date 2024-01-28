@@ -10,12 +10,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/eth-utils/eth"
+	"github.com/nodeset-org/hyperdrive/daemons/common/validator/keystore"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet"
-	lhkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/lighthouse"
-	lskeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/lodestar"
-	nmkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/nimbus"
-	prkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/prysm"
-	tkkeystore "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore/teku"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
@@ -78,11 +74,11 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 
 	// Keystores
 	validatorKeychainPath := "" //os.ExpandEnv(cfg.Hyperdrive.GetValidatorKeychainPath())
-	lighthouseKeystore := lhkeystore.NewKeystore(validatorKeychainPath)
-	lodestarKeystore := lskeystore.NewKeystore(validatorKeychainPath)
-	nimbusKeystore := nmkeystore.NewKeystore(validatorKeychainPath)
-	prysmKeystore := prkeystore.NewKeystore(validatorKeychainPath)
-	tekuKeystore := tkkeystore.NewKeystore(validatorKeychainPath)
+	lighthouseKeystore := keystore.NewLighthouseKeystoreManager(validatorKeychainPath)
+	lodestarKeystore := keystore.NewLodestarKeystoreManager(validatorKeychainPath)
+	nimbusKeystore := keystore.NewNimbusKeystoreManager(validatorKeychainPath)
+	prysmKeystore := keystore.NewPrysmKeystoreManager(validatorKeychainPath)
+	tekuKeystore := keystore.NewTekuKeystoreManager(validatorKeychainPath)
 	nodeWallet.AddValidatorKeystore("lighthouse", lighthouseKeystore)
 	nodeWallet.AddValidatorKeystore("lodestar", lodestarKeystore)
 	nodeWallet.AddValidatorKeystore("nimbus", nimbusKeystore)

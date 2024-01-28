@@ -1,4 +1,4 @@
-package api
+package server
 
 import (
 	"context"
@@ -8,17 +8,11 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/fatih/color"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/service"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/tx"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/utils"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/wallet"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/daemons/common/services"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
@@ -40,20 +34,15 @@ type ApiManager struct {
 }
 
 // parameter: sp *services.ServiceProvider
-func NewApiManager(sp *services.ServiceProvider) *ApiManager {
+func NewApiManager(sp *services.ServiceProvider, socketPath string, handlers []IHandler, route string) *ApiManager {
 	// Create the router
 	router := mux.NewRouter()
 
 	// Create the manager
 	mgr := &ApiManager{
-		log: log.NewColorLogger(ApiLogColor),
-		handlers: []IHandler{
-			service.NewServiceHandler(sp),
-			tx.NewTxHandler(sp),
-			utils.NewUtilsHandler(sp),
-			wallet.NewWalletHandler(sp),
-		},
-		socketPath: filepath.Join(sp.GetUserDir(), config.SocketFilename),
+		log:        log.NewColorLogger(ApiLogColor),
+		handlers:   handlers,
+		socketPath: socketPath, //filepath.Join(sp.GetUserDir(), config.SocketFilename),
 		router:     router,
 		server: http.Server{
 			Handler: router,
@@ -61,7 +50,7 @@ func NewApiManager(sp *services.ServiceProvider) *ApiManager {
 	}
 
 	// Register each route
-	hyperdriveRouter := router.Host("hyperdrive").Subrouter() // The host will be accessible at http://hyperdrive/...
+	hyperdriveRouter := router.Host(route).Subrouter()
 	for _, handler := range mgr.handlers {
 		handler.RegisterRoutes(hyperdriveRouter)
 	}

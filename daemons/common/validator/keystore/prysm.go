@@ -1,75 +1,65 @@
-package prysm
+package keystore
 
 import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
 	"github.com/nodeset-org/eth-utils/beacon"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore"
+	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
 
-// Config
-const (
-	KeystoreDir              string      = "prysm-non-hd"
-	WalletDir                string      = "direct"
-	AccountsDir              string      = "accounts"
-	KeystoreFileName         string      = "all-accounts.keystore.json"
-	ConfigFileName           string      = "keymanageropts.json"
-	KeystorePasswordFileName string      = "secret"
-	DirMode                  fs.FileMode = 0770
-	FileMode                 fs.FileMode = 0640
-
-	DirectEIPVersion = "EIP-2335"
-)
-
-// Prysm keystore
-type Keystore struct {
-	keystorePath string
-	as           *accountStore
-	encryptor    *eth2ks.Encryptor
+// Prysm keystore manager
+type PrysmKeystoreManager struct {
+	keystorePath             string
+	as                       *prysmAccountStore
+	encryptor                *eth2ks.Encryptor
+	keystoreDir              string
+	walletDir                string
+	accountsDir              string
+	keystoreFileName         string
+	configFileName           string
+	keystorePasswordFileName string
 }
 
-// Encrypted validator keystore
-type validatorKeystore struct {
-	Crypto  map[string]interface{} `json:"crypto"`
-	Name    string                 `json:"name"`
-	Version uint                   `json:"version"`
-	UUID    uuid.UUID              `json:"uuid"`
-	Pubkey  string                 `json:"pubkey"`
-}
-type accountStore struct {
+type prysmAccountStore struct {
 	PrivateKeys [][]byte `json:"private_keys"`
 	PublicKeys  [][]byte `json:"public_keys"`
 }
 
 // Prysm direct wallet config
-type walletConfig struct {
+type prysmWalletConfig struct {
 	DirectEIPVersion string `json:"direct_eip_version"`
 }
 
-// Create new prysm keystore
-func NewKeystore(keystorePath string) *Keystore {
-	return &Keystore{
-		keystorePath: keystorePath,
-		encryptor:    eth2ks.New(),
+// Create new prysm keystore manager
+func NewPrysmKeystoreManager(keystorePath string) *PrysmKeystoreManager {
+	return &PrysmKeystoreManager{
+		keystorePath:             keystorePath,
+		encryptor:                eth2ks.New(),
+		keystoreDir:              "prysm-non-hd",
+		walletDir:                "direct",
+		accountsDir:              "accounts",
+		keystoreFileName:         "all-accounts.keystore.json",
+		configFileName:           "keymanageropts.json",
+		keystorePasswordFileName: "secret",
 	}
 }
 
 // Get the keystore directory
-func (ks *Keystore) GetKeystoreDir() string {
-	return filepath.Join(ks.keystorePath, KeystoreDir)
+func (ks *PrysmKeystoreManager) GetKeystoreDir() string {
+	return filepath.Join(ks.keystorePath, ks.keystoreDir)
 }
 
 // Store a validator key
-func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPath string) error {
+func (ks *PrysmKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPath string) error {
 
 	// Initialize the account store
 	if err := ks.initialize(); err != nil {
@@ -94,7 +84,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Get the keystore account password
-	passwordFilePath := filepath.Join(ks.keystorePath, KeystoreDir, WalletDir, AccountsDir, KeystorePasswordFileName)
+	passwordFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystorePasswordFileName)
 	passwordBytes, err := os.ReadFile(passwordFilePath)
 	if err != nil {
 		return fmt.Errorf("Error reading account password file: %w", err)
@@ -108,7 +98,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Create new keystore
-	keystore := validatorKeystore{
+	keystore := types.ValidatorKeystore{
 		Crypto:  asEncrypted,
 		Name:    ks.encryptor.Name(),
 		Version: ks.encryptor.Version(),
@@ -122,8 +112,8 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Get file paths
-	keystoreFilePath := filepath.Join(ks.keystorePath, KeystoreDir, WalletDir, AccountsDir, KeystoreFileName)
-	configFilePath := filepath.Join(ks.keystorePath, KeystoreDir, WalletDir, ConfigFileName)
+	keystoreFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystoreFileName)
+	configFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.walletDir, ks.configFileName)
 
 	// Create keystore dir
 	if err := os.MkdirAll(filepath.Dir(keystoreFilePath), DirMode); err != nil {
@@ -141,7 +131,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Create & encode wallet config
-	configBytes, err := json.Marshal(walletConfig{
+	configBytes, err := json.Marshal(prysmWalletConfig{
 		DirectEIPVersion: DirectEIPVersion,
 	})
 	if err != nil {
@@ -159,7 +149,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 }
 
 // Initialize the account store
-func (ks *Keystore) initialize() error {
+func (ks *PrysmKeystoreManager) initialize() error {
 
 	// Cancel if already initialized
 	if ks.as != nil {
@@ -168,11 +158,11 @@ func (ks *Keystore) initialize() error {
 
 	// Create the random keystore password if it doesn't exist
 	var password string
-	passwordFilePath := filepath.Join(ks.keystorePath, KeystoreDir, WalletDir, AccountsDir, KeystorePasswordFileName)
+	passwordFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystorePasswordFileName)
 	_, err := os.Stat(passwordFilePath)
 	if os.IsNotExist(err) {
 		// Create a new password
-		password, err = keystore.GenerateRandomPassword()
+		password, err = utils.GenerateRandomPassword()
 		if err != nil {
 			return fmt.Errorf("Could not generate random password: %w", err)
 		}
@@ -199,14 +189,14 @@ func (ks *Keystore) initialize() error {
 	password = string(passwordBytes)
 
 	// Read keystore file; initialize empty account store if it doesn't exist
-	ksBytes, err := os.ReadFile(filepath.Join(ks.keystorePath, KeystoreDir, WalletDir, AccountsDir, KeystoreFileName))
+	ksBytes, err := os.ReadFile(filepath.Join(ks.keystorePath, ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystoreFileName))
 	if err != nil {
-		ks.as = &accountStore{}
+		ks.as = &prysmAccountStore{}
 		return nil
 	}
 
 	// Decode keystore
-	keystore := &validatorKeystore{}
+	keystore := &types.ValidatorKeystore{}
 	if err = json.Unmarshal(ksBytes, keystore); err != nil {
 		return fmt.Errorf("Could not decode validator keystore: %w", err)
 	}
@@ -218,7 +208,7 @@ func (ks *Keystore) initialize() error {
 	}
 
 	// Decode account store
-	as := &accountStore{}
+	as := &prysmAccountStore{}
 	if err = json.Unmarshal(asBytes, as); err != nil {
 		return fmt.Errorf("Could not decode validator account store: %w", err)
 	}
@@ -233,7 +223,7 @@ func (ks *Keystore) initialize() error {
 }
 
 // Load a private key
-func (ks *Keystore) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
+func (ks *PrysmKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 
 	// Initialize the account store
 	err := ks.initialize()

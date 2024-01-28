@@ -6,7 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/server"
+	"github.com/nodeset-org/hyperdrive/daemons/common/server"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 

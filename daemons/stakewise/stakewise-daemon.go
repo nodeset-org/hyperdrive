@@ -11,8 +11,8 @@ import (
 	"syscall"
 
 	"github.com/nodeset-org/hyperdrive/daemons/common/services"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/tasks"
+	"github.com/nodeset-org/hyperdrive/daemons/stakewise/api"
+	"github.com/nodeset-org/hyperdrive/daemons/stakewise/tasks"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/urfave/cli/v2"
@@ -30,8 +30,8 @@ func main() {
 	app := cli.NewApp()
 
 	// Set application info
-	app.Name = "hyperdrive-daemon"
-	app.Usage = "Hyperdrive Daemon for NodeSet Node Operator Management"
+	app.Name = "stakewise-daemon"
+	app.Usage = "Hyperdrive Daemon for NodeSet Stakewise Module Management"
 	app.Version = shared.HyperdriveVersion
 	app.Authors = []*cli.Author{
 		{
@@ -90,7 +90,7 @@ func main() {
 		}
 
 		// Start the API manager
-		apiMgr := api.NewHyperdriveServer(sp)
+		apiMgr := api.NewStakewiseServer(sp)
 		err = apiMgr.Start(apiWg, cfgFileStat.Uid, cfgFileStat.Gid)
 		if err != nil {
 			return fmt.Errorf("error starting API manager: %w", err)

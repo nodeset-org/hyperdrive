@@ -3,7 +3,7 @@ package tasks
 import (
 	"github.com/docker/docker/client"
 	"github.com/nodeset-org/eth-utils/eth"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/daemons/common/services"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"

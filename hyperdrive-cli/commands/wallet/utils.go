@@ -15,7 +15,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
@@ -185,7 +185,7 @@ func promptForCustomKeyPasswords(rp *client.Client, cfg *config.HyperdriveConfig
 		}
 
 		// Deserialize it
-		keystore := api.ValidatorKeystore{}
+		keystore := types.ValidatorKeystore{}
 		err = json.Unmarshal(bytes, &keystore)
 		if err != nil {
 			return "", fmt.Errorf("error deserializing custom keystore %s: %w", file.Name(), err)

@@ -2,8 +2,8 @@ package tx
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/api/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/daemons/common/server"
+	"github.com/nodeset-org/hyperdrive/daemons/common/services"
 )
 
 type TxHandler struct {

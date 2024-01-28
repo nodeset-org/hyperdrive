@@ -10,7 +10,7 @@ import (
 	"github.com/goccy/go-json"
 
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/services"
+	"github.com/nodeset-org/hyperdrive/daemons/common/services"
 	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
 )
 

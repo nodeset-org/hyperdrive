@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/color"
 	beaconutils "github.com/nodeset-org/eth-utils/beacon"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/beacon"
+	"github.com/nodeset-org/hyperdrive/daemons/common/beacon"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"

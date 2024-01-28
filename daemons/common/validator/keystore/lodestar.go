@@ -1,67 +1,55 @@
-package nimbus
+package keystore
 
 import (
 	"fmt"
-	"io/fs"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
 	"github.com/nodeset-org/eth-utils/beacon"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
-
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore"
 )
 
-// Config
-const (
-	KeystoreDir   string      = "nimbus"
-	SecretsDir    string      = "secrets"
-	ValidatorsDir string      = "validators"
-	KeyFileName   string      = "keystore.json"
-	DirMode       fs.FileMode = 0770
-	FileMode      fs.FileMode = 0640
-)
-
-// Nimbus keystore
-type Keystore struct {
-	keystorePath string
-	encryptor    *eth2ks.Encryptor
+// Lodestar keystore manager
+type LodestarKeystoreManager struct {
+	keystorePath  string
+	encryptor     *eth2ks.Encryptor
+	keystoreDir   string
+	secretsDir    string
+	validatorsDir string
+	keyFileName   string
 }
 
-// Encrypted validator key store
-type validatorKey struct {
-	Crypto  map[string]interface{} `json:"crypto"`
-	Version uint                   `json:"version"`
-	UUID    uuid.UUID              `json:"uuid"`
-	Path    string                 `json:"path"`
-	Pubkey  beacon.ValidatorPubkey `json:"pubkey"`
-}
-
-// Create new nimbus keystore
-func NewKeystore(keystorePath string) *Keystore {
-	return &Keystore{
-		keystorePath: keystorePath,
-		encryptor:    eth2ks.New(),
+// Create new lodestar keystore manager
+func NewLodestarKeystoreManager(keystorePath string) *LodestarKeystoreManager {
+	return &LodestarKeystoreManager{
+		keystorePath:  keystorePath,
+		encryptor:     eth2ks.New(eth2ks.WithCipher("scrypt")),
+		keystoreDir:   "lodestar",
+		secretsDir:    "secrets",
+		validatorsDir: "validators",
+		keyFileName:   "voting-keystore.json",
 	}
 }
 
 // Get the keystore directory
-func (ks *Keystore) GetKeystoreDir() string {
-	return filepath.Join(ks.keystorePath, KeystoreDir)
+func (ks *LodestarKeystoreManager) GetKeystoreDir() string {
+	return filepath.Join(ks.keystorePath, ks.keystoreDir)
 }
 
 // Store a validator key
-func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPath string) error {
+func (ks *LodestarKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPath string) error {
 
 	// Get validator pubkey
 	pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
 
 	// Create a new password
-	password, err := keystore.GenerateRandomPassword()
+	password, err := utils.GenerateRandomPassword()
 	if err != nil {
 		return fmt.Errorf("Could not generate random password: %w", err)
 	}
@@ -73,7 +61,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Create key store
-	keyStore := validatorKey{
+	keyStore := types.ValidatorKeystore{
 		Crypto:  encryptedKey,
 		Version: ks.encryptor.Version(),
 		UUID:    uuid.New(),
@@ -88,7 +76,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Get secret file path
-	secretFilePath := filepath.Join(ks.keystorePath, KeystoreDir, SecretsDir, utils.AddPrefix(pubkey.Hex()))
+	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, utils.AddPrefix(pubkey.Hex()))
 
 	// Create secrets dir
 	if err := os.MkdirAll(filepath.Dir(secretFilePath), DirMode); err != nil {
@@ -96,12 +84,12 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Write secret to disk
-	if err := os.WriteFile(secretFilePath, []byte(password), FileMode); err != nil {
+	if err := ioutil.WriteFile(secretFilePath, []byte(password), FileMode); err != nil {
 		return fmt.Errorf("Could not write validator secret to disk: %w", err)
 	}
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystorePath, KeystoreDir, ValidatorsDir, utils.AddPrefix(pubkey.Hex()), KeyFileName)
+	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, utils.AddPrefix(pubkey.Hex()), ks.keyFileName)
 
 	// Create key dir
 	if err := os.MkdirAll(filepath.Dir(keyFilePath), DirMode); err != nil {
@@ -109,7 +97,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Write key store to disk
-	if err := os.WriteFile(keyFilePath, keyStoreBytes, FileMode); err != nil {
+	if err := ioutil.WriteFile(keyFilePath, keyStoreBytes, FileMode); err != nil {
 		return fmt.Errorf("Could not write validator key to disk: %w", err)
 	}
 
@@ -119,43 +107,43 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 }
 
 // Load a private key
-func (ks *Keystore) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
+func (ks *LodestarKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystorePath, KeystoreDir, ValidatorsDir, utils.AddPrefix(pubkey.Hex()), KeyFileName)
+	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, utils.AddPrefix(pubkey.Hex()), ks.keyFileName)
 
 	// Read the key file
 	_, err := os.Stat(keyFilePath)
 	if os.IsNotExist(err) {
 		return nil, nil
 	} else if err != nil {
-		return nil, fmt.Errorf("couldn't open the Nimbus keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't open the Lodestar keystore for pubkey %s: %w", pubkey.Hex(), err)
 	}
 	bytes, err := os.ReadFile(keyFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't read the Nimbus keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't read the Lodestar keystore for pubkey %s: %w", pubkey.Hex(), err)
 	}
 
 	// Unmarshal the keystore
-	var keystore validatorKey
+	var keystore types.ValidatorKeystore
 	err = json.Unmarshal(bytes, &keystore)
 	if err != nil {
-		return nil, fmt.Errorf("error deserializing Nimbus keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("error deserializing Lodestar keystore for pubkey %s: %w", pubkey.Hex(), err)
 	}
 
 	// Get secret file path
-	secretFilePath := filepath.Join(ks.keystorePath, KeystoreDir, SecretsDir, utils.AddPrefix(pubkey.Hex()))
+	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, utils.AddPrefix(pubkey.Hex()))
 
 	// Read secret from disk
 	_, err = os.Stat(secretFilePath)
 	if os.IsNotExist(err) {
 		return nil, nil
 	} else if err != nil {
-		return nil, fmt.Errorf("couldn't open the Nimbus secret for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't open the Lodestar secret for pubkey %s: %w", pubkey.Hex(), err)
 	}
 	bytes, err = os.ReadFile(secretFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't read the Nimbus secret for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't read the Lodestar secret for pubkey %s: %w", pubkey.Hex(), err)
 	}
 
 	// Decrypt key

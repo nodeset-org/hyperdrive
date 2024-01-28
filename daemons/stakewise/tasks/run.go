@@ -43,7 +43,7 @@ func (t *TaskLoop) Run() error {
 	errorLog := log.NewColorLogger(ErrorColor)
 
 	// Initialize tasks
-	// Nothing here yet
+	updateDepositData := NewUpdateDepositData(t.sp, log.NewColorLogger(UpdateDepositDataColor))
 
 	// Run the loop
 	go func() {
@@ -68,7 +68,11 @@ func (t *TaskLoop) Run() error {
 				continue
 			}
 
-			// Tasks go here
+			// Update deposit data from the NodeSet server
+			if err := updateDepositData.Run(); err != nil {
+				errorLog.Println(err)
+			}
+			// time.Sleep(taskCooldown)
 
 			if t.sleepAndCheckIfCancelled(tasksInterval) {
 				break

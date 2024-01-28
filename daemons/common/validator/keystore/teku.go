@@ -1,8 +1,7 @@
-package teku
+package keystore
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -12,55 +11,43 @@ import (
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet/keystore"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 )
 
-// Config
-const (
-	KeystoreDir   string      = "teku"
-	SecretsDir    string      = "passwords"
-	ValidatorsDir string      = "keys"
-	DirMode       fs.FileMode = 0770
-	FileMode      fs.FileMode = 0640
-)
-
-// Teku keystore
-type Keystore struct {
-	keystorePath string
-	encryptor    *eth2ks.Encryptor
+// Teku keystore manager
+type TekuKeystoreManager struct {
+	keystorePath  string
+	encryptor     *eth2ks.Encryptor
+	keystoreDir   string
+	secretsDir    string
+	validatorsDir string
 }
 
-// Encrypted validator key store
-type validatorKey struct {
-	Crypto  map[string]interface{} `json:"crypto"`
-	Version uint                   `json:"version"`
-	UUID    uuid.UUID              `json:"uuid"`
-	Path    string                 `json:"path"`
-	Pubkey  beacon.ValidatorPubkey `json:"pubkey"`
-}
-
-// Create new teku keystore
-func NewKeystore(keystorePath string) *Keystore {
-	return &Keystore{
-		keystorePath: keystorePath,
-		encryptor:    eth2ks.New(eth2ks.WithCipher("scrypt")),
+// Create new teku keystore manager
+func NewTekuKeystoreManager(keystorePath string) *TekuKeystoreManager {
+	return &TekuKeystoreManager{
+		keystorePath:  keystorePath,
+		encryptor:     eth2ks.New(eth2ks.WithCipher("scrypt")),
+		keystoreDir:   "teku",
+		secretsDir:    "passwords",
+		validatorsDir: "keys",
 	}
 }
 
 // Get the keystore directory
-func (ks *Keystore) GetKeystoreDir() string {
-	return filepath.Join(ks.keystorePath, KeystoreDir)
+func (ks *TekuKeystoreManager) GetKeystoreDir() string {
+	return filepath.Join(ks.keystorePath, ks.keystoreDir)
 }
 
 // Store a validator key
-func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPath string) error {
+func (ks *TekuKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPath string) error {
 
 	// Get validator pubkey
 	pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
 
 	// Create a new password
-	password, err := keystore.GenerateRandomPassword()
+	password, err := utils.GenerateRandomPassword()
 	if err != nil {
 		return fmt.Errorf("Could not generate random password: %w", err)
 	}
@@ -72,7 +59,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Create key store
-	keyStore := validatorKey{
+	keyStore := types.ValidatorKeystore{
 		Crypto:  encryptedKey,
 		Version: ks.encryptor.Version(),
 		UUID:    uuid.New(),
@@ -87,7 +74,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Get secret file path
-	secretFilePath := filepath.Join(ks.keystorePath, KeystoreDir, SecretsDir, utils.AddPrefix(pubkey.Hex())+".txt")
+	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, utils.AddPrefix(pubkey.Hex())+".txt")
 
 	// Create secrets dir
 	if err := os.MkdirAll(filepath.Dir(secretFilePath), DirMode); err != nil {
@@ -100,7 +87,7 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 	}
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystorePath, KeystoreDir, ValidatorsDir, utils.AddPrefix(pubkey.Hex())+".json")
+	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, utils.AddPrefix(pubkey.Hex())+".json")
 
 	// Create key dir
 	if err := os.MkdirAll(filepath.Dir(keyFilePath), DirMode); err != nil {
@@ -118,10 +105,10 @@ func (ks *Keystore) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPa
 }
 
 // Load a private key
-func (ks *Keystore) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
+func (ks *TekuKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystorePath, KeystoreDir, ValidatorsDir, utils.AddPrefix(pubkey.Hex())+".json")
+	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, utils.AddPrefix(pubkey.Hex())+".json")
 
 	// Read the key file
 	_, err := os.Stat(keyFilePath)
@@ -136,14 +123,14 @@ func (ks *Keystore) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.
 	}
 
 	// Unmarshal the keystore
-	var keystore validatorKey
+	var keystore types.ValidatorKeystore
 	err = json.Unmarshal(bytes, &keystore)
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing Teku keystore for pubkey %s: %w", pubkey.Hex(), err)
 	}
 
 	// Get secret file path
-	secretFilePath := filepath.Join(ks.keystorePath, KeystoreDir, SecretsDir, utils.AddPrefix(pubkey.Hex())+".txt")
+	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, utils.AddPrefix(pubkey.Hex())+".txt")
 
 	// Read secret from disk
 	_, err = os.Stat(secretFilePath)
