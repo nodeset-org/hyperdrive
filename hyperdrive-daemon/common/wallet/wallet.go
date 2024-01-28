@@ -58,22 +58,18 @@ func NewWallet(walletDataPath string, legacyWalletKeystorePath string, walletAdd
 		legacyWalletKeystorePath: legacyWalletKeystorePath,
 		walletDataPath:           walletDataPath,
 	}
-	return w, nil
-}
 
-// Initialize the wallet on first start by loading info from disk
-func (w *Wallet) Initialize() error {
 	// Load the password
 	password, isPasswordSaved, err := w.passwordManager.GetPasswordFromDisk()
 	if err != nil {
-		return fmt.Errorf("error loading password: %w", err)
+		return nil, fmt.Errorf("error loading password: %w", err)
 	}
 
 	// Load the wallet
 	if isPasswordSaved {
 		walletMgr, err := w.loadWalletData(password)
 		if err != nil {
-			return fmt.Errorf("error loading wallet: %w", err)
+			return nil, fmt.Errorf("error loading wallet: %w", err)
 		}
 		if walletMgr != nil {
 			w.walletManager = walletMgr
@@ -83,9 +79,9 @@ func (w *Wallet) Initialize() error {
 	// Load the node address
 	_, _, err = w.addressManager.LoadAddress()
 	if err != nil {
-		return fmt.Errorf("error loading node address: %w", err)
+		return nil, fmt.Errorf("error loading node address: %w", err)
 	}
-	return nil
+	return w, nil
 }
 
 // Gets the status of the wallet and its artifacts
@@ -384,7 +380,7 @@ func (w *Wallet) loadWalletData(password string) (IWalletManager, error) {
 	// Read the file
 	bytes, err := os.ReadFile(w.walletDataPath)
 	if err != nil {
-		return nil, fmt.Errorf("eror reading wallet data at [%s]: %w", w.walletDataPath, err)
+		return nil, fmt.Errorf("error reading wallet data at [%s]: %w", w.walletDataPath, err)
 	}
 
 	// Deserialize it

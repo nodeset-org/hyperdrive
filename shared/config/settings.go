@@ -7,7 +7,7 @@ const (
 
 	// Wallet
 	UserAddressFilename      = "address"
-	UserWalletDataFilename   = "wallet.json"
+	UserWalletDataFilename   = "wallet"
 	UserLegacyWalletFilename = "wallet-v3"
 	UserPasswordFilename     = "password"
 )

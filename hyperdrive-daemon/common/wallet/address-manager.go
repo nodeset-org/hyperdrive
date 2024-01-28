@@ -32,6 +32,8 @@ func (m *AddressManager) LoadAddress() (common.Address, bool, error) {
 	_, err := os.Stat(m.path)
 	if errors.Is(err, fs.ErrNotExist) {
 		return common.Address{}, false, nil
+	} else if err != nil {
+		return common.Address{}, false, fmt.Errorf("error checking if address file exists: %w", err)
 	}
 
 	bytes, err := os.ReadFile(m.path)
