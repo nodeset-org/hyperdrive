@@ -123,19 +123,6 @@ func (m *LocalWalletManager) InitializeKeystore(derivationPath string, walletInd
 		return nil, fmt.Errorf("error loading wallet after initialization: %w", err)
 	}
 
-	// Get the Geth key
-	key := &gethkeystore.Key{
-		Address:    crypto.PubkeyToAddress(m.nodePrivateKey.PublicKey),
-		PrivateKey: m.nodePrivateKey,
-		Id:         uuid.UUID(m.data.UUID),
-	}
-
-	// Serialize it
-	m.ethkey, err = gethkeystore.EncryptKey(key, password, gethkeystore.StandardScryptN, gethkeystore.StandardScryptP)
-	if err != nil {
-		return nil, fmt.Errorf("error serializing legacy keystore: %w", err)
-	}
-
 	return data, nil
 }
 
@@ -208,11 +195,25 @@ func (m *LocalWalletManager) LoadWallet(data *sharedtypes.LocalWalletData, passw
 	}
 	transactor.Context = context.Background()
 
+	// Get the Geth key
+	key := &gethkeystore.Key{
+		Address:    crypto.PubkeyToAddress(privateKeyECDSA.PublicKey),
+		PrivateKey: privateKeyECDSA,
+		Id:         uuid.UUID(data.UUID),
+	}
+
+	// Serialize it
+	ethkey, err := gethkeystore.EncryptKey(key, password, gethkeystore.StandardScryptN, gethkeystore.StandardScryptP)
+	if err != nil {
+		return fmt.Errorf("error serializing legacy keystore: %w", err)
+	}
+
 	// Store everything if there are no errors
 	m.seed = seed
 	m.nodePrivateKey = privateKeyECDSA
 	m.data = data
 	m.transactor = transactor
+	m.ethkey = ethkey
 	return nil
 }
 

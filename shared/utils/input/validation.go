@@ -27,9 +27,10 @@ const (
 //
 
 // Validate command argument count
-func ValidateArgCount(c *cli.Context, count int) error {
-	if c.Args().Len() != count {
-		return fmt.Errorf("Incorrect argument count; usage: %s", c.Command.UsageText)
+func ValidateArgCount(c *cli.Context, expectedCount int) error {
+	argCount := c.Args().Len()
+	if argCount != expectedCount {
+		return fmt.Errorf("Incorrect argument count; expected %d but have %d", expectedCount, argCount)
 	}
 	return nil
 }

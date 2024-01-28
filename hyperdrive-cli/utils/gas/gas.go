@@ -16,78 +16,72 @@ import (
 )
 
 func GetMaxFees(c *cli.Context, hd *client.Client, simResult eth.SimulationResult) (*big.Int, *big.Int, error) {
-	return nil, nil, fmt.Errorf("NYI")
-	/*
-		cfg, isNew, err := hd.LoadConfig()
-		if err != nil {
-			return nil, nil, fmt.Errorf("Error getting Hyperdrive configuration: %w", err)
-		}
-		if isNew {
-			return nil, nil, fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
-		}
+	cfg, isNew, err := hd.LoadConfig()
+	if err != nil {
+		return nil, nil, fmt.Errorf("Error getting Hyperdrive configuration: %w", err)
+	}
+	if isNew {
+		return nil, nil, fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
+	}
 
-		// Get the max fee - prioritize the CLI arguments, default to the config file setting
-		maxFeeGwei := hd.Context.MaxFee
-		if maxFeeGwei == 0 {
-			maxFee := eth.GweiToWei(cfg.Hyperdrive.ManualMaxFee.Value.(float64))
-			if maxFee != nil && maxFee.Uint64() != 0 {
-				maxFeeGwei = eth.WeiToGwei(maxFee)
-			}
-		}
+	// Get the max fee - prioritize the CLI arguments, default to the config file setting
+	maxFeeGwei := hd.Context.MaxFee
 
-		// Get the priority fee - prioritize the CLI arguments, default to the config file setting
-		maxPriorityFeeGwei := hd.Context.MaxPriorityFee
-		if maxPriorityFeeGwei == 0 {
-			maxPriorityFee := eth.GweiToWei(cfg.Hyperdrive.PriorityFee.Value.(float64))
-			if maxPriorityFee == nil || maxPriorityFee.Uint64() == 0 {
-				fmt.Printf("%sNOTE: max priority fee not set or set to 0, defaulting to 2 gwei%s\n", terminal.ColorYellow, terminal.ColorReset)
-				maxPriorityFeeGwei = 2
-			} else {
-				maxPriorityFeeGwei = eth.WeiToGwei(maxPriorityFee)
-			}
-		}
-
-		// Use the requested max fee and priority fee if provided
-		if maxFeeGwei != 0 {
-			fmt.Printf("%sUsing the requested max fee of %.2f gwei (including a max priority fee of %.2f gwei).\n", terminal.ColorYellow, maxFeeGwei, maxPriorityFeeGwei)
-			lowLimit := maxFeeGwei / eth.WeiPerGwei * float64(simResult.EstGasLimit)
-			highLimit := maxFeeGwei / eth.WeiPerGwei * float64(simResult.SafeGasLimit)
-			fmt.Printf("Total cost: %.4f to %.4f ETH%s\n", lowLimit, highLimit, terminal.ColorReset)
+	// Get the priority fee - prioritize the CLI arguments, default to the config file setting
+	maxPriorityFeeGwei := hd.Context.MaxPriorityFee
+	if maxPriorityFeeGwei == 0 {
+		maxPriorityFee := eth.GweiToWei(cfg.MaxPriorityFee.Value)
+		if maxPriorityFee == nil || maxPriorityFee.Uint64() == 0 {
+			defaultFee := cfg.MaxPriorityFee.Default[cfg.Network.Value]
+			fmt.Printf("%sNOTE: max priority fee not set or set to 0, defaulting to %d gwei%s\n", terminal.ColorYellow, defaultFee, terminal.ColorReset)
+			maxPriorityFeeGwei = defaultFee
 		} else {
-			if c.Bool(utils.YesFlag.Name) {
-				maxFeeWei, err := GetHeadlessMaxFeeWei()
-				if err != nil {
-					return nil, nil, err
-				}
-				maxFeeGwei = eth.WeiToGwei(maxFeeWei)
-			} else {
-				// Try to get the latest gas prices from Etherchain
-				etherchainData, err := etherchain.GetGasPrices()
-				if err == nil {
-					// Print the Etherchain data and ask for an amount
-					maxFeeGwei = handleEtherchainGasPrices(etherchainData, simResult, maxPriorityFeeGwei, simResult.SafeGasLimit)
+			maxPriorityFeeGwei = eth.WeiToGwei(maxPriorityFee)
+		}
+	}
 
+	// Use the requested max fee and priority fee if provided
+	if maxFeeGwei != 0 {
+		fmt.Printf("%sUsing the requested max fee of %.2f gwei (including a max priority fee of %.2f gwei).\n", terminal.ColorYellow, maxFeeGwei, maxPriorityFeeGwei)
+		lowLimit := maxFeeGwei / eth.WeiPerGwei * float64(simResult.EstimatedGasLimit)
+		highLimit := maxFeeGwei / eth.WeiPerGwei * float64(simResult.SafeGasLimit)
+		fmt.Printf("Total cost: %.4f to %.4f ETH%s\n", lowLimit, highLimit, terminal.ColorReset)
+	} else {
+		if c.Bool(utils.YesFlag.Name) {
+			maxFeeWei, err := GetHeadlessMaxFeeWei()
+			if err != nil {
+				return nil, nil, err
+			}
+			maxFeeGwei = eth.WeiToGwei(maxFeeWei)
+		} else {
+			// Try to get the latest gas prices from Etherchain
+			etherchainData, err := etherchain.GetGasPrices()
+			if err == nil {
+				// Print the Etherchain data and ask for an amount
+				maxFeeGwei = handleEtherchainGasPrices(etherchainData, simResult, maxPriorityFeeGwei, simResult.SafeGasLimit)
+
+			} else {
+				// Fallback to Etherscan
+				fmt.Printf("%sWarning: couldn't get gas estimates from Etherchain - %s\nFalling back to Etherscan%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
+				etherscanData, err := etherscan.GetGasPrices()
+				if err == nil {
+					// Print the Etherscan data and ask for an amount
+					maxFeeGwei = handleEtherscanGasPrices(etherscanData, simResult, maxPriorityFeeGwei, simResult.SafeGasLimit)
 				} else {
-					// Fallback to Etherscan
-					fmt.Printf("%sWarning: couldn't get gas estimates from Etherchain - %s\nFalling back to Etherscan%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
-					etherscanData, err := etherscan.GetGasPrices()
-					if err == nil {
-						// Print the Etherscan data and ask for an amount
-						maxFeeGwei = handleEtherscanGasPrices(etherscanData, simResult, maxPriorityFeeGwei, simResult.SafeGasLimit)
-					} else {
-						return nil, nil, fmt.Errorf("Error getting gas price suggestions: %w", err)
-					}
+					return nil, nil, fmt.Errorf("Error getting gas price suggestions: %w", err)
 				}
 			}
-			fmt.Printf("%sUsing a max fee of %.2f gwei and a priority fee of %.2f gwei.\n%s", terminal.ColorBlue, maxFeeGwei, maxPriorityFeeGwei, terminal.ColorReset)
 		}
+		fmt.Printf("%sUsing a max fee of %.2f gwei and a priority fee of %.2f gwei.\n%s", terminal.ColorBlue, maxFeeGwei, maxPriorityFeeGwei, terminal.ColorReset)
+	}
 
-		if maxPriorityFeeGwei > maxFeeGwei {
-			return nil, nil, fmt.Errorf("Priority fee cannot be greater than max fee.")
-		}
+	if maxPriorityFeeGwei > maxFeeGwei {
+		return nil, nil, fmt.Errorf("Priority fee cannot be greater than max fee.")
+	}
 
-		// Verify the node has enough ETH to use this max fee
-		maxFee := eth.GweiToWei(maxFeeGwei)
+	// Verify the node has enough ETH to use this max fee
+	maxFee := eth.GweiToWei(maxFeeGwei)
+	/*
 		ethRequired := big.NewInt(0).Mul(maxFee, big.NewInt(int64(simResult.SafeGasLimit)))
 		response, err := hd.Api.Node.Balance()
 		if err != nil {
@@ -95,10 +89,10 @@ func GetMaxFees(c *cli.Context, hd *client.Client, simResult eth.SimulationResul
 		} else if response.Data.Balance.Cmp(ethRequired) < 0 {
 			return nil, nil, fmt.Errorf("Your node has %.6f ETH in its wallet, which is not enough to pay for this transaction with a max fee of %.4f gwei; you require at least %.6f more ETH.", eth.WeiToEth(response.Data.Balance), maxFeeGwei, eth.WeiToEth(big.NewInt(0).Sub(ethRequired, response.Data.Balance)))
 		}
-		maxPriorityFee := eth.GweiToWei(maxPriorityFeeGwei)
-
-		return maxFee, maxPriorityFee, nil
 	*/
+	maxPriorityFee := eth.GweiToWei(maxPriorityFeeGwei)
+
+	return maxFee, maxPriorityFee, nil
 }
 
 // Get the suggested max fee for service operations

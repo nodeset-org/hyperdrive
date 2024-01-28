@@ -58,7 +58,7 @@ func signMessage(c *cli.Context) error {
 
 	// Print the signature
 	formattedSignature := PersonalSignature{
-		Address:   status.WalletStatus.Wallet.WalletAddress,
+		Address:   status.Data.WalletStatus.Wallet.WalletAddress,
 		Message:   message,
 		Signature: response.Data.SignedMessage,
 		Version:   fmt.Sprint(signatureVersion),
