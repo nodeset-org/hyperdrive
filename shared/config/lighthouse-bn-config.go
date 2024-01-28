@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils/sys"
 )
@@ -55,7 +56,7 @@ func NewLighthouseBnConfig(parent *LocalBeaconConfig) *LighthouseBnConfig {
 
 		MaxPeers: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 MaxPeersID,
+				ID:                 ids.MaxPeersID,
 				Name:               "Max Peers",
 				Description:        "The maximum number of peers your client should try to maintain. You can try lowering this if you have a low-resource system or a constrained network.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
@@ -69,7 +70,7 @@ func NewLighthouseBnConfig(parent *LocalBeaconConfig) *LighthouseBnConfig {
 
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Lighthouse container from Docker Hub you want to use for the Beacon Node.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
@@ -85,7 +86,7 @@ func NewLighthouseBnConfig(parent *LocalBeaconConfig) *LighthouseBnConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Flags",
 				Description:        "Additional custom command line flags you want to pass Lighthouse's Beacon Node, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
@@ -115,8 +116,8 @@ func (cfg *LighthouseBnConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *LighthouseBnConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{}
+func (cfg *LighthouseBnConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }
 
 // Get the appropriate LH default tag for production

@@ -1,6 +1,7 @@
-package config
+package validator
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -11,8 +12,6 @@ const (
 
 // Configuration for the Lodestar VC
 type LodestarVcConfig struct {
-	Title string
-
 	// The Docker Hub tag for Lodestar VC
 	ContainerTag types.Parameter[string]
 
@@ -21,13 +20,11 @@ type LodestarVcConfig struct {
 }
 
 // Generates a new Lodestar VC configuration
-func NewLodestarVcConfig(cfg *HyperdriveConfig) *LodestarVcConfig {
+func NewLodestarVcConfig() *LodestarVcConfig {
 	return &LodestarVcConfig{
-		Title: "Lodestar Settings",
-
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Lodestar container from Docker Hub you want to use for the Validator Client.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -43,7 +40,7 @@ func NewLodestarVcConfig(cfg *HyperdriveConfig) *LodestarVcConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Flags",
 				Description:        "Additional custom command line flags you want to pass Lodestar's Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -57,6 +54,11 @@ func NewLodestarVcConfig(cfg *HyperdriveConfig) *LodestarVcConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *LodestarVcConfig) GetTitle() string {
+	return "Lodestar Settings"
+}
+
 // Get the parameters for this config
 func (cfg *LodestarVcConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -65,7 +67,7 @@ func (cfg *LodestarVcConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *LodestarVcConfig) GetTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *LodestarVcConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

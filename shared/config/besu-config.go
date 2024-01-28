@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -86,7 +87,7 @@ func NewBesuConfig(parent *LocalExecutionConfig) *BesuConfig {
 
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Besu container you want to use on Docker Hub.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient},
@@ -102,7 +103,7 @@ func NewBesuConfig(parent *LocalExecutionConfig) *BesuConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Flags",
 				Description:        "Additional custom command line flags you want to pass to Besu, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient},
@@ -133,6 +134,6 @@ func (cfg *BesuConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *BesuConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{}
+func (cfg *BesuConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

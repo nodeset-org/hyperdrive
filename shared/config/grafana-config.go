@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -29,7 +30,7 @@ func NewGrafanaConfig(parent *MetricsConfig) *GrafanaConfig {
 
 		Port: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 PortID,
+				ID:                 ids.PortID,
 				Name:               "Grafana Port",
 				Description:        "The port Grafana should run its HTTP server on - this is the port you will connect to in your browser.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Grafana},
@@ -43,7 +44,7 @@ func NewGrafanaConfig(parent *MetricsConfig) *GrafanaConfig {
 
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Grafana Container Tag",
 				Description:        "The tag name of the Grafana container you want to use on Docker Hub.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Grafana},
@@ -71,6 +72,6 @@ func (cfg *GrafanaConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *GrafanaConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{}
+func (cfg *GrafanaConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

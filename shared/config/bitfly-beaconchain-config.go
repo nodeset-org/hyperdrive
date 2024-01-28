@@ -89,6 +89,6 @@ func (cfg *BitflyNodeMetricsConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *BitflyNodeMetricsConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{}
+func (cfg *BitflyNodeMetricsConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

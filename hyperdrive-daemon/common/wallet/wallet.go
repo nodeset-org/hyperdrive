@@ -314,6 +314,21 @@ func (w *Wallet) SerializeData() (string, error) {
 	return w.walletManager.SerializeData()
 }
 
+// Generate a BLS validator key from the provided path, using the node wallet's seed as a basis
+func (w *Wallet) GenerateValidatorKey(path string) ([]byte, error) {
+	if w.walletManager == nil {
+		return nil, fmt.Errorf("wallet is not loaded")
+	}
+
+	switch w.walletManager.GetType() {
+	case sharedtypes.WalletType_Local:
+		localMgr := w.walletManager.(*LocalWalletManager)
+		return localMgr.GenerateValidatorKey(path)
+	default:
+		return nil, fmt.Errorf("loaded wallet is not local")
+	}
+}
+
 // Builds a local wallet keystore and saves its artifacts to disk
 func (w *Wallet) buildLocalWallet(derivationPath string, walletIndex uint, mnemonic string, password string, savePassword bool, testMode bool) error {
 	// Initialize the wallet with it

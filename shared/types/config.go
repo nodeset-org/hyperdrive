@@ -26,3 +26,15 @@ type ChangedSection struct {
 	// The list of subsections that may or may not have changes
 	Subsections []*ChangedSection
 }
+
+// Interface for describing config sections
+type IConfigSection interface {
+	// Get the name of the section (for display purposes)
+	GetTitle() string
+
+	// Get the list of parameters directly belonging to this section
+	GetParameters() []IParameter
+
+	// Get the sections underneath this one
+	GetSubconfigs() map[string]IConfigSection
+}

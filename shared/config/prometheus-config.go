@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -34,7 +35,7 @@ func NewPrometheusConfig(parent *MetricsConfig) *PrometheusConfig {
 
 		Port: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 PortID,
+				ID:                 ids.PortID,
 				Name:               "Prometheus Port",
 				Description:        "The port Prometheus should make its statistics available on.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Prometheus},
@@ -48,7 +49,7 @@ func NewPrometheusConfig(parent *MetricsConfig) *PrometheusConfig {
 
 		OpenPort: types.Parameter[types.RpcPortMode]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 OpenPortID,
+				ID:                 ids.OpenPortID,
 				Name:               "Expose Prometheus Port",
 				Description:        "Expose the Prometheus's port to other processes on your machine, or to your local network so other machines can access it too.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Prometheus},
@@ -63,7 +64,7 @@ func NewPrometheusConfig(parent *MetricsConfig) *PrometheusConfig {
 
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Prometheus Container Tag",
 				Description:        "The tag name of the Prometheus container on Docker Hub you want to use.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Prometheus},
@@ -77,7 +78,7 @@ func NewPrometheusConfig(parent *MetricsConfig) *PrometheusConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Prometheus Flags",
 				Description:        "Additional custom command line flags you want to pass to Prometheus, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Grafana},
@@ -107,6 +108,6 @@ func (cfg *PrometheusConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *PrometheusConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{}
+func (cfg *PrometheusConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

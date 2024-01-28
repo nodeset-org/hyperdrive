@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -87,7 +88,7 @@ func (configPage *ExecutionConfigPage) createContent() {
 	// Take the client selections out since they're done explicitly
 	localEcItems := []*parameterizedFormItem{}
 	for _, item := range configPage.localEcItems {
-		if item.parameter.GetCommon().ID == config.EcID {
+		if item.parameter.GetCommon().ID == ids.EcID {
 			continue
 		}
 		localEcItems = append(localEcItems, item)
@@ -96,7 +97,7 @@ func (configPage *ExecutionConfigPage) createContent() {
 
 	externalEcItems := []*parameterizedFormItem{}
 	for _, item := range configPage.externalEcItems {
-		if item.parameter.GetCommon().ID == config.EcID {
+		if item.parameter.GetCommon().ID == ids.EcID {
 			continue
 		}
 		externalEcItems = append(externalEcItems, item)

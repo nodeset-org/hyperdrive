@@ -1,6 +1,7 @@
-package config
+package validator
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -12,8 +13,6 @@ const (
 
 // Configuration for the Prysm VC
 type PrysmVcConfig struct {
-	Title string
-
 	// The Docker Hub tag for the Prysm BN
 	ContainerTag types.Parameter[string]
 
@@ -22,13 +21,11 @@ type PrysmVcConfig struct {
 }
 
 // Generates a new Prysm VC configuration
-func NewPrysmVcConfig(cfg *HyperdriveConfig) *PrysmVcConfig {
+func NewPrysmVcConfig() *PrysmVcConfig {
 	return &PrysmVcConfig{
-		Title: "Prysm Settings",
-
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Prysm container on Docker Hub you want to use for the Validator Client.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -44,7 +41,7 @@ func NewPrysmVcConfig(cfg *HyperdriveConfig) *PrysmVcConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Flags",
 				Description:        "Additional custom command line flags you want to pass Prysm's Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -58,6 +55,11 @@ func NewPrysmVcConfig(cfg *HyperdriveConfig) *PrysmVcConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *PrysmVcConfig) GetTitle() string {
+	return "Prysm Settings"
+}
+
 // Get the parameters for this config
 func (cfg *PrysmVcConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -66,7 +68,7 @@ func (cfg *PrysmVcConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *PrysmVcConfig) GetTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *PrysmVcConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

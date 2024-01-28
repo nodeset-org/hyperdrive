@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -46,7 +47,7 @@ func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
 
 		BeaconNode: types.Parameter[types.BeaconNode]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 BnID,
+				ID:                 ids.BnID,
 				Name:               "Beacon Node",
 				Description:        "Select which Beacon Node client you would like to use.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_BeaconNode, types.ContainerID_ValidatorClients},
@@ -108,7 +109,7 @@ func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
 
 		P2pPort: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 P2pPortID,
+				ID:                 ids.P2pPortID,
 				Name:               "P2P Port",
 				Description:        "The port to use for P2P (blockchain) traffic.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
@@ -122,7 +123,7 @@ func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
 
 		HttpPort: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 HttpPortID,
+				ID:                 ids.HttpPortID,
 				Name:               "HTTP API Port",
 				Description:        "The port your Beacon Node should run its HTTP API on.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_BeaconNode, types.ContainerID_ValidatorClients, types.ContainerID_Prometheus},
@@ -136,7 +137,7 @@ func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
 
 		OpenHttpPort: types.Parameter[types.RpcPortMode]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 OpenHttpPortsID,
+				ID:                 ids.OpenHttpPortsID,
 				Name:               "Expose API Port",
 				Description:        "Select an option to expose your Beacon Node's API port to your localhost or external hosts on the network, so other machines can access it too.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
@@ -176,8 +177,8 @@ func (cfg *LocalBeaconConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *LocalBeaconConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{
+func (cfg *LocalBeaconConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{
 		"lighthouse": cfg.Lighthouse,
 		"lodestar":   cfg.Lodestar,
 		"nimbus":     cfg.Nimbus,

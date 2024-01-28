@@ -8,21 +8,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
-const (
-	// Common param IDs across configs
-	MaxPeersID        string = "maxPeers"
-	ContainerTagID    string = "containerTag"
-	AdditionalFlagsID string = "additionalFlags"
-	HttpPortID        string = "httpPort"
-	OpenHttpPortsID   string = "openHttpPort"
-	P2pPortID         string = "p2pPort"
-	PortID            string = "port"
-	OpenPortID        string = "openPort"
-	HttpUrlID         string = "httpUrl"
-	EcID              string = "executionClient"
-	BnID              string = "beaconNode"
-)
-
 // Get the possible RPC port mode options
 func getPortModes(warningOverride string) []*types.ParameterOption[types.RpcPortMode] {
 	if warningOverride == "" {

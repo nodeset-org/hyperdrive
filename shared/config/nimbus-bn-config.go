@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -49,7 +50,7 @@ func NewNimbusBnConfig(parent *LocalBeaconConfig) *NimbusBnConfig {
 
 		MaxPeers: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 MaxPeersID,
+				ID:                 ids.MaxPeersID,
 				Name:               "Max Peers",
 				Description:        "The maximum number of peers your client should try to maintain. You can try lowering this if you have a low-resource system or a constrained network.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
@@ -92,7 +93,7 @@ func NewNimbusBnConfig(parent *LocalBeaconConfig) *NimbusBnConfig {
 
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Nimbus Beacon Node container you want to use on Docker Hub.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
@@ -108,7 +109,7 @@ func NewNimbusBnConfig(parent *LocalBeaconConfig) *NimbusBnConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Flags",
 				Description:        "Additional custom command line flags you want to pass Nimbus's Beacon Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
@@ -138,8 +139,8 @@ func (cfg *NimbusBnConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *NimbusBnConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{}
+func (cfg *NimbusBnConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }
 
 // Get the default number of peers

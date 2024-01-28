@@ -165,7 +165,7 @@ func configureHeadless(c *cli.Context, cfg *config.HyperdriveConfig) error {
 }
 
 // Update a config section from the CLI flags
-func configureSection(c *cli.Context, section config.IConfigSection) error {
+func configureSection(c *cli.Context, section types.IConfigSection) error {
 	// Update the parameters
 	for _, param := range section.GetParameters() {
 		err := updateConfigParamFromCliArg(c, "", param)

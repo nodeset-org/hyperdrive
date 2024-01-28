@@ -4,7 +4,7 @@ import "github.com/nodeset-org/hyperdrive/shared/types"
 
 // Get all of the settings that have changed between the given config sections
 // Assumes the config sections represent the same element, just different instances
-func getChangedSettings(old IConfigSection, new IConfigSection) (*types.ChangedSection, int) {
+func getChangedSettings(old types.IConfigSection, new types.IConfigSection) (*types.ChangedSection, int) {
 	changedSection := &types.ChangedSection{
 		Settings:    []*types.ChangedSetting{},
 		Subsections: []*types.ChangedSection{},

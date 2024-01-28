@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -31,7 +32,7 @@ func NewExternalExecutionConfig(parent *HyperdriveConfig) *ExternalExecutionConf
 
 		ExecutionClient: types.Parameter[types.ExecutionClient]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 EcID,
+				ID:                 ids.EcID,
 				Name:               "Execution Client",
 				Description:        "Select which Execution client your external client is.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -64,7 +65,7 @@ func NewExternalExecutionConfig(parent *HyperdriveConfig) *ExternalExecutionConf
 
 		HttpUrl: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 HttpUrlID,
+				ID:                 ids.HttpUrlID,
 				Name:               "HTTP URL",
 				Description:        "The URL of the HTTP RPC endpoint for your external Execution client.\nNOTE: If you are running it on the same machine as Hyperdrive, addresses like `localhost` and `127.0.0.1` will not work due to Docker limitations. Enter your machine's LAN IP address instead, for example 'http://192.168.1.100:8545'.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon},
@@ -107,6 +108,6 @@ func (cfg *ExternalExecutionConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *ExternalExecutionConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{}
+func (cfg *ExternalExecutionConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

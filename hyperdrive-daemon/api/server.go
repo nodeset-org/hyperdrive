@@ -17,7 +17,7 @@ type HyperdriveServer struct {
 }
 
 func NewHyperdriveServer(sp *services.ServiceProvider) *HyperdriveServer {
-	socketPath := filepath.Join(sp.GetUserDir(), config.HyperdriveDaemonRoute)
+	socketPath := filepath.Join(sp.GetUserDir(), config.SocketFilename)
 	handlers := []server.IHandler{
 		service.NewServiceHandler(sp),
 		tx.NewTxHandler(sp),

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -48,7 +49,7 @@ func NewExporterConfig(parent *MetricsConfig) *ExporterConfig {
 
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Exporter Container Tag",
 				Description:        "The tag name of the Prometheus Node Exporter container on Docker Hub you want to use.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Exporter},
@@ -62,7 +63,7 @@ func NewExporterConfig(parent *MetricsConfig) *ExporterConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Exporter Flags",
 				Description:        "Additional custom command line flags you want to pass to the Node Exporter, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Grafana},
@@ -91,6 +92,6 @@ func (cfg *ExporterConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *ExporterConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{}
+func (cfg *ExporterConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

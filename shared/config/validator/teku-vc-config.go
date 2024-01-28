@@ -1,6 +1,7 @@
-package config
+package validator
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -12,8 +13,6 @@ const (
 
 // Configuration for Teku
 type TekuVcConfig struct {
-	Title string
-
 	// The Docker Hub tag for the Teku VC
 	ContainerTag types.Parameter[string]
 
@@ -22,13 +21,11 @@ type TekuVcConfig struct {
 }
 
 // Generates a new Teku VC configuration
-func NewTekuVcConfig(cfg *HyperdriveConfig) *TekuVcConfig {
+func NewTekuVcConfig() *TekuVcConfig {
 	return &TekuVcConfig{
-		Title: "Teku Settings",
-
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Teku container on Docker Hub you want to use for the Validator Client.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -44,7 +41,7 @@ func NewTekuVcConfig(cfg *HyperdriveConfig) *TekuVcConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Validator Client Flags",
 				Description:        "Additional custom command line flags you want to pass Teku's Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -58,6 +55,11 @@ func NewTekuVcConfig(cfg *HyperdriveConfig) *TekuVcConfig {
 	}
 }
 
+// Get the title for the config
+func (cfg *TekuVcConfig) GetTitle() string {
+	return "Teku Settings"
+}
+
 // Get the parameters for this config
 func (cfg *TekuVcConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -66,7 +68,7 @@ func (cfg *TekuVcConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// Get the title for the config
-func (cfg *TekuVcConfig) GetTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *TekuVcConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

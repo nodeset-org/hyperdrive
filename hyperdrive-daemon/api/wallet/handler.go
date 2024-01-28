@@ -19,6 +19,7 @@ func NewWalletHandler(serviceProvider *services.ServiceProvider) *WalletHandler 
 		&walletDeletePasswordContextFactory{h},
 		&walletExportContextFactory{h},
 		&walletExportEthKeyContextFactory{h},
+		&walletGenerateValidatorKeyContextFactory{h},
 		&walletInitializeContextFactory{h},
 		&walletMasqueradeContextFactory{h},
 		&walletRecoverContextFactory{h},

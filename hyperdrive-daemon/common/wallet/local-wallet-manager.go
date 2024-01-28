@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"sync"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -20,8 +21,22 @@ import (
 	"github.com/google/uuid"
 	sharedtypes "github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/tyler-smith/go-bip39"
+	eth2types "github.com/wealdtech/go-eth2-types/v2"
+	eth2util "github.com/wealdtech/go-eth2-util"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
+
+// Initialize BLS support
+var initBLS sync.Once
+
+// Singleton to make sure BLS is initialized
+func InitializeBLS() error {
+	var err error
+	initBLS.Do(func() {
+		err = eth2types.InitBLS()
+	})
+	return err
+}
 
 // Simple class to wrap a node's local wallet keystore.
 // Note that this does *not* manage the wallet data file on disk, though it does manage the
@@ -263,6 +278,27 @@ func (m *LocalWalletManager) SerializeData() (string, error) {
 		return "", fmt.Errorf("error serializing wallet data: %w", err)
 	}
 	return string(bytes), nil
+}
+
+// Generate the validator key with the provided path, using the wallet's seed as the root
+func (m *LocalWalletManager) GenerateValidatorKey(path string) ([]byte, error) {
+	if len(m.seed) == 0 {
+		return nil, fmt.Errorf("wallet is not initialized")
+	}
+
+	// Initialize BLS support
+	if err := InitializeBLS(); err != nil {
+		return nil, fmt.Errorf("error initializing BLS library: %w", err)
+	}
+
+	// Get private key
+	privateKey, err := eth2util.PrivateKeyFromSeedAndPath(m.seed, path)
+	if err != nil {
+		return nil, fmt.Errorf("error getting validator key at path %s: %w", path, err)
+	}
+
+	// Return
+	return privateKey.Marshal(), nil
 }
 
 // Get the derived key & derivation path for the account at the index

@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -91,7 +92,7 @@ func (configPage *BeaconConfigPage) createContent() {
 	// Take the client selections out since they're done explicitly
 	localBnItems := []*parameterizedFormItem{}
 	for _, item := range configPage.localBnItems {
-		if item.parameter.GetCommon().ID == config.BnID {
+		if item.parameter.GetCommon().ID == ids.BnID {
 			continue
 		}
 		localBnItems = append(localBnItems, item)
@@ -100,7 +101,7 @@ func (configPage *BeaconConfigPage) createContent() {
 
 	externalBnItems := []*parameterizedFormItem{}
 	for _, item := range configPage.externalBnItems {
-		if item.parameter.GetCommon().ID == config.BnID {
+		if item.parameter.GetCommon().ID == ids.BnID {
 			continue
 		}
 		externalBnItems = append(externalBnItems, item)

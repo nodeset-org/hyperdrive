@@ -1,6 +1,7 @@
-package config
+package validator
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils/sys"
 )
@@ -15,8 +16,6 @@ const (
 
 // Configuration for the Lighthouse VC
 type LighthouseVcConfig struct {
-	Title string
-
 	// The Docker Hub tag for Lighthouse VC
 	ContainerTag types.Parameter[string]
 
@@ -25,13 +24,11 @@ type LighthouseVcConfig struct {
 }
 
 // Generates a new Lighthouse VC configuration
-func NewLighthouseVcConfig(cfg *HyperdriveConfig) *LighthouseVcConfig {
+func NewLighthouseVcConfig() *LighthouseVcConfig {
 	return &LighthouseVcConfig{
-		Title: "Lighthouse Settings",
-
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Lighthouse container from Docker Hub you want to use for the Validator Client.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -47,7 +44,7 @@ func NewLighthouseVcConfig(cfg *HyperdriveConfig) *LighthouseVcConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Flags",
 				Description:        "Additional custom command line flags you want to pass Lighthouse's Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -61,6 +58,11 @@ func NewLighthouseVcConfig(cfg *HyperdriveConfig) *LighthouseVcConfig {
 	}
 }
 
+// The the title for the config
+func (cfg *LighthouseVcConfig) GetTitle() string {
+	return "Lighthouse Settings"
+}
+
 // Get the parameters for this config
 func (cfg *LighthouseVcConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -69,9 +71,9 @@ func (cfg *LighthouseVcConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// The the title for the config
-func (cfg *LighthouseVcConfig) GetTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *LighthouseVcConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }
 
 // Get the appropriate LH default tag for production

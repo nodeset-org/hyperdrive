@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -31,7 +32,7 @@ func NewExternalBeaconConfig(parent *HyperdriveConfig) *ExternalBeaconConfig {
 
 		BeaconNode: types.Parameter[types.BeaconNode]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 BnID,
+				ID:                 ids.BnID,
 				Name:               "Beacon Node",
 				Description:        "Select which Beacon Node your external client is.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -77,7 +78,7 @@ func NewExternalBeaconConfig(parent *HyperdriveConfig) *ExternalBeaconConfig {
 
 		HttpUrl: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 HttpUrlID,
+				ID:                 ids.HttpUrlID,
 				Name:               "HTTP URL",
 				Description:        "The URL of the HTTP Beacon API endpoint for your external client.\nNOTE: If you are running it on the same machine as Hyperdrive, addresses like `localhost` and `127.0.0.1` will not work due to Docker limitations. Enter your machine's LAN IP address instead.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ValidatorClients},
@@ -120,6 +121,6 @@ func (cfg *ExternalBeaconConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *ExternalBeaconConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{}
+func (cfg *ExternalBeaconConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

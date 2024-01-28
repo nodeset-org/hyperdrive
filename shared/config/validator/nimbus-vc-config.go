@@ -1,6 +1,7 @@
-package config
+package validator
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -12,8 +13,6 @@ const (
 
 // Configuration for Nimbus
 type NimbusVcConfig struct {
-	Title string
-
 	// The Docker Hub tag for the VC
 	ContainerTag types.Parameter[string]
 
@@ -22,13 +21,11 @@ type NimbusVcConfig struct {
 }
 
 // Generates a new Nimbus VC configuration
-func NewNimbusVcConfig(cfg *HyperdriveConfig) *NimbusVcConfig {
+func NewNimbusVcConfig() *NimbusVcConfig {
 	return &NimbusVcConfig{
-		Title: "Nimbus Settings",
-
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Nimbus Validator Client container you want to use on Docker Hub.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -44,7 +41,7 @@ func NewNimbusVcConfig(cfg *HyperdriveConfig) *NimbusVcConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Flags",
 				Description:        "Additional custom command line flags you want to pass Nimbus's Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
@@ -58,6 +55,11 @@ func NewNimbusVcConfig(cfg *HyperdriveConfig) *NimbusVcConfig {
 	}
 }
 
+// Get the title for the config
+func (cfg *NimbusVcConfig) GetTitle() string {
+	return "Nimbus Settings"
+}
+
 // Get the parameters for this config
 func (cfg *NimbusVcConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
@@ -66,7 +68,7 @@ func (cfg *NimbusVcConfig) GetParameters() []types.IParameter {
 	}
 }
 
-// Get the title for the config
-func (cfg *NimbusVcConfig) GetTitle() string {
-	return cfg.Title
+// Get the sections underneath this one
+func (cfg *NimbusVcConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }

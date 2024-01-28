@@ -150,8 +150,8 @@ func (cfg *MetricsConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *MetricsConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{
+func (cfg *MetricsConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{
 		"grafana":    cfg.Grafana,
 		"prometheus": cfg.Prometheus,
 		"exporter":   cfg.Exporter,

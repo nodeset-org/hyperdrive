@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -56,7 +57,7 @@ func NewGethConfig(parent *LocalExecutionConfig) *GethConfig {
 
 		MaxPeers: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 MaxPeersID,
+				ID:                 ids.MaxPeersID,
 				Name:               "Max Peers",
 				Description:        "The maximum number of peers Geth should connect to. This can be lowered to improve performance on low-power systems or constrained types.Networks. We recommend keeping it at 12 or higher.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient},
@@ -68,7 +69,7 @@ func NewGethConfig(parent *LocalExecutionConfig) *GethConfig {
 
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 ContainerTagID,
+				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Geth container you want to use on Docker Hub.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient},
@@ -84,7 +85,7 @@ func NewGethConfig(parent *LocalExecutionConfig) *GethConfig {
 
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 AdditionalFlagsID,
+				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Flags",
 				Description:        "Additional custom command line flags you want to pass to Geth, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient},
@@ -114,8 +115,8 @@ func (cfg *GethConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *GethConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{}
+func (cfg *GethConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{}
 }
 
 // Calculate the default number of Geth peers

@@ -11,6 +11,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/config/migration"
+	"github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/pbnjay/memory"
 
@@ -64,6 +65,9 @@ type HyperdriveConfig struct {
 
 	// Metrics
 	Metrics *MetricsConfig
+
+	// Modules
+	Modules *modules.ModulesConfig
 
 	// Internal fields
 	Version                 string
@@ -241,6 +245,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg.LocalBeaconConfig = NewLocalBeaconConfig(cfg)
 	cfg.ExternalBeaconConfig = NewExternalBeaconConfig(cfg)
 	cfg.Metrics = NewMetricsConfig(cfg)
+	cfg.Modules = modules.NewModulesConfig()
 
 	// Apply the default values for mainnet
 	cfg.Network.Value = types.Network_Mainnet
@@ -269,14 +274,15 @@ func (cfg *HyperdriveConfig) GetParameters() []types.IParameter {
 }
 
 // Get the subconfigurations for this config
-func (cfg *HyperdriveConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{
+func (cfg *HyperdriveConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{
 		"fallback":          cfg.Fallback,
 		"localExecution":    cfg.LocalExecutionConfig,
 		"externalExecution": cfg.ExternalExecutionConfig,
 		"localBeacon":       cfg.LocalBeaconConfig,
 		"externalBeacon":    cfg.ExternalBeaconConfig,
 		"metrics":           cfg.Metrics,
+		"modules":           cfg.Modules,
 	}
 }
 

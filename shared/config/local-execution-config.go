@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -49,7 +50,7 @@ func NewExecutionCommonConfig(parent *HyperdriveConfig) *LocalExecutionConfig {
 
 		ExecutionClient: types.Parameter[types.ExecutionClient]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 EcID,
+				ID:                 ids.EcID,
 				Name:               "Execution Client",
 				Description:        "Select which Execution client you would like to run.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient, types.ContainerID_ValidatorClients},
@@ -82,7 +83,7 @@ func NewExecutionCommonConfig(parent *HyperdriveConfig) *LocalExecutionConfig {
 
 		HttpPort: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 HttpPortID,
+				ID:                 ids.HttpPortID,
 				Name:               "HTTP API Port",
 				Description:        "The port your Execution client should use for its HTTP API endpoint (also known as HTTP RPC API endpoint).",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ExecutionClient, types.ContainerID_BeaconNode},
@@ -139,7 +140,7 @@ func NewExecutionCommonConfig(parent *HyperdriveConfig) *LocalExecutionConfig {
 
 		P2pPort: types.Parameter[uint16]{
 			ParameterCommon: &types.ParameterCommon{
-				ID:                 P2pPortID,
+				ID:                 ids.P2pPortID,
 				Name:               "P2P Port",
 				Description:        "The port the Execution Client should use for P2P (blockchain) traffic to communicate with other nodes.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient},
@@ -178,8 +179,8 @@ func (cfg *LocalExecutionConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *LocalExecutionConfig) GetSubconfigs() map[string]IConfigSection {
-	return map[string]IConfigSection{
+func (cfg *LocalExecutionConfig) GetSubconfigs() map[string]types.IConfigSection {
+	return map[string]types.IConfigSection{
 		"besu":       cfg.Besu,
 		"geth":       cfg.Geth,
 		"nethermind": cfg.Nethermind,
