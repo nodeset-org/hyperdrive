@@ -5,9 +5,9 @@ import (
 )
 
 // Recover a wallet keystore from a mnemonic - only used for testing mnemonics
-func TestRecovery(derivationPath string, walletIndex uint, mnemonic string, chainID uint) (*LocalWallet, error) {
+func TestRecovery(derivationPath string, walletIndex uint, mnemonic string, chainID uint) (*Wallet, error) {
 	// Create a new dummy wallet with a fake password
-	w, err := NewLocalWallet("", "", "", chainID, false)
+	w, err := NewWallet("", "", "", chainID, false)
 	if err != nil {
 		return nil, fmt.Errorf("error creating new test node wallet: %w", err)
 	}

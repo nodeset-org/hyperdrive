@@ -25,7 +25,7 @@ func deletePassword(c *cli.Context) error {
 		return nil
 	}
 
-	if !c.Bool(utils.YesFlag.Name) || utils.Confirm("Are you sure you want to delete your password from disk? Your node will not be able to submit transactions after a restart until you manually enter the password") {
+	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Are you sure you want to delete your password from disk? Your node will not be able to submit transactions after a restart until you manually enter the password")) {
 		fmt.Println("Cancelled.")
 		return nil
 	}

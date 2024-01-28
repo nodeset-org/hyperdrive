@@ -54,7 +54,7 @@ func (c *walletTestSearchAndRecoverContext) PrepareData(data *api.WalletSearchAn
 	rs := sp.GetResources()
 
 	// Try each derivation path across all of the iterations
-	var recoveredWallet *wallet.LocalWallet
+	var recoveredWallet *wallet.Wallet
 	paths := []string{
 		wallet.DefaultNodeKeyPath,
 		wallet.LedgerLiveNodeKeyPath,

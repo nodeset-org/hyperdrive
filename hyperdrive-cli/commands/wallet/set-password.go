@@ -21,9 +21,13 @@ func setPassword(c *cli.Context) error {
 	status := statusResponse.Data.WalletStatus
 
 	// Check if it's already set
-	if status.HasPassword {
-		fmt.Println("The node wallet password has already been set.")
+	if status.IsPasswordSaved {
+		fmt.Println("The node wallet password is already loaded and saved to disk.")
 		return nil
+	}
+
+	if status.HasKeystore {
+
 	}
 
 	// Get the password

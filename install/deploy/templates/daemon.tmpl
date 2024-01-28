@@ -15,7 +15,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - {{.HyperdriveUserDirectory}}:{{.HyperdriveUserDirectory}}
       - {{.UserDataPath}}:{{.UserDataPath}}
-      - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts
+      - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - /var/lib/hyperdrive/global:/var/lib/hyperdrive/global
       - /var/lib/hyperdrive/data/{{.ProjectName}}:/var/lib/hyperdrive/data/{{.ProjectName}}
     command:

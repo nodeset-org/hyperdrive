@@ -90,15 +90,15 @@ func initWallet(c *cli.Context) error {
 		confirmMnemonic(response.Data.Mnemonic)
 	}
 
-	// Do a recover to save the wallet
-	recoverResponse, err := hd.Api.Wallet.Recover(derivationPath, &response.Data.Mnemonic, walletIndex, nil, nil)
+	// Do a test recover to verify the wallet
+	recoverResponse, err := hd.Api.Wallet.TestRecover(derivationPath, response.Data.Mnemonic, walletIndex)
 	if err != nil {
 		return fmt.Errorf("error saving wallet: %w", err)
 	}
 
 	// Sanity check the addresses
 	if recoverResponse.Data.AccountAddress != response.Data.AccountAddress {
-		return fmt.Errorf("expected %s, but generated %s upon saving", response.Data.AccountAddress, recoverResponse.Data.AccountAddress)
+		return fmt.Errorf("expected %s, but generated %s upon testing recovery", response.Data.AccountAddress, recoverResponse.Data.AccountAddress)
 	}
 
 	// Clear terminal output

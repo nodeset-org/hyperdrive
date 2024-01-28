@@ -23,7 +23,7 @@ import (
 type ServiceProvider struct {
 	// Services
 	cfg        *config.HyperdriveConfig
-	nodeWallet *wallet.LocalWallet
+	nodeWallet *wallet.Wallet
 	ecManager  *ExecutionClientManager
 	bcManager  *BeaconClientManager
 	docker     *client.Client
@@ -58,7 +58,7 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	nodeAddressPath := filepath.Join(userDataPath, config.UserAddressFilename)
 	keystorePath := filepath.Join(userDataPath, config.UserWalletFilename)
 	passwordPath := filepath.Join(userDataPath, config.UserPasswordFilename)
-	nodeWallet, err := wallet.NewLocalWallet(keystorePath, nodeAddressPath, passwordPath, resources.ChainID, true)
+	nodeWallet, err := wallet.NewWallet(keystorePath, nodeAddressPath, passwordPath, resources.ChainID, true)
 	if err != nil {
 		return nil, fmt.Errorf("error creating node wallet: %w", err)
 	}
@@ -134,7 +134,7 @@ func (p *ServiceProvider) GetConfig() *config.HyperdriveConfig {
 	return p.cfg
 }
 
-func (p *ServiceProvider) GetWallet() *wallet.LocalWallet {
+func (p *ServiceProvider) GetWallet() *wallet.Wallet {
 	return p.nodeWallet
 }
 
