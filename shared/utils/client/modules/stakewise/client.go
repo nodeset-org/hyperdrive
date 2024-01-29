@@ -1,4 +1,4 @@
-package client
+package swclient
 
 import (
 	"context"
@@ -6,13 +6,13 @@ import (
 	"net/http"
 
 	"github.com/fatih/color"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
+	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/utils/client"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
 const (
-	baseUrl         string          = "http://" + stakewise.StakewiseDaemonRoute + "/%s"
+	baseUrl         string          = "http://" + swconfig.StakewiseDaemonRoute + "/%s"
 	jsonContentType string          = "application/json"
 	apiColor        color.Attribute = color.FgHiCyan
 )

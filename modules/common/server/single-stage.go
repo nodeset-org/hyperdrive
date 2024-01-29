@@ -1,4 +1,4 @@
-package utils
+package server
 
 import (
 	"fmt"
@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/modules/common/server"
 	"github.com/nodeset-org/hyperdrive/modules/common/services"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	batch "github.com/rocket-pool/batch-query"
@@ -64,20 +63,20 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 
 		// Check the method
 		if r.Method != http.MethodGet {
-			server.HandleInvalidMethod(log, w)
+			HandleInvalidMethod(log, w)
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(args)
 		if err != nil {
-			server.HandleInputError(log, w, err)
+			HandleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runSingleStageRoute[DataType](context, serviceProvider)
-		server.HandleResponse(log, w, response, err, isDebug)
+		HandleResponse(log, w, response, err, isDebug)
 	})
 }
 
@@ -97,14 +96,14 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 
 		// Check the method
 		if r.Method != http.MethodPost {
-			server.HandleInvalidMethod(log, w)
+			HandleInvalidMethod(log, w)
 			return
 		}
 
 		// Read the body
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			server.HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
+			HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
 			return
 		}
 		if isDebug {
@@ -115,20 +114,20 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 		var body BodyType
 		err = json.Unmarshal(bodyBytes, &body)
 		if err != nil {
-			server.HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
+			HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(body)
 		if err != nil {
-			server.HandleInputError(log, w, err)
+			HandleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runSingleStageRoute[DataType](context, serviceProvider)
-		server.HandleResponse(log, w, response, err, isDebug)
+		HandleResponse(log, w, response, err, isDebug)
 	})
 }
 

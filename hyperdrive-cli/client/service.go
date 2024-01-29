@@ -18,8 +18,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
+	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
+	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -510,16 +510,16 @@ func (c *Client) composeModules(cfg *config.HyperdriveConfig, hyperdriveDir stri
 	// Stakewise
 	if cfg.Modules.Stakewise.Enabled.Value {
 		composePaths := template.ComposePaths{
-			RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, modules.ModulesDir, stakewise.StakewiseDaemonRoute),
-			TemplatePath: filepath.Join(templatesDir, modules.ModulesDir, stakewise.StakewiseDaemonRoute),
-			OverridePath: filepath.Join(hyperdriveDir, overrideDir, modules.ModulesDir, stakewise.StakewiseDaemonRoute),
+			RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, modconfig.ModulesDir, swconfig.StakewiseDaemonRoute),
+			TemplatePath: filepath.Join(templatesDir, modconfig.ModulesDir, swconfig.StakewiseDaemonRoute),
+			OverridePath: filepath.Join(hyperdriveDir, overrideDir, modconfig.ModulesDir, swconfig.StakewiseDaemonRoute),
 		}
 
 		// These containers always run
 		toDeploy := []types.ContainerID{
-			stakewise.ContainerID_StakewiseDaemon,
-			stakewise.ContainerID_StakewiseOperator,
-			stakewise.ContainerID_StakewiseValidator,
+			swconfig.ContainerID_StakewiseDaemon,
+			swconfig.ContainerID_StakewiseOperator,
+			swconfig.ContainerID_StakewiseValidator,
 		}
 
 		// Make the modules folder

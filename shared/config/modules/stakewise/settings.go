@@ -1,4 +1,4 @@
-package stakewise
+package swconfig
 
 const (
 	StakewiseDaemonRoute    string = "stakewise"

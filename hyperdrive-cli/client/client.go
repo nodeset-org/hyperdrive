@@ -7,7 +7,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
+	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/utils/client"
 	swclient "github.com/nodeset-org/hyperdrive/shared/utils/client/modules/stakewise"
 	"github.com/urfave/cli/v2"
@@ -52,9 +52,9 @@ func NewClientFromCtx(c *cli.Context) *Client {
 // Only use this function from commands that may work if the Daemon service doesn't exist
 func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
 	snCtx := context.GetHyperdriveContext(c)
-	socketPath := filepath.Join(snCtx.ConfigPath, stakewise.StakewiseSocketFilename)
+	socketPath := filepath.Join(snCtx.ConfigPath, swconfig.StakewiseSocketFilename)
 	client := &StakewiseClient{
-		Api:     swclient.NewApiClient(stakewise.StakewiseDaemonRoute, socketPath, snCtx.DebugEnabled),
+		Api:     swclient.NewApiClient(swconfig.StakewiseDaemonRoute, socketPath, snCtx.DebugEnabled),
 		Context: snCtx,
 	}
 	return client

@@ -8,8 +8,8 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
+	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
+	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 )
 
 // ServerManager manages all of the daemon sockets and servers run by the main Hyperdrive daemon
@@ -52,9 +52,9 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 	fmt.Printf("CLI daemon started on %s\n", cliSocketPath)
 
 	// Handle the Stakewise server
-	modulesDir := filepath.Join(sp.GetConfig().UserDataPath.Value, modules.ModulesDir)
+	modulesDir := filepath.Join(sp.GetConfig().UserDataPath.Value, modconfig.ModulesDir)
 	if cfg.Modules.Stakewise.Enabled.Value {
-		stakewiseSocketPath := filepath.Join(modulesDir, stakewise.StakewiseDaemonRoute, config.HyperdriveSocketFilename)
+		stakewiseSocketPath := filepath.Join(modulesDir, swconfig.StakewiseDaemonRoute, config.HyperdriveSocketFilename)
 		server, err := NewHyperdriveServer(sp, stakewiseSocketPath)
 		if err != nil {
 			return nil, fmt.Errorf("error creating Stakewise server: %w", err)

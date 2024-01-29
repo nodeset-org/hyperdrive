@@ -1,4 +1,4 @@
-package wallet
+package swwallet
 
 import (
 	"github.com/gorilla/mux"

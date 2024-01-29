@@ -1,4 +1,4 @@
-package wallet
+package swwallet
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/server/utils"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
+	"github.com/nodeset-org/hyperdrive/modules/common/server"
+	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	api "github.com/nodeset-org/hyperdrive/shared/types/api/modules/stakewise"
 )
 
@@ -29,7 +29,7 @@ func (f *walletInitializeContextFactory) Create(args url.Values) (*walletInitial
 }
 
 func (f *walletInitializeContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletInitializeContext, api.WalletInitializeData](
+	server.RegisterQuerylessGet[*walletInitializeContext, api.WalletInitializeData](
 		router, "initialize", f, f.handler.serviceProvider,
 	)
 }
@@ -71,7 +71,7 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 	ethKey := ethkeyResponse.Data.EthKeyJson
 
 	// Write it to disk
-	walletPath := filepath.Join(sp.GetModuleDir(), stakewise.StakewiseWalletFilename)
+	walletPath := filepath.Join(sp.GetModuleDir(), swconfig.StakewiseWalletFilename)
 	err = os.WriteFile(walletPath, ethKey, 0600)
 	if err != nil {
 		return fmt.Errorf("error saving wallet keystore to disk: %w", err)

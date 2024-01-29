@@ -11,7 +11,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/config/migration"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules"
+	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/pbnjay/memory"
 
@@ -67,7 +67,7 @@ type HyperdriveConfig struct {
 	Metrics *MetricsConfig
 
 	// Modules
-	Modules *modules.ModulesConfig
+	Modules *modconfig.ModulesConfig
 
 	// Internal fields
 	Version                 string
@@ -245,7 +245,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg.LocalBeaconConfig = NewLocalBeaconConfig(cfg)
 	cfg.ExternalBeaconConfig = NewExternalBeaconConfig(cfg)
 	cfg.Metrics = NewMetricsConfig(cfg)
-	cfg.Modules = modules.NewModulesConfig()
+	cfg.Modules = modconfig.NewModulesConfig()
 
 	// Apply the default values for mainnet
 	cfg.Network.Value = types.Network_Mainnet

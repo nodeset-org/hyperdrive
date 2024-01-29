@@ -1,4 +1,4 @@
-package client
+package swclient
 
 import (
 	"github.com/nodeset-org/hyperdrive/shared/types/api"

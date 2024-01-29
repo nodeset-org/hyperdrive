@@ -1,4 +1,4 @@
-package api
+package swapi
 
 import "github.com/ethereum/go-ethereum/common"
 

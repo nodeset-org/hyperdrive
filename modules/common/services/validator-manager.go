@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/nodeset-org/hyperdrive/modules/common/validator/keystore"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules"
+	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 )
 
 type ValidatorManager struct {
@@ -13,7 +13,7 @@ type ValidatorManager struct {
 
 func NewValidatorManager(moduleDir string) *ValidatorManager {
 	// Get the validator storage path
-	validatorPath := filepath.Join(moduleDir, modules.ValidatorDir)
+	validatorPath := filepath.Join(moduleDir, modconfig.ValidatorDir)
 
 	mgr := &ValidatorManager{
 		keystoreManagers: map[string]keystore.IKeystoreManager{

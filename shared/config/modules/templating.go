@@ -1,4 +1,4 @@
-package modules
+package modconfig
 
 func (c *ModulesConfig) ModulesDirectory() string {
 	return ModulesDir

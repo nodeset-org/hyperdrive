@@ -1,4 +1,4 @@
-package modules
+package modconfig
 
 const (
 	ModulesDir   string = "modules"

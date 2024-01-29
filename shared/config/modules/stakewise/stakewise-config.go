@@ -1,4 +1,4 @@
-package stakewise
+package swconfig
 
 import (
 	"github.com/nodeset-org/hyperdrive/shared"

@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
+	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rivo/tview"
 )
@@ -119,7 +119,7 @@ func (configPage *StakewiseConfigPage) handleLayoutChanged() {
 		// Remove the Stakewise enable param since it's already there
 		stakewiseItems := []*parameterizedFormItem{}
 		for _, item := range configPage.stakewiseItems {
-			if item.parameter.GetCommon().ID == stakewise.StakewiseEnableID {
+			if item.parameter.GetCommon().ID == swconfig.StakewiseEnableID {
 				continue
 			}
 			stakewiseItems = append(stakewiseItems, item)

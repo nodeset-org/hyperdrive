@@ -1,20 +1,20 @@
-package modules
+package modconfig
 
 import (
-	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
+	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 // Configuration for Hyperdrive modules
 type ModulesConfig struct {
-	Stakewise *stakewise.StakewiseConfig
+	Stakewise *swconfig.StakewiseConfig
 }
 
 // Generates a new Modules config
 func NewModulesConfig() *ModulesConfig {
 	cfg := &ModulesConfig{}
 
-	cfg.Stakewise = stakewise.NewStakewiseConfig()
+	cfg.Stakewise = swconfig.NewStakewiseConfig()
 
 	return cfg
 }
