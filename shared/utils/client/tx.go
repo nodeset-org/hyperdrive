@@ -9,10 +9,10 @@ import (
 )
 
 type TxRequester struct {
-	context *requesterContext
+	context *RequesterContext
 }
 
-func NewTxRequester(context *requesterContext) *TxRequester {
+func NewTxRequester(context *RequesterContext) *TxRequester {
 	return &TxRequester{
 		context: context,
 	}
@@ -24,7 +24,7 @@ func (r *TxRequester) GetName() string {
 func (r *TxRequester) GetRoute() string {
 	return "tx"
 }
-func (r *TxRequester) GetContext() *requesterContext {
+func (r *TxRequester) GetContext() *RequesterContext {
 	return r.context
 }
 
@@ -36,7 +36,7 @@ func (r *TxRequester) SignTx(txSubmission *eth.TransactionSubmission, nonce *big
 		MaxFee:         maxFee,
 		MaxPriorityFee: maxPriorityFee,
 	}
-	return sendPostRequest[api.TxSignTxData](r, "sign-tx", "SignTx", body)
+	return SendPostRequest[api.TxSignTxData](r, "sign-tx", "SignTx", body)
 }
 
 // Submit a transaction
@@ -47,7 +47,7 @@ func (r *TxRequester) SubmitTx(txSubmission *eth.TransactionSubmission, nonce *b
 		MaxFee:         maxFee,
 		MaxPriorityFee: maxPriorityFee,
 	}
-	return sendPostRequest[api.TxData](r, "submit-tx", "SubmitTx", body)
+	return SendPostRequest[api.TxData](r, "submit-tx", "SubmitTx", body)
 }
 
 // Use the node private key to sign a batch of transactions without submitting them
@@ -58,7 +58,7 @@ func (r *TxRequester) SignTxBatch(txSubmissions []*eth.TransactionSubmission, fi
 		MaxFee:         maxFee,
 		MaxPriorityFee: maxPriorityFee,
 	}
-	return sendPostRequest[api.TxBatchSignTxData](r, "batch-sign-tx", "SignTxBatch", body)
+	return SendPostRequest[api.TxBatchSignTxData](r, "batch-sign-tx", "SignTxBatch", body)
 }
 
 // Submit a batch of transactions
@@ -69,7 +69,7 @@ func (r *TxRequester) SubmitTxBatch(txSubmissions []*eth.TransactionSubmission, 
 		MaxFee:         maxFee,
 		MaxPriorityFee: maxPriorityFee,
 	}
-	return sendPostRequest[api.BatchTxData](r, "batch-submit-tx", "SubmitTxBatch", body)
+	return SendPostRequest[api.BatchTxData](r, "batch-submit-tx", "SubmitTxBatch", body)
 }
 
 // Wait for a transaction
@@ -77,5 +77,5 @@ func (r *TxRequester) WaitForTransaction(txHash common.Hash) (*api.ApiResponse[a
 	args := map[string]string{
 		"hash": txHash.Hex(),
 	}
-	return sendGetRequest[api.SuccessData](r, "wait", "WaitForTransaction", args)
+	return SendGetRequest[api.SuccessData](r, "wait", "WaitForTransaction", args)
 }

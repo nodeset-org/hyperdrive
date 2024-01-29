@@ -65,9 +65,8 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	}
 	nodeAddressPath := filepath.Join(userDataPath, config.UserAddressFilename)
 	walletDataPath := filepath.Join(userDataPath, config.UserWalletDataFilename)
-	legacyKeystorePath := filepath.Join(userDataPath, config.UserLegacyWalletFilename)
 	passwordPath := filepath.Join(userDataPath, config.UserPasswordFilename)
-	nodeWallet, err := wallet.NewWallet(walletDataPath, legacyKeystorePath, nodeAddressPath, passwordPath, resources.ChainID)
+	nodeWallet, err := wallet.NewWallet(walletDataPath, nodeAddressPath, passwordPath, resources.ChainID)
 	if err != nil {
 		return nil, fmt.Errorf("error creating node wallet: %w", err)
 	}

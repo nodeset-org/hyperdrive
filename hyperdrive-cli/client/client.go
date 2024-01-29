@@ -7,7 +7,9 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/utils/client"
+	swclient "github.com/nodeset-org/hyperdrive/shared/utils/client/modules/stakewise"
 	"github.com/urfave/cli/v2"
 )
 
@@ -27,17 +29,32 @@ type Client struct {
 	Context *context.HyperdriveContext
 }
 
+// Hyperdrive client
+type StakewiseClient struct {
+	Api     *swclient.ApiClient
+	Context *context.HyperdriveContext
+}
+
 // Create new Hyperdrive client from CLI context without checking for sync status
 // Only use this function from commands that may work if the Daemon service doesn't exist
 // Most users should call NewClientFromCtx(c).WithStatus() or NewClientFromCtx(c).WithReady()
 func NewClientFromCtx(c *cli.Context) *Client {
 	snCtx := context.GetHyperdriveContext(c)
-
-	// Set up the default API socket file if it's not specified
 	socketPath := filepath.Join(snCtx.ConfigPath, config.HyperdriveSocketFilename)
-
 	client := &Client{
-		Api:     client.NewApiClient(socketPath, snCtx.DebugEnabled),
+		Api:     client.NewApiClient(config.HyperdriveDaemonRoute, socketPath, snCtx.DebugEnabled),
+		Context: snCtx,
+	}
+	return client
+}
+
+// Create new Stakewise client from CLI context without checking for sync status
+// Only use this function from commands that may work if the Daemon service doesn't exist
+func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
+	snCtx := context.GetHyperdriveContext(c)
+	socketPath := filepath.Join(snCtx.ConfigPath, stakewise.StakewiseSocketFilename)
+	client := &StakewiseClient{
+		Api:     swclient.NewApiClient(stakewise.StakewiseDaemonRoute, socketPath, snCtx.DebugEnabled),
 		Context: snCtx,
 	}
 	return client

@@ -49,7 +49,6 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 		return nil, fmt.Errorf("error starting CLI server: %w", err)
 	}
 	mgr.cliServer = cliServer
-	stopWg.Add(1)
 	fmt.Printf("CLI daemon started on %s\n", cliSocketPath)
 
 	// Handle the Stakewise server
@@ -65,7 +64,6 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 			return nil, fmt.Errorf("error starting Stakewise server: %w", err)
 		}
 		mgr.stakewiseServer = server
-		stopWg.Add(1)
 		fmt.Printf("Stakewise daemon started on %s\n", stakewiseSocketPath)
 	}
 

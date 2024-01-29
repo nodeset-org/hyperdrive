@@ -2,12 +2,10 @@ package api
 
 import (
 	"github.com/nodeset-org/eth-utils/eth"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 type ApiResponse[Data any] struct {
-	WalletStatus types.WalletStatus `json:"walletStatus"`
-	Data         *Data              `json:"data"`
+	Data *Data `json:"data"`
 }
 
 type SuccessData struct {

@@ -5,10 +5,10 @@ import (
 )
 
 type ServiceRequester struct {
-	context *requesterContext
+	context *RequesterContext
 }
 
-func NewServiceRequester(context *requesterContext) *ServiceRequester {
+func NewServiceRequester(context *RequesterContext) *ServiceRequester {
 	return &ServiceRequester{
 		context: context,
 	}
@@ -20,32 +20,32 @@ func (r *ServiceRequester) GetName() string {
 func (r *ServiceRequester) GetRoute() string {
 	return "service"
 }
-func (r *ServiceRequester) GetContext() *requesterContext {
+func (r *ServiceRequester) GetContext() *RequesterContext {
 	return r.context
 }
 
 // Gets the status of the configured Execution and Beacon clients
 func (r *ServiceRequester) ClientStatus() (*api.ApiResponse[api.ServiceClientStatusData], error) {
-	return sendGetRequest[api.ServiceClientStatusData](r, "client-status", "ClientStatus", nil)
+	return SendGetRequest[api.ServiceClientStatusData](r, "client-status", "ClientStatus", nil)
 }
 
 // Gets the Hyperdrive configuration
 func (r *ServiceRequester) GetConfig() (*api.ApiResponse[api.ServiceGetConfigData], error) {
-	return sendGetRequest[api.ServiceGetConfigData](r, "get-config", "GetConfig", nil)
+	return SendGetRequest[api.ServiceGetConfigData](r, "get-config", "GetConfig", nil)
 }
 
 // Restarts the Validator client
 func (r *ServiceRequester) RestartVc() (*api.ApiResponse[api.SuccessData], error) {
-	return sendGetRequest[api.SuccessData](r, "restart-vc", "RestartVc", nil)
+	return SendGetRequest[api.SuccessData](r, "restart-vc", "RestartVc", nil)
 }
 
 // Deletes the data folder including the wallet file, password file, and all validator keys.
 // Don't use this unless you have a very good reason to do it (such as switching from Prater to Mainnet).
 func (r *ServiceRequester) TerminateDataFolder() (*api.ApiResponse[api.ServiceTerminateDataFolderData], error) {
-	return sendGetRequest[api.ServiceTerminateDataFolderData](r, "terminate-data-folder", "TerminateDataFolder", nil)
+	return SendGetRequest[api.ServiceTerminateDataFolderData](r, "terminate-data-folder", "TerminateDataFolder", nil)
 }
 
 // Gets the version of the daemon
 func (r *ServiceRequester) Version() (*api.ApiResponse[api.ServiceVersionData], error) {
-	return sendGetRequest[api.ServiceVersionData](r, "version", "Version", nil)
+	return SendGetRequest[api.ServiceVersionData](r, "version", "Version", nil)
 }

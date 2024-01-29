@@ -32,13 +32,12 @@ type Wallet struct {
 	passwordManager *PasswordManager
 
 	// Misc cache
-	chainID                  uint
-	legacyWalletKeystorePath string
-	walletDataPath           string
+	chainID        uint
+	walletDataPath string
 }
 
 // Create new wallet
-func NewWallet(walletDataPath string, legacyWalletKeystorePath string, walletAddressPath string, passwordFilePath string, chainID uint) (*Wallet, error) {
+func NewWallet(walletDataPath string, walletAddressPath string, passwordFilePath string, chainID uint) (*Wallet, error) {
 	// Create the wallet
 	w := &Wallet{
 		// Create managers
@@ -46,9 +45,8 @@ func NewWallet(walletDataPath string, legacyWalletKeystorePath string, walletAdd
 		passwordManager: NewPasswordManager(passwordFilePath),
 
 		// Initialize other fields
-		chainID:                  chainID,
-		legacyWalletKeystorePath: legacyWalletKeystorePath,
-		walletDataPath:           walletDataPath,
+		chainID:        chainID,
+		walletDataPath: walletDataPath,
 	}
 
 	// Load the password
@@ -319,7 +317,7 @@ func (w *Wallet) GenerateValidatorKey(path string) ([]byte, error) {
 // Builds a local wallet keystore and saves its artifacts to disk
 func (w *Wallet) buildLocalWallet(derivationPath string, walletIndex uint, mnemonic string, password string, savePassword bool, testMode bool) error {
 	// Initialize the wallet with it
-	localMgr := NewLocalWalletManager(w.legacyWalletKeystorePath, w.chainID)
+	localMgr := NewLocalWalletManager(w.chainID)
 	localData, err := localMgr.InitializeKeystore(derivationPath, walletIndex, mnemonic, password)
 	if err != nil {
 		return fmt.Errorf("error initializing wallet keystore with recovered data: %w", err)
@@ -336,12 +334,6 @@ func (w *Wallet) buildLocalWallet(derivationPath string, walletIndex uint, mnemo
 		err = w.saveWalletData(data)
 		if err != nil {
 			return fmt.Errorf("error saving wallet data: %w", err)
-		}
-
-		// Save the legacy key
-		err = localMgr.SaveKeystore()
-		if err != nil {
-			return fmt.Errorf("error saving legacy wallet keystore: %w", err)
 		}
 
 		// Get the wallet address
@@ -396,7 +388,7 @@ func (w *Wallet) loadWalletData(password string) (IWalletManager, error) {
 	var manager IWalletManager
 	switch data.Type {
 	case sharedtypes.WalletType_Local:
-		localMgr := NewLocalWalletManager(w.legacyWalletKeystorePath, w.chainID)
+		localMgr := NewLocalWalletManager(w.chainID)
 		err = localMgr.LoadWallet(&data.LocalData, password)
 		if err != nil {
 			return nil, fmt.Errorf("error loading local wallet data at %s: %w", w.walletDataPath, err)

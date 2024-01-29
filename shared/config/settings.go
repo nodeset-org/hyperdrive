@@ -7,8 +7,7 @@ const (
 	HyperdriveSocketFilename string = HyperdriveDaemonRoute + ".sock"
 
 	// Wallet
-	UserAddressFilename      string = "address"
-	UserWalletDataFilename   string = "wallet"
-	UserLegacyWalletFilename string = "wallet-v3"
-	UserPasswordFilename     string = "password"
+	UserAddressFilename    string = "address"
+	UserWalletDataFilename string = "wallet"
+	UserPasswordFilename   string = "password"
 )

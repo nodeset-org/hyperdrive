@@ -102,6 +102,7 @@ func (m *ApiManager) Start(wg *sync.WaitGroup, socketOwnerUid uint32, socketOwne
 		}
 		wg.Done()
 	}()
+	wg.Add(1)
 
 	return nil
 }

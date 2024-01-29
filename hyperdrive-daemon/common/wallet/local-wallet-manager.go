@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"os"
 	"sync"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
@@ -61,19 +60,15 @@ type LocalWalletManager struct {
 	// Transactor for signing transactions
 	transactor *bind.TransactOpts
 
-	// The path to the keystore in Geth's account (v3) format, needed by some projects
-	gethKeystorePath string
-
 	// The node's wallet's seed data, serialized in Geth account (v3) format
 	ethkey []byte
 }
 
 // Creates a new wallet manager for local wallets
-func NewLocalWalletManager(legacyKeystorePath string, chainID uint) *LocalWalletManager {
+func NewLocalWalletManager(chainID uint) *LocalWalletManager {
 	return &LocalWalletManager{
-		chainID:          big.NewInt(int64(chainID)),
-		gethKeystorePath: legacyKeystorePath,
-		encryptor:        eth2ks.New(),
+		chainID:   big.NewInt(int64(chainID)),
+		encryptor: eth2ks.New(),
 	}
 }
 
@@ -148,7 +143,7 @@ func (m *LocalWalletManager) VerifyPassword(password string) (bool, error) {
 	}
 
 	// Make a new local manager and load the data with the candidate password
-	candidateMgr := NewLocalWalletManager("", 0)
+	candidateMgr := NewLocalWalletManager(0)
 	err := candidateMgr.LoadWallet(m.data, password)
 	if err != nil {
 		return false, fmt.Errorf("error verifying wallet with candidate password: %w", err)
@@ -157,16 +152,6 @@ func (m *LocalWalletManager) VerifyPassword(password string) (bool, error) {
 	candidateBytes := crypto.FromECDSA(candidateMgr.nodePrivateKey)
 
 	return bytes.Equal(trueBytes, candidateBytes), nil
-}
-
-// Saves the legacy Geth keystore to disk
-func (m *LocalWalletManager) SaveKeystore() error {
-	// Write it to file
-	err := os.WriteFile(m.gethKeystorePath, m.ethkey, walletFileMode)
-	if err != nil {
-		return fmt.Errorf("error writing legacy keystore to [%s]: %w", m.gethKeystorePath, err)
-	}
-	return nil
 }
 
 // Load the node wallet's private key from the keystore

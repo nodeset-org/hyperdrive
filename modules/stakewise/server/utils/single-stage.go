@@ -9,10 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive/modules/common/server"
+	"github.com/nodeset-org/hyperdrive/modules/common/services"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
 	batch "github.com/rocket-pool/batch-query"
 )
 
@@ -50,7 +49,7 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 	router *mux.Router,
 	functionName string,
 	factory ISingleStageGetContextFactory[ContextType, DataType],
-	serviceProvider *common.ServiceProvider,
+	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -88,7 +87,7 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 	router *mux.Router,
 	functionName string,
 	factory ISingleStagePostContextFactory[ContextType, BodyType, DataType],
-	serviceProvider *common.ServiceProvider,
+	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -134,9 +133,8 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 }
 
 // Run a route registered with the common single-stage querying pattern
-func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], serviceProvider *common.ServiceProvider) (*api.ApiResponse[DataType], error) {
+func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider) (*api.ApiResponse[DataType], error) {
 	// Get the services
-	w := serviceProvider.GetWallet()
 	q := serviceProvider.GetQueryManager()
 
 	// Initialize the context with any bootstrapping, requirements checks, or bindings it needs to set up
@@ -156,17 +154,22 @@ func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], se
 
 	// Get the transact opts if this node is ready for transaction
 	var opts *bind.TransactOpts
-	walletStatus, err := w.GetStatus()
-	if err != nil {
-		return nil, fmt.Errorf("error getting wallet status: %w", err)
-	}
-	if utils.IsWalletReady(walletStatus) {
-		var err error
-		opts, err = w.GetTransactor()
+
+	// TODO
+	/*
+		w := serviceProvider.GetWallet()
+		walletStatus, err := w.GetStatus()
 		if err != nil {
-			return nil, fmt.Errorf("error getting node account transactor: %w", err)
+			return nil, fmt.Errorf("error getting wallet status: %w", err)
 		}
-	}
+		if utils.IsWalletReady(walletStatus) {
+			var err error
+			opts, err = w.GetTransactor()
+			if err != nil {
+				return nil, fmt.Errorf("error getting node account transactor: %w", err)
+			}
+		}
+	*/
 
 	// Create the response and data
 	data := new(DataType)

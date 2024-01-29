@@ -23,6 +23,7 @@ const (
 type ServiceProvider struct {
 	// Services
 	cfg       *config.HyperdriveConfig
+	hdClient  *client.ApiClient
 	ecManager *ExecutionClientManager
 	bcManager *BeaconClientManager
 	docker    *docker.Client
@@ -35,16 +36,17 @@ type ServiceProvider struct {
 
 	// Path info
 	moduleDir string
+	userDir   string
 }
 
 // Creates a new ServiceProvider instance
 func NewServiceProvider(moduleDir string) (*ServiceProvider, error) {
 	// Create a client for the Hyperdrive daemon
 	hyperdriveSocket := filepath.Join(moduleDir, config.HyperdriveSocketFilename)
-	hdClient := client.NewApiClient(hyperdriveSocket, false)
+	hdClient := client.NewApiClient(config.HyperdriveDaemonRoute, hyperdriveSocket, false)
 
 	// Get the config
-	cfg := config.NewHyperdriveConfig("<Module Copy>")
+	cfg := config.NewHyperdriveConfig("")
 	cfgResponse, err := hdClient.Service.GetConfig()
 	if err != nil {
 		return nil, fmt.Errorf("error getting config from Hyperdrive server: %w", err)
@@ -94,7 +96,9 @@ func NewServiceProvider(moduleDir string) (*ServiceProvider, error) {
 	// Create the provider
 	provider := &ServiceProvider{
 		moduleDir: moduleDir,
+		userDir:   cfg.HyperdriveUserDirectory,
 		cfg:       cfg,
+		hdClient:  hdClient,
 		ecManager: ecManager,
 		bcManager: bcManager,
 		docker:    dockerClient,
@@ -114,8 +118,16 @@ func (p *ServiceProvider) GetModuleDir() string {
 	return p.moduleDir
 }
 
+func (p *ServiceProvider) GetUserDir() string {
+	return p.userDir
+}
+
 func (p *ServiceProvider) GetConfig() *config.HyperdriveConfig {
 	return p.cfg
+}
+
+func (p *ServiceProvider) GetClient() *client.ApiClient {
+	return p.hdClient
 }
 
 func (p *ServiceProvider) GetEthClient() *ExecutionClientManager {

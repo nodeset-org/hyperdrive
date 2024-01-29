@@ -15,7 +15,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/modules/stakewise/tasks"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/urfave/cli/v2"
 )
 
@@ -88,7 +87,7 @@ func main() {
 		if err != nil {
 			return fmt.Errorf("error starting API manager: %w", err)
 		}
-		stopWg.Add(1)
+		fmt.Printf("Started daemon on %s.\n", apiServer.GetSocketPath())
 
 		// Start the task loop
 		taskLoop := tasks.NewTaskLoop(sp, stopWg)
@@ -114,8 +113,7 @@ func main() {
 		}()
 
 		// Run the daemon until closed
-		socketPath := filepath.Join(moduleDir, stakewise.StakewiseSocketFilename)
-		fmt.Printf("Started daemon on %s.\n", socketPath)
+		fmt.Println("Daemon online.")
 		stopWg.Wait()
 		fmt.Println("Daemon stopped.")
 		return nil
