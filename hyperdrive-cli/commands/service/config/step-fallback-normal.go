@@ -22,7 +22,7 @@ func createFallbackNormalStep(wiz *wizard, currentStep int, totalSteps int) *tex
 	done := func(text map[string]string) {
 		wiz.md.Config.Fallback.EcHttpUrl.Value = text[ecHttpLabel]
 		wiz.md.Config.Fallback.BnHttpUrl.Value = text[ccHttpLabel]
-		wiz.metricsModal.show()
+		wiz.modulesModal.show()
 	}
 
 	back := func() {

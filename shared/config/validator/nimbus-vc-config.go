@@ -26,7 +26,7 @@ func NewNimbusVcConfig() *NimbusVcConfig {
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 ids.ContainerTagID,
-				Name:               "Container Tag",
+				Name:               "Validator Client Container Tag",
 				Description:        "The tag name of the Nimbus Validator Client container you want to use on Docker Hub.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
 				CanBeBlank:         false,
@@ -42,8 +42,8 @@ func NewNimbusVcConfig() *NimbusVcConfig {
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 ids.AdditionalFlagsID,
-				Name:               "Additional Flags",
-				Description:        "Additional custom command line flags you want to pass Nimbus's Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
+				Name:               "Additional Validator Client Flags",
+				Description:        "Additional custom command line flags you want to pass the Nimbus Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,

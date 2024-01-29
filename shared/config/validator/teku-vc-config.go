@@ -26,7 +26,7 @@ func NewTekuVcConfig() *TekuVcConfig {
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 ids.ContainerTagID,
-				Name:               "Container Tag",
+				Name:               "Validator Client Container Tag",
 				Description:        "The tag name of the Teku container on Docker Hub you want to use for the Validator Client.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
 				CanBeBlank:         false,
@@ -43,7 +43,7 @@ func NewTekuVcConfig() *TekuVcConfig {
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Validator Client Flags",
-				Description:        "Additional custom command line flags you want to pass Teku's Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
+				Description:        "Additional custom command line flags you want to pass the Teku Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,

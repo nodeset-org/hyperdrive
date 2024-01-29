@@ -24,7 +24,7 @@ func createFallbackPrysmStep(wiz *wizard, currentStep int, totalSteps int) *text
 		wiz.md.Config.Fallback.EcHttpUrl.Value = text[ecHttpLabel]
 		wiz.md.Config.Fallback.BnHttpUrl.Value = text[ccHttpLabel]
 		wiz.md.Config.Fallback.PrysmRpcUrl.Value = text[jsonRpcLabel]
-		wiz.metricsModal.show()
+		wiz.modulesModal.show()
 	}
 
 	back := func() {

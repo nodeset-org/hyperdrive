@@ -19,6 +19,7 @@ type settingsHome struct {
 	fallbackPage     *FallbackConfigPage
 	ccPage           *BeaconConfigPage
 	metricsPage      *MetricsConfigPage
+	modulesPage      *ModulesPage
 	categoryList     *tview.List
 	settingsSubpages []settingsPage
 	content          tview.Primitive
@@ -42,12 +43,14 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 	home.ccPage = NewBeaconConfigPage(home)
 	home.fallbackPage = NewFallbackConfigPage(home)
 	home.metricsPage = NewMetricsConfigPage(home)
+	home.modulesPage = NewModulesPage(home)
 	settingsSubpages := []settingsPage{
 		home.hyperdrivePage,
 		home.ecPage,
 		home.ccPage,
 		home.fallbackPage,
 		home.metricsPage,
+		home.modulesPage,
 	}
 	home.settingsSubpages = settingsSubpages
 

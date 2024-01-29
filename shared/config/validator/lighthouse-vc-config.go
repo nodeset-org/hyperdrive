@@ -29,7 +29,7 @@ func NewLighthouseVcConfig() *LighthouseVcConfig {
 		ContainerTag: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 ids.ContainerTagID,
-				Name:               "Container Tag",
+				Name:               "Validator Client Container Tag",
 				Description:        "The tag name of the Lighthouse container from Docker Hub you want to use for the Validator Client.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
 				CanBeBlank:         false,
@@ -45,8 +45,8 @@ func NewLighthouseVcConfig() *LighthouseVcConfig {
 		AdditionalFlags: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 ids.AdditionalFlagsID,
-				Name:               "Additional Flags",
-				Description:        "Additional custom command line flags you want to pass Lighthouse's Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
+				Name:               "Additional Validator Client Flags",
+				Description:        "Additional custom command line flags you want to pass the Lighthouse Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,

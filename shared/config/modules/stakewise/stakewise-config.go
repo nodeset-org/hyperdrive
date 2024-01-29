@@ -91,7 +91,7 @@ func NewStakewiseConfig() *StakewiseConfig {
 
 // The the title for the config
 func (cfg *StakewiseConfig) GetTitle() string {
-	return "Stakewise Settings"
+	return "Stakewise"
 }
 
 // Get the parameters for this config

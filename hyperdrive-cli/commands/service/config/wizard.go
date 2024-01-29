@@ -35,7 +35,10 @@ type wizard struct {
 	fallbackNormalModal *textBoxWizardStep
 	fallbackPrysmModal  *textBoxWizardStep
 
-	// Step 7 - Metrics
+	// Step 7 - Modules
+	modulesModal *checkBoxWizardStep
+
+	// Step 8 - Metrics
 	metricsModal *choiceWizardStep
 
 	// Done
@@ -48,7 +51,7 @@ func newWizard(md *mainDisplay) *wizard {
 		md: md,
 	}
 
-	totalSteps := 8
+	totalSteps := 9
 
 	// Step 1 - Welcome
 	wiz.welcomeModal = createWelcomeStep(wiz, 1, totalSteps)
@@ -78,11 +81,14 @@ func newWizard(md *mainDisplay) *wizard {
 	wiz.fallbackNormalModal = createFallbackNormalStep(wiz, 6, totalSteps)
 	wiz.fallbackPrysmModal = createFallbackPrysmStep(wiz, 6, totalSteps)
 
-	// Step 7 - Metrics
-	wiz.metricsModal = createMetricsStep(wiz, 7, totalSteps)
+	// Step 7 - Modules
+	wiz.modulesModal = createModulesStep(wiz, 7, totalSteps)
+
+	// Step 8 - Metrics
+	wiz.metricsModal = createMetricsStep(wiz, 8, totalSteps)
 
 	// Done
-	wiz.finishedModal = createFinishedStep(wiz, 8, totalSteps)
+	wiz.finishedModal = createFinishedStep(wiz, 9, totalSteps)
 
 	return wiz
 }

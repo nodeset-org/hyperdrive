@@ -35,7 +35,7 @@ type checkBoxModalLayout struct {
 }
 
 // Creates a new CheckBoxModalLayout instance
-func newCheckBoxModalLayout(app *tview.Application, title string, width int, text string) *checkBoxModalLayout {
+func newCheckBoxModalLayout(app *tview.Application, title string, width int, text string, labels []string, descriptions []string, settings []bool) *checkBoxModalLayout {
 
 	layout := &checkBoxModalLayout{
 		app:   app,
@@ -133,6 +133,9 @@ func newCheckBoxModalLayout(app *tview.Application, title string, width int, tex
 	// Set the content and border for the layout
 	layout.contentGrid = contentGrid
 	layout.borderGrid = borderGrid
+
+	// Populate with controls
+	layout.generateCheckboxes(labels, descriptions, settings)
 
 	return layout
 }
