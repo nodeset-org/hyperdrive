@@ -12,7 +12,7 @@ services:
     user: root
     container_name: {{.ProjectName}}-sw-daemon
     restart: unless-stopped
-    {{$module_dir := (printf "%s/%s/%s" .HyperdriveUserDirectory .Modules.ModulesDirectory .Modules.Stakewise.StakewiseDaemonRoute)}}
+    {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.StakewiseDaemonRoute)}}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - {{.HyperdriveUserDirectory}}:{{.HyperdriveUserDirectory}}

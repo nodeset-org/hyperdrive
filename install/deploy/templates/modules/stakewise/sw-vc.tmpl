@@ -13,7 +13,7 @@ services:
     container_name: {{.ProjectName}}-sw-vc
     restart: unless-stopped
     stop_grace_period: 3m
-    {{$module_dir := (printf "%s/%s/%s" .HyperdriveUserDirectory .Modules.ModulesDirectory .Modules.Stakewise.StakewiseDaemonRoute)}}
+    {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.StakewiseDaemonRoute)}}
     volumes:
       - /usr/share/hyperdrive/scripts:/setup:ro
       - {{$module_dir}}/validators:/validators
