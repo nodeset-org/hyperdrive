@@ -60,6 +60,22 @@ build_daemon() {
 }
 
 
+# Builds the Stakewise daemon image and pushes it to Docker Hub
+# NOTE: You must install qemu first; e.g. sudo apt-get install -y qemu qemu-user-static
+build_sw_daemon() {
+    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
+
+    # Make a multiarch builder, ignore if it's already there
+    docker buildx create --name multiarch-builder --driver docker-container --use > /dev/null 2>&1
+
+    echo "Building and pushing Docker Hyperdrive image..."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-stakewise:$VERSION -f docker/modules/stakewise/sw-daemon.dockerfile --push . || fail "Error building Stakewise daemon image."
+    echo "done!"
+
+    cd ..
+}
+
+
 # Tags the 'latest' Docker Hub image
 tag_latest() {
     echo -n "Tagging 'latest' Docker image... "
@@ -91,12 +107,13 @@ usage() {
 # =================
 
 # Parse arguments
-while getopts "acpdlv:" FLAG; do
+while getopts "acpdslv:" FLAG; do
     case "$FLAG" in
-        a) CLI=true PACKAGES=true DAEMON=true MANIFEST=true LATEST=true ;;
+        a) CLI=true PACKAGES=true SW_DAEMON=true DAEMON=true MANIFEST=true LATEST=true ;;
         c) CLI=true ;;
         p) PACKAGES=true ;;
         d) DAEMON=true ;;
+        s) SW_DAEMON=true ;;
         l) LATEST=true ;;
         v) VERSION="$OPTARG" ;;
         *) usage ;;
@@ -119,6 +136,9 @@ if [ "$PACKAGES" = true ]; then
 fi
 if [ "$DAEMON" = true ]; then
     build_daemon
+fi
+if [ "$SW_DAEMON" = true ]; then
+    build_sw_daemon
 fi
 if [ "$LATEST" = true ]; then
     tag_latest
