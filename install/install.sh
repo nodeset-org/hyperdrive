@@ -344,7 +344,7 @@ install() {
     { cp -r "$PACKAGE_FILES_PATH/override" "$HD_SHARE_PATH" || fail "Could not copy override folder to the Hyperdrive system directory."; } >&2
     { cp -r "$PACKAGE_FILES_PATH/scripts" "$HD_SHARE_PATH" || fail "Could not copy scripts folder to the Hyperdrive system directory."; } >&2
     { cp -r "$PACKAGE_FILES_PATH/templates" "$HD_SHARE_PATH" || fail "Could not copy templates folder to the Hyperdrive system directory."; } >&2
-    { find "$HD_USR_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
+    { find "$HD_SHARE_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
 
     # Clean up unnecessary files from old installations
     progress 7 "Cleaning up obsolete files from previous installs..."
