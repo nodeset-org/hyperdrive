@@ -1,5 +1,6 @@
 package stakewise
 
 const (
-	DaemonRoute string = "stakewise"
+	StakewiseDaemonRoute    string = "stakewise"
+	StakewiseSocketFilename string = StakewiseDaemonRoute + ".sock"
 )

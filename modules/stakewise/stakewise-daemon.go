@@ -10,11 +10,12 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/tasks"
+	"github.com/nodeset-org/hyperdrive/modules/common/services"
+	"github.com/nodeset-org/hyperdrive/modules/stakewise/api"
+	"github.com/nodeset-org/hyperdrive/modules/stakewise/tasks"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/urfave/cli/v2"
 )
 
@@ -30,8 +31,8 @@ func main() {
 	app := cli.NewApp()
 
 	// Set application info
-	app.Name = "hyperdrive-daemon"
-	app.Usage = "Hyperdrive Daemon for NodeSet Node Operator Management"
+	app.Name = "stakewise-daemon"
+	app.Usage = "Hyperdrive Daemon for NodeSet Stakewise Module Management"
 	app.Version = shared.HyperdriveVersion
 	app.Authors = []*cli.Author{
 		{
@@ -41,47 +42,50 @@ func main() {
 	}
 	app.Copyright = "(C) 2024 NodeSet LLC"
 
-	userDirFlag := &cli.StringFlag{
-		Name:     "user-dir",
-		Aliases:  []string{"u"},
-		Usage:    "The path of the user data directory, which contains the configuration file to load and all of the user's runtime data",
+	moduleDirFlag := &cli.StringFlag{
+		Name:     "module-dir",
+		Aliases:  []string{"d"},
+		Usage:    "The path to the Stakewise module data directory",
 		Required: true,
 	}
 
 	app.Flags = []cli.Flag{
-		userDirFlag,
+		moduleDirFlag,
 	}
 	app.Action = func(c *cli.Context) error {
 		// Get the config file
-		userDir := c.String(userDirFlag.Name)
-		cfgPath := filepath.Join(userDir, config.ConfigFilename)
-		_, err := os.Stat(cfgPath)
+		moduleDir := c.String(moduleDirFlag.Name)
+		hyperdriveSocketPath := filepath.Join(moduleDir, config.HyperdriveSocketFilename)
+		_, err := os.Stat(hyperdriveSocketPath)
 		if errors.Is(err, fs.ErrNotExist) {
-			fmt.Printf("Configuration file not found at [%s].", cfgPath)
+			fmt.Printf("Hyperdrive socket not found at [%s].", hyperdriveSocketPath)
 			os.Exit(1)
 		}
 
-		// Wait group to handle graceful stopping
+		// Wait group to handle the API server (separate because of error handling)
 		stopWg := new(sync.WaitGroup)
+		stopWg.Add(1)
 
 		// Create the service provider
-		sp, err := common.NewServiceProvider(userDir)
+		sp, err := services.NewServiceProvider(moduleDir)
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}
 
-		// Create the data dir
-		dataDir := sp.GetConfig().UserDataPath.Value
-		err = os.MkdirAll(dataDir, 0700)
+		// Get the owner of the Hyperdrive socket
+		var hdSocketStat syscall.Stat_t
+		err = syscall.Stat(hyperdriveSocketPath, &hdSocketStat)
 		if err != nil {
-			return fmt.Errorf("error creating user data directory [%s]: %w", dataDir, err)
+			return fmt.Errorf("error getting Hyperdrive socket file [%s] info: %w", hyperdriveSocketPath, err)
 		}
 
-		// Create the server manager
-		serverMgr, err := server.NewServerManager(sp, cfgPath, stopWg)
+		// Start the API manager
+		apiMgr, err := api.NewStakewiseServer(sp)
+		err = apiMgr.Start(stopWg, hdSocketStat.Uid, hdSocketStat.Gid)
 		if err != nil {
-			return fmt.Errorf("error creating server manager: %w", err)
+			return fmt.Errorf("error starting API manager: %w", err)
 		}
+		stopWg.Add(1)
 
 		// Start the task loop
 		taskLoop := tasks.NewTaskLoop(sp, stopWg)
@@ -98,12 +102,16 @@ func main() {
 		go func() {
 			<-termListener
 			fmt.Println("Shutting down daemon...")
-			serverMgr.Stop()
+			err := apiMgr.Stop()
+			if err != nil {
+				fmt.Printf("WARNING: daemon didn't shutdown cleanly: %s\n", err.Error())
+				stopWg.Done()
+			}
 			taskLoop.Stop()
 		}()
 
 		// Run the daemon until closed
-		socketPath := filepath.Join(userDir, config.HyperdriveSocketFilename)
+		socketPath := filepath.Join(moduleDir, stakewise.StakewiseSocketFilename)
 		fmt.Printf("Started daemon on %s.\n", socketPath)
 		stopWg.Wait()
 		fmt.Println("Daemon stopped.")

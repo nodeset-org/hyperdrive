@@ -13,13 +13,13 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 		for label, box := range modal.checkboxes {
 			switch label {
 			case stakewiseLabel:
-				box.SetChecked(wiz.md.Config.Modules.Stakewise.Enable.Value)
+				box.SetChecked(wiz.md.Config.Modules.Stakewise.Enabled.Value)
 			}
 		}
 	}
 
 	done := func(choices map[string]bool) {
-		stakewiseCfg.Enable.Value = choices[stakewiseLabel]
+		stakewiseCfg.Enabled.Value = choices[stakewiseLabel]
 		wiz.metricsModal.show()
 	}
 
@@ -35,8 +35,8 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 		90,
 		"Modules",
 		[]string{stakewiseLabel},
-		[]string{stakewiseCfg.Enable.Description},
-		[]bool{stakewiseCfg.Enable.Value},
+		[]string{stakewiseCfg.Enabled.Description},
+		[]bool{stakewiseCfg.Enabled.Value},
 		show,
 		done,
 		back,

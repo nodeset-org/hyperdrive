@@ -10,7 +10,7 @@ type ServiceCreateFeeRecipientFileData struct {
 	Distributor common.Address `json:"distributor"`
 }
 
-// This is a wrapper for the EC status report
+// This is a wrapper for the EC / BN status report
 type ClientStatus struct {
 	IsWorking    bool    `json:"isWorking"`
 	IsSynced     bool    `json:"isSynced"`
@@ -29,6 +29,10 @@ type ClientManagerStatus struct {
 type ServiceClientStatusData struct {
 	EcManagerStatus ClientManagerStatus `json:"ecManagerStatus"`
 	BcManagerStatus ClientManagerStatus `json:"bcManagerStatus"`
+}
+
+type ServiceGetConfigData struct {
+	Config map[string]any `json:"config"`
 }
 
 type ServiceVersionData struct {

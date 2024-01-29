@@ -77,7 +77,7 @@ func (configPage *StakewiseConfigPage) createContent() {
 	})
 
 	// Set up the form items
-	configPage.enableStakewiseBox = createParameterizedCheckbox(&configPage.masterConfig.Modules.Stakewise.Enable)
+	configPage.enableStakewiseBox = createParameterizedCheckbox(&configPage.masterConfig.Modules.Stakewise.Enabled)
 	configPage.stakewiseItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.GetParameters(), configPage.layout.descriptionBox)
 	configPage.lighthouseItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.Lighthouse.GetParameters(), configPage.layout.descriptionBox)
 	configPage.lodestarItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.Lodestar.GetParameters(), configPage.layout.descriptionBox)
@@ -96,10 +96,10 @@ func (configPage *StakewiseConfigPage) createContent() {
 
 	// Set up the setting callbacks
 	configPage.enableStakewiseBox.item.(*tview.Checkbox).SetChangedFunc(func(checked bool) {
-		if configPage.masterConfig.Modules.Stakewise.Enable.Value == checked {
+		if configPage.masterConfig.Modules.Stakewise.Enabled.Value == checked {
 			return
 		}
-		configPage.masterConfig.Modules.Stakewise.Enable.Value = checked
+		configPage.masterConfig.Modules.Stakewise.Enabled.Value = checked
 		configPage.handleLayoutChanged()
 	})
 
@@ -112,7 +112,7 @@ func (configPage *StakewiseConfigPage) handleLayoutChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.enableStakewiseBox.item)
 
-	if configPage.masterConfig.Modules.Stakewise.Enable.Value == true {
+	if configPage.masterConfig.Modules.Stakewise.Enabled.Value == true {
 		// Remove the Stakewise enable param since it's already there
 		stakewiseItems := []*parameterizedFormItem{}
 		for _, item := range configPage.stakewiseItems {

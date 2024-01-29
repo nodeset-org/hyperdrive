@@ -18,7 +18,7 @@ const (
 // Configuration for Stakewise
 type StakewiseConfig struct {
 	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
-	Enable types.Parameter[bool]
+	Enabled types.Parameter[bool]
 
 	// The Docker Hub tag for the Stakewise operator
 	OperatorContainerTag types.Parameter[string]
@@ -37,7 +37,7 @@ type StakewiseConfig struct {
 // Generates a new Stakewise config
 func NewStakewiseConfig() *StakewiseConfig {
 	cfg := &StakewiseConfig{
-		Enable: types.Parameter[bool]{
+		Enabled: types.Parameter[bool]{
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 StakewiseEnableID,
 				Name:               "Enable",
@@ -97,7 +97,7 @@ func (cfg *StakewiseConfig) GetTitle() string {
 // Get the parameters for this config
 func (cfg *StakewiseConfig) GetParameters() []types.IParameter {
 	return []types.IParameter{
-		&cfg.Enable,
+		&cfg.Enabled,
 		&cfg.OperatorContainerTag,
 		&cfg.AdditionalOpFlags,
 	}

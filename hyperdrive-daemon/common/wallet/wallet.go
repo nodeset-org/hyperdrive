@@ -10,10 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/nodeset-org/hyperdrive/daemons/common/validator/keystore"
 	sharedtypes "github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/tyler-smith/go-bip39"
-	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 // Config
@@ -33,10 +31,6 @@ type Wallet struct {
 	addressManager  *AddressManager
 	passwordManager *PasswordManager
 
-	// Validator keys
-	validatorKeys      map[uint]*eth2types.BLSPrivateKey
-	validatorKeystores map[string]keystore.IKeystoreManager
-
 	// Misc cache
 	chainID                  uint
 	legacyWalletKeystorePath string
@@ -52,8 +46,6 @@ func NewWallet(walletDataPath string, legacyWalletKeystorePath string, walletAdd
 		passwordManager: NewPasswordManager(passwordFilePath),
 
 		// Initialize other fields
-		validatorKeys:            map[uint]*eth2types.BLSPrivateKey{},
-		validatorKeystores:       map[string]keystore.IKeystoreManager{},
 		chainID:                  chainID,
 		legacyWalletKeystorePath: legacyWalletKeystorePath,
 		walletDataPath:           walletDataPath,
@@ -163,11 +155,6 @@ func (w *Wallet) RestoreAddressToWallet() error {
 	}
 
 	return w.MasqueradeAsAddress(walletAddress)
-}
-
-// Add a validator keystore to the wallet
-func (w *Wallet) AddValidatorKeystore(name string, ks keystore.IKeystoreManager) {
-	w.validatorKeystores[name] = ks
 }
 
 // Initialize the wallet from a random seed

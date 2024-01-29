@@ -28,7 +28,6 @@ type settingsHome struct {
 
 // Creates a new SettingsHome instance and adds (and its subpages) it to the main display.
 func newSettingsHome(md *mainDisplay) *settingsHome {
-
 	homePage := newPage(nil, settingsHomeID, "Categories", "", nil)
 
 	// Create the page and return it
@@ -62,7 +61,6 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 	homePage.content = home.content
 	md.pages.AddPage(homePage.id, home.content, true, false)
 	return home
-
 }
 
 // Create the content for this page

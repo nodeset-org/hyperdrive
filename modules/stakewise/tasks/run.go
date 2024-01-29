@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
+	"github.com/nodeset-org/hyperdrive/modules/common/services"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
@@ -23,11 +23,11 @@ const (
 type TaskLoop struct {
 	ctx    context.Context
 	cancel context.CancelFunc
-	sp     *common.ServiceProvider
+	sp     *services.ServiceProvider
 	wg     *sync.WaitGroup
 }
 
-func NewTaskLoop(sp *common.ServiceProvider, wg *sync.WaitGroup) *TaskLoop {
+func NewTaskLoop(sp *services.ServiceProvider, wg *sync.WaitGroup) *TaskLoop {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &TaskLoop{
 		ctx:    ctx,
@@ -43,7 +43,7 @@ func (t *TaskLoop) Run() error {
 	errorLog := log.NewColorLogger(ErrorColor)
 
 	// Initialize tasks
-	// Nothing here yet
+	updateDepositData := NewUpdateDepositData(t.sp, log.NewColorLogger(UpdateDepositDataColor))
 
 	// Run the loop
 	go func() {
@@ -68,7 +68,11 @@ func (t *TaskLoop) Run() error {
 				continue
 			}
 
-			// Tasks go here
+			// Update deposit data from the NodeSet server
+			if err := updateDepositData.Run(); err != nil {
+				errorLog.Println(err)
+			}
+			// time.Sleep(taskCooldown)
 
 			if t.sleepAndCheckIfCancelled(tasksInterval) {
 				break
@@ -78,7 +82,6 @@ func (t *TaskLoop) Run() error {
 		// Signal the task loop is done
 		t.wg.Done()
 	}()
-	t.wg.Add(1)
 
 	/*
 		// Run metrics loop

@@ -22,7 +22,7 @@ func createMetricsStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 	}
 
 	back := func() {
-		wiz.useFallbackModal.show()
+		wiz.modulesModal.show()
 	}
 
 	return newChoiceStep(

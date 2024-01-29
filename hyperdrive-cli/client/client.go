@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/api"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/utils/client"
 	"github.com/urfave/cli/v2"
 )
 
@@ -23,7 +23,7 @@ const (
 
 // Hyperdrive client
 type Client struct {
-	Api     *api.ApiRequester
+	Api     *client.ApiClient
 	Context *context.HyperdriveContext
 }
 
@@ -34,10 +34,10 @@ func NewClientFromCtx(c *cli.Context) *Client {
 	snCtx := context.GetHyperdriveContext(c)
 
 	// Set up the default API socket file if it's not specified
-	socketPath := filepath.Join(snCtx.ConfigPath, config.SocketFilename)
+	socketPath := filepath.Join(snCtx.ConfigPath, config.HyperdriveSocketFilename)
 
 	client := &Client{
-		Api:     api.NewApiRequester(socketPath, snCtx.DebugEnabled),
+		Api:     client.NewApiClient(socketPath, snCtx.DebugEnabled),
 		Context: snCtx,
 	}
 	return client
