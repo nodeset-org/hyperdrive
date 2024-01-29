@@ -17,6 +17,7 @@ type StakewiseConfigPage struct {
 	enableStakewiseBox *parameterizedFormItem
 
 	stakewiseItems  []*parameterizedFormItem
+	vcCommonItems   []*parameterizedFormItem
 	lighthouseItems []*parameterizedFormItem
 	lodestarItems   []*parameterizedFormItem
 	nimbusItems     []*parameterizedFormItem
@@ -79,6 +80,7 @@ func (configPage *StakewiseConfigPage) createContent() {
 	// Set up the form items
 	configPage.enableStakewiseBox = createParameterizedCheckbox(&configPage.masterConfig.Modules.Stakewise.Enabled)
 	configPage.stakewiseItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.GetParameters(), configPage.layout.descriptionBox)
+	configPage.vcCommonItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.VcCommon.GetParameters(), configPage.layout.descriptionBox)
 	configPage.lighthouseItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.Lighthouse.GetParameters(), configPage.layout.descriptionBox)
 	configPage.lodestarItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.Lodestar.GetParameters(), configPage.layout.descriptionBox)
 	configPage.nimbusItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.Nimbus.GetParameters(), configPage.layout.descriptionBox)
@@ -88,6 +90,7 @@ func (configPage *StakewiseConfigPage) createContent() {
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.enableStakewiseBox)
 	configPage.layout.mapParameterizedFormItems(configPage.stakewiseItems...)
+	configPage.layout.mapParameterizedFormItems(configPage.vcCommonItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.lighthouseItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.lodestarItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.nimbusItems...)
@@ -124,6 +127,7 @@ func (configPage *StakewiseConfigPage) handleLayoutChanged() {
 		configPage.layout.addFormItems(stakewiseItems)
 
 		// Display the relevant VC items
+		configPage.layout.addFormItems(configPage.vcCommonItems)
 		var bn types.BeaconNode
 		if configPage.masterConfig.IsLocalMode() {
 			bn = configPage.masterConfig.LocalBeaconConfig.BeaconNode.Value

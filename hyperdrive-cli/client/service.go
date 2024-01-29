@@ -18,6 +18,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/config/modules"
+	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -397,7 +399,7 @@ func (c *Client) compose(composeFiles []string, args string) (string, error) {
 func (c *Client) deployTemplates(cfg *config.HyperdriveConfig, hyperdriveDir string) ([]string, error) {
 	// Prep the override folder
 	overrideFolder := filepath.Join(hyperdriveDir, overrideDir)
-	copyOverrideFiles(overrideFolder)
+	copyOverrideFiles(overrideSourceDir, overrideFolder)
 
 	// Clear out the runtime folder and remake it
 	runtimeFolder := filepath.Join(hyperdriveDir, runtimeDir)
@@ -446,6 +448,7 @@ func (c *Client) deployTemplates(cfg *config.HyperdriveConfig, hyperdriveDir str
 		)
 	}
 
+	// Deploy main containers
 	for _, containerName := range toDeploy {
 		containers, err := composePaths.File(string(containerName)).Write(cfg)
 		if err != nil {
@@ -454,17 +457,18 @@ func (c *Client) deployTemplates(cfg *config.HyperdriveConfig, hyperdriveDir str
 		deployedContainers = append(deployedContainers, containers...)
 	}
 
-	return deployedContainers, nil
+	// Deploy modules
+	return c.composeModules(cfg, hyperdriveDir, deployedContainers)
 }
 
 // Make sure the override files have all been copied to the local user dir
-func copyOverrideFiles(targetPath string) error {
-	err := os.MkdirAll(targetPath, 0755)
+func copyOverrideFiles(sourceDir string, targetDir string) error {
+	err := os.MkdirAll(targetDir, 0755)
 	if err != nil {
 		return fmt.Errorf("error creating override folder: %w", err)
 	}
 
-	files, err := os.ReadDir(overrideSourceDir)
+	files, err := os.ReadDir(sourceDir)
 	if err != nil {
 		return fmt.Errorf("error enumerating override source folder: %w", err)
 	}
@@ -472,25 +476,66 @@ func copyOverrideFiles(targetPath string) error {
 	// Copy any override files that don't exist in the local user directory
 	for _, file := range files {
 		filename := file.Name()
-		targetFilePath := filepath.Join(targetPath, filename)
-		_, err := os.Stat(targetFilePath)
+		targetPath := filepath.Join(targetDir, filename)
+		if file.IsDir() {
+			// Recurse
+			srcPath := filepath.Join(sourceDir, file.Name())
+			copyOverrideFiles(srcPath, targetPath)
+		}
+
+		_, err := os.Stat(targetPath)
 		if !os.IsNotExist(err) {
 			// Ignore files that already exist
 			continue
 		}
 
 		// Read the source
-		srcPath := filepath.Join(overrideSourceDir, filename)
+		srcPath := filepath.Join(sourceDir, filename)
 		contents, err := os.ReadFile(srcPath)
 		if err != nil {
 			return fmt.Errorf("error reading override file [%s]: %w", srcPath, err)
 		}
 
 		// Write a copy to the user dir
-		err = os.WriteFile(targetFilePath, contents, 0644)
+		err = os.WriteFile(targetPath, contents, 0644)
 		if err != nil {
-			return fmt.Errorf("error writing local override file [%s]: %w", targetFilePath, err)
+			return fmt.Errorf("error writing local override file [%s]: %w", targetPath, err)
 		}
 	}
 	return nil
+}
+
+// Handle composing for modules
+func (c *Client) composeModules(cfg *config.HyperdriveConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
+	// Stakewise
+	if cfg.Modules.Stakewise.Enabled.Value {
+		composePaths := template.ComposePaths{
+			RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, modules.ModulesDir, stakewise.StakewiseDaemonRoute),
+			TemplatePath: filepath.Join(templatesDir, modules.ModulesDir, stakewise.StakewiseDaemonRoute),
+			OverridePath: filepath.Join(hyperdriveDir, overrideDir, modules.ModulesDir, stakewise.StakewiseDaemonRoute),
+		}
+
+		// These containers always run
+		toDeploy := []types.ContainerID{
+			stakewise.ContainerID_StakewiseDaemon,
+			stakewise.ContainerID_StakewiseOperator,
+			stakewise.ContainerID_StakewiseValidator,
+		}
+
+		// Make the modules folder
+		err := os.MkdirAll(composePaths.RuntimePath, 0775)
+		if err != nil {
+			return []string{}, fmt.Errorf("error creating modules runtime folder (%s): %w", composePaths.RuntimePath, err)
+		}
+
+		for _, containerName := range toDeploy {
+			containers, err := composePaths.File(string(containerName)).Write(cfg)
+			if err != nil {
+				return []string{}, fmt.Errorf("could not create %s container definition: %w", containerName, err)
+			}
+			deployedContainers = append(deployedContainers, containers...)
+		}
+	}
+
+	return deployedContainers, nil
 }

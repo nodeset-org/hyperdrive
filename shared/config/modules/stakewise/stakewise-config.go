@@ -1,6 +1,7 @@
 package stakewise
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config/validator"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
@@ -12,6 +13,7 @@ const (
 	AdditionalOpFlagsID    string = "additionalOpFlags"
 
 	// Tags
+	daemonTag   string = "nodeset/hyperdrive-stakewise:v" + shared.HyperdriveVersion
 	operatorTag string = "europe-west4-docker.pkg.dev/stakewiselabs/public/v3-operator:v1.0.8"
 )
 
@@ -27,6 +29,7 @@ type StakewiseConfig struct {
 	AdditionalOpFlags types.Parameter[string]
 
 	// Validator client configs
+	VcCommon   *validator.ValidatorClientCommonConfig
 	Lighthouse *validator.LighthouseVcConfig
 	Lodestar   *validator.LodestarVcConfig
 	Nimbus     *validator.NimbusVcConfig
@@ -80,6 +83,7 @@ func NewStakewiseConfig() *StakewiseConfig {
 		},
 	}
 
+	cfg.VcCommon = validator.NewValidatorClientCommonConfig()
 	cfg.Lighthouse = validator.NewLighthouseVcConfig()
 	cfg.Lodestar = validator.NewLodestarVcConfig()
 	cfg.Nimbus = validator.NewNimbusVcConfig()
@@ -106,10 +110,19 @@ func (cfg *StakewiseConfig) GetParameters() []types.IParameter {
 // Get the sections underneath this one
 func (cfg *StakewiseConfig) GetSubconfigs() map[string]types.IConfigSection {
 	return map[string]types.IConfigSection{
+		"common":     cfg.VcCommon,
 		"lighthouse": cfg.Lighthouse,
 		"lodestar":   cfg.Lodestar,
 		"nimbus":     cfg.Nimbus,
 		"prysm":      cfg.Prysm,
 		"teku":       cfg.Teku,
 	}
+}
+
+// ==================
+// === Templating ===
+// ==================
+
+func (cfg *StakewiseConfig) DaemonTag() string {
+	return daemonTag
 }

@@ -31,8 +31,7 @@ services:
       - net
     environment:
       - NETWORK={{.Network}}
-      - EC_CLIENT={{if .IsLocalMode}}{{.LocalExecutionConfig.ExecutionClient}}{{else}}{{.ExternalExecutionConfig.ExecutionClient}}{{end}}
-      - CC_CLIENT={{if .IsLocalMode}}{{.LocalBeaconConfig.BeaconNode}}{{else}}{{.ExternalBeaconConfig.BeaconNode}}{{end}}
+      - CC_CLIENT={{.LocalBeaconConfig.BeaconNode}}
       - EC_HTTP_ENDPOINT={{.GetEcHttpEndpoint}}
       - EC_WS_ENDPOINT={{.GetEcWsEndpoint}}
       - EC_ENGINE_ENDPOINT=http://{{.GetExecutionHostname}}:{{.LocalExecutionConfig.EnginePort}}

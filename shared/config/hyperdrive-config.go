@@ -34,7 +34,7 @@ const (
 	AutoTxGasThresholdID string = "autoTxGasThreshold"
 
 	// Tags
-	HyperdriveTag string = "nodeset/hyperdrive:v" + shared.HyperdriveVersion
+	hyperdriveTag string = "nodeset/hyperdrive:v" + shared.HyperdriveVersion
 
 	// Internal fields
 	userDirectoryKey string = "hdUserDir"

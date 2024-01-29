@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -17,12 +18,68 @@ func (cfg *HyperdriveConfig) IsLocalMode() bool {
 	return cfg.ClientMode.Value == types.ClientMode_Local
 }
 
+func (cfg *HyperdriveConfig) BnHttpUrl() (string, error) {
+	/*
+		// Check if Rescue Node is in-use
+		cc, _ := cfg.GetSelectedConsensusClient()
+		overrides, err := cfg.RescueNode.(*rescue_node.RescueNode).GetOverrides(cc)
+		if err != nil {
+			return "", fmt.Errorf("error using Rescue Node: %w", err)
+		}
+		if overrides != nil {
+			// Use the rescue node
+			return overrides.CcApiEndpoint, nil
+		}
+	*/
+	if cfg.IsLocalMode() {
+		return fmt.Sprintf("http://%s:%d", types.ContainerID_BeaconNode, cfg.LocalBeaconConfig.HttpPort.Value), nil
+	}
+	return cfg.ExternalBeaconConfig.HttpUrl.Value, nil
+}
+
+func (cfg *HyperdriveConfig) BnRpcUrl() (string, error) {
+	/*
+		// Check if Rescue Node is in-use
+		cc, _ := cfg.GetSelectedConsensusClient()
+		if cc != config.ConsensusClient_Prysm {
+			return "", nil
+		}
+
+		overrides, err := cfg.RescueNode.(*rescue_node.RescueNode).GetOverrides(cc)
+		if err != nil {
+			return "", fmt.Errorf("error using Rescue Node: %w", err)
+		}
+		if overrides != nil {
+			// Use the rescue node
+			return overrides.CcRpcEndpoint, nil
+		}
+	*/
+	if cfg.IsLocalMode() {
+		return fmt.Sprintf("%s:%d", types.ContainerID_BeaconNode, cfg.LocalBeaconConfig.Prysm.RpcPort.Value), nil
+	}
+	return cfg.ExternalBeaconConfig.PrysmRpcUrl.Value, nil
+}
+
+func (cfg *HyperdriveConfig) FallbackBnHttpUrl() string {
+	if !cfg.Fallback.UseFallbackClients.Value {
+		return ""
+	}
+	return cfg.Fallback.BnHttpUrl.Value
+}
+
+func (cfg *HyperdriveConfig) FallbackBnRpcUrl() string {
+	if !cfg.Fallback.UseFallbackClients.Value {
+		return ""
+	}
+	return cfg.Fallback.PrysmRpcUrl.Value
+}
+
 // ==============
 // === Daemon ===
 // ==============
 
 func (cfg *HyperdriveConfig) GetDaemonContainerTag() string {
-	return HyperdriveTag
+	return hyperdriveTag
 }
 
 // ========================
@@ -188,4 +245,100 @@ func (cfg *HyperdriveConfig) GetBeaconHostname() (string, error) {
 	}
 
 	return ccUrl.Hostname(), nil
+}
+
+// =================
+// === Stakewise ===
+// =================
+// TODO: Find a better way to break this out so it isn't in the root config
+
+// Get the container tag of the selected VC
+func (cfg *HyperdriveConfig) GetStakewiseVcContainerTag() string {
+	var bn types.BeaconNode
+	if cfg.IsLocalMode() {
+		bn = cfg.LocalBeaconConfig.BeaconNode.Value
+	} else {
+		bn = cfg.ExternalBeaconConfig.BeaconNode.Value
+	}
+
+	switch bn {
+	case types.BeaconNode_Lighthouse:
+		return cfg.Modules.Stakewise.Lighthouse.ContainerTag.Value
+	case types.BeaconNode_Lodestar:
+		return cfg.Modules.Stakewise.Lodestar.ContainerTag.Value
+	case types.BeaconNode_Nimbus:
+		return cfg.Modules.Stakewise.Nimbus.ContainerTag.Value
+	case types.BeaconNode_Prysm:
+		return cfg.Modules.Stakewise.Prysm.ContainerTag.Value
+	case types.BeaconNode_Teku:
+		return cfg.Modules.Stakewise.Teku.ContainerTag.Value
+	default:
+		panic(fmt.Sprintf("Unknown Beacon Node %s", string(cfg.LocalBeaconConfig.BeaconNode.Value)))
+	}
+}
+
+// Gets the additional flags of the selected VC
+func (cfg *HyperdriveConfig) GetStakewiseVcAdditionalFlags() string {
+	var bn types.BeaconNode
+	if cfg.IsLocalMode() {
+		bn = cfg.LocalBeaconConfig.BeaconNode.Value
+	} else {
+		bn = cfg.ExternalBeaconConfig.BeaconNode.Value
+	}
+
+	switch bn {
+	case types.BeaconNode_Lighthouse:
+		return cfg.Modules.Stakewise.Lighthouse.AdditionalFlags.Value
+	case types.BeaconNode_Lodestar:
+		return cfg.Modules.Stakewise.Lodestar.AdditionalFlags.Value
+	case types.BeaconNode_Nimbus:
+		return cfg.Modules.Stakewise.Nimbus.AdditionalFlags.Value
+	case types.BeaconNode_Prysm:
+		return cfg.Modules.Stakewise.Prysm.AdditionalFlags.Value
+	case types.BeaconNode_Teku:
+		return cfg.Modules.Stakewise.Teku.AdditionalFlags.Value
+	default:
+		panic(fmt.Sprintf("Unknown Beacon Node %s", string(cfg.LocalBeaconConfig.BeaconNode.Value)))
+	}
+}
+
+// Used by text/template to format validator.yml
+func (cfg *HyperdriveConfig) StakewiseGraffiti() (string, error) {
+	prefix := cfg.graffitiPrefix()
+	customGraffiti := cfg.Modules.Stakewise.VcCommon.Graffiti.Value
+	if customGraffiti == "" {
+		return prefix, nil
+	}
+	return fmt.Sprintf("%s (%s)", prefix, customGraffiti), nil
+}
+
+// Used by text/template to format validator.yml
+// Only returns the the prefix
+func (cfg *HyperdriveConfig) graffitiPrefix() string {
+	identifier := ""
+	versionString := fmt.Sprintf("v%s", shared.HyperdriveVersion)
+	if len(versionString) < 8 {
+		var ec types.ExecutionClient
+		var bn types.BeaconNode
+		if cfg.IsLocalMode() {
+			ec = cfg.LocalExecutionConfig.ExecutionClient.Value
+			bn = cfg.LocalBeaconConfig.BeaconNode.Value
+		} else {
+			ec = cfg.ExternalExecutionConfig.ExecutionClient.Value
+			bn = cfg.ExternalBeaconConfig.BeaconNode.Value
+		}
+
+		ecInitial := strings.ToUpper(string(ec)[:1])
+
+		var ccInitial string
+		switch bn {
+		case types.BeaconNode_Lodestar:
+			ccInitial = "S" // Lodestar is special because it conflicts with Lighthouse
+		default:
+			ccInitial = strings.ToUpper(string(bn)[:1])
+		}
+		identifier = fmt.Sprintf("-%s%s", ecInitial, ccInitial)
+	}
+
+	return fmt.Sprintf("HD%s %s", identifier, versionString)
 }
