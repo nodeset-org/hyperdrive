@@ -55,7 +55,7 @@ func NewApiServer(socketPath string, handlers []IHandler, route string) (*ApiMan
 	}
 
 	// Create the socket directory
-	socketDir := filepath.Base(socketPath)
+	socketDir := filepath.Dir(socketPath)
 	err := os.MkdirAll(socketDir, 0700)
 	if err != nil {
 		return nil, fmt.Errorf("error creating socket directory [%s]: %w", socketDir, err)

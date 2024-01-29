@@ -50,10 +50,12 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 	}
 	mgr.cliServer = cliServer
 	stopWg.Add(1)
+	fmt.Printf("CLI daemon started on %s\n", cliSocketPath)
 
 	// Handle the Stakewise server
+	modulesDir := filepath.Join(sp.GetConfig().UserDataPath.Value, modules.ModulesDir)
 	if cfg.Modules.Stakewise.Enabled.Value {
-		stakewiseSocketPath := filepath.Join(sp.GetUserDir(), modules.ModulesDir, stakewise.StakewiseDaemonRoute, config.HyperdriveSocketFilename)
+		stakewiseSocketPath := filepath.Join(modulesDir, stakewise.StakewiseDaemonRoute, config.HyperdriveSocketFilename)
 		server, err := NewHyperdriveServer(sp, stakewiseSocketPath)
 		if err != nil {
 			return nil, fmt.Errorf("error creating Stakewise server: %w", err)
@@ -64,6 +66,7 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 		}
 		mgr.stakewiseServer = server
 		stopWg.Add(1)
+		fmt.Printf("Stakewise daemon started on %s\n", stakewiseSocketPath)
 	}
 
 	return mgr, nil
@@ -78,7 +81,7 @@ func (m *ServerManager) Stop() {
 	}
 
 	if m.stakewiseServer != nil {
-		err := m.cliServer.Stop()
+		err := m.stakewiseServer.Stop()
 		if err != nil {
 			fmt.Printf("WARNING: Stakewise server didn't shutdown cleanly: %s\n", err.Error())
 			m.stopWg.Done()

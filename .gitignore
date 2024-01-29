@@ -26,3 +26,4 @@ go.work
 # Binaries
 hyperdrive-cli/hyperdrive-cli
 hyperdrive-daemon/hyperdrive-daemon
+modules/stakewise/stakewise

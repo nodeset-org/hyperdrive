@@ -103,8 +103,7 @@ func main() {
 		}()
 
 		// Run the daemon until closed
-		socketPath := filepath.Join(userDir, config.HyperdriveSocketFilename)
-		fmt.Printf("Started daemon on %s.\n", socketPath)
+		fmt.Println("Daemon online.")
 		stopWg.Wait()
 		fmt.Println("Daemon stopped.")
 		return nil

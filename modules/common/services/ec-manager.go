@@ -83,6 +83,10 @@ func (m ExecutionClientManager) GetPrimaryExecutionClient() eth.IExecutionClient
 	return m.primaryEc
 }
 
+func (m ExecutionClientManager) GetFallbackExecutionClient() eth.IExecutionClient {
+	return m.fallbackEc
+}
+
 /// ========================
 /// ContractCaller Functions
 /// ========================

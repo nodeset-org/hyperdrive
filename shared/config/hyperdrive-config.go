@@ -314,7 +314,14 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	}
 	hdMap, isMap := hyperdriveParams.(map[any]any)
 	if !isMap {
-		return fmt.Errorf("config has an entry named [%s] but it is not a map, it's a %s", ids.RootConfigID, reflect.TypeOf(hyperdriveParams))
+		typedMap, isMap := hyperdriveParams.(map[string]any)
+		if !isMap {
+			return fmt.Errorf("config has an entry named [%s] but it is not a map, it's a %s", ids.RootConfigID, reflect.TypeOf(hyperdriveParams))
+		}
+		hdMap = map[any]any{}
+		for name, value := range typedMap {
+			hdMap[name] = value
+		}
 	}
 	networkVal, exists := hdMap[cfg.Network.ID]
 	if exists {

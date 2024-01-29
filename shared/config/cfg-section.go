@@ -54,7 +54,14 @@ func deserialize(cfg types.IConfigSection, serializedParams map[any]any, network
 		if exists {
 			submap, isMap := subParams.(map[any]any)
 			if !isMap {
-				return fmt.Errorf("subsection [%s] is not a map", name)
+				typedSubmap, isMap := subParams.(map[string]any)
+				if !isMap {
+					return fmt.Errorf("subsection [%s] is not a map", name)
+				}
+				submap = map[any]any{}
+				for name, value := range typedSubmap {
+					submap[name] = value
+				}
 			}
 			err := deserialize(subconfig, submap, network)
 			if err != nil {

@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	"github.com/nodeset-org/hyperdrive/modules/common/services"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/api"
+	"github.com/nodeset-org/hyperdrive/modules/stakewise/server"
 	"github.com/nodeset-org/hyperdrive/modules/stakewise/tasks"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
@@ -79,9 +79,12 @@ func main() {
 			return fmt.Errorf("error getting Hyperdrive socket file [%s] info: %w", hyperdriveSocketPath, err)
 		}
 
-		// Start the API manager
-		apiMgr, err := api.NewStakewiseServer(sp)
-		err = apiMgr.Start(stopWg, hdSocketStat.Uid, hdSocketStat.Gid)
+		// Start the server
+		apiServer, err := server.NewStakewiseServer(sp)
+		if err != nil {
+			return fmt.Errorf("error creating Stakewise server: %w", err)
+		}
+		err = apiServer.Start(stopWg, hdSocketStat.Uid, hdSocketStat.Gid)
 		if err != nil {
 			return fmt.Errorf("error starting API manager: %w", err)
 		}
@@ -102,7 +105,7 @@ func main() {
 		go func() {
 			<-termListener
 			fmt.Println("Shutting down daemon...")
-			err := apiMgr.Stop()
+			err := apiServer.Stop()
 			if err != nil {
 				fmt.Printf("WARNING: daemon didn't shutdown cleanly: %s\n", err.Error())
 				stopWg.Done()

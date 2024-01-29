@@ -1,11 +1,10 @@
-package api
+package server
 
 import (
 	"path/filepath"
 
 	"github.com/nodeset-org/hyperdrive/modules/common/server"
 	"github.com/nodeset-org/hyperdrive/modules/common/services"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 )
 
@@ -14,7 +13,7 @@ type StakewiseServer struct {
 }
 
 func NewStakewiseServer(sp *services.ServiceProvider) (*StakewiseServer, error) {
-	socketPath := filepath.Join(sp.GetModuleDir(), config.HyperdriveSocketFilename)
+	socketPath := filepath.Join(sp.GetModuleDir(), stakewise.StakewiseSocketFilename)
 	handlers := []server.IHandler{}
 	mgr, err := server.NewApiServer(socketPath, handlers, stakewise.StakewiseDaemonRoute)
 	if err != nil {
