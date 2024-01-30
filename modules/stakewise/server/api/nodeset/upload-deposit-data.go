@@ -53,6 +53,8 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *api.SuccessData, opt
 	ddMgr := sp.GetDepositDataManager()
 	res := sp.GetResources()
 	hd := sp.GetClient()
+	cfg := sp.GetConfig()
+	debug := cfg.DebugMode.Value
 
 	// Read the deposit data
 	depositData, err := ddMgr.GetDepositData()
@@ -74,6 +76,11 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *api.SuccessData, opt
 	}
 	request.Header.Set(nodesetAuthHeader, hex.EncodeToString(signature))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	if debug {
+		buffer := bytes.Buffer{}
+		request.Write(&buffer)
+		fmt.Printf("[%s] => [%s]\n", res.NodesetDepositUrl, string(buffer.Bytes()))
+	}
 
 	// Upload it to the server
 	client := &http.Client{}
