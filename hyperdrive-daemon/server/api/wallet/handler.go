@@ -2,8 +2,8 @@ package wallet
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
-	"github.com/nodeset-org/hyperdrive/modules/common/server"
 )
 
 type WalletHandler struct {

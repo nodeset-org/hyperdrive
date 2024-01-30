@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/nodeset-org/eth-utils/eth"
-	"github.com/nodeset-org/hyperdrive/modules/common/services"
+	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 )
 
 const (

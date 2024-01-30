@@ -8,7 +8,7 @@ import (
 	swcmdutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
+	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
 )

@@ -1,7 +1,7 @@
 package modconfig
 
 import (
-	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
+	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 

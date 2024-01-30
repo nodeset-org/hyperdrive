@@ -1,12 +1,12 @@
 package server
 
 import (
+	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/service"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/tx"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/wallet"
-	"github.com/nodeset-org/hyperdrive/modules/common/server"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 

@@ -9,8 +9,8 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
+	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
-	"github.com/nodeset-org/hyperdrive/modules/common/server"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 

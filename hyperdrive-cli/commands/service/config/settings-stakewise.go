@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/gdamore/tcell/v2"
+	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rivo/tview"
 )

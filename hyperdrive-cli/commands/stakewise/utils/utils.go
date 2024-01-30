@@ -5,7 +5,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
+	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 )
 
 func RegenDepositData(hd *client.HyperdriveClient, sw *client.StakewiseClient, noRestart bool) error {

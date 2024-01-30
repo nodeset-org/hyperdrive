@@ -7,9 +7,9 @@ import (
 	"syscall"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
+	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
-	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 )
 
 // ServerManager manages all of the daemon sockets and servers run by the main Hyperdrive daemon

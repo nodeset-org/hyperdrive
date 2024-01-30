@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"strings"
 
+	swshared "github.com/nodeset-org/hyperdrive/modules/stakewise/shared"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types"
-	swutils "github.com/nodeset-org/hyperdrive/shared/utils/modules/stakewise"
 )
 
 // ===============
@@ -318,12 +318,12 @@ func (cfg *HyperdriveConfig) StakewiseGraffiti() (string, error) {
 }
 
 func (cfg *HyperdriveConfig) StakewiseFeeRecipient() string {
-	res := swutils.NewStakewiseResources(cfg.Network.Value)
+	res := swshared.NewStakewiseResources(cfg.Network.Value)
 	return res.FeeRecipient.Hex()
 }
 
 func (cfg *HyperdriveConfig) StakewiseVault() string {
-	res := swutils.NewStakewiseResources(cfg.Network.Value)
+	res := swshared.NewStakewiseResources(cfg.Network.Value)
 	return res.Vault.Hex()
 }
 

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/nodeset-org/hyperdrive/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	swclient "github.com/nodeset-org/hyperdrive/modules/stakewise/client"
+	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
-	"github.com/nodeset-org/hyperdrive/shared/utils/client"
-	swclient "github.com/nodeset-org/hyperdrive/shared/utils/client/modules/stakewise"
 	"github.com/urfave/cli/v2"
 )
 

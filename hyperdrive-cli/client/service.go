@@ -17,9 +17,9 @@ import (
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
+	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
-	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
