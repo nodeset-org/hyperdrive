@@ -29,7 +29,7 @@ type stakewiseWalletData struct {
 type Wallet struct {
 	validatorManager         *services.ValidatorManager
 	stakewiseKeystoreManager *stakewiseKeystoreManager
-	data                     *stakewiseWalletData
+	data                     stakewiseWalletData
 	sp                       *services.ServiceProvider
 }
 
@@ -46,7 +46,9 @@ func NewWallet(sp *services.ServiceProvider) (*Wallet, error) {
 	_, err := os.Stat(dataPath)
 	if errors.Is(err, fs.ErrNotExist) {
 		// No data yet, so make some
-		wallet.data = &stakewiseWalletData{}
+		wallet.data = stakewiseWalletData{
+			NextAccount: 0,
+		}
 		return wallet, nil
 	}
 
@@ -55,10 +57,12 @@ func NewWallet(sp *services.ServiceProvider) (*Wallet, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error loading wallet data: %w", err)
 	}
-	err = json.Unmarshal(bytes, wallet.data)
+	var data stakewiseWalletData
+	err = json.Unmarshal(bytes, &data)
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing wallet data: %w", err)
 	}
+	wallet.data = data
 
 	// Make the Stakewise keystore manager
 	stakewiseKeystoreMgr, err := newStakewiseKeystoreManager(moduleDir)

@@ -17,11 +17,11 @@ import (
 // === Factory ===
 // ===============
 
-type walletwalletGenerateKeysContextFactory struct {
+type walletGenerateKeysContextFactory struct {
 	handler *WalletHandler
 }
 
-func (f *walletwalletGenerateKeysContextFactory) Create(args url.Values) (*walletGenerateKeysContext, error) {
+func (f *walletGenerateKeysContextFactory) Create(args url.Values) (*walletGenerateKeysContext, error) {
 	c := &walletGenerateKeysContext{
 		handler: f.handler,
 	}
@@ -31,7 +31,7 @@ func (f *walletwalletGenerateKeysContextFactory) Create(args url.Values) (*walle
 	return c, errors.Join(inputErrs...)
 }
 
-func (f *walletwalletGenerateKeysContextFactory) RegisterRoute(router *mux.Router) {
+func (f *walletGenerateKeysContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*walletGenerateKeysContext, api.WalletGenerateKeysData](
 		router, "generate-keys", f, f.handler.serviceProvider.ServiceProvider,
 	)
