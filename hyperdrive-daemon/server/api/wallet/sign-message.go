@@ -8,7 +8,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/eth-utils/common"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/modules/common/server"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
@@ -63,6 +62,6 @@ func (c *walletSignMessageContext) PrepareData(data *api.WalletSignMessageData, 
 	if err != nil {
 		return fmt.Errorf("error signing message: %w", err)
 	}
-	data.SignedMessage = common.EncodeHexWithPrefix(signedBytes)
+	data.SignedMessage = signedBytes
 	return nil
 }

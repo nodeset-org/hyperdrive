@@ -55,6 +55,7 @@ func NewServiceProvider(moduleDir string) (*ServiceProvider, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing Hyperdrive config: %w", err)
 	}
+	hdClient.SetDebug(cfg.DebugMode.Value)
 
 	// Logger
 	apiLogger := log.NewColorLogger(apiLogColor)

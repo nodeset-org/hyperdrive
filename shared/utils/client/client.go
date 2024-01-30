@@ -93,6 +93,11 @@ func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClien
 	return apiRequester
 }
 
+// Set debug mode
+func (c *ApiClient) SetDebug(debug bool) {
+	c.context.DebugMode = debug
+}
+
 // Submit a GET request to the API server
 func SendGetRequest[DataType any](r IRequester, method string, requestName string, args map[string]string) (*api.ApiResponse[DataType], error) {
 	if args == nil {

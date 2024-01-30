@@ -1,11 +1,11 @@
 package common
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/goccy/go-json"
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/modules/common/validator/utils"
 	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
@@ -76,4 +76,22 @@ func (m *DepositDataManager) RegenerateDepositData() ([]beacon.ValidatorPubkey, 
 		pubkeys[i] = beacon.ValidatorPubkey(key.PublicKey().Marshal())
 	}
 	return pubkeys, nil
+}
+
+// Read the deposit data file
+func (m *DepositDataManager) GetDepositData() ([]byte, error) {
+	// Read the file
+	bytes, err := os.ReadFile(m.dataPath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading deposit data file [%s]: %w", m.dataPath, err)
+	}
+
+	// Make sure it can deserialize properly
+	var depositData []types.ExtendedDepositData
+	err = json.Unmarshal(bytes, &depositData)
+	if err != nil {
+		return nil, fmt.Errorf("error deserializing deposit data file [%s]: %w", m.dataPath, err)
+	}
+
+	return bytes, nil
 }

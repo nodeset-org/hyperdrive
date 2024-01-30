@@ -39,6 +39,7 @@ type ExtendedDepositData struct {
 	DepositDataRoot       ByteArray `json:"deposit_data_root"`
 	ForkVersion           ByteArray `json:"fork_version"`
 	NetworkName           string    `json:"network_name"`
+	HyperdriveVersion     string    `json:"hyperdrive_version,omitempty"`
 }
 
 // Byte array type

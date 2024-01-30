@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/eth-utils/beacon"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
@@ -62,5 +63,6 @@ func GetDepositData(validatorKey *eth2types.BLSPrivateKey, withdrawalCredentials
 		DepositDataRoot:       depositDataRoot[:],
 		ForkVersion:           genesisForkVersion,
 		NetworkName:           string(network),
+		HyperdriveVersion:     shared.HyperdriveVersion,
 	}, nil
 }

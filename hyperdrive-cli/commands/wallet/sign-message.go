@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
+	commonutils "github.com/nodeset-org/eth-utils/common"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
@@ -60,7 +61,7 @@ func signMessage(c *cli.Context) error {
 	formattedSignature := PersonalSignature{
 		Address:   status.Data.WalletStatus.Wallet.WalletAddress,
 		Message:   message,
-		Signature: response.Data.SignedMessage,
+		Signature: commonutils.EncodeHexWithPrefix(response.Data.SignedMessage),
 		Version:   fmt.Sprint(signatureVersion),
 	}
 	bytes, err := json.MarshalIndent(formattedSignature, "", "    ")
