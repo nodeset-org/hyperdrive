@@ -18,7 +18,7 @@ const (
 
 // Load the config
 // Returns the RocketPoolConfig and whether or not it was newly generated
-func (c *Client) LoadConfig() (*config.HyperdriveConfig, bool, error) {
+func (c *HyperdriveClient) LoadConfig() (*config.HyperdriveConfig, bool, error) {
 	settingsFilePath := filepath.Join(c.Context.ConfigPath, SettingsFile)
 	expandedPath, err := homedir.Expand(settingsFilePath)
 	if err != nil {
@@ -40,7 +40,7 @@ func (c *Client) LoadConfig() (*config.HyperdriveConfig, bool, error) {
 }
 
 // Load the backup config
-func (c *Client) LoadBackupConfig() (*config.HyperdriveConfig, error) {
+func (c *HyperdriveClient) LoadBackupConfig() (*config.HyperdriveConfig, error) {
 	settingsFilePath := filepath.Join(c.Context.ConfigPath, BackupSettingsFile)
 	expandedPath, err := homedir.Expand(settingsFilePath)
 	if err != nil {
@@ -51,7 +51,7 @@ func (c *Client) LoadBackupConfig() (*config.HyperdriveConfig, error) {
 }
 
 // Save the config
-func (c *Client) SaveConfig(cfg *config.HyperdriveConfig) error {
+func (c *HyperdriveClient) SaveConfig(cfg *config.HyperdriveConfig) error {
 	settingsFileDirectoryPath, err := homedir.Expand(c.Context.ConfigPath)
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (c *Client) SaveConfig(cfg *config.HyperdriveConfig) error {
 }
 
 // Load the Prometheus config template, do a template variable substitution, and save it
-func (c *Client) UpdatePrometheusConfiguration(config *config.HyperdriveConfig) error {
+func (c *HyperdriveClient) UpdatePrometheusConfiguration(config *config.HyperdriveConfig) error {
 	prometheusConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, prometheusConfigTemplate))
 	if err != nil {
 		return fmt.Errorf("Error expanding Prometheus config template path: %w", err)
@@ -80,7 +80,7 @@ func (c *Client) UpdatePrometheusConfiguration(config *config.HyperdriveConfig) 
 }
 
 // Load the Grafana config template, do a template variable substitution, and save it
-func (c *Client) UpdateGrafanaDatabaseConfiguration(config *config.HyperdriveConfig) error {
+func (c *HyperdriveClient) UpdateGrafanaDatabaseConfiguration(config *config.HyperdriveConfig) error {
 	grafanaConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, grafanaConfigTemplate))
 	if err != nil {
 		return fmt.Errorf("Error expanding Grafana config template path: %w", err)

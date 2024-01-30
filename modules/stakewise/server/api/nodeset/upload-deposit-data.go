@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/modules/common/server"
 	"github.com/nodeset-org/hyperdrive/modules/stakewise/common"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	swapi "github.com/nodeset-org/hyperdrive/shared/types/api/modules/stakewise"
 )
 
 // ===============
@@ -27,7 +27,7 @@ func (f *nodesetUploadDepositDataContextFactory) Create(args url.Values) (*nodes
 }
 
 func (f *nodesetUploadDepositDataContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*nodesetUploadDepositDataContext, api.SuccessData](
+	server.RegisterQuerylessGet[*nodesetUploadDepositDataContext, swapi.NodesetUploadDepositDataData](
 		router, "upload-deposit-data", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -40,7 +40,7 @@ type nodesetUploadDepositDataContext struct {
 	handler *NodesetHandler
 }
 
-func (c *nodesetUploadDepositDataContext) PrepareData(data *api.SuccessData, opts *bind.TransactOpts) error {
+func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadDepositDataData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	ddMgr := sp.GetDepositDataManager()
 	hd := sp.GetHyperdriveClient()
@@ -60,5 +60,10 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *api.SuccessData, opt
 	signature := signResponse.Data.SignedMessage
 
 	// Submit the upload
-	return nc.UploadDepositData(signature, depositData)
+	response, err := nc.UploadDepositData(signature, depositData)
+	if err != nil {
+		return err
+	}
+	data.ServerResponse = response
+	return nil
 }

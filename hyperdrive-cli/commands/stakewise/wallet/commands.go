@@ -1,7 +1,6 @@
 package wallet
 
 import (
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
 )
@@ -33,7 +32,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Usage:   "Generate new validator keys derived from your node wallet.",
 				Flags: []cli.Flag{
 					generateKeysCountFlag,
-					utils.YesFlag,
+					generateKeysNoRestartFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
@@ -50,7 +49,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Aliases: []string{"r"},
 				Usage:   "Regenerate the combined deposit data for all of your validator keys and upload them to NodeSet's Stakewise vault, so they can be assigned new deposits.",
 				Flags: []cli.Flag{
-					utils.YesFlag,
+					regenDepositDataNoRestartFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args

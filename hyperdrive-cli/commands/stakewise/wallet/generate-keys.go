@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	swcmdutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
@@ -18,12 +19,16 @@ var (
 		Aliases: []string{"c"},
 		Usage:   "The number of keys to generate",
 	}
+	generateKeysNoRestartFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:  "no-restart",
+		Usage: fmt.Sprintf("Don't automatically restart the Validator Client and Stakewise Operator containers after generating keys. %sOnly use this if you know what you're doing and can restart them manually.%s", terminal.ColorYellow, terminal.ColorReset),
+	}
 )
 
 func generateKeys(c *cli.Context) error {
-	// Get the client
 	hd := client.NewClientFromCtx(c)
 	sw := client.NewStakewiseClientFromCtx(c)
+	noRestart := c.Bool(generateKeysNoRestartFlag.Name)
 
 	// Get the count
 	var err error
@@ -59,7 +64,10 @@ func generateKeys(c *cli.Context) error {
 	fmt.Printf("Completed in %s.\n", time.Since(startTime))
 	fmt.Println()
 
-	if c.Bool(utils.YesFlag.Name) || utils.Confirm(fmt.Sprintf("Would you like to restart your Stakewise Validator Client so it loads the new keys?\n%sYou will not be able to attest with these new keys until your VC is restarted and the keys are loaded into it.%s", terminal.ColorYellow, terminal.ColorReset)) {
+	// Restart the VC
+	if noRestart {
+		fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Validator Client at your earliest convenience in order to attest with your new keys. Failure to do so will result in any new validators being offline and *losing ETH* until you restart it.%s\n", terminal.ColorYellow, terminal.ColorReset)
+	} else {
 		fmt.Print("Restarting Validator Client... ")
 		_, err = hd.Api.Service.RestartContainer(swconfig.VcContainerSuffix)
 		if err != nil {
@@ -69,48 +77,26 @@ func generateKeys(c *cli.Context) error {
 		} else {
 			fmt.Println("done!")
 		}
-	} else {
-		fmt.Println("Please restart your Validator Client at your earliest convenience in order to attest with your new keys.")
 	}
 	fmt.Println()
 
 	// Regenerate the deposit data
-	err = regenDepositData(c, sw)
+	err = swcmdutils.RegenDepositData(hd, sw, noRestart)
 	if err != nil {
 		return err
 	}
 
-	if c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to restart the Stakewise Operator service so it loads the new keys and deposit data?") {
-		fmt.Print("Restarting Stakewise Operator... ")
-		_, err = hd.Api.Service.RestartContainer(swconfig.OperatorContainerSuffix)
-		if err != nil {
-			fmt.Println("error")
-			fmt.Printf("%sWARNING: error restarting stakewise operator: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
-			fmt.Println("Please restart it in order to assign deposits to your new keys.")
-			fmt.Println()
-		} else {
-			fmt.Println("done!")
-		}
-	} else {
-		fmt.Println("Please restart the container at your convenience.")
-	}
-	fmt.Println()
-
-	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to upload the deposit data with the new keys to the NodeSet server, so they can be used for new validator assignments?")) {
-		fmt.Println("Please upload the deposit data for all of your keys with `hyperdrive stakewise nodeset upload-deposit-data` when you're ready. Without it, NodeSet won't be able to assign new deposits to your validators.")
-		return nil
-	}
-
-	fmt.Printf("Uploading deposit data to the NodeSet server... ")
-
-	_, err = sw.Api.Nodeset.UploadDepositData()
+	// Upload to the server
+	err = swcmdutils.UploadDepositData(sw)
 	if err != nil {
-		fmt.Println("error")
-		fmt.Printf("%sWARNING: error uploading deposit data to nodeset: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
-		fmt.Println("Please upload the deposit data for all of your keys with `hyperdrive stakewise nodeset upload-deposit-data` when you're ready. Without it, NodeSet won't be able to assign new deposits to your validators.")
+		return err
+	}
+
+	if !noRestart {
 		fmt.Println()
+		fmt.Println("Your new keys are now ready for use. When NodeSet selects one of them for a new deposit, your system will deposit it and begin attesting automatically.")
 	} else {
-		fmt.Println("done!")
+		fmt.Println("Your new keys are uploaded, but you *must* restart your Validator Client and Stakewise Operator service at your earliest convenience to begin attesting.")
 	}
 
 	return nil

@@ -15,7 +15,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func GetMaxFees(c *cli.Context, hd *client.Client, simResult eth.SimulationResult) (*big.Int, *big.Int, error) {
+func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.SimulationResult) (*big.Int, *big.Int, error) {
 	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
 		return nil, nil, fmt.Errorf("Error getting Hyperdrive configuration: %w", err)

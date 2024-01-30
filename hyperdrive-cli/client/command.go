@@ -18,7 +18,7 @@ type command struct {
 }
 
 // Create a command to be run by Hyperdrive
-func (c *Client) newCommand(cmdText string) *command {
+func (c *HyperdriveClient) newCommand(cmdText string) *command {
 	return &command{
 		cmd: exec.Command("sh", "-c", cmdText),
 	}
@@ -82,7 +82,7 @@ func (c *command) OutputPipes() (io.Reader, io.Reader, error) {
 // ==============
 
 // Get the command used to escalate privileges on the system
-func (c *Client) getEscalationCommand() (string, error) {
+func (c *HyperdriveClient) getEscalationCommand() (string, error) {
 	// Check for sudo first
 	sudo := "sudo"
 	exists, err := c.checkIfCommandExists(sudo)
@@ -106,7 +106,7 @@ func (c *Client) getEscalationCommand() (string, error) {
 	return "", fmt.Errorf("no privilege escalation command found")
 }
 
-func (c *Client) checkIfCommandExists(command string) (bool, error) {
+func (c *HyperdriveClient) checkIfCommandExists(command string) (bool, error) {
 	// Run `type` to check for existence
 	cmd := fmt.Sprintf("type %s", command)
 	output, err := c.readOutput(cmd)
@@ -129,7 +129,7 @@ func (c *Client) checkIfCommandExists(command string) (bool, error) {
 }
 
 // Run a command and print its output
-func (c *Client) printOutput(cmdText string) error {
+func (c *HyperdriveClient) printOutput(cmdText string) error {
 	// Initialize command
 	cmd := c.newCommand(cmdText)
 	cmd.SetStdout(os.Stdout)
@@ -145,7 +145,7 @@ func (c *Client) printOutput(cmdText string) error {
 }
 
 // Run a command and return its output
-func (c *Client) readOutput(cmdText string) ([]byte, error) {
+func (c *HyperdriveClient) readOutput(cmdText string) ([]byte, error) {
 	// Initialize command
 	cmd := c.newCommand(cmdText)
 

@@ -2,6 +2,7 @@ package swclient
 
 import (
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	swapi "github.com/nodeset-org/hyperdrive/shared/types/api/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/utils/client"
 )
 
@@ -26,6 +27,6 @@ func (r *NodesetRequester) GetContext() *client.RequesterContext {
 }
 
 // Upload the aggregated deposit data file to NodeSet's servers
-func (r *NodesetRequester) UploadDepositData() (*api.ApiResponse[api.SuccessData], error) {
-	return client.SendGetRequest[api.SuccessData](r, "upload-deposit-data", "UploadDepositData", nil)
+func (r *NodesetRequester) UploadDepositData() (*api.ApiResponse[swapi.NodesetUploadDepositDataData], error) {
+	return client.SendGetRequest[swapi.NodesetUploadDepositDataData](r, "upload-deposit-data", "UploadDepositData", nil)
 }

@@ -26,7 +26,7 @@ func getComposeFiles(c *cli.Context) []string {
 
 // Handle a network change by terminating the service, deleting everything, and starting over
 // TODO
-func changeNetworks(c *cli.Context, hd *client.Client) error {
+func changeNetworks(c *cli.Context, hd *client.HyperdriveClient) error {
 	return fmt.Errorf("NYI")
 
 	// Stop all of the containers
@@ -65,7 +65,7 @@ func changeNetworks(c *cli.Context, hd *client.Client) error {
 }
 
 // Gets the prefix specified for Hyperdrive's Docker containers
-func getContainerPrefix(hd *client.Client) (string, error) {
+func getContainerPrefix(hd *client.HyperdriveClient) (string, error) {
 	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
 		return "", err
@@ -78,7 +78,7 @@ func getContainerPrefix(hd *client.Client) (string, error) {
 }
 
 // Get the amount of free space available in the target dir
-func getPartitionFreeSpace(hd *client.Client, targetDir string) (uint64, error) {
+func getPartitionFreeSpace(hd *client.HyperdriveClient, targetDir string) (uint64, error) {
 	partitions, err := disk.Partitions(true)
 	if err != nil {
 		return 0, fmt.Errorf("error getting partition list: %w", err)

@@ -18,19 +18,19 @@ import (
 )
 
 // Print a TX's details to the console.
-func PrintTransactionHash(hd *client.Client, hash common.Hash) {
+func PrintTransactionHash(hd *client.HyperdriveClient, hash common.Hash) {
 	finalMessage := "Waiting for the transaction to be included in a block... you may wait here for it, or press CTRL+C to exit and return to the terminal.\n\n"
 	printTransactionHashImpl(hd, hash, finalMessage)
 }
 
 // Print a TX's details to the console, but inform the user NOT to cancel it.
-func PrintTransactionHashNoCancel(hd *client.Client, hash common.Hash) {
+func PrintTransactionHashNoCancel(hd *client.HyperdriveClient, hash common.Hash) {
 	finalMessage := "Waiting for the transaction to be included in a block... **DO NOT EXIT!** This transaction is one of several that must be completed.\n\n"
 	printTransactionHashImpl(hd, hash, finalMessage)
 }
 
 // Print a batch of transaction hashes to the console.
-func PrintTransactionBatchHashes(hd *client.Client, hashes []common.Hash) {
+func PrintTransactionBatchHashes(hd *client.HyperdriveClient, hashes []common.Hash) {
 	finalMessage := "Waiting for the transactions to be included in one or more blocks... you may wait here for them, or press CTRL+C to exit and return to the terminal.\n\n"
 
 	// Print the hashes
@@ -64,7 +64,7 @@ func PrintMultiTransactionNonceWarning() {
 }
 
 // Implementation of PrintTransactionHash and PrintTransactionHashNoCancel
-func printTransactionHashImpl(hd *client.Client, hash common.Hash, finalMessage string) {
+func printTransactionHashImpl(hd *client.HyperdriveClient, hash common.Hash, finalMessage string) {
 	txWatchUrl := getTxWatchUrl(hd)
 	hashString := hash.String()
 	fmt.Printf("Transaction has been submitted with hash %s.\n", hashString)
@@ -76,7 +76,7 @@ func printTransactionHashImpl(hd *client.Client, hash common.Hash, finalMessage 
 }
 
 // Get the URL for watching the transaction in a block explorer
-func getTxWatchUrl(hd *client.Client) string {
+func getTxWatchUrl(hd *client.HyperdriveClient) string {
 	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
 		fmt.Printf("Warning: couldn't read config file so the transaction URL will be unavailable (%s).\n", err)

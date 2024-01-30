@@ -24,7 +24,7 @@ const (
 )
 
 // Hyperdrive client
-type Client struct {
+type HyperdriveClient struct {
 	Api     *client.ApiClient
 	Context *context.HyperdriveContext
 }
@@ -38,10 +38,10 @@ type StakewiseClient struct {
 // Create new Hyperdrive client from CLI context without checking for sync status
 // Only use this function from commands that may work if the Daemon service doesn't exist
 // Most users should call NewClientFromCtx(c).WithStatus() or NewClientFromCtx(c).WithReady()
-func NewClientFromCtx(c *cli.Context) *Client {
+func NewClientFromCtx(c *cli.Context) *HyperdriveClient {
 	snCtx := context.GetHyperdriveContext(c)
 	socketPath := filepath.Join(snCtx.ConfigPath, config.HyperdriveSocketFilename)
-	client := &Client{
+	client := &HyperdriveClient{
 		Api:     client.NewApiClient(config.HyperdriveDaemonRoute, socketPath, snCtx.DebugEnabled),
 		Context: snCtx,
 	}
@@ -63,7 +63,7 @@ func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
 // Check the status of a newly created client and return it
 // Only use this function from commands that may work without the clients being synced-
 // most users should use WithReady instead
-func (c *Client) WithStatus() (*Client, bool, error) {
+func (c *HyperdriveClient) WithStatus() (*HyperdriveClient, bool, error) {
 	ready, err := c.checkClientStatus()
 	if err != nil {
 		return nil, false, err
@@ -73,7 +73,7 @@ func (c *Client) WithStatus() (*Client, bool, error) {
 }
 
 // Check the status of a newly created client and ensure the eth clients are synced and ready
-func (c *Client) WithReady() (*Client, error) {
+func (c *HyperdriveClient) WithReady() (*HyperdriveClient, error) {
 	_, ready, err := c.WithStatus()
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (c *Client) WithReady() (*Client, error) {
 }
 
 // Check the status of the Execution and Beacon Node(s) and provision the API with them
-func (c *Client) checkClientStatus() (bool, error) {
+func (c *HyperdriveClient) checkClientStatus() (bool, error) {
 	// Check if the primary clients are up, synced, and able to respond to requests - if not, forces the use of the fallbacks for this command
 	response, err := c.Api.Service.ClientStatus()
 	if err != nil {

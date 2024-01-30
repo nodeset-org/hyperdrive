@@ -16,7 +16,7 @@ import (
 )
 
 // Handle a transaction, either printing its details, signing it, or submitting it and waiting for it to be included
-func HandleTx(c *cli.Context, hd *client.Client, txInfo *eth.TransactionInfo, confirmMessage string, identifier string, submissionMessage string) error {
+func HandleTx(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.TransactionInfo, confirmMessage string, identifier string, submissionMessage string) error {
 	// Make sure the TX was successful
 	if txInfo.SimulationResult.SimulationError != "" {
 		return fmt.Errorf("simulating %s failed: %s", identifier, txInfo.SimulationResult.SimulationError)
@@ -85,7 +85,7 @@ func HandleTx(c *cli.Context, hd *client.Client, txInfo *eth.TransactionInfo, co
 }
 
 // Handle a batch of transactions, either printing their details, signing them, or submitting them and waiting for them to be included
-func HandleTxBatch(c *cli.Context, hd *client.Client, txInfos []*eth.TransactionInfo, confirmMessage string, identifierFunc func(int) string, submissionMessage string) error {
+func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.TransactionInfo, confirmMessage string, identifierFunc func(int) string, submissionMessage string) error {
 	// Make sure the TXs were successful
 	for i, txInfo := range txInfos {
 		if txInfo.SimulationResult.SimulationError != "" {
@@ -165,7 +165,7 @@ func HandleTxBatch(c *cli.Context, hd *client.Client, txInfos []*eth.Transaction
 }
 
 // Wait for a batch of transactions to get included in blocks
-func waitForTransactions(hd *client.Client, hashes []common.Hash, identifierFunc func(int) string) error {
+func waitForTransactions(hd *client.HyperdriveClient, hashes []common.Hash, identifierFunc func(int) string) error {
 	var wg errgroup.Group
 	var lock sync.Mutex
 	total := len(hashes)
@@ -193,7 +193,7 @@ func waitForTransactions(hd *client.Client, hashes []common.Hash, identifierFunc
 }
 
 // If a custom nonce is set, increment it for the next transaction
-func updateCustomNonce(hd *client.Client) {
+func updateCustomNonce(hd *client.HyperdriveClient) {
 	if hd.Context.Nonce.Cmp(common.Big0) > 0 {
 		hd.Context.Nonce.Add(hd.Context.Nonce, common.Big1)
 	}

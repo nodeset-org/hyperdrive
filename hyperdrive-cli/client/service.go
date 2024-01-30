@@ -35,7 +35,7 @@ const (
 )
 
 // Install Hyperdrive
-func (c *Client) InstallService(verbose, noDeps bool, version, path string) error {
+func (c *HyperdriveClient) InstallService(verbose, noDeps bool, version, path string) error {
 	// Get installation script flags
 	flags := []string{
 		"-v", shellescape.Quote(version),
@@ -119,7 +119,7 @@ func (c *Client) InstallService(verbose, noDeps bool, version, path string) erro
 }
 
 // Start the Hyperdrive service
-func (c *Client) StartService(composeFiles []string) error {
+func (c *HyperdriveClient) StartService(composeFiles []string) error {
 	cmd, err := c.compose(composeFiles, "up -d --remove-orphans --quiet-pull")
 	if err != nil {
 		return err
@@ -128,7 +128,7 @@ func (c *Client) StartService(composeFiles []string) error {
 }
 
 // Pause the Hyperdrive service
-func (c *Client) PauseService(composeFiles []string) error {
+func (c *HyperdriveClient) PauseService(composeFiles []string) error {
 	cmd, err := c.compose(composeFiles, "stop")
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (c *Client) PauseService(composeFiles []string) error {
 }
 
 // Stop the Hyperdrive service
-func (c *Client) StopService(composeFiles []string) error {
+func (c *HyperdriveClient) StopService(composeFiles []string) error {
 	cmd, err := c.compose(composeFiles, "down -v")
 	if err != nil {
 		return err
@@ -146,7 +146,7 @@ func (c *Client) StopService(composeFiles []string) error {
 }
 
 // Stop Hyperdrive and remove the config folder
-func (c *Client) TerminateService(composeFiles []string, configPath string) error {
+func (c *HyperdriveClient) TerminateService(composeFiles []string, configPath string) error {
 	// Get the command to run with root privileges
 	rootCmd, err := c.getEscalationCommand()
 	if err != nil {
@@ -181,7 +181,7 @@ func (c *Client) TerminateService(composeFiles []string, configPath string) erro
 }
 
 // Print the Hyperdrive service status
-func (c *Client) PrintServiceStatus(composeFiles []string) error {
+func (c *HyperdriveClient) PrintServiceStatus(composeFiles []string) error {
 	cmd, err := c.compose(composeFiles, "ps")
 	if err != nil {
 		return err
@@ -190,7 +190,7 @@ func (c *Client) PrintServiceStatus(composeFiles []string) error {
 }
 
 // Print the Hyperdrive service logs
-func (c *Client) PrintServiceLogs(composeFiles []string, tail string, serviceNames ...string) error {
+func (c *HyperdriveClient) PrintServiceLogs(composeFiles []string, tail string, serviceNames ...string) error {
 	sanitizedStrings := make([]string, len(serviceNames))
 	for i, serviceName := range serviceNames {
 		sanitizedStrings[i] = shellescape.Quote(serviceName)
@@ -203,7 +203,7 @@ func (c *Client) PrintServiceLogs(composeFiles []string, tail string, serviceNam
 }
 
 // Print the Hyperdrive service stats
-func (c *Client) PrintServiceStats(composeFiles []string) error {
+func (c *HyperdriveClient) PrintServiceStats(composeFiles []string) error {
 	// Get service container IDs
 	cmd, err := c.compose(composeFiles, "ps -q")
 	if err != nil {
@@ -220,7 +220,7 @@ func (c *Client) PrintServiceStats(composeFiles []string) error {
 }
 
 // Print the Hyperdrive service compose config
-func (c *Client) PrintServiceCompose(composeFiles []string) error {
+func (c *HyperdriveClient) PrintServiceCompose(composeFiles []string) error {
 	cmd, err := c.compose(composeFiles, "config")
 	if err != nil {
 		return err
@@ -229,7 +229,7 @@ func (c *Client) PrintServiceCompose(composeFiles []string) error {
 }
 
 // Get the Hyperdrive service version
-func (c *Client) GetServiceVersion() (string, error) {
+func (c *HyperdriveClient) GetServiceVersion() (string, error) {
 	// Get service container version output
 	response, err := c.Api.Service.Version()
 	if err != nil {
@@ -248,7 +248,7 @@ func (c *Client) GetServiceVersion() (string, error) {
 }
 
 // Deletes the data directory, including the node wallet and all validator keys, and restarts the Docker containers
-func (c *Client) PurgeData(composeFiles []string) error {
+func (c *HyperdriveClient) PurgeData(composeFiles []string) error {
 	// Get the command to run with root privileges
 	rootCmd, err := c.getEscalationCommand()
 	if err != nil {
@@ -292,7 +292,7 @@ func (c *Client) PurgeData(composeFiles []string) error {
 }
 
 // Runs the prune provisioner
-func (c *Client) RunPruneProvisioner(container string, volume string, image string) error {
+func (c *HyperdriveClient) RunPruneProvisioner(container string, volume string, image string) error {
 
 	// Run the prune provisioner
 	cmd := fmt.Sprintf("docker run --rm --name %s -v %s:/ethclient %s", container, volume, image)
@@ -311,7 +311,7 @@ func (c *Client) RunPruneProvisioner(container string, volume string, image stri
 }
 
 // Runs the prune provisioner
-func (c *Client) RunNethermindPruneStarter(container string) error {
+func (c *HyperdriveClient) RunNethermindPruneStarter(container string) error {
 	cmd := fmt.Sprintf("docker exec %s %s %s", container, nethermindPruneStarterCommand, nethermindAdminUrl)
 	err := c.printOutput(cmd)
 	if err != nil {
@@ -321,7 +321,7 @@ func (c *Client) RunNethermindPruneStarter(container string) error {
 }
 
 // Runs the EC migrator
-func (c *Client) RunEcMigrator(container string, volume string, targetDir string, mode string, image string) error {
+func (c *HyperdriveClient) RunEcMigrator(container string, volume string, targetDir string, mode string, image string) error {
 	cmd := fmt.Sprintf("docker run --rm --name %s -v %s:/ethclient -v %s:/mnt/external -e EC_MIGRATE_MODE='%s' %s", container, volume, targetDir, mode, image)
 	err := c.printOutput(cmd)
 	if err != nil {
@@ -332,7 +332,7 @@ func (c *Client) RunEcMigrator(container string, volume string, targetDir string
 }
 
 // Gets the size of the target directory via the EC migrator for importing, which should have the same permissions as exporting
-func (c *Client) GetDirSizeViaEcMigrator(container string, targetDir string, image string) (uint64, error) {
+func (c *HyperdriveClient) GetDirSizeViaEcMigrator(container string, targetDir string, image string) (uint64, error) {
 	cmd := fmt.Sprintf("docker run --rm --name %s -v %s:/mnt/external -e OPERATION='size' %s", container, targetDir, image)
 	output, err := c.readOutput(cmd)
 	if err != nil {
@@ -349,7 +349,7 @@ func (c *Client) GetDirSizeViaEcMigrator(container string, targetDir string, ima
 }
 
 // Build a docker compose command
-func (c *Client) compose(composeFiles []string, args string) (string, error) {
+func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, error) {
 	// Get the expanded config path
 	expandedConfigPath, err := homedir.Expand(c.Context.ConfigPath)
 	if err != nil {
@@ -396,7 +396,7 @@ func (c *Client) compose(composeFiles []string, args string) (string, error) {
 }
 
 // Deploys all of the appropriate docker compose template files and provisions them based on the provided configuration
-func (c *Client) deployTemplates(cfg *config.HyperdriveConfig, hyperdriveDir string) ([]string, error) {
+func (c *HyperdriveClient) deployTemplates(cfg *config.HyperdriveConfig, hyperdriveDir string) ([]string, error) {
 	// Prep the override folder
 	overrideFolder := filepath.Join(hyperdriveDir, overrideDir)
 	copyOverrideFiles(overrideSourceDir, overrideFolder)
@@ -506,7 +506,7 @@ func copyOverrideFiles(sourceDir string, targetDir string) error {
 }
 
 // Handle composing for modules
-func (c *Client) composeModules(cfg *config.HyperdriveConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
+func (c *HyperdriveClient) composeModules(cfg *config.HyperdriveConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
 	// Stakewise
 	if cfg.Modules.Stakewise.Enabled.Value {
 		composePaths := template.ComposePaths{

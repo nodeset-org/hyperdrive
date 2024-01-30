@@ -33,13 +33,13 @@ func NewNodesetClient(sp *StakewiseServiceProvider) *NodesetClient {
 }
 
 // Uploads deposit data to Nodeset
-func (c *NodesetClient) UploadDepositData(signature []byte, depositData []byte) error {
+func (c *NodesetClient) UploadDepositData(signature []byte, depositData []byte) ([]byte, error) {
 	res := c.sp.GetResources()
 
 	// Create a new POST request
 	request, err := http.NewRequest(http.MethodPost, res.NodesetDepositUrl, bytes.NewBuffer(depositData))
 	if err != nil {
-		return fmt.Errorf("error generating request: %w", err)
+		return nil, fmt.Errorf("error generating request: %w", err)
 	}
 	request.Header.Set(nodesetAuthHeader, common.EncodeHexWithPrefix(signature))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
@@ -56,7 +56,7 @@ func (c *NodesetClient) UploadDepositData(signature []byte, depositData []byte) 
 	client := &http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
-		return fmt.Errorf("error submitting request to nodeset server: %w", err)
+		return nil, fmt.Errorf("error submitting request to nodeset server: %w", err)
 	}
 
 	// Read the body
@@ -66,20 +66,20 @@ func (c *NodesetClient) UploadDepositData(signature []byte, depositData []byte) 
 	// Check if the request failed
 	if resp.StatusCode != http.StatusOK {
 		if err != nil {
-			return fmt.Errorf("nodeset server responded to upload request with code %s but reading the response body failed: %w", resp.Status, err)
+			return nil, fmt.Errorf("nodeset server responded to upload request with code %s but reading the response body failed: %w", resp.Status, err)
 		}
 		msg := string(bytes)
-		return fmt.Errorf("nodeset server responded to upload request with code %s: [%s]", resp.Status, msg)
+		return nil, fmt.Errorf("nodeset server responded to upload request with code %s: [%s]", resp.Status, msg)
 	}
 	if err != nil {
-		return fmt.Errorf("error reading the response body for nodeset upload request: %w", err)
+		return nil, fmt.Errorf("error reading the response body for nodeset upload request: %w", err)
 	}
 
 	// Debug log
 	if c.debug {
 		fmt.Printf("NODESET UPLOAD RESPONSE: %s\n", string(bytes))
 	}
-	return nil
+	return bytes, nil
 }
 
 // Downloads complete merged deposit data from the Nodeset server
