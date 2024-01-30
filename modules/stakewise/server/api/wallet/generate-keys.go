@@ -42,15 +42,15 @@ func (f *walletGenerateKeysContextFactory) RegisterRoute(router *mux.Router) {
 // ===============
 
 type walletGenerateKeysContext struct {
-	handler *WalletHandler
-	count   uint64
+	handler          *WalletHandler
+	count            uint64
+	regenDepositData bool
 }
 
 func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	client := sp.GetClient()
 	wallet := sp.GetWallet()
-	ddMgr := sp.GetDepositDataManager()
 
 	// Get the wallet status
 	response, err := client.Wallet.Status()
@@ -79,14 +79,6 @@ func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData
 		}
 		pubkeys[i] = beacon.ValidatorPubkey(key.PublicKey().Marshal())
 	}
-
-	// Regen the deposit data file
-	totalCount, err := ddMgr.RegenerateDepositData()
-	if err != nil {
-		return fmt.Errorf("error regenerating deposit data: %w", err)
-	}
-
 	data.Pubkeys = pubkeys
-	data.TotalCount = totalCount
 	return nil
 }

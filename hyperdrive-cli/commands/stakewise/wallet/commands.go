@@ -30,7 +30,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 			{
 				Name:    "generate-keys",
 				Aliases: []string{"g"},
-				Usage:   "Generate new validator keys and optionally upload them to NodeSet's Stakewise vault, so they can be assigned new deposits.",
+				Usage:   "Generate new validator keys derived from your node wallet.",
 				Flags: []cli.Flag{
 					generateKeysCountFlag,
 					utils.YesFlag,
@@ -43,6 +43,23 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 
 					// Run
 					return generateKeys(c)
+				},
+			},
+			{
+				Name:    "regen-deposit-data",
+				Aliases: []string{"r"},
+				Usage:   "Regenerate the combined deposit data for all of your validator keys and upload them to NodeSet's Stakewise vault, so they can be assigned new deposits.",
+				Flags: []cli.Flag{
+					utils.YesFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					if err := input.ValidateArgCount(c, 0); err != nil {
+						return err
+					}
+
+					// Run
+					return regenerateDepositData(c)
 				},
 			},
 		},

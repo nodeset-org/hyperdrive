@@ -34,24 +34,26 @@ func NewDepositDataManager(sp *StakewiseServiceProvider) *DepositDataManager {
 
 // Regenerates the deposit data file from all of the Stakewise validator keys in its keystore folder, and updates the deposit data file.
 // Returns the total number of validator keys stored on disk.
-func (m *DepositDataManager) RegenerateDepositData() (int, error) {
+func (m *DepositDataManager) RegenerateDepositData() ([]beacon.ValidatorPubkey, error) {
 	resources := m.sp.GetResources()
 	wallet := m.sp.GetWallet()
 
 	// Stakewise uses the same withdrawal creds for each validator
 	withdrawalCreds := utils.GetWithdrawalCredsFromAddress(resources.Vault)
 
-	// Create the new aggregated deposit data for all generated keys
+	// Load all of the validator keys
 	keys, err := wallet.GetAllPrivateKeys()
 	if err != nil {
-		return 0, fmt.Errorf("error loading all validator keys: %w", err)
+		return nil, fmt.Errorf("error loading all validator keys: %w", err)
 	}
+
+	// Create the new aggregated deposit data for all generated keys
 	dataList := make([]*types.ExtendedDepositData, len(keys))
 	for i, key := range keys {
 		depositData, err := utils.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, resources.Network)
 		if err != nil {
 			pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
-			return 0, fmt.Errorf("error getting deposit data for key %s: %w", pubkey.Hex(), err)
+			return nil, fmt.Errorf("error getting deposit data for key %s: %w", pubkey.Hex(), err)
 		}
 		dataList[i] = &depositData
 	}
@@ -59,13 +61,19 @@ func (m *DepositDataManager) RegenerateDepositData() (int, error) {
 	// Serialize it
 	bytes, err := json.Marshal(dataList)
 	if err != nil {
-		return 0, fmt.Errorf("error serializing deposit data: %w", err)
+		return nil, fmt.Errorf("error serializing deposit data: %w", err)
 	}
 
 	// Write it
 	err = os.WriteFile(m.dataPath, bytes, fileMode)
 	if err != nil {
-		return 0, fmt.Errorf("error saving deposit data to disk: %w", err)
+		return nil, fmt.Errorf("error saving deposit data to disk: %w", err)
 	}
-	return len(dataList), nil
+
+	// Make a list of pubkeys for all of the loaded keys
+	pubkeys := make([]beacon.ValidatorPubkey, len(keys))
+	for i, key := range keys {
+		pubkeys[i] = beacon.ValidatorPubkey(key.PublicKey().Marshal())
+	}
+	return pubkeys, nil
 }

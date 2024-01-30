@@ -28,7 +28,7 @@ func (r *WalletRequester) GetContext() *client.RequesterContext {
 	return r.context
 }
 
-// Export the wallet in encrypted ETH key format
+// Generate and save new validator keys
 func (r *WalletRequester) GenerateKeys(count uint64) (*api.ApiResponse[swapi.WalletGenerateKeysData], error) {
 	args := map[string]string{
 		"count": strconv.FormatUint(count, 10),
@@ -39,4 +39,9 @@ func (r *WalletRequester) GenerateKeys(count uint64) (*api.ApiResponse[swapi.Wal
 // Export the wallet in encrypted ETH key format
 func (r *WalletRequester) Initialize() (*api.ApiResponse[swapi.WalletInitializeData], error) {
 	return client.SendGetRequest[swapi.WalletInitializeData](r, "initialize", "Initialize", nil)
+}
+
+// Regenerate the aggregated deposit data file for Stakewise to use
+func (r *WalletRequester) RegenerateDepositData() (*api.ApiResponse[swapi.WalletRegenerateDepositDataData], error) {
+	return client.SendGetRequest[swapi.WalletRegenerateDepositDataData](r, "regen-deposit-data", "RegenerateDepositData", nil)
 }

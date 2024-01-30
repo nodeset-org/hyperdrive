@@ -18,6 +18,7 @@ func NewWalletHandler(serviceProvider *common.StakewiseServiceProvider) *WalletH
 	h.factories = []server.IContextFactory{
 		&walletGenerateKeysContextFactory{h},
 		&walletInitializeContextFactory{h},
+		&walletRegenerateDepositDataContextFactory{h},
 	}
 	return h
 }
