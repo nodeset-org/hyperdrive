@@ -11,21 +11,18 @@ import (
 )
 
 // Get the withdrawal private key for a validator based on its mnemonic, index, and path
-func GetWithdrawalKey(mnemonic string, index uint, validatorKeyPath string) (*eth2types.BLSPrivateKey, error) {
-
+func GetWithdrawalKey(mnemonic string, validatorKeyPath string) (*eth2types.BLSPrivateKey, error) {
 	withdrawalKeyPath := strings.TrimSuffix(validatorKeyPath, "/0")
-	withdrawalKey, err := GetPrivateKey(mnemonic, index, withdrawalKeyPath)
+	withdrawalKey, err := GetPrivateKey(mnemonic, withdrawalKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("error getting withdrawal private key: %w", err)
 	}
 
 	return withdrawalKey, nil
-
 }
 
 // Get a voluntary exit message signature for a given validator key and index
 func GetSignedWithdrawalCredsChangeMessage(withdrawalKey *eth2types.BLSPrivateKey, validatorIndex string, newWithdrawalAddress common.Address, signatureDomain []byte) (beacon.ValidatorSignature, error) {
-
 	// Get the withdrawal pubkey
 	withdrawalPubkey := withdrawalKey.PublicKey().Marshal()
 	withdrawalPubkeyBuffer := [48]byte{}
@@ -66,5 +63,4 @@ func GetSignedWithdrawalCredsChangeMessage(withdrawalKey *eth2types.BLSPrivateKe
 
 	// Return
 	return beacon.ValidatorSignature(signature), nil
-
 }

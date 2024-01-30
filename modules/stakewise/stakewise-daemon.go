@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"github.com/nodeset-org/hyperdrive/modules/common/services"
+	"github.com/nodeset-org/hyperdrive/modules/stakewise/common"
 	"github.com/nodeset-org/hyperdrive/modules/stakewise/server"
 	"github.com/nodeset-org/hyperdrive/modules/stakewise/tasks"
 	"github.com/nodeset-org/hyperdrive/shared"
@@ -70,6 +71,10 @@ func main() {
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}
+		stakewiseSp, err := common.NewStakewiseServiceProvider(sp)
+		if err != nil {
+			return fmt.Errorf("error creating Stakewise service provider: %w", err)
+		}
 
 		// Get the owner of the Hyperdrive socket
 		var hdSocketStat syscall.Stat_t
@@ -79,7 +84,7 @@ func main() {
 		}
 
 		// Start the server
-		apiServer, err := server.NewStakewiseServer(sp)
+		apiServer, err := server.NewStakewiseServer(stakewiseSp)
 		if err != nil {
 			return fmt.Errorf("error creating Stakewise server: %w", err)
 		}
@@ -90,7 +95,7 @@ func main() {
 		fmt.Printf("Started daemon on %s.\n", apiServer.GetSocketPath())
 
 		// Start the task loop
-		taskLoop := tasks.NewTaskLoop(sp, stopWg)
+		taskLoop := tasks.NewTaskLoop(stakewiseSp, stopWg)
 		err = taskLoop.Run()
 		if err != nil {
 			return fmt.Errorf("error starting task loop: %w", err)

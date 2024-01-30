@@ -56,6 +56,7 @@ type WalletSignMessageData struct {
 
 type WalletExportEthKeyData struct {
 	EthKeyJson []byte `json:"ethKeyJson"`
+	Password   string `json:"password"`
 }
 
 type WalletGenerateValidatorKeyData struct {

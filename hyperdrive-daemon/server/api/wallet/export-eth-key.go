@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
 )
 
 // ===============
@@ -49,10 +50,17 @@ func (c *walletExportEthKeyContext) PrepareData(data *api.WalletExportEthKeyData
 		return err
 	}
 
-	ethkey, err := w.GetEthKeystore()
+	// Make a new password
+	password, err := sharedutils.GenerateRandomPassword()
+	if err != nil {
+		return fmt.Errorf("error generating random password: %w", err)
+	}
+
+	ethkey, err := w.GetEthKeystore(password)
 	if err != nil {
 		return fmt.Errorf("error getting eth-style keystore: %w", err)
 	}
 	data.EthKeyJson = ethkey
+	data.Password = password
 	return nil
 }

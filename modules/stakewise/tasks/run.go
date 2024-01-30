@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/nodeset-org/hyperdrive/modules/common/services"
+	"github.com/nodeset-org/hyperdrive/modules/stakewise/common"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
@@ -23,11 +23,11 @@ const (
 type TaskLoop struct {
 	ctx    context.Context
 	cancel context.CancelFunc
-	sp     *services.ServiceProvider
+	sp     *common.StakewiseServiceProvider
 	wg     *sync.WaitGroup
 }
 
-func NewTaskLoop(sp *services.ServiceProvider, wg *sync.WaitGroup) *TaskLoop {
+func NewTaskLoop(sp *common.StakewiseServiceProvider, wg *sync.WaitGroup) *TaskLoop {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &TaskLoop{
 		ctx:    ctx,

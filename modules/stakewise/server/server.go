@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/nodeset-org/hyperdrive/modules/common/server"
-	"github.com/nodeset-org/hyperdrive/modules/common/services"
+	"github.com/nodeset-org/hyperdrive/modules/stakewise/common"
 	swwallet "github.com/nodeset-org/hyperdrive/modules/stakewise/server/api/wallet"
 	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 )
@@ -14,12 +14,12 @@ type StakewiseServer struct {
 	socketPath string
 }
 
-func NewStakewiseServer(sp *services.ServiceProvider) (*StakewiseServer, error) {
-	socketPath := filepath.Join(sp.GetUserDir(), swconfig.StakewiseSocketFilename)
+func NewStakewiseServer(sp *common.StakewiseServiceProvider) (*StakewiseServer, error) {
+	socketPath := filepath.Join(sp.GetUserDir(), swconfig.SocketFilename)
 	handlers := []server.IHandler{
 		swwallet.NewWalletHandler(sp),
 	}
-	mgr, err := server.NewApiServer(socketPath, handlers, swconfig.StakewiseDaemonRoute)
+	mgr, err := server.NewApiServer(socketPath, handlers, swconfig.DaemonRoute)
 	if err != nil {
 		return nil, err
 	}

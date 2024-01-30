@@ -1,10 +1,13 @@
 package services
 
 import (
+	"fmt"
 	"path/filepath"
 
+	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/modules/common/validator/keystore"
 	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
+	types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 type ValidatorManager struct {
@@ -25,4 +28,15 @@ func NewValidatorManager(moduleDir string) *ValidatorManager {
 		},
 	}
 	return mgr
+}
+
+func (m *ValidatorManager) StoreKey(key *types.BLSPrivateKey, derivationPath string) error {
+	for name, mgr := range m.keystoreManagers {
+		err := mgr.StoreValidatorKey(key, derivationPath)
+		if err != nil {
+			pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
+			return fmt.Errorf("error saving validator key %s (path %s) to the %s keystore: %w", pubkey.Hex(), derivationPath, name, err)
+		}
+	}
+	return nil
 }

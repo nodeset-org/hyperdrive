@@ -12,13 +12,28 @@ services:
     user: root
     container_name: {{.ProjectName}}-sw-operator
     restart: unless-stopped
-    {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.StakewiseDaemonRoute)}}
+    {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.DaemonRoute)}}
     volumes:
       - {{$module_dir}}:{{$module_dir}}
     command:
-      - "--help"
+      - "src/main.py"
+      - "start"
+      - "--data-dir={{$module_dir}}"
+      - "--network={{.Network}}"
+      - "--vault={{.StakewiseVault}}"
+      - "--execution-endpoints="
+      - "--consensus-endpoints="
+      - "--hot-wallet-file={{$module_dir}}/{{.Modules.Stakewise.WalletFilename}}"
+      - "--hot-wallet-password-file={{$module_dir}}/{{.Modules.Stakewise.PasswordFilename}}"
+      - "--keystores-dir={{$module_dir}}/{{.Modules.ValidatorDir}}/{{.Modules.Stakewise.DaemonRoute}}"
+      - "--keystores-password-file={$module_dir}}/{{.Modules.ValidatorDir}}/{{.Modules.Stakewise.DaemonRoute}}/{{.Modules.Stakewise.KeystorePasswordFile}}"
+      - "--enable-metrics={{.Metrics.EnableMetrics}}
+      - "--metrics-host=0.0.0.0"
+      - "--max-fee-per-gas-gwei={{.AutoTxMaxFeeInt}}
     networks:
       - net
+    environment:
+      - 
     cap_drop:
       - all
     cap_add:

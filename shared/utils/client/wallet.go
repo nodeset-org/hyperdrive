@@ -43,6 +43,14 @@ func (r *WalletRequester) ExportEthKey() (*api.ApiResponse[api.WalletExportEthKe
 	return SendGetRequest[api.WalletExportEthKeyData](r, "export-eth-key", "ExportEthKey", nil)
 }
 
+// Generate a validator key derived from the node wallet's seed
+func (r *WalletRequester) GenerateValidatorKey(path string) (*api.ApiResponse[api.WalletGenerateValidatorKeyData], error) {
+	args := map[string]string{
+		"path": path,
+	}
+	return SendGetRequest[api.WalletGenerateValidatorKeyData](r, "generate-validator-key", "GenerateValidatorKey", args)
+}
+
 // Initialize the wallet with a new key
 func (r *WalletRequester) Initialize(derivationPath *string, index *uint64, password string, save bool) (*api.ApiResponse[api.WalletInitializeData], error) {
 	args := map[string]string{

@@ -52,9 +52,9 @@ func NewClientFromCtx(c *cli.Context) *Client {
 // Only use this function from commands that may work if the Daemon service doesn't exist
 func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
 	snCtx := context.GetHyperdriveContext(c)
-	socketPath := filepath.Join(snCtx.ConfigPath, swconfig.StakewiseSocketFilename)
+	socketPath := filepath.Join(snCtx.ConfigPath, swconfig.SocketFilename)
 	client := &StakewiseClient{
-		Api:     swclient.NewApiClient(swconfig.StakewiseDaemonRoute, socketPath, snCtx.DebugEnabled),
+		Api:     swclient.NewApiClient(swconfig.DaemonRoute, socketPath, snCtx.DebugEnabled),
 		Context: snCtx,
 	}
 	return client

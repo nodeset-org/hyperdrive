@@ -30,7 +30,7 @@ func (f *walletInitializeContextFactory) Create(args url.Values) (*walletInitial
 
 func (f *walletInitializeContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*walletInitializeContext, api.WalletInitializeData](
-		router, "initialize", f, f.handler.serviceProvider,
+		router, "initialize", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -61,7 +61,8 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 		err = sp.RequireWalletReady()
 		if err != nil {
 			return err
-		}*/
+		}
+	*/
 
 	// Get the Geth keystore in JSON format
 	ethkeyResponse, err := client.Wallet.ExportEthKey()
@@ -69,12 +70,21 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 		return fmt.Errorf("error getting geth-style keystore: %w", err)
 	}
 	ethKey := ethkeyResponse.Data.EthKeyJson
+	password := ethkeyResponse.Data.Password
 
-	// Write it to disk
-	walletPath := filepath.Join(sp.GetModuleDir(), swconfig.StakewiseWalletFilename)
+	// Write the wallet to disk
+	moduleDir := sp.GetModuleDir()
+	walletPath := filepath.Join(moduleDir, swconfig.WalletFilename)
 	err = os.WriteFile(walletPath, ethKey, 0600)
 	if err != nil {
 		return fmt.Errorf("error saving wallet keystore to disk: %w", err)
+	}
+
+	// Write the password to disk
+	passwordPath := filepath.Join(moduleDir, swconfig.KeystorePasswordFile)
+	err = os.WriteFile(passwordPath, []byte(password), 0600)
+	if err != nil {
+		return fmt.Errorf("error saving wallet password to disk: %w", err)
 	}
 
 	data.AccountAddress = status.Wallet.WalletAddress

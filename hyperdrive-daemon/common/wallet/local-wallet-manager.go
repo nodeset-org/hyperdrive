@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"sync"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -18,24 +17,12 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/google/uuid"
+	"github.com/nodeset-org/hyperdrive/modules/common/validator/utils"
 	sharedtypes "github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/tyler-smith/go-bip39"
-	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	eth2util "github.com/wealdtech/go-eth2-util"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
-
-// Initialize BLS support
-var initBLS sync.Once
-
-// Singleton to make sure BLS is initialized
-func InitializeBLS() error {
-	var err error
-	initBLS.Do(func() {
-		err = eth2types.InitBLS()
-	})
-	return err
-}
 
 // Simple class to wrap a node's local wallet keystore.
 // Note that this does *not* manage the wallet data file on disk, though it does manage the
@@ -59,9 +46,6 @@ type LocalWalletManager struct {
 
 	// Transactor for signing transactions
 	transactor *bind.TransactOpts
-
-	// The node's wallet's seed data, serialized in Geth account (v3) format
-	ethkey []byte
 }
 
 // Creates a new wallet manager for local wallets
@@ -91,11 +75,24 @@ func (m *LocalWalletManager) GetPrivateKey() *ecdsa.PrivateKey {
 }
 
 // Get the legacy keystore in Geth format
-func (m *LocalWalletManager) GetEthKeystore() ([]byte, error) {
-	if m.ethkey == nil {
+func (m *LocalWalletManager) GetEthKeystore(password string) ([]byte, error) {
+	if m.nodePrivateKey == nil {
 		return nil, fmt.Errorf("wallet is not initialized")
 	}
-	return m.ethkey, nil
+
+	// Get the Geth key
+	key := &gethkeystore.Key{
+		Address:    crypto.PubkeyToAddress(m.nodePrivateKey.PublicKey),
+		PrivateKey: m.nodePrivateKey,
+		Id:         uuid.UUID(m.data.UUID),
+	}
+
+	// Serialize it
+	ethkey, err := gethkeystore.EncryptKey(key, password, gethkeystore.StandardScryptN, gethkeystore.StandardScryptP)
+	if err != nil {
+		return nil, fmt.Errorf("error serializing legacy keystore: %w", err)
+	}
+	return ethkey, nil
 }
 
 // Get the transactor for the wallet
@@ -195,25 +192,11 @@ func (m *LocalWalletManager) LoadWallet(data *sharedtypes.LocalWalletData, passw
 	}
 	transactor.Context = context.Background()
 
-	// Get the Geth key
-	key := &gethkeystore.Key{
-		Address:    crypto.PubkeyToAddress(privateKeyECDSA.PublicKey),
-		PrivateKey: privateKeyECDSA,
-		Id:         uuid.UUID(data.UUID),
-	}
-
-	// Serialize it
-	ethkey, err := gethkeystore.EncryptKey(key, password, gethkeystore.StandardScryptN, gethkeystore.StandardScryptP)
-	if err != nil {
-		return fmt.Errorf("error serializing legacy keystore: %w", err)
-	}
-
 	// Store everything if there are no errors
 	m.seed = seed
 	m.nodePrivateKey = privateKeyECDSA
 	m.data = data
 	m.transactor = transactor
-	m.ethkey = ethkey
 	return nil
 }
 
@@ -272,7 +255,7 @@ func (m *LocalWalletManager) GenerateValidatorKey(path string) ([]byte, error) {
 	}
 
 	// Initialize BLS support
-	if err := InitializeBLS(); err != nil {
+	if err := utils.InitializeBls(); err != nil {
 		return nil, fmt.Errorf("error initializing BLS library: %w", err)
 	}
 

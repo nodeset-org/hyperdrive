@@ -16,7 +16,7 @@ services:
     {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.StakewiseDaemonRoute)}}
     volumes:
       - /usr/share/hyperdrive/scripts:/setup:ro
-      - {{$module_dir}}/validators:/validators
+      - {{$module_dir}}/{{.Modules.Stakewise.KeystoreDir}}:/validators
     networks:
       - net
     environment:
@@ -27,9 +27,10 @@ services:
       - CC_RPC_ENDPOINT={{.BnRpcUrl}}
       - FALLBACK_CC_API_ENDPOINT={{.FallbackBnHttpUrl}}
       - FALLBACK_CC_RPC_ENDPOINT={{.FallbackBnRpcUrl}}
+      - FEE_RECIPIENT={{.StakewiseFeeRecipient}}
       - ENABLE_METRICS={{.Metrics.EnableMetrics}}
       - VC_METRICS_PORT={{.Modules.Stakewise.VcCommon.MetricsPort}}
-      - DOPPELGANGER_DETECTION={{.Modules.Stakewise.VcCommon.DoppelgangerDetection.Value}}
+      - DOPPELGANGER_DETECTION={{.Modules.Stakewise.VcCommon.DoppelgangerDetection}}
       - VC_ADDITIONAL_FLAGS={{.GetStakewiseVcAdditionalFlags}}
       - ENABLE_BITFLY_NODE_METRICS={{.Metrics.EnableBitflyNodeMetrics}}
       - BITFLY_NODE_METRICS_SECRET={{.Metrics.BitflyNodeMetrics.Secret}}

@@ -277,7 +277,7 @@ func (w *Wallet) GetNodePrivateKeyBytes() ([]byte, error) {
 }
 
 // Get the node account private key bytes
-func (w *Wallet) GetEthKeystore() ([]byte, error) {
+func (w *Wallet) GetEthKeystore(password string) ([]byte, error) {
 	if w.walletManager == nil {
 		return nil, fmt.Errorf("wallet is not loaded")
 	}
@@ -285,7 +285,7 @@ func (w *Wallet) GetEthKeystore() ([]byte, error) {
 	switch w.walletManager.GetType() {
 	case sharedtypes.WalletType_Local:
 		localMgr := w.walletManager.(*LocalWalletManager)
-		return localMgr.GetEthKeystore()
+		return localMgr.GetEthKeystore(password)
 	default:
 		return nil, fmt.Errorf("loaded wallet is not local")
 	}

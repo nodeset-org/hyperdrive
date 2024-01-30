@@ -7,6 +7,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types"
+	swutils "github.com/nodeset-org/hyperdrive/shared/utils/modules/stakewise"
 )
 
 // ===============
@@ -72,6 +73,10 @@ func (cfg *HyperdriveConfig) FallbackBnRpcUrl() string {
 		return ""
 	}
 	return cfg.Fallback.PrysmRpcUrl.Value
+}
+
+func (cfg *HyperdriveConfig) AutoTxMaxFeeInt() uint64 {
+	return uint64(cfg.AutoTxMaxFee.Value)
 }
 
 // ==============
@@ -310,6 +315,16 @@ func (cfg *HyperdriveConfig) StakewiseGraffiti() (string, error) {
 		return prefix, nil
 	}
 	return fmt.Sprintf("%s (%s)", prefix, customGraffiti), nil
+}
+
+func (cfg *HyperdriveConfig) StakewiseFeeRecipient() string {
+	res := swutils.NewStakewiseResources(cfg.Network.Value)
+	return res.FeeRecipient.Hex()
+}
+
+func (cfg *HyperdriveConfig) StakewiseVault() string {
+	res := swutils.NewStakewiseResources(cfg.Network.Value)
+	return res.Vault.Hex()
 }
 
 // Used by text/template to format validator.yml
