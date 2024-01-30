@@ -51,7 +51,7 @@ type walletGenerateKeysContext struct {
 
 func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
-	client := sp.GetClient()
+	client := sp.GetHyperdriveClient()
 	wallet := sp.GetWallet()
 
 	// Get the wallet status

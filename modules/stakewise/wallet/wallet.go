@@ -80,7 +80,7 @@ func (w *Wallet) GenerateNewValidatorKey() (*eth2types.BLSPrivateKey, error) {
 	path := fmt.Sprintf(types.StakewiseValidatorPath, w.data.NextAccount)
 
 	// Ask the HD daemon to generate the key
-	client := w.sp.GetClient()
+	client := w.sp.GetHyperdriveClient()
 	response, err := client.Wallet.GenerateValidatorKey(path)
 	if err != nil {
 		return nil, fmt.Errorf("error generating validator key for path [%s]: %w", path, err)

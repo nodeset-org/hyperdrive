@@ -44,7 +44,7 @@ type walletInitializeContext struct {
 
 func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
-	client := sp.GetClient()
+	client := sp.GetHyperdriveClient()
 
 	// Get the wallet status
 	response, err := client.Wallet.Status()

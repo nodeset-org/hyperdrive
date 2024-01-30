@@ -127,7 +127,7 @@ func (p *ServiceProvider) GetConfig() *config.HyperdriveConfig {
 	return p.cfg
 }
 
-func (p *ServiceProvider) GetClient() *client.ApiClient {
+func (p *ServiceProvider) GetHyperdriveClient() *client.ApiClient {
 	return p.hdClient
 }
 
