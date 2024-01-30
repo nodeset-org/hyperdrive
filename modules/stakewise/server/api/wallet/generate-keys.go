@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/modules/common/server"
+	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	api "github.com/nodeset-org/hyperdrive/shared/types/api/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 )
@@ -27,6 +28,7 @@ func (f *walletGenerateKeysContextFactory) Create(args url.Values) (*walletGener
 	}
 	inputErrs := []error{
 		server.ValidateArg("count", args, input.ValidateUint, &c.count),
+		server.ValidateArg("restart-vc", args, input.ValidateBool, &c.restartVc),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -42,9 +44,9 @@ func (f *walletGenerateKeysContextFactory) RegisterRoute(router *mux.Router) {
 // ===============
 
 type walletGenerateKeysContext struct {
-	handler          *WalletHandler
-	count            uint64
-	regenDepositData bool
+	handler   *WalletHandler
+	count     uint64
+	restartVc bool
 }
 
 func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData, opts *bind.TransactOpts) error {
@@ -80,5 +82,13 @@ func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData
 		pubkeys[i] = beacon.ValidatorPubkey(key.PublicKey().Marshal())
 	}
 	data.Pubkeys = pubkeys
+
+	// Restart the VC
+	if c.restartVc {
+		_, err = client.Service.RestartContainer(swconfig.VcContainerSuffix)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

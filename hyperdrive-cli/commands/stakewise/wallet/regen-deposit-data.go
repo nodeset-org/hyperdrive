@@ -5,7 +5,6 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -13,16 +12,10 @@ func regenerateDepositData(c *cli.Context) error {
 	// Get Stakewise client
 	sw := client.NewStakewiseClientFromCtx(c)
 
-	fmt.Println("Regenerating complete deposit data, please wait...")
-	regenResponse, err := sw.Api.Wallet.RegenerateDepositData()
+	err := regenDepositData(c, sw)
 	if err != nil {
-		fmt.Println("%sThere was an error regenerating your deposit data. Please run it manually with `hyperdrive stakewise wallet regen-deposit-data` to try again.%s", terminal.ColorYellow, terminal.ColorReset)
-		return fmt.Errorf("error regenerating deposit data: %w", err)
+		return err
 	}
-
-	// Print the total
-	fmt.Printf("Total keys loaded: %s%d%s\n", terminal.ColorGreen, len(regenResponse.Data.Pubkeys), terminal.ColorReset)
-	fmt.Println()
 
 	if c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to restart the Stakewise Operator service so it loads the new keys and deposit data?") {
 		fmt.Println("NYI")

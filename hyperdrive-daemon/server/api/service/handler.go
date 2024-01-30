@@ -18,6 +18,7 @@ func NewServiceHandler(serviceProvider *common.ServiceProvider) *ServiceHandler 
 	h.factories = []server.IContextFactory{
 		&serviceClientStatusContextFactory{h},
 		&serviceGetConfigContextFactory{h},
+		&serviceRestartContainerContextFactory{h},
 		&serviceVersionContextFactory{h},
 	}
 	return h

@@ -11,3 +11,15 @@ func (c *StakewiseConfig) WalletFilename() string {
 func (c *StakewiseConfig) PasswordFilename() string {
 	return PasswordFilename
 }
+
+func (c *StakewiseConfig) DaemonContainerSuffix() string {
+	return DaemonContainerSuffix
+}
+
+func (c *StakewiseConfig) OperatorContainerSuffix() string {
+	return OperatorContainerSuffix
+}
+
+func (c *StakewiseConfig) VcContainerSuffix() string {
+	return VcContainerSuffix
+}

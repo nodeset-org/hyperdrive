@@ -7,6 +7,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	swconfig "github.com/nodeset-org/hyperdrive/shared/config/modules/stakewise"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
 )
@@ -20,7 +21,8 @@ var (
 )
 
 func generateKeys(c *cli.Context) error {
-	// Get Stakewise client
+	// Get the client
+	hd := client.NewClientFromCtx(c)
 	sw := client.NewStakewiseClientFromCtx(c)
 
 	// Get the count
@@ -41,7 +43,7 @@ func generateKeys(c *cli.Context) error {
 	startTime := time.Now()
 	latestTime := startTime
 	for i := uint64(0); i < count; i++ {
-		response, err := sw.Api.Wallet.GenerateKeys(1)
+		response, err := sw.Api.Wallet.GenerateKeys(1, false)
 		if err != nil {
 			return fmt.Errorf("error generating keys: %w", err)
 		}
@@ -57,19 +59,37 @@ func generateKeys(c *cli.Context) error {
 	fmt.Printf("Completed in %s.\n", time.Since(startTime))
 	fmt.Println()
 
-	fmt.Println("Regenerating complete deposit data, please wait...")
-	regenResponse, err := sw.Api.Wallet.RegenerateDepositData()
-	if err != nil {
-		fmt.Println("%sThere was an error regenerating your deposit data. Please run it manually with `hyperdrive stakewise wallet regen-deposit-data` to try again.%s", terminal.ColorYellow, terminal.ColorReset)
-		return fmt.Errorf("error regenerating deposit data: %w", err)
+	if c.Bool(utils.YesFlag.Name) || utils.Confirm(fmt.Sprintf("Would you like to restart your Stakewise Validator Client so it loads the new keys?\n%sYou will not be able to attest with these new keys until your VC is restarted and the keys are loaded into it.%s", terminal.ColorYellow, terminal.ColorReset)) {
+		fmt.Print("Restarting Validator Client... ")
+		_, err = hd.Api.Service.RestartContainer(swconfig.VcContainerSuffix)
+		if err != nil {
+			fmt.Println("error")
+			fmt.Printf("%sWARNING: error restarting validator client: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+			fmt.Println("Please restart your Validator Client in order to attest with your new keys!")
+		} else {
+			fmt.Println("done!")
+		}
+	} else {
+		fmt.Println("Please restart your Validator Client at your earliest convenience in order to attest with your new keys.")
 	}
-
-	// Print the total
-	fmt.Printf("Total keys loaded: %s%d%s\n", terminal.ColorGreen, len(regenResponse.Data.Pubkeys), terminal.ColorReset)
 	fmt.Println()
 
+	// Regenerate the deposit data
+	err = regenDepositData(c, sw)
+	if err != nil {
+		return err
+	}
+
 	if c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to restart the Stakewise Operator service so it loads the new keys and deposit data?") {
-		fmt.Println("NYI")
+		fmt.Print("Restarting Stakewise Operator... ")
+		_, err = hd.Api.Service.RestartContainer(swconfig.OperatorContainerSuffix)
+		if err != nil {
+			fmt.Printf("%sWARNING: error restarting stakewise operator: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+			fmt.Println("Please restart it in order to assign deposits to your new keys.")
+			fmt.Println()
+		} else {
+			fmt.Println("done!")
+		}
 	} else {
 		fmt.Println("Please restart the container at your convenience.")
 	}

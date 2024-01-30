@@ -34,9 +34,12 @@ func (r *ServiceRequester) GetConfig() (*api.ApiResponse[api.ServiceGetConfigDat
 	return SendGetRequest[api.ServiceGetConfigData](r, "get-config", "GetConfig", nil)
 }
 
-// Restarts the Validator client
-func (r *ServiceRequester) RestartVc() (*api.ApiResponse[api.SuccessData], error) {
-	return SendGetRequest[api.SuccessData](r, "restart-vc", "RestartVc", nil)
+// Restarts a Docker container
+func (r *ServiceRequester) RestartContainer(container string) (*api.ApiResponse[api.SuccessData], error) {
+	args := map[string]string{
+		"container": container,
+	}
+	return SendGetRequest[api.SuccessData](r, "restart-container", "RestartContainer", args)
 }
 
 // Deletes the data folder including the wallet file, password file, and all validator keys.

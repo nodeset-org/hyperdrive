@@ -29,9 +29,10 @@ func (r *WalletRequester) GetContext() *client.RequesterContext {
 }
 
 // Generate and save new validator keys
-func (r *WalletRequester) GenerateKeys(count uint64) (*api.ApiResponse[swapi.WalletGenerateKeysData], error) {
+func (r *WalletRequester) GenerateKeys(count uint64, restartVc bool) (*api.ApiResponse[swapi.WalletGenerateKeysData], error) {
 	args := map[string]string{
-		"count": strconv.FormatUint(count, 10),
+		"count":      strconv.FormatUint(count, 10),
+		"restart-vc": strconv.FormatBool(restartVc),
 	}
 	return client.SendGetRequest[swapi.WalletGenerateKeysData](r, "generate-keys", "GenerateKeys", args)
 }

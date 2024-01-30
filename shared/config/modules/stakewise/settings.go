@@ -7,4 +7,9 @@ const (
 	PasswordFilename     string = "password.txt"
 	KeystorePasswordFile string = "secret.txt"
 	DepositDataFile      string = "deposit-data.json"
+
+	// Container settings
+	DaemonContainerSuffix   string = "sw-daemon"
+	OperatorContainerSuffix string = "sw-operator"
+	VcContainerSuffix       string = "sw-vc"
 )
