@@ -2,10 +2,11 @@ package common
 
 import (
 	"bytes"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/nodeset-org/eth-utils/common"
 )
 
 const (
@@ -40,7 +41,7 @@ func (c *NodesetClient) UploadDepositData(signature []byte, depositData []byte) 
 	if err != nil {
 		return fmt.Errorf("error generating request: %w", err)
 	}
-	request.Header.Set(nodesetAuthHeader, hex.EncodeToString(signature))
+	request.Header.Set(nodesetAuthHeader, common.EncodeHexWithPrefix(signature))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	/*
 		This is way too big - maybe turn it on later?
