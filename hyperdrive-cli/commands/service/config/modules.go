@@ -69,7 +69,7 @@ func (p *ModulesPage) createContent() {
 		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
 			p.layout.descriptionBox.SetText(p.addonSubpages[index].getPage().description)
 		})
-	categoryList.SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+	categoryList.SetBackgroundColor(BackgroundColor)
 	categoryList.SetBorderPadding(0, 0, 1, 1)
 	p.categoryList = categoryList
 

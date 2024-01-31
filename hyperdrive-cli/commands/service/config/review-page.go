@@ -33,7 +33,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *config.HyperdriveConfig, newConfi
 		SetDynamicColors(true).
 		SetWordWrap(true)
 	changeBox.SetBorder(true)
-	changeBox.SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+	changeBox.SetBackgroundColor(BackgroundColor)
 	changeBox.SetBorderPadding(0, 0, 1, 1)
 
 	builder := strings.Builder{}
@@ -87,7 +87,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *config.HyperdriveConfig, newConfi
 		SetTextAlign(tview.AlignCenter).
 		SetWordWrap(true).
 		SetTextColor(tview.Styles.PrimaryTextColor)
-	textView.SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+	textView.SetBackgroundColor(BackgroundColor)
 	textView.SetBorderPadding(0, 0, 1, 1)
 
 	var buttonGrid *tview.Flex
@@ -96,7 +96,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *config.HyperdriveConfig, newConfi
 		buttonGrid = tview.NewFlex().
 			SetDirection(tview.FlexColumn).
 			AddItem(tview.NewBox().
-				SetBackgroundColor(tview.Styles.ContrastBackgroundColor), 0, 1, false)
+				SetBackgroundColor(BackgroundColor), 0, 1, false)
 	} else {
 		// Create the save button
 		saveButton := tview.NewButton("Save Settings")
@@ -122,25 +122,25 @@ func NewReviewPage(md *mainDisplay, oldConfig *config.HyperdriveConfig, newConfi
 		buttonGrid = tview.NewFlex().
 			SetDirection(tview.FlexColumn).
 			AddItem(tview.NewBox().
-				SetBackgroundColor(tview.Styles.ContrastBackgroundColor), 0, 1, false).
+				SetBackgroundColor(BackgroundColor), 0, 1, false).
 			AddItem(saveButton, len(saveButton.GetLabel())+2, 0, true).
 			AddItem(tview.NewBox().
-				SetBackgroundColor(tview.Styles.ContrastBackgroundColor), 0, 1, false)
+				SetBackgroundColor(BackgroundColor), 0, 1, false)
 	}
 
 	// Row spacers with the correct background color
 	spacer1 := tview.NewBox().
-		SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+		SetBackgroundColor(BackgroundColor)
 	spacer2 := tview.NewBox().
-		SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+		SetBackgroundColor(BackgroundColor)
 	spacer3 := tview.NewBox().
-		SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+		SetBackgroundColor(BackgroundColor)
 	spacer4 := tview.NewBox().
-		SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+		SetBackgroundColor(BackgroundColor)
 	spacerL := tview.NewBox().
-		SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+		SetBackgroundColor(BackgroundColor)
 	spacerR := tview.NewBox().
-		SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+		SetBackgroundColor(BackgroundColor)
 
 	// The main content grid
 	contentGrid := tview.NewGrid().
@@ -156,7 +156,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *config.HyperdriveConfig, newConfi
 		AddItem(spacerL, 0, 0, 7, 1, 0, 0, false).
 		AddItem(spacerR, 0, 2, 7, 1, 0, 0, false)
 	contentGrid.
-		SetBackgroundColor(tview.Styles.ContrastBackgroundColor).
+		SetBackgroundColor(BackgroundColor).
 		SetBorder(true).
 		SetTitle(" Review Changes ")
 	contentGrid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {

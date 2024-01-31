@@ -65,7 +65,7 @@ func NewMainDisplay(app *tview.Application, previousConfig *config.HyperdriveCon
 		SetTextAlign(tview.AlignCenter).
 		SetWordWrap(true).
 		SetTextColor(tview.Styles.PrimaryTextColor)
-	resizeWarning.SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+	resizeWarning.SetBackgroundColor(BackgroundColor)
 	resizeWarning.SetBorderPadding(0, 0, 1, 1)
 
 	// Create the main display object

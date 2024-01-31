@@ -33,7 +33,7 @@ func newStandardLayout() *standardLayout {
 	descriptionBox.SetBorderPadding(0, 0, 1, 1)
 	descriptionBox.SetTitle(" Description ")
 	descriptionBox.SetWordWrap(true)
-	descriptionBox.SetBackgroundColor(tview.Styles.ContrastBackgroundColor)
+	descriptionBox.SetBackgroundColor(BackgroundColor)
 	descriptionBox.SetDynamicColors(true)
 
 	grid.AddItem(descriptionBox, 0, 2, 1, 1, 0, 0, false)
@@ -82,7 +82,7 @@ func (layout *standardLayout) createForm(networkParam *types.Parameter[types.Net
 	form := NewForm().
 		SetFieldBackgroundColor(tcell.ColorBlack)
 	form.
-		SetBackgroundColor(tview.Styles.ContrastBackgroundColor).
+		SetBackgroundColor(BackgroundColor).
 		SetBorderPadding(0, 0, 0, 0)
 
 	// Set up the selected parameter change callback to update the description box
