@@ -17,8 +17,12 @@ const (
 )
 
 // Load the config
-// Returns the RocketPoolConfig and whether or not it was newly generated
+// Returns the Hyperdrive config and whether or not it was newly generated
 func (c *HyperdriveClient) LoadConfig() (*config.HyperdriveConfig, bool, error) {
+	if c.cfg != nil {
+		return c.cfg, c.isNewCfg, nil
+	}
+
 	settingsFilePath := filepath.Join(c.Context.ConfigPath, SettingsFile)
 	expandedPath, err := homedir.Expand(settingsFilePath)
 	if err != nil {
@@ -32,11 +36,15 @@ func (c *HyperdriveClient) LoadConfig() (*config.HyperdriveConfig, bool, error) 
 
 	if cfg != nil {
 		// A config was loaded, return it now
+		c.cfg = cfg
 		return cfg, false, nil
 	}
 
 	// Config wasn't loaded, but there was no error- we should create one.
-	return config.NewHyperdriveConfig(c.Context.ConfigPath), true, nil
+	cfg = config.NewHyperdriveConfig(c.Context.ConfigPath)
+	c.cfg = cfg
+	c.isNewCfg = true
+	return cfg, true, nil
 }
 
 // Load the backup config

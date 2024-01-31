@@ -163,7 +163,7 @@ func (c *HyperdriveClient) TerminateService(composeFiles []string, configPath st
 		return fmt.Errorf("error removing Docker artifacts: %w", err)
 	}
 
-	// Delete the RP directory
+	// Delete the Hyperdrive directory
 	path, err := homedir.Expand(configPath)
 	if err != nil {
 		return fmt.Errorf("error loading Hyperdrive directory: %w", err)

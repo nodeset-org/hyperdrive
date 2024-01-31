@@ -15,7 +15,7 @@ services:
     stop_grace_period: 3m
     {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.StakewiseDaemonRoute)}}
     volumes:
-      - /usr/share/hyperdrive/scripts:/setup:ro
+      - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - {{$module_dir}}/{{.Modules.Stakewise.KeystoreDir}}:/validators
     networks:
       - net
@@ -38,7 +38,7 @@ services:
       - BITFLY_NODE_METRICS_MACHINE_NAME={{.Metrics.BitflyNodeMetrics.MachineName}}
       - GRAFFITI={{.StakewiseGraffiti}}
     entrypoint: sh
-    command: "/setup/start-vc.sh"
+    command: "/usr/share/hyperdrive/scripts/{{.GetVcStartScript}}"
     cap_drop:
       - all
     cap_add:

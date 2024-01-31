@@ -17,7 +17,7 @@ services:
     ports: [ "{{$p2p}}:{{$p2p}}/udp", "{{$p2p}}:{{$p2p}}/tcp"{{.GetEcOpenApiPorts}} ]
     volumes:
       - ecdata:/ethclient
-      - /usr/share/hyperdrive/scripts:/setup:ro
+      - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - /var/lib/hyperdrive/data/{{.ProjectName}}:/secrets
     networks:
       - net
@@ -46,7 +46,7 @@ services:
       - RP_GETH_ENABLE_PBSS={{.LocalExecutionConfig.Geth.EnablePbss}}
       {{- end}}
     entrypoint: sh
-    command: "/setup/start-ec.sh"
+    command: "/usr/share/hyperdrive/scripts/{{.GetEcStartScript}}"
     cap_drop:
       - all
     cap_add:

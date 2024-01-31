@@ -11,8 +11,8 @@ import (
 
 // View the Hyperdrive service version information
 func serviceVersion(c *cli.Context) error {
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Get the config
 	cfg, isNew, err := hd.LoadConfig()
@@ -26,7 +26,7 @@ func serviceVersion(c *cli.Context) error {
 		return err
 	}
 
-	// Get RP service version
+	// Get Hyperdrive service version
 	serviceVersion, err := hd.GetServiceVersion()
 	if err != nil {
 		return err

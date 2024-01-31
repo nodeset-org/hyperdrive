@@ -12,11 +12,11 @@ import (
 
 // Destroy and resync the Execution client from scratch
 func resyncExecutionClient(c *cli.Context) error {
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Get the config
-	_, isNew, err := hd.LoadConfig()
+	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
 		return err
 	}
@@ -27,12 +27,6 @@ func resyncExecutionClient(c *cli.Context) error {
 	fmt.Println("This will delete the chain data of your primary Execution client and resync it from scratch.")
 	fmt.Printf("%sYou should only do this if your Execution client has failed and can no longer start or sync properly.\nThis is meant to be a last resort.%s\n", terminal.ColorYellow, terminal.ColorReset)
 
-	// Get the container prefix
-	prefix, err := getContainerPrefix(hd)
-	if err != nil {
-		return fmt.Errorf("Error getting container prefix: %w", err)
-	}
-
 	// Prompt for confirmation
 	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm(fmt.Sprintf("%sAre you SURE you want to delete and resync your main Execution client from scratch? This cannot be undone!%s", terminal.ColorRed, terminal.ColorReset))) {
 		fmt.Println("Cancelled.")
@@ -40,14 +34,11 @@ func resyncExecutionClient(c *cli.Context) error {
 	}
 
 	// Stop Execution
-	executionContainerName := fmt.Sprintf("%s_%s", prefix, types.ContainerID_ExecutionClient)
+	executionContainerName := cfg.GetDockerArtifactName(string(types.ContainerID_ExecutionClient))
 	fmt.Printf("Stopping %s...\n", executionContainerName)
-	result, err := hd.StopContainer(executionContainerName)
+	err = hd.StopContainer(executionContainerName)
 	if err != nil {
 		fmt.Printf("%sWARNING: Stopping main Execution container failed: %s%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
-	}
-	if result != executionContainerName {
-		fmt.Printf("%sWARNING: Unexpected output while stopping main Execution container: %s%s\n", terminal.ColorYellow, result, terminal.ColorReset)
 	}
 
 	// Get Execution volume name
@@ -56,24 +47,18 @@ func resyncExecutionClient(c *cli.Context) error {
 		return fmt.Errorf("Error getting Execution client volume name: %w", err)
 	}
 
-	// Remove ETH1
+	// Remove the EC
 	fmt.Printf("Deleting %s...\n", executionContainerName)
-	result, err = hd.RemoveContainer(executionContainerName)
+	err = hd.RemoveContainer(executionContainerName)
 	if err != nil {
 		return fmt.Errorf("Error deleting main Execution client container: %w", err)
 	}
-	if result != executionContainerName {
-		return fmt.Errorf("Unexpected output while deleting main Execution client container: %s", result)
-	}
 
-	// Delete the ETH1 volume
+	// Delete the EC volume
 	fmt.Printf("Deleting volume %s...\n", volume)
-	result, err = hd.DeleteVolume(volume)
+	err = hd.DeleteVolume(volume)
 	if err != nil {
 		return fmt.Errorf("Error deleting volume: %w", err)
-	}
-	if result != volume {
-		return fmt.Errorf("Unexpected output while deleting volume: %s", result)
 	}
 
 	// Restart Hyperdrive

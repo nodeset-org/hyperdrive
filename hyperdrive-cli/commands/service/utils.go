@@ -64,19 +64,6 @@ func changeNetworks(c *cli.Context, hd *client.HyperdriveClient) error {
 	return nil
 }
 
-// Gets the prefix specified for Hyperdrive's Docker containers
-func getContainerPrefix(hd *client.HyperdriveClient) (string, error) {
-	cfg, isNew, err := hd.LoadConfig()
-	if err != nil {
-		return "", err
-	}
-	if isNew {
-		return "", fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
-	}
-
-	return cfg.ProjectName.Value, nil
-}
-
 // Get the amount of free space available in the target dir
 func getPartitionFreeSpace(hd *client.HyperdriveClient, targetDir string) (uint64, error) {
 	partitions, err := disk.Partitions(true)

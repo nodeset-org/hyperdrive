@@ -7,8 +7,8 @@ import (
 
 // View the Hyperdrive service stats
 func serviceStats(c *cli.Context) error {
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Print service stats
 	return hd.PrintServiceStats(getComposeFiles(c))

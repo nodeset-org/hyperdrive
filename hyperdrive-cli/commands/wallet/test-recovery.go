@@ -11,8 +11,8 @@ import (
 )
 
 func testRecovery(c *cli.Context) error {
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Prompt a notice about test recovery
 	fmt.Printf("%sNOTE:\nThis command will test the recovery of your node wallet's private key, but will not actually write any files; it's simply a \"dry run\" of recovery.\nUse `hyperdrive wallet recover` to actually recover the wallet.%s\n\n", terminal.ColorYellow, terminal.ColorReset)

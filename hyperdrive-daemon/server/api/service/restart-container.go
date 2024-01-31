@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/url"
 
 	"github.com/docker/docker/api/types/container"
@@ -52,7 +51,6 @@ func (c *serviceRestartContainerContext) PrepareData(data *api.SuccessData, opts
 	cfg := sp.GetConfig()
 	d := sp.GetDocker()
 
-	id := fmt.Sprintf("%s-%s", cfg.ProjectName.Value, c.container)
+	id := cfg.GetDockerArtifactName(c.container)
 	return d.ContainerRestart(context.Background(), id, container.StopOptions{})
-	return nil
 }

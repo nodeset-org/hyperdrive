@@ -12,8 +12,8 @@ import (
 )
 
 func recoverWallet(c *cli.Context) error {
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Get & check wallet status
 	statusResponse, err := hd.Api.Wallet.Status()

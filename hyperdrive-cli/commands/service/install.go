@@ -50,8 +50,8 @@ func installService(c *cli.Context) error {
 		return nil
 	}
 
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Install service
 	err := hd.InstallService(c.Bool("verbose"), c.Bool("no-deps"), c.String("version"), c.String("path"))

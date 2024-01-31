@@ -25,7 +25,7 @@ services:
       {{- end}}
     volumes:
       - bndata:/ethclient
-      - /usr/share/hyperdrive/scripts:/setup:ro
+      - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - /var/lib/hyperdrive/data/{{.ProjectName}}:/secrets:ro
     networks:
       - net
@@ -60,7 +60,7 @@ services:
       - BN_P2P_QUIC_PORT={{.Lighthouse.LocalBeaconConfig.P2pQuicPort}}
       {{- end}}
     entrypoint: sh
-    command: "/setup/start-bn.sh"
+    command: "/usr/share/hyperdrive/scripts/{{.GetBnStartScript}}"
     cap_drop:
       - all
     cap_add:

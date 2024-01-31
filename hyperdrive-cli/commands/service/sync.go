@@ -58,8 +58,8 @@ func printSyncProgress(status *api.ClientManagerStatus, name string) {
 }
 
 func getSyncProgress(c *cli.Context) error {
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Get the config
 	cfg, isNew, err := hd.LoadConfig()

@@ -11,4 +11,9 @@ const (
 	UserAddressFilename    string = "address"
 	UserWalletDataFilename string = "wallet"
 	UserPasswordFilename   string = "password"
+
+	// Scripts
+	EcStartScript string = "start-ec.sh"
+	BnStartScript string = "start-bn.sh"
+	VcStartScript string = "start-vc.sh"
 )

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	docker "github.com/docker/docker/client"
 	"github.com/nodeset-org/hyperdrive/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
@@ -25,8 +26,11 @@ const (
 
 // Hyperdrive client
 type HyperdriveClient struct {
-	Api     *client.ApiClient
-	Context *context.HyperdriveContext
+	Api      *client.ApiClient
+	Context  *context.HyperdriveContext
+	docker   *docker.Client
+	cfg      *config.HyperdriveConfig
+	isNewCfg bool
 }
 
 // Hyperdrive client
@@ -37,8 +41,8 @@ type StakewiseClient struct {
 
 // Create new Hyperdrive client from CLI context without checking for sync status
 // Only use this function from commands that may work if the Daemon service doesn't exist
-// Most users should call NewClientFromCtx(c).WithStatus() or NewClientFromCtx(c).WithReady()
-func NewClientFromCtx(c *cli.Context) *HyperdriveClient {
+// Most users should call NewHyperdriveClientFromCtx(c).WithStatus() or NewHyperdriveClientFromCtx(c).WithReady()
+func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
 	snCtx := context.GetHyperdriveContext(c)
 	socketPath := filepath.Join(snCtx.ConfigPath, config.HyperdriveSocketFilename)
 	client := &HyperdriveClient{
@@ -58,6 +62,19 @@ func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
 		Context: snCtx,
 	}
 	return client
+}
+
+// Get the Docker client
+func (c *HyperdriveClient) GetDocker() (*docker.Client, error) {
+	if c.docker == nil {
+		var err error
+		c.docker, err = docker.NewClientWithOpts(docker.WithAPIVersionNegotiation())
+		if err != nil {
+			return nil, fmt.Errorf("error creating Docker client: %w", err)
+		}
+	}
+
+	return c.docker, nil
 }
 
 // Check the status of a newly created client and return it

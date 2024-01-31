@@ -19,6 +19,32 @@ func (cfg *HyperdriveConfig) IsLocalMode() bool {
 	return cfg.ClientMode.Value == types.ClientMode_Local
 }
 
+// Check if any of the services have doppelganger detection enabled
+// NOTE: update this with each new service that runs a VC!
+func (cfg *HyperdriveConfig) IsDoppelgangerEnabled() bool {
+	return cfg.Modules.Stakewise.VcCommon.DoppelgangerDetection.Value
+}
+
+// Gets the full name of the Docker container or volume with the provided suffix (name minus the project ID prefix)
+func (cfg *HyperdriveConfig) GetDockerArtifactName(entity string) string {
+	return fmt.Sprintf("%s_%s", cfg.ProjectName.Value, entity)
+}
+
+// Gets the name of the Execution Client start script
+func (cfg *HyperdriveConfig) GetEcStartScript() string {
+	return EcStartScript
+}
+
+// Gets the name of the Beacon Node start script
+func (cfg *HyperdriveConfig) GetBnStartScript() string {
+	return BnStartScript
+}
+
+// Gets the name of the Validator Client start script
+func (cfg *HyperdriveConfig) GetVcStartScript() string {
+	return VcStartScript
+}
+
 func (cfg *HyperdriveConfig) BnHttpUrl() (string, error) {
 	/*
 		// Check if Rescue Node is in-use

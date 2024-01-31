@@ -26,7 +26,7 @@ var (
 )
 
 func generateKeys(c *cli.Context) error {
-	hd := client.NewClientFromCtx(c)
+	hd := client.NewHyperdriveClientFromCtx(c)
 	sw := client.NewStakewiseClientFromCtx(c)
 	noRestart := c.Bool(generateKeysNoRestartFlag.Name)
 

@@ -19,8 +19,8 @@ var (
 )
 
 func masquerade(c *cli.Context) error {
-	// Get RP client
-	hd, err := client.NewClientFromCtx(c).WithReady()
+	// Get Hyperdrive client
+	hd, err := client.NewHyperdriveClientFromCtx(c).WithReady()
 	if err != nil {
 		return err
 	}

@@ -14,7 +14,7 @@ import (
 var (
 	ignoreSlashTimerFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name:  "ignore-slash-timer",
-		Usage: "Bypass the safety timer that forces a delay when switching to a new ETH2 client",
+		Usage: fmt.Sprintf("Bypass the safety timer that forces a delay when switching to a new Beacon Node.\n%sUsing this flag to bypass the slashing timer could result in a *major* loss of ETH! Only use this is if you absolutely understand the risks!%s", terminal.ColorRed, terminal.ColorReset),
 	}
 	tailFlag *cli.StringFlag = &cli.StringFlag{
 		Name:    "tail",

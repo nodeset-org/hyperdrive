@@ -22,8 +22,8 @@ func serviceLogs(c *cli.Context, aliasedNames ...string) error {
 		serviceNames = append(serviceNames, trueName)
 	}
 
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Print service logs
 	return hd.PrintServiceLogs(getComposeFiles(c), c.String("tail"), serviceNames...)

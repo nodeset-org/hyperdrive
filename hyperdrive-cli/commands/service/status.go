@@ -10,8 +10,8 @@ import (
 
 // View the Hyperdrive service status
 func serviceStatus(c *cli.Context) error {
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Get the config
 	cfg, isNew, err := hd.LoadConfig()

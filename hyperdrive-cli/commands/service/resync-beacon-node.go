@@ -12,8 +12,8 @@ import (
 
 // Destroy and resync the Beacon Node from scratch
 func resyncBeaconNode(c *cli.Context) error {
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Get the merged config
 	cfg, isNew, err := hd.LoadConfig()
@@ -41,53 +41,38 @@ func resyncBeaconNode(c *cli.Context) error {
 		fmt.Printf("You have a checkpoint sync provider configured (%s).\nYour Beacon Node will use it to sync to the head of the Beacon Chain instantly after being rebuilt.\n\n", checkpointSyncUrl)
 	}
 
-	// Get the container prefix
-	prefix, err := getContainerPrefix(hd)
-	if err != nil {
-		return fmt.Errorf("Error getting container prefix: %w", err)
-	}
-
 	// Prompt for confirmation
 	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm(fmt.Sprintf("%sAre you SURE you want to delete and resync your main Beacon Node from scratch? This cannot be undone!%s", terminal.ColorRed, terminal.ColorReset))) {
 		fmt.Println("Cancelled.")
 		return nil
 	}
 
-	// Stop ETH2
-	beaconContainerName := fmt.Sprintf("%s_%s", prefix, types.ContainerID_BeaconNode)
+	// Stop the BN
+	beaconContainerName := cfg.GetDockerArtifactName(string(types.ContainerID_BeaconNode))
 	fmt.Printf("Stopping %s...\n", beaconContainerName)
-	result, err := hd.StopContainer(beaconContainerName)
+	err = hd.StopContainer(beaconContainerName)
 	if err != nil {
 		fmt.Printf("%sWARNING: Stopping Beacon Node container failed: %s%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
 	}
-	if result != beaconContainerName {
-		fmt.Printf("%sWARNING: Unexpected output while stopping Beacon Node container: %s%s\n", terminal.ColorYellow, result, terminal.ColorReset)
-	}
 
-	// Get ETH2 volume name
+	// Get the BN volume name
 	volume, err := hd.GetClientVolumeName(beaconContainerName, clientDataVolumeName)
 	if err != nil {
 		return fmt.Errorf("Error getting Beacon Node volume name: %w", err)
 	}
 
-	// Remove ETH2
+	// Remove the BN
 	fmt.Printf("Deleting %s...\n", beaconContainerName)
-	result, err = hd.RemoveContainer(beaconContainerName)
+	err = hd.RemoveContainer(beaconContainerName)
 	if err != nil {
 		return fmt.Errorf("Error deleting Beacon Node container: %w", err)
 	}
-	if result != beaconContainerName {
-		return fmt.Errorf("Unexpected output while deleting Beacon Node container: %s", result)
-	}
 
-	// Delete the ETH2 volume
+	// Delete the BN volume
 	fmt.Printf("Deleting volume %s...\n", volume)
-	result, err = hd.DeleteVolume(volume)
+	err = hd.DeleteVolume(volume)
 	if err != nil {
 		return fmt.Errorf("Error deleting volume: %w", err)
-	}
-	if result != volume {
-		return fmt.Errorf("Unexpected output while deleting volume: %s", result)
 	}
 
 	// Restart Hyperdrive

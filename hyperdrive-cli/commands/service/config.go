@@ -17,8 +17,8 @@ import (
 
 // Configure the service
 func configureService(c *cli.Context) error {
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Make sure the config directory exists first
 	err := os.MkdirAll(hd.Context.ConfigPath, 0700)

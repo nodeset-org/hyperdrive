@@ -17,8 +17,8 @@ func terminateService(c *cli.Context) error {
 		return nil
 	}
 
-	// Get RP client
-	hd := client.NewClientFromCtx(c)
+	// Get Hyperdrive client
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Stop service
 	return hd.TerminateService(getComposeFiles(c), hd.Context.ConfigPath)
