@@ -124,7 +124,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 func checkForValidatorChange(hd *client.HyperdriveClient, cfg *config.HyperdriveConfig) (bool, error) {
 	// Get all of the VCs belonging to the project
 	prefix := cfg.ProjectName.Value
-	vcs, err := hd.GetValidatorContainers(prefix + "-")
+	vcs, err := hd.GetValidatorContainers(prefix + "_")
 	if err != nil {
 		return false, fmt.Errorf("error getting validator client containers: %w", err)
 	}
