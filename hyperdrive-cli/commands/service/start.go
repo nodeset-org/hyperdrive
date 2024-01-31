@@ -78,8 +78,10 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 			fmt.Printf("%sWARNING: couldn't verify that the validator container can be safely restarted:\n\t%s\n", terminal.ColorYellow, err.Error())
 			fmt.Println("If you are changing to a different client, it may resubmit an attestation you have already submitted.")
 			fmt.Println("This will slash your validator!")
-			fmt.Println("To prevent slashing, you must wait 15 minutes from the time you stopped the clients before starting them again.\n")
-			fmt.Println("**If you did NOT change clients, you can safely ignore this warning.**\n")
+			fmt.Println("To prevent slashing, you must wait 15 minutes from the time you stopped the clients before starting them again.")
+			fmt.Println()
+			fmt.Println("**If you did NOT change clients, you can safely ignore this warning.**")
+			fmt.Println()
 			if !utils.Confirm(fmt.Sprintf("Press y when you understand the above warning, have waited, and are ready to start Hyperdrive:%s", terminal.ColorReset)) {
 				fmt.Println("Cancelled.")
 				return nil
@@ -90,10 +92,11 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 			if !existingNode {
 				fmt.Println("Okay, great! You're safe to start. Have fun!")
 			} else {
-				fmt.Printf("%sSince you're rebuilding a node, Hyperdrive can't determine if you attested in the last 15 minutes.\n", terminal.ColorYellow, err.Error())
+				fmt.Printf("%sSince you're rebuilding a node, Hyperdrive can't determine if you attested in the last 15 minutes.\n", terminal.ColorYellow)
 				fmt.Println("If you did, it may resubmit an attestation you have already submitted.")
 				fmt.Println("This will slash your validator!")
-				fmt.Println("To prevent slashing, you must wait 15 minutes from the time you stopped the clients before starting them again.\n")
+				fmt.Println("To prevent slashing, you must wait 15 minutes from the time you stopped the clients before starting them again.")
+				fmt.Println()
 				if !utils.Confirm(fmt.Sprintf("Press y when you understand the above warning, have waited, and are ready to start Hyperdrive:%s", terminal.ColorReset)) {
 					fmt.Println("Cancelled.")
 					return nil
@@ -121,7 +124,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 func checkForValidatorChange(hd *client.HyperdriveClient, cfg *config.HyperdriveConfig) (bool, error) {
 	// Get all of the VCs belonging to the project
 	prefix := cfg.ProjectName.Value
-	vcs, err := hd.GetValidatorContainers(prefix + "_")
+	vcs, err := hd.GetValidatorContainers(prefix + "-")
 	if err != nil {
 		return false, fmt.Errorf("error getting validator client containers: %w", err)
 	}
@@ -148,7 +151,7 @@ func checkForValidatorChange(hd *client.HyperdriveClient, cfg *config.Hyperdrive
 	for _, vc := range vcs {
 		remainingTime, err := checkValidatorClient(hd, vc, newTagMap)
 		if err != nil {
-			return false, nil
+			return false, err
 		}
 
 		// If this VC has remaining time before it can be safely started, see if it's more than the current max
@@ -165,21 +168,30 @@ func checkForValidatorChange(hd *client.HyperdriveClient, cfg *config.Hyperdrive
 }
 
 func checkValidatorClient(hd *client.HyperdriveClient, vcName string, newTagMap map[string]string) (time.Duration, error) {
+	fmt.Printf("running check on %s\n", vcName)
 	// Get the current and pending VC images
 	currentTag, err := hd.GetDockerImage(vcName)
 	if err != nil {
-		return 0, fmt.Errorf("error getting current validator image for [%s]: %w", vcName, err)
+		return 0, fmt.Errorf("error getting Docker image tag for [%s]: %w", vcName, err)
 	}
-	pendingTag, err := getDockerImageName(newTagMap[vcName])
+	currentVcType, err := getDockerImageName(hd, currentTag)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing current Docker image tag [%s] for [%s]: %w", currentTag, vcName, err)
+	}
+	pendingTag := newTagMap[vcName]
+	pendingVcType, err := getDockerImageName(hd, pendingTag)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing pending Docker image tag [%s] for [%s]: %w", pendingTag, vcName, err)
+	}
 
 	// Compare the clients and warn if necessary
-	if currentTag == pendingTag {
-		fmt.Printf("Validator Client [%s] has not changed images - no slashing prevention delay necessary.\n", vcName)
+	if currentVcType == pendingVcType {
+		fmt.Printf("Validator Client [%s] is still [%s] - no slashing prevention delay necessary.\n", vcName, currentVcType)
 		return 0, nil
 	} else {
 		validatorFinishTime, err := hd.GetDockerContainerShutdownTime(vcName)
 		if err != nil {
-			return 0, fmt.Errorf("error getting VC [%s] shutdown time: %w", err)
+			return 0, fmt.Errorf("error getting VC [%s] shutdown time: %w", vcName, err)
 		}
 
 		// If it hasn't exited yet, shut it down
@@ -201,14 +213,14 @@ func checkValidatorClient(hd *client.HyperdriveClient, vcName string, newTagMap 
 		safeStartTime := validatorFinishTime.Add(15 * time.Minute)
 		remainingTime := time.Until(safeStartTime)
 		if remainingTime <= 0 {
-			fmt.Printf("Validator Client [%s] has been offline for %s, which is long enough to prevent slashing.\n", time.Since(validatorFinishTime))
+			fmt.Printf("Validator Client [%s] has been offline for %s, which is long enough to prevent slashing.\n", vcName, time.Since(validatorFinishTime))
 			return 0, nil
 		}
 
 		// If this VC has remaining time before it can be safely started, add it to the list
 		if remainingTime > 0 {
-			fmt.Printf("Validator Client [%s] has changed tags from [%s] to [%s].\n", vcName, currentTag, pendingTag)
-			fmt.Printf("Only %s has elapsed since you stopped it.\n", currentTag, pendingTag, time.Since(validatorFinishTime), currentTag)
+			fmt.Printf("Validator Client [%s] has changed types from [%s] to [%s].\n", vcName, currentVcType, pendingVcType)
+			fmt.Printf("Only %s has elapsed since you stopped it.\n", time.Since(validatorFinishTime))
 		}
 
 		// This can't be safely started, return its info
@@ -272,7 +284,7 @@ func getVcContainerTagParamMap(cfg *config.HyperdriveConfig, vcs []string) (map[
 	for _, vc := range vcs {
 		_, exists := containerTagMap[vc]
 		if !exists {
-			return nil, fmt.Errorf("validator client [%s] was missing from the slashing prevention check")
+			return nil, fmt.Errorf("validator client [%s] was missing from the slashing prevention check", vc)
 		}
 	}
 
@@ -280,20 +292,20 @@ func getVcContainerTagParamMap(cfg *config.HyperdriveConfig, vcs []string) (map[
 }
 
 // Extract the image name from a Docker image string
-func getDockerImageName(imageString string) (string, error) {
+func getDockerImageName(hd *client.HyperdriveClient, image string) (string, error) {
 	// Return the empty string if the validator didn't exist (probably because this is the first time starting it up)
-	if imageString == "" {
+	if image == "" {
 		return "", nil
 	}
 
 	reg := regexp.MustCompile(dockerImageRegex)
-	matches := reg.FindStringSubmatch(imageString)
+	matches := reg.FindStringSubmatch(image)
 	if matches == nil {
-		return "", fmt.Errorf("Couldn't parse the Docker image string [%s]", imageString)
+		return "", fmt.Errorf("Couldn't parse the Docker image string [%s]", image)
 	}
 	imageIndex := reg.SubexpIndex("image")
 	if imageIndex == -1 {
-		return "", fmt.Errorf("Image name not found in Docker image [%s]", imageString)
+		return "", fmt.Errorf("Image name not found in Docker image [%s]", image)
 	}
 
 	imageName := matches[imageIndex]

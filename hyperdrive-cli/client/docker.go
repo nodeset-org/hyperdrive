@@ -17,7 +17,7 @@ func (c *HyperdriveClient) GetDockerImage(containerName string) (string, error) 
 	if err != nil {
 		return "", err
 	}
-	return ci.Image, nil
+	return ci.Config.Image, nil
 }
 
 // Get the Docker images with the project ID as a prefix that run the VC start script in their command line arguments
@@ -36,6 +36,7 @@ func (c *HyperdriveClient) GetValidatorContainers(projectName string) ([]string,
 	for _, container := range cl {
 		isProjectContainer := false
 		for _, name := range container.Names {
+			name = strings.TrimPrefix(name, "/") // Docker throws a leading / on names
 			if strings.HasPrefix(name, projectName) {
 				isProjectContainer = true
 			}
@@ -43,7 +44,8 @@ func (c *HyperdriveClient) GetValidatorContainers(projectName string) ([]string,
 
 		// This container belongs to the project
 		if isProjectContainer && strings.Contains(container.Command, config.VcStartScript) {
-			containers = append(containers, container.Names[0])
+			name := strings.TrimPrefix(container.Names[0], "/")
+			containers = append(containers, name)
 		}
 	}
 	return containers, nil

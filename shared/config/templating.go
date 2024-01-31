@@ -27,7 +27,7 @@ func (cfg *HyperdriveConfig) IsDoppelgangerEnabled() bool {
 
 // Gets the full name of the Docker container or volume with the provided suffix (name minus the project ID prefix)
 func (cfg *HyperdriveConfig) GetDockerArtifactName(entity string) string {
-	return fmt.Sprintf("%s_%s", cfg.ProjectName.Value, entity)
+	return fmt.Sprintf("%s-%s", cfg.ProjectName.Value, entity)
 }
 
 // Gets the name of the Execution Client start script
