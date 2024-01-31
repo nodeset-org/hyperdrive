@@ -2,7 +2,8 @@ package types
 
 import (
 	"encoding/hex"
-	"encoding/json"
+
+	"github.com/goccy/go-json"
 
 	"github.com/google/uuid"
 	"github.com/nodeset-org/eth-utils/beacon"

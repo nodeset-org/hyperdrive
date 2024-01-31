@@ -2,11 +2,12 @@ package swcommon
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/goccy/go-json"
 
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/eth-utils/common"

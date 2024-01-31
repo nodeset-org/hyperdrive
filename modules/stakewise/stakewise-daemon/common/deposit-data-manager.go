@@ -10,12 +10,12 @@ import (
 	"github.com/nodeset-org/hyperdrive/daemon-utils/validator/utils"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
+	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
 const (
 	// Stakewise validators deposit a full 32 ETH
-	StakewiseDepositAmount uint64      = 32e9
-	fileMode               os.FileMode = 0600
+	StakewiseDepositAmount uint64 = 32e9
 )
 
 // DepositDataManager manages the aggregated deposit data file that Stakewise uses
@@ -32,20 +32,12 @@ func NewDepositDataManager(sp *StakewiseServiceProvider) *DepositDataManager {
 	}
 }
 
-// Regenerates the deposit data file from all of the Stakewise validator keys in its keystore folder, and updates the deposit data file.
-// Returns the total number of validator keys stored on disk.
-func (m *DepositDataManager) RegenerateDepositData() ([]beacon.ValidatorPubkey, error) {
+// Generates deposit data for the provided keys
+func (m *DepositDataManager) GenerateDepositData(keys []*eth2types.BLSPrivateKey) ([]*types.ExtendedDepositData, error) {
 	resources := m.sp.GetResources()
-	wallet := m.sp.GetWallet()
 
 	// Stakewise uses the same withdrawal creds for each validator
 	withdrawalCreds := utils.GetWithdrawalCredsFromAddress(resources.Vault)
-
-	// Load all of the validator keys
-	keys, err := wallet.GetAllPrivateKeys()
-	if err != nil {
-		return nil, fmt.Errorf("error loading all validator keys: %w", err)
-	}
 
 	// Create the new aggregated deposit data for all generated keys
 	dataList := make([]*types.ExtendedDepositData, len(keys))
@@ -57,25 +49,7 @@ func (m *DepositDataManager) RegenerateDepositData() ([]beacon.ValidatorPubkey, 
 		}
 		dataList[i] = &depositData
 	}
-
-	// Serialize it
-	bytes, err := json.Marshal(dataList)
-	if err != nil {
-		return nil, fmt.Errorf("error serializing deposit data: %w", err)
-	}
-
-	// Write it
-	err = os.WriteFile(m.dataPath, bytes, fileMode)
-	if err != nil {
-		return nil, fmt.Errorf("error saving deposit data to disk: %w", err)
-	}
-
-	// Make a list of pubkeys for all of the loaded keys
-	pubkeys := make([]beacon.ValidatorPubkey, len(keys))
-	for i, key := range keys {
-		pubkeys[i] = beacon.ValidatorPubkey(key.PublicKey().Marshal())
-	}
-	return pubkeys, nil
+	return dataList, nil
 }
 
 // Read the deposit data file

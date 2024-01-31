@@ -12,7 +12,3 @@ type WalletInitializeData struct {
 type WalletGenerateKeysData struct {
 	Pubkeys []beacon.ValidatorPubkey `json:"pubkeys"`
 }
-
-type WalletRegenerateDepositDataData struct {
-	Pubkeys []beacon.ValidatorPubkey `json:"pubkeys"`
-}

@@ -5,12 +5,11 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	swshared "github.com/nodeset-org/hyperdrive/modules/stakewise/shared"
-	swwallet "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/wallet"
 )
 
 type StakewiseServiceProvider struct {
 	*services.ServiceProvider
-	wallet             *swwallet.Wallet
+	wallet             *Wallet
 	resources          *swshared.StakewiseResources
 	depositDataManager *DepositDataManager
 	nodesetClient      *NodesetClient
@@ -19,7 +18,7 @@ type StakewiseServiceProvider struct {
 // Create a new service provider with Stakewise daemon-specific features
 func NewStakewiseServiceProvider(sp *services.ServiceProvider) (*StakewiseServiceProvider, error) {
 	// Create the wallet
-	wallet, err := swwallet.NewWallet(sp)
+	wallet, err := NewWallet(sp)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing wallet: %w", err)
 	}
@@ -45,7 +44,7 @@ func NewStakewiseServiceProvider(sp *services.ServiceProvider) (*StakewiseServic
 	return stakewiseSp, nil
 }
 
-func (s *StakewiseServiceProvider) GetWallet() *swwallet.Wallet {
+func (s *StakewiseServiceProvider) GetWallet() *Wallet {
 	return s.wallet
 }
 

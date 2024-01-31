@@ -41,8 +41,3 @@ func (r *WalletRequester) GenerateKeys(count uint64, restartVc bool) (*api.ApiRe
 func (r *WalletRequester) Initialize() (*api.ApiResponse[swapi.WalletInitializeData], error) {
 	return client.SendGetRequest[swapi.WalletInitializeData](r, "initialize", "Initialize", nil)
 }
-
-// Regenerate the aggregated deposit data file for Stakewise to use
-func (r *WalletRequester) RegenerateDepositData() (*api.ApiResponse[swapi.WalletRegenerateDepositDataData], error) {
-	return client.SendGetRequest[swapi.WalletRegenerateDepositDataData](r, "regen-deposit-data", "RegenerateDepositData", nil)
-}

@@ -44,23 +44,6 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 					return generateKeys(c)
 				},
 			},
-			{
-				Name:    "regen-deposit-data",
-				Aliases: []string{"r"},
-				Usage:   "Regenerate the combined deposit data for all of your validator keys and upload them to NodeSet's Stakewise vault, so they can be assigned new deposits.",
-				Flags: []cli.Flag{
-					regenDepositDataNoRestartFlag,
-				},
-				Action: func(c *cli.Context) error {
-					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
-						return err
-					}
-
-					// Run
-					return regenerateDepositData(c)
-				},
-			},
 		},
 	})
 }

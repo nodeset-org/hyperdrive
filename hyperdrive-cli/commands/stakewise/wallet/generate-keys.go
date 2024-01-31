@@ -21,7 +21,7 @@ var (
 	}
 	generateKeysNoRestartFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name:  "no-restart",
-		Usage: fmt.Sprintf("Don't automatically restart the Validator Client and Stakewise Operator containers after generating keys. %sOnly use this if you know what you're doing and can restart them manually.%s", terminal.ColorYellow, terminal.ColorReset),
+		Usage: fmt.Sprintf("Don't automatically restart the Validator Client after generating keys. %sOnly use this if you know what you're doing and can restart it manually.%s", terminal.ColorYellow, terminal.ColorReset),
 	}
 )
 
@@ -80,12 +80,6 @@ func generateKeys(c *cli.Context) error {
 	}
 	fmt.Println()
 
-	// Regenerate the deposit data
-	err = swcmdutils.RegenDepositData(hd, sw, noRestart)
-	if err != nil {
-		return err
-	}
-
 	// Upload to the server
 	err = swcmdutils.UploadDepositData(sw)
 	if err != nil {
@@ -96,7 +90,7 @@ func generateKeys(c *cli.Context) error {
 		fmt.Println()
 		fmt.Println("Your new keys are now ready for use. When NodeSet selects one of them for a new deposit, your system will deposit it and begin attesting automatically.")
 	} else {
-		fmt.Println("Your new keys are uploaded, but you *must* restart your Validator Client and Stakewise Operator service at your earliest convenience to begin attesting.")
+		fmt.Println("Your new keys are uploaded, but you *must* restart your Validator Client at your earliest convenience to begin attesting once they are selected for depositing.")
 	}
 
 	return nil
