@@ -330,7 +330,7 @@ func (m *ExecutionClientManager) SyncProgress(ctx context.Context) (*ethereum.Sy
 /// Internal functions
 /// ==================
 
-func (m *ExecutionClientManager) CheckStatus() *api.ClientManagerStatus {
+func (m *ExecutionClientManager) CheckStatus(ctx context.Context) *api.ClientManagerStatus {
 
 	status := &api.ClientManagerStatus{
 		FallbackEnabled: m.fallbackEc != nil,
@@ -348,14 +348,14 @@ func (m *ExecutionClientManager) CheckStatus() *api.ClientManagerStatus {
 	}
 
 	// Get the primary EC status
-	status.PrimaryClientStatus = checkEcStatus(m.primaryEc)
+	status.PrimaryClientStatus = checkEcStatus(ctx, m.primaryEc)
 
 	// Flag if primary client is ready
 	m.primaryReady = (status.PrimaryClientStatus.IsWorking && status.PrimaryClientStatus.IsSynced)
 
 	// Get the fallback EC status if applicable
 	if status.FallbackEnabled {
-		status.FallbackClientStatus = checkEcStatus(m.fallbackEc)
+		status.FallbackClientStatus = checkEcStatus(ctx, m.fallbackEc)
 		// Check if fallback is using the expected network
 		if status.FallbackClientStatus.Error == "" && status.FallbackClientStatus.NetworkId != m.expectedChainID {
 			m.fallbackReady = false
@@ -386,12 +386,12 @@ func getNetworkNameFromId(networkId uint) string {
 }
 
 // Check the client status
-func checkEcStatus(client *ethclient.Client) api.ClientStatus {
+func checkEcStatus(ctx context.Context, client *ethclient.Client) api.ClientStatus {
 
 	status := api.ClientStatus{}
 
 	// Get the NetworkId
-	networkId, err := client.NetworkID(context.Background())
+	networkId, err := client.NetworkID(ctx)
 	if err != nil {
 		status.Error = fmt.Sprintf("Sync progress check failed with [%s]", err.Error())
 		status.IsSynced = false
@@ -404,7 +404,7 @@ func checkEcStatus(client *ethclient.Client) api.ClientStatus {
 	}
 
 	// Get the fallback's sync progress
-	progress, err := client.SyncProgress(context.Background())
+	progress, err := client.SyncProgress(ctx)
 	if err != nil {
 		status.Error = fmt.Sprintf("Sync progress check failed with [%s]", err.Error())
 		status.IsSynced = false

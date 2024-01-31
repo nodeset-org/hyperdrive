@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -80,9 +81,9 @@ func (m *BeaconClientManager) IsFallbackReady() bool {
 /// ======================
 
 // Get the client's sync status
-func (m *BeaconClientManager) GetSyncStatus() (types.SyncStatus, error) {
+func (m *BeaconClientManager) GetSyncStatus(ctx context.Context) (types.SyncStatus, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetSyncStatus()
+		return client.GetSyncStatus(ctx)
 	})
 	if err != nil {
 		return types.SyncStatus{}, err
@@ -91,9 +92,9 @@ func (m *BeaconClientManager) GetSyncStatus() (types.SyncStatus, error) {
 }
 
 // Get the Beacon configuration
-func (m *BeaconClientManager) GetEth2Config() (types.Eth2Config, error) {
+func (m *BeaconClientManager) GetEth2Config(ctx context.Context) (types.Eth2Config, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetEth2Config()
+		return client.GetEth2Config(ctx)
 	})
 	if err != nil {
 		return types.Eth2Config{}, err
@@ -102,9 +103,9 @@ func (m *BeaconClientManager) GetEth2Config() (types.Eth2Config, error) {
 }
 
 // Get the Beacon configuration
-func (m *BeaconClientManager) GetEth2DepositContract() (types.Eth2DepositContract, error) {
+func (m *BeaconClientManager) GetEth2DepositContract(ctx context.Context) (types.Eth2DepositContract, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetEth2DepositContract()
+		return client.GetEth2DepositContract(ctx)
 	})
 	if err != nil {
 		return types.Eth2DepositContract{}, err
@@ -113,9 +114,9 @@ func (m *BeaconClientManager) GetEth2DepositContract() (types.Eth2DepositContrac
 }
 
 // Get the attestations in a Beacon chain block
-func (m *BeaconClientManager) GetAttestations(blockId string) ([]types.AttestationInfo, bool, error) {
+func (m *BeaconClientManager) GetAttestations(ctx context.Context, blockId string) ([]types.AttestationInfo, bool, error) {
 	result1, result2, err := m.runFunction2(func(client types.IBeaconClient) (interface{}, interface{}, error) {
-		return client.GetAttestations(blockId)
+		return client.GetAttestations(ctx, blockId)
 	})
 	if err != nil {
 		return nil, false, err
@@ -124,9 +125,9 @@ func (m *BeaconClientManager) GetAttestations(blockId string) ([]types.Attestati
 }
 
 // Get a Beacon chain block
-func (m *BeaconClientManager) GetBeaconBlock(blockId string) (types.BeaconBlock, bool, error) {
+func (m *BeaconClientManager) GetBeaconBlock(ctx context.Context, blockId string) (types.BeaconBlock, bool, error) {
 	result1, result2, err := m.runFunction2(func(client types.IBeaconClient) (interface{}, interface{}, error) {
-		return client.GetBeaconBlock(blockId)
+		return client.GetBeaconBlock(ctx, blockId)
 	})
 	if err != nil {
 		return types.BeaconBlock{}, false, err
@@ -135,9 +136,9 @@ func (m *BeaconClientManager) GetBeaconBlock(blockId string) (types.BeaconBlock,
 }
 
 // Get the Beacon chain's head information
-func (m *BeaconClientManager) GetBeaconHead() (types.BeaconHead, error) {
+func (m *BeaconClientManager) GetBeaconHead(ctx context.Context) (types.BeaconHead, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetBeaconHead()
+		return client.GetBeaconHead(ctx)
 	})
 	if err != nil {
 		return types.BeaconHead{}, err
@@ -146,9 +147,9 @@ func (m *BeaconClientManager) GetBeaconHead() (types.BeaconHead, error) {
 }
 
 // Get a validator's status by its index
-func (m *BeaconClientManager) GetValidatorStatusByIndex(index string, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
+func (m *BeaconClientManager) GetValidatorStatusByIndex(ctx context.Context, index string, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetValidatorStatusByIndex(index, opts)
+		return client.GetValidatorStatusByIndex(ctx, index, opts)
 	})
 	if err != nil {
 		return types.ValidatorStatus{}, err
@@ -157,9 +158,9 @@ func (m *BeaconClientManager) GetValidatorStatusByIndex(index string, opts *type
 }
 
 // Get a validator's status by its pubkey
-func (m *BeaconClientManager) GetValidatorStatus(pubkey beaconutils.ValidatorPubkey, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
+func (m *BeaconClientManager) GetValidatorStatus(ctx context.Context, pubkey beaconutils.ValidatorPubkey, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetValidatorStatus(pubkey, opts)
+		return client.GetValidatorStatus(ctx, pubkey, opts)
 	})
 	if err != nil {
 		return types.ValidatorStatus{}, err
@@ -168,9 +169,9 @@ func (m *BeaconClientManager) GetValidatorStatus(pubkey beaconutils.ValidatorPub
 }
 
 // Get the statuses of multiple validators by their pubkeys
-func (m *BeaconClientManager) GetValidatorStatuses(pubkeys []beaconutils.ValidatorPubkey, opts *types.ValidatorStatusOptions) (map[beaconutils.ValidatorPubkey]types.ValidatorStatus, error) {
+func (m *BeaconClientManager) GetValidatorStatuses(ctx context.Context, pubkeys []beaconutils.ValidatorPubkey, opts *types.ValidatorStatusOptions) (map[beaconutils.ValidatorPubkey]types.ValidatorStatus, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetValidatorStatuses(pubkeys, opts)
+		return client.GetValidatorStatuses(ctx, pubkeys, opts)
 	})
 	if err != nil {
 		return nil, err
@@ -179,9 +180,9 @@ func (m *BeaconClientManager) GetValidatorStatuses(pubkeys []beaconutils.Validat
 }
 
 // Get a validator's index
-func (m *BeaconClientManager) GetValidatorIndex(pubkey beaconutils.ValidatorPubkey) (string, error) {
+func (m *BeaconClientManager) GetValidatorIndex(ctx context.Context, pubkey beaconutils.ValidatorPubkey) (string, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetValidatorIndex(pubkey)
+		return client.GetValidatorIndex(ctx, pubkey)
 	})
 	if err != nil {
 		return "", err
@@ -190,9 +191,9 @@ func (m *BeaconClientManager) GetValidatorIndex(pubkey beaconutils.ValidatorPubk
 }
 
 // Get a validator's sync duties
-func (m *BeaconClientManager) GetValidatorSyncDuties(indices []string, epoch uint64) (map[string]bool, error) {
+func (m *BeaconClientManager) GetValidatorSyncDuties(ctx context.Context, indices []string, epoch uint64) (map[string]bool, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetValidatorSyncDuties(indices, epoch)
+		return client.GetValidatorSyncDuties(ctx, indices, epoch)
 	})
 	if err != nil {
 		return nil, err
@@ -201,9 +202,9 @@ func (m *BeaconClientManager) GetValidatorSyncDuties(indices []string, epoch uin
 }
 
 // Get a validator's proposer duties
-func (m *BeaconClientManager) GetValidatorProposerDuties(indices []string, epoch uint64) (map[string]uint64, error) {
+func (m *BeaconClientManager) GetValidatorProposerDuties(ctx context.Context, indices []string, epoch uint64) (map[string]uint64, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetValidatorProposerDuties(indices, epoch)
+		return client.GetValidatorProposerDuties(ctx, indices, epoch)
 	})
 	if err != nil {
 		return nil, err
@@ -212,9 +213,9 @@ func (m *BeaconClientManager) GetValidatorProposerDuties(indices []string, epoch
 }
 
 // Get the Beacon chain's domain data
-func (m *BeaconClientManager) GetDomainData(domainType []byte, epoch uint64, useGenesisFork bool) ([]byte, error) {
+func (m *BeaconClientManager) GetDomainData(ctx context.Context, domainType []byte, epoch uint64, useGenesisFork bool) ([]byte, error) {
 	result, err := m.runFunction1(func(client types.IBeaconClient) (interface{}, error) {
-		return client.GetDomainData(domainType, epoch, useGenesisFork)
+		return client.GetDomainData(ctx, domainType, epoch, useGenesisFork)
 	})
 	if err != nil {
 		return nil, err
@@ -223,25 +224,25 @@ func (m *BeaconClientManager) GetDomainData(domainType []byte, epoch uint64, use
 }
 
 // Voluntarily exit a validator
-func (m *BeaconClientManager) ExitValidator(validatorIndex string, epoch uint64, signature beaconutils.ValidatorSignature) error {
+func (m *BeaconClientManager) ExitValidator(ctx context.Context, validatorIndex string, epoch uint64, signature beaconutils.ValidatorSignature) error {
 	err := m.runFunction0(func(client types.IBeaconClient) error {
-		return client.ExitValidator(validatorIndex, epoch, signature)
+		return client.ExitValidator(ctx, validatorIndex, epoch, signature)
 	})
 	return err
 }
 
 // Close the connection to the Beacon client
-func (m *BeaconClientManager) Close() error {
+func (m *BeaconClientManager) Close(ctx context.Context) error {
 	err := m.runFunction0(func(client types.IBeaconClient) error {
-		return client.Close()
+		return client.Close(ctx)
 	})
 	return err
 }
 
 // Get the EL data for a CL block
-func (m *BeaconClientManager) GetEth1DataForEth2Block(blockId string) (types.Eth1Data, bool, error) {
+func (m *BeaconClientManager) GetEth1DataForEth2Block(ctx context.Context, blockId string) (types.Eth1Data, bool, error) {
 	result1, result2, err := m.runFunction2(func(client types.IBeaconClient) (interface{}, interface{}, error) {
-		return client.GetEth1DataForEth2Block(blockId)
+		return client.GetEth1DataForEth2Block(ctx, blockId)
 	})
 	if err != nil {
 		return types.Eth1Data{}, false, err
@@ -250,9 +251,9 @@ func (m *BeaconClientManager) GetEth1DataForEth2Block(blockId string) (types.Eth
 }
 
 // Change the withdrawal credentials for a validator
-func (m *BeaconClientManager) ChangeWithdrawalCredentials(validatorIndex string, fromBlsPubkey beaconutils.ValidatorPubkey, toExecutionAddress common.Address, signature beaconutils.ValidatorSignature) error {
+func (m *BeaconClientManager) ChangeWithdrawalCredentials(ctx context.Context, validatorIndex string, fromBlsPubkey beaconutils.ValidatorPubkey, toExecutionAddress common.Address, signature beaconutils.ValidatorSignature) error {
 	err := m.runFunction0(func(client types.IBeaconClient) error {
-		return client.ChangeWithdrawalCredentials(validatorIndex, fromBlsPubkey, toExecutionAddress, signature)
+		return client.ChangeWithdrawalCredentials(ctx, validatorIndex, fromBlsPubkey, toExecutionAddress, signature)
 	})
 	if err != nil {
 		return err
@@ -264,7 +265,7 @@ func (m *BeaconClientManager) ChangeWithdrawalCredentials(validatorIndex string,
 /// Internal Functions
 /// ==================
 
-func (m *BeaconClientManager) CheckStatus() *api.ClientManagerStatus {
+func (m *BeaconClientManager) CheckStatus(ctx context.Context) *api.ClientManagerStatus {
 
 	status := &api.ClientManagerStatus{
 		FallbackEnabled: m.fallbackBc != nil,
@@ -282,11 +283,11 @@ func (m *BeaconClientManager) CheckStatus() *api.ClientManagerStatus {
 	}
 
 	// Get the primary BC status
-	status.PrimaryClientStatus = checkBcStatus(m.primaryBc)
+	status.PrimaryClientStatus = checkBcStatus(ctx, m.primaryBc)
 
 	// Get the fallback BC status if applicable
 	if status.FallbackEnabled {
-		status.FallbackClientStatus = checkBcStatus(m.fallbackBc)
+		status.FallbackClientStatus = checkBcStatus(ctx, m.fallbackBc)
 	}
 
 	// Flag the ready clients
@@ -298,12 +299,12 @@ func (m *BeaconClientManager) CheckStatus() *api.ClientManagerStatus {
 }
 
 // Check the client status
-func checkBcStatus(client types.IBeaconClient) api.ClientStatus {
+func checkBcStatus(ctx context.Context, client types.IBeaconClient) api.ClientStatus {
 
 	status := api.ClientStatus{}
 
 	// Get the fallback's sync progress
-	syncStatus, err := client.GetSyncStatus()
+	syncStatus, err := client.GetSyncStatus(ctx)
 	if err != nil {
 		status.Error = fmt.Sprintf("Sync progress check failed with [%s]", err.Error())
 		status.IsSynced = false

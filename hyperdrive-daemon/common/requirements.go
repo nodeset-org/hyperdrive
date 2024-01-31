@@ -58,23 +58,23 @@ func (sp *ServiceProvider) RequireWalletReady() error {
 }
 
 // Wait for the Executon client to sync; timeout of 0 indicates no timeout
-func (sp *ServiceProvider) WaitEthClientSynced(verbose bool) error {
-	_, err := sp.waitEthClientSynced(verbose, 0)
+func (sp *ServiceProvider) WaitEthClientSynced(ctx context.Context, verbose bool) error {
+	_, err := sp.waitEthClientSynced(ctx, verbose, 0)
 	return err
 }
 
 // Wait for the Beacon client to sync; timeout of 0 indicates no timeout
-func (sp *ServiceProvider) WaitBeaconClientSynced(verbose bool) error {
-	_, err := sp.waitBeaconClientSynced(verbose, 0)
+func (sp *ServiceProvider) WaitBeaconClientSynced(ctx context.Context, verbose bool) error {
+	_, err := sp.waitBeaconClientSynced(ctx, verbose, 0)
 	return err
 }
 
 // Check if the primary and fallback Execution clients are synced
 // TODO: Move this into ec-manager and stop exposing the primary and fallback directly...
-func (sp *ServiceProvider) checkExecutionClientStatus() (bool, eth.IExecutionClient, error) {
+func (sp *ServiceProvider) checkExecutionClientStatus(ctx context.Context) (bool, eth.IExecutionClient, error) {
 	// Check the EC status
 	ecMgr := sp.ecManager
-	mgrStatus := ecMgr.CheckStatus()
+	mgrStatus := ecMgr.CheckStatus(ctx)
 	if ecMgr.IsPrimaryReady() {
 		return true, nil, nil
 	}
@@ -112,10 +112,10 @@ func (sp *ServiceProvider) checkExecutionClientStatus() (bool, eth.IExecutionCli
 }
 
 // Check if the primary and fallback Beacon clients are synced
-func (sp *ServiceProvider) checkBeaconClientStatus() (bool, error) {
+func (sp *ServiceProvider) checkBeaconClientStatus(ctx context.Context) (bool, error) {
 	// Check the BC status
 	bcMgr := sp.bcManager
-	mgrStatus := bcMgr.CheckStatus()
+	mgrStatus := bcMgr.CheckStatus(ctx)
 	if bcMgr.IsPrimaryReady() {
 		return true, nil
 	}
@@ -153,12 +153,12 @@ func (sp *ServiceProvider) checkBeaconClientStatus() (bool, error) {
 }
 
 // Wait for the primary or fallback Execution client to be synced
-func (sp *ServiceProvider) waitEthClientSynced(verbose bool, timeout int64) (bool, error) {
+func (sp *ServiceProvider) waitEthClientSynced(ctx context.Context, verbose bool, timeout int64) (bool, error) {
 	// Prevent multiple waiting goroutines from requesting sync progress
 	ethClientSyncLock.Lock()
 	defer ethClientSyncLock.Unlock()
 
-	synced, clientToCheck, err := sp.checkExecutionClientStatus()
+	synced, clientToCheck, err := sp.checkExecutionClientStatus(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -183,7 +183,7 @@ func (sp *ServiceProvider) waitEthClientSynced(verbose bool, timeout int64) (boo
 		if time.Since(ecRefreshTime) > ethClientStatusRefreshInterval {
 			log.Println("Refreshing primary / fallback execution client status...")
 			ecRefreshTime = time.Now()
-			synced, clientToCheck, err = sp.checkExecutionClientStatus()
+			synced, clientToCheck, err = sp.checkExecutionClientStatus(ctx)
 			if err != nil {
 				return false, err
 			}
@@ -227,12 +227,12 @@ func (sp *ServiceProvider) waitEthClientSynced(verbose bool, timeout int64) (boo
 }
 
 // Wait for the primary or fallback Beacon client to be synced
-func (sp *ServiceProvider) waitBeaconClientSynced(verbose bool, timeout int64) (bool, error) {
+func (sp *ServiceProvider) waitBeaconClientSynced(ctx context.Context, verbose bool, timeout int64) (bool, error) {
 	// Prevent multiple waiting goroutines from requesting sync progress
 	beaconClientSyncLock.Lock()
 	defer beaconClientSyncLock.Unlock()
 
-	synced, err := sp.checkBeaconClientStatus()
+	synced, err := sp.checkBeaconClientStatus(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -257,7 +257,7 @@ func (sp *ServiceProvider) waitBeaconClientSynced(verbose bool, timeout int64) (
 		if time.Since(bcRefreshTime) > ethClientStatusRefreshInterval {
 			log.Println("Refreshing primary / fallback Beacon Node status...")
 			bcRefreshTime = time.Now()
-			synced, err = sp.checkBeaconClientStatus()
+			synced, err = sp.checkBeaconClientStatus(ctx)
 			if err != nil {
 				return false, err
 			}
@@ -267,7 +267,7 @@ func (sp *ServiceProvider) waitBeaconClientSynced(verbose bool, timeout int64) (
 		}
 
 		// Get sync status
-		syncStatus, err := sp.bcManager.GetSyncStatus()
+		syncStatus, err := sp.bcManager.GetSyncStatus(ctx)
 		if err != nil {
 			return false, err
 		}

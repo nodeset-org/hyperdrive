@@ -2,6 +2,7 @@ package beacon
 
 import (
 	"bytes"
+	"context"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -56,15 +57,15 @@ func NewStandardHttpClient(providerAddress string) *StandardHttpClient {
 }
 
 // Close the client connection
-func (c *StandardHttpClient) Close() error {
+func (c *StandardHttpClient) Close(ctx context.Context) error {
 	return nil
 }
 
 // Get the node's sync status
-func (c *StandardHttpClient) GetSyncStatus() (types.SyncStatus, error) {
+func (c *StandardHttpClient) GetSyncStatus(ctx context.Context) (types.SyncStatus, error) {
 
 	// Get sync status
-	syncStatus, err := c.getSyncStatus()
+	syncStatus, err := c.getSyncStatus(ctx)
 	if err != nil {
 		return types.SyncStatus{}, err
 	}
@@ -81,7 +82,7 @@ func (c *StandardHttpClient) GetSyncStatus() (types.SyncStatus, error) {
 }
 
 // Get the eth2 config
-func (c *StandardHttpClient) GetEth2Config() (types.Eth2Config, error) {
+func (c *StandardHttpClient) GetEth2Config(ctx context.Context) (types.Eth2Config, error) {
 
 	// Data
 	var wg errgroup.Group
@@ -91,14 +92,14 @@ func (c *StandardHttpClient) GetEth2Config() (types.Eth2Config, error) {
 	// Get eth2 config
 	wg.Go(func() error {
 		var err error
-		eth2Config, err = c.getEth2Config()
+		eth2Config, err = c.getEth2Config(ctx)
 		return err
 	})
 
 	// Get genesis
 	wg.Go(func() error {
 		var err error
-		genesis, err = c.getGenesis()
+		genesis, err = c.getGenesis(ctx)
 		return err
 	})
 
@@ -122,10 +123,10 @@ func (c *StandardHttpClient) GetEth2Config() (types.Eth2Config, error) {
 }
 
 // Get the eth2 deposit contract info
-func (c *StandardHttpClient) GetEth2DepositContract() (types.Eth2DepositContract, error) {
+func (c *StandardHttpClient) GetEth2DepositContract(ctx context.Context) (types.Eth2DepositContract, error) {
 
 	// Get the deposit contract
-	depositContract, err := c.getEth2DepositContract()
+	depositContract, err := c.getEth2DepositContract(ctx)
 	if err != nil {
 		return types.Eth2DepositContract{}, err
 	}
@@ -138,7 +139,7 @@ func (c *StandardHttpClient) GetEth2DepositContract() (types.Eth2DepositContract
 }
 
 // Get the beacon head
-func (c *StandardHttpClient) GetBeaconHead() (types.BeaconHead, error) {
+func (c *StandardHttpClient) GetBeaconHead(ctx context.Context) (types.BeaconHead, error) {
 
 	// Data
 	var wg errgroup.Group
@@ -148,14 +149,14 @@ func (c *StandardHttpClient) GetBeaconHead() (types.BeaconHead, error) {
 	// Get eth2 config
 	wg.Go(func() error {
 		var err error
-		eth2Config, err = c.GetEth2Config()
+		eth2Config, err = c.GetEth2Config(ctx)
 		return err
 	})
 
 	// Get finality checkpoints
 	wg.Go(func() error {
 		var err error
-		finalityCheckpoints, err = c.getFinalityCheckpoints("head")
+		finalityCheckpoints, err = c.getFinalityCheckpoints(ctx, "head")
 		return err
 	})
 
@@ -175,18 +176,18 @@ func (c *StandardHttpClient) GetBeaconHead() (types.BeaconHead, error) {
 }
 
 // Get a validator's status
-func (c *StandardHttpClient) GetValidatorStatus(pubkey beacon.ValidatorPubkey, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
+func (c *StandardHttpClient) GetValidatorStatus(ctx context.Context, pubkey beacon.ValidatorPubkey, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
 
-	return c.getValidatorStatus(pubkey.HexWithPrefix(), opts)
-
-}
-func (c *StandardHttpClient) GetValidatorStatusByIndex(index string, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
-
-	return c.getValidatorStatus(index, opts)
+	return c.getValidatorStatus(ctx, pubkey.HexWithPrefix(), opts)
 
 }
+func (c *StandardHttpClient) GetValidatorStatusByIndex(ctx context.Context, index string, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
 
-func (c *StandardHttpClient) getValidatorStatus(pubkeyOrIndex string, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
+	return c.getValidatorStatus(ctx, index, opts)
+
+}
+
+func (c *StandardHttpClient) getValidatorStatus(ctx context.Context, pubkeyOrIndex string, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
 
 	// Return zero status for null pubkeyOrIndex
 	if pubkeyOrIndex == "" {
@@ -194,7 +195,7 @@ func (c *StandardHttpClient) getValidatorStatus(pubkeyOrIndex string, opts *type
 	}
 
 	// Get validator
-	validators, err := c.getValidatorsByOpts([]string{pubkeyOrIndex}, opts)
+	validators, err := c.getValidatorsByOpts(ctx, []string{pubkeyOrIndex}, opts)
 	if err != nil {
 		return types.ValidatorStatus{}, err
 	}
@@ -222,7 +223,7 @@ func (c *StandardHttpClient) getValidatorStatus(pubkeyOrIndex string, opts *type
 }
 
 // Get multiple validators' statuses
-func (c *StandardHttpClient) GetValidatorStatuses(pubkeys []beacon.ValidatorPubkey, opts *types.ValidatorStatusOptions) (map[beacon.ValidatorPubkey]types.ValidatorStatus, error) {
+func (c *StandardHttpClient) GetValidatorStatuses(ctx context.Context, pubkeys []beacon.ValidatorPubkey, opts *types.ValidatorStatusOptions) (map[beacon.ValidatorPubkey]types.ValidatorStatus, error) {
 
 	// The null validator pubkey
 	nullPubkey := beacon.ValidatorPubkey{}
@@ -247,7 +248,7 @@ func (c *StandardHttpClient) GetValidatorStatuses(pubkeys []beacon.ValidatorPubk
 	}
 
 	// Get validators
-	validators, err := c.getValidatorsByOpts(pubkeysHex, opts)
+	validators, err := c.getValidatorsByOpts(ctx, pubkeysHex, opts)
 	if err != nil {
 		return nil, err
 	}
@@ -291,10 +292,10 @@ func (c *StandardHttpClient) GetValidatorStatuses(pubkeys []beacon.ValidatorPubk
 }
 
 // Get whether validators have sync duties to perform at given epoch
-func (c *StandardHttpClient) GetValidatorSyncDuties(indices []string, epoch uint64) (map[string]bool, error) {
+func (c *StandardHttpClient) GetValidatorSyncDuties(ctx context.Context, indices []string, epoch uint64) (map[string]bool, error) {
 
 	// Perform the post request
-	responseBody, status, err := c.postRequest(fmt.Sprintf(RequestValidatorSyncDuties, strconv.FormatUint(epoch, 10)), indices)
+	responseBody, status, err := c.postRequest(ctx, fmt.Sprintf(RequestValidatorSyncDuties, strconv.FormatUint(epoch, 10)), indices)
 
 	if err != nil {
 		return nil, fmt.Errorf("Could not get validator sync duties: %w", err)
@@ -325,10 +326,10 @@ func (c *StandardHttpClient) GetValidatorSyncDuties(indices []string, epoch uint
 }
 
 // Sums proposer duties per validators for a given epoch
-func (c *StandardHttpClient) GetValidatorProposerDuties(indices []string, epoch uint64) (map[string]uint64, error) {
+func (c *StandardHttpClient) GetValidatorProposerDuties(ctx context.Context, indices []string, epoch uint64) (map[string]uint64, error) {
 
 	// Perform the post request
-	responseBody, status, err := c.getRequest(fmt.Sprintf(RequestValidatorProposerDuties, strconv.FormatUint(epoch, 10)))
+	responseBody, status, err := c.getRequest(ctx, fmt.Sprintf(RequestValidatorProposerDuties, strconv.FormatUint(epoch, 10)))
 
 	if err != nil {
 		return nil, fmt.Errorf("Could not get validator proposer duties: %w", err)
@@ -359,11 +360,11 @@ func (c *StandardHttpClient) GetValidatorProposerDuties(indices []string, epoch 
 }
 
 // Get a validator's index
-func (c *StandardHttpClient) GetValidatorIndex(pubkey beacon.ValidatorPubkey) (string, error) {
+func (c *StandardHttpClient) GetValidatorIndex(ctx context.Context, pubkey beacon.ValidatorPubkey) (string, error) {
 
 	// Get validator
 	pubkeyString := pubkey.HexWithPrefix()
-	validators, err := c.getValidatorsByOpts([]string{pubkeyString}, nil)
+	validators, err := c.getValidatorsByOpts(ctx, []string{pubkeyString}, nil)
 	if err != nil {
 		return "", err
 	}
@@ -378,7 +379,7 @@ func (c *StandardHttpClient) GetValidatorIndex(pubkey beacon.ValidatorPubkey) (s
 }
 
 // Get domain data for a domain type at a given epoch
-func (c *StandardHttpClient) GetDomainData(domainType []byte, epoch uint64, useGenesisFork bool) ([]byte, error) {
+func (c *StandardHttpClient) GetDomainData(ctx context.Context, domainType []byte, epoch uint64, useGenesisFork bool) ([]byte, error) {
 
 	// Data
 	var wg errgroup.Group
@@ -388,14 +389,14 @@ func (c *StandardHttpClient) GetDomainData(domainType []byte, epoch uint64, useG
 	// Get genesis
 	wg.Go(func() error {
 		var err error
-		genesis, err = c.getGenesis()
+		genesis, err = c.getGenesis(ctx)
 		return err
 	})
 
 	// Get fork
 	wg.Go(func() error {
 		var err error
-		fork, err = c.getFork("head")
+		fork, err = c.getFork(ctx, "head")
 		return err
 	})
 
@@ -422,8 +423,8 @@ func (c *StandardHttpClient) GetDomainData(domainType []byte, epoch uint64, useG
 }
 
 // Perform a voluntary exit on a validator
-func (c *StandardHttpClient) ExitValidator(validatorIndex string, epoch uint64, signature beacon.ValidatorSignature) error {
-	return c.postVoluntaryExit(VoluntaryExitRequest{
+func (c *StandardHttpClient) ExitValidator(ctx context.Context, validatorIndex string, epoch uint64, signature beacon.ValidatorSignature) error {
+	return c.postVoluntaryExit(ctx, VoluntaryExitRequest{
 		Message: VoluntaryExitMessage{
 			Epoch:          uinteger(epoch),
 			ValidatorIndex: validatorIndex,
@@ -433,10 +434,10 @@ func (c *StandardHttpClient) ExitValidator(validatorIndex string, epoch uint64, 
 }
 
 // Get the ETH1 data for the target beacon block
-func (c *StandardHttpClient) GetEth1DataForEth2Block(blockId string) (types.Eth1Data, bool, error) {
+func (c *StandardHttpClient) GetEth1DataForEth2Block(ctx context.Context, blockId string) (types.Eth1Data, bool, error) {
 
 	// Get the Beacon block
-	block, exists, err := c.getBeaconBlock(blockId)
+	block, exists, err := c.getBeaconBlock(ctx, blockId)
 	if err != nil {
 		return types.Eth1Data{}, false, err
 	}
@@ -453,8 +454,8 @@ func (c *StandardHttpClient) GetEth1DataForEth2Block(blockId string) (types.Eth1
 
 }
 
-func (c *StandardHttpClient) GetAttestations(blockId string) ([]types.AttestationInfo, bool, error) {
-	attestations, exists, err := c.getAttestations(blockId)
+func (c *StandardHttpClient) GetAttestations(ctx context.Context, blockId string) ([]types.AttestationInfo, bool, error) {
+	attestations, exists, err := c.getAttestations(ctx, blockId)
 	if err != nil {
 		return nil, false, err
 	}
@@ -477,8 +478,8 @@ func (c *StandardHttpClient) GetAttestations(blockId string) ([]types.Attestatio
 	return attestationInfo, true, nil
 }
 
-func (c *StandardHttpClient) GetBeaconBlock(blockId string) (types.BeaconBlock, bool, error) {
-	block, exists, err := c.getBeaconBlock(blockId)
+func (c *StandardHttpClient) GetBeaconBlock(ctx context.Context, blockId string) (types.BeaconBlock, bool, error) {
+	block, exists, err := c.getBeaconBlock(ctx, blockId)
 	if err != nil {
 		return types.BeaconBlock{}, false, err
 	}
@@ -518,8 +519,8 @@ func (c *StandardHttpClient) GetBeaconBlock(blockId string) (types.BeaconBlock, 
 }
 
 // Perform a withdrawal credentials change on a validator
-func (c *StandardHttpClient) ChangeWithdrawalCredentials(validatorIndex string, fromBlsPubkey beacon.ValidatorPubkey, toExecutionAddress common.Address, signature beacon.ValidatorSignature) error {
-	return c.postWithdrawalCredentialsChange(BLSToExecutionChangeRequest{
+func (c *StandardHttpClient) ChangeWithdrawalCredentials(ctx context.Context, validatorIndex string, fromBlsPubkey beacon.ValidatorPubkey, toExecutionAddress common.Address, signature beacon.ValidatorSignature) error {
+	return c.postWithdrawalCredentialsChange(ctx, BLSToExecutionChangeRequest{
 		Message: BLSToExecutionChangeMessage{
 			ValidatorIndex:     validatorIndex,
 			FromBLSPubkey:      fromBlsPubkey[:],
@@ -530,8 +531,8 @@ func (c *StandardHttpClient) ChangeWithdrawalCredentials(validatorIndex string, 
 }
 
 // Get sync status
-func (c *StandardHttpClient) getSyncStatus() (SyncStatusResponse, error) {
-	responseBody, status, err := c.getRequest(RequestSyncStatusPath)
+func (c *StandardHttpClient) getSyncStatus(ctx context.Context) (SyncStatusResponse, error) {
+	responseBody, status, err := c.getRequest(ctx, RequestSyncStatusPath)
 	if err != nil {
 		return SyncStatusResponse{}, fmt.Errorf("Could not get node sync status: %w", err)
 	}
@@ -546,8 +547,8 @@ func (c *StandardHttpClient) getSyncStatus() (SyncStatusResponse, error) {
 }
 
 // Get the eth2 config
-func (c *StandardHttpClient) getEth2Config() (Eth2ConfigResponse, error) {
-	responseBody, status, err := c.getRequest(RequestEth2ConfigPath)
+func (c *StandardHttpClient) getEth2Config(ctx context.Context) (Eth2ConfigResponse, error) {
+	responseBody, status, err := c.getRequest(ctx, RequestEth2ConfigPath)
 	if err != nil {
 		return Eth2ConfigResponse{}, fmt.Errorf("Could not get eth2 config: %w", err)
 	}
@@ -562,8 +563,8 @@ func (c *StandardHttpClient) getEth2Config() (Eth2ConfigResponse, error) {
 }
 
 // Get the eth2 deposit contract info
-func (c *StandardHttpClient) getEth2DepositContract() (Eth2DepositContractResponse, error) {
-	responseBody, status, err := c.getRequest(RequestEth2DepositContractMethod)
+func (c *StandardHttpClient) getEth2DepositContract(ctx context.Context) (Eth2DepositContractResponse, error) {
+	responseBody, status, err := c.getRequest(ctx, RequestEth2DepositContractMethod)
 	if err != nil {
 		return Eth2DepositContractResponse{}, fmt.Errorf("Could not get eth2 deposit contract: %w", err)
 	}
@@ -578,8 +579,8 @@ func (c *StandardHttpClient) getEth2DepositContract() (Eth2DepositContractRespon
 }
 
 // Get genesis information
-func (c *StandardHttpClient) getGenesis() (GenesisResponse, error) {
-	responseBody, status, err := c.getRequest(RequestGenesisPath)
+func (c *StandardHttpClient) getGenesis(ctx context.Context) (GenesisResponse, error) {
+	responseBody, status, err := c.getRequest(ctx, RequestGenesisPath)
 	if err != nil {
 		return GenesisResponse{}, fmt.Errorf("Could not get genesis data: %w", err)
 	}
@@ -594,8 +595,8 @@ func (c *StandardHttpClient) getGenesis() (GenesisResponse, error) {
 }
 
 // Get finality checkpoints
-func (c *StandardHttpClient) getFinalityCheckpoints(stateId string) (FinalityCheckpointsResponse, error) {
-	responseBody, status, err := c.getRequest(fmt.Sprintf(RequestFinalityCheckpointsPath, stateId))
+func (c *StandardHttpClient) getFinalityCheckpoints(ctx context.Context, stateId string) (FinalityCheckpointsResponse, error) {
+	responseBody, status, err := c.getRequest(ctx, fmt.Sprintf(RequestFinalityCheckpointsPath, stateId))
 	if err != nil {
 		return FinalityCheckpointsResponse{}, fmt.Errorf("Could not get finality checkpoints: %w", err)
 	}
@@ -610,8 +611,8 @@ func (c *StandardHttpClient) getFinalityCheckpoints(stateId string) (FinalityChe
 }
 
 // Get fork
-func (c *StandardHttpClient) getFork(stateId string) (ForkResponse, error) {
-	responseBody, status, err := c.getRequest(fmt.Sprintf(RequestForkPath, stateId))
+func (c *StandardHttpClient) getFork(ctx context.Context, stateId string) (ForkResponse, error) {
+	responseBody, status, err := c.getRequest(ctx, fmt.Sprintf(RequestForkPath, stateId))
 	if err != nil {
 		return ForkResponse{}, fmt.Errorf("Could not get fork data: %w", err)
 	}
@@ -626,12 +627,12 @@ func (c *StandardHttpClient) getFork(stateId string) (ForkResponse, error) {
 }
 
 // Get validators
-func (c *StandardHttpClient) getValidators(stateId string, pubkeys []string) (ValidatorsResponse, error) {
+func (c *StandardHttpClient) getValidators(ctx context.Context, stateId string, pubkeys []string) (ValidatorsResponse, error) {
 	var query string
 	if len(pubkeys) > 0 {
 		query = fmt.Sprintf("?id=%s", strings.Join(pubkeys, ","))
 	}
-	responseBody, status, err := c.getRequest(fmt.Sprintf(RequestValidatorsPath, stateId) + query)
+	responseBody, status, err := c.getRequest(ctx, fmt.Sprintf(RequestValidatorsPath, stateId)+query)
 	if err != nil {
 		return ValidatorsResponse{}, fmt.Errorf("Could not get validators: %w", err)
 	}
@@ -646,7 +647,7 @@ func (c *StandardHttpClient) getValidators(stateId string, pubkeys []string) (Va
 }
 
 // Get validators by pubkeys and status options
-func (c *StandardHttpClient) getValidatorsByOpts(pubkeysOrIndices []string, opts *types.ValidatorStatusOptions) (ValidatorsResponse, error) {
+func (c *StandardHttpClient) getValidatorsByOpts(ctx context.Context, pubkeysOrIndices []string, opts *types.ValidatorStatusOptions) (ValidatorsResponse, error) {
 
 	// Get state ID
 	var stateId string
@@ -657,7 +658,7 @@ func (c *StandardHttpClient) getValidatorsByOpts(pubkeysOrIndices []string, opts
 	} else if opts.Epoch != nil {
 
 		// Get eth2 config
-		eth2Config, err := c.getEth2Config()
+		eth2Config, err := c.getEth2Config(ctx)
 		if err != nil {
 			return ValidatorsResponse{}, err
 		}
@@ -685,7 +686,7 @@ func (c *StandardHttpClient) getValidatorsByOpts(pubkeysOrIndices []string, opts
 		wg.Go(func() error {
 			// Get & add validators
 			batch := pubkeysOrIndices[i:max]
-			validators, err := c.getValidators(stateId, batch)
+			validators, err := c.getValidators(ctx, stateId, batch)
 			if err != nil {
 				return fmt.Errorf("error getting validator statuses: %w", err)
 			}
@@ -713,8 +714,8 @@ func (c *StandardHttpClient) getValidatorsByOpts(pubkeysOrIndices []string, opts
 }
 
 // Send voluntary exit request
-func (c *StandardHttpClient) postVoluntaryExit(request VoluntaryExitRequest) error {
-	responseBody, status, err := c.postRequest(RequestVoluntaryExitPath, request)
+func (c *StandardHttpClient) postVoluntaryExit(ctx context.Context, request VoluntaryExitRequest) error {
+	responseBody, status, err := c.postRequest(ctx, RequestVoluntaryExitPath, request)
 	if err != nil {
 		return fmt.Errorf("Could not broadcast exit for validator at index %d: %w", request.Message.ValidatorIndex, err)
 	}
@@ -725,8 +726,8 @@ func (c *StandardHttpClient) postVoluntaryExit(request VoluntaryExitRequest) err
 }
 
 // Get the target beacon block
-func (c *StandardHttpClient) getAttestations(blockId string) (AttestationsResponse, bool, error) {
-	responseBody, status, err := c.getRequest(fmt.Sprintf(RequestAttestationsPath, blockId))
+func (c *StandardHttpClient) getAttestations(ctx context.Context, blockId string) (AttestationsResponse, bool, error) {
+	responseBody, status, err := c.getRequest(ctx, fmt.Sprintf(RequestAttestationsPath, blockId))
 	if err != nil {
 		return AttestationsResponse{}, false, fmt.Errorf("Could not get attestations data for slot %s: %w", blockId, err)
 	}
@@ -744,8 +745,8 @@ func (c *StandardHttpClient) getAttestations(blockId string) (AttestationsRespon
 }
 
 // Get the target beacon block
-func (c *StandardHttpClient) getBeaconBlock(blockId string) (BeaconBlockResponse, bool, error) {
-	responseBody, status, err := c.getRequest(fmt.Sprintf(RequestBeaconBlockPath, blockId))
+func (c *StandardHttpClient) getBeaconBlock(ctx context.Context, blockId string) (BeaconBlockResponse, bool, error) {
+	responseBody, status, err := c.getRequest(ctx, fmt.Sprintf(RequestBeaconBlockPath, blockId))
 	if err != nil {
 		return BeaconBlockResponse{}, false, fmt.Errorf("Could not get beacon block data: %w", err)
 	}
@@ -763,9 +764,9 @@ func (c *StandardHttpClient) getBeaconBlock(blockId string) (BeaconBlockResponse
 }
 
 // Send withdrawal credentials change request
-func (c *StandardHttpClient) postWithdrawalCredentialsChange(request BLSToExecutionChangeRequest) error {
+func (c *StandardHttpClient) postWithdrawalCredentialsChange(ctx context.Context, request BLSToExecutionChangeRequest) error {
 	requestArray := []BLSToExecutionChangeRequest{request} // This route must be wrapped in an array
-	responseBody, status, err := c.postRequest(RequestWithdrawalCredentialsChangePath, requestArray)
+	responseBody, status, err := c.postRequest(ctx, RequestWithdrawalCredentialsChangePath, requestArray)
 	if err != nil {
 		return fmt.Errorf("Could not broadcast withdrawal credentials change for validator %d: %w", request.Message.ValidatorIndex, err)
 	}
@@ -776,22 +777,28 @@ func (c *StandardHttpClient) postWithdrawalCredentialsChange(request BLSToExecut
 }
 
 // Make a GET request but do not read its body yet (allows buffered decoding)
-func (c *StandardHttpClient) getRequestReader(requestPath string) (io.ReadCloser, int, error) {
-
-	// Send request
-	response, err := http.Get(fmt.Sprintf(RequestUrlFormat, c.providerAddress, requestPath))
+func (c *StandardHttpClient) getRequestReader(ctx context.Context, requestPath string) (io.ReadCloser, int, error) {
+	// Make the request
+	path := fmt.Sprintf(RequestUrlFormat, c.providerAddress, requestPath)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, path, nil)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, fmt.Errorf("error creating GET request to [%s]: %w", path, err)
 	}
 
+	// Submit the request
+	client := http.Client{}
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error running GET request to [%s]: %w", path, err)
+	}
 	return response.Body, response.StatusCode, nil
 }
 
 // Make a GET request to the beacon node and read the body of the response
-func (c *StandardHttpClient) getRequest(requestPath string) ([]byte, int, error) {
+func (c *StandardHttpClient) getRequest(ctx context.Context, requestPath string) ([]byte, int, error) {
 
 	// Send request
-	reader, status, err := c.getRequestReader(requestPath)
+	reader, status, err := c.getRequestReader(ctx, requestPath)
 	if err != nil {
 		return []byte{}, 0, err
 	}
@@ -810,8 +817,7 @@ func (c *StandardHttpClient) getRequest(requestPath string) ([]byte, int, error)
 }
 
 // Make a POST request to the beacon node
-func (c *StandardHttpClient) postRequest(requestPath string, requestBody interface{}) ([]byte, int, error) {
-
+func (c *StandardHttpClient) postRequest(ctx context.Context, requestPath string, requestBody interface{}) ([]byte, int, error) {
 	// Get request body
 	requestBodyBytes, err := json.Marshal(requestBody)
 	if err != nil {
@@ -819,10 +825,18 @@ func (c *StandardHttpClient) postRequest(requestPath string, requestBody interfa
 	}
 	requestBodyReader := bytes.NewReader(requestBodyBytes)
 
-	// Send request
-	response, err := http.Post(fmt.Sprintf(RequestUrlFormat, c.providerAddress, requestPath), RequestContentType, requestBodyReader)
+	// Create the request
+	path := fmt.Sprintf(RequestUrlFormat, c.providerAddress, requestPath)
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, path, requestBodyReader)
 	if err != nil {
-		return []byte{}, 0, err
+		return nil, 0, fmt.Errorf("error creating POST request to [%s]: %w", path, err)
+	}
+
+	// Submit the request
+	client := http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return []byte{}, 0, fmt.Errorf("error running POST request to [%s]: %w", path, err)
 	}
 	defer func() {
 		_ = response.Body.Close()
@@ -836,7 +850,6 @@ func (c *StandardHttpClient) postRequest(requestPath string, requestBody interfa
 
 	// Return
 	return body, response.StatusCode, nil
-
 }
 
 // Get an eth2 epoch number by time

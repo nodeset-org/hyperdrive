@@ -49,7 +49,7 @@ func (t *TaskLoop) Run() error {
 	go func() {
 		for {
 			// Check the EC status
-			err := t.sp.WaitEthClientSynced(false) // Force refresh the primary / fallback EC status
+			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
 			if err != nil {
 				errorLog.Println(err)
 				if t.sleepAndCheckIfCancelled(taskCooldown) {
@@ -59,7 +59,7 @@ func (t *TaskLoop) Run() error {
 			}
 
 			// Check the BC status
-			err = t.sp.WaitBeaconClientSynced(false) // Force refresh the primary / fallback BC status
+			err = t.sp.WaitBeaconClientSynced(t.ctx, false) // Force refresh the primary / fallback BC status
 			if err != nil {
 				errorLog.Println(err)
 				if t.sleepAndCheckIfCancelled(taskCooldown) {

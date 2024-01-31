@@ -1,6 +1,8 @@
 package types
 
 import (
+	"context"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/prysmaticlabs/go-bitfield"
@@ -86,21 +88,21 @@ const (
 
 // Beacon client interface
 type IBeaconClient interface {
-	GetSyncStatus() (SyncStatus, error)
-	GetEth2Config() (Eth2Config, error)
-	GetEth2DepositContract() (Eth2DepositContract, error)
-	GetAttestations(blockId string) ([]AttestationInfo, bool, error)
-	GetBeaconBlock(blockId string) (BeaconBlock, bool, error)
-	GetBeaconHead() (BeaconHead, error)
-	GetValidatorStatusByIndex(index string, opts *ValidatorStatusOptions) (ValidatorStatus, error)
-	GetValidatorStatus(pubkey beacon.ValidatorPubkey, opts *ValidatorStatusOptions) (ValidatorStatus, error)
-	GetValidatorStatuses(pubkeys []beacon.ValidatorPubkey, opts *ValidatorStatusOptions) (map[beacon.ValidatorPubkey]ValidatorStatus, error)
-	GetValidatorIndex(pubkey beacon.ValidatorPubkey) (string, error)
-	GetValidatorSyncDuties(indices []string, epoch uint64) (map[string]bool, error)
-	GetValidatorProposerDuties(indices []string, epoch uint64) (map[string]uint64, error)
-	GetDomainData(domainType []byte, epoch uint64, useGenesisFork bool) ([]byte, error)
-	ExitValidator(validatorIndex string, epoch uint64, signature beacon.ValidatorSignature) error
-	Close() error
-	GetEth1DataForEth2Block(blockId string) (Eth1Data, bool, error)
-	ChangeWithdrawalCredentials(validatorIndex string, fromBlsPubkey beacon.ValidatorPubkey, toExecutionAddress common.Address, signature beacon.ValidatorSignature) error
+	GetSyncStatus(ctx context.Context) (SyncStatus, error)
+	GetEth2Config(ctx context.Context) (Eth2Config, error)
+	GetEth2DepositContract(ctx context.Context) (Eth2DepositContract, error)
+	GetAttestations(ctx context.Context, blockId string) ([]AttestationInfo, bool, error)
+	GetBeaconBlock(ctx context.Context, blockId string) (BeaconBlock, bool, error)
+	GetBeaconHead(ctx context.Context) (BeaconHead, error)
+	GetValidatorStatusByIndex(ctx context.Context, index string, opts *ValidatorStatusOptions) (ValidatorStatus, error)
+	GetValidatorStatus(ctx context.Context, pubkey beacon.ValidatorPubkey, opts *ValidatorStatusOptions) (ValidatorStatus, error)
+	GetValidatorStatuses(ctx context.Context, pubkeys []beacon.ValidatorPubkey, opts *ValidatorStatusOptions) (map[beacon.ValidatorPubkey]ValidatorStatus, error)
+	GetValidatorIndex(ctx context.Context, pubkey beacon.ValidatorPubkey) (string, error)
+	GetValidatorSyncDuties(ctx context.Context, indices []string, epoch uint64) (map[string]bool, error)
+	GetValidatorProposerDuties(ctx context.Context, indices []string, epoch uint64) (map[string]uint64, error)
+	GetDomainData(ctx context.Context, domainType []byte, epoch uint64, useGenesisFork bool) ([]byte, error)
+	ExitValidator(ctx context.Context, validatorIndex string, epoch uint64, signature beacon.ValidatorSignature) error
+	Close(ctx context.Context) error
+	GetEth1DataForEth2Block(ctx context.Context, blockId string) (Eth1Data, bool, error)
+	ChangeWithdrawalCredentials(ctx context.Context, validatorIndex string, fromBlsPubkey beacon.ValidatorPubkey, toExecutionAddress common.Address, signature beacon.ValidatorSignature) error
 }
