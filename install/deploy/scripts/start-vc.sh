@@ -27,12 +27,6 @@ else
     exit 1
 fi
 
-# Report a missing fee recipient file
-if [ ! -f "/validators/$FEE_RECIPIENT_FILE" ]; then
-    echo "Fee recipient file not found, please wait for the hyperdrive_daemon process to create one."
-    exit 1
-fi
-
 
 # Lighthouse startup
 if [ "$CC_CLIENT" = "lighthouse" ]; then
@@ -49,7 +43,7 @@ if [ "$CC_CLIENT" = "lighthouse" ]; then
         --init-slashing-protection \
         --logfile-max-number 0 \
         --beacon-nodes $CC_URL_STRING \
-        --suggested-fee-recipient $(cat /validators/$FEE_RECIPIENT_FILE) \
+        --suggested-fee-recipient $FEE_RECIPIENT \
         $VC_ADDITIONAL_FLAGS"
 
     if [ "$DOPPELGANGER_DETECTION" = "true" ]; then
@@ -96,7 +90,7 @@ if [ "$CC_CLIENT" = "lodestar" ]; then
         $FALLBACK_CC_STRING \
         --keystoresDir /validators/lodestar/validators \
         --secretsDir /validators/lodestar/secrets \
-        --suggestedFeeRecipient $(cat /validators/$FEE_RECIPIENT_FILE) \
+        --suggestedFeeRecipient $FEE_RECIPIENT \
         $VC_ADDITIONAL_FLAGS"
 
     if [ "$DOPPELGANGER_DETECTION" = "true" ]; then
@@ -139,7 +133,7 @@ if [ "$CC_CLIENT" = "nimbus" ]; then
         --validators-dir=/validators/nimbus/validators \
         --secrets-dir=/validators/nimbus/secrets \
         --doppelganger-detection=$DOPPELGANGER_DETECTION \
-        --suggested-fee-recipient=$(cat /validators/$FEE_RECIPIENT_FILE) \
+        --suggested-fee-recipient=$FEE_RECIPIENT \
         --block-monitor-type=event \
         $VC_ADDITIONAL_FLAGS"
 
@@ -181,7 +175,7 @@ if [ "$CC_CLIENT" = "prysm" ]; then
         --wallet-dir /validators/prysm-non-hd \
         --wallet-password-file /validators/prysm-non-hd/direct/accounts/secret \
         --beacon-rpc-provider $CC_URL_STRING \
-        --suggested-fee-recipient $(cat /validators/$FEE_RECIPIENT_FILE) \
+        --suggested-fee-recipient $FEE_RECIPIENT \
         $VC_ADDITIONAL_FLAGS"
 
     if [ "$ENABLE_MEV_BOOST" = "true" ]; then
@@ -231,7 +225,7 @@ if [ "$CC_CLIENT" = "teku" ]; then
         --beacon-node-api-endpoints=$CC_URL_STRING \
         --validators-keystore-locking-enabled=false \
         --log-destination=CONSOLE \
-        --validators-proposer-default-fee-recipient=$(cat /validators/$FEE_RECIPIENT_FILE) \
+        --validators-proposer-default-fee-recipient=$FEE_RECIPIENT \
         $VC_ADDITIONAL_FLAGS"
 
     if [ "$DOPPELGANGER_DETECTION" = "true" ]; then

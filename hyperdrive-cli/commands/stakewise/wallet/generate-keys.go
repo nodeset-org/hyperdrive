@@ -69,7 +69,7 @@ func generateKeys(c *cli.Context) error {
 		fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Validator Client at your earliest convenience in order to attest with your new keys. Failure to do so will result in any new validators being offline and *losing ETH* until you restart it.%s\n", terminal.ColorYellow, terminal.ColorReset)
 	} else {
 		fmt.Print("Restarting Validator Client... ")
-		_, err = hd.Api.Service.RestartContainer(swconfig.VcContainerSuffix)
+		_, err = hd.Api.Service.RestartContainer(string(swconfig.ContainerID_StakewiseValidator))
 		if err != nil {
 			fmt.Println("error")
 			fmt.Printf("%sWARNING: error restarting validator client: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)

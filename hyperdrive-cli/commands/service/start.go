@@ -255,7 +255,7 @@ func getVcContainerTagParamMap(cfg *config.HyperdriveConfig, vcs []string) (map[
 	containerTagMap := map[string]string{}
 
 	// Get the VC names
-	stakewiseVc := cfg.GetDockerArtifactName(swconfig.VcContainerSuffix)
+	stakewiseVc := cfg.GetDockerArtifactName(string(swconfig.ContainerID_StakewiseValidator))
 
 	// Get the BN being used
 	var bn types.BeaconNode

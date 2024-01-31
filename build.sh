@@ -69,7 +69,7 @@ build_sw_daemon() {
     docker buildx create --name multiarch-builder --driver docker-container --use > /dev/null 2>&1
 
     echo "Building and pushing Docker Hyperdrive image..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-stakewise:$VERSION -f docker/modules/stakewise/sw-daemon.dockerfile --push . || fail "Error building Stakewise daemon image."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-stakewise:$VERSION -f docker/modules/stakewise/sw_daemon.dockerfile --push . || fail "Error building Stakewise daemon image."
     echo "done!"
 
     cd ..

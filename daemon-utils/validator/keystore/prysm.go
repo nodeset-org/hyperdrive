@@ -18,7 +18,6 @@ import (
 
 // Prysm keystore manager
 type PrysmKeystoreManager struct {
-	keystorePath             string
 	as                       *prysmAccountStore
 	encryptor                *eth2ks.Encryptor
 	keystoreDir              string
@@ -42,9 +41,8 @@ type prysmWalletConfig struct {
 // Create new prysm keystore manager
 func NewPrysmKeystoreManager(keystorePath string) *PrysmKeystoreManager {
 	return &PrysmKeystoreManager{
-		keystorePath:             keystorePath,
 		encryptor:                eth2ks.New(),
-		keystoreDir:              "prysm-non-hd",
+		keystoreDir:              filepath.Join(keystorePath, "prysm-non-hd"),
 		walletDir:                "direct",
 		accountsDir:              "accounts",
 		keystoreFileName:         "all-accounts.keystore.json",
@@ -55,7 +53,7 @@ func NewPrysmKeystoreManager(keystorePath string) *PrysmKeystoreManager {
 
 // Get the keystore directory
 func (ks *PrysmKeystoreManager) GetKeystoreDir() string {
-	return filepath.Join(ks.keystorePath, ks.keystoreDir)
+	return ks.keystoreDir
 }
 
 // Store a validator key
@@ -84,7 +82,7 @@ func (ks *PrysmKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey, 
 	}
 
 	// Get the keystore account password
-	passwordFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystorePasswordFileName)
+	passwordFilePath := filepath.Join(ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystorePasswordFileName)
 	passwordBytes, err := os.ReadFile(passwordFilePath)
 	if err != nil {
 		return fmt.Errorf("Error reading account password file: %w", err)
@@ -112,8 +110,8 @@ func (ks *PrysmKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey, 
 	}
 
 	// Get file paths
-	keystoreFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystoreFileName)
-	configFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.walletDir, ks.configFileName)
+	keystoreFilePath := filepath.Join(ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystoreFileName)
+	configFilePath := filepath.Join(ks.keystoreDir, ks.walletDir, ks.configFileName)
 
 	// Create keystore dir
 	if err := os.MkdirAll(filepath.Dir(keystoreFilePath), DirMode); err != nil {
@@ -158,7 +156,7 @@ func (ks *PrysmKeystoreManager) initialize() error {
 
 	// Create the random keystore password if it doesn't exist
 	var password string
-	passwordFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystorePasswordFileName)
+	passwordFilePath := filepath.Join(ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystorePasswordFileName)
 	_, err := os.Stat(passwordFilePath)
 	if os.IsNotExist(err) {
 		// Create a new password
@@ -189,7 +187,7 @@ func (ks *PrysmKeystoreManager) initialize() error {
 	password = string(passwordBytes)
 
 	// Read keystore file; initialize empty account store if it doesn't exist
-	ksBytes, err := os.ReadFile(filepath.Join(ks.keystorePath, ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystoreFileName))
+	ksBytes, err := os.ReadFile(filepath.Join(ks.keystoreDir, ks.walletDir, ks.accountsDir, ks.keystoreFileName))
 	if err != nil {
 		ks.as = &prysmAccountStore{}
 		return nil

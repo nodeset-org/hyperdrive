@@ -85,7 +85,7 @@ func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData
 
 	// Restart the VC
 	if c.restartVc {
-		_, err = client.Service.RestartContainer(swconfig.VcContainerSuffix)
+		_, err = client.Service.RestartContainer(string(swconfig.ContainerID_StakewiseValidator))
 		if err != nil {
 			return err
 		}

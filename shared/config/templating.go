@@ -166,6 +166,25 @@ func (cfg *HyperdriveConfig) GetExternalIP() string {
 	return ip.String()
 }
 
+// Used by text/template to format bn.yml
+func (cfg *HyperdriveConfig) GetEcHttpEndpoint() string {
+	if cfg.ClientMode.Value == types.ClientMode_Local {
+		return fmt.Sprintf("http://%s:%d", types.ContainerID_ExecutionClient, cfg.LocalExecutionConfig.HttpPort.Value)
+	}
+
+	return cfg.ExternalExecutionConfig.HttpUrl.Value
+}
+
+// Get the endpoints of the EC, including the fallback if applicable
+func (cfg *HyperdriveConfig) GetEcHttpEndpointsWithFallback() string {
+	endpoints := cfg.GetEcHttpEndpoint()
+
+	if cfg.Fallback.UseFallbackClients.Value {
+		endpoints = fmt.Sprintf("%s,%s", endpoints, cfg.Fallback.EcHttpUrl.Value)
+	}
+	return endpoints
+}
+
 // ===================
 // === Beacon Node ===
 // ===================
@@ -182,15 +201,6 @@ func (cfg *HyperdriveConfig) GetBnContainerTag() (string, error) {
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) GetBnOpenPorts() []string {
 	return cfg.LocalBeaconConfig.getOpenApiPortMapping()
-}
-
-// Used by text/template to format bn.yml
-func (cfg *HyperdriveConfig) GetEcHttpEndpoint() string {
-	if cfg.ClientMode.Value == types.ClientMode_Local {
-		return fmt.Sprintf("http://%s:%d", types.ContainerID_ExecutionClient, cfg.LocalExecutionConfig.HttpPort.Value)
-	}
-
-	return cfg.ExternalExecutionConfig.HttpUrl.Value
 }
 
 // Used by text/template to format bn.yml
@@ -217,6 +227,25 @@ func (cfg *HyperdriveConfig) GetBnAdditionalFlags() (string, error) {
 		return "", fmt.Errorf("Beacon Node is external, there is no additional flags")
 	}
 	return cfg.LocalBeaconConfig.getAdditionalFlags(), nil
+}
+
+// Get the HTTP API endpoint for the provided BN
+func (cfg *HyperdriveConfig) GetBnHttpEndpoint() string {
+	if cfg.ClientMode.Value == types.ClientMode_Local {
+		return fmt.Sprintf("http://%s:%d", types.ContainerID_BeaconNode, cfg.LocalBeaconConfig.HttpPort.Value)
+	}
+
+	return cfg.ExternalBeaconConfig.HttpUrl.Value
+}
+
+// Get the endpoints of the BN, including the fallback if applicable
+func (cfg *HyperdriveConfig) GetBnHttpEndpointsWithFallback() string {
+	endpoints := cfg.GetBnHttpEndpoint()
+
+	if cfg.Fallback.UseFallbackClients.Value {
+		endpoints = fmt.Sprintf("%s,%s", endpoints, cfg.Fallback.BnHttpUrl.Value)
+	}
+	return endpoints
 }
 
 // ===============

@@ -8,6 +8,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
 	"github.com/nodeset-org/eth-utils/beacon"
+	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
@@ -16,29 +17,25 @@ import (
 
 // Nimbus keystore manager
 type NimbusKeystoreManager struct {
-	keystorePath  string
-	encryptor     *eth2ks.Encryptor
-	keystoreDir   string
-	secretsDir    string
-	validatorsDir string
-	keyFileName   string
+	encryptor   *eth2ks.Encryptor
+	keystoreDir string
+	secretsDir  string
+	keyFileName string
 }
 
 // Create new nimbus keystore manager
 func NewNimbusKeystoreManager(keystorePath string) *NimbusKeystoreManager {
 	return &NimbusKeystoreManager{
-		keystorePath:  keystorePath,
-		encryptor:     eth2ks.New(),
-		keystoreDir:   "nimbus",
-		secretsDir:    "secrets",
-		validatorsDir: "validators",
-		keyFileName:   "keystore.json",
+		encryptor:   eth2ks.New(),
+		keystoreDir: filepath.Join(keystorePath, "nimbus"),
+		secretsDir:  "secrets",
+		keyFileName: "keystore.json",
 	}
 }
 
 // Get the keystore directory
 func (ks *NimbusKeystoreManager) GetKeystoreDir() string {
-	return filepath.Join(ks.keystorePath, ks.keystoreDir)
+	return ks.keystoreDir
 }
 
 // Store a validator key
@@ -75,7 +72,7 @@ func (ks *NimbusKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey,
 	}
 
 	// Get secret file path
-	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, pubkey.HexWithPrefix())
+	secretFilePath := filepath.Join(ks.keystoreDir, ks.secretsDir, pubkey.HexWithPrefix())
 
 	// Create secrets dir
 	if err := os.MkdirAll(filepath.Dir(secretFilePath), DirMode); err != nil {
@@ -88,7 +85,7 @@ func (ks *NimbusKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey,
 	}
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, pubkey.HexWithPrefix(), ks.keyFileName)
+	keyFilePath := filepath.Join(ks.keystoreDir, modconfig.ValidatorsDirectory, pubkey.HexWithPrefix(), ks.keyFileName)
 
 	// Create key dir
 	if err := os.MkdirAll(filepath.Dir(keyFilePath), DirMode); err != nil {
@@ -109,7 +106,7 @@ func (ks *NimbusKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey,
 func (ks *NimbusKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, pubkey.HexWithPrefix(), ks.keyFileName)
+	keyFilePath := filepath.Join(ks.keystoreDir, modconfig.ValidatorsDirectory, pubkey.HexWithPrefix(), ks.keyFileName)
 
 	// Read the key file
 	_, err := os.Stat(keyFilePath)
@@ -131,7 +128,7 @@ func (ks *NimbusKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey)
 	}
 
 	// Get secret file path
-	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, pubkey.HexWithPrefix())
+	secretFilePath := filepath.Join(ks.keystoreDir, ks.secretsDir, pubkey.HexWithPrefix())
 
 	// Read secret from disk
 	_, err = os.Stat(secretFilePath)

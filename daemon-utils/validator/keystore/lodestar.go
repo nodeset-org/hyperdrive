@@ -9,6 +9,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
 	"github.com/nodeset-org/eth-utils/beacon"
+	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
@@ -17,29 +18,25 @@ import (
 
 // Lodestar keystore manager
 type LodestarKeystoreManager struct {
-	keystorePath  string
-	encryptor     *eth2ks.Encryptor
-	keystoreDir   string
-	secretsDir    string
-	validatorsDir string
-	keyFileName   string
+	encryptor   *eth2ks.Encryptor
+	keystoreDir string
+	secretsDir  string
+	keyFileName string
 }
 
 // Create new lodestar keystore manager
 func NewLodestarKeystoreManager(keystorePath string) *LodestarKeystoreManager {
 	return &LodestarKeystoreManager{
-		keystorePath:  keystorePath,
-		encryptor:     eth2ks.New(eth2ks.WithCipher("scrypt")),
-		keystoreDir:   "lodestar",
-		secretsDir:    "secrets",
-		validatorsDir: "validators",
-		keyFileName:   "voting-keystore.json",
+		encryptor:   eth2ks.New(eth2ks.WithCipher("scrypt")),
+		keystoreDir: filepath.Join(keystorePath, "lodestar"),
+		secretsDir:  "secrets",
+		keyFileName: "voting-keystore.json",
 	}
 }
 
 // Get the keystore directory
 func (ks *LodestarKeystoreManager) GetKeystoreDir() string {
-	return filepath.Join(ks.keystorePath, ks.keystoreDir)
+	return ks.keystoreDir
 }
 
 // Store a validator key
@@ -76,7 +73,7 @@ func (ks *LodestarKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKe
 	}
 
 	// Get secret file path
-	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, pubkey.HexWithPrefix())
+	secretFilePath := filepath.Join(ks.keystoreDir, ks.secretsDir, pubkey.HexWithPrefix())
 
 	// Create secrets dir
 	if err := os.MkdirAll(filepath.Dir(secretFilePath), DirMode); err != nil {
@@ -89,7 +86,7 @@ func (ks *LodestarKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKe
 	}
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, pubkey.HexWithPrefix(), ks.keyFileName)
+	keyFilePath := filepath.Join(ks.keystoreDir, modconfig.ValidatorsDirectory, pubkey.HexWithPrefix(), ks.keyFileName)
 
 	// Create key dir
 	if err := os.MkdirAll(filepath.Dir(keyFilePath), DirMode); err != nil {
@@ -110,7 +107,7 @@ func (ks *LodestarKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKe
 func (ks *LodestarKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, pubkey.HexWithPrefix(), ks.keyFileName)
+	keyFilePath := filepath.Join(ks.keystoreDir, modconfig.ValidatorsDirectory, pubkey.HexWithPrefix(), ks.keyFileName)
 
 	// Read the key file
 	_, err := os.Stat(keyFilePath)
@@ -132,7 +129,7 @@ func (ks *LodestarKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubke
 	}
 
 	// Get secret file path
-	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, pubkey.HexWithPrefix())
+	secretFilePath := filepath.Join(ks.keystoreDir, ks.secretsDir, pubkey.HexWithPrefix())
 
 	// Read secret from disk
 	_, err = os.Stat(secretFilePath)

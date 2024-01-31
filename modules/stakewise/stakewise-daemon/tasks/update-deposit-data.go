@@ -68,9 +68,9 @@ func (t *UpdateDepositData) Run() error {
 
 	// Restart the Stakewise op container
 	t.log.Printlnf("Restarting Stakewise operator...")
-	_, err = hd.Service.RestartContainer(swconfig.OperatorContainerSuffix)
+	_, err = hd.Service.RestartContainer(string(swconfig.ContainerID_StakewiseOperator))
 	if err != nil {
-		return fmt.Errorf("error restarting %s container: %w", swconfig.OperatorContainerSuffix, err)
+		return fmt.Errorf("error restarting %s container: %w", swconfig.ContainerID_StakewiseOperator, err)
 	}
 
 	t.log.Println("Done! Your deposit data is now up to date.")

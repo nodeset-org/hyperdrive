@@ -13,10 +13,10 @@ services:
     container_name: {{.ProjectName}}_sw_vc
     restart: unless-stopped
     stop_grace_period: 3m
-    {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.StakewiseDaemonRoute)}}
+{{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.DaemonRoute)}}
     volumes:
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
-      - {{$module_dir}}/{{.Modules.Stakewise.KeystoreDir}}:/validators
+      - {{$module_dir}}/{{.Modules.ValidatorsDirectory}}:/validators
     networks:
       - net
     environment:

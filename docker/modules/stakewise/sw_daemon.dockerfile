@@ -4,7 +4,7 @@ ARG TARGETARCH
 COPY . /hyperdrive
 ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-O -D__BLST_PORTABLE__"
-RUN cd /hyperdrive/modules/stakewise && go build -o /build/hyperdrive-stakewise-daemon-linux-${TARGETARCH}
+RUN cd /hyperdrive/modules/stakewise/stakewise-daemon && go build -o /build/hyperdrive-stakewise-daemon-linux-${TARGETARCH}
 
 # The daemon image
 FROM debian:bookworm-slim

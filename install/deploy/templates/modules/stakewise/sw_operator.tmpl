@@ -12,28 +12,27 @@ services:
     user: root
     container_name: {{.ProjectName}}_sw_operator
     restart: unless-stopped
-    {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.DaemonRoute)}}
+{{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.DaemonRoute)}}
     volumes:
       - {{$module_dir}}:{{$module_dir}}
     command:
       - "src/main.py"
       - "start"
       - "--data-dir={{$module_dir}}"
+      - "--deposit-data-file={{$module_dir}}/{{.Modules.Stakewise.DepositDataFile}}"
       - "--network={{.Network}}"
       - "--vault={{.StakewiseVault}}"
-      - "--execution-endpoints="
-      - "--consensus-endpoints="
+      - "--execution-endpoints={{.GetEcHttpEndpointsWithFallback}}"
+      - "--consensus-endpoints={{.GetBnHttpEndpointsWithFallback}}"
       - "--hot-wallet-file={{$module_dir}}/{{.Modules.Stakewise.WalletFilename}}"
       - "--hot-wallet-password-file={{$module_dir}}/{{.Modules.Stakewise.PasswordFilename}}"
-      - "--keystores-dir={{$module_dir}}/{{.Modules.ValidatorDir}}/{{.Modules.Stakewise.DaemonRoute}}"
-      - "--keystores-password-file={$module_dir}}/{{.Modules.ValidatorDir}}/{{.Modules.Stakewise.DaemonRoute}}/{{.Modules.Stakewise.KeystorePasswordFile}}"
-      - "--enable-metrics={{.Metrics.EnableMetrics}}
+      - "--keystores-dir={{$module_dir}}/{{.Modules.ValidatorsDirectory}}/{{.Modules.Stakewise.DaemonRoute}}"
+      - "--keystores-password-file={{$module_dir}}/{{.Modules.ValidatorsDirectory}}/{{.Modules.Stakewise.DaemonRoute}}/{{.Modules.Stakewise.KeystorePasswordFile}}"
+      {{if .Metrics.EnableMetrics}}{{"- \"--enable-metrics\""}}{{end}}
       - "--metrics-host=0.0.0.0"
-      - "--max-fee-per-gas-gwei={{.AutoTxMaxFeeInt}}
+      - "--max-fee-per-gas-gwei={{.AutoTxMaxFeeInt}}"
     networks:
       - net
-    environment:
-      - 
     cap_drop:
       - all
     cap_add:

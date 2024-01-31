@@ -16,7 +16,7 @@ type ValidatorManager struct {
 
 func NewValidatorManager(moduleDir string) *ValidatorManager {
 	// Get the validator storage path
-	validatorPath := filepath.Join(moduleDir, modconfig.ValidatorDir)
+	validatorPath := filepath.Join(moduleDir, modconfig.ValidatorsDirectory)
 
 	mgr := &ValidatorManager{
 		keystoreManagers: map[string]keystore.IKeystoreManager{

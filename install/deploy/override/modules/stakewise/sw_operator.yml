@@ -1,4 +1,4 @@
-# Enter your own customizations for the sw-operator container here. These changes will persist after upgrades, so you only need to do them once.
+# Enter your own customizations for the sw_operator container here. These changes will persist after upgrades, so you only need to do them once.
 # 
 # See https://docs.docker.com/compose/extends/#adding-and-overriding-configuration
 # for more information on overriding specific parameters of docker-compose files.

@@ -12,14 +12,22 @@ func (c *StakewiseConfig) PasswordFilename() string {
 	return PasswordFilename
 }
 
+func (c *StakewiseConfig) KeystorePasswordFile() string {
+	return KeystorePasswordFile
+}
+
 func (c *StakewiseConfig) DaemonContainerSuffix() string {
-	return DaemonContainerSuffix
+	return string(ContainerID_StakewiseDaemon)
 }
 
 func (c *StakewiseConfig) OperatorContainerSuffix() string {
-	return OperatorContainerSuffix
+	return string(ContainerID_StakewiseOperator)
 }
 
 func (c *StakewiseConfig) VcContainerSuffix() string {
-	return VcContainerSuffix
+	return string(ContainerID_StakewiseValidator)
+}
+
+func (c *StakewiseConfig) DepositDataFile() string {
+	return DepositDataFile
 }
