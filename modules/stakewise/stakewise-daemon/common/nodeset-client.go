@@ -34,12 +34,12 @@ const (
 
 // api/deposit-data/meta
 type DepositDataMetaResponse struct {
-	Version uint64 `json:"version"`
+	Version int `json:"version"`
 }
 
 // api/deposit-data
 type DepositDataResponse struct {
-	Version uint64                      `json:"version"`
+	Version int                         `json:"version"`
 	Data    []types.ExtendedDepositData `json:"data"`
 }
 
@@ -96,8 +96,11 @@ func (c *NodesetClient) UploadDepositData(depositData []byte) ([]byte, error) {
 }
 
 // Get the current version of the aggregated deposit data on the server
-func (c *NodesetClient) GetServerDepositDataVersion() (uint64, error) {
-	response, err := c.submitRequest(http.MethodGet, nil, nil, depositDataPath, metaPath)
+func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
+	params := map[string]string{
+		"vault": c.res.Vault.Hex(),
+	}
+	response, err := c.submitRequest(http.MethodGet, nil, params, depositDataPath, metaPath)
 	if err != nil {
 		return 0, fmt.Errorf("error getting deposit data version: %w", err)
 	}
@@ -111,7 +114,7 @@ func (c *NodesetClient) GetServerDepositDataVersion() (uint64, error) {
 }
 
 // Get the aggregated deposit data from the server
-func (c *NodesetClient) GetServerDepositData() (uint64, []types.ExtendedDepositData, error) {
+func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData, error) {
 	params := map[string]string{
 		"vault": c.res.Vault.Hex(),
 	}
@@ -154,9 +157,11 @@ func (c *NodesetClient) submitRequest(method string, body io.Reader, queryParams
 	if err != nil {
 		return nil, fmt.Errorf("error generating request to [%s]: %w", path, err)
 	}
+	query := request.URL.Query()
 	for name, value := range queryParams {
-		request.URL.Query().Add(name, value)
+		query.Add(name, value)
 	}
+	request.URL.RawQuery = query.Encode()
 
 	// Set the headers
 	err = c.EnsureAuthSignatureExists()
@@ -168,7 +173,7 @@ func (c *NodesetClient) submitRequest(method string, body io.Reader, queryParams
 
 	// Upload it to the server
 	if c.debug {
-		fmt.Printf("Sending NodeSet server request => %s\n", path)
+		fmt.Printf("Sending NodeSet server request => %s\n", request.URL)
 	}
 	client := &http.Client{}
 	resp, err := client.Do(request)

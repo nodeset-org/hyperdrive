@@ -23,6 +23,9 @@ const (
 type stakewiseWalletData struct {
 	// The next account to generate the key for
 	NextAccount uint64 `json:"nextAccount"`
+
+	// The ID of the nodeset deposit data stored on disk
+	NodeSetDepositDataVersion int `json:"nodeSetDepositDataVersion"`
 }
 
 // Wallet manager for the Stakewise daemon
@@ -47,22 +50,30 @@ func NewWallet(sp *services.ServiceProvider) (*Wallet, error) {
 	if errors.Is(err, fs.ErrNotExist) {
 		// No data yet, so make some
 		wallet.data = stakewiseWalletData{
-			NextAccount: 0,
+			NextAccount:               0,
+			NodeSetDepositDataVersion: 0,
 		}
-		return wallet, nil
-	}
 
-	// Read it
-	bytes, err := os.ReadFile(dataPath)
-	if err != nil {
-		return nil, fmt.Errorf("error loading wallet data: %w", err)
+		// Save it
+		err = wallet.saveData()
+		if err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, fmt.Errorf("error checking status of wallet file [%s]: %w", dataPath, err)
+	} else {
+		// Read it
+		bytes, err := os.ReadFile(dataPath)
+		if err != nil {
+			return nil, fmt.Errorf("error loading wallet data: %w", err)
+		}
+		var data stakewiseWalletData
+		err = json.Unmarshal(bytes, &data)
+		if err != nil {
+			return nil, fmt.Errorf("error deserializing wallet data: %w", err)
+		}
+		wallet.data = data
 	}
-	var data stakewiseWalletData
-	err = json.Unmarshal(bytes, &data)
-	if err != nil {
-		return nil, fmt.Errorf("error deserializing wallet data: %w", err)
-	}
-	wallet.data = data
 
 	// Make the Stakewise keystore manager
 	stakewiseKeystoreMgr, err := newStakewiseKeystoreManager(moduleDir)
@@ -143,6 +154,17 @@ func (w *Wallet) GetAllPrivateKeys() ([]*eth2types.BLSPrivateKey, error) {
 	}
 
 	return keys, nil
+}
+
+// Get the version of the aggregated deposit data from the NodeSet server that's stored on disk
+func (w *Wallet) GetLatestDepositDataVersion() int {
+	return w.data.NodeSetDepositDataVersion
+}
+
+// Set the latest deposit data version and save the wallet data
+func (w *Wallet) SetLatestDepositDataVersion(version int) error {
+	w.data.NodeSetDepositDataVersion = version
+	return w.saveData()
 }
 
 // Write the wallet data to disk

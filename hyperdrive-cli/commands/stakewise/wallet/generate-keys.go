@@ -88,7 +88,7 @@ func generateKeys(c *cli.Context) error {
 
 	if !noRestart {
 		fmt.Println()
-		fmt.Println("Your new keys are now ready for use. When NodeSet selects one of them for a new deposit, your system will deposit it and begin attesting automatically.")
+		fmt.Println("Your new keys are now ready for use. When one of them is selected for activation, your system will deposit it and begin attesting automatically.")
 	} else {
 		fmt.Println("Your new keys are uploaded, but you *must* restart your Validator Client at your earliest convenience to begin attesting once they are selected for depositing.")
 	}

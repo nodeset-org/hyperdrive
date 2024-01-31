@@ -35,7 +35,10 @@ func NewStakewiseServiceProvider(sp *services.ServiceProvider) (*StakewiseServic
 	}
 
 	// Create the deposit data manager
-	ddMgr := NewDepositDataManager(stakewiseSp)
+	ddMgr, err := NewDepositDataManager(stakewiseSp)
+	if err != nil {
+		return nil, fmt.Errorf("error initializing deposit data manager: %w", err)
+	}
 	stakewiseSp.depositDataManager = ddMgr
 
 	// Create the nodeset client

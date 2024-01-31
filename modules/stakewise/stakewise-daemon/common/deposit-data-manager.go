@@ -1,7 +1,9 @@
 package swcommon
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -25,11 +27,26 @@ type DepositDataManager struct {
 }
 
 // Creates a new manager
-func NewDepositDataManager(sp *StakewiseServiceProvider) *DepositDataManager {
-	return &DepositDataManager{
+func NewDepositDataManager(sp *StakewiseServiceProvider) (*DepositDataManager, error) {
+	dataPath := filepath.Join(sp.GetModuleDir(), swconfig.DepositDataFile)
+
+	ddMgr := &DepositDataManager{
 		dataPath: filepath.Join(sp.GetModuleDir(), swconfig.DepositDataFile),
 		sp:       sp,
 	}
+
+	// Initialize the file if it's not there
+	_, err := os.Stat(dataPath)
+	if errors.Is(err, fs.ErrNotExist) {
+		// Make a blank one
+		err = ddMgr.UpdateDepositData([]types.ExtendedDepositData{})
+		return ddMgr, err
+	}
+	if err != nil {
+		return nil, fmt.Errorf("error checking status of wallet file [%s]: %w", dataPath, err)
+	}
+
+	return ddMgr, nil
 }
 
 // Generates deposit data for the provided keys
@@ -68,4 +85,21 @@ func (m *DepositDataManager) GetDepositData() ([]byte, error) {
 	}
 
 	return bytes, nil
+}
+
+// Save the deposit data file
+func (m *DepositDataManager) UpdateDepositData(data []types.ExtendedDepositData) error {
+	// Serialize it
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("error serializing deposit data: %w", err)
+	}
+
+	// Write it
+	err = os.WriteFile(m.dataPath, bytes, fileMode)
+	if err != nil {
+		return fmt.Errorf("error saving deposit data to disk: %w", err)
+	}
+
+	return nil
 }
