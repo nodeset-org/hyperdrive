@@ -7,10 +7,10 @@
 
 version: "3.7"
 services:
-  sw-operator:
+  sw_operator:
     image: {{.Modules.Stakewise.OperatorContainerTag.Value}}
     user: root
-    container_name: {{.ProjectName}}-sw-operator
+    container_name: {{.ProjectName}}_sw_operator
     restart: unless-stopped
     {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.DaemonRoute)}}
     volumes:

@@ -81,7 +81,7 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 	}
 
 	// Write the password to disk
-	passwordPath := filepath.Join(moduleDir, swconfig.KeystorePasswordFile)
+	passwordPath := filepath.Join(moduleDir, swconfig.PasswordFilename)
 	err = os.WriteFile(passwordPath, []byte(password), 0600)
 	if err != nil {
 		return fmt.Errorf("error saving wallet password to disk: %w", err)

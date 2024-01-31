@@ -7,10 +7,10 @@
 
 version: "3.7"
 services:
-  sw-daemon:
+  sw_daemon:
     image: {{.Modules.Stakewise.DaemonTag}}
     user: root
-    container_name: {{.ProjectName}}-sw-daemon
+    container_name: {{.ProjectName}}_sw_daemon
     restart: unless-stopped
     {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.DaemonRoute)}}
     volumes:

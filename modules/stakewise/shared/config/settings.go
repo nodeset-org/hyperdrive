@@ -9,7 +9,7 @@ const (
 	DepositDataFile      string = "deposit-data.json"
 
 	// Container settings
-	DaemonContainerSuffix   string = "sw-daemon"
-	OperatorContainerSuffix string = "sw-operator"
-	VcContainerSuffix       string = "sw-vc"
+	DaemonContainerSuffix   string = "sw_daemon"
+	OperatorContainerSuffix string = "sw_operator"
+	VcContainerSuffix       string = "sw_vc"
 )

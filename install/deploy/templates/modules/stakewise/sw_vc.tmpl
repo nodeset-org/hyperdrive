@@ -7,10 +7,10 @@
 
 version: "3.7"
 services:
-  sw-vc:
+  sw_vc:
     image: {{.GetStakewiseVcContainerTag}}
     user: root
-    container_name: {{.ProjectName}}-sw-vc
+    container_name: {{.ProjectName}}_sw_vc
     restart: unless-stopped
     stop_grace_period: 3m
     {{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.StakewiseDaemonRoute)}}
