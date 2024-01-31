@@ -16,7 +16,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
-	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
@@ -201,10 +200,10 @@ func promptForCustomKeyPasswords(rp *client.HyperdriveClient, cfg *config.Hyperd
 	pubkeyPasswords := map[string]string{}
 	for _, pubkey := range customPubkeys {
 		password := utils.PromptPassword(
-			fmt.Sprintf("Please enter the password that the keystore for %s was encrypted with:", pubkey.Hex()), "^.*$", "",
+			fmt.Sprintf("Please enter the password that the keystore for %s was encrypted with:", pubkey.HexWithPrefix()), "^.*$", "",
 		)
 
-		formattedPubkey := strings.ToUpper(sharedutils.RemovePrefix(pubkey.Hex()))
+		formattedPubkey := strings.ToUpper(pubkey.HexWithPrefix())
 		pubkeyPasswords[formattedPubkey] = password
 
 		fmt.Println()

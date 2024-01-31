@@ -237,10 +237,8 @@ github.com/multiformats/go-multihash v0.2.3 h1:7Lyc8XfX/IY2jWb/gI7JP+o7JEq9hOa7B
 github.com/multiformats/go-multihash v0.2.3/go.mod h1:dXgKXCXjBzdscBLk9JkjINiEsCKRVch90MdaGiKsvSM=
 github.com/multiformats/go-varint v0.0.7 h1:sWSGR+f/eu5ABZA2ZpYKBILXTTs9JWpdEM/nEGOHFS8=
 github.com/multiformats/go-varint v0.0.7/go.mod h1:r8PUYw/fD/SjBCiKOoDlGF6QawOELpZAu9eioSos/OU=
-github.com/nodeset-org/eth-utils v0.0.0-20240126020652-f8596149764b h1:j1ikYaIfFBlKInwY28QMHpBiZIhnUQFOT8owhPiQ6jM=
-github.com/nodeset-org/eth-utils v0.0.0-20240126020652-f8596149764b/go.mod h1:9m5lch6alNcNP1EuZdNM1zyNyfqVI8T3D4KGbnghjtc=
-github.com/nodeset-org/eth-utils v0.0.0-20240127051002-2e487bb86239 h1:HnW3hksmjVMfVVnkLQ1X6S3s1XVFDcxXa38pFnwp7Yg=
-github.com/nodeset-org/eth-utils v0.0.0-20240127051002-2e487bb86239/go.mod h1:3jUAhc8LREFSbI1yFHPiUF6b+lVsj6NFlmkVSIf4/Hw=
+github.com/nodeset-org/eth-utils v0.0.0-20240130225022-0b8abd71186c h1:aLcvYrDao/fTjZlyC0z2l5/4hSfVeCAeFldtQ+Vn2xE=
+github.com/nodeset-org/eth-utils v0.0.0-20240130225022-0b8abd71186c/go.mod h1:3jUAhc8LREFSbI1yFHPiUF6b+lVsj6NFlmkVSIf4/Hw=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=

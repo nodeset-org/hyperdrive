@@ -1,13 +1,12 @@
 package beacon
 
 import (
-	"encoding/hex"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
 
-	"github.com/nodeset-org/hyperdrive/shared/utils"
+	euc "github.com/nodeset-org/eth-utils/common"
 )
 
 // Request types
@@ -171,7 +170,7 @@ func (i *uinteger) UnmarshalJSON(data []byte) error {
 type byteArray []byte
 
 func (b byteArray) MarshalJSON() ([]byte, error) {
-	return json.Marshal(utils.AddPrefix(hex.EncodeToString(b)))
+	return json.Marshal(euc.EncodeHexWithPrefix(b))
 }
 func (b *byteArray) UnmarshalJSON(data []byte) error {
 
@@ -182,7 +181,7 @@ func (b *byteArray) UnmarshalJSON(data []byte) error {
 	}
 
 	// Decode hex
-	value, err := hex.DecodeString(utils.RemovePrefix(dataStr))
+	value, err := euc.DecodeHex(dataStr)
 	if err != nil {
 		return err
 	}

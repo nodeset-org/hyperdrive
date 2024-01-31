@@ -13,8 +13,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/eth-utils/beacon"
+	euc "github.com/nodeset-org/eth-utils/common"
 	"github.com/nodeset-org/hyperdrive/shared/types"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/prysmaticlabs/prysm/v4/crypto/bls"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	"golang.org/x/sync/errgroup"
@@ -177,7 +177,7 @@ func (c *StandardHttpClient) GetBeaconHead() (types.BeaconHead, error) {
 // Get a validator's status
 func (c *StandardHttpClient) GetValidatorStatus(pubkey beacon.ValidatorPubkey, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
 
-	return c.getValidatorStatus(utils.AddPrefix(pubkey.Hex()), opts)
+	return c.getValidatorStatus(pubkey.HexWithPrefix(), opts)
 
 }
 func (c *StandardHttpClient) GetValidatorStatusByIndex(index string, opts *types.ValidatorStatusOptions) (types.ValidatorStatus, error) {
@@ -243,7 +243,7 @@ func (c *StandardHttpClient) GetValidatorStatuses(pubkeys []beacon.ValidatorPubk
 	// Convert pubkeys into hex strings
 	pubkeysHex := make([]string, len(realPubkeys))
 	for vi := 0; vi < len(realPubkeys); vi++ {
-		pubkeysHex[vi] = utils.AddPrefix(realPubkeys[vi].Hex())
+		pubkeysHex[vi] = realPubkeys[vi].HexWithPrefix()
 	}
 
 	// Get validators
@@ -362,7 +362,7 @@ func (c *StandardHttpClient) GetValidatorProposerDuties(indices []string, epoch 
 func (c *StandardHttpClient) GetValidatorIndex(pubkey beacon.ValidatorPubkey) (string, error) {
 
 	// Get validator
-	pubkeyString := utils.AddPrefix(pubkey.Hex())
+	pubkeyString := pubkey.HexWithPrefix()
 	validators, err := c.getValidatorsByOpts([]string{pubkeyString}, nil)
 	if err != nil {
 		return "", err
@@ -465,7 +465,7 @@ func (c *StandardHttpClient) GetAttestations(blockId string) ([]types.Attestatio
 	// Add attestation info
 	attestationInfo := make([]types.AttestationInfo, len(attestations.Data))
 	for i, attestation := range attestations.Data {
-		bitString := utils.RemovePrefix(attestation.AggregationBits)
+		bitString := euc.RemovePrefix(attestation.AggregationBits)
 		attestationInfo[i].SlotIndex = uint64(attestation.Data.Slot)
 		attestationInfo[i].CommitteeIndex = uint64(attestation.Data.Index)
 		attestationInfo[i].AggregationBits, err = hex.DecodeString(bitString)
@@ -502,7 +502,7 @@ func (c *StandardHttpClient) GetBeaconBlock(blockId string) (types.BeaconBlock, 
 
 	// Add attestation info
 	for i, attestation := range block.Data.Message.Body.Attestations {
-		bitString := utils.RemovePrefix(attestation.AggregationBits)
+		bitString := euc.RemovePrefix(attestation.AggregationBits)
 		info := types.AttestationInfo{
 			SlotIndex:      uint64(attestation.Data.Slot),
 			CommitteeIndex: uint64(attestation.Data.Index),

@@ -53,7 +53,7 @@ func (m *DepositDataManager) RegenerateDepositData() ([]beacon.ValidatorPubkey, 
 		depositData, err := utils.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, resources.Network)
 		if err != nil {
 			pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
-			return nil, fmt.Errorf("error getting deposit data for key %s: %w", pubkey.Hex(), err)
+			return nil, fmt.Errorf("error getting deposit data for key %s: %w", pubkey.HexWithPrefix(), err)
 		}
 		dataList[i] = &depositData
 	}

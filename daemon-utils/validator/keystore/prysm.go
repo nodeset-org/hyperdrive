@@ -237,13 +237,13 @@ func (ks *PrysmKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) 
 			decryptedKey := ks.as.PrivateKeys[ki]
 			privateKey, err := eth2types.BLSPrivateKeyFromBytes(decryptedKey)
 			if err != nil {
-				return nil, fmt.Errorf("error recreating private key for validator %s: %w", pubkey.Hex(), err)
+				return nil, fmt.Errorf("error recreating private key for validator %s: %w", pubkey.HexWithPrefix(), err)
 			}
 
 			// Verify the private key matches the public key
 			reconstructedPubkey := beacon.ValidatorPubkey(privateKey.PublicKey().Marshal())
 			if reconstructedPubkey != pubkey {
-				return nil, fmt.Errorf("Prysm's keystore has a key that claims to be for validator %s but it's for validator %s", pubkey.Hex(), reconstructedPubkey.Hex())
+				return nil, fmt.Errorf("Prysm's keystore has a key that claims to be for validator %s but it's for validator %s", pubkey.HexWithPrefix(), reconstructedPubkey.HexWithPrefix())
 			}
 
 			return privateKey, nil

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/eth-utils/common"
 )
 
@@ -16,6 +17,24 @@ const (
 	// Header used for the wallet signature during a deposit data upload
 	nodesetAuthHeader string = "Authorization"
 )
+
+// =================
+// === Responses ===
+// =================
+
+// api/deposit-data/meta
+type DepositDataMetaResponse struct {
+	Version uint64 `json:"version"`
+}
+
+// api/validators
+type ValidatorsResponse struct {
+	Data []beacon.ValidatorPubkey `json:"data"`
+}
+
+// ==============
+// === Client ===
+// ==============
 
 // Client for interacting with the Nodeset server
 type NodesetClient struct {
@@ -51,7 +70,7 @@ func (c *NodesetClient) UploadDepositData(signature []byte, depositData []byte) 
 			fmt.Printf("[%s] => [%s]\n", res.NodesetDepositUrl, buffer.String())
 		}
 	*/
-
+	beacon.ValidatorPubkey{}.Hex()
 	// Upload it to the server
 	client := &http.Client{}
 	resp, err := client.Do(request)

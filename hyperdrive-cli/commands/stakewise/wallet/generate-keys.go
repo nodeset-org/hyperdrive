@@ -59,7 +59,7 @@ func generateKeys(c *cli.Context) error {
 		elapsed := time.Since(latestTime)
 		latestTime = time.Now()
 		pubkey := response.Data.Pubkeys[0]
-		fmt.Printf("Generated %s (%d/%d) in %s\n", pubkey.Hex(), (i + 1), count, elapsed)
+		fmt.Printf("Generated %s (%d/%d) in %s\n", pubkey.HexWithPrefix(), (i + 1), count, elapsed)
 	}
 	fmt.Printf("Completed in %s.\n", time.Since(startTime))
 	fmt.Println()

@@ -35,7 +35,7 @@ func (m *ValidatorManager) StoreKey(key *types.BLSPrivateKey, derivationPath str
 		err := mgr.StoreValidatorKey(key, derivationPath)
 		if err != nil {
 			pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
-			return fmt.Errorf("error saving validator key %s (path %s) to the %s keystore: %w", pubkey.Hex(), derivationPath, name, err)
+			return fmt.Errorf("error saving validator key %s (path %s) to the %s keystore: %w", pubkey.HexWithPrefix(), derivationPath, name, err)
 		}
 	}
 	return nil

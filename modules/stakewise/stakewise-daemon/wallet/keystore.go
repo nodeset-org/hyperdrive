@@ -94,7 +94,7 @@ func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateK
 	}
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystoreDir, pubkey.Hex()+KeystoreSuffix)
+	keyFilePath := filepath.Join(ks.keystoreDir, pubkey.HexWithPrefix()+KeystoreSuffix)
 
 	// Write key store to disk
 	if err := os.WriteFile(keyFilePath, keyStoreBytes, fileMode); err != nil {
@@ -108,41 +108,41 @@ func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateK
 // Load a private key
 func (ks *stakewiseKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystoreDir, pubkey.Hex()+KeystoreSuffix)
+	keyFilePath := filepath.Join(ks.keystoreDir, pubkey.HexWithPrefix()+KeystoreSuffix)
 
 	// Read the key file
 	_, err := os.Stat(keyFilePath)
 	if os.IsNotExist(err) {
 		return nil, nil
 	} else if err != nil {
-		return nil, fmt.Errorf("couldn't open the Stakewise keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't open the Stakewise keystore for pubkey %s: %w", pubkey.HexWithPrefix(), err)
 	}
 	bytes, err := os.ReadFile(keyFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't read the Stakewise keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't read the Stakewise keystore for pubkey %s: %w", pubkey.HexWithPrefix(), err)
 	}
 
 	// Unmarshal the keystore
 	var keystore types.ValidatorKeystore
 	err = json.Unmarshal(bytes, &keystore)
 	if err != nil {
-		return nil, fmt.Errorf("error deserializing Stakewise keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("error deserializing Stakewise keystore for pubkey %s: %w", pubkey.HexWithPrefix(), err)
 	}
 
 	// Decrypt key
 	decryptedKey, err := ks.encryptor.Decrypt(keystore.Crypto, ks.password)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't decrypt keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't decrypt keystore for pubkey %s: %w", pubkey.HexWithPrefix(), err)
 	}
 	privateKey, err := eth2types.BLSPrivateKeyFromBytes(decryptedKey)
 	if err != nil {
-		return nil, fmt.Errorf("error recreating private key for validator %s: %w", keystore.Pubkey.Hex(), err)
+		return nil, fmt.Errorf("error recreating private key for validator %s: %w", keystore.Pubkey.HexWithPrefix(), err)
 	}
 
 	// Verify the private key matches the public key
 	reconstructedPubkey := beacon.ValidatorPubkey(privateKey.PublicKey().Marshal())
 	if reconstructedPubkey != pubkey {
-		return nil, fmt.Errorf("private keystore file %s claims to be for validator %s but it's for validator %s", keyFilePath, pubkey.Hex(), reconstructedPubkey.Hex())
+		return nil, fmt.Errorf("private keystore file %s claims to be for validator %s but it's for validator %s", keyFilePath, pubkey.HexWithPrefix(), reconstructedPubkey.HexWithPrefix())
 	}
 
 	return privateKey, nil

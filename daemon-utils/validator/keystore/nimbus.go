@@ -75,7 +75,7 @@ func (ks *NimbusKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey,
 	}
 
 	// Get secret file path
-	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, utils.AddPrefix(pubkey.Hex()))
+	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, pubkey.HexWithPrefix())
 
 	// Create secrets dir
 	if err := os.MkdirAll(filepath.Dir(secretFilePath), DirMode); err != nil {
@@ -88,7 +88,7 @@ func (ks *NimbusKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey,
 	}
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, utils.AddPrefix(pubkey.Hex()), ks.keyFileName)
+	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, pubkey.HexWithPrefix(), ks.keyFileName)
 
 	// Create key dir
 	if err := os.MkdirAll(filepath.Dir(keyFilePath), DirMode); err != nil {
@@ -109,57 +109,57 @@ func (ks *NimbusKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey,
 func (ks *NimbusKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, utils.AddPrefix(pubkey.Hex()), ks.keyFileName)
+	keyFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.validatorsDir, pubkey.HexWithPrefix(), ks.keyFileName)
 
 	// Read the key file
 	_, err := os.Stat(keyFilePath)
 	if os.IsNotExist(err) {
 		return nil, nil
 	} else if err != nil {
-		return nil, fmt.Errorf("couldn't open the Nimbus keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't open the Nimbus keystore for pubkey %s: %w", pubkey.HexWithPrefix(), err)
 	}
 	bytes, err := os.ReadFile(keyFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't read the Nimbus keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't read the Nimbus keystore for pubkey %s: %w", pubkey.HexWithPrefix(), err)
 	}
 
 	// Unmarshal the keystore
 	var keystore types.ValidatorKeystore
 	err = json.Unmarshal(bytes, &keystore)
 	if err != nil {
-		return nil, fmt.Errorf("error deserializing Nimbus keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("error deserializing Nimbus keystore for pubkey %s: %w", pubkey.HexWithPrefix(), err)
 	}
 
 	// Get secret file path
-	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, utils.AddPrefix(pubkey.Hex()))
+	secretFilePath := filepath.Join(ks.keystorePath, ks.keystoreDir, ks.secretsDir, pubkey.HexWithPrefix())
 
 	// Read secret from disk
 	_, err = os.Stat(secretFilePath)
 	if os.IsNotExist(err) {
 		return nil, nil
 	} else if err != nil {
-		return nil, fmt.Errorf("couldn't open the Nimbus secret for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't open the Nimbus secret for pubkey %s: %w", pubkey.HexWithPrefix(), err)
 	}
 	bytes, err = os.ReadFile(secretFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't read the Nimbus secret for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't read the Nimbus secret for pubkey %s: %w", pubkey.HexWithPrefix(), err)
 	}
 
 	// Decrypt key
 	password := string(bytes)
 	decryptedKey, err := ks.encryptor.Decrypt(keystore.Crypto, password)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't decrypt keystore for pubkey %s: %w", pubkey.Hex(), err)
+		return nil, fmt.Errorf("couldn't decrypt keystore for pubkey %s: %w", pubkey.HexWithPrefix(), err)
 	}
 	privateKey, err := eth2types.BLSPrivateKeyFromBytes(decryptedKey)
 	if err != nil {
-		return nil, fmt.Errorf("error recreating private key for validator %s: %w", keystore.Pubkey.Hex(), err)
+		return nil, fmt.Errorf("error recreating private key for validator %s: %w", keystore.Pubkey.HexWithPrefix(), err)
 	}
 
 	// Verify the private key matches the public key
 	reconstructedPubkey := beacon.ValidatorPubkey(privateKey.PublicKey().Marshal())
 	if reconstructedPubkey != pubkey {
-		return nil, fmt.Errorf("private keystore file %s claims to be for validator %s but it's for validator %s", keyFilePath, pubkey.Hex(), reconstructedPubkey.Hex())
+		return nil, fmt.Errorf("private keystore file %s claims to be for validator %s but it's for validator %s", keyFilePath, pubkey.HexWithPrefix(), reconstructedPubkey.HexWithPrefix())
 	}
 
 	return privateKey, nil
