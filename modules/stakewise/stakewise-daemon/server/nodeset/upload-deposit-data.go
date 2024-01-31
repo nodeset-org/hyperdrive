@@ -1,14 +1,12 @@
 package swnodeset
 
 import (
-	"fmt"
 	"net/url"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 )
 
 // ===============
@@ -43,7 +41,6 @@ type nodesetUploadDepositDataContext struct {
 func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadDepositDataData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	ddMgr := sp.GetDepositDataManager()
-	hd := sp.GetHyperdriveClient()
 	nc := sp.GetNodesetClient()
 
 	// Read the deposit data
@@ -52,15 +49,8 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 		return err
 	}
 
-	// Sign a message
-	signResponse, err := hd.Wallet.SignMessage([]byte(common.NodesetAuthMessage))
-	if err != nil {
-		return fmt.Errorf("error signing authorization message: %w", err)
-	}
-	signature := signResponse.Data.SignedMessage
-
 	// Submit the upload
-	response, err := nc.UploadDepositData(signature, depositData)
+	response, err := nc.UploadDepositData(depositData)
 	if err != nil {
 		return err
 	}

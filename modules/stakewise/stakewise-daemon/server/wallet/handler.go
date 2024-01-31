@@ -3,15 +3,15 @@ package swwallet
 import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 )
 
 type WalletHandler struct {
-	serviceProvider *common.StakewiseServiceProvider
+	serviceProvider *swcommon.StakewiseServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewWalletHandler(serviceProvider *common.StakewiseServiceProvider) *WalletHandler {
+func NewWalletHandler(serviceProvider *swcommon.StakewiseServiceProvider) *WalletHandler {
 	h := &WalletHandler{
 		serviceProvider: serviceProvider,
 	}

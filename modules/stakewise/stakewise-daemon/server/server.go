@@ -5,9 +5,9 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
-	swnodeset "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/server/api/nodeset"
-	swwallet "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/server/api/wallet"
+	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	swnodeset "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/server/nodeset"
+	swwallet "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/server/wallet"
 )
 
 type StakewiseServer struct {
@@ -15,7 +15,7 @@ type StakewiseServer struct {
 	socketPath string
 }
 
-func NewStakewiseServer(sp *common.StakewiseServiceProvider) (*StakewiseServer, error) {
+func NewStakewiseServer(sp *swcommon.StakewiseServiceProvider) (*StakewiseServer, error) {
 	socketPath := filepath.Join(sp.GetUserDir(), swconfig.SocketFilename)
 	handlers := []server.IHandler{
 		swnodeset.NewNodesetHandler(sp),

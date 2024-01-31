@@ -1,9 +1,9 @@
-package tasks
+package swtasks
 
 import (
 	"github.com/docker/docker/client"
 	"github.com/nodeset-org/eth-utils/eth"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
@@ -11,7 +11,7 @@ import (
 
 // Update deposit data task
 type UpdateDepositData struct {
-	sp  *common.StakewiseServiceProvider
+	sp  *swcommon.StakewiseServiceProvider
 	cfg *config.HyperdriveConfig
 	log log.ColorLogger
 	ec  eth.IExecutionClient
@@ -20,7 +20,7 @@ type UpdateDepositData struct {
 }
 
 // Create update deposit data task
-func NewUpdateDepositData(sp *common.StakewiseServiceProvider, logger log.ColorLogger) *UpdateDepositData {
+func NewUpdateDepositData(sp *swcommon.StakewiseServiceProvider, logger log.ColorLogger) *UpdateDepositData {
 	return &UpdateDepositData{
 		sp:  sp,
 		log: logger,

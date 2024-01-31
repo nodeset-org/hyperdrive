@@ -21,8 +21,8 @@ type StakewiseResources struct {
 	// The genesis fork version for the network according to the Beacon config for the network
 	GenesisForkVersion []byte
 
-	// The URL for uploading deposit data to NodeSet
-	NodesetDepositUrl string
+	// The URL for the NodeSet API server
+	NodesetApiUrl string
 }
 
 // Creates a new resource collection for the given network
@@ -33,7 +33,7 @@ func NewStakewiseResources(network types.Network) *StakewiseResources {
 		Vault:              common.HexToAddress(""),
 		FeeRecipient:       common.HexToAddress(""),
 		GenesisForkVersion: common.FromHex("0x00000000"), // https://github.com/eth-clients/eth2-networks/tree/master/shared/mainnet#genesis-information
-		NodesetDepositUrl:  "",
+		NodesetApiUrl:      "",
 	}
 
 	// Holesky
@@ -42,7 +42,7 @@ func NewStakewiseResources(network types.Network) *StakewiseResources {
 		Vault:              common.HexToAddress("0x646F5285D195e08E309cF9A5aDFDF68D6Fcc51C4"),
 		FeeRecipient:       common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
 		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
-		NodesetDepositUrl:  "https://staging.nodeset.io/api/deposit-data",
+		NodesetApiUrl:      "https://staging.nodeset.io/api",
 	}
 
 	// Holesky Dev
@@ -51,7 +51,7 @@ func NewStakewiseResources(network types.Network) *StakewiseResources {
 		Vault:              common.HexToAddress("0x01b353Abc66A65c4c0Ac9c2ecF82e693Ce0303Bc"),
 		FeeRecipient:       common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
 		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
-		NodesetDepositUrl:  "https://staging.nodeset.io/api/deposit-data",
+		NodesetApiUrl:      "https://staging.nodeset.io/api",
 	}
 
 	switch network {

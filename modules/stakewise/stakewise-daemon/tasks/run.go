@@ -1,4 +1,4 @@
-package tasks
+package swtasks
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
 
@@ -23,11 +23,11 @@ const (
 type TaskLoop struct {
 	ctx    context.Context
 	cancel context.CancelFunc
-	sp     *common.StakewiseServiceProvider
+	sp     *swcommon.StakewiseServiceProvider
 	wg     *sync.WaitGroup
 }
 
-func NewTaskLoop(sp *common.StakewiseServiceProvider, wg *sync.WaitGroup) *TaskLoop {
+func NewTaskLoop(sp *swcommon.StakewiseServiceProvider, wg *sync.WaitGroup) *TaskLoop {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &TaskLoop{
 		ctx:    ctx,

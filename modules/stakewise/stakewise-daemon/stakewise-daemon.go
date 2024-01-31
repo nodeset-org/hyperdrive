@@ -11,9 +11,9 @@ import (
 	"syscall"
 
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 	"github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/server"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/tasks"
+	swtasks "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/tasks"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/urfave/cli/v2"
@@ -71,7 +71,7 @@ func main() {
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}
-		stakewiseSp, err := common.NewStakewiseServiceProvider(sp)
+		stakewiseSp, err := swcommon.NewStakewiseServiceProvider(sp)
 		if err != nil {
 			return fmt.Errorf("error creating Stakewise service provider: %w", err)
 		}
@@ -95,7 +95,7 @@ func main() {
 		fmt.Printf("Started daemon on %s.\n", apiServer.GetSocketPath())
 
 		// Start the task loop
-		taskLoop := tasks.NewTaskLoop(stakewiseSp, stopWg)
+		taskLoop := swtasks.NewTaskLoop(stakewiseSp, stopWg)
 		err = taskLoop.Run()
 		if err != nil {
 			return fmt.Errorf("error starting task loop: %w", err)

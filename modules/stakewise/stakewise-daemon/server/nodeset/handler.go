@@ -3,15 +3,15 @@ package swnodeset
 import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 )
 
 type NodesetHandler struct {
-	serviceProvider *common.StakewiseServiceProvider
+	serviceProvider *swcommon.StakewiseServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewNodesetHandler(serviceProvider *common.StakewiseServiceProvider) *NodesetHandler {
+func NewNodesetHandler(serviceProvider *swcommon.StakewiseServiceProvider) *NodesetHandler {
 	h := &NodesetHandler{
 		serviceProvider: serviceProvider,
 	}
