@@ -36,7 +36,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Aliases: []string{"i"},
 				Usage:   "Initialize the node wallet",
 				Flags: []cli.Flag{
-					passwordFlag,
+					PasswordFlag,
 					initConfirmMnemonicFlag,
 					derivationPathFlag,
 					walletIndexFlag,
@@ -48,14 +48,14 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					}
 
 					// Validate flags
-					if c.String(passwordFlag.Name) != "" {
-						if _, err := input.ValidateNodePassword("password", c.String(passwordFlag.Name)); err != nil {
+					if c.String(PasswordFlag.Name) != "" {
+						if _, err := input.ValidateNodePassword("password", c.String(PasswordFlag.Name)); err != nil {
 							return err
 						}
 					}
 
 					// Run
-					return initWallet(c)
+					return InitWallet(c, nil)
 				},
 			},
 
@@ -64,7 +64,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Aliases: []string{"r"},
 				Usage:   "Recover a node wallet from a mnemonic phrase",
 				Flags: []cli.Flag{
-					passwordFlag,
+					PasswordFlag,
 					mnemonicFlag,
 					skipValidatorRecoveryFlag,
 					derivationPathFlag,
@@ -78,8 +78,8 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					}
 
 					// Validate flags
-					if c.String(passwordFlag.Name) != "" {
-						if _, err := input.ValidateNodePassword("password", c.String(passwordFlag.Name)); err != nil {
+					if c.String(PasswordFlag.Name) != "" {
+						if _, err := input.ValidateNodePassword("password", c.String(PasswordFlag.Name)); err != nil {
 							return err
 						}
 					}
@@ -128,8 +128,8 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Aliases: []string{"sp"},
 				Usage:   "Upload the node wallet password to the daemon so it can unlock your node wallet keystore, optionally saving it to disk as well",
 				Flags: []cli.Flag{
-					passwordFlag,
-					utils.YesFlag,
+					PasswordFlag,
+					SavePasswordFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args

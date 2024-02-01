@@ -7,12 +7,14 @@ import (
 	"time"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -109,14 +111,100 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 
 	// Write a note on doppelganger protection
 	if cfg.IsDoppelgangerEnabled() {
-		fmt.Printf("%sNOTE: You currently have Doppelganger Protection enabled on at least one module.\nYour Validator Client will miss up to 3 attestations when it starts.\nThis is *intentional* and does not indicate a problem with your node.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
+		fmt.Printf("%sNOTE: You currently have Doppelganger Protection enabled on at least one module.\nYour Validator Client will miss up to 3 attestations when it starts.\nThis is *intentional* and does not indicate a problem with your node.%s\n\n", terminal.ColorBold, terminal.ColorReset)
 	}
 
 	// Start service
 	err = hd.StartService(getComposeFiles(c))
 	if err != nil {
-		return err
+		return fmt.Errorf("error starting service: %w", err)
 	}
+
+	// Check wallet status
+	fmt.Println()
+	fmt.Println("Checking node wallet status...")
+	var status *types.WalletStatus
+	retries := 5
+	for i := 0; i < retries; i++ {
+		response, err := hd.Api.Wallet.Status()
+		if err != nil {
+			time.Sleep(time.Second)
+			continue
+		}
+		status = &response.Data.WalletStatus
+		break
+	}
+
+	// Handle errors
+	if status == nil {
+		fmt.Println("Hyperdrive couldn't check your node wallet status yet. Check on it again later with `hyperdrive wallet status`. If you haven't madea wallet yet, you can do so now with `hyperdrive wallet init`.")
+		return nil
+	}
+
+	// All set
+	if status.Wallet.IsLoaded {
+		fmt.Printf("Your node wallet with address %s%s%s is loaded and ready to use.\n", terminal.ColorBlue, status.Wallet.WalletAddress.Hex(), terminal.ColorReset)
+		return nil
+	}
+
+	// Prompt for password
+	if status.Wallet.IsOnDisk {
+		return promptForPassword(c, hd)
+	}
+
+	// Init
+	fmt.Println("You don't have a node wallet yet.")
+	if c.Bool(utils.YesFlag.Name) || !utils.Confirm("Would you like to create one now?") {
+		fmt.Println("Please create one using `hyperdrive wallet init` when you're ready.")
+		return nil
+	}
+	err = wallet.InitWallet(c, hd)
+	if err != nil {
+		return fmt.Errorf("error initializing node wallet: %w", err)
+	}
+
+	// Get the wallet status
+	return nil
+}
+
+// Prompt for the wallet password upon startup if it isn't available, but a wallet is on disk
+func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) error {
+	fmt.Println("Your node wallet is saved, but the password is not stored on disk so it cannot be loaded automatically.")
+	// Get the password
+	passwordString := c.String(wallet.PasswordFlag.Name)
+	if passwordString == "" {
+		passwordString = wallet.PromptExistingPassword()
+	}
+	password, err := input.ValidateNodePassword("password", passwordString)
+	if err != nil {
+		return fmt.Errorf("error validating password: %w", err)
+	}
+
+	// Get the save flag
+	savePassword := c.Bool(wallet.SavePasswordFlag.Name) || utils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to repeat this command to manually enter the password after each restart.")
+
+	// Run it
+	_, err = hd.Api.Wallet.SetPassword(password, savePassword)
+	if err != nil {
+		fmt.Printf("%sError setting password: %s%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
+		fmt.Println("Your service has started, but you'll need to provide the node wallet password later with `hyperdrive wallet set-password`.")
+		return nil
+	}
+
+	// Refresh the status
+	response, err := hd.Api.Wallet.Status()
+	if err != nil {
+		fmt.Printf("Wallet password set.\n%sError checking node wallet: %s%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
+		fmt.Println("Please check the service logs with `hyperdrive service logs daemon` for more information.")
+		return nil
+	}
+	status := response.Data.WalletStatus
+	if !status.Wallet.IsLoaded {
+		fmt.Println("Wallet password set, but the node wallet could not be loaded.")
+		fmt.Println("Please check the service logs with `hyperdrive service logs daemon` for more information.")
+		return nil
+	}
+	fmt.Printf("Your node wallet with address %s%s%s is now loaded and ready to use.\n", terminal.ColorBlue, status.Wallet.WalletAddress.Hex(), terminal.ColorReset)
 	return nil
 }
 
@@ -134,11 +222,14 @@ func checkForValidatorChange(hd *client.HyperdriveClient, cfg *config.Hyperdrive
 		return true, nil
 	}
 
-	fmt.Println("Found the following Validator Clients:")
-	for _, vc := range vcs {
-		fmt.Println(vc)
-	}
-	fmt.Println()
+	/*
+		// TODO: DEBUG
+			fmt.Println("Found the following Validator Clients:")
+			for _, vc := range vcs {
+				fmt.Println(vc)
+			}
+			fmt.Println()
+	*/
 
 	// Get the map of VCs to their new tags in the config
 	newTagMap, err := getVcContainerTagParamMap(cfg, vcs)
@@ -168,7 +259,6 @@ func checkForValidatorChange(hd *client.HyperdriveClient, cfg *config.Hyperdrive
 }
 
 func checkValidatorClient(hd *client.HyperdriveClient, vcName string, newTagMap map[string]string) (time.Duration, error) {
-	fmt.Printf("running check on %s\n", vcName)
 	// Get the current and pending VC images
 	currentTag, err := hd.GetDockerImage(vcName)
 	if err != nil {

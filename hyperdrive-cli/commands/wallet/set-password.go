@@ -30,12 +30,12 @@ func setPassword(c *cli.Context) error {
 	}
 
 	// Get the password
-	passwordString := c.String(passwordFlag.Name)
+	passwordString := c.String(PasswordFlag.Name)
 	if passwordString == "" {
 		if status.Wallet.IsOnDisk {
-			passwordString = promptExistingPassword()
+			passwordString = PromptExistingPassword()
 		} else {
-			passwordString = promptNewPassword()
+			passwordString = PromptNewPassword()
 		}
 	}
 	password, err := input.ValidateNodePassword("password", passwordString)
@@ -44,7 +44,7 @@ func setPassword(c *cli.Context) error {
 	}
 
 	// Get the save flag
-	savePassword := c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to repeat this command to manually enter the password after each restart.")
+	savePassword := c.Bool(SavePasswordFlag.Name) || utils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to repeat this command to manually enter the password after each restart.")
 
 	if status.Wallet.IsLoaded && !status.Password.IsPasswordSaved && !savePassword {
 		fmt.Println("You've elected not to save the password but the node wallet is already loaded, so there's nothing to do.")

@@ -18,19 +18,22 @@ var (
 	}
 )
 
-func initWallet(c *cli.Context) error {
-	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+// If hd is provided, this is assumed to be called from another function so the wallet check will be skipped.
+func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
+	if hd == nil {
+		// Get Hyperdrive client
+		hd = client.NewHyperdriveClientFromCtx(c)
 
-	// Get & check wallet status
-	statusResponse, err := hd.Api.Wallet.Status()
-	if err != nil {
-		return err
-	}
-	status := statusResponse.Data.WalletStatus
-	if status.Wallet.IsOnDisk {
-		fmt.Println("The node wallet is already initialized.")
-		return nil
+		// Get & check wallet status
+		statusResponse, err := hd.Api.Wallet.Status()
+		if err != nil {
+			return err
+		}
+		status := statusResponse.Data.WalletStatus
+		if status.Wallet.IsOnDisk {
+			fmt.Println("The node wallet is already initialized.")
+			return nil
+		}
 	}
 
 	// Prompt for user confirmation before printing sensitive information
@@ -41,10 +44,10 @@ func initWallet(c *cli.Context) error {
 
 	// Set password if not set
 	var password string
-	if c.String(passwordFlag.Name) != "" {
-		password = c.String(passwordFlag.Name)
+	if c.String(PasswordFlag.Name) != "" {
+		password = c.String(PasswordFlag.Name)
 	} else {
-		password = promptNewPassword()
+		password = PromptNewPassword()
 	}
 
 	// Ask about saving
@@ -67,7 +70,7 @@ func initWallet(c *cli.Context) error {
 	}
 
 	// Initialize wallet
-	response, err := hd.Api.Wallet.Initialize(derivationPath, walletIndex, password, savePassword)
+	response, err := hd.Api.Wallet.Initialize(derivationPath, walletIndex, false, password, false)
 	if err != nil {
 		return fmt.Errorf("error initializing wallet: %w", err)
 	}
@@ -87,8 +90,8 @@ func initWallet(c *cli.Context) error {
 		confirmMnemonic(response.Data.Mnemonic)
 	}
 
-	// Do a test recover to verify the wallet
-	recoverResponse, err := hd.Api.Wallet.TestRecover(derivationPath, response.Data.Mnemonic, walletIndex)
+	// Do a recover to verify and save the wallet
+	recoverResponse, err := hd.Api.Wallet.Recover(derivationPath, &response.Data.Mnemonic, walletIndex, password, savePassword)
 	if err != nil {
 		return fmt.Errorf("error saving wallet: %w", err)
 	}

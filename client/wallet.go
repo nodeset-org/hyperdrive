@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/hex"
 	"fmt"
+	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
@@ -52,10 +53,11 @@ func (r *WalletRequester) GenerateValidatorKey(path string) (*api.ApiResponse[ap
 }
 
 // Initialize the wallet with a new key
-func (r *WalletRequester) Initialize(derivationPath *string, index *uint64, password string, save bool) (*api.ApiResponse[api.WalletInitializeData], error) {
+func (r *WalletRequester) Initialize(derivationPath *string, index *uint64, saveWallet bool, password string, savePassword bool) (*api.ApiResponse[api.WalletInitializeData], error) {
 	args := map[string]string{
 		"password":      password,
-		"save-password": fmt.Sprint(save),
+		"save-wallet":   strconv.FormatBool(saveWallet),
+		"save-password": strconv.FormatBool(savePassword),
 	}
 	if derivationPath != nil {
 		args["derivation-path"] = *derivationPath

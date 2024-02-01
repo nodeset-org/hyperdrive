@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	sharedtypes "github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 	"github.com/tyler-smith/go-bip39"
 )
 
@@ -38,7 +39,7 @@ type Wallet struct {
 }
 
 // Create new wallet
-func NewWallet(walletDataPath string, walletAddressPath string, passwordFilePath string, chainID uint) (*Wallet, error) {
+func NewWallet(log *log.ColorLogger, walletDataPath string, walletAddressPath string, passwordFilePath string, chainID uint) (*Wallet, error) {
 	// Create the wallet
 	w := &Wallet{
 		// Create managers
@@ -60,9 +61,8 @@ func NewWallet(walletDataPath string, walletAddressPath string, passwordFilePath
 	if isPasswordSaved {
 		walletMgr, err := w.loadWalletData(password)
 		if err != nil {
-			return nil, fmt.Errorf("error loading wallet: %w", err)
-		}
-		if walletMgr != nil {
+			log.Printlnf("[WALLET] Loading wallet with stored node password failed: %s", err.Error())
+		} else if walletMgr != nil {
 			w.walletManager = walletMgr
 		}
 	}
@@ -162,16 +162,10 @@ func (w *Wallet) CreateNewLocalWallet(derivationPath string, walletIndex uint, p
 		return "", fmt.Errorf("wallet keystore is already present - please delete it before creating a new wallet")
 	}
 
-	// Generate random entropy for the mnemonic
-	entropy, err := bip39.NewEntropy(EntropyBits)
+	// Make a mnemonic
+	mnemonic, err := GenerateNewMnemonic()
 	if err != nil {
-		return "", fmt.Errorf("error generating wallet mnemonic entropy bytes: %w", err)
-	}
-
-	// Generate a new mnemonic
-	mnemonic, err := bip39.NewMnemonic(entropy)
-	if err != nil {
-		return "", fmt.Errorf("error generating wallet mnemonic: %w", err)
+		return "", err
 	}
 
 	// Initialize the wallet with it
@@ -324,6 +318,9 @@ func (w *Wallet) buildLocalWallet(derivationPath string, walletIndex uint, mnemo
 		return fmt.Errorf("error initializing wallet keystore with recovered data: %w", err)
 	}
 
+	// Get the wallet address
+	walletAddress, _ := localMgr.GetAddress()
+
 	if !testMode {
 		// Create data
 		data := &sharedtypes.WalletData{
@@ -336,10 +333,6 @@ func (w *Wallet) buildLocalWallet(derivationPath string, walletIndex uint, mnemo
 		if err != nil {
 			return fmt.Errorf("error saving wallet data: %w", err)
 		}
-
-		// Get the wallet address
-		walletAddress, _ := localMgr.GetAddress()
-
 		// Update the address file
 		err = w.addressManager.SetAndSaveAddress(walletAddress)
 		if err != nil {
@@ -352,6 +345,8 @@ func (w *Wallet) buildLocalWallet(derivationPath string, walletIndex uint, mnemo
 				return fmt.Errorf("error saving password: %w", err)
 			}
 		}
+	} else {
+		w.addressManager.SetAddress(walletAddress)
 	}
 
 	w.walletManager = localMgr
@@ -417,4 +412,24 @@ func (w *Wallet) saveWalletData(data *sharedtypes.WalletData) error {
 		return fmt.Errorf("error writing wallet data to [%s]: %w", w.walletDataPath, err)
 	}
 	return nil
+}
+
+// =============
+// === Utils ===
+// =============
+
+// Generate a new random mnemonic and seed
+func GenerateNewMnemonic() (string, error) {
+	// Generate random entropy for the mnemonic
+	entropy, err := bip39.NewEntropy(EntropyBits)
+	if err != nil {
+		return "", fmt.Errorf("error generating wallet mnemonic entropy bytes: %w", err)
+	}
+
+	// Generate a new mnemonic
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return "", fmt.Errorf("error generating wallet mnemonic: %w", err)
+	}
+	return mnemonic, nil
 }

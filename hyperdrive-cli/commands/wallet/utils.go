@@ -22,10 +22,15 @@ import (
 )
 
 var (
-	passwordFlag *cli.StringFlag = &cli.StringFlag{
+	PasswordFlag *cli.StringFlag = &cli.StringFlag{
 		Name:    "password",
 		Aliases: []string{"p"},
 		Usage:   "The password to secure the wallet with (if not already set)",
+	}
+	SavePasswordFlag *cli.StringFlag = &cli.StringFlag{
+		Name:    "save-password",
+		Aliases: []string{"s"},
+		Usage:   "Save the node wallet password to disk, so the wallet can be automatically reloaded upon starting up",
 	}
 	derivationPathFlag *cli.StringFlag = &cli.StringFlag{
 		Name:    "derivation-path",
@@ -56,7 +61,7 @@ var (
 )
 
 // Prompt for a new wallet password
-func promptNewPassword() string {
+func PromptNewPassword() string {
 	for {
 		password := utils.PromptPassword(
 			"Please enter a password to secure your wallet with:",
@@ -73,7 +78,7 @@ func promptNewPassword() string {
 }
 
 // Prompt for the password to a wallet that already exists
-func promptExistingPassword() string {
+func PromptExistingPassword() string {
 	for {
 		password := utils.PromptPassword(
 			"Please enter the password your wallet was originally secured with:",

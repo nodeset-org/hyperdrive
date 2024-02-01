@@ -18,7 +18,8 @@ import (
 )
 
 const (
-	apiLogColor color.Attribute = color.FgHiCyan
+	apiLogColor    color.Attribute = color.FgHiCyan
+	walletLogColor color.Attribute = color.FgYellow
 )
 
 // A container for all of the various services used by Hyperdrive
@@ -34,7 +35,8 @@ type ServiceProvider struct {
 	resources  *utils.Resources
 
 	// TODO: find a better place for this than the common service provider
-	apiLogger *log.ColorLogger
+	apiLogger    *log.ColorLogger
+	walletLogger *log.ColorLogger
 
 	// Path info
 	userDir string
@@ -52,8 +54,9 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 		return nil, fmt.Errorf("hyperdrive config settings file [%s] not found", cfgPath)
 	}
 
-	// Logger
+	// Loggers
 	apiLogger := log.NewColorLogger(apiLogColor)
+	walletLogger := log.NewColorLogger(walletLogColor)
 
 	// Resources
 	resources := utils.NewResources(cfg.Network.Value)
@@ -66,7 +69,7 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	nodeAddressPath := filepath.Join(userDataPath, config.UserAddressFilename)
 	walletDataPath := filepath.Join(userDataPath, config.UserWalletDataFilename)
 	passwordPath := filepath.Join(userDataPath, config.UserPasswordFilename)
-	nodeWallet, err := wallet.NewWallet(walletDataPath, nodeAddressPath, passwordPath, resources.ChainID)
+	nodeWallet, err := wallet.NewWallet(&walletLogger, walletDataPath, nodeAddressPath, passwordPath, resources.ChainID)
 	if err != nil {
 		return nil, fmt.Errorf("error creating node wallet: %w", err)
 	}

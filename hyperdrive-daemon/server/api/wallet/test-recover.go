@@ -57,17 +57,9 @@ func (c *walletTestRecoverContext) PrepareData(data *api.WalletRecoverData, opts
 	rs := sp.GetResources()
 
 	// Parse the derivation path
-	pathType := types.DerivationPath(c.derivationPath)
-	var path string
-	switch pathType {
-	case types.DerivationPath_Default:
-		path = wallet.DefaultNodeKeyPath
-	case types.DerivationPath_LedgerLive:
-		path = wallet.LedgerLiveNodeKeyPath
-	case types.DerivationPath_Mew:
-		path = wallet.MyEtherWalletNodeKeyPath
-	default:
-		return fmt.Errorf("[%s] is not a valid derivation path type", c.derivationPath)
+	path, err := GetDerivationPath(types.DerivationPath(c.derivationPath))
+	if err != nil {
+		return err
 	}
 
 	// Recover the wallet

@@ -50,6 +50,12 @@ func (m *AddressManager) GetAddress() (common.Address, bool) {
 	return m.address, m.isLoaded
 }
 
+// Sets the node address without saving it to disk
+func (m *AddressManager) SetAddress(newAddress common.Address) {
+	m.address = newAddress
+	m.isLoaded = true
+}
+
 // Sets the node address and saves it to disk
 func (m *AddressManager) SetAndSaveAddress(newAddress common.Address) error {
 	m.address = newAddress

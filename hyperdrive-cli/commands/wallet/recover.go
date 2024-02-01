@@ -32,10 +32,10 @@ func recoverWallet(c *cli.Context) error {
 	// Set password if not set
 	var password string
 	var savePassword bool
-	if c.String(passwordFlag.Name) != "" {
-		password = c.String(passwordFlag.Name)
+	if c.String(PasswordFlag.Name) != "" {
+		password = c.String(PasswordFlag.Name)
 	} else {
-		password = promptNewPassword()
+		password = PromptNewPassword()
 	}
 
 	// Ask about saving

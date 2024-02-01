@@ -8,7 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
@@ -70,17 +69,9 @@ func (c *walletRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bi
 	}
 
 	// Parse the derivation path
-	pathType := types.DerivationPath(c.derivationPath)
-	var path string
-	switch pathType {
-	case types.DerivationPath_Default:
-		path = wallet.DefaultNodeKeyPath
-	case types.DerivationPath_LedgerLive:
-		path = wallet.LedgerLiveNodeKeyPath
-	case types.DerivationPath_Mew:
-		path = wallet.MyEtherWalletNodeKeyPath
-	default:
-		return fmt.Errorf("[%s] is not a valid derivation path type", c.derivationPath)
+	path, err := GetDerivationPath(types.DerivationPath(c.derivationPath))
+	if err != nil {
+		return err
 	}
 
 	// Recover the wallet

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/types"
@@ -156,6 +157,8 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "Start the Hyperdrive service",
 				Flags: []cli.Flag{
 					ignoreSlashTimerFlag,
+					wallet.PasswordFlag,
+					wallet.SavePasswordFlag,
 					utils.YesFlag,
 				},
 				Action: func(c *cli.Context) error {
