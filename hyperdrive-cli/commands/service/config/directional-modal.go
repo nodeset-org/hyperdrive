@@ -58,8 +58,8 @@ func NewDirectionalModal(direction int, app *tview.Application) *DirectionalModa
 		m.formsFlex.SetDirection(tview.FlexColumn)
 		form := tview.NewForm().
 			SetButtonsAlign(tview.AlignCenter).
-			SetButtonBackgroundColor(ButtonBackgroundColor).
-			SetButtonTextColor(tview.Styles.PrimaryTextColor)
+			SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
+			SetButtonTextColor(ButtonUnfocusedTextColor)
 		form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
 		form.SetCancelFunc(func() {
 			if m.done != nil {
@@ -92,8 +92,8 @@ func (m *DirectionalModal) SetTextColor(color tcell.Color) *DirectionalModal {
 	return m
 }
 
-// SetButtonBackgroundColor sets the background color of the buttons.
-func (m *DirectionalModal) SetButtonBackgroundColor(color tcell.Color) *DirectionalModal {
+// SetButtonUnfocusedBackgroundColor sets the background color of the buttons.
+func (m *DirectionalModal) SetButtonUnfocusedBackgroundColor(color tcell.Color) *DirectionalModal {
 	for _, form := range m.forms {
 		form.SetButtonBackgroundColor(color)
 	}
@@ -149,8 +149,8 @@ func (m *DirectionalModal) AddButtons(labels []string) *DirectionalModal {
 			} else {
 				form := tview.NewForm().
 					SetButtonsAlign(tview.AlignCenter).
-					SetButtonBackgroundColor(ButtonBackgroundColor).
-					SetButtonTextColor(tview.Styles.PrimaryTextColor)
+					SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
+					SetButtonTextColor(ButtonUnfocusedTextColor)
 				form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
 				form.SetCancelFunc(func() {
 					if m.done != nil {

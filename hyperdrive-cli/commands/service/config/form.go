@@ -134,7 +134,7 @@ func (f *Form) SetButtonTextColor(color tcell.Color) *Form {
 	return f
 }
 
-// SetButtonBackgroundColor sets the background color of the buttons when activated.
+// SetButtonUnfocusedBackgroundColor sets the background color of the buttons when activated.
 func (f *Form) SetButtonBackgroundActivatedColor(color tcell.Color) *Form {
 	f.buttonBackgroundActivatedColor = color
 	return f
@@ -499,6 +499,8 @@ func (f *Form) Draw(screen tcell.Screen) {
 		} else {
 			button.SetLabelColorActivated(f.buttonTextActivatedColor)
 		}
+
+		button.SetStyle(tcell.StyleDefault.Background(f.buttonBackgroundColor).Foreground(f.buttonTextColor))
 
 		buttonIndex := index + len(f.items)
 		positions[buttonIndex].x = x

@@ -44,8 +44,8 @@ func NewMainDisplay(app *tview.Application, previousConfig *config.HyperdriveCon
 
 	grid.SetBorder(true).
 		SetTitle(fmt.Sprintf(" Hyperdrive %s Configuration ", shared.HyperdriveVersion)).
-		SetBorderColor(tcell.ColorOrange).
-		SetTitleColor(tcell.ColorOrange).
+		SetBorderColor(BorderColor).
+		SetTitleColor(BorderColor).
 		SetBackgroundColor(tcell.ColorBlack)
 
 	// Create the navigation header

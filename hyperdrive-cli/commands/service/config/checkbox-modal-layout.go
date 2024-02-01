@@ -157,8 +157,8 @@ func (layout *checkBoxModalLayout) createControlGrid() int {
 	// Create the form for the controls
 	form := NewForm().
 		SetButtonsAlign(tview.AlignCenter).
-		SetButtonBackgroundColor(ButtonBackgroundColor).
-		SetButtonTextColor(tview.Styles.PrimaryTextColor).
+		SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
+		SetButtonTextColor(ButtonUnfocusedTextColor).
 		SetFieldBackgroundColor(tcell.ColorBlack)
 	form.
 		SetBackgroundColor(BackgroundColor).
@@ -172,11 +172,11 @@ func (layout *checkBoxModalLayout) createControlGrid() int {
 	// Create the form for the Next button
 	nextButtonForm := NewForm().
 		SetButtonsAlign(tview.AlignCenter).
-		SetButtonBackgroundColor(ButtonBackgroundColor).
-		SetButtonTextColor(tview.Styles.PrimaryTextColor).
+		SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
+		SetButtonTextColor(ButtonUnfocusedTextColor).
 		SetFieldBackgroundColor(tcell.ColorBlack)
 	nextButtonForm.
-		SetButtonBackgroundColor(ButtonBackgroundColor).
+		SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
 		SetBorderPadding(0, 0, 0, 0).
 		SetBackgroundColor(BackgroundColor)
 	nextButtonForm.AddButton("Next", func() {
@@ -188,13 +188,13 @@ func (layout *checkBoxModalLayout) createControlGrid() int {
 			layout.done(settings)
 		}
 	}).
-		SetButtonTextColor(tcell.ColorLightGray).
-		SetButtonBackgroundActivatedColor(tcell.Color46).
-		SetButtonTextActivatedColor(tcell.ColorBlack)
+		SetButtonTextColor(ButtonUnfocusedTextColor).
+		SetButtonBackgroundActivatedColor(ButtonFocusedBackgroundColor).
+		SetButtonTextActivatedColor(ButtonFocusedTextColor)
 
 	// Set the listeners for the button
 	button := nextButtonForm.GetButton(0)
-	button.SetBackgroundColor(ButtonBackgroundColor)
+	button.SetBackgroundColor(ButtonUnfocusedBackgroundColor)
 	button.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		var nextSelection int
 		switch event.Key() {

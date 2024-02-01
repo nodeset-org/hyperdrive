@@ -159,8 +159,9 @@ func (home *settingsHome) createFooter() (tview.Primitive, int) {
 		home.md.pages.AddPage(reviewPage.page.id, reviewPage.page.content, true, true)
 		home.md.setPage(reviewPage.page)
 	})
-	saveButton.SetBackgroundColorActivated(tcell.Color46)
-	saveButton.SetLabelColorActivated(tcell.ColorBlack)
+	saveButton.SetStyle(tcell.StyleDefault.Background(HomeButtonUnfocusedBackgroundColor).Foreground(HomeButtonUnfocusedTextColor))
+	//saveButton.SetDisabledStyle(tcell.StyleDefault.Background(HomeButtonUnfocusedBackgroundColor).Foreground(HomeButtonUnfocusedTextColor))
+	saveButton.SetActivatedStyle(tcell.StyleDefault.Background(ButtonFocusedBackgroundColor).Foreground(ButtonFocusedTextColor))
 
 	wizardButton.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyTab || event.Key() == tcell.KeyBacktab {
@@ -178,8 +179,9 @@ func (home *settingsHome) createFooter() (tview.Primitive, int) {
 	wizardButton.SetSelectedFunc(func() {
 		home.md.wizard.welcomeModal.show()
 	})
-	wizardButton.SetBackgroundColorActivated(tcell.Color46)
-	wizardButton.SetLabelColorActivated(tcell.ColorBlack)
+	wizardButton.SetStyle(tcell.StyleDefault.Background(HomeButtonUnfocusedBackgroundColor).Foreground(HomeButtonUnfocusedTextColor))
+	//wizardButton.SetDisabledStyle(tcell.StyleDefault.Background(HomeButtonUnfocusedBackgroundColor).Foreground(HomeButtonUnfocusedTextColor))
+	wizardButton.SetActivatedStyle(tcell.StyleDefault.Background(ButtonFocusedBackgroundColor).Foreground(ButtonFocusedTextColor))
 
 	// Create overall layout for the footer
 	buttonBar := tview.NewFlex().

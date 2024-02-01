@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/cpuid/v2 v2.2.6
 	github.com/nodeset-org/eth-utils v0.0.0-20240130225022-0b8abd71186c
-	github.com/rivo/tview v0.0.0-20240122063236-8526c9fe1b54
+	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/shirou/gopsutil/v3 v3.24.1
 	golang.org/x/sync v0.6.0

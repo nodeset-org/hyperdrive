@@ -60,8 +60,8 @@ func NewPseudomodal(direction int, app *tview.Application) *Pseudomodal {
 		m.formsFlex.SetDirection(tview.FlexColumn)
 		form := tview.NewForm().
 			SetButtonsAlign(tview.AlignCenter).
-			SetButtonBackgroundColor(ButtonBackgroundColor).
-			SetButtonTextColor(tview.Styles.PrimaryTextColor)
+			SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
+			SetButtonTextColor(ButtonUnfocusedTextColor)
 		form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
 		form.SetCancelFunc(func() {
 			if m.done != nil {
@@ -94,8 +94,8 @@ func (m *Pseudomodal) SetTextColor(color tcell.Color) *Pseudomodal {
 	return m
 }
 
-// SetButtonBackgroundColor sets the background color of the buttons.
-func (m *Pseudomodal) SetButtonBackgroundColor(color tcell.Color) *Pseudomodal {
+// SetButtonUnfocusedBackgroundColor sets the background color of the buttons.
+func (m *Pseudomodal) SetButtonUnfocusedBackgroundColor(color tcell.Color) *Pseudomodal {
 	for _, form := range m.forms {
 		form.SetButtonBackgroundColor(color)
 	}
@@ -151,8 +151,8 @@ func (m *Pseudomodal) AddButtons(labels []string) *Pseudomodal {
 			} else {
 				form := tview.NewForm().
 					SetButtonsAlign(tview.AlignCenter).
-					SetButtonBackgroundColor(ButtonBackgroundColor).
-					SetButtonTextColor(tview.Styles.PrimaryTextColor)
+					SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
+					SetButtonTextColor(ButtonUnfocusedTextColor)
 				form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
 				form.SetCancelFunc(func() {
 					if m.done != nil {

@@ -8,6 +8,18 @@ const (
 	// Background for all UI elements
 	BackgroundColor tcell.Color = tcell.ColorDarkSlateGray
 
-	// Background for buttons
-	ButtonBackgroundColor tcell.Color = tcell.ColorBlack
+	// Border
+	BorderColor tcell.Color = tcell.ColorGold
+
+	// Unfocused buttons
+	ButtonUnfocusedBackgroundColor tcell.Color = tcell.ColorBlack
+	ButtonUnfocusedTextColor       tcell.Color = tcell.ColorLightGray
+
+	// Focused buttons
+	ButtonFocusedBackgroundColor tcell.Color = tcell.Color46 // A lovely bright green
+	ButtonFocusedTextColor       tcell.Color = tcell.ColorBlack
+
+	// Unfocused home buttons
+	HomeButtonUnfocusedBackgroundColor tcell.Color = tcell.ColorDarkBlue
+	HomeButtonUnfocusedTextColor       tcell.Color = tcell.ColorLightGray
 )

@@ -156,10 +156,10 @@ func (layout *choiceModalLayout) createButtonGrid(buttonLabels []string, buttonD
 		// Create the form for the buttons
 		form := NewForm().
 			SetButtonsAlign(tview.AlignCenter).
-			SetButtonBackgroundColor(ButtonBackgroundColor).
-			SetButtonTextColor(tcell.ColorLightGray).
-			SetButtonBackgroundActivatedColor(tcell.Color46).
-			SetButtonTextActivatedColor(tcell.ColorBlack)
+			SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
+			SetButtonTextColor(ButtonUnfocusedTextColor).
+			SetButtonBackgroundActivatedColor(ButtonFocusedBackgroundColor).
+			SetButtonTextActivatedColor(ButtonFocusedTextColor)
 		form.
 			SetBackgroundColor(BackgroundColor).
 			SetBorderPadding(0, 0, 0, 0)
@@ -221,10 +221,10 @@ func (layout *choiceModalLayout) createButtonGrid(buttonLabels []string, buttonD
 				// Create a new form for this button
 				form := NewForm().
 					SetButtonsAlign(tview.AlignCenter).
-					SetButtonBackgroundColor(ButtonBackgroundColor).
-					SetButtonTextColor(tcell.ColorLightGray).
-					SetButtonBackgroundActivatedColor(tcell.Color46).
-					SetButtonTextActivatedColor(tcell.ColorBlack)
+					SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
+					SetButtonTextColor(ButtonUnfocusedTextColor).
+					SetButtonBackgroundActivatedColor(ButtonFocusedBackgroundColor).
+					SetButtonTextActivatedColor(ButtonFocusedTextColor)
 				form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
 				form.AddButton(label, func() {
 					if layout.done != nil {
