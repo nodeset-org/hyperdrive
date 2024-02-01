@@ -457,14 +457,14 @@ func getNetworkOptions() []*types.ParameterOption[types.Network] {
 		{
 			ParameterOptionCommon: &types.ParameterOptionCommon{
 				Name:        "Ethereum Mainnet",
-				Description: "This is the real Ethereum main network, using real ETH and real RPL to make real validators.",
+				Description: "This is the real Ethereum main network, using real ETH to make real validators.",
 			},
 			Value: types.Network_Mainnet,
 		},
 		{
 			ParameterOptionCommon: &types.ParameterOptionCommon{
 				Name:        "Holesky Testnet",
-				Description: "This is the Holešky (Holešovice) test network, which is the next generation of long-lived testnets for Ethereum. It uses free fake ETH and free fake RPL to make fake validators.\nUse this if you want to practice running Hyperdrive in a free, safe environment before moving to Mainnet.",
+				Description: "This is the Holešky (Holešovice) test network, which is the next generation of long-lived testnets for Ethereum. It uses free fake ETH to make fake validators.\nUse this if you want to practice running Hyperdrive in a free, safe environment before moving to Mainnet.",
 			},
 			Value: types.Network_Holesky,
 		},
