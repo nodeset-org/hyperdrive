@@ -26,7 +26,7 @@ func (c *HyperdriveClient) GetValidatorContainers(projectName string) ([]string,
 	if err != nil {
 		return nil, err
 	}
-	cl, err := d.ContainerList(context.Background(), dt.ContainerListOptions{})
+	cl, err := d.ContainerList(context.Background(), dt.ContainerListOptions{All: true})
 	if err != nil {
 		return nil, fmt.Errorf("error getting container list: %w", err)
 	}
