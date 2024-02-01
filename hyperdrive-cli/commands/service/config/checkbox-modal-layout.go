@@ -177,7 +177,8 @@ func (layout *checkBoxModalLayout) createControlGrid() int {
 		SetFieldBackgroundColor(tcell.ColorBlack)
 	nextButtonForm.
 		SetButtonBackgroundColor(ButtonBackgroundColor).
-		SetBorderPadding(0, 0, 0, 0)
+		SetBorderPadding(0, 0, 0, 0).
+		SetBackgroundColor(BackgroundColor)
 	nextButtonForm.AddButton("Next", func() {
 		if layout.done != nil {
 			settings := map[string]bool{}

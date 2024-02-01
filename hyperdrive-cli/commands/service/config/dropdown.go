@@ -20,6 +20,9 @@ type dropDownOption struct {
 type DropDown struct {
 	*tview.Box
 
+	// Whether or not this drop-down is disabled/read-only.
+	disabled bool
+
 	// The options from which the user can choose.
 	options []*dropDownOption
 
@@ -261,6 +264,15 @@ func (d *DropDown) GetFieldWidth() int {
 // GetFieldHeight returns this primitive's field height.
 func (d *DropDown) GetFieldHeight() int {
 	return 1
+}
+
+// SetDisabled sets whether or not the item is disabled / read-only.
+func (d *DropDown) SetDisabled(disabled bool) tview.FormItem {
+	d.disabled = disabled
+	if d.finished != nil {
+		d.finished(-1)
+	}
+	return d
 }
 
 // AddOption adds a new selectable option to this drop-down. The "selected"
