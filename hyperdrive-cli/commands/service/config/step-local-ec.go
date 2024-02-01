@@ -10,20 +10,36 @@ import (
 )
 
 func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
-	// Create the button names and descriptions from the config
-	clients := wiz.md.Config.LocalExecutionConfig.ExecutionClient.Options
-	clientNames := []string{"Random (Recommended)"}
-	clientDescriptions := []string{"Select a client randomly to help promote the diversity of the Ethereum Chain. We recommend you do this unless you have a strong reason to pick a specific client."}
-	for _, client := range clients {
-		clientNames = append(clientNames, client.Name)
-		clientDescriptions = append(clientDescriptions, client.Description)
-	}
-
+	// Make lists of clients that good and bad
 	goodClients := []*types.ParameterOption[types.ExecutionClient]{}
+	badClients := []*types.ParameterOption[types.ExecutionClient]{}
 	for _, client := range wiz.md.Config.LocalExecutionConfig.ExecutionClient.Options {
 		if !strings.HasPrefix(client.Name, "*") {
 			goodClients = append(goodClients, client)
+		} else {
+			badClients = append(badClients, client)
 		}
+	}
+
+	randomDesc := strings.Builder{}
+	randomDesc.WriteString("Select a client randomly to help promote the diversity of the Ethereum Chain. We recommend you do this unless you have a strong reason to pick a specific client.")
+	if len(badClients) > 0 {
+		randomDesc.WriteString("\n\n[orange]NOTE: The following clients are currently overrepresented on the Ethereum network (\"supermajority\" clients):\n\t")
+		labels := []string{}
+		for _, client := range badClients {
+			labels = append(labels, strings.TrimPrefix(client.Name, "*"))
+		}
+		randomDesc.WriteString(strings.Join(labels, ", "))
+		randomDesc.WriteString("\nWe recommend choosing different clients for the health of the network. Please see https://clientdiversity.org/ to learn more.")
+	}
+
+	// Create the button names and descriptions from the config
+	clients := wiz.md.Config.LocalExecutionConfig.ExecutionClient.Options
+	clientNames := []string{"Random (Recommended)"}
+	clientDescriptions := []string{randomDesc.String()}
+	for _, client := range clients {
+		clientNames = append(clientNames, client.Name)
+		clientDescriptions = append(clientDescriptions, client.Description)
 	}
 
 	helperText := "Please select the Execution Client you would like to use.\n\nHighlight each one to see a brief description of it, or go to https://clientdiversity.org/ to learn more about them."
