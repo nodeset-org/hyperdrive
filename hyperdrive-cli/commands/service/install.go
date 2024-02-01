@@ -37,6 +37,11 @@ var (
 		Aliases: []string{"u"},
 		Usage:   "Certain configuration values are reset when Hyperdrive is updated, such as Docker container tags; use this flag to force that reset, even if Hyperdrive hasn't been updated",
 	}
+	installLocalFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "local-script",
+		Aliases: []string{"l"},
+		Usage:   fmt.Sprintf("Use a local installer script instead of pulling it down from the source repository. The script and the installer package must be in your current working directory.%sMake sure you absolutely trust the script before using this flag.%s", terminal.ColorRed, terminal.ColorReset),
+	}
 )
 
 // Install the Hyperdrive service
@@ -54,7 +59,13 @@ func installService(c *cli.Context) error {
 	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Install service
-	err := hd.InstallService(c.Bool("verbose"), c.Bool("no-deps"), c.String("version"), c.String("path"))
+	err := hd.InstallService(
+		c.Bool(installVersionFlag.Name),
+		c.Bool(installNoDepsFlag.Name),
+		c.String(installVersionFlag.Name),
+		c.String(installPathFlag.Name),
+		c.Bool(installLocalFlag.Name),
+	)
 	if err != nil {
 		return err
 	}

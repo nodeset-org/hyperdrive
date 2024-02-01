@@ -35,7 +35,7 @@ const (
 )
 
 // Install Hyperdrive
-func (c *HyperdriveClient) InstallService(verbose, noDeps bool, version, path string) error {
+func (c *HyperdriveClient) InstallService(verbose bool, noDeps bool, version string, path string, useLocalInstaller bool) error {
 	// Get installation script flags
 	flags := []string{
 		"-v", shellescape.Quote(version),
@@ -47,24 +47,45 @@ func (c *HyperdriveClient) InstallService(verbose, noDeps bool, version, path st
 		flags = append(flags, "-d")
 	}
 
-	// Download the installation script
-	resp, err := http.Get(fmt.Sprintf(InstallerURL, version))
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected http status downloading installation script: %d", resp.StatusCode)
-	}
+	var script []byte
+	if useLocalInstaller {
+		// Make sure it exists
+		_, err := os.Stat(InstallerName)
+		if errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("local install script [%s] does not exist", InstallerName)
+		}
+		if err != nil {
+			return fmt.Errorf("error checking install script [%s]: %w", InstallerName, err)
+		}
 
-	// Sanity check that the script octet length matches content-length
-	script, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
+		// Read it
+		script, err = os.ReadFile(InstallerName)
+		if err != nil {
+			return fmt.Errorf("error reading local install script [%s]: %w", InstallerName, err)
+		}
 
-	if fmt.Sprint(len(script)) != resp.Header.Get("content-length") {
-		return fmt.Errorf("downloaded script length %d did not match content-length header %s", len(script), resp.Header.Get("content-length"))
+		// Set the "local mode" flag
+		flags = append(flags, "-l")
+	} else {
+		// Download the installation script
+		resp, err := http.Get(fmt.Sprintf(InstallerURL, version))
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != http.StatusOK {
+			return fmt.Errorf("unexpected http status downloading installation script: %d", resp.StatusCode)
+		}
+
+		// Sanity check that the script octet length matches content-length
+		script, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		if fmt.Sprint(len(script)) != resp.Header.Get("content-length") {
+			return fmt.Errorf("downloaded script length %d did not match content-length header %s", len(script), resp.Header.Get("content-length"))
+		}
 	}
 
 	// Get the escalation command

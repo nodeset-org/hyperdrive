@@ -16,7 +16,8 @@ import (
 
 // Config
 const (
-	InstallerURL string = "https://github.com/nodeset-org/hyperdrive/releases/download/%s/install.sh"
+	InstallerName string = "install.sh"
+	InstallerURL  string = "https://github.com/nodeset-org/hyperdrive/releases/download/%s/" + InstallerName
 
 	SettingsFile       string = "user-settings.yml"
 	BackupSettingsFile string = "user-settings-backup.yml"

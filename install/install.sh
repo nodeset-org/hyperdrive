@@ -72,19 +72,21 @@ install() {
 
     # Parse arguments
     PACKAGE_VERSION="latest"
-    while getopts "dp:v:" FLAG; do
+    while getopts "dlv:" FLAG; do
         case "$FLAG" in
             d) NO_DEPS=true ;;
+            l) LOCAL_PACKAGE=true ;;
             v) PACKAGE_VERSION="$OPTARG" ;;
             *) fail "Incorrect usage." ;;
         esac
     done
 
+    PACKAGE_NAME="hyperdrive-install.tar.xz"
     # Get package files URL
     if [ "$PACKAGE_VERSION" = "latest" ]; then
-        PACKAGE_URL="https://github.com/nodeset-org/hyperdrive/releases/latest/download/hyperdrive-install.tar.xz"
+        PACKAGE_URL="https://github.com/nodeset-org/hyperdrive/releases/latest/download/$PACKAGE_NAME"
     else
-        PACKAGE_URL="https://github.com/nodeset-org/hyperdrive/releases/download/$PACKAGE_VERSION/hyperdrive-install.tar.xz"
+        PACKAGE_URL="https://github.com/nodeset-org/hyperdrive/releases/download/$PACKAGE_VERSION/$PACKAGE_NAME"
     fi
 
     # Create temporary data folder; clean up on exit
@@ -336,7 +338,14 @@ install() {
 
     # Download and extract package files
     progress 5 "Downloading Hyperdrive package files..."
-    { curl -L "$PACKAGE_URL" | tar -xJ -C "$TEMPDIR" || fail "Could not download and extract the Hyperdrive package files."; } >&2
+    if [ -z "$LOCAL_PACKAGE" ]; then
+        { curl -L "$PACKAGE_URL" | tar -xJ -C "$TEMPDIR" || fail "Could not download and extract the Hyperdrive package files."; } >&2
+    else
+        if [ ! -f $PACKAGE_NAME ]; then
+            fail "Installer package $PACKAGE_NAME does not exist." >&2
+        fi
+        { tar -f "$PACKAGE_NAME" -xJ -C "$TEMPDIR" || fail "Could not extract the local Hyperdrive package files."; } >&2
+    fi
     { test -d "$PACKAGE_FILES_PATH" || fail "Could not extract the Hyperdrive package files."; } >&2
 
     # Copy package files
