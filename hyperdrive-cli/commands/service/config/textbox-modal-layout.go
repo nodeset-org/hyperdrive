@@ -141,7 +141,7 @@ func (layout *textBoxModalLayout) createControlGrid(labels []string, maxLengths 
 	// Create the form for the controls
 	form := NewForm().
 		SetButtonsAlign(tview.AlignCenter).
-		SetButtonBackgroundColor(tview.Styles.PrimitiveBackgroundColor).
+		SetButtonBackgroundColor(ButtonBackgroundColor).
 		SetButtonTextColor(tview.Styles.PrimaryTextColor).
 		SetFieldBackgroundColor(tcell.ColorBlack)
 	form.

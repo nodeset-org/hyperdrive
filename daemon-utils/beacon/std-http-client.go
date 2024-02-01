@@ -47,12 +47,16 @@ const (
 // Beacon client using the standard Beacon HTTP REST API (https://ethereum.github.io/beacon-APIs/)
 type StandardHttpClient struct {
 	providerAddress string
+	client          http.Client
 }
 
 // Create a new client instance
-func NewStandardHttpClient(providerAddress string) *StandardHttpClient {
+func NewStandardHttpClient(providerAddress string, timeout time.Duration) *StandardHttpClient {
 	return &StandardHttpClient{
 		providerAddress: providerAddress,
+		client: http.Client{
+			Timeout: timeout,
+		},
 	}
 }
 
@@ -786,8 +790,7 @@ func (c *StandardHttpClient) getRequestReader(ctx context.Context, requestPath s
 	}
 
 	// Submit the request
-	client := http.Client{}
-	response, err := client.Do(req)
+	response, err := c.client.Do(req)
 	if err != nil {
 		return nil, 0, fmt.Errorf("error running GET request to [%s]: %w", path, err)
 	}
@@ -833,8 +836,7 @@ func (c *StandardHttpClient) postRequest(ctx context.Context, requestPath string
 	}
 
 	// Submit the request
-	client := http.Client{}
-	response, err := client.Do(request)
+	response, err := c.client.Do(request)
 	if err != nil {
 		return []byte{}, 0, fmt.Errorf("error running POST request to [%s]: %w", path, err)
 	}

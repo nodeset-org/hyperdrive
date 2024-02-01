@@ -345,7 +345,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			},
 
 			{
-				Name:    "resync-cc",
+				Name:    "resync-bn",
 				Aliases: []string{"resync-eth2"},
 				Usage:   fmt.Sprintf("%sDeletes the Beacon Node's chain data and resyncs it from scratch. Only use this as a last resort!%s", terminal.ColorRed, terminal.ColorReset),
 				Action: func(c *cli.Context) error {

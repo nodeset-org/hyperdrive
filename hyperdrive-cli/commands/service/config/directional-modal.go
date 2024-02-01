@@ -58,7 +58,7 @@ func NewDirectionalModal(direction int, app *tview.Application) *DirectionalModa
 		m.formsFlex.SetDirection(tview.FlexColumn)
 		form := tview.NewForm().
 			SetButtonsAlign(tview.AlignCenter).
-			SetButtonBackgroundColor(tview.Styles.PrimitiveBackgroundColor).
+			SetButtonBackgroundColor(ButtonBackgroundColor).
 			SetButtonTextColor(tview.Styles.PrimaryTextColor)
 		form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
 		form.SetCancelFunc(func() {
@@ -149,7 +149,7 @@ func (m *DirectionalModal) AddButtons(labels []string) *DirectionalModal {
 			} else {
 				form := tview.NewForm().
 					SetButtonsAlign(tview.AlignCenter).
-					SetButtonBackgroundColor(tview.Styles.PrimitiveBackgroundColor).
+					SetButtonBackgroundColor(ButtonBackgroundColor).
 					SetButtonTextColor(tview.Styles.PrimaryTextColor)
 				form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
 				form.SetCancelFunc(func() {

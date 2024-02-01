@@ -157,7 +157,7 @@ func (layout *checkBoxModalLayout) createControlGrid() int {
 	// Create the form for the controls
 	form := NewForm().
 		SetButtonsAlign(tview.AlignCenter).
-		SetButtonBackgroundColor(tview.Styles.PrimitiveBackgroundColor).
+		SetButtonBackgroundColor(ButtonBackgroundColor).
 		SetButtonTextColor(tview.Styles.PrimaryTextColor).
 		SetFieldBackgroundColor(tcell.ColorBlack)
 	form.
@@ -172,7 +172,7 @@ func (layout *checkBoxModalLayout) createControlGrid() int {
 	// Create the form for the Next button
 	nextButtonForm := NewForm().
 		SetButtonsAlign(tview.AlignCenter).
-		SetButtonBackgroundColor(tview.Styles.PrimitiveBackgroundColor).
+		SetButtonBackgroundColor(ButtonBackgroundColor).
 		SetButtonTextColor(tview.Styles.PrimaryTextColor).
 		SetFieldBackgroundColor(tcell.ColorBlack)
 	nextButtonForm.

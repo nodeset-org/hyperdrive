@@ -60,7 +60,7 @@ func NewPseudomodal(direction int, app *tview.Application) *Pseudomodal {
 		m.formsFlex.SetDirection(tview.FlexColumn)
 		form := tview.NewForm().
 			SetButtonsAlign(tview.AlignCenter).
-			SetButtonBackgroundColor(tview.Styles.PrimitiveBackgroundColor).
+			SetButtonBackgroundColor(ButtonBackgroundColor).
 			SetButtonTextColor(tview.Styles.PrimaryTextColor)
 		form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
 		form.SetCancelFunc(func() {
@@ -151,7 +151,7 @@ func (m *Pseudomodal) AddButtons(labels []string) *Pseudomodal {
 			} else {
 				form := tview.NewForm().
 					SetButtonsAlign(tview.AlignCenter).
-					SetButtonBackgroundColor(tview.Styles.PrimitiveBackgroundColor).
+					SetButtonBackgroundColor(ButtonBackgroundColor).
 					SetButtonTextColor(tview.Styles.PrimaryTextColor)
 				form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
 				form.SetCancelFunc(func() {

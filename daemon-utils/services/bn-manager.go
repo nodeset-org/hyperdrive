@@ -2,8 +2,10 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
+	"net"
+	"syscall"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/color"
@@ -54,9 +56,9 @@ func NewBeaconClientManager(cfg *config.HyperdriveConfig) (*BeaconClientManager,
 
 	var primaryBc types.IBeaconClient
 	var fallbackBc types.IBeaconClient
-	primaryBc = beacon.NewStandardHttpClient(primaryProvider)
+	primaryBc = beacon.NewStandardHttpClient(primaryProvider, config.ClientTimeout)
 	if fallbackProvider != "" {
-		fallbackBc = beacon.NewStandardHttpClient(fallbackProvider)
+		fallbackBc = beacon.NewStandardHttpClient(fallbackProvider, config.ClientTimeout)
 	}
 
 	return &BeaconClientManager{
@@ -420,7 +422,7 @@ func (m *BeaconClientManager) runFunction2(function bcFunction2) (interface{}, i
 		if err != nil {
 			if m.isDisconnected(err) {
 				// If it's disconnected, log it and try the fallback
-				m.logger.Printlnf("WARNING: Primary Beacon client disconnected (%s), using fallback...", err.Error())
+				m.logger.Printlnf("WARNING: Primary Beacon client request failed (%s), using fallback...", err.Error())
 				m.primaryReady = false
 				return m.runFunction2(function)
 			}
@@ -437,7 +439,7 @@ func (m *BeaconClientManager) runFunction2(function bcFunction2) (interface{}, i
 		if err != nil {
 			if m.isDisconnected(err) {
 				// If it's disconnected, log it and try the fallback
-				m.logger.Printlnf("WARNING: Fallback Beacon client disconnected (%s)", err.Error())
+				m.logger.Printlnf("WARNING: Fallback Beacon client request failed (%s)", err.Error())
 				m.fallbackReady = false
 				return nil, nil, fmt.Errorf("all Beacon clients failed")
 			}
@@ -454,5 +456,10 @@ func (m *BeaconClientManager) runFunction2(function bcFunction2) (interface{}, i
 
 // Returns true if the error was a connection failure and a backup client is available
 func (m *BeaconClientManager) isDisconnected(err error) bool {
-	return strings.Contains(err.Error(), "dial tcp")
+	var sysErr syscall.Errno
+	if errors.As(err, &sysErr) {
+		return true
+	}
+	var netErr net.Error
+	return errors.As(err, &netErr)
 }

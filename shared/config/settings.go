@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 const (
 	EventLogInterval         int    = 1000
 	DockerApiVersion         string = "1.40"
@@ -16,4 +18,7 @@ const (
 	EcStartScript string = "start-ec.sh"
 	BnStartScript string = "start-bn.sh"
 	VcStartScript string = "start-vc.sh"
+
+	// HTTP
+	ClientTimeout time.Duration = 8 * time.Second
 )
