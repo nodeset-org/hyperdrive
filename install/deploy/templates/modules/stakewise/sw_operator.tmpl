@@ -20,7 +20,7 @@ services:
       - "start"
       - "--data-dir={{$module_dir}}"
       - "--deposit-data-file={{$module_dir}}/{{.Modules.Stakewise.DepositDataFile}}"
-      - "--network={{.Network}}"
+      - "--network={{.StakewiseNetwork}}"
       - "--vault={{.StakewiseVault}}"
       - "--execution-endpoints={{.GetEcHttpEndpointsWithFallback}}"
       - "--consensus-endpoints={{.GetBnHttpEndpointsWithFallback}}"

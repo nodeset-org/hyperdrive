@@ -382,6 +382,11 @@ func (cfg *HyperdriveConfig) StakewiseVault() string {
 	return res.Vault.Hex()
 }
 
+func (cfg *HyperdriveConfig) StakewiseNetwork() string {
+	res := swshared.NewStakewiseResources(cfg.Network.Value)
+	return res.NodesetNetwork
+}
+
 // Used by text/template to format validator.yml
 // Only returns the the prefix
 func (cfg *HyperdriveConfig) graffitiPrefix() string {
