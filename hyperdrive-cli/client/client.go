@@ -59,7 +59,7 @@ func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
 	snCtx := context.GetHyperdriveContext(c)
 	socketPath := filepath.Join(snCtx.ConfigPath, swconfig.SocketFilename)
 	client := &StakewiseClient{
-		Api:     swclient.NewApiClient(swconfig.DaemonRoute, socketPath, snCtx.DebugEnabled),
+		Api:     swclient.NewApiClient(swconfig.ModuleName, socketPath, snCtx.DebugEnabled),
 		Context: snCtx,
 	}
 	return client

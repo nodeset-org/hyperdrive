@@ -17,7 +17,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
-	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
@@ -478,7 +477,15 @@ func (c *HyperdriveClient) deployTemplates(cfg *GlobalConfig, hyperdriveDir stri
 	}
 
 	// Deploy modules
-	return c.composeModules(cfg, hyperdriveDir, deployedContainers)
+	for _, module := range cfg.GetAllModuleConfigs() {
+		if module.IsEnabled() {
+			deployedContainers, err = c.composeModule(module, hyperdriveDir, deployedContainers)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return deployedContainers, nil
 }
 
 // Make sure the override files have all been copied to the local user dir
@@ -526,35 +533,29 @@ func copyOverrideFiles(sourceDir string, targetDir string) error {
 }
 
 // Handle composing for modules
-func (c *HyperdriveClient) composeModules(cfg *GlobalConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
-	// Stakewise
-	if cfg.Stakewise.Enabled.Value {
-		composePaths := template.ComposePaths{
-			RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, modconfig.ModulesName, swconfig.DaemonRoute),
-			TemplatePath: filepath.Join(templatesDir, modconfig.ModulesName, swconfig.DaemonRoute),
-			OverridePath: filepath.Join(hyperdriveDir, overrideDir, modconfig.ModulesName, swconfig.DaemonRoute),
-		}
+func (c *HyperdriveClient) composeModule(cfg modconfig.IModuleConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
+	moduleName := cfg.GetModuleName()
+	composePaths := template.ComposePaths{
+		RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, modconfig.ModulesName, moduleName),
+		TemplatePath: filepath.Join(templatesDir, modconfig.ModulesName, moduleName),
+		OverridePath: filepath.Join(hyperdriveDir, overrideDir, modconfig.ModulesName, moduleName),
+	}
 
-		// These containers always run
-		toDeploy := []types.ContainerID{
-			swconfig.ContainerID_StakewiseDaemon,
-			swconfig.ContainerID_StakewiseOperator,
-			swconfig.ContainerID_StakewiseValidator,
-		}
+	// These containers always run
+	toDeploy := cfg.GetContainersToDeploy()
 
-		// Make the modules folder
-		err := os.MkdirAll(composePaths.RuntimePath, 0775)
+	// Make the modules folder
+	err := os.MkdirAll(composePaths.RuntimePath, 0775)
+	if err != nil {
+		return []string{}, fmt.Errorf("error creating modules runtime folder (%s): %w", composePaths.RuntimePath, err)
+	}
+
+	for _, containerName := range toDeploy {
+		containers, err := composePaths.File(string(containerName)).Write(cfg)
 		if err != nil {
-			return []string{}, fmt.Errorf("error creating modules runtime folder (%s): %w", composePaths.RuntimePath, err)
+			return []string{}, fmt.Errorf("could not create %s container definition: %w", containerName, err)
 		}
-
-		for _, containerName := range toDeploy {
-			containers, err := composePaths.File(string(containerName)).Write(cfg)
-			if err != nil {
-				return []string{}, fmt.Errorf("could not create %s container definition: %w", containerName, err)
-			}
-			deployedContainers = append(deployedContainers, containers...)
-		}
+		deployedContainers = append(deployedContainers, containers...)
 	}
 
 	return deployedContainers, nil

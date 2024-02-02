@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	baseUrl         string          = "http://" + swconfig.DaemonRoute + "/%s"
+	baseUrl         string          = "http://" + swconfig.ModuleName + "/%s"
 	jsonContentType string          = "application/json"
 	apiColor        color.Attribute = color.FgHiCyan
 )

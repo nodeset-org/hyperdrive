@@ -21,7 +21,7 @@ func NewStakewiseServer(sp *swcommon.StakewiseServiceProvider) (*StakewiseServer
 		swnodeset.NewNodesetHandler(sp),
 		swwallet.NewWalletHandler(sp),
 	}
-	mgr, err := server.NewApiServer(socketPath, handlers, swconfig.DaemonRoute)
+	mgr, err := server.NewApiServer(socketPath, handlers, swconfig.ModuleName)
 	if err != nil {
 		return nil, err
 	}

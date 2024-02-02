@@ -12,12 +12,15 @@ type IModuleConfig interface {
 
 	GetModuleName() string
 
-	// A map of the Validator Client suffixes to their container tags
-	GetValidatorContainerTagInfo() map[string]string
+	// A map of the Validator Client IDs to their container tags
+	GetValidatorContainerTagInfo() map[types.ContainerID]string
 
 	// Return if doppelganger detection is enabled for any of the VCs
 	IsDoppelgangerEnabled() bool
 
 	// True if the module is enabled
 	IsEnabled() bool
+
+	// Get the list of containers that should be deployed
+	GetContainersToDeploy() []types.ContainerID
 }

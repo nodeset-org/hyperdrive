@@ -133,12 +133,20 @@ func (cfg *StakewiseConfig) GetSubconfigs() map[string]types.IConfigSection {
 
 // The module name
 func (cfg *StakewiseConfig) GetModuleName() string {
-	return "stakewise"
+	return ModuleName
 }
 
-func (cfg *StakewiseConfig) GetValidatorContainerTagInfo() map[string]string {
-	return map[string]string{
-		string(ContainerID_StakewiseValidator): cfg.GetStakewiseVcContainerTag(),
+func (cfg *StakewiseConfig) GetValidatorContainerTagInfo() map[types.ContainerID]string {
+	return map[types.ContainerID]string{
+		ContainerID_StakewiseValidator: cfg.GetStakewiseVcContainerTag(),
+	}
+}
+
+func (cfg *StakewiseConfig) GetContainersToDeploy() []types.ContainerID {
+	return []types.ContainerID{
+		ContainerID_StakewiseDaemon,
+		ContainerID_StakewiseOperator,
+		ContainerID_StakewiseValidator,
 	}
 }
 

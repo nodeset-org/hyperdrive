@@ -31,6 +31,17 @@ func (c *GlobalConfig) GetAllModuleConfigs() []modconfig.IModuleConfig {
 	}
 }
 
+// Get the configs for all of the modules in the system that are enabled
+func (c *GlobalConfig) GetEnabledModuleConfigNames() []string {
+	names := []string{}
+	for _, cfg := range c.GetAllModuleConfigs() {
+		if cfg.IsEnabled() {
+			names = append(names, cfg.GetModuleName())
+		}
+	}
+	return names
+}
+
 // Serialize the config and all modules
 func (c *GlobalConfig) Serialize() map[string]any {
 	return c.Hyperdrive.Serialize(c.GetAllModuleConfigs())
@@ -145,7 +156,16 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*types.ChangedSect
 	sectionList = getChanges(oldConfig.Hyperdrive, c.Hyperdrive, sectionList, changedContainers)
 	sectionList = getChanges(oldConfig.Stakewise, c.Stakewise, sectionList, changedContainers)
 
-	// TODO: HANDLE HD CHANGING VCS
+	// Add all VCs to the list of changed containers if any change requires a VC change
+	if changedContainers[types.ContainerID_ValidatorClients] {
+		delete(changedContainers, types.ContainerID_ValidatorClients)
+		for _, module := range c.GetAllModuleConfigs() {
+			vcInfo := module.GetValidatorContainerTagInfo()
+			for name := range vcInfo {
+				changedContainers[name] = true
+			}
+		}
+	}
 
 	// Check if the network has changed
 	changeNetworks := false

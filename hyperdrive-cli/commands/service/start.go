@@ -346,7 +346,7 @@ func getVcContainerTagParamMap(cfg *client.GlobalConfig, vcs []string) (map[stri
 	for _, module := range modCfgs {
 		vcInfo := module.GetValidatorContainerTagInfo()
 		for name, tag := range vcInfo {
-			fullName := cfg.Hyperdrive.GetDockerArtifactName(name)
+			fullName := cfg.Hyperdrive.GetDockerArtifactName(string(name))
 			if _, exists := containerTagMap[fullName]; exists {
 				return nil, fmt.Errorf("validator client map already had an entry named [%s]", fullName)
 			}
