@@ -2,8 +2,8 @@ package config
 
 func createExternalEcSettingsStep(wiz *wizard, currentStep int, totalSteps int) *textBoxWizardStep {
 	// Create the labels
-	httpLabel := wiz.md.Config.ExternalExecutionConfig.HttpUrl.Name
-	wsLabel := wiz.md.Config.ExternalExecutionConfig.WebsocketUrl.Name
+	httpLabel := wiz.md.Config.Hyperdrive.ExternalExecutionConfig.HttpUrl.Name
+	wsLabel := wiz.md.Config.Hyperdrive.ExternalExecutionConfig.WebsocketUrl.Name
 
 	helperText := "Please enter the URL of the HTTP-based RPC API and the URL of the Websocket-based RPC API for your existing client.\n\nFor example: `http://192.168.1.45:8545` and `ws://192.168.1.45:8546`"
 
@@ -11,7 +11,7 @@ func createExternalEcSettingsStep(wiz *wizard, currentStep int, totalSteps int) 
 		wiz.md.setPage(modal.page)
 		modal.focus()
 		for label, box := range modal.textboxes {
-			for _, param := range wiz.md.Config.ExternalExecutionConfig.GetParameters() {
+			for _, param := range wiz.md.Config.Hyperdrive.ExternalExecutionConfig.GetParameters() {
 				if param.GetCommon().Name == label {
 					box.SetText(param.String())
 				}
@@ -20,8 +20,8 @@ func createExternalEcSettingsStep(wiz *wizard, currentStep int, totalSteps int) 
 	}
 
 	done := func(text map[string]string) {
-		wiz.md.Config.ExternalExecutionConfig.HttpUrl.Value = text[httpLabel]
-		wiz.md.Config.ExternalExecutionConfig.WebsocketUrl.Value = text[wsLabel]
+		wiz.md.Config.Hyperdrive.ExternalExecutionConfig.HttpUrl.Value = text[httpLabel]
+		wiz.md.Config.Hyperdrive.ExternalExecutionConfig.WebsocketUrl.Value = text[wsLabel]
 		wiz.externalBnSelectModal.show()
 	}
 
@@ -37,8 +37,8 @@ func createExternalEcSettingsStep(wiz *wizard, currentStep int, totalSteps int) 
 		70,
 		"Execution Client (External) > Settings",
 		[]string{httpLabel, wsLabel},
-		[]int{wiz.md.Config.ExternalExecutionConfig.HttpUrl.MaxLength, wiz.md.Config.ExternalExecutionConfig.WebsocketUrl.MaxLength},
-		[]string{wiz.md.Config.ExternalExecutionConfig.HttpUrl.Regex, wiz.md.Config.ExternalExecutionConfig.WebsocketUrl.Regex},
+		[]int{wiz.md.Config.Hyperdrive.ExternalExecutionConfig.HttpUrl.MaxLength, wiz.md.Config.Hyperdrive.ExternalExecutionConfig.WebsocketUrl.MaxLength},
+		[]string{wiz.md.Config.Hyperdrive.ExternalExecutionConfig.HttpUrl.Regex, wiz.md.Config.Hyperdrive.ExternalExecutionConfig.WebsocketUrl.Regex},
 		show,
 		done,
 		back,

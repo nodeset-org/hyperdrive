@@ -9,7 +9,7 @@ func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choice
 
 	show := func(modal *choiceModalLayout) {
 		wiz.md.setPage(modal.page)
-		if wiz.md.Config.Fallback.UseFallbackClients.Value == false {
+		if wiz.md.Config.Hyperdrive.Fallback.UseFallbackClients.Value == false {
 			modal.focus(0)
 		} else {
 			modal.focus(1)
@@ -18,21 +18,21 @@ func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choice
 
 	done := func(buttonIndex int, buttonLabel string) {
 		if buttonIndex == 1 {
-			wiz.md.Config.Fallback.UseFallbackClients.Value = true
-			if (wiz.md.Config.ClientMode.Value == types.ClientMode_Local && wiz.md.Config.LocalBeaconConfig.BeaconNode.Value == types.BeaconNode_Prysm) ||
-				(wiz.md.Config.ClientMode.Value == types.ClientMode_External && wiz.md.Config.ExternalBeaconConfig.BeaconNode.Value == types.BeaconNode_Prysm) {
+			wiz.md.Config.Hyperdrive.Fallback.UseFallbackClients.Value = true
+			if (wiz.md.Config.Hyperdrive.ClientMode.Value == types.ClientMode_Local && wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == types.BeaconNode_Prysm) ||
+				(wiz.md.Config.Hyperdrive.ClientMode.Value == types.ClientMode_External && wiz.md.Config.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value == types.BeaconNode_Prysm) {
 				wiz.fallbackPrysmModal.show()
 			} else {
 				wiz.fallbackNormalModal.show()
 			}
 		} else {
-			wiz.md.Config.Fallback.UseFallbackClients.Value = false
+			wiz.md.Config.Hyperdrive.Fallback.UseFallbackClients.Value = false
 			wiz.modulesModal.show()
 		}
 	}
 
 	back := func() {
-		if wiz.md.Config.ClientMode.Value == types.ClientMode_Local {
+		if wiz.md.Config.Hyperdrive.ClientMode.Value == types.ClientMode_Local {
 			wiz.checkpointSyncProviderModal.show()
 		} else {
 			wiz.externalBnSelectModal.show()

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"net"
 
 	externalip "github.com/glendc/go-external-ip"
@@ -52,15 +51,4 @@ func getExternalIP() (net.IP, error) {
 	ip6Consensus := externalip.DefaultConsensus(nil, nil)
 	ip6Consensus.UseIPProtocol(6)
 	return ip6Consensus.ExternalIP()
-}
-
-// Check a port setting to see if it's already used elsewhere
-func addAndCheckForDuplicate(portMap map[uint16]bool, param types.Parameter[uint16], errors []string) (map[uint16]bool, []string) {
-	port := param.Value
-	if portMap[port] {
-		return portMap, append(errors, fmt.Sprintf("Port %d for %s is already in use", port, param.GetCommon().Name))
-	} else {
-		portMap[port] = true
-	}
-	return portMap, errors
 }

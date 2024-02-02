@@ -8,7 +8,7 @@ import (
 
 func createModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
 	// Create the button names and descriptions from the config
-	modes := wiz.md.Config.ClientMode.Options
+	modes := wiz.md.Config.Hyperdrive.ClientMode.Options
 	modeNames := []string{}
 	modeDescriptions := []string{}
 	for _, mode := range modes {
@@ -22,8 +22,8 @@ func createModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardS
 		wiz.md.setPage(modal.page)
 		modal.focus(0) // Catch-all for safety
 
-		for i, option := range wiz.md.Config.ClientMode.Options {
-			if option.Value == wiz.md.Config.ClientMode.Value {
+		for i, option := range wiz.md.Config.Hyperdrive.ClientMode.Options {
+			if option.Value == wiz.md.Config.Hyperdrive.ClientMode.Value {
 				modal.focus(i)
 				break
 			}
@@ -31,7 +31,7 @@ func createModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardS
 	}
 
 	done := func(buttonIndex int, buttonLabel string) {
-		wiz.md.Config.ClientMode.Value = modes[buttonIndex].Value
+		wiz.md.Config.Hyperdrive.ClientMode.Value = modes[buttonIndex].Value
 		switch modes[buttonIndex].Value {
 		case types.ClientMode_Local:
 			wiz.ecLocalModal.show()

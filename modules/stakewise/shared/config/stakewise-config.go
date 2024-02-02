@@ -219,3 +219,7 @@ func (cfg *StakewiseConfig) StakewiseNetwork() string {
 	res := swshared.NewStakewiseResources(cfg.hdCfg.Network.Value)
 	return res.NodesetNetwork
 }
+
+func (cfg *StakewiseConfig) IsEnabled() bool {
+	return cfg.Enabled.Value
+}

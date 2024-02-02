@@ -2,7 +2,7 @@ package config
 
 func createExternalEcSelectStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
 	// Create the button names and descriptions from the config
-	clients := wiz.md.Config.ExternalExecutionConfig.ExecutionClient.Options
+	clients := wiz.md.Config.Hyperdrive.ExternalExecutionConfig.ExecutionClient.Options
 	clientNames := []string{}
 	for _, client := range clients {
 		clientNames = append(clientNames, client.Name)
@@ -14,8 +14,8 @@ func createExternalEcSelectStep(wiz *wizard, currentStep int, totalSteps int) *c
 		wiz.md.setPage(modal.page)
 		modal.focus(0) // Catch-all for safety
 
-		for i, option := range wiz.md.Config.ExternalExecutionConfig.ExecutionClient.Options {
-			if option.Value == wiz.md.Config.ExternalExecutionConfig.ExecutionClient.Value {
+		for i, option := range wiz.md.Config.Hyperdrive.ExternalExecutionConfig.ExecutionClient.Options {
+			if option.Value == wiz.md.Config.Hyperdrive.ExternalExecutionConfig.ExecutionClient.Value {
 				modal.focus(i)
 				break
 			}

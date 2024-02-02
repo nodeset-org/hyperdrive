@@ -48,7 +48,7 @@ func createRandomPrysmStep(wiz *wizard, currentStep int, totalSteps int, goodOpt
 
 func createRandomBnStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []*types.ParameterOption[types.BeaconNode]) *choiceWizardStep {
 	var selectedClientName string
-	selectedClient := wiz.md.Config.LocalBeaconConfig.BeaconNode.Value
+	selectedClient := wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value
 	for _, clientOption := range goodOptions {
 		if clientOption.Value == selectedClient {
 			selectedClientName = clientOption.Name

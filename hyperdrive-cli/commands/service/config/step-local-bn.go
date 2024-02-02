@@ -18,7 +18,7 @@ func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 	clientNames := []string{"Random (Recommended)"}
 	clientDescriptions := []string{"Select a client randomly to help promote the diversity of the Beacon Chain. We recommend you do this unless you have a strong reason to pick a specific client. To learn more about why client diversity is important, please visit https://clientdiversity.org for an explanation."}
 	clients := []*types.ParameterOption[types.BeaconNode]{}
-	for _, client := range wiz.md.Config.LocalBeaconConfig.BeaconNode.Options {
+	for _, client := range wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Options {
 		clientNames = append(clientNames, client.Name)
 		clientDescriptions = append(clientDescriptions, getAugmentedBnDescription(client.Value, client.Description))
 		clients = append(clients, client)
@@ -32,8 +32,8 @@ func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 
 		if !wiz.md.isNew {
 			var bnName string
-			for _, option := range wiz.md.Config.LocalBeaconConfig.BeaconNode.Options {
-				if option.Value == wiz.md.Config.LocalBeaconConfig.BeaconNode.Value {
+			for _, option := range wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Options {
+				if option.Value == wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value {
 					bnName = option.Name
 					break
 				}
@@ -55,7 +55,7 @@ func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 		} else {
 			buttonLabel = strings.TrimSpace(buttonLabel)
 			selectedClient := types.BeaconNode_Unknown
-			for _, client := range wiz.md.Config.LocalBeaconConfig.BeaconNode.Options {
+			for _, client := range wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Options {
 				if client.Name == buttonLabel {
 					selectedClient = client.Value
 					break
@@ -64,7 +64,7 @@ func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 			if selectedClient == types.BeaconNode_Unknown {
 				panic(fmt.Sprintf("Local BN selection buttons didn't match any known clients, buttonLabel = %s\n", buttonLabel))
 			}
-			wiz.md.Config.LocalBeaconConfig.BeaconNode.Value = selectedClient
+			wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value = selectedClient
 			switch selectedClient {
 			//case config.ConsensusClient_Prysm:
 			//	wiz.consensusLocalPrysmWarning.show()
@@ -131,7 +131,7 @@ func selectRandomBn(goodOptions []*types.ParameterOption[types.BeaconNode], incl
 	// Select a random client
 	rand.Seed(time.Now().UnixNano())
 	selectedClient := filteredClients[rand.Intn(len(filteredClients))]
-	wiz.md.Config.LocalBeaconConfig.BeaconNode.Value = selectedClient
+	wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value = selectedClient
 
 	// Show the selection page
 	/*

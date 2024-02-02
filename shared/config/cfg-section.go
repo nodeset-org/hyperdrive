@@ -68,7 +68,7 @@ func Deserialize(cfg types.IConfigSection, serializedParams map[string]any, netw
 }
 
 // Copy a section's settings into the corresponding section of a new config
-func clone(source types.IConfigSection, target types.IConfigSection, network types.Network) {
+func Clone(source types.IConfigSection, target types.IConfigSection, network types.Network) {
 	// Handle the parameters
 	targetParams := target.GetParameters()
 	for i, sourceParam := range source.GetParameters() {
@@ -79,12 +79,12 @@ func clone(source types.IConfigSection, target types.IConfigSection, network typ
 	// Handle the subconfigs
 	targetSubconfigs := target.GetSubconfigs()
 	for i, sourceSubconfig := range source.GetSubconfigs() {
-		clone(sourceSubconfig, targetSubconfigs[i], network)
+		Clone(sourceSubconfig, targetSubconfigs[i], network)
 	}
 }
 
 // Change the active network for an entire configuration
-func changeNetwork(cfg types.IConfigSection, oldNetwork types.Network, newNetwork types.Network) {
+func ChangeNetwork(cfg types.IConfigSection, oldNetwork types.Network, newNetwork types.Network) {
 	// Update the master parameters
 	params := cfg.GetParameters()
 	for _, param := range params {
@@ -94,12 +94,12 @@ func changeNetwork(cfg types.IConfigSection, oldNetwork types.Network, newNetwor
 	// Update all of the child config objects
 	subconfigs := cfg.GetSubconfigs()
 	for _, subconfig := range subconfigs {
-		changeNetwork(subconfig, oldNetwork, newNetwork)
+		ChangeNetwork(subconfig, oldNetwork, newNetwork)
 	}
 }
 
 // Update the default settings after a network change
-func updateDefaults(cfg types.IConfigSection, newNetwork types.Network) {
+func UpdateDefaults(cfg types.IConfigSection, newNetwork types.Network) {
 	// Update the parameters
 	for _, param := range cfg.GetParameters() {
 		if param.GetCommon().OverwriteOnUpgrade {
@@ -109,12 +109,12 @@ func updateDefaults(cfg types.IConfigSection, newNetwork types.Network) {
 
 	// Update the subconfigs
 	for _, subconfig := range cfg.GetSubconfigs() {
-		updateDefaults(subconfig, newNetwork)
+		UpdateDefaults(subconfig, newNetwork)
 	}
 }
 
 // Apply the default settings for each parameter and subparameter
-func applyDefaults(cfg types.IConfigSection, network types.Network) {
+func ApplyDefaults(cfg types.IConfigSection, network types.Network) {
 	// Update the parameters
 	for _, param := range cfg.GetParameters() {
 		param.SetToDefault(network)
@@ -122,6 +122,6 @@ func applyDefaults(cfg types.IConfigSection, network types.Network) {
 
 	// Update the subconfigs
 	for _, subconfig := range cfg.GetSubconfigs() {
-		applyDefaults(subconfig, network)
+		ApplyDefaults(subconfig, network)
 	}
 }

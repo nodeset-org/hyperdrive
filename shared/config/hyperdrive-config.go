@@ -369,34 +369,10 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	return nil
 }
 
-// Create a copy of this configuration
-func (cfg *HyperdriveConfig) CreateCopy() *HyperdriveConfig {
-	cfgCopy := NewHyperdriveConfig(cfg.HyperdriveUserDirectory)
-	network := cfg.Network.Value
-	clone(cfg, cfgCopy, network)
-	return cfgCopy
-}
-
-// Handle a network change on all of the parameters
-func (cfg *HyperdriveConfig) ChangeNetwork(newNetwork types.Network) {
-	// Get the current network
-	oldNetwork := cfg.Network.Value
-	if oldNetwork == newNetwork {
-		return
-	}
-	cfg.Network.Value = newNetwork
-	changeNetwork(cfg, oldNetwork, newNetwork)
-}
-
-// Update the default settings for all overwrite-on-upgrade parameters
-func (cfg *HyperdriveConfig) UpdateDefaults() {
-	updateDefaults(cfg, cfg.Network.Value)
-}
-
 // Get all of the settings that have changed between an old config and this config, and get all of the containers that are affected by those changes - also returns whether or not the selected network was changed
 func (cfg *HyperdriveConfig) GetChanges(oldConfig *HyperdriveConfig) (*types.ChangedSection, map[types.ContainerID]bool, bool) {
 	// Get the changed parameters
-	section, changeCount := getChangedSettings(oldConfig, cfg)
+	section, changeCount := GetChangedSettings(oldConfig, cfg)
 	if changeCount == 0 {
 		return nil, map[types.ContainerID]bool{}, false
 	}
@@ -404,7 +380,7 @@ func (cfg *HyperdriveConfig) GetChanges(oldConfig *HyperdriveConfig) (*types.Cha
 
 	// Get the affected containers
 	containers := map[types.ContainerID]bool{}
-	getAffectedContainers(section, containers)
+	GetAffectedContainers(section, containers)
 
 	// Check if the network has changed
 	changeNetworks := false
@@ -416,46 +392,6 @@ func (cfg *HyperdriveConfig) GetChanges(oldConfig *HyperdriveConfig) (*types.Cha
 	return section, containers, changeNetworks
 }
 
-// Checks to see if the current configuration is valid; if not, returns a list of errors
-func (cfg *HyperdriveConfig) Validate() []string {
-	errors := []string{}
-
-	// Check for illegal blank strings
-	/* TODO - this needs to be smarter and ignore irrelevant settings
-	for _, param := range config.GetParameters() {
-		if param.Type == ParameterType_String && !param.CanBeBlank && param.Value == "" {
-			errors = append(errors, fmt.Sprintf("[%s] cannot be blank.", param.Name))
-		}
-	}
-
-	for name, subconfig := range config.GetSubconfigs() {
-		for _, param := range subconfig.GetParameters() {
-			if param.Type == ParameterType_String && !param.CanBeBlank && param.Value == "" {
-				errors = append(errors, fmt.Sprintf("[%s - %s] cannot be blank.", name, param.Name))
-			}
-		}
-	}
-	*/
-
-	// Ensure the selected port numbers are unique. Keeps track of all the errors
-	portMap := make(map[uint16]bool)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalBeaconConfig.HttpPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalBeaconConfig.P2pPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalExecutionConfig.HttpPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalExecutionConfig.WebsocketPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalExecutionConfig.EnginePort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.LocalExecutionConfig.P2pPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.EcMetricsPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.BnMetricsPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.Prometheus.Port, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.ExporterMetricsPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.Grafana.Port, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, cfg.Metrics.DaemonMetricsPort, errors)
-	_, errors = addAndCheckForDuplicate(portMap, cfg.LocalBeaconConfig.Lighthouse.P2pQuicPort, errors)
-
-	return errors
-}
-
 // =====================
 // === Field Helpers ===
 // =====================
@@ -463,7 +399,7 @@ func (cfg *HyperdriveConfig) Validate() []string {
 // Applies all of the defaults to all of the settings that have them defined
 func (cfg *HyperdriveConfig) applyAllDefaults() {
 	network := cfg.Network.Value
-	applyDefaults(cfg, network)
+	ApplyDefaults(cfg, network)
 }
 
 // Get the list of options for networks to run on

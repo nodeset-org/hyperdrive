@@ -17,13 +17,13 @@ const reviewPageID string = "review-settings"
 // The changed settings review page
 type ReviewPage struct {
 	md              *mainDisplay
-	changedSettings *types.ChangedSection
+	changedSettings []*types.ChangedSection
 	page            *page
 }
 
 // Create a page to review any changes
 func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *client.GlobalConfig) *ReviewPage {
-	var changedSettings *types.ChangedSection
+	var changedSettings []*types.ChangedSection
 	var totalAffectedContainers map[types.ContainerID]bool
 	var changeNetworks bool
 	var containersToRestart []types.ContainerID
@@ -57,8 +57,10 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 		}
 
 		// Get the map of changed settings by section name
-		if changedSettings != nil {
-			addChangesToDescription(changedSettings, "", &builder)
+		if len(changedSettings) > 0 {
+			for _, change := range changedSettings {
+				addChangesToDescription(change, "", &builder)
+			}
 		}
 
 		// Print the list of containers to restart

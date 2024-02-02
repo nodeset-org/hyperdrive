@@ -10,7 +10,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
@@ -109,8 +108,10 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Write a note on doppelganger protection
-	if cfg.IsDoppelgangerEnabled() {
-		fmt.Printf("%sNOTE: You currently have Doppelganger Protection enabled on at least one module.\nYour Validator Client will miss up to 3 attestations when it starts.\nThis is *intentional* and does not indicate a problem with your node.%s\n\n", terminal.ColorBold, terminal.ColorReset)
+	for _, module := range cfg.GetAllModuleConfigs() {
+		if module.IsDoppelgangerEnabled() {
+			fmt.Printf("%sNOTE: You currently have Doppelganger Protection enabled on at least one module.\nYour Validator Client will miss up to 3 attestations when it starts.\nThis is *intentional* and does not indicate a problem with your node.%s\n\n", terminal.ColorBold, terminal.ColorReset)
+		}
 	}
 
 	// Start service
@@ -337,36 +338,20 @@ func showSlashingDelay(remainingTime time.Duration) {
 	fmt.Println("You may now safely start Hyperdrive without fear of being slashed.")
 }
 
-// !!!!
-// THIS IS A TOTAL HACK DESIGNED TO PROTECT YOU FROM FORGETTING TO ADD A MODULE, DO THIS BETTER WHEN MODULES ARE PROPERLY SPLIT OUT
-// !!!!
+// Get the map of tags
 func getVcContainerTagParamMap(cfg *client.GlobalConfig, vcs []string) (map[string]string, error) {
 	containerTagMap := map[string]string{}
 
-	// Get the VC names
-	stakewiseVc := cfg.Hyperdrive.GetDockerArtifactName(string(swconfig.ContainerID_StakewiseValidator))
-
-	// Get the BN being used
-	var bn types.BeaconNode
-	if cfg.Hyperdrive.IsLocalMode() {
-		bn = cfg.Hyperdrive.LocalBeaconConfig.BeaconNode.Value
-	} else {
-		bn = cfg.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value
-	}
-
-	switch bn {
-	case types.BeaconNode_Lighthouse:
-		containerTagMap[stakewiseVc] = cfg.Stakewise.Lighthouse.ContainerTag.Value
-	case types.BeaconNode_Lodestar:
-		containerTagMap[stakewiseVc] = cfg.Stakewise.Lodestar.ContainerTag.Value
-	case types.BeaconNode_Nimbus:
-		containerTagMap[stakewiseVc] = cfg.Stakewise.Nimbus.ContainerTag.Value
-	case types.BeaconNode_Prysm:
-		containerTagMap[stakewiseVc] = cfg.Stakewise.Prysm.ContainerTag.Value
-	case types.BeaconNode_Teku:
-		containerTagMap[stakewiseVc] = cfg.Stakewise.Teku.ContainerTag.Value
-	default:
-		panic(fmt.Sprintf("unknown Beacon Node type: [%v]", bn))
+	modCfgs := cfg.GetAllModuleConfigs()
+	for _, module := range modCfgs {
+		vcInfo := module.GetValidatorContainerTagInfo()
+		for name, tag := range vcInfo {
+			fullName := cfg.Hyperdrive.GetDockerArtifactName(name)
+			if _, exists := containerTagMap[fullName]; exists {
+				return nil, fmt.Errorf("validator client map already had an entry named [%s]", fullName)
+			}
+			containerTagMap[fullName] = tag
+		}
 	}
 
 	// SANITY CHECK

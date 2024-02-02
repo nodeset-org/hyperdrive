@@ -5,7 +5,7 @@ func createMetricsStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 
 	show := func(modal *choiceModalLayout) {
 		wiz.md.setPage(modal.page)
-		if wiz.md.Config.Metrics.EnableMetrics.Value == false {
+		if wiz.md.Config.Hyperdrive.Metrics.EnableMetrics.Value == false {
 			modal.focus(0)
 		} else {
 			modal.focus(1)
@@ -14,9 +14,9 @@ func createMetricsStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 
 	done := func(buttonIndex int, buttonLabel string) {
 		if buttonIndex == 1 {
-			wiz.md.Config.Metrics.EnableMetrics.Value = true
+			wiz.md.Config.Hyperdrive.Metrics.EnableMetrics.Value = true
 		} else {
-			wiz.md.Config.Metrics.EnableMetrics.Value = false
+			wiz.md.Config.Hyperdrive.Metrics.EnableMetrics.Value = false
 		}
 		wiz.finishedModal.show()
 	}

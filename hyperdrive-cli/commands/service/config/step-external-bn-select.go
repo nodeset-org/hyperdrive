@@ -4,7 +4,7 @@ import "github.com/nodeset-org/hyperdrive/shared/types"
 
 func createExternalBnSelectStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
 	// Create the button names and descriptions from the config
-	clients := wiz.md.Config.ExternalBeaconConfig.BeaconNode.Options
+	clients := wiz.md.Config.Hyperdrive.ExternalBeaconConfig.BeaconNode.Options
 	clientNames := []string{}
 	for _, client := range clients {
 		clientNames = append(clientNames, client.Name)
@@ -16,8 +16,8 @@ func createExternalBnSelectStep(wiz *wizard, currentStep int, totalSteps int) *c
 		wiz.md.setPage(modal.page)
 		modal.focus(0) // Catch-all for safety
 
-		for i, option := range wiz.md.Config.ExternalBeaconConfig.BeaconNode.Options {
-			if option.Value == wiz.md.Config.ExternalBeaconConfig.BeaconNode.Value {
+		for i, option := range wiz.md.Config.Hyperdrive.ExternalBeaconConfig.BeaconNode.Options {
+			if option.Value == wiz.md.Config.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value {
 				modal.focus(i)
 				break
 			}
@@ -25,7 +25,7 @@ func createExternalBnSelectStep(wiz *wizard, currentStep int, totalSteps int) *c
 	}
 
 	done := func(buttonIndex int, buttonLabel string) {
-		switch wiz.md.Config.ExternalBeaconConfig.BeaconNode.Value {
+		switch wiz.md.Config.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value {
 		case types.BeaconNode_Prysm:
 			wiz.externalPrysmSettingsModal.show()
 		default:
