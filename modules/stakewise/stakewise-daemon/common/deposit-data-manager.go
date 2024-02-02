@@ -59,7 +59,7 @@ func (m *DepositDataManager) GenerateDepositData(keys []*eth2types.BLSPrivateKey
 	// Create the new aggregated deposit data for all generated keys
 	dataList := make([]*types.ExtendedDepositData, len(keys))
 	for i, key := range keys {
-		depositData, err := utils.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, resources.Network)
+		depositData, err := utils.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, types.Network(resources.NodesetNetwork))
 		if err != nil {
 			pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
 			return nil, fmt.Errorf("error getting deposit data for key %s: %w", pubkey.HexWithPrefix(), err)
