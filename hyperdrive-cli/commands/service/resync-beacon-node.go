@@ -28,13 +28,13 @@ func resyncBeaconNode(c *cli.Context) error {
 	fmt.Printf("%sYou should only do this if your Beacon Node has failed and can no longer start or sync properly.\nThis is meant to be a last resort.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
 
 	// Check the client mode
-	if cfg.ClientMode.Value == types.ClientMode_External {
+	if cfg.Hyperdrive.ClientMode.Value == types.ClientMode_External {
 		fmt.Println("You use an externally-managed Beacon Node. Hyperdrive cannot resync it for you.")
 		return nil
 	}
 
 	// Get the current checkpoint sync URL
-	checkpointSyncUrl := cfg.LocalBeaconConfig.CheckpointSyncProvider.Value
+	checkpointSyncUrl := cfg.Hyperdrive.LocalBeaconConfig.CheckpointSyncProvider.Value
 	if checkpointSyncUrl == "" {
 		fmt.Printf("%sYou do not have a checkpoint sync provider configured.\nIf you have active validators, they %swill be considered offline and will lose ETH%s%s until your Beacon Node finishes syncing.\nWe strongly recommend you configure a checkpoint sync provider with `hyperdrive service config` so it syncs instantly before running this.%s\n\n", terminal.ColorRed, terminal.ColorBold, terminal.ColorReset, terminal.ColorRed, terminal.ColorReset)
 	} else {
@@ -48,7 +48,7 @@ func resyncBeaconNode(c *cli.Context) error {
 	}
 
 	// Stop the BN
-	beaconContainerName := cfg.GetDockerArtifactName(string(types.ContainerID_BeaconNode))
+	beaconContainerName := cfg.Hyperdrive.GetDockerArtifactName(string(types.ContainerID_BeaconNode))
 	fmt.Printf("Stopping %s...\n", beaconContainerName)
 	err = hd.StopContainer(beaconContainerName)
 	if err != nil {

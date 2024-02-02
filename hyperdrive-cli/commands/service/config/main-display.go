@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rivo/tview"
 )
@@ -23,15 +23,15 @@ type mainDisplay struct {
 	isUpdate            bool
 	previousWidth       int
 	previousHeight      int
-	PreviousConfig      *config.HyperdriveConfig
-	Config              *config.HyperdriveConfig
+	PreviousConfig      *client.GlobalConfig
+	Config              *client.GlobalConfig
 	ShouldSave          bool
 	ContainersToRestart []types.ContainerID
 	ChangeNetworks      bool
 }
 
 // Creates a new MainDisplay instance.
-func NewMainDisplay(app *tview.Application, previousConfig *config.HyperdriveConfig, config *config.HyperdriveConfig, isNew bool, isUpdate bool) *mainDisplay {
+func NewMainDisplay(app *tview.Application, previousConfig *client.GlobalConfig, config *client.GlobalConfig, isNew bool, isUpdate bool) *mainDisplay {
 	// Create a copy of the original config for comparison purposes
 	if previousConfig == nil {
 		previousConfig = config.CreateCopy()

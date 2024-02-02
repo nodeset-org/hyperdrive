@@ -21,7 +21,7 @@ func serviceVersion(c *cli.Context) error {
 	}
 
 	// Print what network we're on
-	err = utils.PrintNetwork(cfg.Network.Value, isNew)
+	err = utils.PrintNetwork(cfg.Hyperdrive.Network.Value, isNew)
 	if err != nil {
 		return err
 	}
@@ -35,37 +35,37 @@ func serviceVersion(c *cli.Context) error {
 	// Get the execution client string
 	var executionClientString string
 	var beaconNodeString string
-	clientMode := cfg.ClientMode.Value
+	clientMode := cfg.Hyperdrive.ClientMode.Value
 	switch clientMode {
 	case types.ClientMode_Local:
 		format := "%s (Locally managed)\n\tImage: %s"
 
 		// Execution client
-		ec := cfg.LocalExecutionConfig.ExecutionClient.Value
+		ec := cfg.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value
 		switch ec {
 		case types.ExecutionClient_Geth:
-			executionClientString = fmt.Sprintf(format, "Geth", cfg.LocalExecutionConfig.Geth.ContainerTag.Value)
+			executionClientString = fmt.Sprintf(format, "Geth", cfg.Hyperdrive.LocalExecutionConfig.Geth.ContainerTag.Value)
 		case types.ExecutionClient_Nethermind:
-			executionClientString = fmt.Sprintf(format, "Nethermind", cfg.LocalExecutionConfig.Nethermind.ContainerTag.Value)
+			executionClientString = fmt.Sprintf(format, "Nethermind", cfg.Hyperdrive.LocalExecutionConfig.Nethermind.ContainerTag.Value)
 		case types.ExecutionClient_Besu:
-			executionClientString = fmt.Sprintf(format, "Besu", cfg.LocalExecutionConfig.Besu.ContainerTag.Value)
+			executionClientString = fmt.Sprintf(format, "Besu", cfg.Hyperdrive.LocalExecutionConfig.Besu.ContainerTag.Value)
 		default:
 			return fmt.Errorf("unknown local execution client [%v]", ec)
 		}
 
 		// Beacon node
-		bn := cfg.LocalBeaconConfig.BeaconNode.Value
+		bn := cfg.Hyperdrive.LocalBeaconConfig.BeaconNode.Value
 		switch bn {
 		case types.BeaconNode_Lighthouse:
-			beaconNodeString = fmt.Sprintf(format, "Lighthouse", cfg.LocalBeaconConfig.Lighthouse.ContainerTag.Value)
+			beaconNodeString = fmt.Sprintf(format, "Lighthouse", cfg.Hyperdrive.LocalBeaconConfig.Lighthouse.ContainerTag.Value)
 		case types.BeaconNode_Lodestar:
-			beaconNodeString = fmt.Sprintf(format, "Lodestar", cfg.LocalBeaconConfig.Lodestar.ContainerTag.Value)
+			beaconNodeString = fmt.Sprintf(format, "Lodestar", cfg.Hyperdrive.LocalBeaconConfig.Lodestar.ContainerTag.Value)
 		case types.BeaconNode_Nimbus:
-			beaconNodeString = fmt.Sprintf(format, "Nimbus", cfg.LocalBeaconConfig.Nimbus.ContainerTag.Value)
+			beaconNodeString = fmt.Sprintf(format, "Nimbus", cfg.Hyperdrive.LocalBeaconConfig.Nimbus.ContainerTag.Value)
 		case types.BeaconNode_Prysm:
-			beaconNodeString = fmt.Sprintf(format, "Prysm", cfg.LocalBeaconConfig.Prysm.ContainerTag.Value)
+			beaconNodeString = fmt.Sprintf(format, "Prysm", cfg.Hyperdrive.LocalBeaconConfig.Prysm.ContainerTag.Value)
 		case types.BeaconNode_Teku:
-			beaconNodeString = fmt.Sprintf(format, "Teku", cfg.LocalBeaconConfig.Teku.ContainerTag.Value)
+			beaconNodeString = fmt.Sprintf(format, "Teku", cfg.Hyperdrive.LocalBeaconConfig.Teku.ContainerTag.Value)
 		default:
 			return fmt.Errorf("unknown local Beacon Node [%v]", bn)
 		}
@@ -74,7 +74,7 @@ func serviceVersion(c *cli.Context) error {
 		format := "Externally managed (%s)"
 
 		// Execution client
-		ec := cfg.ExternalExecutionConfig.ExecutionClient.Value
+		ec := cfg.Hyperdrive.ExternalExecutionConfig.ExecutionClient.Value
 		switch ec {
 		case types.ExecutionClient_Geth:
 			executionClientString = fmt.Sprintf(format, "Geth")
@@ -87,7 +87,7 @@ func serviceVersion(c *cli.Context) error {
 		}
 
 		// Beacon node
-		bn := cfg.ExternalBeaconConfig.BeaconNode.Value
+		bn := cfg.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value
 		switch bn {
 		case types.BeaconNode_Lighthouse:
 			beaconNodeString = fmt.Sprintf(format, "Lighthouse")

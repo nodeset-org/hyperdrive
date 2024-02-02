@@ -42,6 +42,6 @@ func (c *serviceGetConfigContext) PrepareData(data *api.ServiceGetConfigData, op
 	sp := c.handler.serviceProvider
 	cfg := sp.GetConfig()
 
-	data.Config = cfg.Serialize()
+	data.Config = cfg.Serialize(nil)
 	return nil
 }

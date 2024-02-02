@@ -18,7 +18,6 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
@@ -290,7 +289,7 @@ func (c *HyperdriveClient) PurgeData(composeFiles []string) error {
 	}
 
 	// Delete the user's data directory
-	dataPath, err := homedir.Expand(cfg.UserDataPath.Value)
+	dataPath, err := homedir.Expand(cfg.Hyperdrive.UserDataPath.Value)
 	if err != nil {
 		return fmt.Errorf("error loading data path: %w", err)
 	}
@@ -388,12 +387,12 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 	}
 
 	// Check config
-	if cfg.ClientMode.Value == types.ClientMode_Unknown {
+	if cfg.Hyperdrive.ClientMode.Value == types.ClientMode_Unknown {
 		return "", fmt.Errorf("You haven't selected local or external mode for your clients yet.\nPlease run 'hyperdrive service config' before running this command.")
-	} else if cfg.IsLocalMode() && cfg.LocalExecutionConfig.ExecutionClient.Value == types.ExecutionClient_Unknown {
+	} else if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value == types.ExecutionClient_Unknown {
 		return "", errors.New("No Execution Client selected. Please run 'hyperdrive service config' before running this command.")
 	}
-	if cfg.IsLocalMode() && cfg.LocalBeaconConfig.BeaconNode.Value == types.BeaconNode_Unknown {
+	if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == types.BeaconNode_Unknown {
 		return "", errors.New("No Beacon Node selected. Please run 'hyperdrive service config' before running this command.")
 	}
 
@@ -413,11 +412,11 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 	}
 
 	// Return command
-	return fmt.Sprintf("COMPOSE_PROJECT_NAME=%s docker compose --project-directory %s %s %s", cfg.ProjectName.Value, shellescape.Quote(expandedConfigPath), strings.Join(composeFileFlags, " "), args), nil
+	return fmt.Sprintf("COMPOSE_PROJECT_NAME=%s docker compose --project-directory %s %s %s", cfg.Hyperdrive.ProjectName.Value, shellescape.Quote(expandedConfigPath), strings.Join(composeFileFlags, " "), args), nil
 }
 
 // Deploys all of the appropriate docker compose template files and provisions them based on the provided configuration
-func (c *HyperdriveClient) deployTemplates(cfg *config.HyperdriveConfig, hyperdriveDir string) ([]string, error) {
+func (c *HyperdriveClient) deployTemplates(cfg *GlobalConfig, hyperdriveDir string) ([]string, error) {
 	// Prep the override folder
 	overrideFolder := filepath.Join(hyperdriveDir, overrideDir)
 	copyOverrideFiles(overrideSourceDir, overrideFolder)
@@ -455,13 +454,13 @@ func (c *HyperdriveClient) deployTemplates(cfg *config.HyperdriveConfig, hyperdr
 	}
 
 	// Check if we are running the Execution Layer locally
-	if cfg.IsLocalMode() {
+	if cfg.Hyperdrive.IsLocalMode() {
 		toDeploy = append(toDeploy, types.ContainerID_ExecutionClient)
 		toDeploy = append(toDeploy, types.ContainerID_BeaconNode)
 	}
 
 	// Check the metrics containers
-	if cfg.Metrics.EnableMetrics.Value == true {
+	if cfg.Hyperdrive.Metrics.EnableMetrics.Value == true {
 		toDeploy = append(toDeploy,
 			types.ContainerID_Grafana,
 			types.ContainerID_Exporter,
@@ -527,9 +526,9 @@ func copyOverrideFiles(sourceDir string, targetDir string) error {
 }
 
 // Handle composing for modules
-func (c *HyperdriveClient) composeModules(cfg *config.HyperdriveConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
+func (c *HyperdriveClient) composeModules(cfg *GlobalConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
 	// Stakewise
-	if cfg.Modules.Stakewise.Enabled.Value {
+	if cfg.Stakewise.Enabled.Value {
 		composePaths := template.ComposePaths{
 			RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, modconfig.ModulesName, swconfig.DaemonRoute),
 			TemplatePath: filepath.Join(templatesDir, modconfig.ModulesName, swconfig.DaemonRoute),

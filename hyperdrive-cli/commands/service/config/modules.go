@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/rivo/tview"
 )
 
@@ -14,7 +14,7 @@ type ModulesPage struct {
 	home          *settingsHome
 	page          *page
 	layout        *standardLayout
-	masterConfig  *config.HyperdriveConfig
+	masterConfig  *client.GlobalConfig
 	stakewisePage *StakewiseConfigPage
 	categoryList  *tview.List
 	addonSubpages []settingsPage

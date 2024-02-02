@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
@@ -12,7 +12,7 @@ type ExecutionConfigPage struct {
 	home               *settingsHome
 	page               *page
 	layout             *standardLayout
-	masterConfig       *config.HyperdriveConfig
+	masterConfig       *client.GlobalConfig
 	clientModeDropdown *parameterizedFormItem
 	localEcDropdown    *parameterizedFormItem
 	externalEcDropdown *parameterizedFormItem
@@ -54,7 +54,7 @@ func (configPage *ExecutionConfigPage) createContent() {
 
 	// Create the layout
 	configPage.layout = newStandardLayout()
-	configPage.layout.createForm(&configPage.masterConfig.Network, "Execution Client Settings")
+	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Execution Client Settings")
 
 	// Return to the home page after pressing Escape
 	configPage.layout.form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -76,14 +76,14 @@ func (configPage *ExecutionConfigPage) createContent() {
 	})
 
 	// Set up the form items
-	configPage.clientModeDropdown = createParameterizedDropDown(&configPage.masterConfig.ClientMode, configPage.layout.descriptionBox)
-	configPage.localEcDropdown = createParameterizedDropDown(&configPage.masterConfig.LocalExecutionConfig.ExecutionClient, configPage.layout.descriptionBox)
-	configPage.externalEcDropdown = createParameterizedDropDown(&configPage.masterConfig.ExternalExecutionConfig.ExecutionClient, configPage.layout.descriptionBox)
-	configPage.localEcItems = createParameterizedFormItems(configPage.masterConfig.LocalExecutionConfig.GetParameters(), configPage.layout.descriptionBox)
-	configPage.gethItems = createParameterizedFormItems(configPage.masterConfig.LocalExecutionConfig.Geth.GetParameters(), configPage.layout.descriptionBox)
-	configPage.nethermindItems = createParameterizedFormItems(configPage.masterConfig.LocalExecutionConfig.Nethermind.GetParameters(), configPage.layout.descriptionBox)
-	configPage.besuItems = createParameterizedFormItems(configPage.masterConfig.LocalExecutionConfig.Besu.GetParameters(), configPage.layout.descriptionBox)
-	configPage.externalEcItems = createParameterizedFormItems(configPage.masterConfig.ExternalExecutionConfig.GetParameters(), configPage.layout.descriptionBox)
+	configPage.clientModeDropdown = createParameterizedDropDown(&configPage.masterConfig.Hyperdrive.ClientMode, configPage.layout.descriptionBox)
+	configPage.localEcDropdown = createParameterizedDropDown(&configPage.masterConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient, configPage.layout.descriptionBox)
+	configPage.externalEcDropdown = createParameterizedDropDown(&configPage.masterConfig.Hyperdrive.ExternalExecutionConfig.ExecutionClient, configPage.layout.descriptionBox)
+	configPage.localEcItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalExecutionConfig.GetParameters(), configPage.layout.descriptionBox)
+	configPage.gethItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalExecutionConfig.Geth.GetParameters(), configPage.layout.descriptionBox)
+	configPage.nethermindItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalExecutionConfig.Nethermind.GetParameters(), configPage.layout.descriptionBox)
+	configPage.besuItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalExecutionConfig.Besu.GetParameters(), configPage.layout.descriptionBox)
+	configPage.externalEcItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.ExternalExecutionConfig.GetParameters(), configPage.layout.descriptionBox)
 
 	// Take the client selections out since they're done explicitly
 	localEcItems := []*parameterizedFormItem{}
@@ -114,24 +114,24 @@ func (configPage *ExecutionConfigPage) createContent() {
 
 	// Set up the setting callbacks
 	configPage.clientModeDropdown.item.(*DropDown).SetSelectedFunc(func(text string, index int) {
-		if configPage.masterConfig.ClientMode.Value == configPage.masterConfig.ClientMode.Options[index].Value {
+		if configPage.masterConfig.Hyperdrive.ClientMode.Value == configPage.masterConfig.Hyperdrive.ClientMode.Options[index].Value {
 			return
 		}
-		configPage.masterConfig.ClientMode.Value = configPage.masterConfig.ClientMode.Options[index].Value
+		configPage.masterConfig.Hyperdrive.ClientMode.Value = configPage.masterConfig.Hyperdrive.ClientMode.Options[index].Value
 		configPage.handleEcModeChanged()
 	})
 	configPage.localEcDropdown.item.(*DropDown).SetSelectedFunc(func(text string, index int) {
-		if configPage.masterConfig.LocalExecutionConfig.ExecutionClient.Value == configPage.masterConfig.LocalExecutionConfig.ExecutionClient.Options[index].Value {
+		if configPage.masterConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value == configPage.masterConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Options[index].Value {
 			return
 		}
-		configPage.masterConfig.LocalExecutionConfig.ExecutionClient.Value = configPage.masterConfig.LocalExecutionConfig.ExecutionClient.Options[index].Value
+		configPage.masterConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value = configPage.masterConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Options[index].Value
 		configPage.handleLocalEcChanged()
 	})
 	configPage.externalEcDropdown.item.(*DropDown).SetSelectedFunc(func(text string, index int) {
-		if configPage.masterConfig.ExternalExecutionConfig.ExecutionClient.Value == configPage.masterConfig.ExternalExecutionConfig.ExecutionClient.Options[index].Value {
+		if configPage.masterConfig.Hyperdrive.ExternalExecutionConfig.ExecutionClient.Value == configPage.masterConfig.Hyperdrive.ExternalExecutionConfig.ExecutionClient.Options[index].Value {
 			return
 		}
-		configPage.masterConfig.ExternalExecutionConfig.ExecutionClient.Value = configPage.masterConfig.ExternalExecutionConfig.ExecutionClient.Options[index].Value
+		configPage.masterConfig.Hyperdrive.ExternalExecutionConfig.ExecutionClient.Value = configPage.masterConfig.Hyperdrive.ExternalExecutionConfig.ExecutionClient.Options[index].Value
 		configPage.handleExternalEcChanged()
 	})
 
@@ -145,7 +145,7 @@ func (configPage *ExecutionConfigPage) handleEcModeChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.clientModeDropdown.item)
 
-	selectedMode := configPage.masterConfig.ClientMode.Value
+	selectedMode := configPage.masterConfig.Hyperdrive.ClientMode.Value
 	switch selectedMode {
 	case types.ClientMode_Local:
 		// Local (Docker mode)
@@ -162,7 +162,7 @@ func (configPage *ExecutionConfigPage) handleLocalEcChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.clientModeDropdown.item)
 	configPage.layout.form.AddFormItem(configPage.localEcDropdown.item)
-	selectedEc := configPage.masterConfig.LocalExecutionConfig.ExecutionClient.Value
+	selectedEc := configPage.masterConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value
 
 	switch selectedEc {
 	case types.ExecutionClient_Geth:

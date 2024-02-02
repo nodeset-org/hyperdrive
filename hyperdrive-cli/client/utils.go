@@ -24,22 +24,29 @@ func SyncRatioToPercent(in float64) float64 {
 }
 
 // Loads a config without updating it if it exists
-func LoadConfigFromFile(path string) (*config.HyperdriveConfig, error) {
+func LoadConfigFromFile(path string) (*GlobalConfig, error) {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		return nil, nil
 	}
 
-	cfg, err := config.LoadFromFile(path)
+	hdCfg, err := config.LoadFromFile(path)
 	if err != nil {
 		return nil, err
+	}
+
+	// Load the module configs
+	cfg := NewGlobalConfig(hdCfg)
+	err = cfg.DeserializeModules()
+	if err != nil {
+		return nil, fmt.Errorf("error loading module configs from [%s]: %w", path, err)
 	}
 
 	return cfg, nil
 }
 
-// Saves a config and removes the upgrade flag file
-func SaveConfig(cfg *config.HyperdriveConfig, directory, filename string) error {
+// Saves a config
+func SaveConfig(cfg *GlobalConfig, directory, filename string) error {
 	path := filepath.Join(directory, filename)
 
 	settings := cfg.Serialize()

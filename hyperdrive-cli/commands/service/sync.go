@@ -68,7 +68,7 @@ func getSyncProgress(c *cli.Context) error {
 	}
 
 	// Print what network we're on
-	err = utils.PrintNetwork(cfg.Network.Value, isNew)
+	err = utils.PrintNetwork(cfg.Hyperdrive.Network.Value, isNew)
 	if err != nil {
 		return err
 	}

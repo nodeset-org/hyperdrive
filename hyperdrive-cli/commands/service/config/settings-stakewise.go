@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rivo/tview"
 )
@@ -13,7 +13,7 @@ type StakewiseConfigPage struct {
 	modulesPage        *ModulesPage
 	page               *page
 	layout             *standardLayout
-	masterConfig       *config.HyperdriveConfig
+	masterConfig       *client.GlobalConfig
 	enableStakewiseBox *parameterizedFormItem
 
 	stakewiseItems  []*parameterizedFormItem
@@ -56,7 +56,7 @@ func (configPage *StakewiseConfigPage) createContent() {
 
 	// Create the layout
 	configPage.layout = newStandardLayout()
-	configPage.layout.createForm(&configPage.masterConfig.Network, "Stakewise Settings")
+	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Stakewise Settings")
 
 	// Return to the home page after pressing Escape
 	configPage.layout.form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -78,14 +78,14 @@ func (configPage *StakewiseConfigPage) createContent() {
 	})
 
 	// Set up the form items
-	configPage.enableStakewiseBox = createParameterizedCheckbox(&configPage.masterConfig.Modules.Stakewise.Enabled)
-	configPage.stakewiseItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.GetParameters(), configPage.layout.descriptionBox)
-	configPage.vcCommonItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.VcCommon.GetParameters(), configPage.layout.descriptionBox)
-	configPage.lighthouseItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.Lighthouse.GetParameters(), configPage.layout.descriptionBox)
-	configPage.lodestarItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.Lodestar.GetParameters(), configPage.layout.descriptionBox)
-	configPage.nimbusItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.Nimbus.GetParameters(), configPage.layout.descriptionBox)
-	configPage.prysmItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.Prysm.GetParameters(), configPage.layout.descriptionBox)
-	configPage.tekuItems = createParameterizedFormItems(configPage.masterConfig.Modules.Stakewise.Teku.GetParameters(), configPage.layout.descriptionBox)
+	configPage.enableStakewiseBox = createParameterizedCheckbox(&configPage.masterConfig.Stakewise.Enabled)
+	configPage.stakewiseItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.GetParameters(), configPage.layout.descriptionBox)
+	configPage.vcCommonItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.VcCommon.GetParameters(), configPage.layout.descriptionBox)
+	configPage.lighthouseItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.Lighthouse.GetParameters(), configPage.layout.descriptionBox)
+	configPage.lodestarItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.Lodestar.GetParameters(), configPage.layout.descriptionBox)
+	configPage.nimbusItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.Nimbus.GetParameters(), configPage.layout.descriptionBox)
+	configPage.prysmItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.Prysm.GetParameters(), configPage.layout.descriptionBox)
+	configPage.tekuItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.Teku.GetParameters(), configPage.layout.descriptionBox)
 
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.enableStakewiseBox)
@@ -99,10 +99,10 @@ func (configPage *StakewiseConfigPage) createContent() {
 
 	// Set up the setting callbacks
 	configPage.enableStakewiseBox.item.(*tview.Checkbox).SetChangedFunc(func(checked bool) {
-		if configPage.masterConfig.Modules.Stakewise.Enabled.Value == checked {
+		if configPage.masterConfig.Stakewise.Enabled.Value == checked {
 			return
 		}
-		configPage.masterConfig.Modules.Stakewise.Enabled.Value = checked
+		configPage.masterConfig.Stakewise.Enabled.Value = checked
 		configPage.handleLayoutChanged()
 	})
 
@@ -115,7 +115,7 @@ func (configPage *StakewiseConfigPage) handleLayoutChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.enableStakewiseBox.item)
 
-	if configPage.masterConfig.Modules.Stakewise.Enabled.Value == true {
+	if configPage.masterConfig.Stakewise.Enabled.Value == true {
 		// Remove the Stakewise enable param since it's already there
 		stakewiseItems := []*parameterizedFormItem{}
 		for _, item := range configPage.stakewiseItems {
@@ -128,13 +128,8 @@ func (configPage *StakewiseConfigPage) handleLayoutChanged() {
 
 		// Display the relevant VC items
 		configPage.layout.addFormItems(configPage.vcCommonItems)
-		var bn types.BeaconNode
-		if configPage.masterConfig.IsLocalMode() {
-			bn = configPage.masterConfig.LocalBeaconConfig.BeaconNode.Value
-		} else {
-			bn = configPage.masterConfig.ExternalBeaconConfig.BeaconNode.Value
-		}
 
+		bn := configPage.masterConfig.Hyperdrive.GetSelectedBeaconNode()
 		switch bn {
 		case types.BeaconNode_Lighthouse:
 			configPage.layout.addFormItems(configPage.lighthouseItems)

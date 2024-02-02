@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/types"
@@ -12,7 +13,7 @@ type BeaconConfigPage struct {
 	home               *settingsHome
 	page               *page
 	layout             *standardLayout
-	masterConfig       *config.HyperdriveConfig
+	masterConfig       *client.GlobalConfig
 	clientModeDropdown *parameterizedFormItem
 	localBnDropdown    *parameterizedFormItem
 	externalBnDropdown *parameterizedFormItem
@@ -56,7 +57,7 @@ func (configPage *BeaconConfigPage) createContent() {
 
 	// Create the layout
 	configPage.layout = newStandardLayout()
-	configPage.layout.createForm(&configPage.masterConfig.Network, "Beacon Node Settings")
+	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Beacon Node Settings")
 
 	// Return to the home page after pressing Escape
 	configPage.layout.form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -78,16 +79,16 @@ func (configPage *BeaconConfigPage) createContent() {
 	})
 
 	// Set up the form items
-	configPage.clientModeDropdown = createParameterizedDropDown(&configPage.masterConfig.ClientMode, configPage.layout.descriptionBox)
-	configPage.localBnDropdown = createParameterizedDropDown(&configPage.masterConfig.LocalBeaconConfig.BeaconNode, configPage.layout.descriptionBox)
-	configPage.externalBnDropdown = createParameterizedDropDown(&configPage.masterConfig.ExternalBeaconConfig.BeaconNode, configPage.layout.descriptionBox)
-	configPage.localBnItems = createParameterizedFormItems(configPage.masterConfig.LocalBeaconConfig.GetParameters(), configPage.layout.descriptionBox)
-	configPage.lighthouseItems = createParameterizedFormItems(configPage.masterConfig.LocalBeaconConfig.Lighthouse.GetParameters(), configPage.layout.descriptionBox)
-	configPage.lodestarItems = createParameterizedFormItems(configPage.masterConfig.LocalBeaconConfig.Lodestar.GetParameters(), configPage.layout.descriptionBox)
-	configPage.nimbusItems = createParameterizedFormItems(configPage.masterConfig.LocalBeaconConfig.Nimbus.GetParameters(), configPage.layout.descriptionBox)
-	configPage.prysmItems = createParameterizedFormItems(configPage.masterConfig.LocalBeaconConfig.Prysm.GetParameters(), configPage.layout.descriptionBox)
-	configPage.tekuItems = createParameterizedFormItems(configPage.masterConfig.LocalBeaconConfig.Teku.GetParameters(), configPage.layout.descriptionBox)
-	configPage.externalBnItems = createParameterizedFormItems(configPage.masterConfig.ExternalBeaconConfig.GetParameters(), configPage.layout.descriptionBox)
+	configPage.clientModeDropdown = createParameterizedDropDown(&configPage.masterConfig.Hyperdrive.ClientMode, configPage.layout.descriptionBox)
+	configPage.localBnDropdown = createParameterizedDropDown(&configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode, configPage.layout.descriptionBox)
+	configPage.externalBnDropdown = createParameterizedDropDown(&configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.BeaconNode, configPage.layout.descriptionBox)
+	configPage.localBnItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalBeaconConfig.GetParameters(), configPage.layout.descriptionBox)
+	configPage.lighthouseItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalBeaconConfig.Lighthouse.GetParameters(), configPage.layout.descriptionBox)
+	configPage.lodestarItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalBeaconConfig.Lodestar.GetParameters(), configPage.layout.descriptionBox)
+	configPage.nimbusItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalBeaconConfig.Nimbus.GetParameters(), configPage.layout.descriptionBox)
+	configPage.prysmItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalBeaconConfig.Prysm.GetParameters(), configPage.layout.descriptionBox)
+	configPage.tekuItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalBeaconConfig.Teku.GetParameters(), configPage.layout.descriptionBox)
+	configPage.externalBnItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.GetParameters(), configPage.layout.descriptionBox)
 
 	// Take the client selections out since they're done explicitly
 	localBnItems := []*parameterizedFormItem{}
@@ -120,24 +121,24 @@ func (configPage *BeaconConfigPage) createContent() {
 
 	// Set up the setting callbacks
 	configPage.clientModeDropdown.item.(*DropDown).SetSelectedFunc(func(text string, index int) {
-		if configPage.masterConfig.ClientMode.Value == configPage.masterConfig.ClientMode.Options[index].Value {
+		if configPage.masterConfig.Hyperdrive.ClientMode.Value == configPage.masterConfig.Hyperdrive.ClientMode.Options[index].Value {
 			return
 		}
-		configPage.masterConfig.ClientMode.Value = configPage.masterConfig.ClientMode.Options[index].Value
+		configPage.masterConfig.Hyperdrive.ClientMode.Value = configPage.masterConfig.Hyperdrive.ClientMode.Options[index].Value
 		configPage.handleClientModeChanged()
 	})
 	configPage.localBnDropdown.item.(*DropDown).SetSelectedFunc(func(text string, index int) {
-		if configPage.masterConfig.LocalBeaconConfig.BeaconNode.Value == configPage.masterConfig.LocalBeaconConfig.BeaconNode.Options[index].Value {
+		if configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Options[index].Value {
 			return
 		}
-		configPage.masterConfig.LocalBeaconConfig.BeaconNode.Value = configPage.masterConfig.LocalBeaconConfig.BeaconNode.Options[index].Value
+		configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Value = configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Options[index].Value
 		configPage.handleLocalBnChanged()
 	})
 	configPage.externalBnDropdown.item.(*DropDown).SetSelectedFunc(func(text string, index int) {
-		if configPage.masterConfig.ExternalBeaconConfig.BeaconNode.Value == configPage.masterConfig.ExternalBeaconConfig.BeaconNode.Options[index].Value {
+		if configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value == configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.BeaconNode.Options[index].Value {
 			return
 		}
-		configPage.masterConfig.ExternalBeaconConfig.BeaconNode.Value = configPage.masterConfig.ExternalBeaconConfig.BeaconNode.Options[index].Value
+		configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value = configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.BeaconNode.Options[index].Value
 		configPage.handleExternalBnChanged()
 	})
 
@@ -151,7 +152,7 @@ func (configPage *BeaconConfigPage) handleClientModeChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.clientModeDropdown.item)
 
-	selectedMode := configPage.masterConfig.ClientMode.Value
+	selectedMode := configPage.masterConfig.Hyperdrive.ClientMode.Value
 	switch selectedMode {
 	case types.ClientMode_Local:
 		// Local (Docker mode)
@@ -168,7 +169,7 @@ func (configPage *BeaconConfigPage) handleLocalBnChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.clientModeDropdown.item)
 	configPage.layout.form.AddFormItem(configPage.localBnDropdown.item)
-	selectedBn := configPage.masterConfig.LocalBeaconConfig.BeaconNode.Value
+	selectedBn := configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Value
 
 	switch selectedBn {
 	case types.BeaconNode_Lighthouse:
@@ -205,7 +206,7 @@ func (configPage *BeaconConfigPage) handleExternalBnChanged() {
 
 	// Show items based on the client selection
 	configPage.layout.addFormItems(commonSettings)
-	if configPage.masterConfig.ExternalBeaconConfig.BeaconNode.Value == types.BeaconNode_Prysm {
+	if configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value == types.BeaconNode_Prysm {
 		configPage.layout.addFormItems(prysmSettings)
 	}
 

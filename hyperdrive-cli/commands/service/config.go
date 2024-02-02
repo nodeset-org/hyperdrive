@@ -10,7 +10,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 	"github.com/urfave/cli/v2"
 )
@@ -28,14 +27,14 @@ func configureService(c *cli.Context) error {
 	}
 
 	// Load the config, checking to see if it's new (hasn't been installed before)
-	var oldCfg *config.HyperdriveConfig
+	var oldCfg *client.GlobalConfig
 	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("error loading user settings: %w", err)
 	}
 
 	// Check if this is an update
-	oldVersion := strings.TrimPrefix(cfg.Version, "v")
+	oldVersion := strings.TrimPrefix(cfg.Hyperdrive.Version, "v")
 	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
 	isUpdate := c.Bool(installUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
 
@@ -76,10 +75,10 @@ func configureService(c *cli.Context) error {
 		fmt.Println("Your changes have been saved!")
 
 		// Handle network changes
-		prefix := fmt.Sprint(md.PreviousConfig.ProjectName.Value)
+		prefix := fmt.Sprint(md.PreviousConfig.Hyperdrive.ProjectName.Value)
 		if md.ChangeNetworks {
 			// Remove the checkpoint sync provider
-			md.Config.LocalBeaconConfig.CheckpointSyncProvider.Value = ""
+			md.Config.Hyperdrive.LocalBeaconConfig.CheckpointSyncProvider.Value = ""
 			err = hd.SaveConfig(md.Config)
 			if err != nil {
 				return fmt.Errorf("error saving config: %w", err)

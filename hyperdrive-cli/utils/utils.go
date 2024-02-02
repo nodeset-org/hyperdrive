@@ -86,7 +86,7 @@ func getTxWatchUrl(hd *client.HyperdriveClient) string {
 		fmt.Print("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
 		return ""
 	}
-	resources := utils.NewResources(cfg.Network.Value)
+	resources := utils.NewResources(cfg.Hyperdrive.Network.Value)
 	return resources.TxWatchUrl
 }
 

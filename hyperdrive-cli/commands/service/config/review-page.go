@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rivo/tview"
 )
@@ -22,7 +22,7 @@ type ReviewPage struct {
 }
 
 // Create a page to review any changes
-func NewReviewPage(md *mainDisplay, oldConfig *config.HyperdriveConfig, newConfig *config.HyperdriveConfig) *ReviewPage {
+func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *client.GlobalConfig) *ReviewPage {
 	var changedSettings *types.ChangedSection
 	var totalAffectedContainers map[types.ContainerID]bool
 	var changeNetworks bool
@@ -50,7 +50,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *config.HyperdriveConfig, newConfi
 		if md.isUpdate {
 			totalAffectedContainers[types.ContainerID_Daemon] = true
 
-			if newConfig.ClientMode.Value == types.ClientMode_Local && newConfig.LocalExecutionConfig.ExecutionClient.Value != types.ExecutionClient_Geth {
+			if newConfig.Hyperdrive.ClientMode.Value == types.ClientMode_Local && newConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value != types.ExecutionClient_Geth {
 				totalAffectedContainers[types.ContainerID_ExecutionClient] = true
 			}
 			builder.WriteString(fmt.Sprintf("Updated to Hyperdrive v%s (will affect several containers)\n\n", shared.HyperdriveVersion))

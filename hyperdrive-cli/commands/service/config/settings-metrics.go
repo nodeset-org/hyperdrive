@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rivo/tview"
 )
@@ -12,7 +12,7 @@ type MetricsConfigPage struct {
 	home                       *settingsHome
 	page                       *page
 	layout                     *standardLayout
-	masterConfig               *config.HyperdriveConfig
+	masterConfig               *client.GlobalConfig
 	enableMetricsBox           *parameterizedFormItem
 	ecMetricsPortBox           *parameterizedFormItem
 	bnMetricsPortBox           *parameterizedFormItem
@@ -56,7 +56,7 @@ func (configPage *MetricsConfigPage) createContent() {
 
 	// Create the layout
 	configPage.layout = newStandardLayout()
-	configPage.layout.createForm(&configPage.masterConfig.Network, "Monitoring / Metrics Settings")
+	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Monitoring / Metrics Settings")
 
 	// Return to the home page after pressing Escape
 	configPage.layout.form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -78,16 +78,16 @@ func (configPage *MetricsConfigPage) createContent() {
 	})
 
 	// Set up the form items
-	configPage.enableMetricsBox = createParameterizedCheckbox(&configPage.masterConfig.Metrics.EnableMetrics)
-	configPage.ecMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Metrics.EcMetricsPort)
-	configPage.bnMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Metrics.BnMetricsPort)
-	configPage.daemonMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Metrics.DaemonMetricsPort)
-	configPage.exporterMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Metrics.ExporterMetricsPort)
-	configPage.grafanaItems = createParameterizedFormItems(configPage.masterConfig.Metrics.Grafana.GetParameters(), configPage.layout.descriptionBox)
-	configPage.prometheusItems = createParameterizedFormItems(configPage.masterConfig.Metrics.Prometheus.GetParameters(), configPage.layout.descriptionBox)
-	configPage.exporterItems = createParameterizedFormItems(configPage.masterConfig.Metrics.Exporter.GetParameters(), configPage.layout.descriptionBox)
-	configPage.enableBitflyNodeMetricsBox = createParameterizedCheckbox(&configPage.masterConfig.Metrics.EnableBitflyNodeMetrics)
-	configPage.bitflyNodeMetricsItems = createParameterizedFormItems(configPage.masterConfig.Metrics.BitflyNodeMetrics.GetParameters(), configPage.layout.descriptionBox)
+	configPage.enableMetricsBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics)
+	configPage.ecMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Hyperdrive.Metrics.EcMetricsPort)
+	configPage.bnMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Hyperdrive.Metrics.BnMetricsPort)
+	configPage.daemonMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Hyperdrive.Metrics.DaemonMetricsPort)
+	configPage.exporterMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Hyperdrive.Metrics.ExporterMetricsPort)
+	configPage.grafanaItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.Metrics.Grafana.GetParameters(), configPage.layout.descriptionBox)
+	configPage.prometheusItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.Metrics.Prometheus.GetParameters(), configPage.layout.descriptionBox)
+	configPage.exporterItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.Metrics.Exporter.GetParameters(), configPage.layout.descriptionBox)
+	configPage.enableBitflyNodeMetricsBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics)
+	configPage.bitflyNodeMetricsItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.Metrics.BitflyNodeMetrics.GetParameters(), configPage.layout.descriptionBox)
 
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.enableMetricsBox, configPage.ecMetricsPortBox, configPage.bnMetricsPortBox, configPage.daemonMetricsPortBox, configPage.exporterMetricsPortBox)
@@ -99,17 +99,17 @@ func (configPage *MetricsConfigPage) createContent() {
 
 	// Set up the setting callbacks
 	configPage.enableMetricsBox.item.(*tview.Checkbox).SetChangedFunc(func(checked bool) {
-		if configPage.masterConfig.Metrics.EnableMetrics.Value == checked {
+		if configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics.Value == checked {
 			return
 		}
-		configPage.masterConfig.Metrics.EnableMetrics.Value = checked
+		configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics.Value = checked
 		configPage.handleLayoutChanged()
 	})
 	configPage.enableBitflyNodeMetricsBox.item.(*tview.Checkbox).SetChangedFunc(func(checked bool) {
-		if configPage.masterConfig.Metrics.EnableBitflyNodeMetrics.Value == checked {
+		if configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value == checked {
 			return
 		}
-		configPage.masterConfig.Metrics.EnableBitflyNodeMetrics.Value = checked
+		configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value = checked
 		configPage.handleLayoutChanged()
 	})
 
@@ -122,18 +122,18 @@ func (configPage *MetricsConfigPage) handleLayoutChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.enableMetricsBox.item)
 
-	if configPage.masterConfig.Metrics.EnableMetrics.Value == true {
+	if configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics.Value == true {
 		configPage.layout.addFormItems([]*parameterizedFormItem{configPage.ecMetricsPortBox, configPage.bnMetricsPortBox, configPage.daemonMetricsPortBox, configPage.exporterMetricsPortBox})
 		configPage.layout.addFormItems(configPage.grafanaItems)
 		configPage.layout.addFormItems(configPage.prometheusItems)
 		configPage.layout.addFormItems(configPage.exporterItems)
 	}
 
-	if configPage.masterConfig.ClientMode.Value == types.ClientMode_Local {
-		switch configPage.masterConfig.LocalBeaconConfig.BeaconNode.Value {
+	if configPage.masterConfig.Hyperdrive.ClientMode.Value == types.ClientMode_Local {
+		switch configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Value {
 		case types.BeaconNode_Teku, types.BeaconNode_Lighthouse, types.BeaconNode_Lodestar:
 			configPage.layout.form.AddFormItem(configPage.enableBitflyNodeMetricsBox.item)
-			if configPage.masterConfig.Metrics.EnableBitflyNodeMetrics.Value == true {
+			if configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value == true {
 				configPage.layout.addFormItems(configPage.bitflyNodeMetricsItems)
 			}
 		}

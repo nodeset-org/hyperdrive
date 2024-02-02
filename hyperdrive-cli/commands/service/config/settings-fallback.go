@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 )
@@ -11,7 +12,7 @@ type FallbackConfigPage struct {
 	home           *settingsHome
 	page           *page
 	layout         *standardLayout
-	masterConfig   *config.HyperdriveConfig
+	masterConfig   *client.GlobalConfig
 	useFallbackBox *parameterizedFormItem
 	fallbackItems  []*parameterizedFormItem
 }
@@ -47,7 +48,7 @@ func (configPage *FallbackConfigPage) createContent() {
 
 	// Create the layout
 	configPage.layout = newStandardLayout()
-	configPage.layout.createForm(&configPage.masterConfig.Network, "Fallback Client Settings")
+	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Fallback Client Settings")
 
 	// Return to the home page after pressing Escape
 	configPage.layout.form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -69,8 +70,8 @@ func (configPage *FallbackConfigPage) createContent() {
 	})
 
 	// Set up the form items
-	configPage.useFallbackBox = createParameterizedCheckbox(&configPage.masterConfig.Fallback.UseFallbackClients)
-	configPage.fallbackItems = createParameterizedFormItems(configPage.masterConfig.Fallback.GetParameters(), configPage.layout.descriptionBox)
+	configPage.useFallbackBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.Fallback.UseFallbackClients)
+	configPage.fallbackItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.Fallback.GetParameters(), configPage.layout.descriptionBox)
 
 	// Take the enable out since it's done explicitly
 	fallbackItems := []*parameterizedFormItem{}
@@ -88,10 +89,10 @@ func (configPage *FallbackConfigPage) createContent() {
 
 	// Set up the setting callbacks
 	configPage.useFallbackBox.item.(*tview.Checkbox).SetChangedFunc(func(checked bool) {
-		if configPage.masterConfig.Fallback.UseFallbackClients.Value == checked {
+		if configPage.masterConfig.Hyperdrive.Fallback.UseFallbackClients.Value == checked {
 			return
 		}
-		configPage.masterConfig.Fallback.UseFallbackClients.Value = checked
+		configPage.masterConfig.Hyperdrive.Fallback.UseFallbackClients.Value = checked
 		configPage.handleUseFallbackChanged()
 	})
 
@@ -105,7 +106,7 @@ func (configPage *FallbackConfigPage) handleUseFallbackChanged() {
 	configPage.layout.form.AddFormItem(configPage.useFallbackBox.item)
 
 	// Only add the supporting stuff if external clients are enabled
-	if configPage.masterConfig.Fallback.UseFallbackClients.Value == false {
+	if configPage.masterConfig.Hyperdrive.Fallback.UseFallbackClients.Value == false {
 		return
 	}
 

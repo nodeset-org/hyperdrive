@@ -109,6 +109,7 @@ func LoadFromFile(path string) (*HyperdriveConfig, error) {
 func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg := &HyperdriveConfig{
 		HyperdriveUserDirectory: hdDir,
+		Modules:                 map[string]any{},
 
 		ProjectName: types.Parameter[string]{
 			ParameterCommon: &types.ParameterCommon{
@@ -285,7 +286,7 @@ func (cfg *HyperdriveConfig) GetSubconfigs() map[string]types.IConfigSection {
 }
 
 // Serializes the configuration into a map of maps, compatible with a settings file
-func (cfg *HyperdriveConfig) Serialize() map[string]any {
+func (cfg *HyperdriveConfig) Serialize(modules []modconfig.IModuleConfig) map[string]any {
 	masterMap := map[string]any{}
 
 	hdMap := Serialize(cfg)
@@ -293,6 +294,18 @@ func (cfg *HyperdriveConfig) Serialize() map[string]any {
 	masterMap[ids.VersionID] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	masterMap[ids.RootConfigID] = hdMap
 
+	// Handle modules
+	modulesMap := map[string]any{}
+	for modName, value := range cfg.Modules {
+		// Copy the module configs already on-board
+		modulesMap[modName] = value
+	}
+	for _, module := range modules {
+		// Serialize / overwrite them with explictly provided ones
+		modMap := Serialize(module)
+		modulesMap[module.GetModuleName()] = modMap
+	}
+	masterMap[modconfig.ModulesName] = modulesMap
 	return masterMap
 }
 

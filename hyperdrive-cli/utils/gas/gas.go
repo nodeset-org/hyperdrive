@@ -30,9 +30,9 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 	// Get the priority fee - prioritize the CLI arguments, default to the config file setting
 	maxPriorityFeeGwei := hd.Context.MaxPriorityFee
 	if maxPriorityFeeGwei == 0 {
-		maxPriorityFee := eth.GweiToWei(cfg.MaxPriorityFee.Value)
+		maxPriorityFee := eth.GweiToWei(cfg.Hyperdrive.MaxPriorityFee.Value)
 		if maxPriorityFee == nil || maxPriorityFee.Uint64() == 0 {
-			defaultFee := cfg.MaxPriorityFee.Default[cfg.Network.Value]
+			defaultFee := cfg.Hyperdrive.MaxPriorityFee.Default[cfg.Hyperdrive.Network.Value]
 			fmt.Printf("%sNOTE: max priority fee not set or set to 0, defaulting to %d gwei%s\n", terminal.ColorYellow, defaultFee, terminal.ColorReset)
 			maxPriorityFeeGwei = defaultFee
 		} else {

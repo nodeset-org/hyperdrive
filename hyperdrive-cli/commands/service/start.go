@@ -12,7 +12,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
@@ -34,7 +33,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Check if this is a new install
-	oldVersion := strings.TrimPrefix(cfg.Version, "v")
+	oldVersion := strings.TrimPrefix(cfg.Hyperdrive.Version, "v")
 	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
 	isUpdate := oldVersion != currentVersion
 	if isUpdate && !ignoreConfigSuggestion {
@@ -49,7 +48,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Update the Prometheus and Grafana config templates with the assigned ports
-	metricsEnabled := cfg.Metrics.EnableMetrics.Value
+	metricsEnabled := cfg.Hyperdrive.Metrics.EnableMetrics.Value
 	if metricsEnabled {
 		err := hd.UpdatePrometheusConfiguration(cfg)
 		if err != nil {
@@ -209,9 +208,9 @@ func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) error {
 }
 
 // Check if any of the VCs has changed and force a wait for slashing protection, since all VCs are tied to the BN selection
-func checkForValidatorChange(hd *client.HyperdriveClient, cfg *config.HyperdriveConfig) (bool, error) {
+func checkForValidatorChange(hd *client.HyperdriveClient, cfg *client.GlobalConfig) (bool, error) {
 	// Get all of the VCs belonging to the project
-	prefix := cfg.ProjectName.Value
+	prefix := cfg.Hyperdrive.ProjectName.Value
 	vcs, err := hd.GetValidatorContainers(prefix + "_")
 	if err != nil {
 		return false, fmt.Errorf("error getting validator client containers: %w", err)
@@ -341,31 +340,31 @@ func showSlashingDelay(remainingTime time.Duration) {
 // !!!!
 // THIS IS A TOTAL HACK DESIGNED TO PROTECT YOU FROM FORGETTING TO ADD A MODULE, DO THIS BETTER WHEN MODULES ARE PROPERLY SPLIT OUT
 // !!!!
-func getVcContainerTagParamMap(cfg *config.HyperdriveConfig, vcs []string) (map[string]string, error) {
+func getVcContainerTagParamMap(cfg *client.GlobalConfig, vcs []string) (map[string]string, error) {
 	containerTagMap := map[string]string{}
 
 	// Get the VC names
-	stakewiseVc := cfg.GetDockerArtifactName(string(swconfig.ContainerID_StakewiseValidator))
+	stakewiseVc := cfg.Hyperdrive.GetDockerArtifactName(string(swconfig.ContainerID_StakewiseValidator))
 
 	// Get the BN being used
 	var bn types.BeaconNode
-	if cfg.IsLocalMode() {
-		bn = cfg.LocalBeaconConfig.BeaconNode.Value
+	if cfg.Hyperdrive.IsLocalMode() {
+		bn = cfg.Hyperdrive.LocalBeaconConfig.BeaconNode.Value
 	} else {
-		bn = cfg.ExternalBeaconConfig.BeaconNode.Value
+		bn = cfg.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value
 	}
 
 	switch bn {
 	case types.BeaconNode_Lighthouse:
-		containerTagMap[stakewiseVc] = cfg.Modules.Stakewise.Lighthouse.ContainerTag.Value
+		containerTagMap[stakewiseVc] = cfg.Stakewise.Lighthouse.ContainerTag.Value
 	case types.BeaconNode_Lodestar:
-		containerTagMap[stakewiseVc] = cfg.Modules.Stakewise.Lodestar.ContainerTag.Value
+		containerTagMap[stakewiseVc] = cfg.Stakewise.Lodestar.ContainerTag.Value
 	case types.BeaconNode_Nimbus:
-		containerTagMap[stakewiseVc] = cfg.Modules.Stakewise.Nimbus.ContainerTag.Value
+		containerTagMap[stakewiseVc] = cfg.Stakewise.Nimbus.ContainerTag.Value
 	case types.BeaconNode_Prysm:
-		containerTagMap[stakewiseVc] = cfg.Modules.Stakewise.Prysm.ContainerTag.Value
+		containerTagMap[stakewiseVc] = cfg.Stakewise.Prysm.ContainerTag.Value
 	case types.BeaconNode_Teku:
-		containerTagMap[stakewiseVc] = cfg.Modules.Stakewise.Teku.ContainerTag.Value
+		containerTagMap[stakewiseVc] = cfg.Stakewise.Teku.ContainerTag.Value
 	default:
 		panic(fmt.Sprintf("unknown Beacon Node type: [%v]", bn))
 	}

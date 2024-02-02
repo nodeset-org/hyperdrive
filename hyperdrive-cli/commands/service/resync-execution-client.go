@@ -34,7 +34,7 @@ func resyncExecutionClient(c *cli.Context) error {
 	}
 
 	// Stop Execution
-	executionContainerName := cfg.GetDockerArtifactName(string(types.ContainerID_ExecutionClient))
+	executionContainerName := cfg.Hyperdrive.GetDockerArtifactName(string(types.ContainerID_ExecutionClient))
 	fmt.Printf("Stopping %s...\n", executionContainerName)
 	err = hd.StopContainer(executionContainerName)
 	if err != nil {

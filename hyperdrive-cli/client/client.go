@@ -30,11 +30,11 @@ type HyperdriveClient struct {
 	Api      *client.ApiClient
 	Context  *context.HyperdriveContext
 	docker   *docker.Client
-	cfg      *config.HyperdriveConfig
+	cfg      *GlobalConfig
 	isNewCfg bool
 }
 
-// Hyperdrive client
+// Stakewise client
 type StakewiseClient struct {
 	Api     *swclient.ApiClient
 	Context *context.HyperdriveContext

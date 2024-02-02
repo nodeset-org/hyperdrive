@@ -44,7 +44,7 @@ func (configPage *HyperdriveConfigPage) createContent() {
 	masterConfig := configPage.home.md.Config
 	layout := newStandardLayout()
 	configPage.layout = layout
-	layout.createForm(&masterConfig.Network, "Hyperdrive and TX Fee Settings")
+	layout.createForm(&masterConfig.Hyperdrive.Network, "Hyperdrive and TX Fee Settings")
 
 	// Return to the home page after pressing Escape
 	layout.form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -66,7 +66,7 @@ func (configPage *HyperdriveConfigPage) createContent() {
 	})
 
 	// Set up the form items
-	formItems := createParameterizedFormItems(masterConfig.GetParameters(), layout.descriptionBox)
+	formItems := createParameterizedFormItems(masterConfig.Hyperdrive.GetParameters(), layout.descriptionBox)
 	for _, formItem := range formItems {
 		// Ignore the client mode item since it's presented in the EC / BN sections
 		if formItem.parameter.GetCommon().ID == config.ClientModeID {
@@ -79,7 +79,7 @@ func (configPage *HyperdriveConfigPage) createContent() {
 		if formItem.parameter.GetCommon().ID == config.NetworkID {
 			dropDown := formItem.item.(*DropDown)
 			dropDown.SetSelectedFunc(func(text string, index int) {
-				newNetwork := configPage.home.md.Config.Network.Options[index].Value
+				newNetwork := configPage.home.md.Config.Hyperdrive.Network.Options[index].Value
 				configPage.home.md.Config.ChangeNetwork(newNetwork)
 				configPage.home.refresh()
 			})
