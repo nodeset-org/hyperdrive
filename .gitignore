@@ -27,3 +27,4 @@ go.work
 hyperdrive-cli/hyperdrive-cli
 hyperdrive-daemon/hyperdrive-daemon
 modules/stakewise/stakewise
+modules/stakewise/stakewise-daemon/stakewise-daemon
