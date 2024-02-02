@@ -75,6 +75,8 @@ func (home *settingsHome) createContent() {
 		})
 	categoryList.SetBackgroundColor(BackgroundColor)
 	categoryList.SetBorderPadding(0, 0, 1, 1)
+	//categoryList.SetSelectedBackgroundColor(ButtonFocusedBackgroundColor)
+
 	home.categoryList = categoryList
 
 	// Set tab to switch to the save and quit buttons

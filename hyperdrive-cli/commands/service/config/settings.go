@@ -20,6 +20,6 @@ const (
 	ButtonFocusedTextColor       tcell.Color = tcell.ColorBlack
 
 	// Unfocused home buttons
-	HomeButtonUnfocusedBackgroundColor tcell.Color = tcell.ColorDarkBlue
+	HomeButtonUnfocusedBackgroundColor tcell.Color = tcell.ColorDarkSlateGray
 	HomeButtonUnfocusedTextColor       tcell.Color = tcell.ColorLightGray
 )

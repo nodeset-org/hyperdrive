@@ -98,7 +98,8 @@ func (c *NodesetClient) UploadDepositData(depositData []byte) ([]byte, error) {
 // Get the current version of the aggregated deposit data on the server
 func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
 	params := map[string]string{
-		"vault": c.res.Vault.Hex(),
+		"vault":   c.res.Vault.Hex(),
+		"network": c.res.NodesetNetwork,
 	}
 	response, err := c.submitRequest(http.MethodGet, nil, params, depositDataPath, metaPath)
 	if err != nil {
@@ -116,7 +117,8 @@ func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
 // Get the aggregated deposit data from the server
 func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData, error) {
 	params := map[string]string{
-		"vault": c.res.Vault.Hex(),
+		"vault":   c.res.Vault.Hex(),
+		"network": c.res.NodesetNetwork,
 	}
 	response, err := c.submitRequest(http.MethodGet, nil, params, depositDataPath)
 	if err != nil {

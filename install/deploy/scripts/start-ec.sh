@@ -38,7 +38,7 @@ elif [ "$NETWORK" = "prater" ]; then
     GETH_NETWORK="--goerli"
     HD_NETHERMIND_NETWORK="goerli"
     BESU_NETWORK="--network=goerli"
-elif [ "$NETWORK" = "devnet" ]; then
+elif [ "$NETWORK" = "holesky-dev" ]; then
     GETH_NETWORK="--holesky"
     HD_NETHERMIND_NETWORK="holesky"
     BESU_NETWORK="--network=holesky"

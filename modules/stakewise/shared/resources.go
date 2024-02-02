@@ -23,6 +23,9 @@ type StakewiseResources struct {
 
 	// The URL for the NodeSet API server
 	NodesetApiUrl string
+
+	// The string to put in requests for the network param
+	NodesetNetwork string
 }
 
 // Creates a new resource collection for the given network
@@ -34,6 +37,7 @@ func NewStakewiseResources(network types.Network) *StakewiseResources {
 		FeeRecipient:       common.HexToAddress(""),
 		GenesisForkVersion: common.FromHex("0x00000000"), // https://github.com/eth-clients/eth2-networks/tree/master/shared/mainnet#genesis-information
 		NodesetApiUrl:      "",
+		NodesetNetwork:     "mainnet",
 	}
 
 	// Holesky
@@ -43,6 +47,7 @@ func NewStakewiseResources(network types.Network) *StakewiseResources {
 		FeeRecipient:       common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
 		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
 		NodesetApiUrl:      "https://staging.nodeset.io/api",
+		NodesetNetwork:     "holesky",
 	}
 
 	// Holesky Dev
@@ -52,6 +57,7 @@ func NewStakewiseResources(network types.Network) *StakewiseResources {
 		FeeRecipient:       common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
 		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
 		NodesetApiUrl:      "https://staging.nodeset.io/api",
+		NodesetNetwork:     "holesky",
 	}
 
 	switch network {

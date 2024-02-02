@@ -57,7 +57,7 @@ services:
       {{- else if eq .LocalBeaconConfig.BeaconNode.String "nimbus"}}
       - NIMBUS_PRUNING_MODE={{.LocalBeaconConfig.Nimbus.PruningMode}}
       {{- else if eq .LocalBeaconConfig.BeaconNode.String "lighthouse"}}
-      - BN_P2P_QUIC_PORT={{.Lighthouse.LocalBeaconConfig.P2pQuicPort}}
+      - BN_P2P_QUIC_PORT={{.LocalBeaconConfig.Lighthouse.P2pQuicPort}}
       {{- end}}
     entrypoint: sh
     command: "/usr/share/hyperdrive/scripts/{{.GetBnStartScript}}"

@@ -27,7 +27,7 @@ func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choice
 			}
 		} else {
 			wiz.md.Config.Fallback.UseFallbackClients.Value = false
-			wiz.metricsModal.show()
+			wiz.modulesModal.show()
 		}
 	}
 
