@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
+	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 	"github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/server"
 	swtasks "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/tasks"
@@ -67,7 +68,7 @@ func main() {
 		stopWg.Add(1)
 
 		// Create the service provider
-		sp, err := services.NewServiceProvider(moduleDir)
+		sp, err := services.NewServiceProvider(moduleDir, swconfig.NewStakewiseConfig)
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}

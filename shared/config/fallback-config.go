@@ -92,7 +92,7 @@ func NewFallbackConfig(parent *HyperdriveConfig) *FallbackConfig {
 	}
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *FallbackConfig) GetTitle() string {
 	return "Fallback Client Settings"
 }

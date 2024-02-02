@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
+	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 
 	"github.com/gorilla/mux"
 )
@@ -47,11 +48,11 @@ type IQuerylessPostContextFactory[ContextType IQuerylessCallContext[DataType], B
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via GET; use this for typical general-purpose calls
-func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType any](
+func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType any, ConfigType modconfig.IModuleConfig](
 	router *mux.Router,
 	functionName string,
 	factory IQuerylessGetContextFactory[ContextType, DataType],
-	serviceProvider *services.ServiceProvider,
+	serviceProvider *services.ServiceProvider[ConfigType],
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -85,11 +86,11 @@ func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType 
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via POST; use this for typical general-purpose calls
-func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType any, DataType any](
+func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType any, DataType any, ConfigType modconfig.IModuleConfig](
 	router *mux.Router,
 	functionName string,
 	factory IQuerylessPostContextFactory[ContextType, BodyType, DataType],
-	serviceProvider *services.ServiceProvider,
+	serviceProvider *services.ServiceProvider[ConfigType],
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -135,7 +136,7 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 }
 
 // Run a route registered with no structured chain query pattern
-func runQuerylessRoute[DataType any](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider) (*ApiResponse[DataType], error) {
+func runQuerylessRoute[DataType any, ConfigType modconfig.IModuleConfig](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*ApiResponse[DataType], error) {
 	// Get the services
 
 	//TODO

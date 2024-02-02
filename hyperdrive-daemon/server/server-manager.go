@@ -7,7 +7,6 @@ import (
 	"syscall"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
-	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 )
@@ -25,11 +24,10 @@ type ServerManager struct {
 }
 
 // Creates a new server manager
-func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.WaitGroup) (*ServerManager, error) {
+func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.WaitGroup, moduleNames []string) (*ServerManager, error) {
 	mgr := &ServerManager{
 		stopWg: stopWg,
 	}
-	cfg := sp.GetConfig()
 
 	// Get the owner of the config file
 	var cfgFileStat syscall.Stat_t
@@ -51,20 +49,20 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 	mgr.cliServer = cliServer
 	fmt.Printf("CLI daemon started on %s\n", cliSocketPath)
 
-	// Handle the Stakewise server
-	modulesDir := filepath.Join(sp.GetConfig().UserDataPath.Value, modconfig.ModulesDir)
-	if cfg.Modules.Stakewise.Enabled.Value {
-		stakewiseSocketPath := filepath.Join(modulesDir, swconfig.DaemonRoute, config.HyperdriveSocketFilename)
-		server, err := NewHyperdriveServer(sp, stakewiseSocketPath)
+	// Handle each module server
+	for _, module := range moduleNames {
+		modulesDir := filepath.Join(sp.GetConfig().UserDataPath.Value, modconfig.ModulesName)
+		moduleSocketPath := filepath.Join(modulesDir, module, config.HyperdriveSocketFilename)
+		server, err := NewHyperdriveServer(sp, moduleSocketPath)
 		if err != nil {
-			return nil, fmt.Errorf("error creating Stakewise server: %w", err)
+			return nil, fmt.Errorf("error creating server for module [%s]: %w", module, err)
 		}
 		err = server.Start(stopWg, cfgFileStat.Uid, cfgFileStat.Gid)
 		if err != nil {
-			return nil, fmt.Errorf("error starting Stakewise server: %w", err)
+			return nil, fmt.Errorf("error starting server for module [%s]: %w", module, err)
 		}
 		mgr.stakewiseServer = server
-		fmt.Printf("Stakewise daemon started on %s\n", stakewiseSocketPath)
+		fmt.Printf("Daemon started on %s\n", moduleSocketPath)
 	}
 
 	return mgr, nil

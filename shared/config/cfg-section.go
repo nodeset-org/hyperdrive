@@ -2,12 +2,13 @@ package config
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 // Serialize a config section into a map
-func serialize(cfg types.IConfigSection) map[string]any {
+func Serialize(cfg types.IConfigSection) map[string]any {
 	masterMap := map[string]any{}
 
 	// Serialize parameters
@@ -20,14 +21,14 @@ func serialize(cfg types.IConfigSection) map[string]any {
 	// Serialize subconfigs
 	subConfigs := cfg.GetSubconfigs()
 	for name, subconfig := range subConfigs {
-		masterMap[name] = serialize(subconfig)
+		masterMap[name] = Serialize(subconfig)
 	}
 
 	return masterMap
 }
 
 // Deserialize a config section
-func deserialize(cfg types.IConfigSection, serializedParams map[any]any, network types.Network) error {
+func Deserialize(cfg types.IConfigSection, serializedParams map[string]any, network types.Network) error {
 	// Handle the parameters
 	params := cfg.GetParameters()
 	for _, param := range params {
@@ -52,18 +53,11 @@ func deserialize(cfg types.IConfigSection, serializedParams map[any]any, network
 	for name, subconfig := range subconfigs {
 		subParams, exists := serializedParams[name]
 		if exists {
-			submap, isMap := subParams.(map[any]any)
+			submap, isMap := subParams.(map[string]any)
 			if !isMap {
-				typedSubmap, isMap := subParams.(map[string]any)
-				if !isMap {
-					return fmt.Errorf("subsection [%s] is not a map", name)
-				}
-				submap = map[any]any{}
-				for name, value := range typedSubmap {
-					submap[name] = value
-				}
+				return fmt.Errorf("subsection [%s] is not a map, it is %s", name, reflect.TypeOf(subParams))
 			}
-			err := deserialize(subconfig, submap, network)
+			err := Deserialize(subconfig, submap, network)
 			if err != nil {
 				return fmt.Errorf("error deserializing subsection [%s]: %w", name, err)
 			}

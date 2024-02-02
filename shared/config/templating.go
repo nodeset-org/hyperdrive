@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"strings"
 
-	swshared "github.com/nodeset-org/hyperdrive/modules/stakewise/shared"
 	"github.com/nodeset-org/hyperdrive/shared"
+	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -17,12 +17,6 @@ import (
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) IsLocalMode() bool {
 	return cfg.ClientMode.Value == types.ClientMode_Local
-}
-
-// Check if any of the services have doppelganger detection enabled
-// NOTE: update this with each new service that runs a VC!
-func (cfg *HyperdriveConfig) IsDoppelgangerEnabled() bool {
-	return cfg.Modules.Stakewise.VcCommon.DoppelgangerDetection.Value
 }
 
 // Gets the full name of the Docker container or volume with the provided suffix (name minus the project ID prefix)
@@ -117,6 +111,14 @@ func (cfg *HyperdriveConfig) GetDaemonContainerTag() string {
 // === Execution Client ===
 // ========================
 
+// Get the selected Beacon Node
+func (cfg *HyperdriveConfig) GetSelectedExecutionClient() types.ExecutionClient {
+	if cfg.IsLocalMode() {
+		return cfg.LocalExecutionConfig.ExecutionClient.Value
+	}
+	return cfg.ExternalExecutionConfig.ExecutionClient.Value
+}
+
 // Gets the port mapping of the ec container
 // Used by text/template to format ec.yml
 func (cfg *HyperdriveConfig) GetEcOpenApiPorts() string {
@@ -188,6 +190,14 @@ func (cfg *HyperdriveConfig) GetEcHttpEndpointsWithFallback() string {
 // ===================
 // === Beacon Node ===
 // ===================
+
+// Get the selected Beacon Node
+func (cfg *HyperdriveConfig) GetSelectedBeaconNode() types.BeaconNode {
+	if cfg.IsLocalMode() {
+		return cfg.LocalBeaconConfig.BeaconNode.Value
+	}
+	return cfg.ExternalBeaconConfig.BeaconNode.Value
+}
 
 // Gets the tag of the bn container
 // Used by text/template to format bn.yml
@@ -307,89 +317,9 @@ func (cfg *HyperdriveConfig) GetBeaconHostname() (string, error) {
 	return ccUrl.Hostname(), nil
 }
 
-// =================
-// === Stakewise ===
-// =================
-// TODO: Find a better way to break this out so it isn't in the root config
-
-// Get the container tag of the selected VC
-func (cfg *HyperdriveConfig) GetStakewiseVcContainerTag() string {
-	var bn types.BeaconNode
-	if cfg.IsLocalMode() {
-		bn = cfg.LocalBeaconConfig.BeaconNode.Value
-	} else {
-		bn = cfg.ExternalBeaconConfig.BeaconNode.Value
-	}
-
-	switch bn {
-	case types.BeaconNode_Lighthouse:
-		return cfg.Modules.Stakewise.Lighthouse.ContainerTag.Value
-	case types.BeaconNode_Lodestar:
-		return cfg.Modules.Stakewise.Lodestar.ContainerTag.Value
-	case types.BeaconNode_Nimbus:
-		return cfg.Modules.Stakewise.Nimbus.ContainerTag.Value
-	case types.BeaconNode_Prysm:
-		return cfg.Modules.Stakewise.Prysm.ContainerTag.Value
-	case types.BeaconNode_Teku:
-		return cfg.Modules.Stakewise.Teku.ContainerTag.Value
-	default:
-		panic(fmt.Sprintf("Unknown Beacon Node %s", string(cfg.LocalBeaconConfig.BeaconNode.Value)))
-	}
-}
-
-// Gets the additional flags of the selected VC
-func (cfg *HyperdriveConfig) GetStakewiseVcAdditionalFlags() string {
-	var bn types.BeaconNode
-	if cfg.IsLocalMode() {
-		bn = cfg.LocalBeaconConfig.BeaconNode.Value
-	} else {
-		bn = cfg.ExternalBeaconConfig.BeaconNode.Value
-	}
-
-	switch bn {
-	case types.BeaconNode_Lighthouse:
-		return cfg.Modules.Stakewise.Lighthouse.AdditionalFlags.Value
-	case types.BeaconNode_Lodestar:
-		return cfg.Modules.Stakewise.Lodestar.AdditionalFlags.Value
-	case types.BeaconNode_Nimbus:
-		return cfg.Modules.Stakewise.Nimbus.AdditionalFlags.Value
-	case types.BeaconNode_Prysm:
-		return cfg.Modules.Stakewise.Prysm.AdditionalFlags.Value
-	case types.BeaconNode_Teku:
-		return cfg.Modules.Stakewise.Teku.AdditionalFlags.Value
-	default:
-		panic(fmt.Sprintf("Unknown Beacon Node %s", string(cfg.LocalBeaconConfig.BeaconNode.Value)))
-	}
-}
-
-// Used by text/template to format validator.yml
-func (cfg *HyperdriveConfig) StakewiseGraffiti() (string, error) {
-	prefix := cfg.graffitiPrefix()
-	customGraffiti := cfg.Modules.Stakewise.VcCommon.Graffiti.Value
-	if customGraffiti == "" {
-		return prefix, nil
-	}
-	return fmt.Sprintf("%s (%s)", prefix, customGraffiti), nil
-}
-
-func (cfg *HyperdriveConfig) StakewiseFeeRecipient() string {
-	res := swshared.NewStakewiseResources(cfg.Network.Value)
-	return res.FeeRecipient.Hex()
-}
-
-func (cfg *HyperdriveConfig) StakewiseVault() string {
-	res := swshared.NewStakewiseResources(cfg.Network.Value)
-	return res.Vault.Hex()
-}
-
-func (cfg *HyperdriveConfig) StakewiseNetwork() string {
-	res := swshared.NewStakewiseResources(cfg.Network.Value)
-	return res.NodesetNetwork
-}
-
 // Used by text/template to format validator.yml
 // Only returns the the prefix
-func (cfg *HyperdriveConfig) graffitiPrefix() string {
+func (cfg *HyperdriveConfig) GraffitiPrefix() string {
 	identifier := ""
 	versionString := fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	if len(versionString) < 8 {
@@ -416,4 +346,16 @@ func (cfg *HyperdriveConfig) graffitiPrefix() string {
 	}
 
 	return fmt.Sprintf("HD%s %s", identifier, versionString)
+}
+
+// ===============
+// === Modules ===
+// ===============
+
+func (c *HyperdriveConfig) ModulesDirectory() string {
+	return modconfig.ModulesName
+}
+
+func (c *HyperdriveConfig) ValidatorsDirectory() string {
+	return modconfig.ValidatorsDirectory
 }

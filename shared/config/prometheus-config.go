@@ -92,7 +92,7 @@ func NewPrometheusConfig(parent *MetricsConfig) *PrometheusConfig {
 	}
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *PrometheusConfig) GetTitle() string {
 	return "Prometheus Settings"
 }

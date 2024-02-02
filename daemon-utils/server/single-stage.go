@@ -10,6 +10,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
+	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	batch "github.com/rocket-pool/batch-query"
 )
@@ -44,11 +45,11 @@ type ISingleStagePostContextFactory[ContextType ISingleStageCallContext[DataType
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called; use this for typical general-purpose calls
-func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], DataType any](
+func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], DataType any, ConfigType modconfig.IModuleConfig](
 	router *mux.Router,
 	functionName string,
 	factory ISingleStageGetContextFactory[ContextType, DataType],
-	serviceProvider *services.ServiceProvider,
+	serviceProvider *services.ServiceProvider[ConfigType],
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -82,11 +83,11 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via POST; use this for typical general-purpose calls
-func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], BodyType any, DataType any](
+func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], BodyType any, DataType any, ConfigType modconfig.IModuleConfig](
 	router *mux.Router,
 	functionName string,
 	factory ISingleStagePostContextFactory[ContextType, BodyType, DataType],
-	serviceProvider *services.ServiceProvider,
+	serviceProvider *services.ServiceProvider[ConfigType],
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -132,7 +133,7 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 }
 
 // Run a route registered with the common single-stage querying pattern
-func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider) (*api.ApiResponse[DataType], error) {
+func runSingleStageRoute[DataType any, ConfigType modconfig.IModuleConfig](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*api.ApiResponse[DataType], error) {
 	// Get the services
 	q := serviceProvider.GetQueryManager()
 

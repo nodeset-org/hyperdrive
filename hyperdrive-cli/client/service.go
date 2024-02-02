@@ -531,9 +531,9 @@ func (c *HyperdriveClient) composeModules(cfg *config.HyperdriveConfig, hyperdri
 	// Stakewise
 	if cfg.Modules.Stakewise.Enabled.Value {
 		composePaths := template.ComposePaths{
-			RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, modconfig.ModulesDir, swconfig.DaemonRoute),
-			TemplatePath: filepath.Join(templatesDir, modconfig.ModulesDir, swconfig.DaemonRoute),
-			OverridePath: filepath.Join(hyperdriveDir, overrideDir, modconfig.ModulesDir, swconfig.DaemonRoute),
+			RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, modconfig.ModulesName, swconfig.DaemonRoute),
+			TemplatePath: filepath.Join(templatesDir, modconfig.ModulesName, swconfig.DaemonRoute),
+			OverridePath: filepath.Join(hyperdriveDir, overrideDir, modconfig.ModulesName, swconfig.DaemonRoute),
 		}
 
 		// These containers always run

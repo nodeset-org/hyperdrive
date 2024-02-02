@@ -116,7 +116,7 @@ func NewPrysmBnConfig(parent *LocalBeaconConfig) *PrysmBnConfig {
 	}
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *PrysmBnConfig) GetTitle() string {
 	return "Prysm Settings"
 }

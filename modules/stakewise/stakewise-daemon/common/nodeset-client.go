@@ -62,7 +62,7 @@ type NodesetClient struct {
 
 // Creates a new Nodeset client
 func NewNodesetClient(sp *StakewiseServiceProvider) *NodesetClient {
-	cfg := sp.GetConfig()
+	cfg := sp.GetHyperdriveConfig()
 	return &NodesetClient{
 		sp:    sp,
 		res:   sp.GetResources(),

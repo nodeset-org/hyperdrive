@@ -48,8 +48,15 @@ func main() {
 		Required: true,
 	}
 
+	moduleFlag := &cli.StringSliceFlag{
+		Name:    "module",
+		Aliases: []string{"m"},
+		Usage:   "Provide the name of a module that you want the daemon to create an API socket for. This flag can be specified multiple times, once per module.",
+	}
+
 	app.Flags = []cli.Flag{
 		userDirFlag,
+		moduleFlag,
 	}
 	app.Action = func(c *cli.Context) error {
 		// Get the config file
@@ -78,7 +85,7 @@ func main() {
 		}
 
 		// Create the server manager
-		serverMgr, err := server.NewServerManager(sp, cfgPath, stopWg)
+		serverMgr, err := server.NewServerManager(sp, cfgPath, stopWg, c.StringSlice(moduleFlag.Name))
 		if err != nil {
 			return fmt.Errorf("error creating server manager: %w", err)
 		}

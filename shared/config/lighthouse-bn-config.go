@@ -100,7 +100,7 @@ func NewLighthouseBnConfig(parent *LocalBeaconConfig) *LighthouseBnConfig {
 	}
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *LighthouseBnConfig) GetTitle() string {
 	return "Lighthouse Settings"
 }

@@ -58,7 +58,7 @@ func NewLighthouseVcConfig() *LighthouseVcConfig {
 	}
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *LighthouseVcConfig) GetTitle() string {
 	return "Lighthouse Settings"
 }

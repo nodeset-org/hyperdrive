@@ -117,7 +117,7 @@ func NewBesuConfig(parent *LocalExecutionConfig) *BesuConfig {
 	}
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *BesuConfig) GetTitle() string {
 	return "Besu Settings"
 }

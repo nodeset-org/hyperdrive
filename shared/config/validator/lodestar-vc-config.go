@@ -54,7 +54,7 @@ func NewLodestarVcConfig() *LodestarVcConfig {
 	}
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *LodestarVcConfig) GetTitle() string {
 	return "Lodestar Settings"
 }

@@ -55,7 +55,7 @@ func NewPrysmVcConfig() *PrysmVcConfig {
 	}
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *PrysmVcConfig) GetTitle() string {
 	return "Prysm Settings"
 }

@@ -1,6 +1,6 @@
 package modconfig
 
 const (
-	ModulesDir          string = "modules"
+	ModulesName         string = "modules"
 	ValidatorsDirectory string = "validators"
 )

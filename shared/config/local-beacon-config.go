@@ -160,7 +160,7 @@ func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
 	return cfg
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *LocalBeaconConfig) GetTitle() string {
 	return "Local Beacon Node Settings"
 }

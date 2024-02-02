@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 
 	docker "github.com/docker/docker/client"
@@ -11,6 +12,7 @@ import (
 	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/client"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
@@ -20,16 +22,17 @@ const (
 )
 
 // A container for all of the various services used by Hyperdrive
-type ServiceProvider struct {
+type ServiceProvider[ConfigType modconfig.IModuleConfig] struct {
 	// Services
-	cfg       *config.HyperdriveConfig
-	hdClient  *client.ApiClient
-	ecManager *ExecutionClientManager
-	bcManager *BeaconClientManager
-	docker    *docker.Client
-	txMgr     *eth.TransactionManager
-	queryMgr  *eth.QueryManager
-	resources *utils.Resources
+	hdCfg        *config.HyperdriveConfig
+	moduleConfig ConfigType
+	hdClient     *client.ApiClient
+	ecManager    *ExecutionClientManager
+	bcManager    *BeaconClientManager
+	docker       *docker.Client
+	txMgr        *eth.TransactionManager
+	queryMgr     *eth.QueryManager
+	resources    *utils.Resources
 
 	// TODO: find a better place for this than the common service provider
 	apiLogger *log.ColorLogger
@@ -40,37 +43,53 @@ type ServiceProvider struct {
 }
 
 // Creates a new ServiceProvider instance
-func NewServiceProvider(moduleDir string) (*ServiceProvider, error) {
+func NewServiceProvider[ConfigType modconfig.IModuleConfig](moduleDir string, factory func(*config.HyperdriveConfig) ConfigType) (*ServiceProvider[ConfigType], error) {
 	// Create a client for the Hyperdrive daemon
 	hyperdriveSocket := filepath.Join(moduleDir, config.HyperdriveSocketFilename)
 	hdClient := client.NewApiClient(config.HyperdriveDaemonRoute, hyperdriveSocket, false)
 
-	// Get the config
-	cfg := config.NewHyperdriveConfig("")
+	// Get the Hyperdrive config
+	hdCfg := config.NewHyperdriveConfig("")
 	cfgResponse, err := hdClient.Service.GetConfig()
 	if err != nil {
 		return nil, fmt.Errorf("error getting config from Hyperdrive server: %w", err)
 	}
-	err = cfg.Deserialize(cfgResponse.Data.Config)
+	err = hdCfg.Deserialize(cfgResponse.Data.Config)
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing Hyperdrive config: %w", err)
 	}
-	hdClient.SetDebug(cfg.DebugMode.Value)
+	hdClient.SetDebug(hdCfg.DebugMode.Value)
+
+	// Get the module config
+	moduleCfg := factory(hdCfg)
+	moduleName := moduleCfg.GetModuleName()
+	modCfgEnrty, exists := hdCfg.Modules[moduleName]
+	if !exists {
+		return nil, fmt.Errorf("config section for module [%s] not found", moduleName)
+	}
+	modCfgMap, ok := modCfgEnrty.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("config section for module [%s] is not a map, it's a %s", moduleName, reflect.TypeOf(modCfgMap))
+	}
+	err = config.Deserialize(moduleCfg, modCfgMap, hdCfg.Network.Value)
+	if err != nil {
+		return nil, fmt.Errorf("error deserialzing config for module [%s]: %w", moduleName, err)
+	}
 
 	// Logger
 	apiLogger := log.NewColorLogger(apiLogColor)
 
 	// Resources
-	resources := utils.NewResources(cfg.Network.Value)
+	resources := utils.NewResources(hdCfg.Network.Value)
 
 	// EC Manager
-	ecManager, err := NewExecutionClientManager(cfg)
+	ecManager, err := NewExecutionClientManager(hdCfg)
 	if err != nil {
 		return nil, fmt.Errorf("error creating executon client manager: %w", err)
 	}
 
 	// Beacon manager
-	bcManager, err := NewBeaconClientManager(cfg)
+	bcManager, err := NewBeaconClientManager(hdCfg)
 	if err != nil {
 		return nil, fmt.Errorf("error creating Beacon client manager: %w", err)
 	}
@@ -95,10 +114,10 @@ func NewServiceProvider(moduleDir string) (*ServiceProvider, error) {
 	queryMgr := eth.NewQueryManager(ecManager, resources.MulticallAddress, concurrentCallLimit)
 
 	// Create the provider
-	provider := &ServiceProvider{
+	provider := &ServiceProvider[ConfigType]{
 		moduleDir: moduleDir,
-		userDir:   cfg.HyperdriveUserDirectory,
-		cfg:       cfg,
+		userDir:   hdCfg.HyperdriveUserDirectory,
+		hdCfg:     hdCfg,
 		hdClient:  hdClient,
 		ecManager: ecManager,
 		bcManager: bcManager,
@@ -115,52 +134,56 @@ func NewServiceProvider(moduleDir string) (*ServiceProvider, error) {
 // === Getters ===
 // ===============
 
-func (p *ServiceProvider) GetModuleDir() string {
+func (p *ServiceProvider[_]) GetModuleDir() string {
 	return p.moduleDir
 }
 
-func (p *ServiceProvider) GetUserDir() string {
+func (p *ServiceProvider[_]) GetUserDir() string {
 	return p.userDir
 }
 
-func (p *ServiceProvider) GetConfig() *config.HyperdriveConfig {
-	return p.cfg
+func (p *ServiceProvider[_]) GetHyperdriveConfig() *config.HyperdriveConfig {
+	return p.hdCfg
 }
 
-func (p *ServiceProvider) GetHyperdriveClient() *client.ApiClient {
+func (p *ServiceProvider[ConfigType]) GetModuleConfig() ConfigType {
+	return p.moduleConfig
+}
+
+func (p *ServiceProvider[_]) GetHyperdriveClient() *client.ApiClient {
 	return p.hdClient
 }
 
-func (p *ServiceProvider) GetEthClient() *ExecutionClientManager {
+func (p *ServiceProvider[_]) GetEthClient() *ExecutionClientManager {
 	return p.ecManager
 }
 
-func (p *ServiceProvider) GetBeaconClient() *BeaconClientManager {
+func (p *ServiceProvider[_]) GetBeaconClient() *BeaconClientManager {
 	return p.bcManager
 }
 
-func (p *ServiceProvider) GetDocker() *docker.Client {
+func (p *ServiceProvider[_]) GetDocker() *docker.Client {
 	return p.docker
 }
 
-func (p *ServiceProvider) GetResources() *utils.Resources {
+func (p *ServiceProvider[_]) GetResources() *utils.Resources {
 	return p.resources
 }
 
-func (p *ServiceProvider) GetTransactionManager() *eth.TransactionManager {
+func (p *ServiceProvider[_]) GetTransactionManager() *eth.TransactionManager {
 	return p.txMgr
 }
 
-func (p *ServiceProvider) GetQueryManager() *eth.QueryManager {
+func (p *ServiceProvider[_]) GetQueryManager() *eth.QueryManager {
 	return p.queryMgr
 }
 
-func (p *ServiceProvider) GetApiLogger() *log.ColorLogger {
+func (p *ServiceProvider[_]) GetApiLogger() *log.ColorLogger {
 	return p.apiLogger
 }
 
-func (p *ServiceProvider) IsDebugMode() bool {
-	return p.cfg.DebugMode.Value
+func (p *ServiceProvider[_]) IsDebugMode() bool {
+	return p.hdCfg.DebugMode.Value
 }
 
 // =============

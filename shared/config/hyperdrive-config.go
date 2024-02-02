@@ -15,7 +15,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/pbnjay/memory"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // =========================
@@ -67,7 +67,7 @@ type HyperdriveConfig struct {
 	Metrics *MetricsConfig
 
 	// Modules
-	Modules *modconfig.ModulesConfig
+	Modules map[string]any
 
 	// Internal fields
 	Version                 string
@@ -245,7 +245,6 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg.LocalBeaconConfig = NewLocalBeaconConfig(cfg)
 	cfg.ExternalBeaconConfig = NewExternalBeaconConfig(cfg)
 	cfg.Metrics = NewMetricsConfig(cfg)
-	cfg.Modules = modconfig.NewModulesConfig()
 
 	// Apply the default values for mainnet
 	cfg.Network.Value = types.Network_Mainnet
@@ -282,7 +281,6 @@ func (cfg *HyperdriveConfig) GetSubconfigs() map[string]types.IConfigSection {
 		"localBeacon":       cfg.LocalBeaconConfig,
 		"externalBeacon":    cfg.ExternalBeaconConfig,
 		"metrics":           cfg.Metrics,
-		"modules":           cfg.Modules,
 	}
 }
 
@@ -290,7 +288,7 @@ func (cfg *HyperdriveConfig) GetSubconfigs() map[string]types.IConfigSection {
 func (cfg *HyperdriveConfig) Serialize() map[string]any {
 	masterMap := map[string]any{}
 
-	hdMap := serialize(cfg)
+	hdMap := Serialize(cfg)
 	masterMap[userDirectoryKey] = cfg.HyperdriveUserDirectory
 	masterMap[ids.VersionID] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	masterMap[ids.RootConfigID] = hdMap
@@ -312,16 +310,9 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	if !exists {
 		return fmt.Errorf("config is missing the [%s] section", ids.RootConfigID)
 	}
-	hdMap, isMap := hyperdriveParams.(map[any]any)
+	hdMap, isMap := hyperdriveParams.(map[string]any)
 	if !isMap {
-		typedMap, isMap := hyperdriveParams.(map[string]any)
-		if !isMap {
-			return fmt.Errorf("config has an entry named [%s] but it is not a map, it's a %s", ids.RootConfigID, reflect.TypeOf(hyperdriveParams))
-		}
-		hdMap = map[any]any{}
-		for name, value := range typedMap {
-			hdMap[name] = value
-		}
+		return fmt.Errorf("config has an entry named [%s] but it is not a map, it's a %s", ids.RootConfigID, reflect.TypeOf(hyperdriveParams))
 	}
 	networkVal, exists := hdMap[cfg.Network.ID]
 	if exists {
@@ -333,7 +324,7 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	}
 
 	// Deserialize the params and subconfigs
-	err = deserialize(cfg, hdMap, network)
+	err = Deserialize(cfg, hdMap, network)
 	if err != nil {
 		return fmt.Errorf("error deserializing [%s]: %w", ids.RootConfigID, err)
 	}
@@ -344,12 +335,23 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 		return fmt.Errorf("expected a user directory parameter named [%s] but it was not found", userDirectoryKey)
 	}
 	cfg.HyperdriveUserDirectory = udKey.(string)
-
 	version, exists := masterMap[ids.VersionID]
 	if !exists {
 		return fmt.Errorf("expected a version parameter named [%s] but it was not found", ids.VersionID)
 	}
 	cfg.Version = version.(string)
+
+	// Handle modules
+	modules, exists := masterMap[modconfig.ModulesName]
+	if exists {
+		if modMap, ok := modules.(map[string]any); ok {
+			cfg.Modules = modMap
+		} else {
+			return fmt.Errorf("config has an entry named [%s] but it is not a map, it's a %s", modconfig.ModulesName, reflect.TypeOf(modules))
+		}
+	} else {
+		cfg.Modules = map[string]any{}
+	}
 
 	return nil
 }

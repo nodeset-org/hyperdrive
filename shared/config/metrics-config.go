@@ -132,7 +132,7 @@ func NewMetricsConfig(parent *HyperdriveConfig) *MetricsConfig {
 	return cfg
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *MetricsConfig) GetTitle() string {
 	return "Metrics Settings"
 }

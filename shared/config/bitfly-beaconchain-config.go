@@ -74,7 +74,7 @@ func NewBitflyNodeMetricsConfig(parent *MetricsConfig) *BitflyNodeMetricsConfig 
 	}
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *BitflyNodeMetricsConfig) GetTitle() string {
 	return "Bitfly Node Metrics Settings"
 }

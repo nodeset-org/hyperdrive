@@ -1,7 +1,11 @@
 package swconfig
 
 import (
+	"fmt"
+
+	swshared "github.com/nodeset-org/hyperdrive/modules/stakewise/shared"
 	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config/validator"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
@@ -19,6 +23,8 @@ const (
 
 // Configuration for Stakewise
 type StakewiseConfig struct {
+	hdCfg *config.HyperdriveConfig
+
 	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
 	Enabled types.Parameter[bool]
 
@@ -38,8 +44,10 @@ type StakewiseConfig struct {
 }
 
 // Generates a new Stakewise config
-func NewStakewiseConfig() *StakewiseConfig {
+func NewStakewiseConfig(hdCfg *config.HyperdriveConfig) *StakewiseConfig {
 	cfg := &StakewiseConfig{
+		hdCfg: hdCfg,
+
 		Enabled: types.Parameter[bool]{
 			ParameterCommon: &types.ParameterCommon{
 				ID:                 StakewiseEnableID,
@@ -93,7 +101,7 @@ func NewStakewiseConfig() *StakewiseConfig {
 	return cfg
 }
 
-// The the title for the config
+// The title for the config
 func (cfg *StakewiseConfig) GetTitle() string {
 	return "Stakewise"
 }
@@ -119,10 +127,95 @@ func (cfg *StakewiseConfig) GetSubconfigs() map[string]types.IConfigSection {
 	}
 }
 
+// ===================
+// === Module Info ===
+// ===================
+
+// The module name
+func (cfg *StakewiseConfig) GetModuleName() string {
+	return "stakewise"
+}
+
+func (cfg *StakewiseConfig) GetValidatorContainerTagInfo() map[string]string {
+	return map[string]string{
+		string(ContainerID_StakewiseValidator): cfg.GetStakewiseVcContainerTag(),
+	}
+}
+
 // ==================
 // === Templating ===
 // ==================
 
+// The tag for the daemon container
 func (cfg *StakewiseConfig) DaemonTag() string {
 	return daemonTag
+}
+
+// Get the container tag of the selected VC
+func (cfg *StakewiseConfig) GetStakewiseVcContainerTag() string {
+	bn := cfg.hdCfg.GetSelectedBeaconNode()
+	switch bn {
+	case types.BeaconNode_Lighthouse:
+		return cfg.Lighthouse.ContainerTag.Value
+	case types.BeaconNode_Lodestar:
+		return cfg.Lodestar.ContainerTag.Value
+	case types.BeaconNode_Nimbus:
+		return cfg.Nimbus.ContainerTag.Value
+	case types.BeaconNode_Prysm:
+		return cfg.Prysm.ContainerTag.Value
+	case types.BeaconNode_Teku:
+		return cfg.Teku.ContainerTag.Value
+	default:
+		panic(fmt.Sprintf("Unknown Beacon Node %s", bn))
+	}
+}
+
+// Gets the additional flags of the selected VC
+func (cfg *StakewiseConfig) GetStakewiseVcAdditionalFlags() string {
+	bn := cfg.hdCfg.GetSelectedBeaconNode()
+	switch bn {
+	case types.BeaconNode_Lighthouse:
+		return cfg.Lighthouse.AdditionalFlags.Value
+	case types.BeaconNode_Lodestar:
+		return cfg.Lodestar.AdditionalFlags.Value
+	case types.BeaconNode_Nimbus:
+		return cfg.Nimbus.AdditionalFlags.Value
+	case types.BeaconNode_Prysm:
+		return cfg.Prysm.AdditionalFlags.Value
+	case types.BeaconNode_Teku:
+		return cfg.Teku.AdditionalFlags.Value
+	default:
+		panic(fmt.Sprintf("Unknown Beacon Node %s", bn))
+	}
+}
+
+// Check if any of the services have doppelganger detection enabled
+// NOTE: update this with each new service that runs a VC!
+func (cfg *StakewiseConfig) IsDoppelgangerEnabled() bool {
+	return cfg.VcCommon.DoppelgangerDetection.Value
+}
+
+// Used by text/template to format validator.yml
+func (cfg *StakewiseConfig) StakewiseGraffiti() (string, error) {
+	prefix := cfg.hdCfg.GraffitiPrefix()
+	customGraffiti := cfg.VcCommon.Graffiti.Value
+	if customGraffiti == "" {
+		return prefix, nil
+	}
+	return fmt.Sprintf("%s (%s)", prefix, customGraffiti), nil
+}
+
+func (cfg *StakewiseConfig) StakewiseFeeRecipient() string {
+	res := swshared.NewStakewiseResources(cfg.hdCfg.Network.Value)
+	return res.FeeRecipient.Hex()
+}
+
+func (cfg *StakewiseConfig) StakewiseVault() string {
+	res := swshared.NewStakewiseResources(cfg.hdCfg.Network.Value)
+	return res.Vault.Hex()
+}
+
+func (cfg *StakewiseConfig) StakewiseNetwork() string {
+	res := swshared.NewStakewiseResources(cfg.hdCfg.Network.Value)
+	return res.NodesetNetwork
 }

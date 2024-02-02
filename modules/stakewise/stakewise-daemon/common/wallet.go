@@ -11,6 +11,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
+	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
@@ -33,11 +34,11 @@ type Wallet struct {
 	validatorManager         *services.ValidatorManager
 	stakewiseKeystoreManager *stakewiseKeystoreManager
 	data                     stakewiseWalletData
-	sp                       *services.ServiceProvider
+	sp                       *services.ServiceProvider[*swconfig.StakewiseConfig]
 }
 
 // Create a new wallet
-func NewWallet(sp *services.ServiceProvider) (*Wallet, error) {
+func NewWallet(sp *services.ServiceProvider[*swconfig.StakewiseConfig]) (*Wallet, error) {
 	moduleDir := sp.GetModuleDir()
 	wallet := &Wallet{
 		sp:               sp,
