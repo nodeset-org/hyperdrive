@@ -75,7 +75,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		// Do the client swap check
 		firstRun, err := checkForValidatorChange(hd, cfg)
 		if err != nil {
-			fmt.Printf("%sWARNING: couldn't verify that the validator container can be safely restarted:\n\t%s\n", terminal.ColorYellow, err.Error())
+			fmt.Printf("%sWARNING: couldn't verify that the Validator Client containers can be safely restarted:\n\t%s\n", terminal.ColorYellow, err.Error())
 			fmt.Println("If you are changing to a different client, it may resubmit an attestation you have already submitted.")
 			fmt.Println("This will slash your validator!")
 			fmt.Println("To prevent slashing, you must wait 15 minutes from the time you stopped the clients before starting them again.")
@@ -87,12 +87,12 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 				return nil
 			}
 		} else if firstRun {
-			fmt.Println("It looks like this is your first time starting Hyperdrive.")
-			existingNode := utils.Confirm("Just to be sure, are you rebuilding a node that has existing, active validators attesting on the Beacon Chain?")
+			fmt.Println("It looks like this is your first time starting a Validator Client.")
+			existingNode := utils.Confirm("Just to be sure, does your node have any existing, active validators attesting on the Beacon Chain?")
 			if !existingNode {
 				fmt.Println("Okay, great! You're safe to start. Have fun!")
 			} else {
-				fmt.Printf("%sSince you're rebuilding a node, Hyperdrive can't determine if you attested in the last 15 minutes.\n", terminal.ColorYellow)
+				fmt.Printf("%sSince didn't have any Validator Clients before, Hyperdrive can't determine if you attested in the last 15 minutes.\n", terminal.ColorYellow)
 				fmt.Println("If you did, it may resubmit an attestation you have already submitted.")
 				fmt.Println("This will slash your validator!")
 				fmt.Println("To prevent slashing, you must wait 15 minutes from the time you stopped the clients before starting them again.")
