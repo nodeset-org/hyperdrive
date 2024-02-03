@@ -256,7 +256,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 
 // Get the title for this config
 func (cfg *HyperdriveConfig) GetTitle() string {
-	return "Hyperdrive Settings"
+	return "Hyperdrive"
 }
 
 // Get the parameters for this config
@@ -367,29 +367,6 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	}
 
 	return nil
-}
-
-// Get all of the settings that have changed between an old config and this config, and get all of the containers that are affected by those changes - also returns whether or not the selected network was changed
-func (cfg *HyperdriveConfig) GetChanges(oldConfig *HyperdriveConfig) (*types.ChangedSection, map[types.ContainerID]bool, bool) {
-	// Get the changed parameters
-	section, changeCount := GetChangedSettings(oldConfig, cfg)
-	if changeCount == 0 {
-		return nil, map[types.ContainerID]bool{}, false
-	}
-	section.Name = cfg.GetTitle()
-
-	// Get the affected containers
-	containers := map[types.ContainerID]bool{}
-	GetAffectedContainers(section, containers)
-
-	// Check if the network has changed
-	changeNetworks := false
-	if oldConfig.Network.Value != cfg.Network.Value {
-		changeNetworks = true
-	}
-
-	// Return everything
-	return section, containers, changeNetworks
 }
 
 // =====================

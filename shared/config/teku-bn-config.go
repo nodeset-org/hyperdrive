@@ -118,7 +118,7 @@ func NewTekuBnConfig(parent *LocalBeaconConfig) *TekuBnConfig {
 
 // Get the title for the config
 func (cfg *TekuBnConfig) GetTitle() string {
-	return "Teku Settings"
+	return "Teku Beacon Node"
 }
 
 // Get the parameters for this config

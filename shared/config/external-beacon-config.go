@@ -108,7 +108,7 @@ func NewExternalBeaconConfig(parent *HyperdriveConfig) *ExternalBeaconConfig {
 
 // The title for the config
 func (cfg *ExternalBeaconConfig) GetTitle() string {
-	return "External Beacon Node Settings"
+	return "External Beacon Node"
 }
 
 // Get the parameters for this config

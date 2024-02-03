@@ -119,7 +119,7 @@ func NewBesuConfig(parent *LocalExecutionConfig) *BesuConfig {
 
 // The title for the config
 func (cfg *BesuConfig) GetTitle() string {
-	return "Besu Settings"
+	return "Besu"
 }
 
 // Get the parameters for this config

@@ -60,7 +60,7 @@ func NewGrafanaConfig(parent *MetricsConfig) *GrafanaConfig {
 
 // The title for the config
 func (cfg *GrafanaConfig) GetTitle() string {
-	return "Grafana Settings"
+	return "Grafana"
 }
 
 // Get the parameters for this config

@@ -125,7 +125,7 @@ func NewNimbusBnConfig(parent *LocalBeaconConfig) *NimbusBnConfig {
 
 // Get the title for the config
 func (cfg *NimbusBnConfig) GetTitle() string {
-	return "Nimbus Settings"
+	return "Nimbus Beacon Node"
 }
 
 // Get the parameters for this config

@@ -78,7 +78,7 @@ func NewLodestarBnConfig(parent *LocalBeaconConfig) *LodestarBnConfig {
 
 // The title for the config
 func (cfg *LodestarBnConfig) GetTitle() string {
-	return "Lodestar Settings"
+	return "Lodestar Beacon Node"
 }
 
 // Get the parameters for this config

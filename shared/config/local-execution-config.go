@@ -163,7 +163,7 @@ func NewExecutionCommonConfig(parent *HyperdriveConfig) *LocalExecutionConfig {
 
 // Get the title for the config
 func (cfg *LocalExecutionConfig) GetTitle() string {
-	return "Local Execution Client Settings"
+	return "Local Execution Client"
 }
 
 // Get the parameters for this config

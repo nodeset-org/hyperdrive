@@ -79,7 +79,7 @@ func NewExporterConfig(parent *MetricsConfig) *ExporterConfig {
 
 // The title for the config
 func (cfg *ExporterConfig) GetTitle() string {
-	return "Node Exporter Settings"
+	return "Node Exporter"
 }
 
 // Get the parameters for this config

@@ -94,7 +94,7 @@ func NewPrometheusConfig(parent *MetricsConfig) *PrometheusConfig {
 
 // The title for the config
 func (cfg *PrometheusConfig) GetTitle() string {
-	return "Prometheus Settings"
+	return "Prometheus"
 }
 
 // Get the parameters for this config

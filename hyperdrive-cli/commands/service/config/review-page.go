@@ -69,7 +69,8 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 		} else {
 			builder.WriteString("The following containers must be restarted for these changes to take effect:")
 			for container, _ := range totalAffectedContainers {
-				builder.WriteString(fmt.Sprintf("\n\t%v", container))
+				containerName := oldConfig.Hyperdrive.GetDockerArtifactName(string(container))
+				builder.WriteString(fmt.Sprintf("\n\t%s", containerName))
 				containersToRestart = append(containersToRestart, container)
 			}
 		}
@@ -225,12 +226,12 @@ func addChangesToDescription(section *types.ChangedSection, titlePrefix string, 
 	if titlePrefix == "" {
 		sectionName = section.Name
 	} else {
-		sectionName = fmt.Sprintf("%s > %s", titlePrefix, sectionName)
+		sectionName = fmt.Sprintf("%s > %s", titlePrefix, section.Name)
 	}
 
 	// Handle the parameters
 	if len(section.Settings) > 0 {
-		description.WriteString(fmt.Sprintf("[%s]\n", sectionName))
+		description.WriteString(fmt.Sprintf("{%s}\n", sectionName))
 		for _, setting := range section.Settings {
 			description.WriteString(fmt.Sprintf("\t%s: %s => %s\n", setting.Name, setting.OldValue, setting.NewValue))
 		}

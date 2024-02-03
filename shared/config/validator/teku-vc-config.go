@@ -57,7 +57,7 @@ func NewTekuVcConfig() *TekuVcConfig {
 
 // Get the title for the config
 func (cfg *TekuVcConfig) GetTitle() string {
-	return "Teku Settings"
+	return "Teku Validator Client"
 }
 
 // Get the parameters for this config

@@ -34,12 +34,12 @@ func GetChangedSettings(old types.IConfigSection, new types.IConfigSection) (*ty
 		newSubconfig := newSubconfigs[name]
 		subsection, subcount := GetChangedSettings(oldSubconfig, newSubconfig)
 		if subcount > 0 {
-			subsection.Name = oldSubconfig.GetTitle()
 			changedSection.Subsections = append(changedSection.Subsections, subsection)
 			totalCount += subcount
 		}
 	}
 
+	changedSection.Name = old.GetTitle()
 	return changedSection, totalCount
 }
 

@@ -57,7 +57,7 @@ func NewPrysmVcConfig() *PrysmVcConfig {
 
 // The title for the config
 func (cfg *PrysmVcConfig) GetTitle() string {
-	return "Prysm Settings"
+	return "Prysm Validator Client"
 }
 
 // Get the parameters for this config

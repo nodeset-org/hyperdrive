@@ -57,7 +57,7 @@ func NewNimbusVcConfig() *NimbusVcConfig {
 
 // Get the title for the config
 func (cfg *NimbusVcConfig) GetTitle() string {
-	return "Nimbus Settings"
+	return "Nimbus Validator Client"
 }
 
 // Get the parameters for this config

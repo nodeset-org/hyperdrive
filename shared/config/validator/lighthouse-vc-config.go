@@ -60,7 +60,7 @@ func NewLighthouseVcConfig() *LighthouseVcConfig {
 
 // The title for the config
 func (cfg *LighthouseVcConfig) GetTitle() string {
-	return "Lighthouse Settings"
+	return "Lighthouse Validator Client"
 }
 
 // Get the parameters for this config

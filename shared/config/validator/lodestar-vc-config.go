@@ -56,7 +56,7 @@ func NewLodestarVcConfig() *LodestarVcConfig {
 
 // The title for the config
 func (cfg *LodestarVcConfig) GetTitle() string {
-	return "Lodestar Settings"
+	return "Lodestar Validator Client"
 }
 
 // Get the parameters for this config

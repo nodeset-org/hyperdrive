@@ -101,7 +101,7 @@ func NewGethConfig(parent *LocalExecutionConfig) *GethConfig {
 
 // Get the title for the config
 func (cfg *GethConfig) GetTitle() string {
-	return "Geth Settings"
+	return "Geth"
 }
 
 // Get the parameters for this config

@@ -158,7 +158,7 @@ func NewNethermindConfig(parent *LocalExecutionConfig) *NethermindConfig {
 
 // Get the title for the config
 func (cfg *NethermindConfig) GetTitle() string {
-	return "Nethermind Settings"
+	return "Nethermind"
 }
 
 // Get the parameters for this config

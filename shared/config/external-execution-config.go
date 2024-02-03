@@ -95,7 +95,7 @@ func NewExternalExecutionConfig(parent *HyperdriveConfig) *ExternalExecutionConf
 
 // The title for the config
 func (cfg *ExternalExecutionConfig) GetTitle() string {
-	return "External Execution Client Settings"
+	return "External Execution Client"
 }
 
 // Get the parameters for this config

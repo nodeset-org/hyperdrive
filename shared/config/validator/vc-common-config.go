@@ -69,7 +69,7 @@ func NewValidatorClientCommonConfig() *ValidatorClientCommonConfig {
 
 // Get the title for the config
 func (cfg *ValidatorClientCommonConfig) GetTitle() string {
-	return "Common Validator Client Settings"
+	return "Common Validator Client"
 }
 
 // Get the parameters for this config
