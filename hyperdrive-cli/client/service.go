@@ -479,7 +479,7 @@ func (c *HyperdriveClient) deployTemplates(cfg *GlobalConfig, hyperdriveDir stri
 	// Deploy modules
 	for _, module := range cfg.GetAllModuleConfigs() {
 		if module.IsEnabled() {
-			deployedContainers, err = c.composeModule(module, hyperdriveDir, deployedContainers)
+			deployedContainers, err = c.composeModule(cfg, module, hyperdriveDir, deployedContainers)
 			if err != nil {
 				return nil, err
 			}
@@ -533,8 +533,8 @@ func copyOverrideFiles(sourceDir string, targetDir string) error {
 }
 
 // Handle composing for modules
-func (c *HyperdriveClient) composeModule(cfg modconfig.IModuleConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
-	moduleName := cfg.GetModuleName()
+func (c *HyperdriveClient) composeModule(global *GlobalConfig, module modconfig.IModuleConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
+	moduleName := module.GetModuleName()
 	composePaths := template.ComposePaths{
 		RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, modconfig.ModulesName, moduleName),
 		TemplatePath: filepath.Join(templatesDir, modconfig.ModulesName, moduleName),
@@ -542,7 +542,7 @@ func (c *HyperdriveClient) composeModule(cfg modconfig.IModuleConfig, hyperdrive
 	}
 
 	// These containers always run
-	toDeploy := cfg.GetContainersToDeploy()
+	toDeploy := module.GetContainersToDeploy()
 
 	// Make the modules folder
 	err := os.MkdirAll(composePaths.RuntimePath, 0775)
@@ -551,7 +551,7 @@ func (c *HyperdriveClient) composeModule(cfg modconfig.IModuleConfig, hyperdrive
 	}
 
 	for _, containerName := range toDeploy {
-		containers, err := composePaths.File(string(containerName)).Write(cfg)
+		containers, err := composePaths.File(string(containerName)).Write(global)
 		if err != nil {
 			return []string{}, fmt.Errorf("could not create %s container definition: %w", containerName, err)
 		}

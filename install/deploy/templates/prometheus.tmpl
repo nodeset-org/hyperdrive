@@ -7,20 +7,20 @@
 
 version: "3.7"
 services:
-  prometheus:
-    image: {{.Metrics.Prometheus.ContainerTag}}
-    container_name: {{.ProjectName}}_prometheus
+  {{.Hyperdrive.PrometheusContainerName}}:
+    image: {{.Hyperdrive.Metrics.Prometheus.ContainerTag}}
+    container_name: {{.Hyperdrive.ProjectName}}_{{.Hyperdrive.PrometheusContainerName}}
     restart: unless-stopped
     command:
-      - "--web.listen-address=:{{or .Metrics.Prometheus.Port "9091"}}"
+      - "--web.listen-address=:{{or .Hyperdrive.Metrics.Prometheus.Port "9091"}}"
       - "--config.file=/etc/prometheus/prometheus.yml"
-      {{- range $flag := .GetPrometheusAdditionalFlags}}
+      {{- range $flag := .Hyperdrive.GetPrometheusAdditionalFlags}}
       - "{{$flag}}"
       {{- end}}
-    ports: [{{.GetPrometheusOpenPorts}}]
+    ports: [{{.Hyperdrive.GetPrometheusOpenPorts}}]
     volumes:
-      - "{{.HyperdriveUserDirectory}}/prometheus.yml:/etc/prometheus/prometheus.yml"
-      - "{{.HyperdriveUserDirectory}}/extra-scrape-jobs:/extra-scrape-jobs"
+      - "{{.Hyperdrive.HyperdriveUserDirectory}}/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "{{.Hyperdrive.HyperdriveUserDirectory}}/extra-scrape-jobs:/extra-scrape-jobs"
       - "prometheus-data:/prometheus"
     networks:
       - net

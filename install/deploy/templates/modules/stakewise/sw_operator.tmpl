@@ -7,30 +7,32 @@
 
 version: "3.7"
 services:
-  sw_operator:
-    image: {{.Modules.Stakewise.OperatorContainerTag.Value}}
+  {{.Stakewise.OperatorContainerName}}:
+    image: {{.Stakewise.OperatorContainerTag.Value}}
     user: root
-    container_name: {{.ProjectName}}_sw_operator
+    container_name: {{.Hyperdrive.ProjectName}}_{{.Stakewise.OperatorContainerName}}
     restart: unless-stopped
-{{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.DaemonRoute)}}
+{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .Stakewise.GetModuleName)}}
     volumes:
       - {{$module_dir}}:{{$module_dir}}
     command:
       - "src/main.py"
       - "start"
       - "--data-dir={{$module_dir}}"
-      - "--deposit-data-file={{$module_dir}}/{{.Modules.Stakewise.DepositDataFile}}"
-      - "--network={{.StakewiseNetwork}}"
-      - "--vault={{.StakewiseVault}}"
-      - "--execution-endpoints={{.GetEcHttpEndpointsWithFallback}}"
-      - "--consensus-endpoints={{.GetBnHttpEndpointsWithFallback}}"
-      - "--hot-wallet-file={{$module_dir}}/{{.Modules.Stakewise.WalletFilename}}"
-      - "--hot-wallet-password-file={{$module_dir}}/{{.Modules.Stakewise.PasswordFilename}}"
-      - "--keystores-dir={{$module_dir}}/{{.Modules.ValidatorsDirectory}}/{{.Modules.Stakewise.DaemonRoute}}"
-      - "--keystores-password-file={{$module_dir}}/{{.Modules.ValidatorsDirectory}}/{{.Modules.Stakewise.DaemonRoute}}/{{.Modules.Stakewise.KeystorePasswordFile}}"
-      {{if .Metrics.EnableMetrics}}{{"- \"--enable-metrics\""}}{{end}}
+      - "--deposit-data-file={{$module_dir}}/{{.Stakewise.DepositDataFile}}"
+      - "--network={{.Stakewise.Network}}"
+      - "--vault={{.Stakewise.Vault}}"
+      - "--execution-endpoints={{.Hyperdrive.GetEcHttpEndpointsWithFallback}}"
+      - "--consensus-endpoints={{.Hyperdrive.GetBnHttpEndpointsWithFallback}}"
+      - "--hot-wallet-file={{$module_dir}}/{{.Stakewise.WalletFilename}}"
+      - "--hot-wallet-password-file={{$module_dir}}/{{.Stakewise.PasswordFilename}}"
+      - "--keystores-dir={{$module_dir}}/{{.ValidatorsDirectory}}/{{.Stakewise.GetModuleName}}"
+      - "--keystores-password-file={{$module_dir}}/{{.ValidatorsDirectory}}/{{.Stakewise.GetModuleName}}/{{.Stakewise.KeystorePasswordFile}}"
+      {{- if .Hyperdrive.Metrics.EnableMetrics}}
+      - "--enable-metrics"
+      {{end}}
       - "--metrics-host=0.0.0.0"
-      - "--max-fee-per-gas-gwei={{.AutoTxMaxFeeInt}}"
+      - "--max-fee-per-gas-gwei={{.Hyperdrive.AutoTxMaxFeeInt}}"
     networks:
       - net
     cap_drop:

@@ -36,17 +36,6 @@ func (c *GlobalConfig) GetAllModuleConfigs() []modconfig.IModuleConfig {
 	}
 }
 
-// Get the configs for all of the modules in the system that are enabled
-func (c *GlobalConfig) GetEnabledModuleConfigNames() []string {
-	names := []string{}
-	for _, cfg := range c.GetAllModuleConfigs() {
-		if cfg.IsEnabled() {
-			names = append(names, cfg.GetModuleName())
-		}
-	}
-	return names
-}
-
 // Serialize the config and all modules
 func (c *GlobalConfig) Serialize() map[string]any {
 	return c.Hyperdrive.Serialize(c.GetAllModuleConfigs())

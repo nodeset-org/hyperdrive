@@ -7,46 +7,46 @@
 
 version: "3.7"
 services:
-  ec:
-    image: {{.GetEcContainerTag}}
+  {{.Hyperdrive.ExecutionClientContainerName}}:
+    image: {{.Hyperdrive.GetEcContainerTag}}
     user: root
-    container_name: {{.ProjectName}}_ec
+    container_name: {{.Hyperdrive.ProjectName}}_{{.Hyperdrive.ExecutionClientContainerName}}
     restart: unless-stopped
     stop_grace_period: 15m
-    {{- $p2p := (or .LocalExecutionConfig.P2pPort.Value "30303")}}
-    ports: [ "{{$p2p}}:{{$p2p}}/udp", "{{$p2p}}:{{$p2p}}/tcp"{{.GetEcOpenApiPorts}} ]
+    {{- $p2p := (or .Hyperdrive.LocalExecutionConfig.P2pPort.String "30303")}}
+    ports: [ "{{$p2p}}:{{$p2p}}/udp", "{{$p2p}}:{{$p2p}}/tcp"{{.Hyperdrive.GetEcOpenApiPorts}} ]
     volumes:
-      - ecdata:/ethclient
+      - {{.Hyperdrive.ExecutionClientDataVolume}}:/ethclient
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
-      - /var/lib/hyperdrive/data/{{.ProjectName}}:/secrets
+      - /var/lib/hyperdrive/data/{{.Hyperdrive.ProjectName}}:/secrets
     networks:
       - net
     environment:
-      - NETWORK={{.Network}}
-      - CLIENT={{.LocalExecutionConfig.ExecutionClient}}
-      - EC_MAX_PEERS={{.GetEcMaxPeers}}
+      - NETWORK={{.Hyperdrive.Network}}
+      - CLIENT={{.Hyperdrive.LocalExecutionConfig.ExecutionClient}}
+      - EC_MAX_PEERS={{.Hyperdrive.GetEcMaxPeers}}
       - EC_P2P_PORT={{$p2p}}
-      - EC_ADDITIONAL_FLAGS={{.GetEcAdditionalFlags}}
-      - EC_HTTP_PORT={{.LocalExecutionConfig.HttpPort}}
-      - EC_WS_PORT={{.LocalExecutionConfig.WebsocketPort}}
-      - EC_ENGINE_PORT={{.LocalExecutionConfig.EnginePort}}
-      - EXTERNAL_IP={{.GetExternalIP}}
-      - ENABLE_METRICS={{.Metrics.EnableMetrics}}
-      - EC_METRICS_PORT={{.Metrics.EcMetricsPort}}
+      - EC_ADDITIONAL_FLAGS={{.Hyperdrive.GetEcAdditionalFlags}}
+      - EC_HTTP_PORT={{.Hyperdrive.LocalExecutionConfig.HttpPort}}
+      - EC_WS_PORT={{.Hyperdrive.LocalExecutionConfig.WebsocketPort}}
+      - EC_ENGINE_PORT={{.Hyperdrive.LocalExecutionConfig.EnginePort}}
+      - EXTERNAL_IP={{.Hyperdrive.GetExternalIP}}
+      - ENABLE_METRICS={{.Hyperdrive.Metrics.EnableMetrics}}
+      - EC_METRICS_PORT={{.Hyperdrive.Metrics.EcMetricsPort}}
       {{- /* Client-specific values */}}
-      {{- if eq .LocalExecutionConfig.ExecutionClient.String "besu"}}
-      - BESU_MAX_BACK_LAYERS={{.LocalExecutionConfig.Besu.MaxBackLayers}}
-      - BESU_JVM_HEAP_SIZE={{.LocalExecutionConfig.Besu.JvmHeapSize}}
-      {{- else if eq .LocalExecutionConfig.ExecutionClient.String "nethermind"}}
-      - EC_CACHE_SIZE={{.LocalExecutionConfig.Nethermind.CacheSize}}
-      - RP_NETHERMIND_PRUNE_MEM_SIZE={{.LocalExecutionConfig.Nethermind.PruneMemSize}}
-      - RP_NETHERMIND_ADDITIONAL_MODULES={{.LocalExecutionConfig.Nethermind.AdditionalModules}}
-      - RP_NETHERMIND_ADDITIONAL_URLS={{.LocalExecutionConfig.Nethermind.AdditionalUrls}}
-      {{- else if eq .LocalExecutionConfig.ExecutionClient.String "geth"}}
-      - RP_GETH_ENABLE_PBSS={{.LocalExecutionConfig.Geth.EnablePbss}}
+      {{- if eq .Hyperdrive.LocalExecutionConfig.ExecutionClient.String "besu"}}
+      - BESU_MAX_BACK_LAYERS={{.Hyperdrive.LocalExecutionConfig.Besu.MaxBackLayers}}
+      - BESU_JVM_HEAP_SIZE={{.Hyperdrive.LocalExecutionConfig.Besu.JvmHeapSize}}
+      {{- else if eq .Hyperdrive.LocalExecutionConfig.ExecutionClient.String "nethermind"}}
+      - EC_CACHE_SIZE={{.Hyperdrive.LocalExecutionConfig.Nethermind.CacheSize}}
+      - RP_NETHERMIND_PRUNE_MEM_SIZE={{.Hyperdrive.LocalExecutionConfig.Nethermind.PruneMemSize}}
+      - RP_NETHERMIND_ADDITIONAL_MODULES={{.Hyperdrive.LocalExecutionConfig.Nethermind.AdditionalModules}}
+      - RP_NETHERMIND_ADDITIONAL_URLS={{.Hyperdrive.LocalExecutionConfig.Nethermind.AdditionalUrls}}
+      {{- else if eq .Hyperdrive.LocalExecutionConfig.ExecutionClient.String "geth"}}
+      - RP_GETH_ENABLE_PBSS={{.Hyperdrive.LocalExecutionConfig.Geth.EnablePbss}}
       {{- end}}
     entrypoint: sh
-    command: "/usr/share/hyperdrive/scripts/{{.GetEcStartScript}}"
+    command: "/usr/share/hyperdrive/scripts/{{.Hyperdrive.GetEcStartScript}}"
     cap_drop:
       - all
     cap_add:
@@ -56,4 +56,4 @@ services:
 networks:
   net:
 volumes:
-  ecdata:
+  {{.Hyperdrive.ExecutionClientDataVolume}}:

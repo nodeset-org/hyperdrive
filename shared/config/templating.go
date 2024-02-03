@@ -6,9 +6,44 @@ import (
 	"strings"
 
 	"github.com/nodeset-org/hyperdrive/shared"
-	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
+
+// =================
+// === Constants ===
+// =================
+
+func (c *HyperdriveConfig) BeaconNodeContainerName() string {
+	return string(types.ContainerID_BeaconNode)
+}
+
+func (c *HyperdriveConfig) DaemonContainerName() string {
+	return string(types.ContainerID_Daemon)
+}
+
+func (c *HyperdriveConfig) ExecutionClientContainerName() string {
+	return string(types.ContainerID_ExecutionClient)
+}
+
+func (c *HyperdriveConfig) ExporterContainerName() string {
+	return string(types.ContainerID_Exporter)
+}
+
+func (c *HyperdriveConfig) GrafanaContainerName() string {
+	return string(types.ContainerID_Grafana)
+}
+
+func (c *HyperdriveConfig) PrometheusContainerName() string {
+	return string(types.ContainerID_Prometheus)
+}
+
+func (c *HyperdriveConfig) ExecutionClientDataVolume() string {
+	return ExecutionClientDataVolume
+}
+
+func (c *HyperdriveConfig) BeaconNodeDataVolume() string {
+	return BeaconNodeDataVolume
+}
 
 // ===============
 // === General ===
@@ -346,16 +381,4 @@ func (cfg *HyperdriveConfig) GraffitiPrefix() string {
 	}
 
 	return fmt.Sprintf("HD%s %s", identifier, versionString)
-}
-
-// ===============
-// === Modules ===
-// ===============
-
-func (c *HyperdriveConfig) ModulesDirectory() string {
-	return modconfig.ModulesName
-}
-
-func (c *HyperdriveConfig) ValidatorsDirectory() string {
-	return modconfig.ValidatorsDirectory
 }

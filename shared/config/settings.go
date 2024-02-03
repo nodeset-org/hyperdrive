@@ -21,4 +21,8 @@ const (
 
 	// HTTP
 	ClientTimeout time.Duration = 8 * time.Second
+
+	// Volumes
+	ExecutionClientDataVolume string = "ecdata"
+	BeaconNodeDataVolume      string = "bndata"
 )

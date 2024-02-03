@@ -7,60 +7,60 @@
 
 version: "3.7"
 services:
-  bn:
-    image: {{.GetBnContainerTag}}
+  {{.Hyperdrive.BeaconNodeContainerName}}:
+    image: {{.Hyperdrive.GetBnContainerTag}}
     user: root
-    container_name: {{.ProjectName}}_bn
+    container_name: {{.Hyperdrive.ProjectName}}_{{.Hyperdrive.BeaconNodeContainerName}}
     restart: unless-stopped
     stop_grace_period: 3m
-    {{- $p2p := (or .LocalBeaconConfig.P2pPort.String "9001")}}
+    {{- $p2p := (or .Hyperdrive.LocalBeaconConfig.P2pPort.String "9001")}}
     ports:
       - "{{$p2p}}:{{$p2p}}/udp"
       - "{{$p2p}}:{{$p2p}}/tcp"
-      {{- if eq .LocalBeaconConfig.BeaconNode.String "lighthouse"}}
-      - "{{.LocalBeaconConfig.Lighthouse.P2pQuicPort}}:{{.LocalBeaconConfig.Lighthouse.P2pQuicPort}}/udp"
+      {{- if eq .Hyperdrive.LocalBeaconConfig.BeaconNode.String "lighthouse"}}
+      - "{{.Hyperdrive.LocalBeaconConfig.Lighthouse.P2pQuicPort}}:{{.Hyperdrive.LocalBeaconConfig.Lighthouse.P2pQuicPort}}/udp"
       {{- end}}
-      {{- range $entry := .GetBnOpenPorts}}
+      {{- range $entry := .Hyperdrive.GetBnOpenPorts}}
       - "{{$entry}}"
       {{- end}}
     volumes:
-      - bndata:/ethclient
+      - {{.Hyperdrive.BeaconNodeDataVolume}}:/ethclient
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
-      - /var/lib/hyperdrive/data/{{.ProjectName}}:/secrets:ro
+      - /var/lib/hyperdrive/data/{{.Hyperdrive.ProjectName}}:/secrets:ro
     networks:
       - net
     environment:
-      - NETWORK={{.Network}}
-      - CC_CLIENT={{.LocalBeaconConfig.BeaconNode}}
-      - EC_HTTP_ENDPOINT={{.GetEcHttpEndpoint}}
-      - EC_WS_ENDPOINT={{.GetEcWsEndpoint}}
-      - EC_ENGINE_ENDPOINT=http://{{.GetExecutionHostname}}:{{.LocalExecutionConfig.EnginePort}}
-      - EC_ENGINE_WS_ENDPOINT=ws://{{.GetExecutionHostname}}:{{.LocalExecutionConfig.EnginePort}}
+      - NETWORK={{.Hyperdrive.Network}}
+      - CC_CLIENT={{.Hyperdrive.LocalBeaconConfig.BeaconNode}}
+      - EC_HTTP_ENDPOINT={{.Hyperdrive.GetEcHttpEndpoint}}
+      - EC_WS_ENDPOINT={{.Hyperdrive.GetEcWsEndpoint}}
+      - EC_ENGINE_ENDPOINT=http://{{.Hyperdrive.GetExecutionHostname}}:{{.Hyperdrive.LocalExecutionConfig.EnginePort}}
+      - EC_ENGINE_WS_ENDPOINT=ws://{{.Hyperdrive.GetExecutionHostname}}:{{.Hyperdrive.LocalExecutionConfig.EnginePort}}
       - BN_P2P_PORT={{$p2p}}
-      - BN_API_PORT={{.LocalBeaconConfig.HttpPort}}
-      - BN_MAX_PEERS={{.GetBnMaxPeers}}
-      - ENABLE_METRICS={{.Metrics.EnableMetrics}}
-      - BN_METRICS_PORT={{.Metrics.BnMetricsPort}}
-      - EXTERNAL_IP={{.GetExternalIP}}
-      - CHECKPOINT_SYNC_URL={{.LocalBeaconConfig.CheckpointSyncProvider}}
-      - BN_ADDITIONAL_FLAGS={{.GetBnAdditionalFlags}}
-      - ENABLE_BITFLY_NODE_METRICS={{.Metrics.EnableBitflyNodeMetrics}}
-      - BITFLY_NODE_METRICS_SECRET={{.Metrics.BitflyNodeMetrics.Secret}}
-      - BITFLY_NODE_METRICS_ENDPOINT={{.Metrics.BitflyNodeMetrics.Endpoint}}
-      - BITFLY_NODE_METRICS_MACHINE_NAME={{.Metrics.BitflyNodeMetrics.MachineName}}
+      - BN_API_PORT={{.Hyperdrive.LocalBeaconConfig.HttpPort}}
+      - BN_MAX_PEERS={{.Hyperdrive.GetBnMaxPeers}}
+      - ENABLE_METRICS={{.Hyperdrive.Metrics.EnableMetrics}}
+      - BN_METRICS_PORT={{.Hyperdrive.Metrics.BnMetricsPort}}
+      - EXTERNAL_IP={{.Hyperdrive.GetExternalIP}}
+      - CHECKPOINT_SYNC_URL={{.Hyperdrive.LocalBeaconConfig.CheckpointSyncProvider}}
+      - BN_ADDITIONAL_FLAGS={{.Hyperdrive.GetBnAdditionalFlags}}
+      - ENABLE_BITFLY_NODE_METRICS={{.Hyperdrive.Metrics.EnableBitflyNodeMetrics}}
+      - BITFLY_NODE_METRICS_SECRET={{.Hyperdrive.Metrics.BitflyNodeMetrics.Secret}}
+      - BITFLY_NODE_METRICS_ENDPOINT={{.Hyperdrive.Metrics.BitflyNodeMetrics.Endpoint}}
+      - BITFLY_NODE_METRICS_MACHINE_NAME={{.Hyperdrive.Metrics.BitflyNodeMetrics.MachineName}}
       {{- /* Client-specific values */}}
-      {{- if eq .LocalBeaconConfig.BeaconNode.String "teku"}}
-      - TEKU_JVM_HEAP_SIZE={{.LocalBeaconConfig.Teku.JvmHeapSize}}
-      - TEKU_ARCHIVE_MODE={{.LocalBeaconConfig.Teku.ArchiveMode}}
-      {{- else if eq .LocalBeaconConfig.BeaconNode.String "prysm"}}
-      - BN_RPC_PORT={{.LocalBeaconConfig.Prysm.RpcPort}}
-      {{- else if eq .LocalBeaconConfig.BeaconNode.String "nimbus"}}
-      - NIMBUS_PRUNING_MODE={{.LocalBeaconConfig.Nimbus.PruningMode}}
-      {{- else if eq .LocalBeaconConfig.BeaconNode.String "lighthouse"}}
-      - BN_P2P_QUIC_PORT={{.LocalBeaconConfig.Lighthouse.P2pQuicPort}}
+      {{- if eq .Hyperdrive.LocalBeaconConfig.BeaconNode.String "teku"}}
+      - TEKU_JVM_HEAP_SIZE={{.Hyperdrive.LocalBeaconConfig.Teku.JvmHeapSize}}
+      - TEKU_ARCHIVE_MODE={{.Hyperdrive.LocalBeaconConfig.Teku.ArchiveMode}}
+      {{- else if eq .Hyperdrive.LocalBeaconConfig.BeaconNode.String "prysm"}}
+      - BN_RPC_PORT={{.Hyperdrive.LocalBeaconConfig.Prysm.RpcPort}}
+      {{- else if eq .Hyperdrive.LocalBeaconConfig.BeaconNode.String "nimbus"}}
+      - NIMBUS_PRUNING_MODE={{.Hyperdrive.LocalBeaconConfig.Nimbus.PruningMode}}
+      {{- else if eq .Hyperdrive.LocalBeaconConfig.BeaconNode.String "lighthouse"}}
+      - BN_P2P_QUIC_PORT={{.Hyperdrive.LocalBeaconConfig.Lighthouse.P2pQuicPort}}
       {{- end}}
     entrypoint: sh
-    command: "/usr/share/hyperdrive/scripts/{{.GetBnStartScript}}"
+    command: "/usr/share/hyperdrive/scripts/{{.Hyperdrive.GetBnStartScript}}"
     cap_drop:
       - all
     cap_add:
@@ -70,4 +70,4 @@ services:
 networks:
   net:
 volumes:
-  bndata:
+  {{.Hyperdrive.BeaconNodeDataVolume}}:

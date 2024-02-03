@@ -7,38 +7,38 @@
 
 version: "3.7"
 services:
-  sw_vc:
-    image: {{.GetStakewiseVcContainerTag}}
+  {{.Stakewise.VcContainerName}}:
+    image: {{.Stakewise.GetVcContainerTag}}
     user: root
-    container_name: {{.ProjectName}}_sw_vc
+    container_name: {{.Hyperdrive.ProjectName}}_{{.Stakewise.VcContainerName}}
     restart: unless-stopped
     stop_grace_period: 3m
-{{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.DaemonRoute)}}
+{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .Stakewise.GetModuleName)}}
     volumes:
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
-      - {{$module_dir}}/{{.Modules.ValidatorsDirectory}}:/validators
+      - {{$module_dir}}/{{.ValidatorsDirectory}}:/validators
     networks:
       - net
     environment:
-      - NETWORK={{.Network}}
-      - EC_CLIENT={{if .IsLocalMode}}{{.LocalExecutionConfig.ExecutionClient}}{{else}}{{.ExternalExecutionConfig.ExecutionClient}}{{end}}
-      - CC_CLIENT={{if .IsLocalMode}}{{.LocalBeaconConfig.BeaconNode}}{{else}}{{.ExternalBeaconConfig.BeaconNode}}{{end}}
-      - CC_API_ENDPOINT={{.BnHttpUrl}}
-      - CC_RPC_ENDPOINT={{.BnRpcUrl}}
-      - FALLBACK_CC_API_ENDPOINT={{.FallbackBnHttpUrl}}
-      - FALLBACK_CC_RPC_ENDPOINT={{.FallbackBnRpcUrl}}
-      - FEE_RECIPIENT={{.StakewiseFeeRecipient}}
-      - ENABLE_METRICS={{.Metrics.EnableMetrics}}
-      - VC_METRICS_PORT={{.Modules.Stakewise.VcCommon.MetricsPort}}
-      - DOPPELGANGER_DETECTION={{.Modules.Stakewise.VcCommon.DoppelgangerDetection}}
-      - VC_ADDITIONAL_FLAGS={{.GetStakewiseVcAdditionalFlags}}
-      - ENABLE_BITFLY_NODE_METRICS={{.Metrics.EnableBitflyNodeMetrics}}
-      - BITFLY_NODE_METRICS_SECRET={{.Metrics.BitflyNodeMetrics.Secret}}
-      - BITFLY_NODE_METRICS_ENDPOINT={{.Metrics.BitflyNodeMetrics.Endpoint}}
-      - BITFLY_NODE_METRICS_MACHINE_NAME={{.Metrics.BitflyNodeMetrics.MachineName}}
-      - GRAFFITI={{.StakewiseGraffiti}}
+      - NETWORK={{.Hyperdrive.Network}}
+      - EC_CLIENT={{.Hyperdrive.GetSelectedExecutionClient}}
+      - CC_CLIENT={{.Hyperdrive.GetSelectedBeaconNode}}
+      - CC_API_ENDPOINT={{.Hyperdrive.BnHttpUrl}}
+      - CC_RPC_ENDPOINT={{.Hyperdrive.BnRpcUrl}}
+      - FALLBACK_CC_API_ENDPOINT={{.Hyperdrive.FallbackBnHttpUrl}}
+      - FALLBACK_CC_RPC_ENDPOINT={{.Hyperdrive.FallbackBnRpcUrl}}
+      - FEE_RECIPIENT={{.Stakewise.FeeRecipient}}
+      - ENABLE_METRICS={{.Hyperdrive.Metrics.EnableMetrics}}
+      - VC_METRICS_PORT={{.Stakewise.VcCommon.MetricsPort}}
+      - DOPPELGANGER_DETECTION={{.Stakewise.VcCommon.DoppelgangerDetection}}
+      - VC_ADDITIONAL_FLAGS={{.Stakewise.GetVcAdditionalFlags}}
+      - ENABLE_BITFLY_NODE_METRICS={{.Hyperdrive.Metrics.EnableBitflyNodeMetrics}}
+      - BITFLY_NODE_METRICS_SECRET={{.Hyperdrive.Metrics.BitflyNodeMetrics.Secret}}
+      - BITFLY_NODE_METRICS_ENDPOINT={{.Hyperdrive.Metrics.BitflyNodeMetrics.Endpoint}}
+      - BITFLY_NODE_METRICS_MACHINE_NAME={{.Hyperdrive.Metrics.BitflyNodeMetrics.MachineName}}
+      - GRAFFITI={{.Stakewise.Graffiti}}
     entrypoint: sh
-    command: "/usr/share/hyperdrive/scripts/{{.GetVcStartScript}}"
+    command: "/usr/share/hyperdrive/scripts/{{.Hyperdrive.GetVcStartScript}}"
     cap_drop:
       - all
     cap_add:

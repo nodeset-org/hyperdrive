@@ -7,15 +7,15 @@
 
 version: "3.7"
 services:
-  sw_daemon:
-    image: {{.Modules.Stakewise.DaemonTag}}
+  {{.Stakewise.DaemonContainerName}}:
+    image: {{.Stakewise.DaemonTag}}
     user: root
-    container_name: {{.ProjectName}}_sw_daemon
+    container_name: {{.Hyperdrive.ProjectName}}_{{.Stakewise.DaemonContainerName}}
     restart: unless-stopped
-{{$module_dir := (printf "%s/%s/%s" .UserDataPath.Value .Modules.ModulesDirectory .Modules.Stakewise.DaemonRoute)}}
+{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .Stakewise.GetModuleName)}}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - {{.HyperdriveUserDirectory}}:{{.HyperdriveUserDirectory}}
+      - {{.Hyperdrive.HyperdriveUserDirectory}}:{{.Hyperdrive.HyperdriveUserDirectory}}
       - {{$module_dir}}:{{$module_dir}}
     command:
       - "--module-dir"
