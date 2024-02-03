@@ -18,10 +18,15 @@ type GlobalConfig struct {
 
 // Make a new global config
 func NewGlobalConfig(hdCfg *config.HyperdriveConfig) *GlobalConfig {
-	return &GlobalConfig{
+	cfg := &GlobalConfig{
 		Hyperdrive: hdCfg,
 		Stakewise:  swconfig.NewStakewiseConfig(hdCfg),
 	}
+
+	for _, module := range cfg.GetAllModuleConfigs() {
+		config.ApplyDefaults(module, hdCfg.Network.Value)
+	}
+	return cfg
 }
 
 // Get the configs for all of the modules in the system
