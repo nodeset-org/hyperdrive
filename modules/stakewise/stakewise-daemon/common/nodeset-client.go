@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/goccy/go-json"
 
@@ -97,8 +98,9 @@ func (c *NodesetClient) UploadDepositData(depositData []byte) ([]byte, error) {
 
 // Get the current version of the aggregated deposit data on the server
 func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
+	vault := common.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
 	params := map[string]string{
-		"vault":   c.res.Vault.Hex(),
+		"vault":   vault,
 		"network": c.res.NodesetNetwork,
 	}
 	response, err := c.submitRequest(http.MethodGet, nil, params, depositDataPath, metaPath)
@@ -116,8 +118,9 @@ func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
 
 // Get the aggregated deposit data from the server
 func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData, error) {
+	vault := common.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
 	params := map[string]string{
-		"vault":   c.res.Vault.Hex(),
+		"vault":   vault,
 		"network": c.res.NodesetNetwork,
 	}
 	response, err := c.submitRequest(http.MethodGet, nil, params, depositDataPath)
