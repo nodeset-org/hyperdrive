@@ -18,8 +18,8 @@ const (
 	NethermindAdditionalUrlsID    string = "additionalUrls"
 
 	// Tags
-	nethermindTagProd string = "nethermind/nethermind:1.25.1"
-	nethermindTagTest string = "nethermind/nethermind:1.25.1"
+	nethermindTagProd string = "nethermind/nethermind:1.25.3"
+	nethermindTagTest string = "nethermind/nethermind:1.25.3"
 )
 
 // Configuration for Nethermind

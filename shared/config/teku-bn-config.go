@@ -12,8 +12,8 @@ const (
 	TekuArchiveModeID string = "archiveMode"
 
 	// Tags
-	tekuBnTagTest string = "consensys/teku:24.1.0"
-	tekuBnTagProd string = "consensys/teku:24.1.0"
+	tekuBnTagTest string = "consensys/teku:24.1.1"
+	tekuBnTagProd string = "consensys/teku:24.1.1"
 )
 
 // Configuration for Teku

@@ -11,10 +11,10 @@ const (
 	LhQuicPortID string = "p2pQuicPort"
 
 	// Tags
-	lighthouseBnTagPortableTest string = "sigp/lighthouse:v4.5.0"
-	lighthouseBnTagPortableProd string = "sigp/lighthouse:v4.5.0"
-	lighthouseBnTagModernTest   string = "sigp/lighthouse:v4.5.0-modern"
-	lighthouseBnTagModernProd   string = "sigp/lighthouse:v4.5.0-modern"
+	lighthouseBnTagPortableTest string = "sigp/lighthouse:v4.6.0"
+	lighthouseBnTagPortableProd string = "sigp/lighthouse:v4.6.0"
+	lighthouseBnTagModernTest   string = "sigp/lighthouse:v4.6.0-modern"
+	lighthouseBnTagModernProd   string = "sigp/lighthouse:v4.6.0-modern"
 )
 
 // Configuration for the Lighthouse BN

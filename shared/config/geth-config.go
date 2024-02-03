@@ -14,8 +14,8 @@ const (
 	GethEnablePbssID string = "enablePbss"
 
 	// Tags
-	gethTagProd string = "ethereum/client-go:v1.13.10"
-	gethTagTest string = "ethereum/client-go:v1.13.10"
+	gethTagProd string = "ethereum/client-go:v1.13.11"
+	gethTagTest string = "ethereum/client-go:v1.13.11"
 )
 
 // Configuration for Geth

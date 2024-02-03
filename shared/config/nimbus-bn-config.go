@@ -13,8 +13,8 @@ const (
 	NimbusPruningModeID string = "pruningMode"
 
 	// Tags
-	nimbusBnTagTest string = "statusim/nimbus-eth2:multiarch-v24.1.1"
-	nimbusBnTagProd string = "statusim/nimbus-eth2:multiarch-v24.1.1"
+	nimbusBnTagTest string = "statusim/nimbus-eth2:multiarch-v24.2.0"
+	nimbusBnTagProd string = "statusim/nimbus-eth2:multiarch-v24.2.0"
 )
 
 // Nimbus's pruning mode

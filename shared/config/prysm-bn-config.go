@@ -11,8 +11,8 @@ const (
 	PrysmOpenRpcPortID string = "openRpcPort"
 
 	// Tags
-	prysmBnTagTest string = "rocketpool/prysm:v4.2.0"
-	prysmBnTagProd string = "rocketpool/prysm:v4.2.0"
+	prysmBnTagTest string = "rocketpool/prysm:v4.2.1"
+	prysmBnTagProd string = "rocketpool/prysm:v4.2.1"
 )
 
 // Configuration for the Prysm BN

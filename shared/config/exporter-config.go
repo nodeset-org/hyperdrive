@@ -10,7 +10,7 @@ const (
 	ExporterEnableRootFsID string = "enableRootFs"
 
 	// Tags
-	exporterTag string = "prom/node-exporter:v1.6.1"
+	exporterTag string = "prom/node-exporter:v1.7.0"
 )
 
 // Configuration for Exporter

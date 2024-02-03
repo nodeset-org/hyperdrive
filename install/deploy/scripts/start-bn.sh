@@ -71,7 +71,6 @@ if [ "$CC_CLIENT" = "lighthouse" ]; then
         --staking \
         --http-allow-sync-stalled \
         --execution-jwt=/secrets/jwtsecret \
-        --always-prefer-builder-payload \
         --quic-port ${BN_P2P_QUIC_PORT:-8001} \
         --historic-state-cache-size 2 \
         $BN_ADDITIONAL_FLAGS"
@@ -209,7 +208,7 @@ fi
 if [ "$CC_CLIENT" = "prysm" ]; then
 
     # Grab the Holesky genesis state if needed
-    if [ "$NETWORK" = "holesky" ]; then
+    if [ "$NETWORK" = "holesky" -o "$NETWORK" = "holesky-dev" ]; then
         echo "Prysm is configured to use Holesky, genesis state required."
         if [ ! -f "/ethclient/holesky-genesis.ssz" ]; then
             echo "Downloading from Github..."

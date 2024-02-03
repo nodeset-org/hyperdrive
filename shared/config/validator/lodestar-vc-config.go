@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	lodestarVcTagTest string = "chainsafe/lodestar:v1.12.1"
-	lodestarVcTagProd string = "chainsafe/lodestar:v1.12.1"
+	lodestarVcTagTest string = "chainsafe/lodestar:v1.15.0"
+	lodestarVcTagProd string = "chainsafe/lodestar:v1.15.0"
 )
 
 // Configuration for the Lodestar VC

@@ -51,7 +51,7 @@ if [ "$CC_CLIENT" = "lighthouse" ]; then
     fi
 
     if [ "$ENABLE_MEV_BOOST" = "true" ]; then
-        CMD="$CMD --builder-proposals"
+        CMD="$CMD --builder-proposals --prefer_builder_proposals"
     fi
 
     if [ "$ENABLE_METRICS" = "true" ]; then
