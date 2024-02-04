@@ -21,7 +21,7 @@ var (
 	}
 	generateKeysNoRestartFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name:  "no-restart",
-		Usage: fmt.Sprintf("Don't automatically restart the Validator Client after generating keys. %sOnly use this if you know what you're doing and can restart it manually.%s", terminal.ColorYellow, terminal.ColorReset),
+		Usage: fmt.Sprintf("Don't automatically restart the Stakewise Operator or Validator Client containers after generating keys. %sOnly use this if you know what you're doing and can restart them manually.%s", terminal.ColorRed, terminal.ColorReset),
 	}
 )
 
@@ -79,6 +79,22 @@ func generateKeys(c *cli.Context) error {
 		fmt.Printf("Generated %s (%d/%d) in %s\n", pubkey.HexWithPrefix(), (i + 1), count, elapsed)
 	}
 	fmt.Printf("Completed in %s.\n", time.Since(startTime))
+	fmt.Println()
+
+	// Restart the Stakewise Operator
+	if noRestart {
+		fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Stakewise Operator container at your earliest convenience in order to deposit your new keys once it's your turn. Failure to do so will prevent your validators from ever being activated.%s\n", terminal.ColorYellow, terminal.ColorReset)
+	} else {
+		fmt.Print("Restarting Stakewise Operator... ")
+		_, err = hd.Api.Service.RestartContainer(string(swconfig.ContainerID_StakewiseOperator))
+		if err != nil {
+			fmt.Println("error")
+			fmt.Printf("%sWARNING: error restarting stakewise operator: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+			fmt.Println("Please restart your Stakewise Operator container in order to be able to deposit for your new keys,")
+		} else {
+			fmt.Println("done!")
+		}
+	}
 	fmt.Println()
 
 	// Restart the VC

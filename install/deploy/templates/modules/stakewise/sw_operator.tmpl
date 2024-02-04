@@ -32,7 +32,7 @@ services:
       - "--enable-metrics"
       {{end}}
       - "--metrics-host=0.0.0.0"
-      - "--max-fee-per-gas-gwei={{.Hyperdrive.AutoTxMaxFeeInt}}"
+      - "--max-fee-per-gas-gwei={{.Hyperdrive.AutoTxGasThresholdInt}}"
     networks:
       - net
     cap_drop:

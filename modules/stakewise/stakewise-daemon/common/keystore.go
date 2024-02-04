@@ -19,7 +19,8 @@ import (
 )
 
 const (
-	KeystoreSuffix string = ".json"
+	keystorePrefix string = "keystore-"
+	keystoreSuffix string = ".json"
 )
 
 // Keystore manager for the Stakewise operator
@@ -92,7 +93,7 @@ func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateK
 	}
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystoreDir, pubkey.HexWithPrefix()+KeystoreSuffix)
+	keyFilePath := filepath.Join(ks.keystoreDir, keystorePrefix+pubkey.HexWithPrefix()+keystoreSuffix)
 
 	// Write key store to disk
 	if err := os.WriteFile(keyFilePath, keyStoreBytes, fileMode); err != nil {
@@ -106,7 +107,7 @@ func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateK
 // Load a private key
 func (ks *stakewiseKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystoreDir, pubkey.HexWithPrefix()+KeystoreSuffix)
+	keyFilePath := filepath.Join(ks.keystoreDir, keystorePrefix+pubkey.HexWithPrefix()+keystoreSuffix)
 
 	// Read the key file
 	_, err := os.Stat(keyFilePath)

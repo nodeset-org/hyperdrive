@@ -134,6 +134,10 @@ func (cfg *HyperdriveConfig) AutoTxMaxFeeInt() uint64 {
 	return uint64(cfg.AutoTxMaxFee.Value)
 }
 
+func (cfg *HyperdriveConfig) AutoTxGasThresholdInt() uint64 {
+	return uint64(cfg.AutoTxGasThreshold.Value)
+}
+
 // ==============
 // === Daemon ===
 // ==============

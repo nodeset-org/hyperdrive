@@ -135,12 +135,13 @@ func (w *Wallet) GetAllPrivateKeys() ([]*eth2types.BLSPrivateKey, error) {
 	keys := []*eth2types.BLSPrivateKey{}
 	for _, file := range files {
 		filename := file.Name()
-		if !strings.HasSuffix(filename, KeystoreSuffix) {
+		if !strings.HasPrefix(filename, keystorePrefix) || !strings.HasSuffix(filename, keystoreSuffix) {
 			continue
 		}
 
 		// Get the pubkey from the filename
-		trimmed := strings.TrimSuffix(filename, KeystoreSuffix)
+		trimmed := strings.TrimPrefix(filename, keystorePrefix)
+		trimmed = strings.TrimSuffix(trimmed, keystoreSuffix)
 		pubkey, err := beacon.HexToValidatorPubkey(trimmed)
 		if err != nil {
 			return nil, fmt.Errorf("error getting pubkey for keystore file [%s]: %w", filename, err)
