@@ -36,6 +36,12 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 		}
 	}
 
+	// Get the config
+	cfg, _, err := hd.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("error getting Hyperdrive configuration: %w", err)
+	}
+
 	// Prompt for user confirmation before printing sensitive information
 	if !(hd.Context.SecureSession ||
 		utils.ConfirmSecureSession("Creating a wallet will print sensitive information to your screen.")) {
@@ -104,8 +110,19 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	// Clear terminal output
 	_ = term.Clear()
 
-	// Log & return
 	fmt.Println("The node wallet was successfully initialized.")
 	fmt.Printf("Node account: %s%s%s\n", terminal.ColorBlue, response.Data.AccountAddress.Hex(), terminal.ColorReset)
+
+	// Initialize the Stakewise wallet if it's enabled
+	if cfg.Stakewise.Enabled.Value {
+		fmt.Println()
+		fmt.Println("You have the Stakewise module enabled. Initializing it with your new wallet...")
+		sw := client.NewStakewiseClientFromCtx(c)
+		_, err = sw.Api.Wallet.Initialize()
+		if err != nil {
+			return fmt.Errorf("error initializing Stakewise wallet: %w", err)
+		}
+		fmt.Println("Stakewise wallet initialized.")
+	}
 	return nil
 }
