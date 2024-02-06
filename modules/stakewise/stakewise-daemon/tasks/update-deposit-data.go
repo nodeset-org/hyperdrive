@@ -3,10 +3,13 @@ package swtasks
 import (
 	"fmt"
 
+	"github.com/ethereum/go-ethereum/common"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
+	batch "github.com/rocket-pool/batch-query"
 )
 
 // Update deposit data task
@@ -33,6 +36,7 @@ func (t *UpdateDepositData) Run() error {
 	hd := t.sp.GetHyperdriveClient()
 	ns := t.sp.GetNodesetClient()
 	ddMgr := t.sp.GetDepositDataManager()
+	cfg := t.sp.GetModuleConfig()
 
 	// Check the version of the NodeSet
 
@@ -56,6 +60,17 @@ func (t *UpdateDepositData) Run() error {
 		return fmt.Errorf("error getting latest deposit data: %w", err)
 	}
 
+	// Verify the merkle roots if enabled
+	if cfg.VerifyDepositsRoot.Value {
+		isMatch, err := t.verifyDepositsRoot(depositData)
+		if err != nil {
+			return err
+		}
+		if !isMatch {
+			return nil
+		}
+	}
+
 	// Save it
 	err = ddMgr.UpdateDepositData(depositData)
 	if err != nil {
@@ -75,4 +90,45 @@ func (t *UpdateDepositData) Run() error {
 
 	t.log.Println("Done! Your deposit data is now up to date.")
 	return nil
+}
+
+// Verify the Merkle root from the deposits data matches what's on chain before saving
+func (t *UpdateDepositData) verifyDepositsRoot(depositData []types.ExtendedDepositData) (bool, error) {
+	// Get services
+	ec := t.sp.GetEthClient()
+	res := t.sp.GetResources()
+	txMgr := t.sp.GetTransactionManager()
+	q := t.sp.GetQueryManager()
+	ddMgr := t.sp.GetDepositDataManager()
+
+	// Get the Merkle root from it
+	localRoot, err := ddMgr.ComputeMerkleRoot(depositData)
+	if err != nil {
+		return false, fmt.Errorf("error computing Merkle root from deposit data: %w", err)
+	}
+	t.log.Printlnf("Computed Merkle root:   %s", localRoot.Hex())
+
+	// Get the Merkle root from the vault
+	vault, err := swcommon.NewStakewiseVault(res.Vault, ec, txMgr)
+	if err != nil {
+		return false, fmt.Errorf("error creating Stakewise Vault binding: %w", err)
+	}
+	var contractRoot common.Hash
+	err = q.Query(func(mc *batch.MultiCaller) error {
+		vault.GetValidatorsRoot(mc, &contractRoot)
+		return nil
+	}, nil)
+	if err != nil {
+		return false, fmt.Errorf("error getting canonical deposit root from the Stakewise Vault: %w", err)
+	}
+	t.log.Printlnf("Contract's Merkle root: %s", contractRoot.Hex())
+
+	// Compare them
+	if localRoot != contractRoot {
+		t.log.Printlnf("WARNING: Locally computed deposits data root (%s) does not match the value stored on chain (%s), refusing to save for safety!", localRoot.Hex(), contractRoot.Hex())
+		return false, nil
+	} else {
+		t.log.Println("Locally computed deposits data root matches the root stored on-chain, updating may proceed.")
+	}
+	return true, nil
 }

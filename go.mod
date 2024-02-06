@@ -11,7 +11,7 @@ require (
 	github.com/gdamore/tcell/v2 v2.7.0
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/cpuid/v2 v2.2.6
-	github.com/nodeset-org/eth-utils v0.0.0-20240206150818-9a1e202a5284
+	github.com/nodeset-org/eth-utils v0.0.0-20240206193509-7fcb898d408f
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/shirou/gopsutil/v3 v3.24.1
@@ -86,6 +86,8 @@ require (
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect
 	github.com/wealdtech/go-bytesutil v1.2.1 // indirect
+	github.com/wealdtech/go-merkletree v1.0.0 // indirect
+	github.com/wealdtech/go-merkletree/v2 v2.5.1 // indirect
 	github.com/wealdtech/go-multicodec v1.4.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20231213231151-1d8dd44e695e // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect

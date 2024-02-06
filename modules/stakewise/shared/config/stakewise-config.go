@@ -11,6 +11,7 @@ const (
 	StakewiseEnableID      string = "enable"
 	OperatorContainerTagID string = "operatorContainerTag"
 	AdditionalOpFlagsID    string = "additionalOpFlags"
+	VerifyDepositRootsID   string = "verifyDepositRoots"
 
 	// Tags
 	daemonTag   string = "nodeset/hyperdrive-stakewise:v" + shared.HyperdriveVersion
@@ -23,6 +24,9 @@ type StakewiseConfig struct {
 
 	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
 	Enabled config.Parameter[bool]
+
+	// Toggle for verifying deposit data Merkle roots before saving
+	VerifyDepositsRoot config.Parameter[bool]
 
 	// The Docker Hub tag for the Stakewise operator
 	OperatorContainerTag config.Parameter[string]
@@ -48,13 +52,27 @@ func NewStakewiseConfig(hdCfg *config.HyperdriveConfig) *StakewiseConfig {
 			ParameterCommon: &config.ParameterCommon{
 				ID:                 StakewiseEnableID,
 				Name:               "Enable",
-				Description:        "Enable support for Stakewise <placeholder description>",
+				Description:        "Enable support for Stakewise (see more at https://docs.nodeset.io).",
 				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseOperator},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
 			Default: map[config.Network]bool{
 				config.Network_All: false,
+			},
+		},
+
+		VerifyDepositsRoot: config.Parameter[bool]{
+			ParameterCommon: &config.ParameterCommon{
+				ID:                 VerifyDepositRootsID,
+				Name:               "Verify Deposits Root",
+				Description:        "Enable this to verify that the Merkle root of aggregated deposit data return by the NodeSet server matches the Merkle root stored in the NodeSet vault contract. This is a safety mechanism to ensure the Stakewise Operator container won't try to submit deposits for validators that the NodeSet vault hasn't verified yet.\n\n[orange]Don't disable this unless you know what you're doing.",
+				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseDaemon},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[config.Network]bool{
+				config.Network_All: true,
 			},
 		},
 
@@ -106,6 +124,7 @@ func (cfg *StakewiseConfig) GetTitle() string {
 func (cfg *StakewiseConfig) GetParameters() []config.IParameter {
 	return []config.IParameter{
 		&cfg.Enabled,
+		&cfg.VerifyDepositsRoot,
 		&cfg.OperatorContainerTag,
 		&cfg.AdditionalOpFlags,
 	}

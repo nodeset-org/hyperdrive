@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"math/big"
 	"os"
 	"path/filepath"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/validator/utils"
@@ -14,6 +16,8 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
+	"github.com/wealdtech/go-merkletree/v2"
+	"github.com/wealdtech/go-merkletree/v2/keccak256"
 )
 
 const (
@@ -103,4 +107,57 @@ func (m *DepositDataManager) UpdateDepositData(data []types.ExtendedDepositData)
 	}
 
 	return nil
+}
+
+// Compute the Merkle root of the aggregated deposit data using the Stakewise rules
+// NOTE: reverse engineered from https://github.com/stakewise/v3-operator/blob/fa4ac2673a64a486ced51098005376e56e2ddd19/src/validators/utils.py#L207
+func (m *DepositDataManager) ComputeMerkleRoot(data []types.ExtendedDepositData) (common.Hash, error) {
+	totalData := make([][]byte, len(data))
+
+	// Create leaf data for each deposit data
+	for i, dd := range data {
+		entryData := make([]byte, 0, beacon.ValidatorPubkeyLength+beacon.ValidatorSignatureLength+common.HashLength*2) // pubkey :: signature :: dd root :: index
+		// Get the deposit data root for this deposit data
+		ddRoot, err := m.regenerateDepositDataRoot(dd)
+		if err != nil {
+			pubkey := beacon.ValidatorPubkey(dd.PublicKey)
+			return common.Hash{}, fmt.Errorf("error generating deposit data root for validator %d (%s): %w", i, pubkey.Hex(), err)
+		}
+
+		// Convert the index into a uint256
+		index := big.NewInt(int64(i))
+		indexBytes := make([]byte, 32)
+		index.FillBytes(indexBytes)
+
+		// Make a leaf hash for this deposit
+		entryData = append(entryData, dd.PublicKey...)
+		entryData = append(entryData, dd.Signature...)
+		entryData = append(entryData, ddRoot[:]...)
+		entryData = append(entryData, indexBytes...)
+		totalData[i] = entryData
+	}
+
+	// Generate the tree
+	tree, err := merkletree.NewTree(merkletree.WithData(totalData), merkletree.WithHashType(keccak256.New()), merkletree.WithSorted(true))
+	if err != nil {
+		return common.Hash{}, fmt.Errorf("error computing Merkle tree root from deposit data: %w", err)
+	}
+	return common.Hash(tree.Root()), nil
+}
+
+// Regenerate the deposit data hash root from a deposit data object instead of explicitly relying on the deposit data root provided in the EDD
+func (m *DepositDataManager) regenerateDepositDataRoot(dd types.ExtendedDepositData) (common.Hash, error) {
+	var depositData = beacon.DepositData{
+		PublicKey:             dd.PublicKey,
+		WithdrawalCredentials: dd.WithdrawalCredentials,
+		Amount:                dd.Amount,
+		Signature:             dd.Signature,
+	}
+
+	// Get deposit data root
+	root, err := depositData.HashTreeRoot()
+	if err != nil {
+		return common.Hash{}, err
+	}
+	return root, nil
 }
