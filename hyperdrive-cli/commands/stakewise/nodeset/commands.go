@@ -46,6 +46,20 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 					return uploadDepositData(c)
 				},
 			},
+			{
+				Name:    "exit-validators",
+				Aliases: []string{"e"},
+				Usage:   "Exits all of your validators from the Stakewise vault in NodeSet.",
+				Action: func(c *cli.Context) error {
+					// Validate args
+					if err := input.ValidateArgCount(c, 0); err != nil {
+						return err
+					}
+
+					// Run
+					return exitValidators(c)
+				},
+			},
 		},
 	})
 }
