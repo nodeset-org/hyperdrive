@@ -3,12 +3,22 @@ package config
 import (
 	"fmt"
 	"reflect"
-
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
+// Interface for describing config sections
+type IConfigSection interface {
+	// Get the name of the section (for display purposes)
+	GetTitle() string
+
+	// Get the list of parameters directly belonging to this section
+	GetParameters() []IParameter
+
+	// Get the sections underneath this one
+	GetSubconfigs() map[string]IConfigSection
+}
+
 // Serialize a config section into a map
-func Serialize(cfg types.IConfigSection) map[string]any {
+func Serialize(cfg IConfigSection) map[string]any {
 	masterMap := map[string]any{}
 
 	// Serialize parameters
@@ -28,7 +38,7 @@ func Serialize(cfg types.IConfigSection) map[string]any {
 }
 
 // Deserialize a config section
-func Deserialize(cfg types.IConfigSection, serializedParams map[string]any, network types.Network) error {
+func Deserialize(cfg IConfigSection, serializedParams map[string]any, network Network) error {
 	// Handle the parameters
 	params := cfg.GetParameters()
 	for _, param := range params {
@@ -68,7 +78,7 @@ func Deserialize(cfg types.IConfigSection, serializedParams map[string]any, netw
 }
 
 // Copy a section's settings into the corresponding section of a new config
-func Clone(source types.IConfigSection, target types.IConfigSection, network types.Network) {
+func Clone(source IConfigSection, target IConfigSection, network Network) {
 	// Handle the parameters
 	targetParams := target.GetParameters()
 	for i, sourceParam := range source.GetParameters() {
@@ -84,7 +94,7 @@ func Clone(source types.IConfigSection, target types.IConfigSection, network typ
 }
 
 // Change the active network for an entire configuration
-func ChangeNetwork(cfg types.IConfigSection, oldNetwork types.Network, newNetwork types.Network) {
+func ChangeNetwork(cfg IConfigSection, oldNetwork Network, newNetwork Network) {
 	// Update the master parameters
 	params := cfg.GetParameters()
 	for _, param := range params {
@@ -99,7 +109,7 @@ func ChangeNetwork(cfg types.IConfigSection, oldNetwork types.Network, newNetwor
 }
 
 // Update the default settings after a network change
-func UpdateDefaults(cfg types.IConfigSection, newNetwork types.Network) {
+func UpdateDefaults(cfg IConfigSection, newNetwork Network) {
 	// Update the parameters
 	for _, param := range cfg.GetParameters() {
 		if param.GetCommon().OverwriteOnUpgrade {
@@ -114,7 +124,7 @@ func UpdateDefaults(cfg types.IConfigSection, newNetwork types.Network) {
 }
 
 // Apply the default settings for each parameter and subparameter
-func ApplyDefaults(cfg types.IConfigSection, network types.Network) {
+func ApplyDefaults(cfg IConfigSection, network Network) {
 	// Update the parameters
 	for _, param := range cfg.GetParameters() {
 		param.SetToDefault(network)

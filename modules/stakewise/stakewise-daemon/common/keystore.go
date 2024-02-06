@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/nodeset-org/eth-utils/beacon"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
@@ -32,7 +32,7 @@ type stakewiseKeystoreManager struct {
 
 // Create new Stakewise keystore manager
 func newStakewiseKeystoreManager(moduleDir string) (*stakewiseKeystoreManager, error) {
-	keystoreDir := filepath.Join(moduleDir, modconfig.ValidatorsDirectory, swconfig.ModuleName)
+	keystoreDir := filepath.Join(moduleDir, config.ValidatorsDirectory, swconfig.ModuleName)
 	passwordPath := filepath.Join(keystoreDir, swconfig.KeystorePasswordFile)
 
 	// Read the password file

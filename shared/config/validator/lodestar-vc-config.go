@@ -1,8 +1,8 @@
 package validator
 
 import (
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 const (
@@ -13,42 +13,42 @@ const (
 // Configuration for the Lodestar VC
 type LodestarVcConfig struct {
 	// The Docker Hub tag for Lodestar VC
-	ContainerTag types.Parameter[string]
+	ContainerTag config.Parameter[string]
 
 	// Custom command line flags for the VC
-	AdditionalFlags types.Parameter[string]
+	AdditionalFlags config.Parameter[string]
 }
 
 // Generates a new Lodestar VC configuration
 func NewLodestarVcConfig() *LodestarVcConfig {
 	return &LodestarVcConfig{
-		ContainerTag: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		ContainerTag: config.Parameter[string]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 ids.ContainerTagID,
 				Name:               "Validator Client Container Tag",
 				Description:        "The tag name of the Lodestar container from Docker Hub you want to use for the Validator Client.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_ValidatorClients},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: true,
 			},
-			Default: map[types.Network]string{
-				types.Network_Mainnet:    lodestarVcTagProd,
-				types.Network_HoleskyDev: lodestarVcTagTest,
-				types.Network_Holesky:    lodestarVcTagTest,
+			Default: map[config.Network]string{
+				config.Network_Mainnet:    lodestarVcTagProd,
+				config.Network_HoleskyDev: lodestarVcTagTest,
+				config.Network_Holesky:    lodestarVcTagTest,
 			},
 		},
 
-		AdditionalFlags: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		AdditionalFlags: config.Parameter[string]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Validator Client Flags",
 				Description:        "Additional custom command line flags you want to pass the Lodestar Validator Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_ValidatorClients},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "",
+			Default: map[config.Network]string{
+				config.Network_All: "",
 			},
 		},
 	}
@@ -60,14 +60,14 @@ func (cfg *LodestarVcConfig) GetTitle() string {
 }
 
 // Get the parameters for this config
-func (cfg *LodestarVcConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
+func (cfg *LodestarVcConfig) GetParameters() []config.IParameter {
+	return []config.IParameter{
 		&cfg.ContainerTag,
 		&cfg.AdditionalFlags,
 	}
 }
 
 // Get the sections underneath this one
-func (cfg *LodestarVcConfig) GetSubconfigs() map[string]types.IConfigSection {
-	return map[string]types.IConfigSection{}
+func (cfg *LodestarVcConfig) GetSubconfigs() map[string]config.IConfigSection {
+	return map[string]config.IConfigSection{}
 }

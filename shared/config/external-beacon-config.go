@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 const (
@@ -13,13 +12,13 @@ const (
 // Configuration for external Beacon Nodes
 type ExternalBeaconConfig struct {
 	// The selected BN
-	BeaconNode types.Parameter[types.BeaconNode]
+	BeaconNode Parameter[BeaconNode]
 
 	// The URL of the HTTP endpoint
-	HttpUrl types.Parameter[string]
+	HttpUrl Parameter[string]
 
 	// The URL of the Prysm gRPC endpoint (only needed if using Prysm VCs)
-	PrysmRpcUrl types.Parameter[string]
+	PrysmRpcUrl Parameter[string]
 
 	// Internal Fields
 	parent *HyperdriveConfig
@@ -30,77 +29,77 @@ func NewExternalBeaconConfig(parent *HyperdriveConfig) *ExternalBeaconConfig {
 	return &ExternalBeaconConfig{
 		parent: parent,
 
-		BeaconNode: types.Parameter[types.BeaconNode]{
-			ParameterCommon: &types.ParameterCommon{
+		BeaconNode: Parameter[BeaconNode]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.BnID,
 				Name:               "Beacon Node",
 				Description:        "Select which Beacon Node your external client is.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
+				AffectsContainers:  []ContainerID{ContainerID_ValidatorClients},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Options: []*types.ParameterOption[types.BeaconNode]{
+			Options: []*ParameterOption[BeaconNode]{
 				{
-					ParameterOptionCommon: &types.ParameterOptionCommon{
+					ParameterOptionCommon: &ParameterOptionCommon{
 						Name:        "Lighthouse",
 						Description: "Select if your external client is Lighthouse.",
 					},
-					Value: types.BeaconNode_Lighthouse,
+					Value: BeaconNode_Lighthouse,
 				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
+					ParameterOptionCommon: &ParameterOptionCommon{
 						Name:        "Lodestar",
 						Description: "Select if your external client is Lodestar.",
 					},
-					Value: types.BeaconNode_Lodestar,
+					Value: BeaconNode_Lodestar,
 				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
+					ParameterOptionCommon: &ParameterOptionCommon{
 						Name:        "Nimbus",
 						Description: "Select if your external client is Nimbus.",
 					},
-					Value: types.BeaconNode_Nimbus,
+					Value: BeaconNode_Nimbus,
 				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
+					ParameterOptionCommon: &ParameterOptionCommon{
 						Name:        "Prysm",
 						Description: "Select if your external client is Prysm.",
 					},
-					Value: types.BeaconNode_Prysm,
+					Value: BeaconNode_Prysm,
 				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
+					ParameterOptionCommon: &ParameterOptionCommon{
 						Name:        "Teku",
 						Description: "Select if your external client is Teku.",
 					},
-					Value: types.BeaconNode_Teku,
+					Value: BeaconNode_Teku,
 				}},
-			Default: map[types.Network]types.BeaconNode{
-				types.Network_All: types.BeaconNode_Nimbus,
+			Default: map[Network]BeaconNode{
+				Network_All: BeaconNode_Nimbus,
 			},
 		},
 
-		HttpUrl: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		HttpUrl: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.HttpUrlID,
 				Name:               "HTTP URL",
 				Description:        "The URL of the HTTP Beacon API endpoint for your external client.\nNOTE: If you are running it on the same machine as Hyperdrive, addresses like `localhost` and `127.0.0.1` will not work due to Docker limitations. Enter your machine's LAN IP address instead.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ValidatorClients},
+				AffectsContainers:  []ContainerID{ContainerID_Daemon, ContainerID_ValidatorClients},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "",
+			Default: map[Network]string{
+				Network_All: "",
 			},
 		},
 
-		PrysmRpcUrl: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		PrysmRpcUrl: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 PrysmRpcUrlID,
 				Name:               "Prysm RPC URL",
 				Description:        "The URL of Prysm's gRPC API endpoint for your external Beacon Node. Prysm's Validator Client will need this in order to connect to it.\nNOTE: If you are running it on the same machine as Hyperdrive, addresses like `localhost` and `127.0.0.1` will not work due to Docker limitations. Enter your machine's LAN IP address instead.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_ValidatorClients},
+				AffectsContainers:  []ContainerID{ContainerID_ValidatorClients},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "",
+			Default: map[Network]string{
+				Network_All: "",
 			},
 		},
 	}
@@ -112,8 +111,8 @@ func (cfg *ExternalBeaconConfig) GetTitle() string {
 }
 
 // Get the parameters for this config
-func (cfg *ExternalBeaconConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
+func (cfg *ExternalBeaconConfig) GetParameters() []IParameter {
+	return []IParameter{
 		&cfg.BeaconNode,
 		&cfg.HttpUrl,
 		&cfg.PrysmRpcUrl,
@@ -121,6 +120,6 @@ func (cfg *ExternalBeaconConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *ExternalBeaconConfig) GetSubconfigs() map[string]types.IConfigSection {
-	return map[string]types.IConfigSection{}
+func (cfg *ExternalBeaconConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

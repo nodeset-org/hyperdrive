@@ -3,8 +3,8 @@ package config
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 // The page wrapper for the EC config
@@ -147,11 +147,11 @@ func (configPage *ExecutionConfigPage) handleEcModeChanged() {
 
 	selectedMode := configPage.masterConfig.Hyperdrive.ClientMode.Value
 	switch selectedMode {
-	case types.ClientMode_Local:
+	case config.ClientMode_Local:
 		// Local (Docker mode)
 		configPage.handleLocalEcChanged()
 
-	case types.ClientMode_External:
+	case config.ClientMode_External:
 		// External (Hybrid mode)
 		configPage.handleExternalEcChanged()
 	}
@@ -165,11 +165,11 @@ func (configPage *ExecutionConfigPage) handleLocalEcChanged() {
 	selectedEc := configPage.masterConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value
 
 	switch selectedEc {
-	case types.ExecutionClient_Geth:
+	case config.ExecutionClient_Geth:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.gethItems, nil)
-	case types.ExecutionClient_Nethermind:
+	case config.ExecutionClient_Nethermind:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.nethermindItems, nil)
-	case types.ExecutionClient_Besu:
+	case config.ExecutionClient_Besu:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.besuItems, nil)
 	}
 

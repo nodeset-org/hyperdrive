@@ -3,13 +3,13 @@ package config
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 const randomBnPrysmID string = "step-random-bn-prysm"
 const randomBnID string = "step-random-bn"
 
-func createRandomPrysmStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []*types.ParameterOption[types.BeaconNode]) *choiceWizardStep {
+func createRandomPrysmStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []*config.ParameterOption[config.BeaconNode]) *choiceWizardStep {
 	helperText := "You have been randomly assigned to Prysm for your Beacon Node.\n\n[orange]NOTE: Prysm currently has a very high representation of the Beacon Chain. For the health of the network and the overall safety of your funds, please consider choosing a client with a lower representation. Please visit https://clientdiversity.org to learn more."
 
 	show := func(modal *choiceModalLayout) {
@@ -46,7 +46,7 @@ func createRandomPrysmStep(wiz *wizard, currentStep int, totalSteps int, goodOpt
 	)
 }
 
-func createRandomBnStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []*types.ParameterOption[types.BeaconNode]) *choiceWizardStep {
+func createRandomBnStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []*config.ParameterOption[config.BeaconNode]) *choiceWizardStep {
 	var selectedClientName string
 	selectedClient := wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value
 	for _, clientOption := range goodOptions {

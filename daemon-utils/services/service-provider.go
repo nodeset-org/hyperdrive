@@ -12,7 +12,6 @@ import (
 	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/client"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
@@ -22,7 +21,7 @@ const (
 )
 
 // A container for all of the various services used by Hyperdrive
-type ServiceProvider[ConfigType modconfig.IModuleConfig] struct {
+type ServiceProvider[ConfigType config.IModuleConfig] struct {
 	// Services
 	hdCfg        *config.HyperdriveConfig
 	moduleConfig ConfigType
@@ -43,7 +42,7 @@ type ServiceProvider[ConfigType modconfig.IModuleConfig] struct {
 }
 
 // Creates a new ServiceProvider instance
-func NewServiceProvider[ConfigType modconfig.IModuleConfig](moduleDir string, factory func(*config.HyperdriveConfig) ConfigType) (*ServiceProvider[ConfigType], error) {
+func NewServiceProvider[ConfigType config.IModuleConfig](moduleDir string, factory func(*config.HyperdriveConfig) ConfigType) (*ServiceProvider[ConfigType], error) {
 	// Create a client for the Hyperdrive daemon
 	hyperdriveSocket := filepath.Join(moduleDir, config.HyperdriveSocketFilename)
 	hdClient := client.NewApiClient(config.HyperdriveDaemonRoute, hyperdriveSocket, false)

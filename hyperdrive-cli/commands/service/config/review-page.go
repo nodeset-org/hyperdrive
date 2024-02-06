@@ -7,7 +7,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 )
 
@@ -17,16 +17,16 @@ const reviewPageID string = "review-settings"
 // The changed settings review page
 type ReviewPage struct {
 	md              *mainDisplay
-	changedSettings []*types.ChangedSection
+	changedSettings []*config.ChangedSection
 	page            *page
 }
 
 // Create a page to review any changes
 func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *client.GlobalConfig) *ReviewPage {
-	var changedSettings []*types.ChangedSection
-	var totalAffectedContainers map[types.ContainerID]bool
+	var changedSettings []*config.ChangedSection
+	var totalAffectedContainers map[config.ContainerID]bool
 	var changeNetworks bool
-	var containersToRestart []types.ContainerID
+	var containersToRestart []config.ContainerID
 
 	// Create the visual list for all of the changed settings
 	changeBox := tview.NewTextView().
@@ -48,10 +48,10 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 
 		// Add changed containers if this is an update
 		if md.isUpdate {
-			totalAffectedContainers[types.ContainerID_Daemon] = true
+			totalAffectedContainers[config.ContainerID_Daemon] = true
 
-			if newConfig.Hyperdrive.ClientMode.Value == types.ClientMode_Local && newConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value != types.ExecutionClient_Geth {
-				totalAffectedContainers[types.ContainerID_ExecutionClient] = true
+			if newConfig.Hyperdrive.ClientMode.Value == config.ClientMode_Local && newConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value != config.ExecutionClient_Geth {
+				totalAffectedContainers[config.ContainerID_ExecutionClient] = true
 			}
 			builder.WriteString(fmt.Sprintf("Updated to Hyperdrive v%s (will affect several containers)\n\n", shared.HyperdriveVersion))
 		}
@@ -220,7 +220,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 }
 
 // Add all of the changed parameters to the description builder
-func addChangesToDescription(section *types.ChangedSection, titlePrefix string, description *strings.Builder) {
+func addChangesToDescription(section *config.ChangedSection, titlePrefix string, description *strings.Builder) {
 	// Get the full section name, including the title
 	var sectionName string
 	if titlePrefix == "" {

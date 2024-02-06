@@ -4,13 +4,13 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 // A collection of network-specific resources and getters for them
 type Resources struct {
 	// The network being used
-	network types.Network
+	network config.Network
 
 	// The address of the multicall contract
 	MulticallAddress common.Address
@@ -23,7 +23,7 @@ type Resources struct {
 }
 
 // Creates a new resource collection for the given network
-func NewResources(network types.Network) *Resources {
+func NewResources(network config.Network) *Resources {
 	// Mainnet
 	mainnetResources := &Resources{
 		network:          network,
@@ -41,9 +41,9 @@ func NewResources(network types.Network) *Resources {
 	}
 
 	switch network {
-	case types.Network_Mainnet:
+	case config.Network_Mainnet:
 		return mainnetResources
-	case types.Network_Holesky, types.Network_HoleskyDev:
+	case config.Network_Holesky, config.Network_HoleskyDev:
 		return holeskyResources
 	}
 

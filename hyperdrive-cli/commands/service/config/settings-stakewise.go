@@ -4,7 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 )
 
@@ -131,15 +131,15 @@ func (configPage *StakewiseConfigPage) handleLayoutChanged() {
 
 		bn := configPage.masterConfig.Hyperdrive.GetSelectedBeaconNode()
 		switch bn {
-		case types.BeaconNode_Lighthouse:
+		case config.BeaconNode_Lighthouse:
 			configPage.layout.addFormItems(configPage.lighthouseItems)
-		case types.BeaconNode_Lodestar:
+		case config.BeaconNode_Lodestar:
 			configPage.layout.addFormItems(configPage.lodestarItems)
-		case types.BeaconNode_Nimbus:
+		case config.BeaconNode_Nimbus:
 			configPage.layout.addFormItems(configPage.nimbusItems)
-		case types.BeaconNode_Prysm:
+		case config.BeaconNode_Prysm:
 			configPage.layout.addFormItems(configPage.prysmItems)
-		case types.BeaconNode_Teku:
+		case config.BeaconNode_Teku:
 			configPage.layout.addFormItems(configPage.tekuItems)
 		}
 	}

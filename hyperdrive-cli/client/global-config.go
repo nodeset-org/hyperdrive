@@ -6,8 +6,6 @@ import (
 
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 // Wrapper for global configuration
@@ -30,8 +28,8 @@ func NewGlobalConfig(hdCfg *config.HyperdriveConfig) *GlobalConfig {
 }
 
 // Get the configs for all of the modules in the system
-func (c *GlobalConfig) GetAllModuleConfigs() []modconfig.IModuleConfig {
-	return []modconfig.IModuleConfig{
+func (c *GlobalConfig) GetAllModuleConfigs() []config.IModuleConfig {
+	return []config.IModuleConfig{
 		c.Stakewise,
 	}
 }
@@ -77,7 +75,7 @@ func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 }
 
 // Changes the current network, propagating new parameter settings if they are affected
-func (c *GlobalConfig) ChangeNetwork(newNetwork types.Network) {
+func (c *GlobalConfig) ChangeNetwork(newNetwork config.Network) {
 	// Get the current network
 	oldNetwork := c.Hyperdrive.Network.Value
 	if oldNetwork == newNetwork {
@@ -142,17 +140,17 @@ func (c *GlobalConfig) Validate() []string {
 }
 
 // Get all of the settings that have changed between an old config and this config, and get all of the containers that are affected by those changes - also returns whether or not the selected network was changed
-func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*types.ChangedSection, map[types.ContainerID]bool, bool) {
-	sectionList := []*types.ChangedSection{}
-	changedContainers := map[types.ContainerID]bool{}
+func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSection, map[config.ContainerID]bool, bool) {
+	sectionList := []*config.ChangedSection{}
+	changedContainers := map[config.ContainerID]bool{}
 
 	// Process all configs for changes
 	sectionList = getChanges(oldConfig.Hyperdrive, c.Hyperdrive, sectionList, changedContainers)
 	sectionList = getChanges(oldConfig.Stakewise, c.Stakewise, sectionList, changedContainers)
 
 	// Add all VCs to the list of changed containers if any change requires a VC change
-	if changedContainers[types.ContainerID_ValidatorClients] {
-		delete(changedContainers, types.ContainerID_ValidatorClients)
+	if changedContainers[config.ContainerID_ValidatorClients] {
+		delete(changedContainers, config.ContainerID_ValidatorClients)
 		for _, module := range c.GetAllModuleConfigs() {
 			vcInfo := module.GetValidatorContainerTagInfo()
 			for name := range vcInfo {
@@ -172,11 +170,11 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*types.ChangedSect
 
 // Compare two config sections and see what's changed between them, generating a ChangedSection for the results.
 func getChanges(
-	oldConfig types.IConfigSection,
-	newConfig types.IConfigSection,
-	sectionList []*types.ChangedSection,
-	changedContainers map[types.ContainerID]bool,
-) []*types.ChangedSection {
+	oldConfig config.IConfigSection,
+	newConfig config.IConfigSection,
+	sectionList []*config.ChangedSection,
+	changedContainers map[config.ContainerID]bool,
+) []*config.ChangedSection {
 	section, changeCount := config.GetChangedSettings(oldConfig, newConfig)
 	section.Name = newConfig.GetTitle()
 	if changeCount > 0 {
@@ -187,7 +185,7 @@ func getChanges(
 }
 
 // Check a port setting to see if it's already used elsewhere
-func addAndCheckForDuplicate(portMap map[uint16]bool, param types.Parameter[uint16], errors []string) (map[uint16]bool, []string) {
+func addAndCheckForDuplicate(portMap map[uint16]bool, param config.Parameter[uint16], errors []string) (map[uint16]bool, []string) {
 	port := param.Value
 	if portMap[port] {
 		return portMap, append(errors, fmt.Sprintf("Port %d for %s is already in use", port, param.GetCommon().Name))

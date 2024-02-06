@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 )
 
@@ -129,9 +129,9 @@ func (configPage *MetricsConfigPage) handleLayoutChanged() {
 		configPage.layout.addFormItems(configPage.exporterItems)
 	}
 
-	if configPage.masterConfig.Hyperdrive.ClientMode.Value == types.ClientMode_Local {
+	if configPage.masterConfig.Hyperdrive.ClientMode.Value == config.ClientMode_Local {
 		switch configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Value {
-		case types.BeaconNode_Teku, types.BeaconNode_Lighthouse, types.BeaconNode_Lodestar:
+		case config.BeaconNode_Teku, config.BeaconNode_Lighthouse, config.BeaconNode_Lodestar:
 			configPage.layout.form.AddFormItem(configPage.enableBitflyNodeMetricsBox.item)
 			if configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value == true {
 				configPage.layout.addFormItems(configPage.bitflyNodeMetricsItems)

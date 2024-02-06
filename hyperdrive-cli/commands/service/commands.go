@@ -7,7 +7,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
 )
@@ -26,7 +26,7 @@ var (
 )
 
 // Creates CLI argument flags from the parameters of the configuration struct
-func createFlagsFromConfigParams(sectionName string, params []types.IParameter, configFlags []cli.Flag, network types.Network) []cli.Flag {
+func createFlagsFromConfigParams(sectionName string, params []config.IParameter, configFlags []cli.Flag, network config.Network) []cli.Flag {
 	for _, param := range params {
 		common := param.GetCommon()
 		var paramName string

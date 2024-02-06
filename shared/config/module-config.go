@@ -1,6 +1,4 @@
-package modconfig
-
-import "github.com/nodeset-org/hyperdrive/shared/types"
+package config
 
 const (
 	ModulesName         string = "modules"
@@ -8,12 +6,12 @@ const (
 )
 
 type IModuleConfig interface {
-	types.IConfigSection
+	IConfigSection
 
 	GetModuleName() string
 
 	// A map of the Validator Client IDs to their container tags
-	GetValidatorContainerTagInfo() map[types.ContainerID]string
+	GetValidatorContainerTagInfo() map[ContainerID]string
 
 	// Return if doppelganger detection is enabled for any of the VCs
 	IsDoppelgangerEnabled() bool
@@ -22,5 +20,5 @@ type IModuleConfig interface {
 	IsEnabled() bool
 
 	// Get the list of containers that should be deployed
-	GetContainersToDeploy() []types.ContainerID
+	GetContainersToDeploy() []ContainerID
 }

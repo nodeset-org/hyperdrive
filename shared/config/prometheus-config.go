@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 const (
@@ -13,16 +12,16 @@ const (
 // Configuration for Prometheus
 type PrometheusConfig struct {
 	// The port to serve metrics on
-	Port types.Parameter[uint16]
+	Port Parameter[uint16]
 
 	// Toggle for forwarding the API port outside of Docker
-	OpenPort types.Parameter[types.RpcPortMode]
+	OpenPort Parameter[RpcPortMode]
 
 	// The Docker Hub tag for Prometheus
-	ContainerTag types.Parameter[string]
+	ContainerTag Parameter[string]
 
 	// Custom command line flags
-	AdditionalFlags types.Parameter[string]
+	AdditionalFlags Parameter[string]
 
 	// Internal Fields
 	parent *MetricsConfig
@@ -33,60 +32,60 @@ func NewPrometheusConfig(parent *MetricsConfig) *PrometheusConfig {
 	return &PrometheusConfig{
 		parent: parent,
 
-		Port: types.Parameter[uint16]{
-			ParameterCommon: &types.ParameterCommon{
+		Port: Parameter[uint16]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.PortID,
 				Name:               "Prometheus Port",
 				Description:        "The port Prometheus should make its statistics available on.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Prometheus},
+				AffectsContainers:  []ContainerID{ContainerID_Prometheus},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]uint16{
-				types.Network_All: 9091,
+			Default: map[Network]uint16{
+				Network_All: 9091,
 			},
 		},
 
-		OpenPort: types.Parameter[types.RpcPortMode]{
-			ParameterCommon: &types.ParameterCommon{
+		OpenPort: Parameter[RpcPortMode]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.OpenPortID,
 				Name:               "Expose Prometheus Port",
 				Description:        "Expose the Prometheus's port to other processes on your machine, or to your local network so other machines can access it too.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Prometheus},
+				AffectsContainers:  []ContainerID{ContainerID_Prometheus},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
 			Options: getPortModes(""),
-			Default: map[types.Network]types.RpcPortMode{
-				types.Network_All: types.RpcPortMode_Closed,
+			Default: map[Network]RpcPortMode{
+				Network_All: RpcPortMode_Closed,
 			},
 		},
 
-		ContainerTag: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		ContainerTag: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.ContainerTagID,
 				Name:               "Prometheus Container Tag",
 				Description:        "The tag name of the Prometheus container on Docker Hub you want to use.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Prometheus},
+				AffectsContainers:  []ContainerID{ContainerID_Prometheus},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: true,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: prometheusTag,
+			Default: map[Network]string{
+				Network_All: prometheusTag,
 			},
 		},
 
-		AdditionalFlags: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		AdditionalFlags: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Prometheus Flags",
 				Description:        "Additional custom command line flags you want to pass to Prometheus, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Grafana},
+				AffectsContainers:  []ContainerID{ContainerID_Grafana},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "",
+			Default: map[Network]string{
+				Network_All: "",
 			},
 		},
 	}
@@ -98,8 +97,8 @@ func (cfg *PrometheusConfig) GetTitle() string {
 }
 
 // Get the parameters for this config
-func (cfg *PrometheusConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
+func (cfg *PrometheusConfig) GetParameters() []IParameter {
+	return []IParameter{
 		&cfg.Port,
 		&cfg.OpenPort,
 		&cfg.ContainerTag,
@@ -108,6 +107,6 @@ func (cfg *PrometheusConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *PrometheusConfig) GetSubconfigs() map[string]types.IConfigSection {
-	return map[string]types.IConfigSection{}
+func (cfg *PrometheusConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

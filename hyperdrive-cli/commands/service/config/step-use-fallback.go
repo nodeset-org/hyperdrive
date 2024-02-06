@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
@@ -19,8 +19,8 @@ func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choice
 	done := func(buttonIndex int, buttonLabel string) {
 		if buttonIndex == 1 {
 			wiz.md.Config.Hyperdrive.Fallback.UseFallbackClients.Value = true
-			if (wiz.md.Config.Hyperdrive.ClientMode.Value == types.ClientMode_Local && wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == types.BeaconNode_Prysm) ||
-				(wiz.md.Config.Hyperdrive.ClientMode.Value == types.ClientMode_External && wiz.md.Config.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value == types.BeaconNode_Prysm) {
+			if (wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_Local && wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == config.BeaconNode_Prysm) ||
+				(wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_External && wiz.md.Config.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value == config.BeaconNode_Prysm) {
 				wiz.fallbackPrysmModal.show()
 			} else {
 				wiz.fallbackNormalModal.show()
@@ -32,7 +32,7 @@ func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choice
 	}
 
 	back := func() {
-		if wiz.md.Config.Hyperdrive.ClientMode.Value == types.ClientMode_Local {
+		if wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_Local {
 			wiz.checkpointSyncProviderModal.show()
 		} else {
 			wiz.externalBnSelectModal.show()

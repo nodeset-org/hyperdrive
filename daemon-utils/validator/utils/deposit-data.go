@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/prysmaticlabs/prysm/v4/beacon-chain/core/signing"
 	prdeposit "github.com/prysmaticlabs/prysm/v4/contracts/deposit"
@@ -14,7 +15,7 @@ import (
 )
 
 // Get deposit data & root for a given validator key and withdrawal credentials
-func GetDepositData(validatorKey *eth2types.BLSPrivateKey, withdrawalCredentials common.Hash, genesisForkVersion []byte, depositAmount uint64, network types.Network) (types.ExtendedDepositData, error) {
+func GetDepositData(validatorKey *eth2types.BLSPrivateKey, withdrawalCredentials common.Hash, genesisForkVersion []byte, depositAmount uint64, network config.Network) (types.ExtendedDepositData, error) {
 	// Build deposit data
 	dd := beacon.DepositDataNoSignature{
 		PublicKey:             validatorKey.PublicKey().Marshal(),

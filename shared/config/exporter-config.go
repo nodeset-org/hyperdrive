@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 const (
@@ -16,13 +15,13 @@ const (
 // Configuration for Exporter
 type ExporterConfig struct {
 	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
-	RootFs types.Parameter[bool]
+	RootFs Parameter[bool]
 
 	// The Docker Hub tag for the Exporter
-	ContainerTag types.Parameter[string]
+	ContainerTag Parameter[string]
 
 	// Custom command line flags
-	AdditionalFlags types.Parameter[string]
+	AdditionalFlags Parameter[string]
 
 	// Internal Fields
 	parent *MetricsConfig
@@ -33,45 +32,45 @@ func NewExporterConfig(parent *MetricsConfig) *ExporterConfig {
 	return &ExporterConfig{
 		parent: parent,
 
-		RootFs: types.Parameter[bool]{
-			ParameterCommon: &types.ParameterCommon{
+		RootFs: Parameter[bool]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ExporterEnableRootFsID,
 				Name:               "Allow Root Filesystem Access",
 				Description:        "Give Prometheus's Node Exporter permission to view your root filesystem instead of being limited to its own Docker container.\nThis is needed if you want the Grafana dashboard to report the used disk space of a second SSD.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Exporter},
+				AffectsContainers:  []ContainerID{ContainerID_Exporter},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]bool{
-				types.Network_All: false,
+			Default: map[Network]bool{
+				Network_All: false,
 			},
 		},
 
-		ContainerTag: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		ContainerTag: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.ContainerTagID,
 				Name:               "Exporter Container Tag",
 				Description:        "The tag name of the Prometheus Node Exporter container on Docker Hub you want to use.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Exporter},
+				AffectsContainers:  []ContainerID{ContainerID_Exporter},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: true,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: exporterTag,
+			Default: map[Network]string{
+				Network_All: exporterTag,
 			},
 		},
 
-		AdditionalFlags: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		AdditionalFlags: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Exporter Flags",
 				Description:        "Additional custom command line flags you want to pass to the Node Exporter, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Grafana},
+				AffectsContainers:  []ContainerID{ContainerID_Grafana},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "",
+			Default: map[Network]string{
+				Network_All: "",
 			},
 		},
 	}
@@ -83,8 +82,8 @@ func (cfg *ExporterConfig) GetTitle() string {
 }
 
 // Get the parameters for this config
-func (cfg *ExporterConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
+func (cfg *ExporterConfig) GetParameters() []IParameter {
+	return []IParameter{
 		&cfg.RootFs,
 		&cfg.ContainerTag,
 		&cfg.AdditionalFlags,
@@ -92,6 +91,6 @@ func (cfg *ExporterConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *ExporterConfig) GetSubconfigs() map[string]types.IConfigSection {
-	return map[string]types.IConfigSection{}
+func (cfg *ExporterConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

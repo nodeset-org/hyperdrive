@@ -4,34 +4,33 @@ import (
 	"net"
 
 	externalip "github.com/glendc/go-external-ip"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 // Get the possible RPC port mode options
-func getPortModes(warningOverride string) []*types.ParameterOption[types.RpcPortMode] {
+func getPortModes(warningOverride string) []*ParameterOption[RpcPortMode] {
 	if warningOverride == "" {
 		warningOverride = "Allow connections from external hosts. This is safe if you're running your node on your local network. If you're a VPS user, this would expose your node to the internet"
 	}
 
-	return []*types.ParameterOption[types.RpcPortMode]{
+	return []*ParameterOption[RpcPortMode]{
 		{
-			ParameterOptionCommon: &types.ParameterOptionCommon{
+			ParameterOptionCommon: &ParameterOptionCommon{
 				Name:        "Closed",
 				Description: "Do not allow connections to the port",
 			},
-			Value: types.RpcPortMode_Closed,
+			Value: RpcPortMode_Closed,
 		}, {
-			ParameterOptionCommon: &types.ParameterOptionCommon{
+			ParameterOptionCommon: &ParameterOptionCommon{
 				Name:        "Open to Localhost",
 				Description: "Allow connections from this host only",
 			},
-			Value: types.RpcPortMode_OpenLocalhost,
+			Value: RpcPortMode_OpenLocalhost,
 		}, {
-			ParameterOptionCommon: &types.ParameterOptionCommon{
+			ParameterOptionCommon: &ParameterOptionCommon{
 				Name:        "Open to External hosts",
 				Description: warningOverride,
 			},
-			Value: types.RpcPortMode_OpenExternal,
+			Value: RpcPortMode_OpenExternal,
 		},
 	}
 }

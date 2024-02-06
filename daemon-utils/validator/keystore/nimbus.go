@@ -8,7 +8,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
 	"github.com/nodeset-org/eth-utils/beacon"
-	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
@@ -85,7 +85,7 @@ func (ks *NimbusKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey,
 	}
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystoreDir, modconfig.ValidatorsDirectory, pubkey.HexWithPrefix(), ks.keyFileName)
+	keyFilePath := filepath.Join(ks.keystoreDir, config.ValidatorsDirectory, pubkey.HexWithPrefix(), ks.keyFileName)
 
 	// Create key dir
 	if err := os.MkdirAll(filepath.Dir(keyFilePath), DirMode); err != nil {
@@ -106,7 +106,7 @@ func (ks *NimbusKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey,
 func (ks *NimbusKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 
 	// Get key file path
-	keyFilePath := filepath.Join(ks.keystoreDir, modconfig.ValidatorsDirectory, pubkey.HexWithPrefix(), ks.keyFileName)
+	keyFilePath := filepath.Join(ks.keystoreDir, config.ValidatorsDirectory, pubkey.HexWithPrefix(), ks.keyFileName)
 
 	// Read the key file
 	_, err := os.Stat(keyFilePath)

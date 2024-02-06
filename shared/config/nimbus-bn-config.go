@@ -5,7 +5,6 @@ import (
 	"runtime"
 
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 const (
@@ -28,16 +27,16 @@ const (
 // Configuration for Nimbus
 type NimbusBnConfig struct {
 	// The max number of P2P peers to connect to
-	MaxPeers types.Parameter[uint16]
+	MaxPeers Parameter[uint16]
 
 	// The Docker Hub tag for the BN
-	ContainerTag types.Parameter[string]
+	ContainerTag Parameter[string]
 
 	// The pruning mode to use in the BN
-	PruningMode types.Parameter[Nimbus_PruningMode]
+	PruningMode Parameter[Nimbus_PruningMode]
 
 	// Custom command line flags for the BN
-	AdditionalFlags types.Parameter[string]
+	AdditionalFlags Parameter[string]
 
 	// Internal Fields
 	parent *LocalBeaconConfig
@@ -48,76 +47,76 @@ func NewNimbusBnConfig(parent *LocalBeaconConfig) *NimbusBnConfig {
 	return &NimbusBnConfig{
 		parent: parent,
 
-		MaxPeers: types.Parameter[uint16]{
-			ParameterCommon: &types.ParameterCommon{
+		MaxPeers: Parameter[uint16]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.MaxPeersID,
 				Name:               "Max Peers",
 				Description:        "The maximum number of peers your client should try to maintain. You can try lowering this if you have a low-resource system or a constrained network.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]uint16{
-				types.Network_All: getNimbusDefaultPeers(),
+			Default: map[Network]uint16{
+				Network_All: getNimbusDefaultPeers(),
 			},
 		},
 
-		PruningMode: types.Parameter[Nimbus_PruningMode]{
-			ParameterCommon: &types.ParameterCommon{
+		PruningMode: Parameter[Nimbus_PruningMode]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 NimbusPruningModeID,
 				Name:               "Pruning Mode",
 				Description:        "Choose how Nimbus will prune its database. Highlight each option to learn more about it.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Options: []*types.ParameterOption[Nimbus_PruningMode]{
+			Options: []*ParameterOption[Nimbus_PruningMode]{
 				{
-					ParameterOptionCommon: &types.ParameterOptionCommon{
+					ParameterOptionCommon: &ParameterOptionCommon{
 						Name:        "Pruned",
 						Description: "Nimbus will only keep the last 5 months of data available, and will delete everything older than that. This will make Nimbus use less disk space overall, but you won't be able to access state older than 5 months (such as regenerating old rewards trees).\n\n[orange]WARNING: Pruning an *existing* database will take a VERY long time when Nimbus first starts. If you change from Archive to Pruned, you should delete your old chain data and do a checkpoint sync using `hyperdrive service resync-eth2`. Make sure you have a checkpoint sync provider specified first!",
 					},
 					Value: Nimbus_PruningMode_Pruned,
 				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
+					ParameterOptionCommon: &ParameterOptionCommon{
 						Name:        "Archive",
 						Description: "Nimbus will download the entire Beacon Chain history and store it forever. This is healthier for the overall network, since people will be able to sync the entire chain from scratch using your node.",
 					},
 					Value: Nimbus_PruningMode_Archive,
 				},
 			},
-			Default: map[types.Network]Nimbus_PruningMode{
-				types.Network_All: Nimbus_PruningMode_Pruned,
+			Default: map[Network]Nimbus_PruningMode{
+				Network_All: Nimbus_PruningMode_Pruned,
 			},
 		},
 
-		ContainerTag: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		ContainerTag: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Nimbus Beacon Node container you want to use on Docker Hub.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: true,
 			},
-			Default: map[types.Network]string{
-				types.Network_Mainnet:    nimbusBnTagProd,
-				types.Network_HoleskyDev: nimbusBnTagTest,
-				types.Network_Holesky:    nimbusBnTagTest,
+			Default: map[Network]string{
+				Network_Mainnet:    nimbusBnTagProd,
+				Network_HoleskyDev: nimbusBnTagTest,
+				Network_Holesky:    nimbusBnTagTest,
 			},
 		},
 
-		AdditionalFlags: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		AdditionalFlags: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Flags",
 				Description:        "Additional custom command line flags you want to pass Nimbus's Beacon Client, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "",
+			Default: map[Network]string{
+				Network_All: "",
 			},
 		},
 	}
@@ -129,8 +128,8 @@ func (cfg *NimbusBnConfig) GetTitle() string {
 }
 
 // Get the parameters for this config
-func (cfg *NimbusBnConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
+func (cfg *NimbusBnConfig) GetParameters() []IParameter {
+	return []IParameter{
 		&cfg.MaxPeers,
 		&cfg.ContainerTag,
 		&cfg.PruningMode,
@@ -139,8 +138,8 @@ func (cfg *NimbusBnConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *NimbusBnConfig) GetSubconfigs() map[string]types.IConfigSection {
-	return map[string]types.IConfigSection{}
+func (cfg *NimbusBnConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }
 
 // Get the default number of peers

@@ -1,9 +1,5 @@
 package config
 
-import (
-	"github.com/nodeset-org/hyperdrive/shared/types"
-)
-
 // Defaults
 const (
 	BitflySecretID      string = "bitflySecret"
@@ -13,11 +9,11 @@ const (
 
 // Configuration for Bitfly Node Metrics
 type BitflyNodeMetricsConfig struct {
-	Secret types.Parameter[string]
+	Secret Parameter[string]
 
-	Endpoint types.Parameter[string]
+	Endpoint Parameter[string]
 
-	MachineName types.Parameter[string]
+	MachineName Parameter[string]
 
 	// Internal Fields
 	parent *MetricsConfig
@@ -28,47 +24,47 @@ func NewBitflyNodeMetricsConfig(parent *MetricsConfig) *BitflyNodeMetricsConfig 
 	return &BitflyNodeMetricsConfig{
 		parent: parent,
 
-		Secret: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		Secret: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                BitflySecretID,
 				Name:              "Beaconcha.in API Key",
 				Description:       "The API key used to authenticate your Beaconcha.in node metrics integration. Can be found in your Beaconcha.in account settings.\n\nPlease visit https://beaconcha.in/user/settings#api to access your account information.",
-				AffectsContainers: []types.ContainerID{types.ContainerID_BeaconNode, types.ContainerID_ValidatorClients},
+				AffectsContainers: []ContainerID{ContainerID_BeaconNode, ContainerID_ValidatorClients},
 				// ensures the string is 28 characters of Base64
 				Regex:              "^[A-Za-z0-9+/]{28}$",
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "",
+			Default: map[Network]string{
+				Network_All: "",
 			},
 		},
 
-		Endpoint: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		Endpoint: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 BitflyEndpointID,
 				Name:               "Node Metrics Endpoint",
 				Description:        "The endpoint to send your Beaconcha.in Node Metrics data to. Should be left as the default.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode, types.ContainerID_ValidatorClients},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode, ContainerID_ValidatorClients},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "https://beaconcha.in/api/v1/client/metrics",
+			Default: map[Network]string{
+				Network_All: "https://beaconcha.in/api/v1/client/metrics",
 			},
 		},
 
-		MachineName: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		MachineName: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 BitflyMachineNameID,
 				Name:               "Node Metrics Machine Name",
 				Description:        "The name of the machine you are running on. This is used to identify your machine in the mobile app.\nChange this if you are running multiple Hyperdrives with the same Secret.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_ExecutionClient, types.ContainerID_ValidatorClients},
+				AffectsContainers:  []ContainerID{ContainerID_ExecutionClient, ContainerID_ValidatorClients},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "Hyperdrive Node",
+			Default: map[Network]string{
+				Network_All: "Hyperdrive Node",
 			},
 		},
 	}
@@ -80,8 +76,8 @@ func (cfg *BitflyNodeMetricsConfig) GetTitle() string {
 }
 
 // Get the parameters for this config
-func (cfg *BitflyNodeMetricsConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
+func (cfg *BitflyNodeMetricsConfig) GetParameters() []IParameter {
+	return []IParameter{
 		&cfg.Secret,
 		&cfg.Endpoint,
 		&cfg.MachineName,
@@ -89,6 +85,6 @@ func (cfg *BitflyNodeMetricsConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *BitflyNodeMetricsConfig) GetSubconfigs() map[string]types.IConfigSection {
-	return map[string]types.IConfigSection{}
+func (cfg *BitflyNodeMetricsConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }

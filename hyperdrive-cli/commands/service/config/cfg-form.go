@@ -6,17 +6,17 @@ import (
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 )
 
 // A form item linked to a Parameter
 type parameterizedFormItem struct {
-	parameter types.IParameter
+	parameter config.IParameter
 	item      tview.FormItem
 }
 
-func registerEnableCheckbox(param types.Parameter[bool], checkbox *tview.Checkbox, form *Form, items []*parameterizedFormItem) {
+func registerEnableCheckbox(param config.Parameter[bool], checkbox *tview.Checkbox, form *Form, items []*parameterizedFormItem) {
 	checkbox.SetChangedFunc(func(checked bool) {
 		param.Value = checked
 
@@ -32,7 +32,7 @@ func registerEnableCheckbox(param types.Parameter[bool], checkbox *tview.Checkbo
 }
 
 // Create a list of form items based on a set of parameters
-func createParameterizedFormItems(params []types.IParameter, descriptionBox *tview.TextView) []*parameterizedFormItem {
+func createParameterizedFormItems(params []config.IParameter, descriptionBox *tview.TextView) []*parameterizedFormItem {
 	formItems := []*parameterizedFormItem{}
 	for _, param := range params {
 		item := getTypedFormItem(param, descriptionBox)
@@ -43,33 +43,33 @@ func createParameterizedFormItems(params []types.IParameter, descriptionBox *tvi
 }
 
 // Create a form item binding for a parameter based on its type
-func getTypedFormItem(param types.IParameter, descriptionBox *tview.TextView) *parameterizedFormItem {
+func getTypedFormItem(param config.IParameter, descriptionBox *tview.TextView) *parameterizedFormItem {
 	if len(param.GetOptions()) > 0 {
 		return createParameterizedDropDown(param, descriptionBox)
 	}
-	if boolParam, ok := param.(*types.Parameter[bool]); ok {
+	if boolParam, ok := param.(*config.Parameter[bool]); ok {
 		return createParameterizedCheckbox(boolParam)
 	}
-	if intParam, ok := param.(*types.Parameter[int]); ok {
+	if intParam, ok := param.(*config.Parameter[int]); ok {
 		return createParameterizedIntField(intParam)
 	}
-	if uintParam, ok := param.(*types.Parameter[uint64]); ok {
+	if uintParam, ok := param.(*config.Parameter[uint64]); ok {
 		return createParameterizedUintField(uintParam)
 	}
-	if uint16Param, ok := param.(*types.Parameter[uint16]); ok {
+	if uint16Param, ok := param.(*config.Parameter[uint16]); ok {
 		return createParameterizedUint16Field(uint16Param)
 	}
-	if stringParam, ok := param.(*types.Parameter[string]); ok {
+	if stringParam, ok := param.(*config.Parameter[string]); ok {
 		return createParameterizedStringField(stringParam)
 	}
-	if floatParam, ok := param.(*types.Parameter[float64]); ok {
+	if floatParam, ok := param.(*config.Parameter[float64]); ok {
 		return createParameterizedFloatField(floatParam)
 	}
 	panic(fmt.Sprintf("param [%s] is not a supported type for form item binding", param.GetCommon().Name))
 }
 
 // Create a standard form checkbox
-func createParameterizedCheckbox(param *types.Parameter[bool]) *parameterizedFormItem {
+func createParameterizedCheckbox(param *config.Parameter[bool]) *parameterizedFormItem {
 	item := tview.NewCheckbox().
 		SetLabel(param.Name).
 		SetChecked(param.Value == true).
@@ -94,7 +94,7 @@ func createParameterizedCheckbox(param *types.Parameter[bool]) *parameterizedFor
 }
 
 // Create a standard int field
-func createParameterizedIntField(param *types.Parameter[int]) *parameterizedFormItem {
+func createParameterizedIntField(param *config.Parameter[int]) *parameterizedFormItem {
 	item := tview.NewInputField().
 		SetLabel(param.Name).
 		SetAcceptanceFunc(tview.InputFieldInteger)
@@ -129,7 +129,7 @@ func createParameterizedIntField(param *types.Parameter[int]) *parameterizedForm
 }
 
 // Create a standard uint field
-func createParameterizedUintField(param *types.Parameter[uint64]) *parameterizedFormItem {
+func createParameterizedUintField(param *config.Parameter[uint64]) *parameterizedFormItem {
 	item := tview.NewInputField().
 		SetLabel(param.Name).
 		SetAcceptanceFunc(tview.InputFieldInteger)
@@ -164,7 +164,7 @@ func createParameterizedUintField(param *types.Parameter[uint64]) *parameterized
 }
 
 // Create a standard uint16 field
-func createParameterizedUint16Field(param *types.Parameter[uint16]) *parameterizedFormItem {
+func createParameterizedUint16Field(param *config.Parameter[uint16]) *parameterizedFormItem {
 	item := tview.NewInputField().
 		SetLabel(param.Name).
 		SetAcceptanceFunc(tview.InputFieldInteger)
@@ -199,7 +199,7 @@ func createParameterizedUint16Field(param *types.Parameter[uint16]) *parameteriz
 }
 
 // Create a standard string field
-func createParameterizedStringField(param *types.Parameter[string]) *parameterizedFormItem {
+func createParameterizedStringField(param *config.Parameter[string]) *parameterizedFormItem {
 	item := tview.NewInputField().
 		SetLabel(param.Name)
 	item.SetDoneFunc(func(key tcell.Key) {
@@ -236,7 +236,7 @@ func createParameterizedStringField(param *types.Parameter[string]) *parameteriz
 }
 
 // Create a standard float field
-func createParameterizedFloatField(param *types.Parameter[float64]) *parameterizedFormItem {
+func createParameterizedFloatField(param *config.Parameter[float64]) *parameterizedFormItem {
 	item := tview.NewInputField().
 		SetLabel(param.Name).
 		SetAcceptanceFunc(tview.InputFieldFloat)
@@ -271,7 +271,7 @@ func createParameterizedFloatField(param *types.Parameter[float64]) *parameteriz
 }
 
 // Create a standard choice field
-func createParameterizedDropDown(param types.IParameter, descriptionBox *tview.TextView) *parameterizedFormItem {
+func createParameterizedDropDown(param config.IParameter, descriptionBox *tview.TextView) *parameterizedFormItem {
 	// Create the list of options
 	options := []string{}
 	descriptions := []string{}

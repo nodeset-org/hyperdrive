@@ -1,13 +1,11 @@
 package config
 
-import "github.com/nodeset-org/hyperdrive/shared/types"
-
 // Get all of the settings that have changed between the given config sections
 // Assumes the config sections represent the same element, just different instances
-func GetChangedSettings(old types.IConfigSection, new types.IConfigSection) (*types.ChangedSection, int) {
-	changedSection := &types.ChangedSection{
-		Settings:    []*types.ChangedSetting{},
-		Subsections: []*types.ChangedSection{},
+func GetChangedSettings(old IConfigSection, new IConfigSection) (*ChangedSection, int) {
+	changedSection := &ChangedSection{
+		Settings:    []*ChangedSetting{},
+		Subsections: []*ChangedSection{},
 	}
 
 	// Go through the parameters
@@ -18,7 +16,7 @@ func GetChangedSettings(old types.IConfigSection, new types.IConfigSection) (*ty
 		oldVal := oldParam.String()
 		newVal := newParam.String()
 		if oldVal != newVal {
-			changedSection.Settings = append(changedSection.Settings, &types.ChangedSetting{
+			changedSection.Settings = append(changedSection.Settings, &ChangedSetting{
 				Name:               oldParam.GetCommon().Name,
 				OldValue:           oldVal,
 				NewValue:           newVal,
@@ -44,7 +42,7 @@ func GetChangedSettings(old types.IConfigSection, new types.IConfigSection) (*ty
 }
 
 // Get a list of containers that will be need to be restarted after this change is applied
-func GetAffectedContainers(section *types.ChangedSection, containers map[types.ContainerID]bool) {
+func GetAffectedContainers(section *ChangedSection, containers map[ContainerID]bool) {
 	for _, setting := range section.Settings {
 		for _, affectedContainer := range setting.AffectedContainers {
 			containers[affectedContainer] = true

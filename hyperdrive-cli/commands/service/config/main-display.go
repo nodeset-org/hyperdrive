@@ -6,7 +6,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 )
 
@@ -26,7 +26,7 @@ type mainDisplay struct {
 	PreviousConfig      *client.GlobalConfig
 	Config              *client.GlobalConfig
 	ShouldSave          bool
-	ContainersToRestart []types.ContainerID
+	ContainersToRestart []config.ContainerID
 	ChangeNetworks      bool
 }
 

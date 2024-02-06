@@ -6,7 +6,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/urfave/cli/v2"
 )
 
@@ -34,7 +34,7 @@ func resyncExecutionClient(c *cli.Context) error {
 	}
 
 	// Stop Execution
-	executionContainerName := cfg.Hyperdrive.GetDockerArtifactName(string(types.ContainerID_ExecutionClient))
+	executionContainerName := cfg.Hyperdrive.GetDockerArtifactName(string(config.ContainerID_ExecutionClient))
 	fmt.Printf("Stopping %s...\n", executionContainerName)
 	err = hd.StopContainer(executionContainerName)
 	if err != nil {

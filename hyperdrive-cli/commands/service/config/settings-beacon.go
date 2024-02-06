@@ -5,7 +5,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 // The page wrapper for the BN configs
@@ -154,11 +153,11 @@ func (configPage *BeaconConfigPage) handleClientModeChanged() {
 
 	selectedMode := configPage.masterConfig.Hyperdrive.ClientMode.Value
 	switch selectedMode {
-	case types.ClientMode_Local:
+	case config.ClientMode_Local:
 		// Local (Docker mode)
 		configPage.handleLocalBnChanged()
 
-	case types.ClientMode_External:
+	case config.ClientMode_External:
 		// External (Hybrid mode)
 		configPage.handleExternalBnChanged()
 	}
@@ -172,15 +171,15 @@ func (configPage *BeaconConfigPage) handleLocalBnChanged() {
 	selectedBn := configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Value
 
 	switch selectedBn {
-	case types.BeaconNode_Lighthouse:
+	case config.BeaconNode_Lighthouse:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localBnItems, configPage.lighthouseItems, nil)
-	case types.BeaconNode_Lodestar:
+	case config.BeaconNode_Lodestar:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localBnItems, configPage.lodestarItems, nil)
-	case types.BeaconNode_Nimbus:
+	case config.BeaconNode_Nimbus:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localBnItems, configPage.nimbusItems, nil)
-	case types.BeaconNode_Prysm:
+	case config.BeaconNode_Prysm:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localBnItems, configPage.prysmItems, nil)
-	case types.BeaconNode_Teku:
+	case config.BeaconNode_Teku:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localBnItems, configPage.tekuItems, nil)
 	}
 
@@ -206,7 +205,7 @@ func (configPage *BeaconConfigPage) handleExternalBnChanged() {
 
 	// Show items based on the client selection
 	configPage.layout.addFormItems(commonSettings)
-	if configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value == types.BeaconNode_Prysm {
+	if configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value == config.BeaconNode_Prysm {
 		configPage.layout.addFormItems(prysmSettings)
 	}
 

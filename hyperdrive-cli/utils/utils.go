@@ -10,7 +10,7 @@ import (
 	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	"github.com/urfave/cli/v2"
@@ -131,17 +131,17 @@ func PrintDepositMismatchError(rpNetwork, beaconNetwork uint64, rpDepositAddress
 }
 
 // Prints what network you're currently on
-func PrintNetwork(currentNetwork types.Network, isNew bool) error {
+func PrintNetwork(currentNetwork config.Network, isNew bool) error {
 	if isNew {
 		return fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
 	}
 
 	switch currentNetwork {
-	case types.Network_Mainnet:
+	case config.Network_Mainnet:
 		fmt.Printf("Hyperdrive is currently using the %sEthereum Mainnet.%s\n\n", terminal.ColorGreen, terminal.ColorReset)
-	case types.Network_HoleskyDev:
+	case config.Network_HoleskyDev:
 		fmt.Printf("Hyperdrive is currently using the %sHolesky Development Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
-	case types.Network_Holesky:
+	case config.Network_Holesky:
 		fmt.Printf("Hyperdrive is currently using the %sHolesky Test Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
 	default:
 		fmt.Printf("%sYou are on an unexpected network [%v].%s\n\n", terminal.ColorYellow, currentNetwork, terminal.ColorReset)

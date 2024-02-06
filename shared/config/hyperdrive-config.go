@@ -11,8 +11,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/config/migration"
-	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/pbnjay/memory"
 
 	"gopkg.in/yaml.v3"
@@ -43,14 +41,14 @@ const (
 // The master configuration struct
 type HyperdriveConfig struct {
 	// General settings
-	DebugMode          types.Parameter[bool]
-	Network            types.Parameter[types.Network]
-	ClientMode         types.Parameter[types.ClientMode]
-	ProjectName        types.Parameter[string]
-	UserDataPath       types.Parameter[string]
-	AutoTxMaxFee       types.Parameter[float64]
-	MaxPriorityFee     types.Parameter[float64]
-	AutoTxGasThreshold types.Parameter[float64]
+	DebugMode          Parameter[bool]
+	Network            Parameter[Network]
+	ClientMode         Parameter[ClientMode]
+	ProjectName        Parameter[string]
+	UserDataPath       Parameter[string]
+	AutoTxMaxFee       Parameter[float64]
+	MaxPriorityFee     Parameter[float64]
+	AutoTxGasThreshold Parameter[float64]
 
 	// Execution client settings
 	LocalExecutionConfig    *LocalExecutionConfig
@@ -72,7 +70,7 @@ type HyperdriveConfig struct {
 	// Internal fields
 	Version                 string
 	HyperdriveUserDirectory string
-	chainID                 map[types.Network]uint
+	chainID                 map[Network]uint
 }
 
 // Load configuration settings from a file
@@ -111,130 +109,130 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 		HyperdriveUserDirectory: hdDir,
 		Modules:                 map[string]any{},
 
-		ProjectName: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		ProjectName: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ProjectNameID,
 				Name:               "Project Name",
 				Description:        "This is the prefix that will be attached to all of the Docker containers managed by Hyperdrive.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode, types.ContainerID_Daemon, types.ContainerID_ExecutionClient, types.ContainerID_Exporter, types.ContainerID_Grafana, types.ContainerID_Prometheus, types.ContainerID_ValidatorClients},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode, ContainerID_Daemon, ContainerID_ExecutionClient, ContainerID_Exporter, ContainerID_Grafana, ContainerID_Prometheus, ContainerID_ValidatorClients},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "hyperdrive",
+			Default: map[Network]string{
+				Network_All: "hyperdrive",
 			},
 		},
 
-		Network: types.Parameter[types.Network]{
-			ParameterCommon: &types.ParameterCommon{
+		Network: Parameter[Network]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 NetworkID,
 				Name:               "Network",
 				Description:        "The Ethereum network you want to use - select Prater Testnet or Holesky Testnet to practice with fake ETH, or Mainnet to stake on the real network using real ETH.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ExecutionClient, types.ContainerID_BeaconNode, types.ContainerID_ValidatorClients},
+				AffectsContainers:  []ContainerID{ContainerID_Daemon, ContainerID_ExecutionClient, ContainerID_BeaconNode, ContainerID_ValidatorClients},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
 			Options: getNetworkOptions(),
-			Default: map[types.Network]types.Network{
-				types.Network_All: types.Network_Mainnet,
+			Default: map[Network]Network{
+				Network_All: Network_Mainnet,
 			},
 		},
 
-		ClientMode: types.Parameter[types.ClientMode]{
-			ParameterCommon: &types.ParameterCommon{
+		ClientMode: Parameter[ClientMode]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ClientModeID,
 				Name:               "Client Mode",
 				Description:        "Choose which mode to use for your Execution Client and Beacon Node - locally managed (Docker Mode), or externally managed (Hybrid Mode).",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ExecutionClient, types.ContainerID_BeaconNode},
+				AffectsContainers:  []ContainerID{ContainerID_Daemon, ContainerID_ExecutionClient, ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Options: []*types.ParameterOption[types.ClientMode]{
+			Options: []*ParameterOption[ClientMode]{
 				{
-					ParameterOptionCommon: &types.ParameterOptionCommon{
+					ParameterOptionCommon: &ParameterOptionCommon{
 						Name:        "Locally Managed",
 						Description: "Allow Hyperdrive to manage the Execution Client and Beacon Node for you (Docker Mode)",
 					},
-					Value: types.ClientMode_Local,
+					Value: ClientMode_Local,
 				}, {
-					ParameterOptionCommon: &types.ParameterOptionCommon{
+					ParameterOptionCommon: &ParameterOptionCommon{
 						Name:        "Externally Managed",
 						Description: "Use an existing Execution Client and Beacon Node that you manage on your own (Hybrid Mode)",
 					},
-					Value: types.ClientMode_External,
+					Value: ClientMode_External,
 				}},
-			Default: map[types.Network]types.ClientMode{
-				types.Network_All: types.ClientMode_Local,
+			Default: map[Network]ClientMode{
+				Network_All: ClientMode_Local,
 			},
 		},
 
-		AutoTxMaxFee: types.Parameter[float64]{
-			ParameterCommon: &types.ParameterCommon{
+		AutoTxMaxFee: Parameter[float64]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 AutoTxMaxFeeID,
 				Name:               "Auto TX Max Fee",
 				Description:        "Set this if you want all of Hyperdrive's automatic transactions to use this specific max fee value (in gwei), which is the most you'd be willing to pay (*including the priority fee*).\n\nA value of 0 will use the suggested max fee based on the current network conditions.\n\nAny other value will ignore the network suggestion and use this value instead.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon},
+				AffectsContainers:  []ContainerID{ContainerID_Daemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]float64{
-				types.Network_All: float64(0),
+			Default: map[Network]float64{
+				Network_All: float64(0),
 			},
 		},
 
-		MaxPriorityFee: types.Parameter[float64]{
-			ParameterCommon: &types.ParameterCommon{
+		MaxPriorityFee: Parameter[float64]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 MaxPriorityFeeID,
 				Name:               "Max Priority Fee",
 				Description:        "The default value for the priority fee (in gwei) for all of your transactions, including automatic ones. This describes how much you're willing to pay *above the network's current base fee* - the higher this is, the more ETH you give to the validators for including your transaction, which generally means it will be included in a block faster (as long as your max fee is sufficiently high to cover the current network conditions).\n\nMust be larger than 0.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon},
+				AffectsContainers:  []ContainerID{ContainerID_Daemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]float64{
-				types.Network_All: float64(1),
+			Default: map[Network]float64{
+				Network_All: float64(1),
 			},
 		},
 
-		AutoTxGasThreshold: types.Parameter[float64]{
-			ParameterCommon: &types.ParameterCommon{
+		AutoTxGasThreshold: Parameter[float64]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 AutoTxGasThresholdID,
 				Name:               "Automatic TX Gas Threshold",
 				Description:        "The threshold (in gwei) that the recommended network gas price must be under in order for automated transactions to be submitted when due.\n\nA value of 0 will disable non-essential automatic transactions.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon},
+				AffectsContainers:  []ContainerID{ContainerID_Daemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]float64{
-				types.Network_All: float64(100),
+			Default: map[Network]float64{
+				Network_All: float64(100),
 			},
 		},
 
-		UserDataPath: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		UserDataPath: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 UserDataPathID,
 				Name:               "User Data Path",
 				Description:        "The absolute path of your personal `data` folder that contains secrets such as your node wallet's encrypted file, the password for your node wallet, and all of the validator keys for any Hyperdrive modules.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon, types.ContainerID_ValidatorClients},
+				AffectsContainers:  []ContainerID{ContainerID_Daemon, ContainerID_ValidatorClients},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: filepath.Join(hdDir, "data"),
+			Default: map[Network]string{
+				Network_All: filepath.Join(hdDir, "data"),
 			},
 		},
 
-		DebugMode: types.Parameter[bool]{
-			ParameterCommon: &types.ParameterCommon{
+		DebugMode: Parameter[bool]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 DebugModeID,
 				Name:               "Debug Mode",
 				Description:        "Enable debug log printing in the daemon.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_Daemon},
+				AffectsContainers:  []ContainerID{ContainerID_Daemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]bool{
-				types.Network_All: false,
+			Default: map[Network]bool{
+				Network_All: false,
 			},
 		},
 	}
@@ -248,7 +246,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg.Metrics = NewMetricsConfig(cfg)
 
 	// Apply the default values for mainnet
-	cfg.Network.Value = types.Network_Mainnet
+	cfg.Network.Value = Network_Mainnet
 	cfg.applyAllDefaults()
 
 	return cfg
@@ -260,8 +258,8 @@ func (cfg *HyperdriveConfig) GetTitle() string {
 }
 
 // Get the parameters for this config
-func (cfg *HyperdriveConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
+func (cfg *HyperdriveConfig) GetParameters() []IParameter {
+	return []IParameter{
 		&cfg.ProjectName,
 		&cfg.Network,
 		&cfg.ClientMode,
@@ -274,8 +272,8 @@ func (cfg *HyperdriveConfig) GetParameters() []types.IParameter {
 }
 
 // Get the subconfigurations for this config
-func (cfg *HyperdriveConfig) GetSubconfigs() map[string]types.IConfigSection {
-	return map[string]types.IConfigSection{
+func (cfg *HyperdriveConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{
 		"fallback":          cfg.Fallback,
 		"localExecution":    cfg.LocalExecutionConfig,
 		"externalExecution": cfg.ExternalExecutionConfig,
@@ -286,7 +284,7 @@ func (cfg *HyperdriveConfig) GetSubconfigs() map[string]types.IConfigSection {
 }
 
 // Serializes the configuration into a map of maps, compatible with a settings file
-func (cfg *HyperdriveConfig) Serialize(modules []modconfig.IModuleConfig) map[string]any {
+func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig) map[string]any {
 	masterMap := map[string]any{}
 
 	hdMap := Serialize(cfg)
@@ -305,7 +303,7 @@ func (cfg *HyperdriveConfig) Serialize(modules []modconfig.IModuleConfig) map[st
 		modMap := Serialize(module)
 		modulesMap[module.GetModuleName()] = modMap
 	}
-	masterMap[modconfig.ModulesName] = modulesMap
+	masterMap[ModulesName] = modulesMap
 	return masterMap
 }
 
@@ -318,7 +316,7 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	}
 
 	// Get the network
-	network := types.Network_Mainnet
+	network := Network_Mainnet
 	hyperdriveParams, exists := masterMap[ids.RootConfigID]
 	if !exists {
 		return fmt.Errorf("config is missing the [%s] section", ids.RootConfigID)
@@ -333,7 +331,7 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 		if !isString {
 			return fmt.Errorf("expected [%s - %s] to be a string but it is not", ids.RootConfigID, cfg.Network.ID)
 		}
-		network = types.Network(networkString)
+		network = Network(networkString)
 	}
 
 	// Deserialize the params and subconfigs
@@ -355,12 +353,12 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	cfg.Version = version.(string)
 
 	// Handle modules
-	modules, exists := masterMap[modconfig.ModulesName]
+	modules, exists := masterMap[ModulesName]
 	if exists {
 		if modMap, ok := modules.(map[string]any); ok {
 			cfg.Modules = modMap
 		} else {
-			return fmt.Errorf("config has an entry named [%s] but it is not a map, it's a %s", modconfig.ModulesName, reflect.TypeOf(modules))
+			return fmt.Errorf("config has an entry named [%s] but it is not a map, it's a %s", ModulesName, reflect.TypeOf(modules))
 		}
 	} else {
 		cfg.Modules = map[string]any{}
@@ -380,31 +378,31 @@ func (cfg *HyperdriveConfig) applyAllDefaults() {
 }
 
 // Get the list of options for networks to run on
-func getNetworkOptions() []*types.ParameterOption[types.Network] {
-	options := []*types.ParameterOption[types.Network]{
+func getNetworkOptions() []*ParameterOption[Network] {
+	options := []*ParameterOption[Network]{
 		/*{
-			ParameterOptionCommon: &types.ParameterOptionCommon{
+			ParameterOptionCommon: &ParameterOptionCommon{
 				Name:        "Ethereum Mainnet",
 				Description: "This is the real Ethereum main network, using real ETH to make real validators.",
 			},
-			Value: types.Network_Mainnet,
+			Value: Network_Mainnet,
 		},*/
 		{
-			ParameterOptionCommon: &types.ParameterOptionCommon{
+			ParameterOptionCommon: &ParameterOptionCommon{
 				Name:        "Holesky Testnet",
 				Description: "This is the Holešky (Holešovice) test network, which is the next generation of long-lived testnets for Ethereum. It uses free fake ETH to make fake validators.\nUse this if you want to practice running Hyperdrive in a free, safe environment before moving to Mainnet.",
 			},
-			Value: types.Network_Holesky,
+			Value: Network_Holesky,
 		},
 	}
 
 	if strings.HasSuffix(shared.HyperdriveVersion, "-dev") {
-		options = append(options, &types.ParameterOption[types.Network]{
-			ParameterOptionCommon: &types.ParameterOptionCommon{
+		options = append(options, &ParameterOption[Network]{
+			ParameterOptionCommon: &ParameterOptionCommon{
 				Name:        "Devnet",
 				Description: "This is a development network used by Hyperdrive engineers to test new features and contract upgrades before they are promoted to Holesky for staging. You should not use this network unless invited to do so by the developers.",
 			},
-			Value: types.Network_HoleskyDev,
+			Value: Network_HoleskyDev,
 		})
 	}
 
@@ -412,14 +410,14 @@ func getNetworkOptions() []*types.ParameterOption[types.Network] {
 }
 
 // Get a more verbose client description, including warnings
-func getAugmentedEcDescription(client types.ExecutionClient, originalDescription string) string {
+func getAugmentedEcDescription(client ExecutionClient, originalDescription string) string {
 	switch client {
-	case types.ExecutionClient_Nethermind:
+	case ExecutionClient_Nethermind:
 		totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
 		if totalMemoryGB < 9 {
 			return fmt.Sprintf("%s\n\n[red]WARNING: Nethermind currently requires over 8 GB of RAM to run smoothly. We do not recommend it for your system. This may be improved in a future release.", originalDescription)
 		}
-	case types.ExecutionClient_Besu:
+	case ExecutionClient_Besu:
 		totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
 		if totalMemoryGB < 9 {
 			return fmt.Sprintf("%s\n\n[red]WARNING: Besu currently requires over 8 GB of RAM to run smoothly. We do not recommend it for your system. This may be improved in a future release.", originalDescription)

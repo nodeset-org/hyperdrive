@@ -164,7 +164,7 @@ func configureHeadless(c *cli.Context, cfg *config.HyperdriveConfig) error {
 }
 
 // Update a config section from the CLI flags
-func configureSection(c *cli.Context, section types.IConfigSection) error {
+func configureSection(c *cli.Context, section config.IConfigSection) error {
 	// Update the parameters
 	for _, param := range section.GetParameters() {
 		err := updateConfigParamFromCliArg(c, "", param)
@@ -175,7 +175,7 @@ func configureSection(c *cli.Context, section types.IConfigSection) error {
 }
 
 // Updates a config parameter from a CLI flag
-func updateConfigParamFromCliArg(c *cli.Context, sectionName string, param types.IParameter) error {
+func updateConfigParamFromCliArg(c *cli.Context, sectionName string, param config.IParameter) error {
 	var paramName string
 	if sectionName == "" {
 		paramName = param.GetCommon().ID
@@ -186,23 +186,23 @@ func updateConfigParamFromCliArg(c *cli.Context, sectionName string, param types
 	if c.IsSet(paramName) {
 
 		switch param.Type {
-		case types.ParameterType_Bool:
+		case config.ParameterType_Bool:
 			param.Value = c.Bool(paramName)
-		case cfgtypes.ParameterType_Int:
+		case cfgconfig.ParameterType_Int:
 			param.Value = c.Int(paramName)
-		case cfgtypes.ParameterType_Float:
+		case cfgconfig.ParameterType_Float:
 			param.Value = c.Float64(paramName)
-		case cfgtypes.ParameterType_String:
+		case cfgconfig.ParameterType_String:
 			setting := c.String(paramName)
 			if param.MaxLength > 0 && len(setting) > param.MaxLength {
 				return fmt.Errorf("error setting value for %s: [%s] is too long (max length %d)", paramName, setting, param.MaxLength)
 			}
 			param.Value = c.String(paramName)
-		case cfgtypes.ParameterType_Uint:
+		case cfgconfig.ParameterType_Uint:
 			param.Value = c.Uint(paramName)
-		case cfgtypes.ParameterType_Uint16:
+		case cfgconfig.ParameterType_Uint16:
 			param.Value = uint16(c.Uint(paramName))
-		case cfgtypes.ParameterType_Choice:
+		case cfgconfig.ParameterType_Choice:
 			selection := c.String(paramName)
 			found := false
 			for _, option := range param.Options {

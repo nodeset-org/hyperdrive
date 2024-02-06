@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 )
 
@@ -86,10 +86,10 @@ func processConfigAfterQuit(md *mainDisplay) {
 		_, totalAffectedContainers, changeNetworks := md.Config.GetChanges(md.PreviousConfig)
 
 		if md.isUpdate {
-			totalAffectedContainers[types.ContainerID_Daemon] = true
+			totalAffectedContainers[config.ContainerID_Daemon] = true
 		}
 
-		var containersToRestart []types.ContainerID
+		var containersToRestart []config.ContainerID
 		for container := range totalAffectedContainers {
 			containersToRestart = append(containersToRestart, container)
 		}

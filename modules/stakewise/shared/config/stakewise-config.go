@@ -4,7 +4,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config/validator"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
 const (
@@ -23,13 +22,13 @@ type StakewiseConfig struct {
 	hdCfg *config.HyperdriveConfig
 
 	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
-	Enabled types.Parameter[bool]
+	Enabled config.Parameter[bool]
 
 	// The Docker Hub tag for the Stakewise operator
-	OperatorContainerTag types.Parameter[string]
+	OperatorContainerTag config.Parameter[string]
 
 	// Custom command line flags
-	AdditionalOpFlags types.Parameter[string]
+	AdditionalOpFlags config.Parameter[string]
 
 	// Validator client configs
 	VcCommon   *validator.ValidatorClientCommonConfig
@@ -45,45 +44,45 @@ func NewStakewiseConfig(hdCfg *config.HyperdriveConfig) *StakewiseConfig {
 	cfg := &StakewiseConfig{
 		hdCfg: hdCfg,
 
-		Enabled: types.Parameter[bool]{
-			ParameterCommon: &types.ParameterCommon{
+		Enabled: config.Parameter[bool]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 StakewiseEnableID,
 				Name:               "Enable",
 				Description:        "Enable support for Stakewise <placeholder description>",
-				AffectsContainers:  []types.ContainerID{ContainerID_StakewiseOperator},
+				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseOperator},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]bool{
-				types.Network_All: false,
+			Default: map[config.Network]bool{
+				config.Network_All: false,
 			},
 		},
 
-		OperatorContainerTag: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		OperatorContainerTag: config.Parameter[string]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 OperatorContainerTagID,
 				Name:               "Operator Container Tag",
 				Description:        "The tag name of the Stakewise Operator image to use. See https://github.com/stakewise/v3-operator#using-docker for more details.",
-				AffectsContainers:  []types.ContainerID{ContainerID_StakewiseOperator},
+				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseOperator},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: true,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: operatorTag,
+			Default: map[config.Network]string{
+				config.Network_All: operatorTag,
 			},
 		},
 
-		AdditionalOpFlags: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		AdditionalOpFlags: config.Parameter[string]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 AdditionalOpFlagsID,
 				Name:               "Additional Operator Flags",
 				Description:        "Additional custom command line flags you want to pass to the Operator container, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
-				AffectsContainers:  []types.ContainerID{ContainerID_StakewiseOperator},
+				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseOperator},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "",
+			Default: map[config.Network]string{
+				config.Network_All: "",
 			},
 		},
 	}
@@ -104,8 +103,8 @@ func (cfg *StakewiseConfig) GetTitle() string {
 }
 
 // Get the parameters for this config
-func (cfg *StakewiseConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
+func (cfg *StakewiseConfig) GetParameters() []config.IParameter {
+	return []config.IParameter{
 		&cfg.Enabled,
 		&cfg.OperatorContainerTag,
 		&cfg.AdditionalOpFlags,
@@ -113,8 +112,8 @@ func (cfg *StakewiseConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *StakewiseConfig) GetSubconfigs() map[string]types.IConfigSection {
-	return map[string]types.IConfigSection{
+func (cfg *StakewiseConfig) GetSubconfigs() map[string]config.IConfigSection {
+	return map[string]config.IConfigSection{
 		"common":     cfg.VcCommon,
 		"lighthouse": cfg.Lighthouse,
 		"lodestar":   cfg.Lodestar,
@@ -133,14 +132,14 @@ func (cfg *StakewiseConfig) GetModuleName() string {
 	return ModuleName
 }
 
-func (cfg *StakewiseConfig) GetValidatorContainerTagInfo() map[types.ContainerID]string {
-	return map[types.ContainerID]string{
+func (cfg *StakewiseConfig) GetValidatorContainerTagInfo() map[config.ContainerID]string {
+	return map[config.ContainerID]string{
 		ContainerID_StakewiseValidator: cfg.GetVcContainerTag(),
 	}
 }
 
-func (cfg *StakewiseConfig) GetContainersToDeploy() []types.ContainerID {
-	return []types.ContainerID{
+func (cfg *StakewiseConfig) GetContainersToDeploy() []config.ContainerID {
+	return []config.ContainerID{
 		ContainerID_StakewiseDaemon,
 		ContainerID_StakewiseOperator,
 		ContainerID_StakewiseValidator,

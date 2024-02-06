@@ -1,6 +1,6 @@
 package config
 
-import "github.com/nodeset-org/hyperdrive/shared/types"
+import "github.com/nodeset-org/hyperdrive/shared/config"
 
 func createExternalBnSelectStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
 	// Create the button names and descriptions from the config
@@ -26,7 +26,7 @@ func createExternalBnSelectStep(wiz *wizard, currentStep int, totalSteps int) *c
 
 	done := func(buttonIndex int, buttonLabel string) {
 		switch wiz.md.Config.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value {
-		case types.BeaconNode_Prysm:
+		case config.BeaconNode_Prysm:
 			wiz.externalPrysmSettingsModal.show()
 		default:
 			wiz.externalBnSettingsModal.show()

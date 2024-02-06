@@ -4,13 +4,13 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 // A collection of network-specific resources and getters for them
 type StakewiseResources struct {
 	// The Network being used
-	Network types.Network
+	Network config.Network
 
 	// The address of the Stakewise vault
 	Vault common.Address
@@ -29,7 +29,7 @@ type StakewiseResources struct {
 }
 
 // Creates a new resource collection for the given network
-func NewStakewiseResources(network types.Network) *StakewiseResources {
+func NewStakewiseResources(network config.Network) *StakewiseResources {
 	// Mainnet
 	mainnetResources := &StakewiseResources{
 		Network:            network,
@@ -61,11 +61,11 @@ func NewStakewiseResources(network types.Network) *StakewiseResources {
 	}
 
 	switch network {
-	case types.Network_Mainnet:
+	case config.Network_Mainnet:
 		return mainnetResources
-	case types.Network_Holesky:
+	case config.Network_Holesky:
 		return holeskyResources
-	case types.Network_HoleskyDev:
+	case config.Network_HoleskyDev:
 		return holeskyDevResources
 	}
 

@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/pbnjay/memory"
 )
 
@@ -19,19 +18,19 @@ const (
 // Configuration for Teku
 type TekuBnConfig struct {
 	// Max number of P2P peers to connect to
-	JvmHeapSize types.Parameter[uint64]
+	JvmHeapSize Parameter[uint64]
 
 	// The max number of P2P peers to connect to
-	MaxPeers types.Parameter[uint16]
+	MaxPeers Parameter[uint16]
 
 	// The archive mode flag
-	ArchiveMode types.Parameter[bool]
+	ArchiveMode Parameter[bool]
 
 	// The Docker Hub tag for the Teku BN
-	ContainerTag types.Parameter[string]
+	ContainerTag Parameter[string]
 
 	// Custom command line flags for the BN
-	AdditionalFlags types.Parameter[string]
+	AdditionalFlags Parameter[string]
 
 	// Internal Fields
 	parent *LocalBeaconConfig
@@ -42,75 +41,75 @@ func NewTekuBnConfig(parent *LocalBeaconConfig) *TekuBnConfig {
 	return &TekuBnConfig{
 		parent: parent,
 
-		JvmHeapSize: types.Parameter[uint64]{
-			ParameterCommon: &types.ParameterCommon{
+		JvmHeapSize: Parameter[uint64]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 TekuJvmHeapSizeID,
 				Name:               "JVM Heap Size",
 				Description:        "The max amount of RAM, in MB, that Teku's JVM should limit itself to. Setting this lower will cause Teku to use less RAM, though it will always use more than this limit.\n\nUse 0 for automatic allocation.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]uint64{
-				types.Network_All: getTekuHeapSize(),
+			Default: map[Network]uint64{
+				Network_All: getTekuHeapSize(),
 			},
 		},
 
-		MaxPeers: types.Parameter[uint16]{
-			ParameterCommon: &types.ParameterCommon{
+		MaxPeers: Parameter[uint16]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.MaxPeersID,
 				Name:               "Max Peers",
 				Description:        "The maximum number of peers your client should try to maintain. You can try lowering this if you have a low-resource system or a constrained network.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]uint16{
-				types.Network_All: 100,
+			Default: map[Network]uint16{
+				Network_All: 100,
 			},
 		},
 
-		ArchiveMode: types.Parameter[bool]{
-			ParameterCommon: &types.ParameterCommon{
+		ArchiveMode: Parameter[bool]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 TekuArchiveModeID,
 				Name:               "Enable Archive Mode",
 				Description:        "When enabled, Teku will run in \"archive\" mode which means it can recreate the state of the Beacon chain for a previous block. This is required for manually generating the Merkle rewards tree.\n\nIf you are sure you will never be manually generating a tree, you can disable archive mode.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]bool{
-				types.Network_All: false,
+			Default: map[Network]bool{
+				Network_All: false,
 			},
 		},
 
-		ContainerTag: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		ContainerTag: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.ContainerTagID,
 				Name:               "Container Tag",
 				Description:        "The tag name of the Teku container on Docker Hub you want to use for the Beacon Node.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: true,
 			},
-			Default: map[types.Network]string{
-				types.Network_Mainnet:    tekuBnTagProd,
-				types.Network_HoleskyDev: tekuBnTagTest,
-				types.Network_Holesky:    tekuBnTagTest,
+			Default: map[Network]string{
+				Network_Mainnet:    tekuBnTagProd,
+				Network_HoleskyDev: tekuBnTagTest,
+				Network_Holesky:    tekuBnTagTest,
 			},
 		},
 
-		AdditionalFlags: types.Parameter[string]{
-			ParameterCommon: &types.ParameterCommon{
+		AdditionalFlags: Parameter[string]{
+			ParameterCommon: &ParameterCommon{
 				ID:                 ids.AdditionalFlagsID,
 				Name:               "Additional Flags",
 				Description:        "Additional custom command line flags you want to pass Teku's Beacon Node, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
-				AffectsContainers:  []types.ContainerID{types.ContainerID_BeaconNode},
+				AffectsContainers:  []ContainerID{ContainerID_BeaconNode},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[types.Network]string{
-				types.Network_All: "",
+			Default: map[Network]string{
+				Network_All: "",
 			},
 		},
 	}
@@ -122,8 +121,8 @@ func (cfg *TekuBnConfig) GetTitle() string {
 }
 
 // Get the parameters for this config
-func (cfg *TekuBnConfig) GetParameters() []types.IParameter {
-	return []types.IParameter{
+func (cfg *TekuBnConfig) GetParameters() []IParameter {
+	return []IParameter{
 		&cfg.JvmHeapSize,
 		&cfg.MaxPeers,
 		&cfg.ArchiveMode,
@@ -133,8 +132,8 @@ func (cfg *TekuBnConfig) GetParameters() []types.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *TekuBnConfig) GetSubconfigs() map[string]types.IConfigSection {
-	return map[string]types.IConfigSection{}
+func (cfg *TekuBnConfig) GetSubconfigs() map[string]IConfigSection {
+	return map[string]IConfigSection{}
 }
 
 // Get the recommended heap size for Teku

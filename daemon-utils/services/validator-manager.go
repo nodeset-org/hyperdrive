@@ -6,7 +6,7 @@ import (
 
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/validator/keystore"
-	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -16,7 +16,7 @@ type ValidatorManager struct {
 
 func NewValidatorManager(moduleDir string) *ValidatorManager {
 	// Get the validator storage path
-	validatorPath := filepath.Join(moduleDir, modconfig.ValidatorsDirectory)
+	validatorPath := filepath.Join(moduleDir, config.ValidatorsDirectory)
 
 	mgr := &ValidatorManager{
 		keystoreManagers: map[string]keystore.IKeystoreManager{

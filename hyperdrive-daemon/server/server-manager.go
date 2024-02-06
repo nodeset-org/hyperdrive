@@ -8,7 +8,6 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	modconfig "github.com/nodeset-org/hyperdrive/shared/config/modules"
 )
 
 // ServerManager manages all of the daemon sockets and servers run by the main Hyperdrive daemon
@@ -51,7 +50,7 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 
 	// Handle each module server
 	for _, module := range moduleNames {
-		modulesDir := filepath.Join(sp.GetConfig().UserDataPath.Value, modconfig.ModulesName)
+		modulesDir := filepath.Join(sp.GetConfig().UserDataPath.Value, config.ModulesName)
 		moduleSocketPath := filepath.Join(modulesDir, module, config.HyperdriveSocketFilename)
 		server, err := NewHyperdriveServer(sp, moduleSocketPath)
 		if err != nil {
