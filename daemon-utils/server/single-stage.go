@@ -12,6 +12,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	batch "github.com/rocket-pool/batch-query"
 )
 
@@ -136,6 +137,8 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 func runSingleStageRoute[DataType any, ConfigType config.IModuleConfig](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*api.ApiResponse[DataType], error) {
 	// Get the services
 	q := serviceProvider.GetQueryManager()
+	hd := serviceProvider.GetHyperdriveClient()
+	signer := serviceProvider.GetSigner()
 
 	// Initialize the context with any bootstrapping, requirements checks, or bindings it needs to set up
 	err := ctx.Initialize()
@@ -154,22 +157,14 @@ func runSingleStageRoute[DataType any, ConfigType config.IModuleConfig](ctx ISin
 
 	// Get the transact opts if this node is ready for transaction
 	var opts *bind.TransactOpts
-
-	// TODO
-	/*
-		w := serviceProvider.GetWallet()
-		walletStatus, err := w.GetStatus()
-		if err != nil {
-			return nil, fmt.Errorf("error getting wallet status: %w", err)
-		}
-		if utils.IsWalletReady(walletStatus) {
-			var err error
-			opts, err = w.GetTransactor()
-			if err != nil {
-				return nil, fmt.Errorf("error getting node account transactor: %w", err)
-			}
-		}
-	*/
+	walletResponse, err := hd.Wallet.Status()
+	if err != nil {
+		return nil, fmt.Errorf("error getting wallet status: %w", err)
+	}
+	status := walletResponse.Data.WalletStatus
+	if utils.IsWalletReady(status) {
+		opts = signer.GetTransactor(status.Wallet.WalletAddress)
+	}
 
 	// Create the response and data
 	data := new(DataType)

@@ -5,10 +5,9 @@ import (
 )
 
 const (
-	PrintTxDataFlag string = "print-tx-data"
-	SignTxOnlyFlag  string = "sign-tx-only"
-	NoRestartFlag   string = "no-restart"
-	MnemonicFlag    string = "mnemonic"
+	SignTxOnlyFlag string = "sign-tx-only"
+	NoRestartFlag  string = "no-restart"
+	MnemonicFlag   string = "mnemonic"
 )
 
 var (
@@ -16,6 +15,11 @@ var (
 		Name:    "yes",
 		Aliases: []string{"y"},
 		Usage:   "Automatically confirm all interactive questions",
+	}
+	PrintTxDataFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "print-tx-data",
+		Aliases: []string{"pd"},
+		Usage:   "Print the TX data for transactions without signing or submitting them. Useful for masquerade mode or offline wallet operations.",
 	}
 	RawFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name: "raw",

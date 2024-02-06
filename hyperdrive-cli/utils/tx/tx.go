@@ -18,12 +18,12 @@ import (
 // Handle a transaction, either printing its details, signing it, or submitting it and waiting for it to be included
 func HandleTx(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.TransactionInfo, confirmMessage string, identifier string, submissionMessage string) error {
 	// Make sure the TX was successful
-	if txInfo.SimulationResult.SimulationError != "" {
+	/*if txInfo.SimulationResult.SimulationError != "" {
 		return fmt.Errorf("simulating %s failed: %s", identifier, txInfo.SimulationResult.SimulationError)
-	}
+	}*/
 
 	// Print the TX data if requested
-	if c.Bool(utils.PrintTxDataFlag) {
+	if c.Bool(utils.PrintTxDataFlag.Name) {
 		fmt.Printf("TX Data for %s:\n", identifier)
 		fmt.Printf("\tTo:       %s\n", txInfo.To.Hex())
 		fmt.Printf("\tData:     %s\n", hexutil.Encode(txInfo.Data))
@@ -94,7 +94,7 @@ func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.T
 	}
 
 	// Print the TX data if requested
-	if c.Bool(utils.PrintTxDataFlag) {
+	if c.Bool(utils.PrintTxDataFlag.Name) {
 		for i, info := range txInfos {
 			fmt.Printf("Data for TX %d (%s):\n", i, identifierFunc(i))
 			fmt.Printf("\tTo:       %s\n", info.To.Hex())

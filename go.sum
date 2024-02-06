@@ -355,6 +355,8 @@ github.com/multiformats/go-varint v0.0.7 h1:sWSGR+f/eu5ABZA2ZpYKBILXTTs9JWpdEM/n
 github.com/multiformats/go-varint v0.0.7/go.mod h1:r8PUYw/fD/SjBCiKOoDlGF6QawOELpZAu9eioSos/OU=
 github.com/nodeset-org/eth-utils v0.0.0-20240130225022-0b8abd71186c h1:aLcvYrDao/fTjZlyC0z2l5/4hSfVeCAeFldtQ+Vn2xE=
 github.com/nodeset-org/eth-utils v0.0.0-20240130225022-0b8abd71186c/go.mod h1:3jUAhc8LREFSbI1yFHPiUF6b+lVsj6NFlmkVSIf4/Hw=
+github.com/nodeset-org/eth-utils v0.0.0-20240206150818-9a1e202a5284 h1:Br4SOVDzneGXbj4akS7qH4twphLh1kJCeWUBW/INNA4=
+github.com/nodeset-org/eth-utils v0.0.0-20240206150818-9a1e202a5284/go.mod h1:3jUAhc8LREFSbI1yFHPiUF6b+lVsj6NFlmkVSIf4/Hw=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=

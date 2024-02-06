@@ -10,6 +10,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -138,25 +139,19 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 // Run a route registered with no structured chain query pattern
 func runQuerylessRoute[DataType any, ConfigType config.IModuleConfig](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*ApiResponse[DataType], error) {
 	// Get the services
+	hd := serviceProvider.GetHyperdriveClient()
+	signer := serviceProvider.GetSigner()
 
-	//TODO
-	/*
-		w := serviceProvider.GetWallet()
-
-		// Get the transact opts if this node is ready for transaction
-		var opts *bind.TransactOpts
-		walletStatus, err := w.GetStatus()
-		if err != nil {
-			return nil, fmt.Errorf("error getting wallet status: %w", err)
-		}
-		if utils.IsWalletReady(walletStatus) {
-			var err error
-			opts, err = w.GetTransactor()
-			if err != nil {
-				return nil, fmt.Errorf("error getting node account transactor: %w", err)
-			}
-		}
-	*/
+	// Get the transact opts if this node is ready for transaction
+	var opts *bind.TransactOpts
+	walletResponse, err := hd.Wallet.Status()
+	if err != nil {
+		return nil, fmt.Errorf("error getting wallet status: %w", err)
+	}
+	status := walletResponse.Data.WalletStatus
+	if utils.IsWalletReady(status) {
+		opts = signer.GetTransactor(status.Wallet.WalletAddress)
+	}
 
 	// Create the response and data
 	data := new(DataType)
@@ -165,7 +160,7 @@ func runQuerylessRoute[DataType any, ConfigType config.IModuleConfig](ctx IQuery
 	}
 
 	// Prep the data with the context-specific behavior
-	err := ctx.PrepareData(data, nil) // opts)
+	err = ctx.PrepareData(data, opts)
 	if err != nil {
 		return nil, err
 	}

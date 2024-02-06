@@ -28,7 +28,7 @@ func (f *txWaitContextFactory) Create(args url.Values) (*txWaitContext, error) {
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("hash", args, input.ValidateTxHash, &c.hash),
+		server.ValidateArg("hash", args, input.ValidateHash, &c.hash),
 	}
 	return c, errors.Join(inputErrs...)
 }

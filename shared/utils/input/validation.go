@@ -221,8 +221,8 @@ func ValidateTimezoneLocation(name, value string) (string, error) {
 	return value, nil
 }
 
-// Validate a transaction hash
-func ValidateTxHash(name, value string) (common.Hash, error) {
+// Validate a hash
+func ValidateHash(name, value string) (common.Hash, error) {
 	// Remove a 0x prefix if present
 	value = strings.TrimPrefix(value, "0x")
 

@@ -176,3 +176,11 @@ func (r *WalletRequester) SignMessage(message []byte) (*api.ApiResponse[api.Wall
 	}
 	return SendGetRequest[api.WalletSignMessageData](r, "sign-message", "SignMessage", args)
 }
+
+// Use the node private key to sign a transaction
+func (r *WalletRequester) SignTx(message []byte) (*api.ApiResponse[api.WalletSignTxData], error) {
+	args := map[string]string{
+		"tx": hex.EncodeToString(message),
+	}
+	return SendGetRequest[api.WalletSignTxData](r, "sign-tx", "SignTx", args)
+}

@@ -16,6 +16,7 @@ func NewNodesetHandler(serviceProvider *swcommon.StakewiseServiceProvider) *Node
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{
+		&nodesetSetValidatorsRootContextFactory{h},
 		&nodesetUploadDepositDataContextFactory{h},
 	}
 	return h

@@ -29,6 +29,7 @@ func NewWalletHandler(serviceProvider *common.ServiceProvider) *WalletHandler {
 		&walletSetEnsNameContextFactory{h},
 		&walletSetPasswordContextFactory{h},
 		&walletSignMessageContextFactory{h},
+		&walletSignTxContextFactory{h},
 		&walletStatusFactory{h},
 		&walletTestRecoverContextFactory{h},
 		&walletTestSearchAndRecoverContextFactory{h},

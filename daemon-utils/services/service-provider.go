@@ -32,6 +32,7 @@ type ServiceProvider[ConfigType config.IModuleConfig] struct {
 	txMgr        *eth.TransactionManager
 	queryMgr     *eth.QueryManager
 	resources    *utils.Resources
+	signer       *ModuleSigner
 
 	// TODO: find a better place for this than the common service provider
 	apiLogger *log.ColorLogger
@@ -112,6 +113,9 @@ func NewServiceProvider[ConfigType config.IModuleConfig](moduleDir string, facto
 	}
 	queryMgr := eth.NewQueryManager(ecManager, resources.MulticallAddress, concurrentCallLimit)
 
+	// Signer
+	signer := NewModuleSigner(hdClient)
+
 	// Create the provider
 	provider := &ServiceProvider[ConfigType]{
 		moduleDir: moduleDir,
@@ -125,6 +129,7 @@ func NewServiceProvider[ConfigType config.IModuleConfig](moduleDir string, facto
 		txMgr:     txMgr,
 		queryMgr:  queryMgr,
 		apiLogger: &apiLogger,
+		signer:    signer,
 	}
 	return provider, nil
 }
@@ -175,6 +180,10 @@ func (p *ServiceProvider[_]) GetTransactionManager() *eth.TransactionManager {
 
 func (p *ServiceProvider[_]) GetQueryManager() *eth.QueryManager {
 	return p.queryMgr
+}
+
+func (p *ServiceProvider[_]) GetSigner() *ModuleSigner {
+	return p.signer
 }
 
 func (p *ServiceProvider[_]) GetApiLogger() *log.ColorLogger {

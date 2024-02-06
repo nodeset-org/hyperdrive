@@ -54,6 +54,10 @@ type WalletSignMessageData struct {
 	SignedMessage []byte `json:"signedMessage"`
 }
 
+type WalletSignTxData struct {
+	SignedTx []byte `json:"signedTx"`
+}
+
 type WalletExportEthKeyData struct {
 	EthKeyJson []byte `json:"ethKeyJson"`
 	Password   string `json:"password"`

@@ -11,6 +11,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
 	swcmd "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/urfave/cli/v2"
@@ -88,6 +89,7 @@ func main() {
 
 	// Set application flags
 	app.Flags = []cli.Flag{
+		utils.PrintTxDataFlag,
 		allowRootFlag,
 		configPathFlag,
 		maxFeeFlag,

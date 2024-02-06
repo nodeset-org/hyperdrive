@@ -1,6 +1,7 @@
 package swclient
 
 import (
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/client"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
@@ -24,6 +25,14 @@ func (r *NodesetRequester) GetRoute() string {
 }
 func (r *NodesetRequester) GetContext() *client.RequesterContext {
 	return r.context
+}
+
+// Set the validators root for the NodeSet vault
+func (r *NodesetRequester) SetValidatorsRoot(root common.Hash) (*api.ApiResponse[api.TxInfoData], error) {
+	args := map[string]string{
+		"root": root.Hex(),
+	}
+	return client.SendGetRequest[api.TxInfoData](r, "set-validators-root", "SetValidatorsRoot", args)
 }
 
 // Upload the aggregated deposit data file to NodeSet's servers
