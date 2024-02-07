@@ -38,8 +38,6 @@ func (t *UpdateDepositData) Run() error {
 	ddMgr := t.sp.GetDepositDataManager()
 	cfg := t.sp.GetModuleConfig()
 
-	// Check the version of the NodeSet
-
 	// Get the version on the server
 	remoteVersion, err := ns.GetServerDepositDataVersion()
 	if err != nil {
