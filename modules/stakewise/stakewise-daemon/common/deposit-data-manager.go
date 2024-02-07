@@ -8,7 +8,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/validator/utils"
@@ -116,7 +118,6 @@ func (m *DepositDataManager) ComputeMerkleRoot(data []types.ExtendedDepositData)
 
 	// Create leaf data for each deposit data
 	for i, dd := range data {
-		entryData := make([]byte, 0, beacon.ValidatorPubkeyLength+beacon.ValidatorSignatureLength+common.HashLength*2) // pubkey :: signature :: dd root :: index
 		// Get the deposit data root for this deposit data
 		ddRoot, err := m.regenerateDepositDataRoot(dd)
 		if err != nil {
@@ -124,17 +125,38 @@ func (m *DepositDataManager) ComputeMerkleRoot(data []types.ExtendedDepositData)
 			return common.Hash{}, fmt.Errorf("error generating deposit data root for validator %d (%s): %w", i, pubkey.Hex(), err)
 		}
 
-		// Convert the index into a uint256
+		// Get the index
 		index := big.NewInt(int64(i))
-		indexBytes := make([]byte, 32)
-		index.FillBytes(indexBytes)
 
-		// Make a leaf hash for this deposit
+		// The Stakewise tree ABI encodes its leaves in a custom format, so we have to replicate that for Geth to use
+		bytesType, _ := abi.NewType("bytes", "bytes", nil)
+		uint256Type, _ := abi.NewType("uint256", "uint256", nil)
+		args := abi.Arguments{
+			{
+				// This is a tweaked version of the deposit data at index i, "entry data"
+				Type: bytesType,
+			},
+			{
+				// This is index i
+				Type: uint256Type,
+			},
+		}
+
+		// entryData = pubkey :: signature :: ddRoot
+		entryData := []byte{}
 		entryData = append(entryData, dd.PublicKey...)
 		entryData = append(entryData, dd.Signature...)
 		entryData = append(entryData, ddRoot[:]...)
-		entryData = append(entryData, indexBytes...)
-		totalData[i] = entryData
+
+		// ABI encode entryData and index to produce the raw leaf node value
+		bytes, err := args.Pack(entryData, index)
+		if err != nil {
+			return common.Hash{}, fmt.Errorf("error packing abi_encode args for %d: %w", i, err)
+		}
+
+		// Keccak256 the ABI-encoded data; note this will be Keccak256's *again* by the actual Merkle tree generator; this is intended
+		hash := crypto.Keccak256(bytes)
+		totalData[i] = hash
 	}
 
 	// Generate the tree
@@ -150,7 +172,7 @@ func (m *DepositDataManager) regenerateDepositDataRoot(dd types.ExtendedDepositD
 	var depositData = beacon.DepositData{
 		PublicKey:             dd.PublicKey,
 		WithdrawalCredentials: dd.WithdrawalCredentials,
-		Amount:                dd.Amount,
+		Amount:                StakewiseDepositAmount, // Note: hardcoded here because Stakewise ignores the actual amount in the deposit data and hardcodes it in their tree generation
 		Signature:             dd.Signature,
 	}
 

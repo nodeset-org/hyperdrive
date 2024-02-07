@@ -353,10 +353,6 @@ github.com/multiformats/go-multihash v0.2.3 h1:7Lyc8XfX/IY2jWb/gI7JP+o7JEq9hOa7B
 github.com/multiformats/go-multihash v0.2.3/go.mod h1:dXgKXCXjBzdscBLk9JkjINiEsCKRVch90MdaGiKsvSM=
 github.com/multiformats/go-varint v0.0.7 h1:sWSGR+f/eu5ABZA2ZpYKBILXTTs9JWpdEM/nEGOHFS8=
 github.com/multiformats/go-varint v0.0.7/go.mod h1:r8PUYw/fD/SjBCiKOoDlGF6QawOELpZAu9eioSos/OU=
-github.com/nodeset-org/eth-utils v0.0.0-20240130225022-0b8abd71186c h1:aLcvYrDao/fTjZlyC0z2l5/4hSfVeCAeFldtQ+Vn2xE=
-github.com/nodeset-org/eth-utils v0.0.0-20240130225022-0b8abd71186c/go.mod h1:3jUAhc8LREFSbI1yFHPiUF6b+lVsj6NFlmkVSIf4/Hw=
-github.com/nodeset-org/eth-utils v0.0.0-20240206150818-9a1e202a5284 h1:Br4SOVDzneGXbj4akS7qH4twphLh1kJCeWUBW/INNA4=
-github.com/nodeset-org/eth-utils v0.0.0-20240206150818-9a1e202a5284/go.mod h1:3jUAhc8LREFSbI1yFHPiUF6b+lVsj6NFlmkVSIf4/Hw=
 github.com/nodeset-org/eth-utils v0.0.0-20240206193509-7fcb898d408f h1:1Cuxxx1/kN12fkBpQeFUsRwLHdPpzVcYpgi7G9nIYjI=
 github.com/nodeset-org/eth-utils v0.0.0-20240206193509-7fcb898d408f/go.mod h1:3jUAhc8LREFSbI1yFHPiUF6b+lVsj6NFlmkVSIf4/Hw=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
@@ -477,8 +473,6 @@ github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.4.1 h1:9j7bpwjT9wmwB
 github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.4.1/go.mod h1:+tI1VD76E1WINI+Nstg7RVGpUolL5ql10nu2YztMO/4=
 github.com/wealdtech/go-eth2-wallet-types/v2 v2.11.0 h1:yX9+FfUXvPDvZ8Q5bhF+64AWrQwh4a3/HpfTx99DnZc=
 github.com/wealdtech/go-eth2-wallet-types/v2 v2.11.0/go.mod h1:UVP9YFcnPiIzHqbmCMW3qrQ3TK5FOqr1fmKqNT9JGr8=
-github.com/wealdtech/go-merkletree v1.0.0 h1:DsF1xMzj5rK3pSQM6mPv8jlyJyHXhFxpnA2bwEjMMBY=
-github.com/wealdtech/go-merkletree v1.0.0/go.mod h1:cdil512d/8ZC7Kx3bfrDvGMQXB25NTKbsm0rFrmDax4=
 github.com/wealdtech/go-merkletree/v2 v2.5.1 h1:qr1vJ2JcuqXiAzHdm+4w8qV+rZffS4tbFbdzh22KHB8=
 github.com/wealdtech/go-merkletree/v2 v2.5.1/go.mod h1:h1O8kgX9uFNowy2ObbJvIa0JUxOemb2uFfJ5rwnLnxo=
 github.com/wealdtech/go-multicodec v1.4.0 h1:iq5PgxwssxnXGGPTIK1srvt6U5bJwIp7k6kBrudIWxg=

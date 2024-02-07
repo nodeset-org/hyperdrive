@@ -125,7 +125,7 @@ func (t *UpdateDepositData) verifyDepositsRoot(depositData []types.ExtendedDepos
 
 	// Compare them
 	if localRoot != contractRoot {
-		t.log.Printlnf("WARNING: Locally computed deposits data root (%s) does not match the value stored on chain (%s), refusing to save for safety!", localRoot.Hex(), contractRoot.Hex())
+		t.log.Printlnf("WARNING: Locally computed deposits data root does not match the value stored on chain, refusing to save for safety!")
 		return false, nil
 	} else {
 		t.log.Println("Locally computed deposits data root matches the root stored on-chain, updating may proceed.")

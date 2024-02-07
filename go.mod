@@ -15,6 +15,7 @@ require (
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/shirou/gopsutil/v3 v3.24.1
+	github.com/wealdtech/go-merkletree/v2 v2.5.1
 	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.16.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -86,8 +87,6 @@ require (
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect
 	github.com/wealdtech/go-bytesutil v1.2.1 // indirect
-	github.com/wealdtech/go-merkletree v1.0.0 // indirect
-	github.com/wealdtech/go-merkletree/v2 v2.5.1 // indirect
 	github.com/wealdtech/go-multicodec v1.4.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20231213231151-1d8dd44e695e // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect

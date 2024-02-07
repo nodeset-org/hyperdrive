@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -118,18 +117,19 @@ func NewServiceProvider[ConfigType config.IModuleConfig](moduleDir string, facto
 
 	// Create the provider
 	provider := &ServiceProvider[ConfigType]{
-		moduleDir: moduleDir,
-		userDir:   hdCfg.HyperdriveUserDirectory,
-		hdCfg:     hdCfg,
-		hdClient:  hdClient,
-		ecManager: ecManager,
-		bcManager: bcManager,
-		docker:    dockerClient,
-		resources: resources,
-		txMgr:     txMgr,
-		queryMgr:  queryMgr,
-		apiLogger: &apiLogger,
-		signer:    signer,
+		moduleDir:    moduleDir,
+		userDir:      hdCfg.HyperdriveUserDirectory,
+		hdCfg:        hdCfg,
+		moduleConfig: moduleCfg,
+		hdClient:     hdClient,
+		ecManager:    ecManager,
+		bcManager:    bcManager,
+		docker:       dockerClient,
+		resources:    resources,
+		txMgr:        txMgr,
+		queryMgr:     queryMgr,
+		apiLogger:    &apiLogger,
+		signer:       signer,
 	}
 	return provider, nil
 }
@@ -192,23 +192,4 @@ func (p *ServiceProvider[_]) GetApiLogger() *log.ColorLogger {
 
 func (p *ServiceProvider[_]) IsDebugMode() bool {
 	return p.hdCfg.DebugMode.Value
-}
-
-// =============
-// === Utils ===
-// =============
-
-// Loads a Hyperdrive config without updating it if it exists
-func loadConfigFromFile(path string) (*config.HyperdriveConfig, error) {
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		return nil, nil
-	}
-
-	cfg, err := config.LoadFromFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	return cfg, nil
 }
