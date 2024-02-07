@@ -11,10 +11,10 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 	cmd.Subcommands = append(cmd.Subcommands, &cli.Command{
 		Name:    name,
 		Aliases: aliases,
-		Usage:   "Blah",
+		Usage:   "Get SW node status",
 		Action: func(c *cli.Context) error {
-			fmt.Printf("!!! Get wallet statuses\n")
-			return nil
+			fmt.Printf("!!! Get SW node status\n")
+			return getNodeStatus(c)
 		},
 	})
 }

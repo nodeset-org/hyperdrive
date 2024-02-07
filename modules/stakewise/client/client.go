@@ -22,8 +22,8 @@ type ApiClient struct {
 	Nodeset   *NodesetRequester
 	Validator *ValidatorRequester
 	Wallet    *WalletRequester
-
-	context *client.RequesterContext
+	Status    *StatusRequester
+	context   *client.RequesterContext
 }
 
 // Creates a new API client instance
