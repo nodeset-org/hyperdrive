@@ -15,7 +15,6 @@ require (
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/shirou/gopsutil/v3 v3.24.1
-	github.com/wealdtech/go-merkletree/v2 v2.5.1
 	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.16.0
 	gopkg.in/yaml.v2 v2.4.0

@@ -1,12 +1,14 @@
 package swcommon
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
 	"math/big"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -18,8 +20,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
-	"github.com/wealdtech/go-merkletree/v2"
-	"github.com/wealdtech/go-merkletree/v2/keccak256"
 )
 
 const (
@@ -114,7 +114,8 @@ func (m *DepositDataManager) UpdateDepositData(data []types.ExtendedDepositData)
 // Compute the Merkle root of the aggregated deposit data using the Stakewise rules
 // NOTE: reverse engineered from https://github.com/stakewise/v3-operator/blob/fa4ac2673a64a486ced51098005376e56e2ddd19/src/validators/utils.py#L207
 func (m *DepositDataManager) ComputeMerkleRoot(data []types.ExtendedDepositData) (common.Hash, error) {
-	totalData := make([][]byte, len(data))
+	leafCount := len(data)
+	leaves := make([][]byte, leafCount)
 
 	// Create leaf data for each deposit data
 	for i, dd := range data {
@@ -154,17 +155,40 @@ func (m *DepositDataManager) ComputeMerkleRoot(data []types.ExtendedDepositData)
 			return common.Hash{}, fmt.Errorf("error packing abi_encode args for %d: %w", i, err)
 		}
 
-		// Keccak256 the ABI-encoded data; note this will be Keccak256's *again* by the actual Merkle tree generator; this is intended
+		// Keccak256 the ABI-encoded data twice
 		hash := crypto.Keccak256(bytes)
-		totalData[i] = hash
+		hash = crypto.Keccak256(hash)
+		leaves[i] = hash
 	}
 
-	// Generate the tree
-	tree, err := merkletree.NewTree(merkletree.WithData(totalData), merkletree.WithHashType(keccak256.New()), merkletree.WithSorted(true))
-	if err != nil {
-		return common.Hash{}, fmt.Errorf("error computing Merkle tree root from deposit data: %w", err)
+	// Sort the hashes
+	sort.SliceStable(leaves, func(i, j int) bool {
+		return bytes.Compare(leaves[i], leaves[j]) == -1
+	})
+
+	// Add the leaves to the "tree" backwards - note that this is a nonstandard tree; the leaves aren't padded so they don't all necessarily live at the same depth.
+	treeLength := 2*leafCount - 1
+	tree := make([][]byte, treeLength)
+	for i, leaf := range leaves {
+		tree[treeLength-1-i] = leaf
 	}
-	return common.Hash(tree.Root()), nil
+
+	// Traverse up the "tree", calculating nodes from the children that are already present
+	for i := treeLength - 1 - leafCount; i > -1; i-- {
+		leftChild := tree[2*i+1]
+		rightChild := tree[2*i+2]
+
+		// Compute the hash in sorted mode
+		var hash []byte
+		if bytes.Compare(leftChild, rightChild) < 0 {
+			hash = crypto.Keccak256(leftChild, rightChild)
+		} else {
+			hash = crypto.Keccak256(rightChild, leftChild)
+		}
+		tree[i] = hash
+	}
+
+	return common.Hash(tree[0]), nil
 }
 
 // Regenerate the deposit data hash root from a deposit data object instead of explicitly relying on the deposit data root provided in the EDD
