@@ -19,8 +19,9 @@ const (
 
 // Binder for the Hyperdrive daemon API server
 type ApiClient struct {
-	Nodeset *NodesetRequester
-	Wallet  *WalletRequester
+	Nodeset   *NodesetRequester
+	Validator *ValidatorRequester
+	Wallet    *WalletRequester
 
 	context *client.RequesterContext
 }
@@ -47,6 +48,7 @@ func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClien
 	apiRequester.context.Log = &log
 
 	apiRequester.Nodeset = NewNodesetRequester(apiRequester.context)
+	apiRequester.Validator = NewValidatorRequester(apiRequester.context)
 	apiRequester.Wallet = NewWalletRequester(apiRequester.context)
 	return apiRequester
 }

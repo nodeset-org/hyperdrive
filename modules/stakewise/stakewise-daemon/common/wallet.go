@@ -123,6 +123,11 @@ func (w *Wallet) GenerateNewValidatorKey() (*eth2types.BLSPrivateKey, error) {
 	return key, nil
 }
 
+// Get the private validator key with the corresponding pubkey
+func (w *Wallet) GetPrivateKeyForPubkey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
+	return w.stakewiseKeystoreManager.LoadValidatorKey(pubkey)
+}
+
 // Gets all of the validator private keys that are stored in the Stakewise keystore folder
 func (w *Wallet) GetAllPrivateKeys() ([]*eth2types.BLSPrivateKey, error) {
 	dir := w.stakewiseKeystoreManager.GetKeystoreDir()

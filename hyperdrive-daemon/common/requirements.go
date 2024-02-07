@@ -13,6 +13,9 @@ import (
 )
 
 const (
+	EthClientSyncTimeout    int64 = 8 // 8 seconds
+	BeaconClientSyncTimeout int64 = 8 // 8 seconds
+
 	ethClientStatusRefreshInterval time.Duration = 60 * time.Second
 	ethClientSyncPollInterval      time.Duration = 5 * time.Second
 	beaconClientSyncPollInterval   time.Duration = 5 * time.Second
@@ -53,6 +56,28 @@ func (sp *ServiceProvider) RequireWalletReady() error {
 	}
 	if status.Wallet.WalletAddress != status.Address.NodeAddress {
 		return errors.New("The node's wallet keystore does not match the node address. This node is currently in read-only mode.")
+	}
+	return nil
+}
+
+func (sp *ServiceProvider) RequireEthClientSynced(ctx context.Context) error {
+	ethClientSynced, err := sp.waitEthClientSynced(ctx, false, EthClientSyncTimeout)
+	if err != nil {
+		return err
+	}
+	if !ethClientSynced {
+		return errors.New("The Execution client is currently syncing. Please try again later.")
+	}
+	return nil
+}
+
+func (sp *ServiceProvider) RequireBeaconClientSynced(ctx context.Context) error {
+	beaconClientSynced, err := sp.waitBeaconClientSynced(ctx, false, BeaconClientSyncTimeout)
+	if err != nil {
+		return err
+	}
+	if !beaconClientSynced {
+		return errors.New("The Beacon client is currently syncing. Please try again later.")
 	}
 	return nil
 }

@@ -17,6 +17,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/fatih/color"
+	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 )
@@ -214,7 +215,7 @@ func HandleResponse[DataType any](context *RequesterContext, resp *http.Response
 
 // Types that can be batched into a comma-delmited string
 type BatchInputType interface {
-	uint64 | common.Address
+	uint64 | common.Address | beacon.ValidatorPubkey
 }
 
 // Converts an array of inputs into a comma-delimited string
@@ -230,6 +231,10 @@ func MakeBatchArg[DataType BatchInputType](input []DataType) string {
 	case *[]common.Address:
 		for i, address := range *typedInput {
 			results[i] = address.Hex()
+		}
+	case *[]beacon.ValidatorPubkey:
+		for i, pubkey := range *typedInput {
+			results[i] = pubkey.HexWithPrefix()
 		}
 	}
 	return strings.Join(results, ",")

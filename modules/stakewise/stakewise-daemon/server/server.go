@@ -7,6 +7,7 @@ import (
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 	swnodeset "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/server/nodeset"
+	swvalidator "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/server/validator"
 	swwallet "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/server/wallet"
 )
 
@@ -19,6 +20,7 @@ func NewStakewiseServer(sp *swcommon.StakewiseServiceProvider) (*StakewiseServer
 	socketPath := filepath.Join(sp.GetUserDir(), swconfig.SocketFilename)
 	handlers := []server.IHandler{
 		swnodeset.NewNodesetHandler(sp),
+		swvalidator.NewValidatorHandler(sp),
 		swwallet.NewWalletHandler(sp),
 	}
 	mgr, err := server.NewApiServer(socketPath, handlers, swconfig.ModuleName)
