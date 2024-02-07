@@ -15,10 +15,9 @@ func NewStatusHandler(serviceProvider *swcommon.StakewiseServiceProvider) *Statu
 	h := &StatusHandler{
 		serviceProvider: serviceProvider,
 	}
-	// h.factories = []server.IContextFactory{
-	// 	&nodesetSetValidatorsRootContextFactory{h},
-	// 	&nodesetUploadDepositDataContextFactory{h},
-	// }
+	h.factories = []server.IContextFactory{
+		&statusGetActiveValidatorsContextFactory{h},
+	}
 	return h
 }
 
