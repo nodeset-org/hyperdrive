@@ -2,6 +2,8 @@ package swclient
 
 import (
 	"github.com/nodeset-org/hyperdrive/client"
+	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
+	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
 type StatusRequester struct {
@@ -17,9 +19,15 @@ func NewStatusRequester(context *client.RequesterContext) *StatusRequester {
 func (r *StatusRequester) GetName() string {
 	return "Status"
 }
+
 func (r *StatusRequester) GetRoute() string {
 	return "status"
 }
+
 func (r *StatusRequester) GetContext() *client.RequesterContext {
 	return r.context
+}
+
+func (r *StatusRequester) GetActiveWallets() (*api.ApiResponse[swapi.StatusActiveWalletsData], error) {
+	return client.SendGetRequest[swapi.StatusActiveWalletsData](r, "status", "Status", nil)
 }
