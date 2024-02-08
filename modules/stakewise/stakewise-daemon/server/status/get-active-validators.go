@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"net/url"
 
+	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
+
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
 // ===============
@@ -30,7 +31,7 @@ func (f *statusGetActiveValidatorsContextFactory) Create(args url.Values) (*stat
 }
 
 func (f *statusGetActiveValidatorsContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*statusGetActiveValidatorsContext, api.ActiveValidatorsData](
+	server.RegisterQuerylessGet[*statusGetActiveValidatorsContext, swapi.ActiveValidatorsData](
 		router, "status", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -44,7 +45,7 @@ type statusGetActiveValidatorsContext struct {
 	// root    common.Hash
 }
 
-func (c *statusGetActiveValidatorsContext) PrepareData(data *api.ActiveValidatorsData, opts *bind.TransactOpts) error {
+func (c *statusGetActiveValidatorsContext) PrepareData(data *swapi.ActiveValidatorsData, opts *bind.TransactOpts) error {
 	fmt.Printf("statusGetActiveValidatorsContext.PrepareData data: %+v\n", data)
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
