@@ -10,5 +10,5 @@ type StatusActiveWalletsResponse struct {
 }
 
 type ActiveValidatorsData struct {
-	ActiveValidators []beacon.ValidatorPubkey `json:"active_validators"`
+	ActiveValidators []beacon.ValidatorPubkey `json:"pubkeys"`
 }
