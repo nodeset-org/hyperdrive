@@ -9,12 +9,17 @@ import (
 
 func getNodeStatus(c *cli.Context) error {
 	sw := client.NewStakewiseClientFromCtx(c)
-	// TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	response, err := sw.Api.Status.GetActiveValidators()
 	if err != nil {
-		fmt.Printf("!!! Error: %v\n", err)
+		fmt.Printf("error fetching active validators: %v\n", err)
 		return err
 	}
-	fmt.Printf("!!! response: %v\n", response)
+
+	fmt.Printf("Active Validators: \n")
+
+	for _, validator := range response.Data.ActiveValidators {
+		fmt.Printf("%v\n", validator.HexWithPrefix())
+	}
+
 	return nil
 }
