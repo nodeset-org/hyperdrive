@@ -10,7 +10,7 @@ import (
 func getNodeStatus(c *cli.Context) error {
 	sw := client.NewStakewiseClientFromCtx(c)
 	// TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	response, err := sw.Api.Status.GetActiveWallets()
+	response, err := sw.Api.Status.GetActiveValidators()
 	if err != nil {
 		fmt.Printf("!!! Error: %v\n", err)
 		return err

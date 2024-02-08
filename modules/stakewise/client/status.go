@@ -28,6 +28,6 @@ func (r *StatusRequester) GetContext() *client.RequesterContext {
 	return r.context
 }
 
-func (r *StatusRequester) GetActiveWallets() (*api.ApiResponse[swapi.ActiveValidatorsData], error) {
+func (r *StatusRequester) GetActiveValidators() (*api.ApiResponse[swapi.ActiveValidatorsData], error) {
 	return client.SendGetRequest[swapi.ActiveValidatorsData](r, "status", "Status", nil)
 }
