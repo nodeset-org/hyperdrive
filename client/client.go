@@ -63,7 +63,6 @@ type ApiClient struct {
 	Tx      *TxRequester
 	Utils   *UtilsRequester
 	Wallet  *WalletRequester
-	Status  *StatusRequester
 
 	context *RequesterContext
 }
@@ -93,7 +92,6 @@ func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClien
 	apiRequester.Tx = NewTxRequester(apiRequester.context)
 	apiRequester.Utils = NewUtilsRequester(apiRequester.context)
 	apiRequester.Wallet = NewWalletRequester(apiRequester.context)
-	apiRequester.Status = NewStatusRequester(apiRequester.context)
 
 	return apiRequester
 }
@@ -124,6 +122,7 @@ func RawGetRequest[DataType any](context *RequesterContext, path string, params 
 	}
 
 	// Create the request
+	fmt.Printf("!! RawGetRequest url: %s\n", fmt.Sprintf("http://%s/%s", context.Base, path))
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/%s", context.Base, path), nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP request: %w", err)
