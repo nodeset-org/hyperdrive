@@ -1,6 +1,7 @@
 package swclient
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/nodeset-org/hyperdrive/client"
@@ -39,5 +40,6 @@ func (r *WalletRequester) GenerateKeys(count uint64, restartVc bool) (*api.ApiRe
 
 // Export the wallet in encrypted ETH key format
 func (r *WalletRequester) Initialize() (*api.ApiResponse[swapi.WalletInitializeData], error) {
+	fmt.Printf("Initialize: %v\n", r)
 	return client.SendGetRequest[swapi.WalletInitializeData](r, "initialize", "Initialize", nil)
 }

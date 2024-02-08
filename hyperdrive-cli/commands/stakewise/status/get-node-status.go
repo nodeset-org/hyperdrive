@@ -9,6 +9,12 @@ import (
 
 func getNodeStatus(c *cli.Context) error {
 	sw := client.NewStakewiseClientFromCtx(c)
-	fmt.Printf("!!! SW: %v\n", sw)
+	// TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	response, err := sw.Api.Status.GetActiveWallets()
+	if err != nil {
+		fmt.Printf("!!! Error: %v\n", err)
+		return err
+	}
+	fmt.Printf("!!! response: %v\n", response)
 	return nil
 }

@@ -71,12 +71,12 @@ func (c *HyperdriveClient) SaveConfig(cfg *GlobalConfig) error {
 func (c *HyperdriveClient) UpdatePrometheusConfiguration(config *GlobalConfig) error {
 	prometheusConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, prometheusConfigTemplate))
 	if err != nil {
-		return fmt.Errorf("Error expanding Prometheus config template path: %w", err)
+		return fmt.Errorf("error expanding Prometheus config template path: %w", err)
 	}
 
 	prometheusConfigTargetPath, err := homedir.Expand(filepath.Join(c.Context.ConfigPath, prometheusConfigTarget))
 	if err != nil {
-		return fmt.Errorf("Error expanding Prometheus config target path: %w", err)
+		return fmt.Errorf("error expanding Prometheus config target path: %w", err)
 	}
 
 	t := template.Template{
@@ -91,12 +91,12 @@ func (c *HyperdriveClient) UpdatePrometheusConfiguration(config *GlobalConfig) e
 func (c *HyperdriveClient) UpdateGrafanaDatabaseConfiguration(config *GlobalConfig) error {
 	grafanaConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, grafanaConfigTemplate))
 	if err != nil {
-		return fmt.Errorf("Error expanding Grafana config template path: %w", err)
+		return fmt.Errorf("error expanding Grafana config template path: %w", err)
 	}
 
 	grafanaConfigTargetPath, err := homedir.Expand(filepath.Join(c.Context.ConfigPath, grafanaConfigTarget))
 	if err != nil {
-		return fmt.Errorf("Error expanding Grafana config target path: %w", err)
+		return fmt.Errorf("error expanding Grafana config target path: %w", err)
 	}
 
 	t := template.Template{

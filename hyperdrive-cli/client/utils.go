@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"io/fs"
 	"math"
-	"net"
 	"os"
 	"path/filepath"
 
 	"github.com/alessio/shellescape"
-	externalip "github.com/glendc/go-external-ip"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"gopkg.in/yaml.v2"
@@ -112,19 +110,19 @@ func SaveConfig(cfg *GlobalConfig, directory, filename string) error {
 // Get the external IP address. Try finding an IPv4 address first to:
 // * Improve peer discovery and node performance
 // * Avoid unnecessary container restarts caused by switching between IPv4 and IPv6
-func getExternalIP() (net.IP, error) {
-	// Try IPv4 first
-	ip4Consensus := externalip.DefaultConsensus(nil, nil)
-	ip4Consensus.UseIPProtocol(4)
-	if ip, err := ip4Consensus.ExternalIP(); err == nil {
-		return ip, nil
-	}
+// func getExternalIP() (net.IP, error) {
+// 	// Try IPv4 first
+// 	ip4Consensus := externalip.DefaultConsensus(nil, nil)
+// 	ip4Consensus.UseIPProtocol(4)
+// 	if ip, err := ip4Consensus.ExternalIP(); err == nil {
+// 		return ip, nil
+// 	}
 
-	// Try IPv6 as fallback
-	ip6Consensus := externalip.DefaultConsensus(nil, nil)
-	ip6Consensus.UseIPProtocol(6)
-	return ip6Consensus.ExternalIP()
-}
+// 	// Try IPv6 as fallback
+// 	ip6Consensus := externalip.DefaultConsensus(nil, nil)
+// 	ip6Consensus.UseIPProtocol(6)
+// 	return ip6Consensus.ExternalIP()
+// }
 
 // Parse and augment the status of a client into a human-readable format
 func getClientStatusString(clientStatus api.ClientStatus) string {
