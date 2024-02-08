@@ -63,6 +63,7 @@ type ApiClient struct {
 	Tx      *TxRequester
 	Utils   *UtilsRequester
 	Wallet  *WalletRequester
+	Status  *StatusRequester
 
 	context *RequesterContext
 }
@@ -92,6 +93,8 @@ func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClien
 	apiRequester.Tx = NewTxRequester(apiRequester.context)
 	apiRequester.Utils = NewUtilsRequester(apiRequester.context)
 	apiRequester.Wallet = NewWalletRequester(apiRequester.context)
+	apiRequester.Status = NewStatusRequester(apiRequester.context)
+
 	return apiRequester
 }
 

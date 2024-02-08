@@ -34,7 +34,7 @@ func (f *statusGetActiveValidatorsContextFactory) Create(args url.Values) (*stat
 func (f *statusGetActiveValidatorsContextFactory) RegisterRoute(router *mux.Router) {
 	// TODO: Should I be using SuccessData here???
 	server.RegisterQuerylessGet[*statusGetActiveValidatorsContext, api.SuccessData](
-		router, "get-active-validators", f, f.handler.serviceProvider.ServiceProvider,
+		router, "status", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
