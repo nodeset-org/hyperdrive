@@ -15,7 +15,7 @@ func getNodeStatus(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Printf("Active Validators: \n")
+	fmt.Printf("Active Validator Pubkeys: \n")
 
 	for _, validator := range response.Data.ActiveValidators {
 		fmt.Printf("%v\n", validator.HexWithPrefix())

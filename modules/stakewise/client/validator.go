@@ -1,7 +1,6 @@
 package swclient
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/nodeset-org/eth-utils/beacon"
@@ -32,7 +31,6 @@ func (r *ValidatorRequester) GetContext() *client.RequesterContext {
 
 // Get signed exit messages for the provided validators, with an optional epoch parameter. If not specified, the epoch from the current chain head will be used.
 func (r *ValidatorRequester) GetSignedExitMessage(pubkeys []beacon.ValidatorPubkey, epoch *uint64) (*api.ApiResponse[swapi.ValidatorGetSignedExitMessagesData], error) {
-	fmt.Printf("GetSignedExitMessage: %v\n", r)
 	args := map[string]string{
 		"pubkeys": client.MakeBatchArg(pubkeys),
 	}

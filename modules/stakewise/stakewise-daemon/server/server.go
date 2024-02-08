@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
@@ -26,7 +25,6 @@ func NewStakewiseServer(sp *swcommon.StakewiseServiceProvider) (*StakewiseServer
 		swwallet.NewWalletHandler(sp),
 		swstatus.NewStatusHandler(sp),
 	}
-	fmt.Printf("!!! NewStakewiseServer handlers: %+v\n", handlers)
 	mgr, err := server.NewApiServer(socketPath, handlers, swconfig.ModuleName)
 	if err != nil {
 		return nil, err

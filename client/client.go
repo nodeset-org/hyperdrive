@@ -122,7 +122,6 @@ func RawGetRequest[DataType any](context *RequesterContext, path string, params 
 	}
 
 	// Create the request
-	fmt.Printf("!! RawGetRequest url: %s\n", fmt.Sprintf("http://%s/%s", context.Base, path))
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s/%s", context.Base, path), nil)
 	if err != nil {
 		return nil, fmt.Errorf("error creating HTTP request: %w", err)

@@ -24,9 +24,7 @@ func (f *statusGetActiveValidatorsContextFactory) Create(args url.Values) (*stat
 	c := &statusGetActiveValidatorsContext{
 		handler: f.handler,
 	}
-	inputErrs := []error{
-		// server.ValidateArg("root", args, input.ValidateHash, &c.root),
-	}
+	inputErrs := []error{}
 	return c, errors.Join(inputErrs...)
 }
 
@@ -42,11 +40,9 @@ func (f *statusGetActiveValidatorsContextFactory) RegisterRoute(router *mux.Rout
 
 type statusGetActiveValidatorsContext struct {
 	handler *StatusHandler
-	// root    common.Hash
 }
 
 func (c *statusGetActiveValidatorsContext) PrepareData(data *swapi.ActiveValidatorsData, opts *bind.TransactOpts) error {
-	fmt.Printf("statusGetActiveValidatorsContext.PrepareData data: %+v\n", data)
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 	privateKeys, err := w.GetAllPrivateKeys()
@@ -58,6 +54,5 @@ func (c *statusGetActiveValidatorsContext) PrepareData(data *swapi.ActiveValidat
 		return fmt.Errorf("error getting public keys: %w", err)
 	}
 	data.ActiveValidators = publicKeys
-	fmt.Printf("statusGetActiveValidatorsContext.PrepareData publicKeys: %+v\n", publicKeys)
 	return nil
 }
