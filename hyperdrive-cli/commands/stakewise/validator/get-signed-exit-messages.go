@@ -27,12 +27,13 @@ func getSignedExitMessages(c *cli.Context) error {
 	// Get the client
 	sw := client.NewStakewiseClientFromCtx(c)
 
-	response, err := sw.Api.Status.GetActiveValidators()
-	activeValidators := response.Data.ActiveValidators
+	activeValidatorResponse, err := sw.Api.Status.GetActiveValidators()
 
 	if err != nil {
 		return fmt.Errorf("error while getting active validators: %w", err)
 	}
+
+	activeValidators := activeValidatorResponse.Data.ActiveValidators
 
 	// Get selected validators
 	options := make([]utils.SelectionOption[beacon.ValidatorPubkey], len(activeValidators))
