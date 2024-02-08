@@ -128,6 +128,36 @@ func (w *Wallet) GetPrivateKeyForPubkey(pubkey beacon.ValidatorPubkey) (*eth2typ
 	return w.stakewiseKeystoreManager.LoadValidatorKey(pubkey)
 }
 
+// Get the private validator key with the corresponding pubkey
+func (w *Wallet) DerivePubKeys(privateKeys []*eth2types.BLSPrivateKey) ([]beacon.ValidatorPubkey, error) {
+	publicKeys := make([]beacon.ValidatorPubkey, 0, len(privateKeys))
+
+	for i, privateKey := range privateKeys {
+		if privateKey == nil {
+			return nil, fmt.Errorf("nil private key encountered at index %d", i)
+		}
+
+		// Derive the public key from the private key
+		publicKey := privateKey.PublicKey()
+		if publicKey == nil {
+			return nil, fmt.Errorf("failed to derive public key from private key at index %d", i)
+		}
+
+		// Convert public key bytes to hex string
+		publicKeyHex := fmt.Sprintf("%x", publicKey.Marshal())
+
+		// Assuming HexToValidatorPubkey returns a beacon.ValidatorPubkey and an error
+		validatorPubkey, err := beacon.HexToValidatorPubkey(publicKeyHex)
+		if err != nil {
+			return nil, fmt.Errorf("error converting hex to ValidatorPubkey at index %d: %w", i, err)
+		}
+
+		publicKeys = append(publicKeys, validatorPubkey)
+	}
+
+	return publicKeys, nil
+}
+
 // Gets all of the validator private keys that are stored in the Stakewise keystore folder
 func (w *Wallet) GetAllPrivateKeys() ([]*eth2types.BLSPrivateKey, error) {
 	dir := w.stakewiseKeystoreManager.GetKeystoreDir()

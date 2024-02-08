@@ -30,8 +30,7 @@ func (f *statusGetActiveValidatorsContextFactory) Create(args url.Values) (*stat
 }
 
 func (f *statusGetActiveValidatorsContextFactory) RegisterRoute(router *mux.Router) {
-	// TODO: Should I be using SuccessData here???
-	server.RegisterQuerylessGet[*statusGetActiveValidatorsContext, api.SuccessData](
+	server.RegisterQuerylessGet[*statusGetActiveValidatorsContext, api.ActiveValidatorsData](
 		router, "status", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -45,15 +44,19 @@ type statusGetActiveValidatorsContext struct {
 	// root    common.Hash
 }
 
-func (c *statusGetActiveValidatorsContext) PrepareData(data *api.SuccessData, opts *bind.TransactOpts) error {
+func (c *statusGetActiveValidatorsContext) PrepareData(data *api.ActiveValidatorsData, opts *bind.TransactOpts) error {
 	fmt.Printf("statusGetActiveValidatorsContext.PrepareData data: %+v\n", data)
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 	privateKeys, err := w.GetAllPrivateKeys()
-	// TODO: Derive pubkeys and return
 	if err != nil {
 		return fmt.Errorf("error getting private keys: %w", err)
 	}
-	fmt.Printf("statusGetActiveValidatorsContext.PrepareData privateKeys: %+v\n", privateKeys)
+	publicKeys, err := w.DerivePubKeys(privateKeys)
+	if err != nil {
+		return fmt.Errorf("error getting public keys: %w", err)
+	}
+	data.ActiveValidators = publicKeys
+	fmt.Printf("statusGetActiveValidatorsContext.PrepareData publicKeys: %+v\n", publicKeys)
 	return nil
 }
