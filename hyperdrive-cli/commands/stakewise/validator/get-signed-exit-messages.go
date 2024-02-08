@@ -34,7 +34,6 @@ func getSignedExitMessages(c *cli.Context) error {
 	}
 
 	activeValidators := activeValidatorResponse.Data.ActiveValidators
-
 	// Get selected validators
 	options := make([]utils.SelectionOption[beacon.ValidatorPubkey], len(activeValidators))
 	for i, pubkey := range activeValidators {
