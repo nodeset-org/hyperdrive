@@ -137,21 +137,7 @@ func (w *Wallet) DerivePubKeys(privateKeys []*eth2types.BLSPrivateKey) ([]beacon
 			return nil, fmt.Errorf("nil private key encountered at index %d", i)
 		}
 
-		// Derive the public key from the private key
-		publicKey := privateKey.PublicKey()
-		if publicKey == nil {
-			return nil, fmt.Errorf("failed to derive public key from private key at index %d", i)
-		}
-
-		// Convert public key bytes to hex string
-		publicKeyHex := fmt.Sprintf("%x", publicKey.Marshal())
-
-		// Assuming HexToValidatorPubkey returns a beacon.ValidatorPubkey and an error
-		validatorPubkey, err := beacon.HexToValidatorPubkey(publicKeyHex)
-		if err != nil {
-			return nil, fmt.Errorf("error converting hex to ValidatorPubkey at index %d: %w", i, err)
-		}
-
+		validatorPubkey := beacon.ValidatorPubkey(privateKey.PublicKey().Marshal())
 		publicKeys = append(publicKeys, validatorPubkey)
 	}
 
