@@ -61,7 +61,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 	sp := c.handler.serviceProvider
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
-	data.ExitInfos = map[beacon.ValidatorPubkey]api.ValidatorExitInfo{}
+	data.ExitInfos = map[string]api.ValidatorExitInfo{}
 
 	if len(c.pubkeys) == 0 {
 		return nil
@@ -97,25 +97,24 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 	if err != nil {
 		return fmt.Errorf("error getting Beacon domain data: %w", err)
 	}
-
 	// Get the statuses (indices) of each validator
 	statuses, err := bc.GetValidatorStatuses(context.Background(), c.pubkeys, nil)
 	if err != nil {
 		return fmt.Errorf("error getting validator indices: %w", err)
 	}
-
 	// Get the signatures
 	for i, key := range keys {
 		// Get signed voluntary exit message
 		pubkey := c.pubkeys[i]
 		index := statuses[pubkey].Index
+
 		signature, err := utils.GetSignedExitMessage(key, index, c.epoch, signatureDomain)
 		if err != nil {
 			return fmt.Errorf("error getting exit message signature for validator %s: %w", pubkey.Hex(), err)
 		}
 		indexUint, _ := strconv.ParseUint(index, 10, 64)
 
-		data.ExitInfos[pubkey] = api.ValidatorExitInfo{
+		data.ExitInfos[pubkey.HexWithPrefix()] = api.ValidatorExitInfo{
 			Index:     indexUint,
 			Signature: signature,
 		}

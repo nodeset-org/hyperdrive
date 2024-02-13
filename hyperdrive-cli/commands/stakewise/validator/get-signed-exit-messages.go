@@ -28,7 +28,6 @@ func getSignedExitMessages(c *cli.Context) error {
 	sw := client.NewStakewiseClientFromCtx(c)
 
 	activeValidatorResponse, err := sw.Api.Status.GetActiveValidators()
-
 	if err != nil {
 		return fmt.Errorf("error while getting active validators: %w", err)
 	}
@@ -69,13 +68,11 @@ func getSignedExitMessages(c *cli.Context) error {
 		epoch := c.Uint64(epochFlag.Name)
 		epochPtr = &epoch
 	}
-
 	// Get the pubkeys
 	pubkeys := make([]beacon.ValidatorPubkey, len(selectedValidators))
 	for i, validator := range selectedValidators {
 		pubkeys[i] = *validator
 	}
-
 	// Get signed exit messages
 	response, err := sw.Api.Validator.GetSignedExitMessage(pubkeys, epochPtr)
 	if err != nil {
@@ -86,7 +83,7 @@ func getSignedExitMessages(c *cli.Context) error {
 	fmt.Printf("Exit epoch: %d\n", response.Data.Epoch)
 	fmt.Println()
 	for pubkey, info := range response.Data.ExitInfos {
-		fmt.Printf("Validator %d (%s):\n", info.Index, pubkey.HexWithPrefix())
+		fmt.Printf("Validator %d (%s):\n", info.Index, pubkey)
 		fmt.Printf("\tSignature: %s\n", info.Signature.HexWithPrefix())
 		fmt.Println()
 	}

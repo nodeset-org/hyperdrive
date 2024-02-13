@@ -8,6 +8,6 @@ type ValidatorExitInfo struct {
 }
 
 type ValidatorGetSignedExitMessagesData struct {
-	Epoch     uint64                                       `json:"epoch"`
-	ExitInfos map[beacon.ValidatorPubkey]ValidatorExitInfo `json:"exitInfos"`
+	Epoch     uint64                       `json:"epoch"`
+	ExitInfos map[string]ValidatorExitInfo `json:"exitInfos"` // map[beacon.ValidatorPubkey]ValidatorExitInfo
 }
