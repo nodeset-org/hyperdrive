@@ -244,13 +244,11 @@ func (c *StandardHttpClient) GetValidatorStatuses(ctx context.Context, pubkeys [
 			}
 		}
 	}
-
 	// Convert pubkeys into hex strings
 	pubkeysHex := make([]string, len(realPubkeys))
 	for vi := 0; vi < len(realPubkeys); vi++ {
 		pubkeysHex[vi] = realPubkeys[vi].HexWithPrefix()
 	}
-
 	// Get validators
 	validators, err := c.getValidatorsByOpts(ctx, pubkeysHex, opts)
 	if err != nil {

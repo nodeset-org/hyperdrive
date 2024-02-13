@@ -22,8 +22,8 @@ type ApiClient struct {
 	Nodeset   *NodesetRequester
 	Validator *ValidatorRequester
 	Wallet    *WalletRequester
-
-	context *client.RequesterContext
+	Status    *StatusRequester
+	context   *client.RequesterContext
 }
 
 // Creates a new API client instance
@@ -50,5 +50,6 @@ func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClien
 	apiRequester.Nodeset = NewNodesetRequester(apiRequester.context)
 	apiRequester.Validator = NewValidatorRequester(apiRequester.context)
 	apiRequester.Wallet = NewWalletRequester(apiRequester.context)
+	apiRequester.Status = NewStatusRequester(apiRequester.context)
 	return apiRequester
 }
