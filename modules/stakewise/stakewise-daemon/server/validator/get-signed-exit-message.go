@@ -36,7 +36,7 @@ func (f *validatorGetSignedExitMessagesContextFactory) Create(args url.Values) (
 	inputErrs := []error{
 		server.ValidateOptionalArg("epoch", args, input.ValidateUint, &c.epoch, &c.isEpochSet),
 		server.ValidateArgBatch("pubkeys", args, pubkeyLimit, input.ValidatePubkey, &c.pubkeys),
-		server.ValidateOptionalArg("skip-tx", args, input.ValidateBool, &c.skipTx, nil),
+		server.ValidateOptionalArg("no-broadcast", args, input.ValidateBool, &c.noBroadcast, nil),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -52,11 +52,11 @@ func (f *validatorGetSignedExitMessagesContextFactory) RegisterRoute(router *mux
 // ===============
 
 type validatorGetSignedExitMessagesContext struct {
-	handler    *ValidatorHandler
-	epoch      uint64
-	isEpochSet bool
-	pubkeys    []beacon.ValidatorPubkey
-	skipTx     bool
+	handler     *ValidatorHandler
+	epoch       uint64
+	isEpochSet  bool
+	pubkeys     []beacon.ValidatorPubkey
+	noBroadcast bool
 }
 
 func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorGetSignedExitMessagesData, opts *bind.TransactOpts) error {
@@ -120,7 +120,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 			Index:     indexUint,
 			Signature: signature,
 		}
-		if !c.skipTx {
+		if !c.noBroadcast {
 			err = bc.ExitValidator(context.Background(), index, c.epoch, signature)
 			if err != nil {
 				return fmt.Errorf("error exiting validator %s: %w", pubkey.Hex(), err)

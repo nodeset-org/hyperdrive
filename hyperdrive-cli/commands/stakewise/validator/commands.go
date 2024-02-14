@@ -19,7 +19,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Flags: []cli.Flag{
 					pubkeysFlag,
 					epochFlag,
-					skipTxFlag,
+					noBroadcastFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
