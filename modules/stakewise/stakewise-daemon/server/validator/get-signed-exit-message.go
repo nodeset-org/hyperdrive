@@ -36,6 +36,7 @@ func (f *validatorGetSignedExitMessagesContextFactory) Create(args url.Values) (
 	inputErrs := []error{
 		server.ValidateOptionalArg("epoch", args, input.ValidateUint, &c.epoch, &c.isEpochSet),
 		server.ValidateArgBatch("pubkeys", args, pubkeyLimit, input.ValidatePubkey, &c.pubkeys),
+		server.ValidateOptionalArg("skip-tx", args, input.ValidateBool, &c.skipTx, nil),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -55,6 +56,7 @@ type validatorGetSignedExitMessagesContext struct {
 	epoch      uint64
 	isEpochSet bool
 	pubkeys    []beacon.ValidatorPubkey
+	skipTx     bool
 }
 
 func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorGetSignedExitMessagesData, opts *bind.TransactOpts) error {
@@ -118,8 +120,12 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 			Index:     indexUint,
 			Signature: signature,
 		}
-		// NOTE: if you wanted to actually publish the exit, you could do it here with this:
-		// err = bc.ExitValidator(context.Background(), index, c.epoch, signature)
+		if !c.skipTx {
+			err = bc.ExitValidator(context.Background(), index, c.epoch, signature)
+			if err != nil {
+				return fmt.Errorf("error exiting validator %s: %w", pubkey.Hex(), err)
+			}
+		}
 	}
 
 	return nil

@@ -21,6 +21,11 @@ var (
 		Aliases: []string{"e"},
 		Usage:   "(Optional) the epoch to use when creating the signed exit messages. If not specified, the current chain head will be used.",
 	}
+	skipTxFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "skip-tx",
+		Aliases: []string{"s"},
+		Usage:   "(Optional) pass this flag to skip the transaction and just print the signed exit messages",
+	}
 )
 
 func getSignedExitMessages(c *cli.Context) error {
@@ -68,13 +73,19 @@ func getSignedExitMessages(c *cli.Context) error {
 		epoch := c.Uint64(epochFlag.Name)
 		epochPtr = &epoch
 	}
+
+	// Get the skip-tx flag
+	skipTxBool := false
+	if c.IsSet(skipTxFlag.Name) {
+		skipTxBool = c.Bool(skipTxFlag.Name)
+	}
 	// Get the pubkeys
 	pubkeys := make([]beacon.ValidatorPubkey, len(selectedValidators))
 	for i, validator := range selectedValidators {
 		pubkeys[i] = *validator
 	}
 	// Get signed exit messages
-	response, err := sw.Api.Validator.GetSignedExitMessage(pubkeys, epochPtr)
+	response, err := sw.Api.Validator.GetSignedExitMessage(pubkeys, epochPtr, skipTxBool)
 	if err != nil {
 		return fmt.Errorf("error while getting validator exit messages: %w", err)
 	}
