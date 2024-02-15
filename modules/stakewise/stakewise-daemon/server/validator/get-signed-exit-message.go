@@ -94,7 +94,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 		c.epoch = head.Epoch
 	}
 
-	// Get the voluntary exit signature domain
+	// Get the BlsToExecutionChange signature domain
 	signatureDomain, err := bc.GetDomainData(context.Background(), eth2types.DomainVoluntaryExit[:], c.epoch, false)
 	if err != nil {
 		return fmt.Errorf("error getting Beacon domain data: %w", err)
