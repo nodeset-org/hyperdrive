@@ -10,7 +10,7 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
         export CC=aarch64-linux-gnu-gcc && export CC_FOR_TARGET=gcc-aarch64-linux-gnu; \
     fi && \
     cd /hyperdrive/modules/stakewise/stakewise-daemon && \
-    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o build/hyperdrive-stakewise-daemon-${TARGETOS}-${TARGETARCH}
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /build/hyperdrive-stakewise-daemon-${TARGETOS}-${TARGETARCH}
 
 # The daemon image
 FROM debian:bookworm-slim

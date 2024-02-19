@@ -10,12 +10,12 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
         export CC=aarch64-linux-gnu-gcc && export CC_FOR_TARGET=gcc-aarch64-linux-gnu; \
     fi && \
     cd /hyperdrive/hyperdrive-daemon && \
-    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o build/hyperdrive-daemon-${TARGETOS}-${TARGETARCH}
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /build/hyperdrive-daemon-${TARGETOS}-${TARGETARCH}
 
 # The daemon image
 FROM debian:bookworm-slim
 ARG TARGETOS TARGETARCH
-COPY --from=builder /hyperdrive/hyperdrive-daemon/build/hyperdrive-daemon-${TARGETOS}-${TARGETARCH} /usr/bin/hyperdrive-daemon
+COPY --from=builder /build/hyperdrive-daemon-${TARGETOS}-${TARGETARCH} /usr/bin/hyperdrive-daemon
 RUN apt update && \
     apt install ca-certificates -y && \
 	# Cleanup
