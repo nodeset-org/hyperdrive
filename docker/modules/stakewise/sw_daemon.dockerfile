@@ -1,6 +1,6 @@
 # The builder for building the daemon
 FROM --platform=${BUILDPLATFORM} golang:1.21-bookworm AS builder
-ARG TARGETARCH
+ARG TARGETOS TARGETARCH
 COPY . /hyperdrive
 ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-O -D__BLST_PORTABLE__"
