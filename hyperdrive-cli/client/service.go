@@ -131,7 +131,7 @@ func (c *HyperdriveClient) InstallService(verbose bool, noDeps bool, version str
 	// Run command and return error output
 	err = cmd.Run()
 	if err != nil {
-		return fmt.Errorf("Could not install Hyperdrive service: %s", errMessage)
+		return fmt.Errorf("could not install Hyperdrive service: %s", errMessage)
 	}
 	return nil
 }
@@ -321,7 +321,7 @@ func (c *HyperdriveClient) RunPruneProvisioner(container string, volume string, 
 
 	outputString := strings.TrimSpace(string(output))
 	if outputString != "" {
-		return fmt.Errorf("Unexpected output running the prune provisioner: %s", outputString)
+		return fmt.Errorf("unexpected output running the prune provisioner: %s", outputString)
 	}
 
 	return nil
@@ -354,13 +354,13 @@ func (c *HyperdriveClient) GetDirSizeViaEcMigrator(container string, targetDir s
 	cmd := fmt.Sprintf("docker run --rm --name %s -v %s:/mnt/external -e OPERATION='size' %s", container, targetDir, image)
 	output, err := c.readOutput(cmd)
 	if err != nil {
-		return 0, fmt.Errorf("Error getting source directory size: %w", err)
+		return 0, fmt.Errorf("error getting source directory size: %w", err)
 	}
 
 	trimmedOutput := strings.TrimRight(string(output), "\n")
 	dirSize, err := strconv.ParseUint(trimmedOutput, 0, 64)
 	if err != nil {
-		return 0, fmt.Errorf("Error parsing directory size output [%s]: %w", trimmedOutput, err)
+		return 0, fmt.Errorf("error parsing directory size output [%s]: %w", trimmedOutput, err)
 	}
 
 	return dirSize, nil
@@ -381,17 +381,17 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 	}
 
 	if isNew {
-		return "", fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive before starting it.")
+		return "", fmt.Errorf("settings file not found. Please run `hyperdrive service config` to set up Hyperdrive before starting it")
 	}
 
 	// Check config
 	if cfg.Hyperdrive.ClientMode.Value == config.ClientMode_Unknown {
-		return "", fmt.Errorf("You haven't selected local or external mode for your clients yet.\nPlease run 'hyperdrive service config' before running this command.")
+		return "", fmt.Errorf("you haven't selected local or external mode for your clients yet.\nPlease run 'hyperdrive service config' before running this command")
 	} else if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value == config.ExecutionClient_Unknown {
-		return "", errors.New("No Execution Client selected. Please run 'hyperdrive service config' before running this command.")
+		return "", errors.New("no Execution Client selected. Please run 'hyperdrive service config' before running this command")
 	}
 	if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == config.BeaconNode_Unknown {
-		return "", errors.New("No Beacon Node selected. Please run 'hyperdrive service config' before running this command.")
+		return "", errors.New("no Beacon Node selected. Please run 'hyperdrive service config' before running this command")
 	}
 
 	// Deploy the templates and run environment variable substitution on them
@@ -458,7 +458,7 @@ func (c *HyperdriveClient) deployTemplates(cfg *GlobalConfig, hyperdriveDir stri
 	}
 
 	// Check the metrics containers
-	if cfg.Hyperdrive.Metrics.EnableMetrics.Value == true {
+	if cfg.Hyperdrive.Metrics.EnableMetrics.Value {
 		toDeploy = append(toDeploy,
 			config.ContainerID_Grafana,
 			config.ContainerID_Exporter,

@@ -106,5 +106,5 @@ func printPatchNotes(c *cli.Context) {
 	fmt.Printf("Changes you should be aware of before starting:\n\n")
 
 	fmt.Printf("%s=== Alpha! ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("So it begins.\n")
+	fmt.Println("So it begins.")
 }

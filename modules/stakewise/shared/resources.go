@@ -53,7 +53,7 @@ func NewStakewiseResources(network config.Network) *StakewiseResources {
 	// Holesky Dev
 	holeskyDevResources := &StakewiseResources{
 		Network:            network,
-		Vault:              common.HexToAddress("0x01b353Abc66A65c4c0Ac9c2ecF82e693Ce0303Bc"),
+		Vault:              common.HexToAddress("0xf8763855473ce978232bBa37ef90fcFc8aAE10d1"),
 		FeeRecipient:       common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
 		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
 		NodesetApiUrl:      "https://staging.nodeset.io/api",

@@ -66,7 +66,7 @@ func NewStakewiseConfig(hdCfg *config.HyperdriveConfig) *StakewiseConfig {
 			ParameterCommon: &config.ParameterCommon{
 				ID:                 VerifyDepositRootsID,
 				Name:               "Verify Deposits Root",
-				Description:        "Enable this to verify that the Merkle root of aggregated deposit data return by the NodeSet server matches the Merkle root stored in the NodeSet vault contract. This is a safety mechanism to ensure the Stakewise Operator container won't try to submit deposits for validators that the NodeSet vault hasn't verified yet.\n\n[orange]Don't disable this unless you know what you're doing.",
+				Description:        "Enable this to verify that the Merkle root of aggregated deposit data returned by the NodeSet server matches the Merkle root stored in the NodeSet vault contract. This is a safety mechanism to ensure the Stakewise Operator container won't try to submit deposits for validators that the NodeSet vault hasn't verified yet.\n\n[orange]Don't disable this unless you know what you're doing.",
 				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseDaemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,

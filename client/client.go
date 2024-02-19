@@ -92,6 +92,7 @@ func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClien
 	apiRequester.Tx = NewTxRequester(apiRequester.context)
 	apiRequester.Utils = NewUtilsRequester(apiRequester.context)
 	apiRequester.Wallet = NewWalletRequester(apiRequester.context)
+
 	return apiRequester
 }
 
