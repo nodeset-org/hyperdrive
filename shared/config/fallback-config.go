@@ -20,16 +20,11 @@ type FallbackConfig struct {
 
 	// The URL of the Prysm gRPC endpoint (only needed if using Prysm VCs)
 	PrysmRpcUrl Parameter[string]
-
-	// Internal Fields
-	parent *HyperdriveConfig
 }
 
 // Generates a new FallbackConfig configuration
-func NewFallbackConfig(parent *HyperdriveConfig) *FallbackConfig {
+func NewFallbackConfig() *FallbackConfig {
 	return &FallbackConfig{
-		parent: parent,
-
 		UseFallbackClients: Parameter[bool]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 UseFallbackClientsID,

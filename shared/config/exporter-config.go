@@ -22,16 +22,11 @@ type ExporterConfig struct {
 
 	// Custom command line flags
 	AdditionalFlags Parameter[string]
-
-	// Internal Fields
-	parent *MetricsConfig
 }
 
 // Generates a new Exporter config
-func NewExporterConfig(parent *MetricsConfig) *ExporterConfig {
+func NewExporterConfig() *ExporterConfig {
 	return &ExporterConfig{
-		parent: parent,
-
 		RootFs: Parameter[bool]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 ExporterEnableRootFsID,

@@ -30,16 +30,11 @@ type PrysmBnConfig struct {
 
 	// Custom command line flags for the BN
 	AdditionalFlags Parameter[string]
-
-	// Internal Fields
-	parent *LocalBeaconConfig
 }
 
 // Generates a new Prysm BN configuration
-func NewPrysmBnConfig(parent *LocalBeaconConfig) *PrysmBnConfig {
+func NewPrysmBnConfig() *PrysmBnConfig {
 	return &PrysmBnConfig{
-		parent: parent,
-
 		MaxPeers: Parameter[uint16]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 ids.MaxPeersID,

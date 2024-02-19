@@ -25,16 +25,11 @@ type MetricsConfig struct {
 	Prometheus        *PrometheusConfig
 	Exporter          *ExporterConfig
 	BitflyNodeMetrics *BitflyNodeMetricsConfig
-
-	// Internal Fields
-	parent *HyperdriveConfig
 }
 
 // Generates a new Besu configuration
-func NewMetricsConfig(parent *HyperdriveConfig) *MetricsConfig {
+func NewMetricsConfig() *MetricsConfig {
 	cfg := &MetricsConfig{
-		parent: parent,
-
 		EnableMetrics: Parameter[bool]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 MetricsEnableID,
@@ -120,10 +115,10 @@ func NewMetricsConfig(parent *HyperdriveConfig) *MetricsConfig {
 		},
 	}
 
-	cfg.Grafana = NewGrafanaConfig(cfg)
-	cfg.Prometheus = NewPrometheusConfig(cfg)
-	cfg.Exporter = NewExporterConfig(cfg)
-	cfg.BitflyNodeMetrics = NewBitflyNodeMetricsConfig(cfg)
+	cfg.Grafana = NewGrafanaConfig()
+	cfg.Prometheus = NewPrometheusConfig()
+	cfg.Exporter = NewExporterConfig()
+	cfg.BitflyNodeMetrics = NewBitflyNodeMetricsConfig()
 
 	return cfg
 }

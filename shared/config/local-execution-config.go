@@ -37,16 +37,11 @@ type LocalExecutionConfig struct {
 	Geth       *GethConfig
 	Nethermind *NethermindConfig
 	Besu       *BesuConfig
-
-	// Internal Fields
-	parent *HyperdriveConfig
 }
 
 // Create a new LocalExecutionConfig struct
-func NewExecutionCommonConfig(parent *HyperdriveConfig) *LocalExecutionConfig {
+func NewExecutionCommonConfig() *LocalExecutionConfig {
 	cfg := &LocalExecutionConfig{
-		parent: parent,
-
 		ExecutionClient: Parameter[ExecutionClient]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 ids.EcID,
@@ -153,9 +148,9 @@ func NewExecutionCommonConfig(parent *HyperdriveConfig) *LocalExecutionConfig {
 	}
 
 	// Create the subconfigs
-	cfg.Geth = NewGethConfig(cfg)
-	cfg.Nethermind = NewNethermindConfig(cfg)
-	cfg.Besu = NewBesuConfig(cfg)
+	cfg.Geth = NewGethConfig()
+	cfg.Nethermind = NewNethermindConfig()
+	cfg.Besu = NewBesuConfig()
 
 	return cfg
 }

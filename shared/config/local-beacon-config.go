@@ -34,16 +34,11 @@ type LocalBeaconConfig struct {
 	Nimbus     *NimbusBnConfig
 	Prysm      *PrysmBnConfig
 	Teku       *TekuBnConfig
-
-	// Internal Fields
-	parent *HyperdriveConfig
 }
 
 // Create a new LocalBeaconConfig struct
-func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
+func NewLocalBeaconConfig() *LocalBeaconConfig {
 	cfg := &LocalBeaconConfig{
-		parent: parent,
-
 		BeaconNode: Parameter[BeaconNode]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 ids.BnID,
@@ -150,11 +145,11 @@ func NewLocalBeaconConfig(parent *HyperdriveConfig) *LocalBeaconConfig {
 		},
 	}
 
-	cfg.Lighthouse = NewLighthouseBnConfig(cfg)
-	cfg.Lodestar = NewLodestarBnConfig(cfg)
-	cfg.Nimbus = NewNimbusBnConfig(cfg)
-	cfg.Prysm = NewPrysmBnConfig(cfg)
-	cfg.Teku = NewTekuBnConfig(cfg)
+	cfg.Lighthouse = NewLighthouseBnConfig()
+	cfg.Lodestar = NewLodestarBnConfig()
+	cfg.Nimbus = NewNimbusBnConfig()
+	cfg.Prysm = NewPrysmBnConfig()
+	cfg.Teku = NewTekuBnConfig()
 
 	return cfg
 }

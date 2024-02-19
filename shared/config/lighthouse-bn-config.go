@@ -29,16 +29,11 @@ type LighthouseBnConfig struct {
 
 	// Custom command line flags for the BN
 	AdditionalFlags Parameter[string]
-
-	// Internal Flags
-	parent *LocalBeaconConfig
 }
 
 // Generates a new Lighthouse BN configuration
-func NewLighthouseBnConfig(parent *LocalBeaconConfig) *LighthouseBnConfig {
+func NewLighthouseBnConfig() *LighthouseBnConfig {
 	return &LighthouseBnConfig{
-		parent: parent,
-
 		P2pQuicPort: Parameter[uint16]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 LhQuicPortID,
