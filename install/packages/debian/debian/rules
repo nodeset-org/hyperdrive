@@ -3,35 +3,52 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-# Get the root source directory for Hyperdrive
+# Get the root Hyperdrive directory
 CURRENT_DIR := $(shell dirname $(realpath $(firstword ${MAKEFILE_LIST})))
-SRC_DIR := $(realpath ${CURRENT_DIR}/../../../..)
+export HD_DIR := $(realpath ${CURRENT_DIR}/../../../..)
+export CGO_ENABLED := 0
 
-#export DH_GOLANG_BUILDPKG := github.com/nodeset-org/hyperdrive/hyperdrive-cli
+export DH_GOLANG_BUILDPKG := github.com/nodeset-org/hyperdrive/hyperdrive-cli
+
+# Set up the golang variables because dh-golang defaults to them being unset, which breaks things
+export GO111MODULE := on
+export GOPROXY := https://goproxy.io,direct
 
 # Pass building to dh-golang
 %:
-	dh $@ --builddirectory=_build --buildsystem=golang --with=golang
+	dh $@
 
-# Build the CLI
-override_dh_auto_build:
-	GOOS=linux go build -o hyperdrive ${SRC_DIR}/hyperdrive-cli 
+override_dh_auto_clean:
+	rm -rf client hyperdrive-cli shared modules go.mod go.sum
+	dh_auto_clean
+
+# Set up configuration for dh-golang; we're kind of tricking the system a bit here,
+# it wants all of the source to be present already in the working dir but since that's not our layout,
+# we have to basically copy just the CLI source to the working dir
+override_dh_auto_configure:
+#	Hyperdrive
+	cp -r ${HD_DIR}/client ${HD_DIR}/hyperdrive-cli ${HD_DIR}/shared ${HD_DIR}/go.mod ${HD_DIR}/go.sum ./
+#	Stakewise
+	mkdir -p ./modules/stakewise
+	cp -r ${HD_DIR}/modules/stakewise/client ${HD_DIR}/modules/stakewise/shared ./modules/stakewise/
+#	Run the normal config process
+	dh_auto_configure
 
 # Copy the CLI and deploy files during installation
 override_dh_auto_install:
 	dh_auto_install -- --no-source
-	install -D hyperdrive debian/hyperdrive/usr/bin/hyperdrive
+	mv debian/hyperdrive/usr/bin/hyperdrive-cli debian/hyperdrive/usr/bin/hyperdrive
 	install -dm 0700 debian/hyperdrive/var/lib/hyperdrive/data
 	install -dm 0700 debian/hyperdrive/var/lib/hyperdrive/global
-	for file in ${SRC_DIR}/install/deploy/override/*; do \
+	for file in ${HD_DIR}/install/deploy/override/*; do \
 		install -Dm 644 $${file} debian/hyperdrive/usr/share/hyperdrive/override/`basename $${file}`; \
 	done
-	for file in ${SRC_DIR}/install/deploy/templates/*; do \
+	for file in ${HD_DIR}/install/deploy/templates/*; do \
 		install -Dm 644 $${file} debian/hyperdrive/usr/share/hyperdrive/templates/`basename $${file}`; \
 	done
-	for file in ${SRC_DIR}/install/deploy/scripts/*; do \
+	for file in ${HD_DIR}/install/deploy/scripts/*; do \
 		install -D $${file} debian/hyperdrive/usr/share/hyperdrive/scripts/`basename $${file}`; \
 	done
 
 override_dh_auto_test:
-	echo "Skpping dh_auto_test"
+	

@@ -39,3 +39,4 @@ modules/stakewise/stakewise-daemon/stakewise-daemon
 *debhelper*
 install/packages/debian/hyperdrive
 install/packages/debian/debian/hyperdrive*
+install/packages/debian/_build/
