@@ -8,16 +8,18 @@ CURRENT_DIR := $(shell dirname $(realpath $(firstword ${MAKEFILE_LIST})))
 export HD_DIR := $(realpath ${CURRENT_DIR}/../../../..)
 export CGO_ENABLED := 0
 
+# We're only building the CLI here
 export DH_GOLANG_BUILDPKG := github.com/nodeset-org/hyperdrive/hyperdrive-cli
 
 # Set up the golang variables because dh-golang defaults to them being unset, which breaks things
 export GO111MODULE := on
 export GOPROXY := https://goproxy.io,direct
 
-# Pass building to dh-golang
+# Pass building to dh-golang, all of the defaults are fine
 %:
-	dh $@
+	dh $@ --builddirectory=_build
 
+# Clean the manually copied source files
 override_dh_auto_clean:
 	rm -rf client hyperdrive-cli shared modules go.mod go.sum
 	dh_auto_clean
@@ -36,8 +38,11 @@ override_dh_auto_configure:
 
 # Copy the CLI and deploy files during installation
 override_dh_auto_install:
+# Install the go binaries without the source copied over to /usr
 	dh_auto_install -- --no-source
+# Change the name of the binary to hyperdrive since we can't do it as part of the build process
 	mv debian/hyperdrive/usr/bin/hyperdrive-cli debian/hyperdrive/usr/bin/hyperdrive
+# Create the folder structure and copy the deploy files over
 	install -dm 0700 debian/hyperdrive/var/lib/hyperdrive/data
 	install -dm 0700 debian/hyperdrive/var/lib/hyperdrive/global
 	for file in ${HD_DIR}/install/deploy/override/*; do \
@@ -49,6 +54,3 @@ override_dh_auto_install:
 	for file in ${HD_DIR}/install/deploy/scripts/*; do \
 		install -D $${file} debian/hyperdrive/usr/share/hyperdrive/scripts/`basename $${file}`; \
 	done
-
-override_dh_auto_test:
-	
