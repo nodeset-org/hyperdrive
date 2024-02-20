@@ -1,0 +1,24 @@
+Source: hyperdrive
+Maintainer: NodeSet LLC <info@nodeset.io>
+Section: utils
+Priority: optional
+Build-Depends: debhelper (>= 13.4),
+               debhelper-compat (= 13),
+               dh-golang,
+               golang-any (>= 1.21.0)
+Standards-Version: 4.6.1
+Vcs-Browser: https://github.com/nodeset-org/hyperdrive
+Vcs-Git: https://github.com/nodeset-org/hyperdrive.git
+XS-Go-Import-Path: github.com/nodeset-org/hyperdrive
+
+Package: hyperdrive
+Architecture: any
+Section: utils
+Priority: optional
+Depends:  chrony (>= 4.0),
+          docker-ce (>= 5:24.0.9),
+          docker-ce-cli,
+          docker-compose-plugin (>= 2.24.1),
+          containerd.io (>= 1.6.4),
+          ${misc:Depends}, ${shlibs:Depends}
+Description: Hyperdrive is an all-in-one node management system for NodeSet node operators.

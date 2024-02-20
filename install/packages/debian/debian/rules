@@ -1,0 +1,37 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# Get the root source directory for Hyperdrive
+CURRENT_DIR := $(shell dirname $(realpath $(firstword ${MAKEFILE_LIST})))
+SRC_DIR := $(realpath ${CURRENT_DIR}/../../../..)
+
+#export DH_GOLANG_BUILDPKG := github.com/nodeset-org/hyperdrive/hyperdrive-cli
+
+# Pass building to dh-golang
+%:
+	dh $@ --builddirectory=_build --buildsystem=golang --with=golang
+
+# Build the CLI
+override_dh_auto_build:
+	GOOS=linux go build -o hyperdrive ${SRC_DIR}/hyperdrive-cli 
+
+# Copy the CLI and deploy files during installation
+override_dh_auto_install:
+	dh_auto_install -- --no-source
+	install -D hyperdrive debian/hyperdrive/usr/bin/hyperdrive
+	install -dm 0700 debian/hyperdrive/var/lib/hyperdrive/data
+	install -dm 0700 debian/hyperdrive/var/lib/hyperdrive/global
+	for file in ${SRC_DIR}/install/deploy/override/*; do \
+		install -Dm 644 $${file} debian/hyperdrive/usr/share/hyperdrive/override/`basename $${file}`; \
+	done
+	for file in ${SRC_DIR}/install/deploy/templates/*; do \
+		install -Dm 644 $${file} debian/hyperdrive/usr/share/hyperdrive/templates/`basename $${file}`; \
+	done
+	for file in ${SRC_DIR}/install/deploy/scripts/*; do \
+		install -D $${file} debian/hyperdrive/usr/share/hyperdrive/scripts/`basename $${file}`; \
+	done
+
+override_dh_auto_test:
+	echo "Skpping dh_auto_test"
