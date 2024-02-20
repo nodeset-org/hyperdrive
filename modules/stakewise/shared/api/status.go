@@ -5,5 +5,7 @@ import (
 )
 
 type ValidatorStatusData struct {
-	ActiveValidators []beacon.ValidatorPubkey `json:"pubkeys"`
+	ActiveValidators  []beacon.ValidatorPubkey `json:"activePubkeys"`
+	ExitingValidators []beacon.ValidatorPubkey `json:"exitPubkeys"`
+	ExitedValidators  []beacon.ValidatorPubkey `json:"exitedPubkeys"`
 }

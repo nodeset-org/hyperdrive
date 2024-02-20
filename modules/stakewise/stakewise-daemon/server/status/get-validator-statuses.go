@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/nodeset-org/eth-utils/beacon"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -53,6 +54,31 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	if err != nil {
 		return fmt.Errorf("error getting public keys: %w", err)
 	}
-	data.ActiveValidators = publicKeys
+
+	var activeValidators, exitingValidators, exitedValidators []beacon.ValidatorPubkey
+
+	for _, pubKey := range publicKeys {
+		if IsExiting(pubKey) { // Assume IsExiting is a function you define to check if a validator is exiting
+			exitingValidators = append(exitingValidators, pubKey)
+		} else if IsExited(pubKey) { // Assume IsExited is a function you define to check if a validator has exited
+			exitedValidators = append(exitedValidators, pubKey)
+		} else {
+			activeValidators = append(activeValidators, pubKey)
+		}
+	}
+
+	data.ActiveValidators = activeValidators
+	data.ExitingValidators = exitingValidators
+	data.ExitedValidators = exitedValidators
 	return nil
+}
+
+func IsExiting(pubKey beacon.ValidatorPubkey) bool {
+	// TODO
+	return true
+}
+
+func IsExited(pubKey beacon.ValidatorPubkey) bool {
+	// TODO
+	return true
 }
