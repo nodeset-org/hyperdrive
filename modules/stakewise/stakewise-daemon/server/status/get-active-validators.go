@@ -16,20 +16,20 @@ import (
 // === Factory ===
 // ===============
 
-type statusGetActiveValidatorsContextFactory struct {
+type statusGetValidatorsStatusesContextFactory struct {
 	handler *StatusHandler
 }
 
-func (f *statusGetActiveValidatorsContextFactory) Create(args url.Values) (*statusGetActiveValidatorsContext, error) {
-	c := &statusGetActiveValidatorsContext{
+func (f *statusGetValidatorsStatusesContextFactory) Create(args url.Values) (*statusGetValidatorsStatusesContext, error) {
+	c := &statusGetValidatorsStatusesContext{
 		handler: f.handler,
 	}
 	inputErrs := []error{}
 	return c, errors.Join(inputErrs...)
 }
 
-func (f *statusGetActiveValidatorsContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*statusGetActiveValidatorsContext, swapi.ActiveValidatorsData](
+func (f *statusGetValidatorsStatusesContextFactory) RegisterRoute(router *mux.Router) {
+	server.RegisterQuerylessGet[*statusGetValidatorsStatusesContext, swapi.ValidatorStatusData](
 		router, "status", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -38,11 +38,11 @@ func (f *statusGetActiveValidatorsContextFactory) RegisterRoute(router *mux.Rout
 // === Context ===
 // ===============
 
-type statusGetActiveValidatorsContext struct {
+type statusGetValidatorsStatusesContext struct {
 	handler *StatusHandler
 }
 
-func (c *statusGetActiveValidatorsContext) PrepareData(data *swapi.ActiveValidatorsData, opts *bind.TransactOpts) error {
+func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorStatusData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 	privateKeys, err := w.GetAllPrivateKeys()

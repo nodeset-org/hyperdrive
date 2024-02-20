@@ -32,7 +32,7 @@ func getSignedExitMessages(c *cli.Context) error {
 	// Get the client
 	sw := client.NewStakewiseClientFromCtx(c)
 
-	activeValidatorResponse, err := sw.Api.Status.GetActiveValidators()
+	activeValidatorResponse, err := sw.Api.Status.GetValidatorStatuses()
 	if err != nil {
 		return fmt.Errorf("error while getting active validators: %w", err)
 	}

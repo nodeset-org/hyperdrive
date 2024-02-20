@@ -9,7 +9,7 @@ import (
 
 func getNodeStatus(c *cli.Context) error {
 	sw := client.NewStakewiseClientFromCtx(c)
-	response, err := sw.Api.Status.GetActiveValidators()
+	response, err := sw.Api.Status.GetValidatorStatuses()
 	if err != nil {
 		fmt.Printf("error fetching active validators: %v\n", err)
 		return err

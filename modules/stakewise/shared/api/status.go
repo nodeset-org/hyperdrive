@@ -4,6 +4,6 @@ import (
 	"github.com/nodeset-org/eth-utils/beacon"
 )
 
-type ActiveValidatorsData struct {
+type ValidatorStatusData struct {
 	ActiveValidators []beacon.ValidatorPubkey `json:"pubkeys"`
 }
