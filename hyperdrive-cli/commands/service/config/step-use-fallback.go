@@ -5,7 +5,7 @@ import (
 )
 
 func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
-	helperText := "If you have an extra externally-managed Execution Client and Beacon Node pair that you trust, you can use them as \"fallback\" clients.\nHyperrive and any modules' Validator Clients will connect to these if your primary clients go offline for any reason, so your node will continue functioning properly until they're back online.\n\nWould you like to use a fallback client pair?"
+	helperText := "If you have an extra externally-managed Execution Client and Beacon Node pair that you trust, you can use them as \"fallback\" clients.\nHyperdrive and any modules' Validator Clients will connect to these if your primary clients go offline for any reason, so your node will continue functioning properly until they're back online.\n\nWould you like to use a fallback client pair?"
 
 	show := func(modal *choiceModalLayout) {
 		wiz.md.setPage(modal.page)
