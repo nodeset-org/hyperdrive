@@ -9,7 +9,7 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
         apt update && apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu && \
         export CC=aarch64-linux-gnu-gcc && export CC_FOR_TARGET=gcc-aarch64-linux-gnu; \
     fi && \
-    cd /hyperdrive/modules/stakewise/stakewise-daemon && \
+    cd /hyperdrive/src/modules/stakewise/stakewise-daemon && \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /build/hyperdrive-stakewise-daemon-${TARGETOS}-${TARGETARCH}
 
 # The daemon image

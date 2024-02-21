@@ -9,7 +9,7 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
         apt update && apt install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu && \
         export CC=aarch64-linux-gnu-gcc && export CC_FOR_TARGET=gcc-aarch64-linux-gnu; \
     fi && \
-    cd /hyperdrive/hyperdrive-daemon && \
+    cd /hyperdrive/src/hyperdrive-daemon && \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /build/hyperdrive-daemon-${TARGETOS}-${TARGETARCH}
 
 # The daemon image
