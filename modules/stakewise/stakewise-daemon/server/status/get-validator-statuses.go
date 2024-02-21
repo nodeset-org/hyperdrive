@@ -58,6 +58,7 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 		return fmt.Errorf("error getting public keys: %w", err)
 	}
 	statuses, err := bc.GetValidatorStatuses(context.Background(), publicKeys, nil)
+	fmt.Printf("!!! statuses: %v\n", statuses)
 	if err != nil {
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}
@@ -104,51 +105,43 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 }
 
 func IsExited(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO
-	return true
+	return statuses[pubKey].Status == types.ValidatorState_ExitedSlashed || statuses[pubKey].Status == types.ValidatorState_ExitedUnslashed
+
 }
 
 func IsExiting(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO
-	return true
+	return statuses[pubKey].Status == types.ValidatorState_ActiveExiting
+
 }
 
 func IsActive(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO
-	return true
+	return statuses[pubKey].Status == types.ValidatorState_ActiveOngoing
 }
 
 func IsDeposited(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO
-	return true
+	return false
 }
 
 func IsDepositing(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO
-	return true
+	return statuses[pubKey].Status == types.ValidatorState_PendingInitialized
 }
 
 func IsWaitingDepositConfirmation(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO
-	return true
+	return statuses[pubKey].Status == types.ValidatorState_PendingQueued
 }
 
 func IsRegisteredToStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO
-	return true
+	return false
 }
 
 func IsUploadedStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO
-	return true
+	return false
 }
 
 func IsUploadedToNodeset(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO
-	return true
+	return false
 }
 
 func IsGenerated(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO
 	return true
 }
