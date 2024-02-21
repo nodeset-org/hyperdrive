@@ -1,4 +1,4 @@
-# The builder for building the daemon
+# The builder for building the CLIs
 FROM golang:1.21-bookworm AS builder
 COPY . /hyperdrive
 ENV CGO_ENABLED=0
