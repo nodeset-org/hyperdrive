@@ -58,9 +58,9 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	var activeValidators, exitingValidators, exitedValidators []beacon.ValidatorPubkey
 
 	for _, pubKey := range publicKeys {
-		if IsExiting(pubKey) { // Assume IsExiting is a function you define to check if a validator is exiting
+		if IsExiting(pubKey) {
 			exitingValidators = append(exitingValidators, pubKey)
-		} else if IsExited(pubKey) { // Assume IsExited is a function you define to check if a validator has exited
+		} else if IsExited(pubKey) {
 			exitedValidators = append(exitedValidators, pubKey)
 		} else {
 			activeValidators = append(activeValidators, pubKey)
