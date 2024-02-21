@@ -47,7 +47,7 @@ override_dh_auto_build:
 		mv ${BUILD_DIR}/hyperdrive ${BUILD_DIR}/bin/; \
 	else \
 		mkdir -p ${BUILD_DIR}/bin/linux_${DEB_TARGET_ARCH} && \
-		mv ${BUILD_DIR}/hyperdrive ${BUILD_DIR}/bin/linux_${DEB_TARGET_ARCH}; \
+		mv ${BUILD_DIR}/hyperdrive ${BUILD_DIR}/bin/linux_${DEB_TARGET_ARCH}/; \
 	fi
 
 # Copy the CLI and deploy files during installation
