@@ -1,12 +1,14 @@
 package swstatus
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
 
 	"github.com/nodeset-org/eth-utils/beacon"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
+	"github.com/nodeset-org/hyperdrive/shared/types"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
@@ -45,6 +47,7 @@ type statusGetValidatorsStatusesContext struct {
 
 func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorStatusData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
+	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
 	privateKeys, err := w.GetAllPrivateKeys()
 	if err != nil {
@@ -54,29 +57,32 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	if err != nil {
 		return fmt.Errorf("error getting public keys: %w", err)
 	}
-
+	statuses, err := bc.GetValidatorStatuses(context.Background(), publicKeys, nil)
+	if err != nil {
+		return fmt.Errorf("error getting validator statuses: %w", err)
+	}
 	var generatedValidators, uploadedNodesetValidators, uploadedStakewiseValidators, registeredStakewiseValidators, waitingDepositConfirmationValidators, depositingValidators, depositedValidators, activeValidators, exitingValidators, exitedValidators []beacon.ValidatorPubkey
 
 	for _, pubKey := range publicKeys {
-		if IsExited(pubKey) {
+		if IsExited(pubKey, statuses) {
 			exitedValidators = append(exitedValidators, pubKey)
-		} else if IsExiting(pubKey) {
+		} else if IsExiting(pubKey, statuses) {
 			exitingValidators = append(exitingValidators, pubKey)
-		} else if IsActive(pubKey) {
+		} else if IsActive(pubKey, statuses) {
 			activeValidators = append(activeValidators, pubKey)
-		} else if IsDeposited(pubKey) {
+		} else if IsDeposited(pubKey, statuses) {
 			depositedValidators = append(depositedValidators, pubKey)
-		} else if IsDepositing(pubKey) {
+		} else if IsDepositing(pubKey, statuses) {
 			depositingValidators = append(depositingValidators, pubKey)
-		} else if IsWaitingDepositConfirmation(pubKey) {
+		} else if IsWaitingDepositConfirmation(pubKey, statuses) {
 			waitingDepositConfirmationValidators = append(waitingDepositConfirmationValidators, pubKey)
-		} else if IsRegisteredToStakewise(pubKey) {
+		} else if IsRegisteredToStakewise(pubKey, statuses) {
 			registeredStakewiseValidators = append(registeredStakewiseValidators, pubKey)
-		} else if IsUploadedStakewise(pubKey) {
+		} else if IsUploadedStakewise(pubKey, statuses) {
 			uploadedStakewiseValidators = append(uploadedStakewiseValidators, pubKey)
-		} else if IsUploadedToNodeset(pubKey) {
+		} else if IsUploadedToNodeset(pubKey, statuses) {
 			uploadedNodesetValidators = append(uploadedNodesetValidators, pubKey)
-		} else if IsGenerated(pubKey) {
+		} else if IsGenerated(pubKey, statuses) {
 			generatedValidators = append(generatedValidators, pubKey)
 		} else {
 			fmt.Printf("Unknown status for validator %s\n", pubKey.HexWithPrefix())
@@ -97,52 +103,52 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	return nil
 }
 
-func IsExited(pubKey beacon.ValidatorPubkey) bool {
+func IsExited(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO
 	return true
 }
 
-func IsExiting(pubKey beacon.ValidatorPubkey) bool {
+func IsExiting(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO
 	return true
 }
 
-func IsActive(pubKey beacon.ValidatorPubkey) bool {
+func IsActive(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO
 	return true
 }
 
-func IsDeposited(pubKey beacon.ValidatorPubkey) bool {
+func IsDeposited(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO
 	return true
 }
 
-func IsDepositing(pubKey beacon.ValidatorPubkey) bool {
+func IsDepositing(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO
 	return true
 }
 
-func IsWaitingDepositConfirmation(pubKey beacon.ValidatorPubkey) bool {
+func IsWaitingDepositConfirmation(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO
 	return true
 }
 
-func IsRegisteredToStakewise(pubKey beacon.ValidatorPubkey) bool {
+func IsRegisteredToStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO
 	return true
 }
 
-func IsUploadedStakewise(pubKey beacon.ValidatorPubkey) bool {
+func IsUploadedStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO
 	return true
 }
 
-func IsUploadedToNodeset(pubKey beacon.ValidatorPubkey) bool {
+func IsUploadedToNodeset(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO
 	return true
 }
 
-func IsGenerated(pubKey beacon.ValidatorPubkey) bool {
+func IsGenerated(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO
 	return true
 }
