@@ -55,22 +55,51 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 		return fmt.Errorf("error getting public keys: %w", err)
 	}
 
-	var activeValidators, exitingValidators, exitedValidators []beacon.ValidatorPubkey
+	var generatedValidators, uploadedNodesetValidators, uploadedStakewiseValidators, registeredStakewiseValidators, waitingDepositConfirmationValidators, depositingValidators, depositedValidators, activeValidators, exitingValidators, exitedValidators []beacon.ValidatorPubkey
 
 	for _, pubKey := range publicKeys {
-		if IsExiting(pubKey) {
-			exitingValidators = append(exitingValidators, pubKey)
-		} else if IsExited(pubKey) {
+		if IsExited(pubKey) {
 			exitedValidators = append(exitedValidators, pubKey)
-		} else {
+		} else if IsExiting(pubKey) {
+			exitingValidators = append(exitingValidators, pubKey)
+		} else if IsActive(pubKey) {
 			activeValidators = append(activeValidators, pubKey)
+		} else if IsDeposited(pubKey) {
+			depositedValidators = append(depositedValidators, pubKey)
+		} else if IsDepositing(pubKey) {
+			depositingValidators = append(depositingValidators, pubKey)
+		} else if IsWaitingDepositConfirmation(pubKey) {
+			waitingDepositConfirmationValidators = append(waitingDepositConfirmationValidators, pubKey)
+		} else if IsRegisteredToStakewise(pubKey) {
+			registeredStakewiseValidators = append(registeredStakewiseValidators, pubKey)
+		} else if IsUploadedStakewise(pubKey) {
+			uploadedStakewiseValidators = append(uploadedStakewiseValidators, pubKey)
+		} else if IsUploadedToNodeset(pubKey) {
+			uploadedNodesetValidators = append(uploadedNodesetValidators, pubKey)
+		} else if IsGenerated(pubKey) {
+			generatedValidators = append(generatedValidators, pubKey)
+		} else {
+			fmt.Printf("Unknown status for validator %s\n", pubKey.HexWithPrefix())
 		}
 	}
 
-	data.ActiveValidators = activeValidators
-	data.ExitingValidators = exitingValidators
-	data.ExitedValidators = exitedValidators
+	data.Generated = generatedValidators
+	data.UploadedToNodeset = uploadedNodesetValidators
+	data.UploadToStakewise = uploadedStakewiseValidators
+	data.RegisteredToStakewise = registeredStakewiseValidators
+	data.WaitingDepositConfirmation = waitingDepositConfirmationValidators
+	data.Depositing = depositingValidators
+	data.Deposited = depositedValidators
+	data.Active = activeValidators
+	data.Exiting = exitingValidators
+	data.Exited = exitedValidators
+
 	return nil
+}
+
+func IsExited(pubKey beacon.ValidatorPubkey) bool {
+	// TODO
+	return true
 }
 
 func IsExiting(pubKey beacon.ValidatorPubkey) bool {
@@ -78,7 +107,42 @@ func IsExiting(pubKey beacon.ValidatorPubkey) bool {
 	return true
 }
 
-func IsExited(pubKey beacon.ValidatorPubkey) bool {
+func IsActive(pubKey beacon.ValidatorPubkey) bool {
+	// TODO
+	return true
+}
+
+func IsDeposited(pubKey beacon.ValidatorPubkey) bool {
+	// TODO
+	return true
+}
+
+func IsDepositing(pubKey beacon.ValidatorPubkey) bool {
+	// TODO
+	return true
+}
+
+func IsWaitingDepositConfirmation(pubKey beacon.ValidatorPubkey) bool {
+	// TODO
+	return true
+}
+
+func IsRegisteredToStakewise(pubKey beacon.ValidatorPubkey) bool {
+	// TODO
+	return true
+}
+
+func IsUploadedStakewise(pubKey beacon.ValidatorPubkey) bool {
+	// TODO
+	return true
+}
+
+func IsUploadedToNodeset(pubKey beacon.ValidatorPubkey) bool {
+	// TODO
+	return true
+}
+
+func IsGenerated(pubKey beacon.ValidatorPubkey) bool {
 	// TODO
 	return true
 }
