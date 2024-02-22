@@ -13,12 +13,13 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 		Usage:   "Manage your Stakewise validator keys",
 		Subcommands: []*cli.Command{
 			{
-				Name:    "get-signed-exit-messages",
-				Aliases: []string{"s"},
-				Usage:   "Get signed exit messages for one or more validators",
+				Name:    "exit",
+				Aliases: []string{"e"},
+				Usage:   "Exit a validator",
 				Flags: []cli.Flag{
 					pubkeysFlag,
 					epochFlag,
+					noBroadcastFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args

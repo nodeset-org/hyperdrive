@@ -36,6 +36,7 @@ func (f *validatorGetSignedExitMessagesContextFactory) Create(args url.Values) (
 	inputErrs := []error{
 		server.ValidateOptionalArg("epoch", args, input.ValidateUint, &c.epoch, &c.isEpochSet),
 		server.ValidateArgBatch("pubkeys", args, pubkeyLimit, input.ValidatePubkey, &c.pubkeys),
+		server.ValidateOptionalArg("no-broadcast", args, input.ValidateBool, &c.noBroadcast, nil),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -51,10 +52,11 @@ func (f *validatorGetSignedExitMessagesContextFactory) RegisterRoute(router *mux
 // ===============
 
 type validatorGetSignedExitMessagesContext struct {
-	handler    *ValidatorHandler
-	epoch      uint64
-	isEpochSet bool
-	pubkeys    []beacon.ValidatorPubkey
+	handler     *ValidatorHandler
+	epoch       uint64
+	isEpochSet  bool
+	pubkeys     []beacon.ValidatorPubkey
+	noBroadcast bool
 }
 
 func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorGetSignedExitMessagesData, opts *bind.TransactOpts) error {
@@ -92,7 +94,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 		c.epoch = head.Epoch
 	}
 
-	// Get the voluntary exit signature domain
+	// Get the BlsToExecutionChange signature domain
 	signatureDomain, err := bc.GetDomainData(context.Background(), eth2types.DomainVoluntaryExit[:], c.epoch, false)
 	if err != nil {
 		return fmt.Errorf("error getting Beacon domain data: %w", err)
@@ -118,8 +120,12 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 			Index:     indexUint,
 			Signature: signature,
 		}
-		// NOTE: if you wanted to actually publish the exit, you could do it here with this:
-		// err = bc.ExitValidator(context.Background(), index, c.epoch, signature)
+		if !c.noBroadcast {
+			err = bc.ExitValidator(context.Background(), index, c.epoch, signature)
+			if err != nil {
+				return fmt.Errorf("error exiting validator %s: %w", pubkey.Hex(), err)
+			}
+		}
 	}
 
 	return nil
