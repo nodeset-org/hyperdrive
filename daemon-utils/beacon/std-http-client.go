@@ -386,7 +386,7 @@ func (c *StandardHttpClient) GetDomainData(ctx context.Context, domainType []byt
 	// Data
 	var wg errgroup.Group
 	var genesis GenesisResponse
-	var fork ForkResponse
+	var eth2Config Eth2ConfigResponse
 
 	// Get genesis
 	wg.Go(func() error {
@@ -395,10 +395,10 @@ func (c *StandardHttpClient) GetDomainData(ctx context.Context, domainType []byt
 		return err
 	})
 
-	// Get fork
+	// Get the BN spec as we need the CAPELLA_FORK_VERSION
 	wg.Go(func() error {
 		var err error
-		fork, err = c.getFork(ctx, "head")
+		eth2Config, err = c.getEth2Config(ctx)
 		return err
 	})
 
@@ -410,17 +410,17 @@ func (c *StandardHttpClient) GetDomainData(ctx context.Context, domainType []byt
 	// Get fork version
 	var forkVersion []byte
 	if useGenesisFork {
+		// Used to compute the domain for credential changes
 		forkVersion = genesis.Data.GenesisForkVersion
-	} else if epoch < uint64(fork.Data.Epoch) {
-		forkVersion = fork.Data.PreviousVersion
 	} else {
-		forkVersion = fork.Data.CurrentVersion
+		// According to EIP-7044 (https://eips.ethereum.org/EIPS/eip-7044) the CAPELLA_FORK_VERSION should always be used to compute the domain for voluntary exits signatures.
+		forkVersion = eth2Config.Data.CapellaForkVersion
 	}
 
 	// Compute & return domain
 	var dt [4]byte
 	copy(dt[:], domainType[:])
-	return eth2types.Domain(dt, forkVersion, genesis.Data.GenesisValidatorsRoot), nil
+	return eth2types.ComputeDomain(dt, forkVersion, genesis.Data.GenesisValidatorsRoot)
 
 }
 
@@ -719,10 +719,10 @@ func (c *StandardHttpClient) getValidatorsByOpts(ctx context.Context, pubkeysOrI
 func (c *StandardHttpClient) postVoluntaryExit(ctx context.Context, request VoluntaryExitRequest) error {
 	responseBody, status, err := c.postRequest(ctx, RequestVoluntaryExitPath, request)
 	if err != nil {
-		return fmt.Errorf("Could not broadcast exit for validator at index %d: %w", request.Message.ValidatorIndex, err)
+		return fmt.Errorf("Could not broadcast exit for validator at index %s: %w", request.Message.ValidatorIndex, err)
 	}
 	if status != http.StatusOK {
-		return fmt.Errorf("Could not broadcast exit for validator at index %d: HTTP status %d; response body: '%s'", request.Message.ValidatorIndex, status, string(responseBody))
+		return fmt.Errorf("Could not broadcast exit for validator at index %s: HTTP status %d; response body: '%s'", request.Message.ValidatorIndex, status, string(responseBody))
 	}
 	return nil
 }
