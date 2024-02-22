@@ -37,8 +37,8 @@ func main() {
 	app.Version = shared.HyperdriveVersion
 	app.Authors = []*cli.Author{
 		{
-			Name:  "Joe Clapis",
-			Email: "joe@nodeset.io",
+			Name:  "Nodeset",
+			Email: "info@nodeset.io",
 		},
 	}
 	app.Copyright = "(C) 2024 NodeSet LLC"

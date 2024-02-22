@@ -21,6 +21,11 @@ var (
 		Aliases: []string{"e"},
 		Usage:   "(Optional) the epoch to use when creating the signed exit messages. If not specified, the current chain head will be used.",
 	}
+	noBroadcastFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "no-broadcast",
+		Aliases: []string{"n"},
+		Usage:   "(Optional) pass this flag to skip broadcasting the exit message(s) and print them instead",
+	}
 )
 
 func getSignedExitMessages(c *cli.Context) error {
@@ -68,13 +73,19 @@ func getSignedExitMessages(c *cli.Context) error {
 		epoch := c.Uint64(epochFlag.Name)
 		epochPtr = &epoch
 	}
+
+	// Get the no broadcast flag
+	noBroadcastBool := false
+	if c.IsSet(noBroadcastFlag.Name) {
+		noBroadcastBool = c.Bool(noBroadcastFlag.Name)
+	}
 	// Get the pubkeys
 	pubkeys := make([]beacon.ValidatorPubkey, len(selectedValidators))
 	for i, validator := range selectedValidators {
 		pubkeys[i] = *validator
 	}
 	// Get signed exit messages
-	response, err := sw.Api.Validator.GetSignedExitMessage(pubkeys, epochPtr)
+	response, err := sw.Api.Validator.GetSignedExitMessage(pubkeys, epochPtr, noBroadcastBool)
 	if err != nil {
 		return fmt.Errorf("error while getting validator exit messages: %w", err)
 	}
