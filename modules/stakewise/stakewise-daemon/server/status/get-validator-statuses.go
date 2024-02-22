@@ -106,12 +106,10 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 
 func IsExited(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	return statuses[pubKey].Status == types.ValidatorState_ExitedSlashed || statuses[pubKey].Status == types.ValidatorState_ExitedUnslashed
-
 }
 
 func IsExiting(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	return statuses[pubKey].Status == types.ValidatorState_ActiveExiting
-
+	return statuses[pubKey].Status == types.ValidatorState_ActiveExiting || statuses[pubKey].Status == types.ValidatorState_WithdrawalPossible || statuses[pubKey].Status == types.ValidatorState_WithdrawalDone
 }
 
 func IsActive(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
