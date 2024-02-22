@@ -3,12 +3,9 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-# Set up some directories
-CURRENT_DIR := $(shell dirname $(realpath $(firstword ${MAKEFILE_LIST})))
-export HD_DIR := $(realpath ${CURRENT_DIR}/../../../..)
-export SRC_DIR := ${HD_DIR}/src
-export DEPLOY_DIR := ${HD_DIR}/install/deploy
+# We're targeting just the CLI for this package
 export BUILD_DIR := _build
+export DH_GOLANG_BUILDPKG := github.com/nodeset-org/hyperdrive/hyperdrive-cli
 
 # Set up the golang variables because dh-golang defaults to them being unset, which breaks things
 export GO111MODULE := on
@@ -18,28 +15,12 @@ export GOPROXY := https://goproxy.io,direct
 %:
 	dh $@ --builddirectory=${BUILD_DIR}
 
-# Clean the manually copied source files
-override_dh_auto_clean:
-	dh_auto_clean
-	rm -rf client hyperdrive-cli shared modules go.mod go.sum
-
-# Set up configuration for dh-golang; we're kind of tricking the system a bit here.
-# It wants all of the source to be present already in the working dir but since that's not our layout,
-# we have to copy just the CLI source to the working dir
-override_dh_auto_configure:
-#	Hyperdrive
-	cp -r ${SRC_DIR}/client ${SRC_DIR}/hyperdrive-cli ${SRC_DIR}/shared ${SRC_DIR}/go.mod ${SRC_DIR}/go.sum ./
-#	Stakewise
-	mkdir -p ./modules/stakewise
-	cp -r ${SRC_DIR}/modules/stakewise/client ${SRC_DIR}/modules/stakewise/shared ./modules/stakewise/
-#	Run the normal config process
-	dh_auto_configure
-
 # We have a very nonstandard build process; we're changing the name of the binary from hyperdrive-cli to hyperdrive,
 # and we're using CGO_ENABLED=0... neither of which the default dh-golang system can handle. Thus, we're completely
 # rolling our own build here and ignoring the dh-golang one entirely.
 override_dh_auto_build:
 #	Build the CLI with a vanilla build instead of installing it
+	mkdir -p ${BUILD_DIR}
 	cd ${BUILD_DIR} && CGO_ENABLED=0 GOOS=linux GOARCH=${DEB_TARGET_ARCH} go build -trimpath -v -o hyperdrive github.com/nodeset-org/hyperdrive/hyperdrive-cli
 #	For whatever reason, go install will install into bin/$GOOS_$GOARCH if we're cross compiling so we have to emulate that here
 	if [ "${DEB_BUILD_ARCH}" = "${DEB_TARGET_ARCH}" ]; then \
@@ -57,14 +38,8 @@ override_dh_auto_install:
 # Create the folder structure and copy the deploy files over
 	install -dm 0700 debian/hyperdrive/var/lib/hyperdrive/data
 	install -dm 0700 debian/hyperdrive/var/lib/hyperdrive/global
-	for file in ${DEPLOY_DIR}/override/*; do \
-		install -Dm 644 $${file} debian/hyperdrive/usr/share/hyperdrive/override/`basename $${file}`; \
-	done
-	for file in ${DEPLOY_DIR}/templates/*; do \
-		install -Dm 644 $${file} debian/hyperdrive/usr/share/hyperdrive/templates/`basename $${file}`; \
-	done
-	for file in ${DEPLOY_DIR}/scripts/*; do \
-		install -D $${file} debian/hyperdrive/usr/share/hyperdrive/scripts/`basename $${file}`; \
-	done
+	mkdir -p debian/hyperdrive/usr/share/hyperdrive/
+	cp -r deploy/* debian/hyperdrive/usr/share/hyperdrive/
+	chmod -R +x debian/hyperdrive/usr/share/hyperdrive/scripts
 
 override_dh_auto_test:

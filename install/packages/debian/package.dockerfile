@@ -1,7 +1,11 @@
 # The builder for building the Debian package
-FROM nodeset/hyperdrive-deb-builder:v0.1.0 AS builder
-COPY . /hyperdrive
-WORKDIR /hyperdrive/install/packages/debian
+FROM nodeset/hyperdrive-deb-builder:v1.0.0 AS builder
+
+# Debian packages need a very particular folder structure, so we're basically converting the repo structure into what it wants here 
+COPY ./install/packages/debian/debian /hyperdrive/debian/debian
+COPY ./install/deploy /hyperdrive/debian/deploy
+COPY ./src/ /hyperdrive/debian/
+WORKDIR /hyperdrive/debian
 
 # Build the amd64 package and source package
 RUN DEB_BUILD_OPTIONS=noautodbgsym debuild -us -uc
@@ -11,4 +15,4 @@ RUN DEB_BUILD_OPTIONS=noautodbgsym debuild -us -uc -b -aarm64 --no-check-buildde
 
 # Copy the output
 FROM scratch AS package
-COPY --from=builder /hyperdrive/install/packages/hyperdrive* /
+COPY --from=builder /hyperdrive/hyperdrive* /
