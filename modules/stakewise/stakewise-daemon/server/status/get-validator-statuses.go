@@ -62,21 +62,27 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	if err != nil {
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}
-	var generatedValidators, uploadedNodesetValidators, uploadedStakewiseValidators, registeredStakewiseValidators, waitingDepositConfirmationValidators, depositingValidators, depositedValidators, activeValidators, exitingValidators, exitedValidators []beacon.ValidatorPubkey
+	var generatedValidators, uploadedNodesetValidators, uploadedStakewiseValidators, registeredStakewiseValidators, withdrawalDone, withdrawalPossible, exitedSlashed, exitedUnslashed, activeSlashed, activeExited, activeOngoing, pendingQueued, pendingInitialized []beacon.ValidatorPubkey
 
 	for _, pubKey := range publicKeys {
-		if IsExited(pubKey, statuses) {
-			exitedValidators = append(exitedValidators, pubKey)
-		} else if IsExiting(pubKey, statuses) {
-			exitingValidators = append(exitingValidators, pubKey)
-		} else if IsActive(pubKey, statuses) {
-			activeValidators = append(activeValidators, pubKey)
-		} else if IsDeposited(pubKey, statuses) {
-			depositedValidators = append(depositedValidators, pubKey)
-		} else if IsDepositing(pubKey, statuses) {
-			depositingValidators = append(depositingValidators, pubKey)
-		} else if IsWaitingDepositConfirmation(pubKey, statuses) {
-			waitingDepositConfirmationValidators = append(waitingDepositConfirmationValidators, pubKey)
+		if IsWithdrawalDone(pubKey, statuses) {
+			withdrawalDone = append(withdrawalDone, pubKey)
+		} else if IsWithdrawalPossible(pubKey, statuses) {
+			withdrawalPossible = append(withdrawalPossible, pubKey)
+		} else if IsExitedSlashed(pubKey, statuses) {
+			exitedSlashed = append(exitedSlashed, pubKey)
+		} else if IsExitedUnslashed(pubKey, statuses) {
+			exitedUnslashed = append(exitedUnslashed, pubKey)
+		} else if IsActiveSlashed(pubKey, statuses) {
+			activeSlashed = append(activeSlashed, pubKey)
+		} else if IsActiveExited(pubKey, statuses) {
+			activeExited = append(activeExited, pubKey)
+		} else if IsActiveOngoing(pubKey, statuses) {
+			activeOngoing = append(activeOngoing, pubKey)
+		} else if IsPendingQueued(pubKey, statuses) {
+			pendingQueued = append(pendingQueued, pubKey)
+		} else if IsPendingInitialized(pubKey, statuses) {
+			pendingInitialized = append(pendingInitialized, pubKey)
 		} else if IsRegisteredToStakewise(pubKey, statuses) {
 			registeredStakewiseValidators = append(registeredStakewiseValidators, pubKey)
 		} else if IsUploadedStakewise(pubKey, statuses) {
@@ -94,52 +100,70 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	data.UploadedToNodeset = uploadedNodesetValidators
 	data.UploadToStakewise = uploadedStakewiseValidators
 	data.RegisteredToStakewise = registeredStakewiseValidators
-	data.WaitingDepositConfirmation = waitingDepositConfirmationValidators
-	data.Depositing = depositingValidators
-	data.Deposited = depositedValidators
-	data.Active = activeValidators
-	data.Exiting = exitingValidators
-	data.Exited = exitedValidators
+	data.PendingInitialized = pendingInitialized
+	data.PendingQueued = pendingQueued
+	data.ActiveOngoing = activeOngoing
+	data.ActiveExited = activeExited
+	data.ActiveSlashed = activeSlashed
+	data.ExitedUnslashed = exitedUnslashed
+	data.ExitedSlashed = exitedSlashed
+	data.WithdrawalPossible = withdrawalPossible
+	data.WithdrawalDone = withdrawalDone
 
 	return nil
 }
 
-func IsExited(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	return statuses[pubKey].Status == types.ValidatorState_ExitedSlashed || statuses[pubKey].Status == types.ValidatorState_ExitedUnslashed
+func IsPendingInitialized(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	return statuses[pubKey].Status == types.ValidatorState_PendingInitialized
 }
-
-func IsExiting(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	return statuses[pubKey].Status == types.ValidatorState_ActiveExiting || statuses[pubKey].Status == types.ValidatorState_WithdrawalPossible || statuses[pubKey].Status == types.ValidatorState_WithdrawalDone
+func IsPendingQueued(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	return statuses[pubKey].Status == types.ValidatorState_PendingQueued
 }
-
-func IsActive(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+func IsActiveOngoing(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	return statuses[pubKey].Status == types.ValidatorState_ActiveOngoing
 }
 
-func IsDeposited(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	return false
+func IsActiveExited(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	return statuses[pubKey].Status == types.ValidatorState_ActiveExiting
 }
 
-func IsDepositing(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	return statuses[pubKey].Status == types.ValidatorState_PendingInitialized
+func IsActiveSlashed(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	return statuses[pubKey].Status == types.ValidatorState_ActiveSlashed
 }
 
-func IsWaitingDepositConfirmation(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	return statuses[pubKey].Status == types.ValidatorState_PendingQueued
+func IsExitedUnslashed(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	return statuses[pubKey].Status == types.ValidatorState_ExitedUnslashed
+}
+
+func IsExitedSlashed(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	return statuses[pubKey].Status == types.ValidatorState_ExitedSlashed
+}
+
+func IsWithdrawalPossible(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	return statuses[pubKey].Status == types.ValidatorState_WithdrawalPossible
+}
+
+func IsWithdrawalDone(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	return statuses[pubKey].Status == types.ValidatorState_WithdrawalDone
 }
 
 func IsRegisteredToStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	// TODO: Implement
 	return false
 }
 
 func IsUploadedStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	// TODO: Implement
 	return false
 }
 
+// IMPORTANT
 func IsUploadedToNodeset(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+	// TODO: Implement
 	return false
 }
 
+// IMPORTANT
 func IsGenerated(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	return true
 }

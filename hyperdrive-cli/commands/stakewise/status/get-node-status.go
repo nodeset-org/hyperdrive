@@ -15,54 +15,89 @@ func getNodeStatus(c *cli.Context) error {
 		return err
 	}
 
-	if len(response.Data.Active) != 0 {
-		fmt.Printf("Active Validator Pubkeys: \n")
+	if len(response.Data.WithdrawalDone) != 0 {
+		fmt.Printf("Withdrawal Done: \n")
 
-		for _, validator := range response.Data.Active {
+		for _, validator := range response.Data.WithdrawalDone {
 			fmt.Printf("%v\n", validator.HexWithPrefix())
 		}
 		fmt.Println("")
 	}
 
-	if len(response.Data.Exited) != 0 {
-		fmt.Printf("Exited Validator Pubkeys: \n")
+	if len(response.Data.WithdrawalPossible) != 0 {
+		fmt.Printf("Withdrawal Possible: \n")
 
-		for _, validator := range response.Data.Exited {
+		for _, validator := range response.Data.WithdrawalPossible {
 			fmt.Printf("%v\n", validator.HexWithPrefix())
 		}
 		fmt.Println("")
 	}
 
-	if len(response.Data.Exiting) != 0 {
-		fmt.Printf("Exiting Validator Pubkeys: \n")
+	if len(response.Data.ExitedSlashed) != 0 {
+		fmt.Printf("Exited Slashed: \n")
 
-		for _, validator := range response.Data.Exiting {
-			fmt.Printf("%v\n", validator.HexWithPrefix())
-		}
-		fmt.Println("")
-	}
-	fmt.Println("")
-
-	if len(response.Data.Deposited) != 0 {
-		fmt.Printf("Deposited Validator Pubkeys: \n")
-
-		for _, validator := range response.Data.Deposited {
+		for _, validator := range response.Data.ExitedSlashed {
 			fmt.Printf("%v\n", validator.HexWithPrefix())
 		}
 		fmt.Println("")
 	}
 
-	if len(response.Data.Depositing) != 0 {
-		fmt.Printf("Depositing Validator Pubkeys: \n")
+	if len(response.Data.ExitedUnslashed) != 0 {
+		fmt.Printf("Exited Unslashed: \n")
 
-		for _, validator := range response.Data.Depositing {
+		for _, validator := range response.Data.ExitedUnslashed {
+			fmt.Printf("%v\n", validator.HexWithPrefix())
+		}
+		fmt.Println("")
+	}
+
+	if len(response.Data.ActiveSlashed) != 0 {
+		fmt.Printf("Active Slashed: \n")
+
+		for _, validator := range response.Data.ActiveSlashed {
+			fmt.Printf("%v\n", validator.HexWithPrefix())
+		}
+		fmt.Println("")
+	}
+
+	if len(response.Data.ActiveExited) != 0 {
+		fmt.Printf("Active Exited: \n")
+
+		for _, validator := range response.Data.ActiveExited {
+			fmt.Printf("%v\n", validator.HexWithPrefix())
+		}
+		fmt.Println("")
+	}
+
+	if len(response.Data.ActiveOngoing) != 0 {
+		fmt.Printf("Active Ongoing: \n")
+
+		for _, validator := range response.Data.ActiveOngoing {
+			fmt.Printf("%v\n", validator.HexWithPrefix())
+		}
+		fmt.Println("")
+	}
+
+	if len(response.Data.PendingQueued) != 0 {
+		fmt.Printf("Pending Queued: \n")
+
+		for _, validator := range response.Data.PendingQueued {
+			fmt.Printf("%v\n", validator.HexWithPrefix())
+		}
+		fmt.Println("")
+	}
+
+	if len(response.Data.PendingInitialized) != 0 {
+		fmt.Printf("Pending Initialized: \n")
+
+		for _, validator := range response.Data.PendingInitialized {
 			fmt.Printf("%v\n", validator.HexWithPrefix())
 		}
 		fmt.Println("")
 	}
 
 	if len(response.Data.RegisteredToStakewise) != 0 {
-		fmt.Printf("Registered to Stakewise Validator Pubkeys: \n")
+		fmt.Printf("Registered To Stakewise: \n")
 
 		for _, validator := range response.Data.RegisteredToStakewise {
 			fmt.Printf("%v\n", validator.HexWithPrefix())
@@ -70,17 +105,8 @@ func getNodeStatus(c *cli.Context) error {
 		fmt.Println("")
 	}
 
-	if len(response.Data.UploadedToNodeset) != 0 {
-		fmt.Printf("Uploaded to Nodeset Validator Pubkeys: \n")
-
-		for _, validator := range response.Data.UploadedToNodeset {
-			fmt.Printf("%v\n", validator.HexWithPrefix())
-		}
-		fmt.Println("")
-	}
-
 	if len(response.Data.UploadToStakewise) != 0 {
-		fmt.Printf("Upload to Stakewise Validator Pubkeys: \n")
+		fmt.Printf("Uploaded To Stakewise: \n")
 
 		for _, validator := range response.Data.UploadToStakewise {
 			fmt.Printf("%v\n", validator.HexWithPrefix())
@@ -88,10 +114,10 @@ func getNodeStatus(c *cli.Context) error {
 		fmt.Println("")
 	}
 
-	if len(response.Data.WaitingDepositConfirmation) != 0 {
-		fmt.Printf("Waiting Deposit Confirmation Validator Pubkeys: \n")
+	if len(response.Data.UploadedToNodeset) != 0 {
+		fmt.Printf("Uploaded To Nodeset: \n")
 
-		for _, validator := range response.Data.WaitingDepositConfirmation {
+		for _, validator := range response.Data.UploadedToNodeset {
 			fmt.Printf("%v\n", validator.HexWithPrefix())
 		}
 		fmt.Println("")

@@ -36,8 +36,11 @@ func getSignedExitMessages(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("error while getting active validators: %w", err)
 	}
+	var activeValidators []beacon.ValidatorPubkey
+	activeValidators = append(activeValidators, activeValidatorResponse.Data.ActiveOngoing...)
+	activeValidators = append(activeValidators, activeValidatorResponse.Data.ActiveExited...)
+	activeValidators = append(activeValidators, activeValidatorResponse.Data.ActiveSlashed...)
 
-	activeValidators := activeValidatorResponse.Data.Active
 	// Get selected validators
 	options := make([]utils.SelectionOption[beacon.ValidatorPubkey], len(activeValidators))
 	for i, pubkey := range activeValidators {
