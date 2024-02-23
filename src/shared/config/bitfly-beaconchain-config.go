@@ -14,16 +14,11 @@ type BitflyNodeMetricsConfig struct {
 	Endpoint Parameter[string]
 
 	MachineName Parameter[string]
-
-	// Internal Fields
-	parent *MetricsConfig
 }
 
 // Generates a new Bitfly Node Metrics config
-func NewBitflyNodeMetricsConfig(parent *MetricsConfig) *BitflyNodeMetricsConfig {
+func NewBitflyNodeMetricsConfig() *BitflyNodeMetricsConfig {
 	return &BitflyNodeMetricsConfig{
-		parent: parent,
-
 		Secret: Parameter[string]{
 			ParameterCommon: &ParameterCommon{
 				ID:                BitflySecretID,

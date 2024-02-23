@@ -238,12 +238,12 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	}
 
 	// Create the subconfigs
-	cfg.Fallback = NewFallbackConfig(cfg)
-	cfg.LocalExecutionConfig = NewExecutionCommonConfig(cfg)
-	cfg.ExternalExecutionConfig = NewExternalExecutionConfig(cfg)
-	cfg.LocalBeaconConfig = NewLocalBeaconConfig(cfg)
-	cfg.ExternalBeaconConfig = NewExternalBeaconConfig(cfg)
-	cfg.Metrics = NewMetricsConfig(cfg)
+	cfg.Fallback = NewFallbackConfig()
+	cfg.LocalExecutionConfig = NewExecutionCommonConfig()
+	cfg.ExternalExecutionConfig = NewExternalExecutionConfig()
+	cfg.LocalBeaconConfig = NewLocalBeaconConfig()
+	cfg.ExternalBeaconConfig = NewExternalBeaconConfig()
+	cfg.Metrics = NewMetricsConfig()
 
 	// Apply the default values for mainnet
 	cfg.Network.Value = Network_Mainnet

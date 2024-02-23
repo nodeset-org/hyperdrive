@@ -17,16 +17,11 @@ type GrafanaConfig struct {
 
 	// The Docker Hub tag for Grafana
 	ContainerTag Parameter[string]
-
-	// Internal Fields
-	parent *MetricsConfig
 }
 
 // Generates a new Grafana config
-func NewGrafanaConfig(parent *MetricsConfig) *GrafanaConfig {
+func NewGrafanaConfig() *GrafanaConfig {
 	return &GrafanaConfig{
-		parent: parent,
-
 		Port: Parameter[uint16]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 ids.PortID,

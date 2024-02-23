@@ -43,16 +43,11 @@ type NethermindConfig struct {
 
 	// Custom command line flags
 	AdditionalFlags Parameter[string]
-
-	// Internal Fields
-	parent *LocalExecutionConfig
 }
 
 // Generates a new Nethermind configuration
-func NewNethermindConfig(parent *LocalExecutionConfig) *NethermindConfig {
+func NewNethermindConfig() *NethermindConfig {
 	return &NethermindConfig{
-		parent: parent,
-
 		CacheSize: Parameter[uint64]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 NethermindCacheSizeID,

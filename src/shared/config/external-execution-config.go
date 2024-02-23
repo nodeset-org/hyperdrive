@@ -19,16 +19,11 @@ type ExternalExecutionConfig struct {
 
 	// The URL of the Websocket endpoint
 	WebsocketUrl Parameter[string]
-
-	// Internal Fields
-	parent *HyperdriveConfig
 }
 
 // Generates a new ExternalExecutionConfig configuration
-func NewExternalExecutionConfig(parent *HyperdriveConfig) *ExternalExecutionConfig {
+func NewExternalExecutionConfig() *ExternalExecutionConfig {
 	return &ExternalExecutionConfig{
-		parent: parent,
-
 		ExecutionClient: Parameter[ExecutionClient]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 ids.EcID,

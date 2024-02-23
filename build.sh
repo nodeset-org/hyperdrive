@@ -29,6 +29,18 @@ build_cli() {
 }
 
 
+# Builds the hyperdrive distro packages
+build_distro_packages() {
+    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
+
+    echo -n "Building deb packages..."
+    docker buildx build --rm -f install/packages/debian/package.dockerfile --output ../$VERSION --target package . || fail "Error building deb packages."
+    echo "done!"
+
+    cd ..
+}
+
+
 # Builds the .tar.xz file packages with the HD configuration files
 build_install_packages() {
     cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
@@ -95,8 +107,10 @@ usage() {
     echo "Options:"
     echo $'\t-a\tBuild all of the artifacts'
     echo $'\t-c\tBuild the CLI binaries for all platforms'
+    echo $'\t-t\tBuild the distro packages (.deb)'
     echo $'\t-p\tBuild the Hyperdrive installer packages'
-    echo $'\t-d\tBuild the Daemon Hyperdrive images, and push them to Docker Hub'
+    echo $'\t-d\tBuild the Hyperdrive daemon image, and push it to Docker Hub'
+    echo $'\t-s\tBuild the Hyperdrive Stakewise daemon image, and push it to Docker Hub'
     echo $'\t-l\tTag the given version as "latest" on Docker Hub'
     exit 0
 }
@@ -107,10 +121,11 @@ usage() {
 # =================
 
 # Parse arguments
-while getopts "acpdslv:" FLAG; do
+while getopts "actpdslv:" FLAG; do
     case "$FLAG" in
-        a) CLI=true PACKAGES=true SW_DAEMON=true DAEMON=true MANIFEST=true LATEST=true ;;
+        a) CLI=true DISTRO=true PACKAGES=true SW_DAEMON=true DAEMON=true MANIFEST=true LATEST=true ;;
         c) CLI=true ;;
+        t) DISTRO=true ;;
         p) PACKAGES=true ;;
         d) DAEMON=true ;;
         s) SW_DAEMON=true ;;
@@ -124,12 +139,15 @@ if [ -z "$VERSION" ]; then
 fi
 
 # Cleanup old artifacts
-rm -f ./$VERSION/*
+rm -rf ./$VERSION/*
 mkdir -p ./$VERSION
 
 # Build the artifacts
 if [ "$CLI" = true ]; then
     build_cli
+fi
+if [ "$DISTRO" = true ]; then
+    build_distro_packages
 fi
 if [ "$PACKAGES" = true ]; then
     build_install_packages
@@ -143,3 +161,19 @@ fi
 if [ "$LATEST" = true ]; then
     tag_latest
 fi
+
+
+# =======================
+# === Manual Routines ===
+# =======================
+
+# Builds the deb package builder image
+build_deb_builder() {
+    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
+
+    echo -n "Building deb builder..."
+    docker buildx build --rm --platform=linux/amd64 -t nodeset/hyperdrive-deb-builder:$VERSION -f install/packages/debian/builder.dockerfile --push . || fail "Error building deb builder."
+    echo "done!"
+
+    cd ..
+}

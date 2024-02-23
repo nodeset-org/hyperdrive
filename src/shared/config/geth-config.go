@@ -30,16 +30,11 @@ type GethConfig struct {
 
 	// Custom command line flags
 	AdditionalFlags Parameter[string]
-
-	// Internal Fields
-	parent *LocalExecutionConfig
 }
 
 // Generates a new Geth configuration
-func NewGethConfig(parent *LocalExecutionConfig) *GethConfig {
+func NewGethConfig() *GethConfig {
 	return &GethConfig{
-		parent: parent,
-
 		EnablePbss: Parameter[bool]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 GethEnablePbssID,

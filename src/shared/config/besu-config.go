@@ -32,16 +32,11 @@ type BesuConfig struct {
 
 	// Custom command line flags
 	AdditionalFlags Parameter[string]
-
-	// Internal Fields
-	parent *LocalExecutionConfig
 }
 
 // Generates a new Besu configuration
-func NewBesuConfig(parent *LocalExecutionConfig) *BesuConfig {
+func NewBesuConfig() *BesuConfig {
 	return &BesuConfig{
-		parent: parent,
-
 		JvmHeapSize: Parameter[uint64]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 BesuJvmHeapSizeID,

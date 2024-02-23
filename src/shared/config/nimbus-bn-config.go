@@ -37,16 +37,11 @@ type NimbusBnConfig struct {
 
 	// Custom command line flags for the BN
 	AdditionalFlags Parameter[string]
-
-	// Internal Fields
-	parent *LocalBeaconConfig
 }
 
 // Generates a new Nimbus configuration
-func NewNimbusBnConfig(parent *LocalBeaconConfig) *NimbusBnConfig {
+func NewNimbusBnConfig() *NimbusBnConfig {
 	return &NimbusBnConfig{
-		parent: parent,
-
 		MaxPeers: Parameter[uint16]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 ids.MaxPeersID,

@@ -19,16 +19,11 @@ type LodestarBnConfig struct {
 
 	// Custom command line flags for the BN
 	AdditionalFlags Parameter[string]
-
-	// Internal Fields
-	parent *LocalBeaconConfig
 }
 
 // Generates a new Lodestar BN configuration
-func NewLodestarBnConfig(parent *LocalBeaconConfig) *LodestarBnConfig {
+func NewLodestarBnConfig() *LodestarBnConfig {
 	return &LodestarBnConfig{
-		parent: parent,
-
 		MaxPeers: Parameter[uint16]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 ids.MaxPeersID,

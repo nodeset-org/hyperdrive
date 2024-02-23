@@ -31,16 +31,11 @@ type TekuBnConfig struct {
 
 	// Custom command line flags for the BN
 	AdditionalFlags Parameter[string]
-
-	// Internal Fields
-	parent *LocalBeaconConfig
 }
 
 // Generates a new Teku BN configuration
-func NewTekuBnConfig(parent *LocalBeaconConfig) *TekuBnConfig {
+func NewTekuBnConfig() *TekuBnConfig {
 	return &TekuBnConfig{
-		parent: parent,
-
 		JvmHeapSize: Parameter[uint64]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 TekuJvmHeapSizeID,

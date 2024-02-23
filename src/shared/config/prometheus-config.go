@@ -22,16 +22,11 @@ type PrometheusConfig struct {
 
 	// Custom command line flags
 	AdditionalFlags Parameter[string]
-
-	// Internal Fields
-	parent *MetricsConfig
 }
 
 // Generates a new Prometheus config
-func NewPrometheusConfig(parent *MetricsConfig) *PrometheusConfig {
+func NewPrometheusConfig() *PrometheusConfig {
 	return &PrometheusConfig{
-		parent: parent,
-
 		Port: Parameter[uint16]{
 			ParameterCommon: &ParameterCommon{
 				ID:                 ids.PortID,
