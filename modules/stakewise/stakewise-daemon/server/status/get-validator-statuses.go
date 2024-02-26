@@ -49,6 +49,12 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	sp := c.handler.serviceProvider
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
+	nc := sp.GetNodesetClient()
+	registeredPubkeys, err := nc.GetRegisteredValidators()
+	if err != nil {
+		return fmt.Errorf("error getting registered validators: %w", err)
+	}
+	fmt.Printf("!!! registeredPubkeys: %v\n", registeredPubkeys)
 	privateKeys, err := w.GetAllPrivateKeys()
 	if err != nil {
 		return fmt.Errorf("error getting private keys: %w", err)
@@ -87,12 +93,10 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 			registeredStakewiseValidators = append(registeredStakewiseValidators, pubKey)
 		} else if IsUploadedStakewise(pubKey, statuses) {
 			uploadedStakewiseValidators = append(uploadedStakewiseValidators, pubKey)
-		} else if IsUploadedToNodeset(pubKey, statuses) {
+		} else if IsUploadedToNodeset(pubKey, statuses, registeredPubkeys) {
 			uploadedNodesetValidators = append(uploadedNodesetValidators, pubKey)
-		} else if IsGenerated(pubKey, statuses) {
-			generatedValidators = append(generatedValidators, pubKey)
 		} else {
-			fmt.Printf("Unknown status for validator %s\n", pubKey.HexWithPrefix())
+			generatedValidators = append(generatedValidators, pubKey)
 		}
 	}
 
@@ -157,13 +161,11 @@ func IsUploadedStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.Vali
 	return false
 }
 
-// IMPORTANT
-func IsUploadedToNodeset(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	// TODO: Implement
+func IsUploadedToNodeset(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus, registeredPubkeys []beacon.ValidatorPubkey) bool {
+	for _, registeredPubKey := range registeredPubkeys {
+		if registeredPubKey == pubKey {
+			return true
+		}
+	}
 	return false
-}
-
-// IMPORTANT
-func IsGenerated(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
-	return true
 }
