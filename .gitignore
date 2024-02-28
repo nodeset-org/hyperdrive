@@ -23,8 +23,21 @@ go.work
 # VS Code metafiles
 .vscode-ctags
 
+# Editor files
+*.swp
+
 # Binaries
-hyperdrive-cli/hyperdrive-cli
-hyperdrive-daemon/hyperdrive-daemon
-modules/stakewise/stakewise
-modules/stakewise/stakewise-daemon/stakewise-daemon
+src/hyperdrive-cli/hyperdrive-cli
+src/hyperdrive-daemon/hyperdrive-daemon
+src/modules/stakewise/stakewise
+src/modules/stakewise/stakewise-daemon/stakewise-daemon
+
+# Packaging
+build/
+*.build
+*.dsc
+*.tar.gz
+*debhelper*
+install/packages/debian/hyperdrive
+install/packages/debian/debian/hyperdrive*
+install/packages/debian/_build/

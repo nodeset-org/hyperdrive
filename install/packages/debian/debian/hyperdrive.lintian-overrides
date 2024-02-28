@@ -1,0 +1,4 @@
+hyperdrive: description-starts-with-package-name
+hyperdrive: extended-description-is-empty
+hyperdrive: statically-linked-binary [usr/bin/hyperdrive]
+hyperdrive: no-manual-page [usr/bin/hyperdrive]
