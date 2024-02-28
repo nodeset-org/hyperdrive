@@ -54,7 +54,6 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	if err != nil {
 		return fmt.Errorf("error getting registered validators: %w", err)
 	}
-	fmt.Printf("!!! registeredPubkeys: %v\n", registeredPubkeys)
 	privateKeys, err := w.GetAllPrivateKeys()
 	if err != nil {
 		return fmt.Errorf("error getting private keys: %w", err)
@@ -64,7 +63,6 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 		return fmt.Errorf("error getting public keys: %w", err)
 	}
 	statuses, err := bc.GetValidatorStatuses(context.Background(), publicKeys, nil)
-	fmt.Printf("!!! statuses: %v\n", statuses)
 	if err != nil {
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}

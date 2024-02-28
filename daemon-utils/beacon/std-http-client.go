@@ -717,7 +717,6 @@ func (c *StandardHttpClient) getValidatorsByOpts(ctx context.Context, pubkeysOrI
 
 // Send voluntary exit request
 func (c *StandardHttpClient) postVoluntaryExit(ctx context.Context, request VoluntaryExitRequest) error {
-	fmt.Printf("!!! postVoluntaryExit request: %v\n", request)
 	responseBody, status, err := c.postRequest(ctx, RequestVoluntaryExitPath, request)
 	if err != nil {
 		return fmt.Errorf("Could not broadcast exit for validator at index %s: %w", request.Message.ValidatorIndex, err)
@@ -825,7 +824,6 @@ func (c *StandardHttpClient) getRequest(ctx context.Context, requestPath string)
 // Make a POST request to the beacon node
 func (c *StandardHttpClient) postRequest(ctx context.Context, requestPath string, requestBody interface{}) ([]byte, int, error) {
 	// Get request body
-	fmt.Printf("!!! requestBody: %v\n", requestBody)
 	requestBodyBytes, err := json.Marshal(requestBody)
 	if err != nil {
 		return []byte{}, 0, err

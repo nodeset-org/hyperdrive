@@ -173,7 +173,6 @@ func (c *NodesetClient) submitRequest(method string, body io.Reader, queryParams
 	if err != nil {
 		return nil, fmt.Errorf("initializing authorization signature failed: %w", err)
 	}
-	fmt.Printf("!!! SUBMITREQUEST")
 	request.Header.Set(authHeader, common.EncodeHexWithPrefix(c.authSignature))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
