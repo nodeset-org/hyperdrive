@@ -20,7 +20,7 @@ func getNodeStatus(c *cli.Context) error {
 		fmt.Printf("%v: %v\n", pubKey, status)
 	}
 
-	fmt.Printf("Nodeset Statuses:\n")
+	fmt.Printf("\n\nNodeset Statuses:\n")
 	for pubKey, status := range response.Data.NodesetStatus {
 		fmt.Printf("%v: %v\n", pubKey, status)
 	}
