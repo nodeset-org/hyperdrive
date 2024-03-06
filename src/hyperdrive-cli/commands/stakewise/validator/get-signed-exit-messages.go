@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
+
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
@@ -37,9 +39,14 @@ func getSignedExitMessages(c *cli.Context) error {
 		return fmt.Errorf("error while getting active validators: %w", err)
 	}
 	var activeValidators []beacon.ValidatorPubkey
-	activeValidators = append(activeValidators, activeValidatorResponse.Data.ActiveOngoing...)
-	activeValidators = append(activeValidators, activeValidatorResponse.Data.ActiveExited...)
-	activeValidators = append(activeValidators, activeValidatorResponse.Data.ActiveSlashed...)
+	for pubKey, status := range activeValidatorResponse.Data.ValidatorStatus {
+		if status == swapi.ActiveOngoing || status == swapi.ActiveSlashed {
+			activeValidators = append(activeValidators, pubKey)
+		}
+	}
+
+	// activeValidators = append(activeValidators, activeValidatorResponse.Data.ActiveOngoing...)
+	// activeValidators = append(activeValidators, activeValidatorResponse.Data.ActiveSlashed...)
 
 	// Get selected validators
 	options := make([]utils.SelectionOption[beacon.ValidatorPubkey], len(activeValidators))

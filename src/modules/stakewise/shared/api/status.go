@@ -4,18 +4,24 @@ import (
 	"github.com/nodeset-org/eth-utils/beacon"
 )
 
+type ValidatorStatus string
+
+const (
+	WithdrawalDone        ValidatorStatus = "WithdrawalDone"
+	WithdrawalPossible    ValidatorStatus = "WithdrawalPossible"
+	ExitedSlashed         ValidatorStatus = "ExitedSlashed"
+	ExitedUnslashed       ValidatorStatus = "ExitedUnslashed"
+	ActiveSlashed         ValidatorStatus = "ActiveSlashed"
+	ActiveExited          ValidatorStatus = "ActiveExited"
+	ActiveOngoing         ValidatorStatus = "ActiveOngoing"
+	PendingQueued         ValidatorStatus = "PendingQueued"
+	PendingInitialized    ValidatorStatus = "PendingInitialized"
+	RegisteredToStakewise ValidatorStatus = "RegisteredToStakewise"
+	UploadedStakewise     ValidatorStatus = "UploadedStakewise"
+	UploadedToNodeset     ValidatorStatus = "UploadedToNodeset"
+	Generated             ValidatorStatus = "Generated"
+)
+
 type ValidatorStatusData struct {
-	Generated             []beacon.ValidatorPubkey `json:"generatedPubkeys"`
-	UploadedToNodeset     []beacon.ValidatorPubkey `json:"uploadedNodesetPubkeys"`
-	UploadToStakewise     []beacon.ValidatorPubkey `json:"uploadedStakewisePubkeys"`
-	RegisteredToStakewise []beacon.ValidatorPubkey `json:"registeredStakewisePubkeys"`
-	PendingInitialized    []beacon.ValidatorPubkey `json:"pendingInitializedPubkeys"`
-	PendingQueued         []beacon.ValidatorPubkey `json:"pendingQueuedPubkeys"`
-	ActiveOngoing         []beacon.ValidatorPubkey `json:"activeOngoingPubkeys"`
-	ActiveExited          []beacon.ValidatorPubkey `json:"activeExitedPubkeys"`
-	ActiveSlashed         []beacon.ValidatorPubkey `json:"activeSlashedPubkeys"`
-	ExitedUnslashed       []beacon.ValidatorPubkey `json:"exitedUnslashedPubkeys"`
-	ExitedSlashed         []beacon.ValidatorPubkey `json:"exitedSlashedPubkeys"`
-	WithdrawalPossible    []beacon.ValidatorPubkey `json:"withdrawalPossiblePubkeys"`
-	WithdrawalDone        []beacon.ValidatorPubkey `json:"withdrawalDonePubkeys"`
+	ValidatorStatus map[beacon.ValidatorPubkey]ValidatorStatus `json:"validatorStatus"`
 }

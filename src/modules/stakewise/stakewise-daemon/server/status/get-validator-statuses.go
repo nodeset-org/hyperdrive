@@ -66,51 +66,40 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	if err != nil {
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}
-	var generatedValidators, uploadedNodesetValidators, uploadedStakewiseValidators, registeredStakewiseValidators, withdrawalDone, withdrawalPossible, exitedSlashed, exitedUnslashed, activeSlashed, activeExited, activeOngoing, pendingQueued, pendingInitialized []beacon.ValidatorPubkey
 
+	validatorStatuses := make(map[beacon.ValidatorPubkey]swapi.ValidatorStatus)
 	for _, pubKey := range publicKeys {
-		if IsWithdrawalDone(pubKey, statuses) {
-			withdrawalDone = append(withdrawalDone, pubKey)
-		} else if IsWithdrawalPossible(pubKey, statuses) {
-			withdrawalPossible = append(withdrawalPossible, pubKey)
-		} else if IsExitedSlashed(pubKey, statuses) {
-			exitedSlashed = append(exitedSlashed, pubKey)
-		} else if IsExitedUnslashed(pubKey, statuses) {
-			exitedUnslashed = append(exitedUnslashed, pubKey)
-		} else if IsActiveSlashed(pubKey, statuses) {
-			activeSlashed = append(activeSlashed, pubKey)
-		} else if IsActiveExited(pubKey, statuses) {
-			activeExited = append(activeExited, pubKey)
-		} else if IsActiveOngoing(pubKey, statuses) {
-			activeOngoing = append(activeOngoing, pubKey)
-		} else if IsPendingQueued(pubKey, statuses) {
-			pendingQueued = append(pendingQueued, pubKey)
-		} else if IsPendingInitialized(pubKey, statuses) {
-			pendingInitialized = append(pendingInitialized, pubKey)
-		} else if IsRegisteredToStakewise(pubKey, statuses) {
-			registeredStakewiseValidators = append(registeredStakewiseValidators, pubKey)
-		} else if IsUploadedStakewise(pubKey, statuses) {
-			uploadedStakewiseValidators = append(uploadedStakewiseValidators, pubKey)
-		} else if IsUploadedToNodeset(pubKey, statuses, registeredPubkeys) {
-			uploadedNodesetValidators = append(uploadedNodesetValidators, pubKey)
-		} else {
-			generatedValidators = append(generatedValidators, pubKey)
+		switch {
+		case IsWithdrawalDone(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.WithdrawalDone
+		case IsWithdrawalPossible(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.WithdrawalPossible
+		case IsExitedSlashed(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.ExitedSlashed
+		case IsExitedUnslashed(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.ExitedUnslashed
+		case IsActiveSlashed(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.ActiveSlashed
+		case IsActiveExited(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.ActiveExited
+		case IsActiveOngoing(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.ActiveOngoing
+		case IsPendingQueued(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.PendingQueued
+		case IsPendingInitialized(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.PendingInitialized
+		case IsRegisteredToStakewise(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.RegisteredToStakewise
+		case IsUploadedStakewise(pubKey, statuses):
+			validatorStatuses[pubKey] = swapi.UploadedStakewise
+		case IsUploadedToNodeset(pubKey, statuses, registeredPubkeys):
+			validatorStatuses[pubKey] = swapi.UploadedToNodeset
+		default:
+			validatorStatuses[pubKey] = swapi.Generated
 		}
 	}
 
-	data.Generated = generatedValidators
-	data.UploadedToNodeset = uploadedNodesetValidators
-	data.UploadToStakewise = uploadedStakewiseValidators
-	data.RegisteredToStakewise = registeredStakewiseValidators
-	data.PendingInitialized = pendingInitialized
-	data.PendingQueued = pendingQueued
-	data.ActiveOngoing = activeOngoing
-	data.ActiveExited = activeExited
-	data.ActiveSlashed = activeSlashed
-	data.ExitedUnslashed = exitedUnslashed
-	data.ExitedSlashed = exitedSlashed
-	data.WithdrawalPossible = withdrawalPossible
-	data.WithdrawalDone = withdrawalDone
+	data.ValidatorStatus = validatorStatuses
 
 	return nil
 }
