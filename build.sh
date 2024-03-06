@@ -172,7 +172,7 @@ build_deb_builder() {
     cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
 
     echo -n "Building deb builder..."
-    docker buildx build --rm --platform=linux/amd64 -t nodeset/hyperdrive-deb-builder:$VERSION -f install/packages/debian/builder.dockerfile --push . || fail "Error building deb builder."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-deb-builder:$VERSION -f install/packages/debian/builder.dockerfile --push . || fail "Error building deb builder."
     echo "done!"
 
     cd ..
