@@ -1,9 +1,5 @@
 package swapi
 
-import (
-	"github.com/nodeset-org/eth-utils/beacon"
-)
-
 type BeaconStatus string
 type NodesetStatus string
 
@@ -28,6 +24,6 @@ const (
 )
 
 type ValidatorStatusData struct {
-	BeaconStatus  map[beacon.ValidatorPubkey]BeaconStatus  `json:"beaconStatus"`
-	NodesetStatus map[beacon.ValidatorPubkey]NodesetStatus `json:"nodesetStatus"`
+	BeaconStatus  map[string]BeaconStatus  `json:"beaconStatus"`  // string => beacon.ValidatorPubkey
+	NodesetStatus map[string]NodesetStatus `json:"nodesetStatus"` // string => beacon.ValidatorPubkey
 }
