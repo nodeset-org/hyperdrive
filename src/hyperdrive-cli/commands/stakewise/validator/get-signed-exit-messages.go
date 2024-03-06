@@ -39,7 +39,7 @@ func getSignedExitMessages(c *cli.Context) error {
 		return fmt.Errorf("error while getting active validators: %w", err)
 	}
 	var activeValidators []beacon.ValidatorPubkey
-	for pubKey, status := range activeValidatorResponse.Data.ValidatorStatus {
+	for pubKey, status := range activeValidatorResponse.Data.BeaconStatus {
 		if status == swapi.ActiveOngoing || status == swapi.ActiveSlashed {
 			activeValidators = append(activeValidators, pubKey)
 		}

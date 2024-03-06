@@ -4,24 +4,30 @@ import (
 	"github.com/nodeset-org/eth-utils/beacon"
 )
 
-type ValidatorStatus string
+type BeaconStatus string
+type NodesetStatus string
 
 const (
-	WithdrawalDone        ValidatorStatus = "WithdrawalDone"
-	WithdrawalPossible    ValidatorStatus = "WithdrawalPossible"
-	ExitedSlashed         ValidatorStatus = "ExitedSlashed"
-	ExitedUnslashed       ValidatorStatus = "ExitedUnslashed"
-	ActiveSlashed         ValidatorStatus = "ActiveSlashed"
-	ActiveExited          ValidatorStatus = "ActiveExited"
-	ActiveOngoing         ValidatorStatus = "ActiveOngoing"
-	PendingQueued         ValidatorStatus = "PendingQueued"
-	PendingInitialized    ValidatorStatus = "PendingInitialized"
-	RegisteredToStakewise ValidatorStatus = "RegisteredToStakewise"
-	UploadedStakewise     ValidatorStatus = "UploadedStakewise"
-	UploadedToNodeset     ValidatorStatus = "UploadedToNodeset"
-	Generated             ValidatorStatus = "Generated"
+	WithdrawalDone     BeaconStatus = "WithdrawalDone"
+	WithdrawalPossible BeaconStatus = "WithdrawalPossible"
+	ExitedSlashed      BeaconStatus = "ExitedSlashed"
+	ExitedUnslashed    BeaconStatus = "ExitedUnslashed"
+	ActiveSlashed      BeaconStatus = "ActiveSlashed"
+	ActiveExited       BeaconStatus = "ActiveExited"
+	ActiveOngoing      BeaconStatus = "ActiveOngoing"
+	PendingQueued      BeaconStatus = "PendingQueued"
+	PendingInitialized BeaconStatus = "PendingInitialized"
+	NotAvailable       BeaconStatus = "NotAvailable"
+)
+
+const (
+	RegisteredToStakewise NodesetStatus = "RegisteredToStakewise"
+	UploadedStakewise     NodesetStatus = "UploadedStakewise"
+	UploadedToNodeset     NodesetStatus = "UploadedToNodeset"
+	Generated             NodesetStatus = "Generated"
 )
 
 type ValidatorStatusData struct {
-	ValidatorStatus map[beacon.ValidatorPubkey]ValidatorStatus `json:"validatorStatus"`
+	BeaconStatus  map[beacon.ValidatorPubkey]BeaconStatus  `json:"beaconStatus"`
+	NodesetStatus map[beacon.ValidatorPubkey]NodesetStatus `json:"nodesetStatus"`
 }

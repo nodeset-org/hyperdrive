@@ -67,39 +67,49 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}
 
-	validatorStatuses := make(map[beacon.ValidatorPubkey]swapi.ValidatorStatus)
+	beaconStatuses := make(map[beacon.ValidatorPubkey]swapi.BeaconStatus)
+	nodesetStatuses := make(map[beacon.ValidatorPubkey]swapi.NodesetStatus)
+
 	for _, pubKey := range publicKeys {
 		switch {
 		case IsWithdrawalDone(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.WithdrawalDone
+			beaconStatuses[pubKey] = swapi.WithdrawalDone
 		case IsWithdrawalPossible(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.WithdrawalPossible
+			beaconStatuses[pubKey] = swapi.WithdrawalPossible
 		case IsExitedSlashed(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.ExitedSlashed
+			beaconStatuses[pubKey] = swapi.ExitedSlashed
 		case IsExitedUnslashed(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.ExitedUnslashed
+			beaconStatuses[pubKey] = swapi.ExitedUnslashed
 		case IsActiveSlashed(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.ActiveSlashed
+			beaconStatuses[pubKey] = swapi.ActiveSlashed
 		case IsActiveExited(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.ActiveExited
+			beaconStatuses[pubKey] = swapi.ActiveExited
 		case IsActiveOngoing(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.ActiveOngoing
+			beaconStatuses[pubKey] = swapi.ActiveOngoing
 		case IsPendingQueued(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.PendingQueued
+			beaconStatuses[pubKey] = swapi.PendingQueued
 		case IsPendingInitialized(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.PendingInitialized
-		case IsRegisteredToStakewise(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.RegisteredToStakewise
-		case IsUploadedStakewise(pubKey, statuses):
-			validatorStatuses[pubKey] = swapi.UploadedStakewise
-		case IsUploadedToNodeset(pubKey, statuses, registeredPubkeys):
-			validatorStatuses[pubKey] = swapi.UploadedToNodeset
+			beaconStatuses[pubKey] = swapi.PendingInitialized
+
 		default:
-			validatorStatuses[pubKey] = swapi.Generated
+			beaconStatuses[pubKey] = swapi.NotAvailable
 		}
 	}
 
-	data.ValidatorStatus = validatorStatuses
+	for _, pubKey := range publicKeys {
+		switch {
+		case IsRegisteredToStakewise(pubKey, statuses):
+			nodesetStatuses[pubKey] = swapi.RegisteredToStakewise
+		case IsUploadedStakewise(pubKey, statuses):
+			nodesetStatuses[pubKey] = swapi.UploadedStakewise
+		case IsUploadedToNodeset(pubKey, statuses, registeredPubkeys):
+			nodesetStatuses[pubKey] = swapi.UploadedToNodeset
+		default:
+			nodesetStatuses[pubKey] = swapi.Generated
+		}
+	}
+
+	data.BeaconStatus = beaconStatuses
 
 	return nil
 }

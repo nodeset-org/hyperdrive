@@ -15,7 +15,13 @@ func getNodeStatus(c *cli.Context) error {
 		return err
 	}
 
-	for pubKey, status := range response.Data.ValidatorStatus {
+	fmt.Printf("Beacon Statuses:\n")
+	for pubKey, status := range response.Data.BeaconStatus {
+		fmt.Printf("%v: %v\n", pubKey.HexWithPrefix(), status)
+	}
+
+	fmt.Printf("Nodeset Statuses:\n")
+	for pubKey, status := range response.Data.NodesetStatus {
 		fmt.Printf("%v: %v\n", pubKey.HexWithPrefix(), status)
 	}
 
