@@ -12,6 +12,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	batch "github.com/rocket-pool/batch-query"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
 )
@@ -65,20 +66,20 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 
 		// Check the method
 		if r.Method != http.MethodGet {
-			HandleInvalidMethod(log, w)
+			nmc_server.HandleInvalidMethod(log, w)
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(args)
 		if err != nil {
-			HandleInputError(log, w, err)
+			nmc_server.HandleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runSingleStageRoute[DataType](context, serviceProvider)
-		HandleResponse(log, w, response, err, isDebug)
+		nmc_server.HandleResponse(log, w, response, err, isDebug)
 	})
 }
 
@@ -98,14 +99,14 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 
 		// Check the method
 		if r.Method != http.MethodPost {
-			HandleInvalidMethod(log, w)
+			nmc_server.HandleInvalidMethod(log, w)
 			return
 		}
 
 		// Read the body
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
+			nmc_server.HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
 			return
 		}
 		if isDebug {
@@ -116,20 +117,20 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 		var body BodyType
 		err = json.Unmarshal(bodyBytes, &body)
 		if err != nil {
-			HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
+			nmc_server.HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(body)
 		if err != nil {
-			HandleInputError(log, w, err)
+			nmc_server.HandleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runSingleStageRoute[DataType](context, serviceProvider)
-		HandleResponse(log, w, response, err, isDebug)
+		nmc_server.HandleResponse(log, w, response, err, isDebug)
 	})
 }
 

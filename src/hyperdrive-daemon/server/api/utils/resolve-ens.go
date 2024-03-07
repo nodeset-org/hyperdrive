@@ -8,7 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
@@ -28,8 +27,8 @@ func (f *utilsResolveEnsContextFactory) Create(args url.Values) (*utilsResolveEn
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("address", args, input.ValidateAddress, &c.address),
-		server.GetStringFromVars("name", args, &c.name),
+		nmc_server.ValidateArg("address", args, input.ValidateAddress, &c.address),
+		nmc_server.GetStringFromVars("name", args, &c.name),
 	}
 	return c, errors.Join(inputErrs...)
 }

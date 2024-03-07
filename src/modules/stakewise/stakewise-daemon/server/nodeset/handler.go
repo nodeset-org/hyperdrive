@@ -2,20 +2,20 @@ package swnodeset
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 )
 
 type NodesetHandler struct {
 	serviceProvider *swcommon.StakewiseServiceProvider
-	factories       []server.IContextFactory
+	factories       []nmc_server.IContextFactory
 }
 
 func NewNodesetHandler(serviceProvider *swcommon.StakewiseServiceProvider) *NodesetHandler {
 	h := &NodesetHandler{
 		serviceProvider: serviceProvider,
 	}
-	h.factories = []server.IContextFactory{
+	h.factories = []nmc_server.IContextFactory{
 		&nodesetSetValidatorsRootContextFactory{h},
 		&nodesetUploadDepositDataContextFactory{h},
 	}

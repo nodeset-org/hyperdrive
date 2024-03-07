@@ -2,20 +2,20 @@ package swwallet
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 )
 
 type WalletHandler struct {
 	serviceProvider *swcommon.StakewiseServiceProvider
-	factories       []server.IContextFactory
+	factories       []nmc_server.IContextFactory
 }
 
 func NewWalletHandler(serviceProvider *swcommon.StakewiseServiceProvider) *WalletHandler {
 	h := &WalletHandler{
 		serviceProvider: serviceProvider,
 	}
-	h.factories = []server.IContextFactory{
+	h.factories = []nmc_server.IContextFactory{
 		&walletGenerateKeysContextFactory{h},
 		&walletInitializeContextFactory{h},
 	}

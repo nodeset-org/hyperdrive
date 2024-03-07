@@ -1,13 +1,7 @@
 package client
 
 import (
-	"github.com/fatih/color"
 	nmc_client "github.com/rocket-pool/node-manager-core/api/client"
-)
-
-const (
-	jsonContentType string          = "application/json"
-	apiColor        color.Attribute = color.FgHiCyan
 )
 
 // Binder for the Hyperdrive daemon API server

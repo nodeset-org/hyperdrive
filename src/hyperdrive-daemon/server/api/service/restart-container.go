@@ -8,7 +8,6 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 )
@@ -26,7 +25,7 @@ func (f *serviceRestartContainerContextFactory) Create(args url.Values) (*servic
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.GetStringFromVars("container", args, &c.container),
+		nmc_server.GetStringFromVars("container", args, &c.container),
 	}
 	return c, errors.Join(inputErrs...)
 }

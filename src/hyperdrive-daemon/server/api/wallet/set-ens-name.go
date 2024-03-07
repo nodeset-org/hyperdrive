@@ -7,7 +7,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	ens "github.com/wealdtech/go-ens/v3"
@@ -26,7 +25,7 @@ func (f *walletSetEnsNameContextFactory) Create(args url.Values) (*walletSetEnsN
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.GetStringFromVars("name", args, &c.name),
+		nmc_server.GetStringFromVars("name", args, &c.name),
 	}
 	return c, errors.Join(inputErrs...)
 }

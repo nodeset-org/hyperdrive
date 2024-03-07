@@ -8,7 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
@@ -29,8 +28,8 @@ func (f *walletTestSearchAndRecoverContextFactory) Create(args url.Values) (*wal
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("mnemonic", args, input.ValidateWalletMnemonic, &c.mnemonic),
-		server.ValidateArg("address", args, input.ValidateAddress, &c.address),
+		nmc_server.ValidateArg("mnemonic", args, input.ValidateWalletMnemonic, &c.mnemonic),
+		nmc_server.ValidateArg("address", args, input.ValidateAddress, &c.address),
 	}
 	return c, errors.Join(inputErrs...)
 }

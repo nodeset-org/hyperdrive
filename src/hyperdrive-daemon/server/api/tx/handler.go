@@ -2,20 +2,20 @@ package tx
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 )
 
 type TxHandler struct {
 	serviceProvider *common.ServiceProvider
-	factories       []server.IContextFactory
+	factories       []nmc_server.IContextFactory
 }
 
 func NewTxHandler(serviceProvider *common.ServiceProvider) *TxHandler {
 	h := &TxHandler{
 		serviceProvider: serviceProvider,
 	}
-	h.factories = []server.IContextFactory{
+	h.factories = []nmc_server.IContextFactory{
 		&txBatchSignTxsContextFactory{h},
 		&txBatchSubmitTxsContextFactory{h},
 		&txSignTxContextFactory{h},

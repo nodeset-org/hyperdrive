@@ -2,20 +2,20 @@ package swvalidator
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 )
 
 type ValidatorHandler struct {
 	serviceProvider *swcommon.StakewiseServiceProvider
-	factories       []server.IContextFactory
+	factories       []nmc_server.IContextFactory
 }
 
 func NewValidatorHandler(serviceProvider *swcommon.StakewiseServiceProvider) *ValidatorHandler {
 	h := &ValidatorHandler{
 		serviceProvider: serviceProvider,
 	}
-	h.factories = []server.IContextFactory{
+	h.factories = []nmc_server.IContextFactory{
 		&validatorGetSignedExitMessagesContextFactory{h},
 	}
 	return h

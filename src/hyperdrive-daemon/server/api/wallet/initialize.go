@@ -7,7 +7,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
@@ -27,12 +26,12 @@ func (f *walletInitializeContextFactory) Create(args url.Values) (*walletInitial
 	c := &walletInitializeContext{
 		handler: f.handler,
 	}
-	server.GetOptionalStringFromVars("derivation-path", args, &c.derivationPath)
+	nmc_server.GetOptionalStringFromVars("derivation-path", args, &c.derivationPath)
 	inputErrs := []error{
-		server.ValidateOptionalArg("index", args, input.ValidateUint, &c.index, nil),
-		server.ValidateArg("password", args, input.ValidateNodePassword, &c.password),
-		server.ValidateArg("save-wallet", args, input.ValidateBool, &c.saveWallet),
-		server.ValidateArg("save-password", args, input.ValidateBool, &c.savePassword),
+		nmc_server.ValidateOptionalArg("index", args, input.ValidateUint, &c.index, nil),
+		nmc_server.ValidateArg("password", args, input.ValidateNodePassword, &c.password),
+		nmc_server.ValidateArg("save-wallet", args, input.ValidateBool, &c.saveWallet),
+		nmc_server.ValidateArg("save-password", args, input.ValidateBool, &c.savePassword),
 	}
 	return c, errors.Join(inputErrs...)
 }

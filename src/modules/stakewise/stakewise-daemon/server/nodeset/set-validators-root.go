@@ -11,6 +11,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 )
 
@@ -27,7 +28,7 @@ func (f *nodesetSetValidatorsRootContextFactory) Create(args url.Values) (*nodes
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("root", args, input.ValidateHash, &c.root),
+		nmc_server.ValidateArg("root", args, input.ValidateHash, &c.root),
 	}
 	return c, errors.Join(inputErrs...)
 }

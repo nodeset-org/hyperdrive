@@ -8,7 +8,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 )
@@ -26,7 +25,7 @@ func (f *walletGenerateValidatorKeyContextFactory) Create(args url.Values) (*wal
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.GetStringFromVars("path", args, &c.path),
+		nmc_server.GetStringFromVars("path", args, &c.path),
 	}
 	return c, errors.Join(inputErrs...)
 }

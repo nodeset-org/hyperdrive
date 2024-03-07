@@ -11,6 +11,7 @@ import (
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 )
 
@@ -27,8 +28,8 @@ func (f *walletGenerateKeysContextFactory) Create(args url.Values) (*walletGener
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("count", args, input.ValidateUint, &c.count),
-		server.ValidateArg("restart-vc", args, input.ValidateBool, &c.restartVc),
+		nmc_server.ValidateArg("count", args, input.ValidateUint, &c.count),
+		nmc_server.ValidateArg("restart-vc", args, input.ValidateBool, &c.restartVc),
 	}
 	return c, errors.Join(inputErrs...)
 }

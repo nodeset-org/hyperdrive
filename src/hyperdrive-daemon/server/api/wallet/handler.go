@@ -2,20 +2,20 @@ package wallet
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 )
 
 type WalletHandler struct {
 	serviceProvider *common.ServiceProvider
-	factories       []server.IContextFactory
+	factories       []nmc_server.IContextFactory
 }
 
 func NewWalletHandler(serviceProvider *common.ServiceProvider) *WalletHandler {
 	h := &WalletHandler{
 		serviceProvider: serviceProvider,
 	}
-	h.factories = []server.IContextFactory{
+	h.factories = []nmc_server.IContextFactory{
 		&walletDeletePasswordContextFactory{h},
 		&walletExportContextFactory{h},
 		&walletExportEthKeyContextFactory{h},
