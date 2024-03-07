@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 // A layout container with the standard elements and design
@@ -74,7 +74,7 @@ func (layout *standardLayout) setFooter(footer tview.Primitive, height int) {
 }
 
 // Create a standard form for this layout (for settings pages)
-func (layout *standardLayout) createForm(networkParam *config.Parameter[config.Network], title string) {
+func (layout *standardLayout) createForm(networkParam *nmc_config.Parameter[nmc_config.Network], title string) {
 
 	layout.parameters = map[tview.FormItem]*parameterizedFormItem{}
 
@@ -110,7 +110,7 @@ func (layout *standardLayout) refresh() {
 		param := layout.parameters[formItem].parameter
 
 		// Set the form item to the current value
-		if boolParam, ok := param.(*config.Parameter[bool]); ok {
+		if boolParam, ok := param.(*nmc_config.Parameter[bool]); ok {
 			// Bool
 			formItem.(*tview.Checkbox).SetChecked(boolParam.Value)
 		} else if len(param.GetOptions()) > 0 {

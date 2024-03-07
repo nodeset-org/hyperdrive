@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 func createModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
@@ -33,9 +33,9 @@ func createModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardS
 	done := func(buttonIndex int, buttonLabel string) {
 		wiz.md.Config.Hyperdrive.ClientMode.Value = modes[buttonIndex].Value
 		switch modes[buttonIndex].Value {
-		case config.ClientMode_Local:
+		case nmc_config.ClientMode_Local:
 			wiz.ecLocalModal.show()
-		case config.ClientMode_External:
+		case nmc_config.ClientMode_External:
 			wiz.externalEcSelectModal.show()
 		default:
 			panic(fmt.Sprintf("Unknown client mode %s", modes[buttonIndex].Value))

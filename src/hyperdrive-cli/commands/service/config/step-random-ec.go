@@ -3,12 +3,12 @@ package config
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 const randomEcID string = "step-random-ec"
 
-func createRandomEcStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []*config.ParameterOption[config.ExecutionClient]) *choiceWizardStep {
+func createRandomEcStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []*nmc_config.ParameterOption[nmc_config.ExecutionClient]) *choiceWizardStep {
 	var selectedClientName string
 	selectedClient := wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value
 	for _, clientOption := range goodOptions {

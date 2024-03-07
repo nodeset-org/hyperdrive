@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ===============
@@ -32,8 +32,8 @@ func (f *walletGenerateValidatorKeyContextFactory) Create(args url.Values) (*wal
 }
 
 func (f *walletGenerateValidatorKeyContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletGenerateValidatorKeyContext, api.WalletGenerateValidatorKeyData](
-		router, "generate-validator-key", f, f.handler.serviceProvider,
+	nmc_server.RegisterQuerylessGet[*walletGenerateValidatorKeyContext, api.WalletGenerateValidatorKeyData](
+		router, "generate-validator-key", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	ens "github.com/wealdtech/go-ens/v3"
 )
 
@@ -32,8 +32,8 @@ func (f *walletSetEnsNameContextFactory) Create(args url.Values) (*walletSetEnsN
 }
 
 func (f *walletSetEnsNameContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletSetEnsNameContext, api.WalletSetEnsNameData](
-		router, "set-ens-name", f, f.handler.serviceProvider,
+	nmc_server.RegisterQuerylessGet[*walletSetEnsNameContext, api.WalletSetEnsNameData](
+		router, "set-ens-name", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

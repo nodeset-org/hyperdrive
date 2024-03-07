@@ -6,8 +6,8 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 // This represents the primary TUI for the configuration command
@@ -26,7 +26,7 @@ type mainDisplay struct {
 	PreviousConfig      *client.GlobalConfig
 	Config              *client.GlobalConfig
 	ShouldSave          bool
-	ContainersToRestart []config.ContainerID
+	ContainersToRestart []nmc_config.ContainerID
 	ChangeNetworks      bool
 }
 

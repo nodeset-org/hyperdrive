@@ -77,7 +77,7 @@ require (
 	github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44 // indirect
 	github.com/prysmaticlabs/gohashtree v0.0.3-alpha // indirect
 	github.com/rivo/uniseg v0.4.6 // indirect
-	github.com/rocket-pool/node-manager-core v0.0.0-20240306210131-f6cef8cf8891 // indirect
+	github.com/rocket-pool/node-manager-core v0.0.0-20240307072654-810c143c87aa // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect

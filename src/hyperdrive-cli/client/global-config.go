@@ -6,6 +6,7 @@ import (
 
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 // Wrapper for global configuration
@@ -22,7 +23,7 @@ func NewGlobalConfig(hdCfg *config.HyperdriveConfig) *GlobalConfig {
 	}
 
 	for _, module := range cfg.GetAllModuleConfigs() {
-		config.ApplyDefaults(module, hdCfg.Network.Value)
+		nmc_config.ApplyDefaults(module, hdCfg.Network.Value)
 	}
 	return cfg
 }
@@ -49,7 +50,7 @@ func (c *GlobalConfig) DeserializeModules() error {
 		if !ok {
 			return fmt.Errorf("config module section [%s] is not a map, it's a %s", stakewiseName, reflect.TypeOf(section))
 		}
-		err := config.Deserialize(c.Stakewise, configMap, c.Hyperdrive.Network.Value)
+		err := nmc_config.Deserialize(c.Stakewise, configMap, c.Hyperdrive.Network.Value)
 		if err != nil {
 			return fmt.Errorf("error deserializing stakewise configuration: %w", err)
 		}
@@ -62,11 +63,11 @@ func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 	// Hyperdrive
 	network := c.Hyperdrive.Network.Value
 	hdCopy := config.NewHyperdriveConfig(c.Hyperdrive.HyperdriveUserDirectory)
-	config.Clone(c.Hyperdrive, hdCopy, network)
+	nmc_config.Clone(c.Hyperdrive, hdCopy, network)
 
 	// Stakewise
 	swCopy := swconfig.NewStakewiseConfig(hdCopy)
-	config.Clone(c.Stakewise, swCopy, network)
+	nmc_config.Clone(c.Stakewise, swCopy, network)
 
 	return &GlobalConfig{
 		Hyperdrive: hdCopy,
@@ -75,7 +76,7 @@ func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 }
 
 // Changes the current network, propagating new parameter settings if they are affected
-func (c *GlobalConfig) ChangeNetwork(newNetwork config.Network) {
+func (c *GlobalConfig) ChangeNetwork(newNetwork nmc_config.Network) {
 	// Get the current network
 	oldNetwork := c.Hyperdrive.Network.Value
 	if oldNetwork == newNetwork {
@@ -84,18 +85,18 @@ func (c *GlobalConfig) ChangeNetwork(newNetwork config.Network) {
 	c.Hyperdrive.Network.Value = newNetwork
 
 	// Run the changes
-	config.ChangeNetwork(c.Hyperdrive, oldNetwork, newNetwork)
+	nmc_config.ChangeNetwork(c.Hyperdrive, oldNetwork, newNetwork)
 	for _, module := range c.GetAllModuleConfigs() {
-		config.ChangeNetwork(module, oldNetwork, newNetwork)
+		nmc_config.ChangeNetwork(module, oldNetwork, newNetwork)
 	}
 }
 
 // Updates the default parameters based on the current network value
 func (c *GlobalConfig) UpdateDefaults() {
 	network := c.Hyperdrive.Network.Value
-	config.UpdateDefaults(c.Hyperdrive, network)
+	nmc_config.UpdateDefaults(c.Hyperdrive, network)
 	for _, module := range c.GetAllModuleConfigs() {
-		config.UpdateDefaults(module, network)
+		nmc_config.UpdateDefaults(module, network)
 	}
 }
 
@@ -105,14 +106,14 @@ func (c *GlobalConfig) Validate() []string {
 
 	// Check for illegal blank strings
 	/* TODO - this needs to be smarter and ignore irrelevant settings
-	for _, param := range config.GetParameters() {
+	for _, param := range nmc_config.GetParameters() {
 		if param.Type == ParameterType_String && !param.CanBeBlank && param.Value == "" {
 			errors = append(errors, fmt.Sprintf("[%s] cannot be blank.", param.Name))
 		}
 	}
 
-	for name, subconfig := range config.GetSubconfigs() {
-		for _, param := range subconfig.GetParameters() {
+	for name, subconfig := range nmc_config.GetSubconfigs() {
+		for _, param := range subnmc_config.GetParameters() {
 			if param.Type == ParameterType_String && !param.CanBeBlank && param.Value == "" {
 				errors = append(errors, fmt.Sprintf("[%s - %s] cannot be blank.", name, param.Name))
 			}
@@ -140,17 +141,17 @@ func (c *GlobalConfig) Validate() []string {
 }
 
 // Get all of the settings that have changed between an old config and this config, and get all of the containers that are affected by those changes - also returns whether or not the selected network was changed
-func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSection, map[config.ContainerID]bool, bool) {
-	sectionList := []*config.ChangedSection{}
-	changedContainers := map[config.ContainerID]bool{}
+func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*nmc_config.ChangedSection, map[nmc_config.ContainerID]bool, bool) {
+	sectionList := []*nmc_config.ChangedSection{}
+	changedContainers := map[nmc_config.ContainerID]bool{}
 
 	// Process all configs for changes
 	sectionList = getChanges(oldConfig.Hyperdrive, c.Hyperdrive, sectionList, changedContainers)
 	sectionList = getChanges(oldConfig.Stakewise, c.Stakewise, sectionList, changedContainers)
 
 	// Add all VCs to the list of changed containers if any change requires a VC change
-	if changedContainers[config.ContainerID_ValidatorClients] {
-		delete(changedContainers, config.ContainerID_ValidatorClients)
+	if changedContainers[nmc_config.ContainerID_ValidatorClient] {
+		delete(changedContainers, nmc_config.ContainerID_ValidatorClient)
 		for _, module := range c.GetAllModuleConfigs() {
 			vcInfo := module.GetValidatorContainerTagInfo()
 			for name := range vcInfo {
@@ -170,22 +171,22 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 
 // Compare two config sections and see what's changed between them, generating a ChangedSection for the results.
 func getChanges(
-	oldConfig config.IConfigSection,
-	newConfig config.IConfigSection,
-	sectionList []*config.ChangedSection,
-	changedContainers map[config.ContainerID]bool,
-) []*config.ChangedSection {
-	section, changeCount := config.GetChangedSettings(oldConfig, newConfig)
+	oldConfig nmc_config.IConfigSection,
+	newConfig nmc_config.IConfigSection,
+	sectionList []*nmc_config.ChangedSection,
+	changedContainers map[nmc_config.ContainerID]bool,
+) []*nmc_config.ChangedSection {
+	section, changeCount := nmc_config.GetChangedSettings(oldConfig, newConfig)
 	section.Name = newConfig.GetTitle()
 	if changeCount > 0 {
-		config.GetAffectedContainers(section, changedContainers)
+		nmc_config.GetAffectedContainers(section, changedContainers)
 		sectionList = append(sectionList, section)
 	}
 	return sectionList
 }
 
 // Check a port setting to see if it's already used elsewhere
-func addAndCheckForDuplicate(portMap map[uint16]bool, param config.Parameter[uint16], errors []string) (map[uint16]bool, []string) {
+func addAndCheckForDuplicate(portMap map[uint16]bool, param nmc_config.Parameter[uint16], errors []string) (map[uint16]bool, []string) {
 	port := param.Value
 	if portMap[port] {
 		return portMap, append(errors, fmt.Sprintf("Port %d for %s is already in use", port, param.GetCommon().Name))

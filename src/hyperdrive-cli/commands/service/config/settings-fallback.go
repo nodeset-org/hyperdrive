@@ -3,8 +3,8 @@ package config
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 // The page wrapper for the fallback config
@@ -76,7 +76,7 @@ func (configPage *FallbackConfigPage) createContent() {
 	// Take the enable out since it's done explicitly
 	fallbackItems := []*parameterizedFormItem{}
 	for _, item := range configPage.fallbackItems {
-		if item.parameter.GetCommon().ID == config.UseFallbackClientsID {
+		if item.parameter.GetCommon().ID == nmc_config.UseFallbackClientsID {
 			continue
 		}
 		fallbackItems = append(fallbackItems, item)

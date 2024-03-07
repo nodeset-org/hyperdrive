@@ -6,8 +6,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_utils "github.com/rocket-pool/node-manager-core/utils"
 )
 
@@ -27,8 +27,8 @@ func (f *walletExportEthKeyContextFactory) Create(args url.Values) (*walletExpor
 }
 
 func (f *walletExportEthKeyContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletExportEthKeyContext, api.WalletExportEthKeyData](
-		router, "export-eth-key", f, f.handler.serviceProvider,
+	nmc_server.RegisterQuerylessGet[*walletExportEthKeyContext, api.WalletExportEthKeyData](
+		router, "export-eth-key", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

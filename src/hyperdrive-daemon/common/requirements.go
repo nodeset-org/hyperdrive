@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
+	"github.com/rocket-pool/node-manager-core/eth"
 )
 
 const (
@@ -27,7 +27,7 @@ var (
 )
 
 func (sp *ServiceProvider) RequireNodeAddress() error {
-	status, err := sp.nodeWallet.GetStatus()
+	status, err := sp.GetWallet().GetStatus()
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (sp *ServiceProvider) RequireNodeAddress() error {
 }
 
 func (sp *ServiceProvider) RequireWalletReady() error {
-	status, err := sp.nodeWallet.GetStatus()
+	status, err := sp.GetWallet().GetStatus()
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func (sp *ServiceProvider) WaitBeaconClientSynced(ctx context.Context, verbose b
 // TODO: Move this into ec-manager and stop exposing the primary and fallback directly...
 func (sp *ServiceProvider) checkExecutionClientStatus(ctx context.Context) (bool, eth.IExecutionClient, error) {
 	// Check the EC status
-	ecMgr := sp.ecManager
+	ecMgr := sp.GetEthClient()
 	mgrStatus := ecMgr.CheckStatus(ctx)
 	if ecMgr.IsPrimaryReady() {
 		return true, nil, nil
@@ -139,7 +139,7 @@ func (sp *ServiceProvider) checkExecutionClientStatus(ctx context.Context) (bool
 // Check if the primary and fallback Beacon clients are synced
 func (sp *ServiceProvider) checkBeaconClientStatus(ctx context.Context) (bool, error) {
 	// Check the BC status
-	bcMgr := sp.bcManager
+	bcMgr := sp.GetBeaconClient()
 	mgrStatus := bcMgr.CheckStatus(ctx)
 	if bcMgr.IsPrimaryReady() {
 		return true, nil
@@ -292,7 +292,7 @@ func (sp *ServiceProvider) waitBeaconClientSynced(ctx context.Context, verbose b
 		}
 
 		// Get sync status
-		syncStatus, err := sp.bcManager.GetSyncStatus(ctx)
+		syncStatus, err := sp.GetBeaconClient().GetSyncStatus(ctx)
 		if err != nil {
 			return false, err
 		}

@@ -10,7 +10,7 @@ import (
 
 	"github.com/alessio/shellescape"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -125,7 +125,7 @@ func SaveConfig(cfg *GlobalConfig, directory, filename string) error {
 // }
 
 // Parse and augment the status of a client into a human-readable format
-func getClientStatusString(clientStatus api.ClientStatus) string {
+func getClientStatusString(clientStatus types.ClientStatus) string {
 	if clientStatus.IsSynced {
 		return "synced and ready"
 	}

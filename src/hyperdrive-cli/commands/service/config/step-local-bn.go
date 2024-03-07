@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/pbnjay/memory"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 const localBnStepID string = "step-local-bn"
@@ -17,7 +17,7 @@ func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 	// Create the button names and descriptions from the config
 	clientNames := []string{"Random (Recommended)"}
 	clientDescriptions := []string{"Select a client randomly to help promote the diversity of the Beacon Chain. We recommend you do this unless you have a strong reason to pick a specific client. To learn more about why client diversity is important, please visit https://clientdiversity.org for an explanation."}
-	clients := []*config.ParameterOption[config.BeaconNode]{}
+	clients := []*nmc_config.ParameterOption[nmc_config.BeaconNode]{}
 	for _, client := range wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Options {
 		clientNames = append(clientNames, client.Name)
 		clientDescriptions = append(clientDescriptions, getAugmentedBnDescription(client.Value, client.Description))
@@ -54,21 +54,21 @@ func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 			selectRandomBn(clients, true, wiz, currentStep, totalSteps)
 		} else {
 			buttonLabel = strings.TrimSpace(buttonLabel)
-			selectedClient := config.BeaconNode_Unknown
+			selectedClient := nmc_config.BeaconNode_Unknown
 			for _, client := range wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Options {
 				if client.Name == buttonLabel {
 					selectedClient = client.Value
 					break
 				}
 			}
-			if selectedClient == config.BeaconNode_Unknown {
+			if selectedClient == nmc_config.BeaconNode_Unknown {
 				panic(fmt.Sprintf("Local BN selection buttons didn't match any known clients, buttonLabel = %s\n", buttonLabel))
 			}
 			wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value = selectedClient
 			switch selectedClient {
-			//case config.ConsensusClient_Prysm:
+			//case nmc_config.ConsensusClient_Prysm:
 			//	wiz.consensusLocalPrysmWarning.show()
-			case config.BeaconNode_Teku:
+			case nmc_config.BeaconNode_Teku:
 				totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
 				if runtime.GOARCH == "arm64" || totalMemoryGB < 15 {
 					wiz.bnLocalTekuWarning.show()
@@ -103,22 +103,22 @@ func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 }
 
 // Get a random client compatible with the user's hardware and EC choices.
-func selectRandomBn(goodOptions []*config.ParameterOption[config.BeaconNode], includeSupermajority bool, wiz *wizard, currentStep int, totalSteps int) {
+func selectRandomBn(goodOptions []*nmc_config.ParameterOption[nmc_config.BeaconNode], includeSupermajority bool, wiz *wizard, currentStep int, totalSteps int) {
 	// Get system specs
 	totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
 	isLowPower := (totalMemoryGB < 15 || runtime.GOARCH == "arm64")
 
 	// Filter out the clients based on system specs
-	filteredClients := []config.BeaconNode{}
+	filteredClients := []nmc_config.BeaconNode{}
 	for _, clientOption := range goodOptions {
 		client := clientOption.Value
 		switch client {
-		case config.BeaconNode_Teku:
+		case nmc_config.BeaconNode_Teku:
 			if !isLowPower {
 				filteredClients = append(filteredClients, client)
 			}
 		/*
-			case config.BeaconNode_Prysm:
+			case nmc_config.BeaconNode_Prysm:
 				if includeSupermajority {
 					filteredClients = append(filteredClients, client)
 				}
@@ -135,7 +135,7 @@ func selectRandomBn(goodOptions []*config.ParameterOption[config.BeaconNode], in
 
 	// Show the selection page
 	/*
-		if selectedClient == config.BeaconNode_Prysm {
+		if selectedClient == nmc_config.BeaconNode_Prysm {
 			wiz.consensusLocalRandomPrysmModal = createRandomPrysmStep(wiz, currentStep, totalSteps, goodOptions)
 			wiz.consensusLocalRandomPrysmModal.show()
 		} else {
@@ -148,13 +148,13 @@ func selectRandomBn(goodOptions []*config.ParameterOption[config.BeaconNode], in
 }
 
 // Get a more verbose client description, including warnings
-func getAugmentedBnDescription(client config.BeaconNode, originalDescription string) string {
+func getAugmentedBnDescription(client nmc_config.BeaconNode, originalDescription string) string {
 	switch client {
 	/*
-		case config.BeaconNode_Prysm:
+		case nmc_config.BeaconNode_Prysm:
 			return fmt.Sprintf("%s\n\n[orange]NOTE: Prysm currently has a very high representation of the Beacon Chain. For the health of the network and the overall safety of your funds, please consider choosing a client with a lower representation. Please visit https://clientdiversity.org to learn more.", originalDescription)
 	*/
-	case config.BeaconNode_Teku:
+	case nmc_config.BeaconNode_Teku:
 		totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
 		if runtime.GOARCH == "arm64" || totalMemoryGB < 15 {
 			return fmt.Sprintf("%s\n\n[orange]WARNING: Teku is a resource-heavy client and will likely not perform well on your system given your CPU power or amount of available RAM. We recommend you pick a lighter client instead.", originalDescription)

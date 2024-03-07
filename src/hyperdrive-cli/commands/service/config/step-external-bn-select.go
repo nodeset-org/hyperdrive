@@ -1,6 +1,6 @@
 package config
 
-import "github.com/nodeset-org/hyperdrive/shared/config"
+import nmc_config "github.com/rocket-pool/node-manager-core/config"
 
 func createExternalBnSelectStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
 	// Create the button names and descriptions from the config
@@ -26,7 +26,7 @@ func createExternalBnSelectStep(wiz *wizard, currentStep int, totalSteps int) *c
 
 	done := func(buttonIndex int, buttonLabel string) {
 		switch wiz.md.Config.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value {
-		case config.BeaconNode_Prysm:
+		case nmc_config.BeaconNode_Prysm:
 			wiz.externalPrysmSettingsModal.show()
 		default:
 			wiz.externalBnSettingsModal.show()

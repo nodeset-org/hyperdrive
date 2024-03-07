@@ -3,8 +3,8 @@ package config
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 // The page wrapper for the EC config
@@ -147,11 +147,11 @@ func (configPage *ExecutionConfigPage) handleEcModeChanged() {
 
 	selectedMode := configPage.masterConfig.Hyperdrive.ClientMode.Value
 	switch selectedMode {
-	case config.ClientMode_Local:
+	case nmc_config.ClientMode_Local:
 		// Local (Docker mode)
 		configPage.handleLocalEcChanged()
 
-	case config.ClientMode_External:
+	case nmc_config.ClientMode_External:
 		// External (Hybrid mode)
 		configPage.handleExternalEcChanged()
 	}
@@ -165,11 +165,11 @@ func (configPage *ExecutionConfigPage) handleLocalEcChanged() {
 	selectedEc := configPage.masterConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value
 
 	switch selectedEc {
-	case config.ExecutionClient_Geth:
+	case nmc_config.ExecutionClient_Geth:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.gethItems, nil)
-	case config.ExecutionClient_Nethermind:
+	case nmc_config.ExecutionClient_Nethermind:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.nethermindItems, nil)
-	case config.ExecutionClient_Besu:
+	case nmc_config.ExecutionClient_Besu:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.besuItems, nil)
 	}
 

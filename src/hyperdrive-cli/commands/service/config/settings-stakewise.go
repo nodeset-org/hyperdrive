@@ -4,8 +4,8 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 // The page wrapper for the Stakewise config
@@ -131,15 +131,15 @@ func (configPage *StakewiseConfigPage) handleLayoutChanged() {
 
 		bn := configPage.masterConfig.Hyperdrive.GetSelectedBeaconNode()
 		switch bn {
-		case config.BeaconNode_Lighthouse:
+		case nmc_config.BeaconNode_Lighthouse:
 			configPage.layout.addFormItems(configPage.lighthouseItems)
-		case config.BeaconNode_Lodestar:
+		case nmc_config.BeaconNode_Lodestar:
 			configPage.layout.addFormItems(configPage.lodestarItems)
-		case config.BeaconNode_Nimbus:
+		case nmc_config.BeaconNode_Nimbus:
 			configPage.layout.addFormItems(configPage.nimbusItems)
-		case config.BeaconNode_Prysm:
+		case nmc_config.BeaconNode_Prysm:
 			configPage.layout.addFormItems(configPage.prysmItems)
-		case config.BeaconNode_Teku:
+		case nmc_config.BeaconNode_Teku:
 			configPage.layout.addFormItems(configPage.tekuItems)
 		}
 	}

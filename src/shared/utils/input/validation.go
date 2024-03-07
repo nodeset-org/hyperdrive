@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/eth-utils/beacon"
-	"github.com/nodeset-org/eth-utils/eth"
+	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/tyler-smith/go-bip39"
 	"github.com/urfave/cli/v2"
 )

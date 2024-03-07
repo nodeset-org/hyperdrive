@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/nodeset-org/eth-utils/eth"
+	"github.com/rocket-pool/node-manager-core/eth"
 )
 
 type ApiResponse[Data any] struct {

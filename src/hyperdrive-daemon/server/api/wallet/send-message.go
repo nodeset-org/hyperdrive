@@ -9,9 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ===============
@@ -34,8 +34,8 @@ func (f *walletSendMessageContextFactory) Create(args url.Values) (*walletSendMe
 }
 
 func (f *walletSendMessageContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletSendMessageContext, api.TxInfoData](
-		router, "send-message", f, f.handler.serviceProvider,
+	nmc_server.RegisterQuerylessGet[*walletSendMessageContext, api.TxInfoData](
+		router, "send-message", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

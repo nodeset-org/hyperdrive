@@ -8,11 +8,11 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	nmc_nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
+	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
 )
 
 // ===============
@@ -38,8 +38,8 @@ func (f *walletInitializeContextFactory) Create(args url.Values) (*walletInitial
 }
 
 func (f *walletInitializeContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletInitializeContext, api.WalletInitializeData](
-		router, "initialize", f, f.handler.serviceProvider,
+	nmc_server.RegisterQuerylessGet[*walletInitializeContext, api.WalletInitializeData](
+		router, "initialize", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -61,21 +61,21 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 	sp := c.handler.serviceProvider
 
 	// Parse the derivation path
-	path, err := GetDerivationPath(types.DerivationPath(c.derivationPath))
+	path, err := nmc_nodewallet.GetDerivationPath(nmc_wallet.DerivationPath(c.derivationPath))
 	if err != nil {
 		return err
 	}
 
-	var w *wallet.Wallet
+	var w *nmc_nodewallet.Wallet
 	var mnemonic string
 	if !c.saveWallet {
 		// Make a dummy wallet for the sake of creating a mnemonic and derived address
-		mnemonic, err = wallet.GenerateNewMnemonic()
+		mnemonic, err = nmc_nodewallet.GenerateNewMnemonic()
 		if err != nil {
 			return fmt.Errorf("error generating new mnemonic: %w", err)
 		}
 
-		w, err = wallet.TestRecovery(path, uint(c.index), mnemonic, 0)
+		w, err = nmc_nodewallet.TestRecovery(path, uint(c.index), mnemonic, 0)
 		if err != nil {
 			return fmt.Errorf("error generating wallet from new mnemonic: %w", err)
 		}

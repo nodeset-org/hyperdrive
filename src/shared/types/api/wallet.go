@@ -3,12 +3,12 @@ package api
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/eth-utils/beacon"
-	"github.com/nodeset-org/eth-utils/eth"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/rocket-pool/node-manager-core/eth"
+	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
 )
 
 type WalletStatusData struct {
-	WalletStatus types.WalletStatus `json:"walletStatus"`
+	WalletStatus nmc_wallet.WalletStatus `json:"walletStatus"`
 }
 
 type WalletInitializeData struct {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/nodeset-org/eth-utils/eth"
+	"github.com/rocket-pool/node-manager-core/eth"
 )
 
 const (

@@ -9,9 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ===============
@@ -33,8 +33,8 @@ func (f *walletSignTxContextFactory) Create(args url.Values) (*walletSignTxConte
 }
 
 func (f *walletSignTxContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletSignTxContext, api.WalletSignTxData](
-		router, "sign-tx", f, f.handler.serviceProvider,
+	nmc_server.RegisterQuerylessGet[*walletSignTxContext, api.WalletSignTxData](
+		router, "sign-tx", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

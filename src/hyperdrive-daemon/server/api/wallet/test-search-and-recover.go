@@ -9,10 +9,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	nmc_nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
+	nmc_wallet "github.com/rocket-pool/node-manager-core/node/wallet"
 )
 
 // ===============
@@ -35,8 +36,8 @@ func (f *walletTestSearchAndRecoverContextFactory) Create(args url.Values) (*wal
 }
 
 func (f *walletTestSearchAndRecoverContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletTestSearchAndRecoverContext, api.WalletSearchAndRecoverData](
-		router, "test-search-and-recover", f, f.handler.serviceProvider,
+	nmc_server.RegisterQuerylessGet[*walletTestSearchAndRecoverContext, api.WalletSearchAndRecoverData](
+		router, "test-search-and-recover", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -55,17 +56,17 @@ func (c *walletTestSearchAndRecoverContext) PrepareData(data *api.WalletSearchAn
 	rs := sp.GetResources()
 
 	// Try each derivation path across all of the iterations
-	var recoveredWallet *wallet.Wallet
+	var recoveredWallet *nmc_nodewallet.Wallet
 	paths := []string{
-		wallet.DefaultNodeKeyPath,
-		wallet.LedgerLiveNodeKeyPath,
-		wallet.MyEtherWalletNodeKeyPath,
+		nmc_wallet.DefaultNodeKeyPath,
+		nmc_wallet.LedgerLiveNodeKeyPath,
+		nmc_wallet.MyEtherWalletNodeKeyPath,
 	}
 	for i := uint(0); i < findIterations; i++ {
 		for j := 0; j < len(paths); j++ {
 			var err error
 			derivationPath := paths[j]
-			recoveredWallet, err = wallet.TestRecovery(derivationPath, i, c.mnemonic, rs.ChainID)
+			recoveredWallet, err = nmc_nodewallet.TestRecovery(derivationPath, i, c.mnemonic, rs.ChainID)
 			if err != nil {
 				return fmt.Errorf("error recovering wallet with path [%s], index [%d]: %w", derivationPath, i, err)
 			}

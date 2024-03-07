@@ -8,10 +8,11 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	nmc_nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
+	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
 )
 
 // ===============
@@ -37,8 +38,8 @@ func (f *walletRecoverContextFactory) Create(args url.Values) (*walletRecoverCon
 }
 
 func (f *walletRecoverContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletRecoverContext, api.WalletRecoverData](
-		router, "recover", f, f.handler.serviceProvider,
+	nmc_server.RegisterQuerylessGet[*walletRecoverContext, api.WalletRecoverData](
+		router, "recover", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -69,7 +70,7 @@ func (c *walletRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bi
 	}
 
 	// Parse the derivation path
-	path, err := GetDerivationPath(types.DerivationPath(c.derivationPath))
+	path, err := nmc_nodewallet.GetDerivationPath(nmc_wallet.DerivationPath(c.derivationPath))
 	if err != nil {
 		return err
 	}

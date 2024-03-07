@@ -11,8 +11,8 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/urfave/cli/v2"
 )
 
@@ -123,7 +123,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	// Check wallet status
 	fmt.Println()
 	fmt.Println("Checking node wallet status...")
-	var status *types.WalletStatus
+	var status *nmc_wallet.WalletStatus
 	retries := 5
 	for i := 0; i < retries; i++ {
 		response, err := hd.Api.Wallet.Status()
