@@ -1,7 +1,9 @@
 package swnodeset
 
 import (
+	"context"
 	"fmt"
+	"math/big"
 	"net/url"
 
 	"github.com/goccy/go-json"
@@ -49,6 +51,16 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	nc := sp.GetNodesetClient()
 	w := sp.GetWallet()
 	ec := sp.GetEthClient()
+	// Note this uses current gas price but this could fluctuate.
+	// Potentially use a hardcoded value like 200 gwei to make sure TX will have a higher likelyhood of going through
+	gasPrice, err := ec.SuggestGasPrice(context.Background())
+	if err != nil {
+		return fmt.Errorf("error getting suggested gas price: %w", err)
+	}
+	balance, err := ec.BalanceAt(context.Background(), opts.From, nil)
+	if err != nil {
+		return fmt.Errorf("error getting balance: %w", err)
+	}
 
 	// Get the list of registered validators
 	registeredPubkeyMap := map[beacon.ValidatorPubkey]bool{}
@@ -85,7 +97,10 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	}
 
 	// Make sure validator has enough funds to pay for the deposit
-	// 300,000 gas unit * 100 gwei = 0.03 ETH / wallet
+	totalCost := new(big.Int).Mul(gasPrice, big.NewInt(int64(len(unregisteredKeys))))
+	if totalCost.Cmp(balance) > 0 {
+		return fmt.Errorf("not enough funds to pay for the deposit. wallet should have at least %s", totalCost.String())
+	}
 
 	// Get the deposit data for those pubkeys
 	depositData, err := ddMgr.GenerateDepositData(unregisteredKeys)
