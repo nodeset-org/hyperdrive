@@ -5,7 +5,6 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/term"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/urfave/cli/v2"
 )
@@ -108,7 +107,7 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	}
 
 	// Clear terminal output
-	_ = term.Clear()
+	_ = utils.ClearTerminal()
 
 	fmt.Println("The node wallet was successfully initialized.")
 	fmt.Printf("Node account: %s%s%s\n", terminal.ColorBlue, response.Data.AccountAddress.Hex(), terminal.ColorReset)

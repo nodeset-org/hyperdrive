@@ -3,6 +3,8 @@ package utils
 import (
 	"fmt"
 	"math/big"
+	"os"
+	"os/exec"
 	"strconv"
 	"time"
 
@@ -180,4 +182,11 @@ func ParseFloat(c *cli.Context, name string, value string, isFraction bool) (*bi
 		return nil, nil
 	}
 	return trueVal, nil
+}
+
+// Clear terminal output
+func ClearTerminal() error {
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }
