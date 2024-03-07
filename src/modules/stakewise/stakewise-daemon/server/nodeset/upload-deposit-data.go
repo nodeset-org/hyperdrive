@@ -99,7 +99,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	// Make sure validator has enough funds to pay for the deposit
 	totalCost := new(big.Int).Mul(gasPrice, big.NewInt(int64(len(unregisteredKeys))))
 	if totalCost.Cmp(balance) > 0 {
-		return fmt.Errorf("not enough funds to pay for the deposit. wallet should have at least %s", totalCost.String())
+		return fmt.Errorf("not enough funds to pay for the deposit transactions. wallet should have at least %s wei", totalCost.String())
 	}
 
 	// Get the deposit data for those pubkeys
