@@ -14,10 +14,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/goccy/go-json"
-	"github.com/nodeset-org/eth-utils/beacon"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types"
+	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 	nmc_config "github.com/rocket-pool/node-manager-core/config"
 	nmc_utils "github.com/rocket-pool/node-manager-core/node/validator/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
@@ -69,7 +69,7 @@ func (m *DepositDataManager) GenerateDepositData(keys []*eth2types.BLSPrivateKey
 	for i, key := range keys {
 		depositData, err := nmc_utils.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, nmc_config.Network(resources.NodesetNetwork))
 		if err != nil {
-			pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
+			pubkey := nmc_beacon.ValidatorPubkey(key.PublicKey().Marshal())
 			return nil, fmt.Errorf("error getting deposit data for key %s: %w", pubkey.HexWithPrefix(), err)
 		}
 		dataList[i] = &types.ExtendedDepositData{
@@ -126,7 +126,7 @@ func (m *DepositDataManager) ComputeMerkleRoot(data []types.ExtendedDepositData)
 		// Get the deposit data root for this deposit data
 		ddRoot, err := m.regenerateDepositDataRoot(dd)
 		if err != nil {
-			pubkey := beacon.ValidatorPubkey(dd.PublicKey)
+			pubkey := nmc_beacon.ValidatorPubkey(dd.PublicKey)
 			return common.Hash{}, fmt.Errorf("error generating deposit data root for validator %d (%s): %w", i, pubkey.Hex(), err)
 		}
 
@@ -197,7 +197,7 @@ func (m *DepositDataManager) ComputeMerkleRoot(data []types.ExtendedDepositData)
 
 // Regenerate the deposit data hash root from a deposit data object instead of explicitly relying on the deposit data root provided in the EDD
 func (m *DepositDataManager) regenerateDepositDataRoot(dd types.ExtendedDepositData) (common.Hash, error) {
-	var depositData = beacon.DepositData{
+	var depositData = nmc_beacon.DepositData{
 		PublicKey:             dd.PublicKey,
 		WithdrawalCredentials: dd.WithdrawalCredentials,
 		Amount:                StakewiseDepositAmount, // Note: hardcoded here because Stakewise ignores the actual amount in the deposit data and hardcodes it in their tree generation
