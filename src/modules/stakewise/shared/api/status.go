@@ -1,9 +1,9 @@
 package swapi
 
 import (
-	"github.com/nodeset-org/eth-utils/beacon"
+	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 )
 
 type ActiveValidatorsData struct {
-	ActiveValidators []beacon.ValidatorPubkey `json:"pubkeys"`
+	ActiveValidators []nmc_beacon.ValidatorPubkey `json:"pubkeys"`
 }

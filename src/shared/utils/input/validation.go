@@ -11,7 +11,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
-	"github.com/nodeset-org/eth-utils/beacon"
+	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/tyler-smith/go-bip39"
 	"github.com/urfave/cli/v2"
@@ -263,10 +263,10 @@ func ValidateTxInfo(name string, value string) (*eth.TransactionInfo, error) {
 }
 
 // Validate a validator pubkey
-func ValidatePubkey(name, value string) (beacon.ValidatorPubkey, error) {
-	pubkey, err := beacon.HexToValidatorPubkey(value)
+func ValidatePubkey(name, value string) (nmc_beacon.ValidatorPubkey, error) {
+	pubkey, err := nmc_beacon.HexToValidatorPubkey(value)
 	if err != nil {
-		return beacon.ValidatorPubkey{}, fmt.Errorf("Invalid %s '%s': %w", name, value, err)
+		return nmc_beacon.ValidatorPubkey{}, fmt.Errorf("Invalid %s '%s': %w", name, value, err)
 	}
 	return pubkey, nil
 }

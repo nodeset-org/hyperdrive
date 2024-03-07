@@ -10,10 +10,10 @@ import (
 
 	"github.com/goccy/go-json"
 
-	"github.com/nodeset-org/eth-utils/beacon"
-	"github.com/nodeset-org/eth-utils/common"
 	swshared "github.com/nodeset-org/hyperdrive/modules/stakewise/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types"
+	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
+	nmc_utils "github.com/rocket-pool/node-manager-core/utils"
 )
 
 const (
@@ -46,7 +46,7 @@ type DepositDataResponse struct {
 
 // api/validators
 type ValidatorsResponse struct {
-	Data []beacon.ValidatorPubkey `json:"data"`
+	Data []nmc_beacon.ValidatorPubkey `json:"data"`
 }
 
 // ==============
@@ -98,7 +98,7 @@ func (c *NodesetClient) UploadDepositData(depositData []byte) ([]byte, error) {
 
 // Get the current version of the aggregated deposit data on the server
 func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
-	vault := common.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
+	vault := nmc_utils.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
 	params := map[string]string{
 		"vault":   vault,
 		"network": c.res.NodesetNetwork,
@@ -118,7 +118,7 @@ func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
 
 // Get the aggregated deposit data from the server
 func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData, error) {
-	vault := common.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
+	vault := nmc_utils.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
 	params := map[string]string{
 		"vault":   vault,
 		"network": c.res.NodesetNetwork,
@@ -137,7 +137,7 @@ func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData
 }
 
 // Get a list of all of the pubkeys that have already been registered with NodeSet for this node
-func (c *NodesetClient) GetRegisteredValidators() ([]beacon.ValidatorPubkey, error) {
+func (c *NodesetClient) GetRegisteredValidators() ([]nmc_beacon.ValidatorPubkey, error) {
 	response, err := c.submitRequest(http.MethodGet, nil, nil, validatorsPath)
 	if err != nil {
 		return nil, fmt.Errorf("error getting registered validators: %w", err)
@@ -173,7 +173,7 @@ func (c *NodesetClient) submitRequest(method string, body io.Reader, queryParams
 	if err != nil {
 		return nil, fmt.Errorf("initializing authorization signature failed: %w", err)
 	}
-	request.Header.Set(authHeader, common.EncodeHexWithPrefix(c.authSignature))
+	request.Header.Set(authHeader, nmc_utils.EncodeHexWithPrefix(c.authSignature))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Upload it to the server

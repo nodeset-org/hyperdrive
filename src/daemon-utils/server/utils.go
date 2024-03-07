@@ -7,7 +7,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
-	"github.com/nodeset-org/hyperdrive/shared/utils/log"
+	"github.com/rocket-pool/node-manager-core/utils/log"
 )
 
 // Function for validating an argument (wraps the old CLI validators)

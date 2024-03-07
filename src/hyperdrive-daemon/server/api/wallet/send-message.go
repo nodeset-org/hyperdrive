@@ -9,9 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -34,7 +34,7 @@ func (f *walletSendMessageContextFactory) Create(args url.Values) (*walletSendMe
 }
 
 func (f *walletSendMessageContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*walletSendMessageContext, api.TxInfoData](
+	nmc_server.RegisterQuerylessGet[*walletSendMessageContext, nmc_types.TxInfoData](
 		router, "send-message", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -49,7 +49,7 @@ type walletSendMessageContext struct {
 	address common.Address
 }
 
-func (c *walletSendMessageContext) PrepareData(data *api.TxInfoData, opts *bind.TransactOpts) error {
+func (c *walletSendMessageContext) PrepareData(data *nmc_types.TxInfoData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 

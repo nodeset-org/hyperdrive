@@ -8,9 +8,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
+	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -50,7 +50,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	w := sp.GetWallet()
 
 	// Get the list of registered validators
-	registeredPubkeyMap := map[beacon.ValidatorPubkey]bool{}
+	registeredPubkeyMap := map[nmc_beacon.ValidatorPubkey]bool{}
 	registeredPubkeys, err := nc.GetRegisteredValidators()
 	if err != nil {
 		return fmt.Errorf("error getting registered validators: %w", err)
@@ -68,9 +68,9 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 
 	// Find the ones that haven't been uploaded yet
 	unregisteredKeys := []*eth2types.BLSPrivateKey{}
-	newPubkeys := []beacon.ValidatorPubkey{}
+	newPubkeys := []nmc_beacon.ValidatorPubkey{}
 	for _, key := range keys {
-		pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
+		pubkey := nmc_beacon.ValidatorPubkey(key.PublicKey().Marshal())
 		_, exists := registeredPubkeyMap[pubkey]
 		if !exists {
 			unregisteredKeys = append(unregisteredKeys, key)

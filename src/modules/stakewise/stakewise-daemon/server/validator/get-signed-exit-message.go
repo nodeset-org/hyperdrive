@@ -9,11 +9,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/validator/utils"
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
+	nmc_utils "github.com/rocket-pool/node-manager-core/node/validator/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -55,7 +55,7 @@ type validatorGetSignedExitMessagesContext struct {
 	handler     *ValidatorHandler
 	epoch       uint64
 	isEpochSet  bool
-	pubkeys     []beacon.ValidatorPubkey
+	pubkeys     []nmc_beacon.ValidatorPubkey
 	noBroadcast bool
 }
 
@@ -110,7 +110,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 		pubkey := c.pubkeys[i]
 		index := statuses[pubkey].Index
 
-		signature, err := utils.GetSignedExitMessage(key, index, c.epoch, signatureDomain)
+		signature, err := nmc_utils.GetSignedExitMessage(key, index, c.epoch, signatureDomain)
 		if err != nil {
 			return fmt.Errorf("error getting exit message signature for validator %s: %w", pubkey.Hex(), err)
 		}

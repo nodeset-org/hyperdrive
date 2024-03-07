@@ -1,10 +1,12 @@
 package swapi
 
-import "github.com/nodeset-org/eth-utils/beacon"
+import (
+	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
+)
 
 type ValidatorExitInfo struct {
-	Index     uint64                    `json:"index"`
-	Signature beacon.ValidatorSignature `json:"signature"`
+	Index     uint64                        `json:"index"`
+	Signature nmc_beacon.ValidatorSignature `json:"signature"`
 }
 
 type ValidatorGetSignedExitMessagesData struct {

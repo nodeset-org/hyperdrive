@@ -7,7 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
-	"github.com/nodeset-org/hyperdrive/shared/utils/log"
+	"github.com/rocket-pool/node-manager-core/utils/log"
 )
 
 // Config

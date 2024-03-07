@@ -8,8 +8,8 @@ import (
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
-	"github.com/nodeset-org/hyperdrive/shared/utils/log"
 	batch "github.com/rocket-pool/batch-query"
+	"github.com/rocket-pool/node-manager-core/utils/log"
 )
 
 // Update deposit data task

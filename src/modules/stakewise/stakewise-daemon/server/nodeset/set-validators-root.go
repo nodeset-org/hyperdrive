@@ -10,8 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -33,7 +33,7 @@ func (f *nodesetSetValidatorsRootContextFactory) Create(args url.Values) (*nodes
 }
 
 func (f *nodesetSetValidatorsRootContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*nodesetSetValidatorsRootContext, api.TxInfoData](
+	server.RegisterQuerylessGet[*nodesetSetValidatorsRootContext, nmc_types.TxInfoData](
 		router, "set-validators-root", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -47,7 +47,7 @@ type nodesetSetValidatorsRootContext struct {
 	root    common.Hash
 }
 
-func (c *nodesetSetValidatorsRootContext) PrepareData(data *api.TxInfoData, opts *bind.TransactOpts) error {
+func (c *nodesetSetValidatorsRootContext) PrepareData(data *nmc_types.TxInfoData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
 	res := sp.GetResources()

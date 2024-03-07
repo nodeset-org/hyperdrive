@@ -9,14 +9,13 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/mitchellh/go-homedir"
-	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet/bip39"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
 )
@@ -180,7 +179,7 @@ func promptForCustomKeyPasswords(hd *client.HyperdriveClient, cfg *config.Hyperd
 	}
 
 	// Get the pubkeys for the custom keystores
-	customPubkeys := []beacon.ValidatorPubkey{}
+	customPubkeys := []nmc_beacon.ValidatorPubkey{}
 	for _, file := range files {
 		// Read the file
 		bytes, err := os.ReadFile(filepath.Join(customKeyDir, file.Name()))
@@ -189,7 +188,7 @@ func promptForCustomKeyPasswords(hd *client.HyperdriveClient, cfg *config.Hyperd
 		}
 
 		// Deserialize it
-		keystore := types.ValidatorKeystore{}
+		keystore := nmc_beacon.ValidatorKeystore{}
 		err = json.Unmarshal(bytes, &keystore)
 		if err != nil {
 			return "", fmt.Errorf("error deserializing custom keystore %s: %w", file.Name(), err)

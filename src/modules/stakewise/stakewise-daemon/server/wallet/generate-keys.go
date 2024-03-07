@@ -7,11 +7,11 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 )
 
 // ===============
@@ -73,13 +73,13 @@ func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData
 	*/
 
 	// Generate and save the keys
-	pubkeys := make([]beacon.ValidatorPubkey, c.count)
+	pubkeys := make([]nmc_beacon.ValidatorPubkey, c.count)
 	for i := 0; i < int(c.count); i++ {
 		key, err := wallet.GenerateNewValidatorKey()
 		if err != nil {
 			return fmt.Errorf("error generating validator key: %w", err)
 		}
-		pubkeys[i] = beacon.ValidatorPubkey(key.PublicKey().Marshal())
+		pubkeys[i] = nmc_beacon.ValidatorPubkey(key.PublicKey().Marshal())
 	}
 	data.Pubkeys = pubkeys
 

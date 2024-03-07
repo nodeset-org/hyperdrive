@@ -1,55 +1,28 @@
 package swclient
 
 import (
-	"context"
-	"net"
-	"net/http"
-
-	"github.com/fatih/color"
-	"github.com/nodeset-org/hyperdrive/client"
-	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/rocket-pool/node-manager-core/utils/log"
-)
-
-const (
-	baseUrl         string          = "http://" + swconfig.ModuleName + "/%s"
-	jsonContentType string          = "application/json"
-	apiColor        color.Attribute = color.FgHiCyan
+	nmc_client "github.com/rocket-pool/node-manager-core/api/client"
 )
 
 // Binder for the Hyperdrive daemon API server
 type ApiClient struct {
+	context   *nmc_client.RequesterContext
 	Nodeset   *NodesetRequester
 	Validator *ValidatorRequester
 	Wallet    *WalletRequester
 	Status    *StatusRequester
-	context   *client.RequesterContext
 }
 
 // Creates a new API client instance
 func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClient {
-	apiRequester := &ApiClient{
-		context: &client.RequesterContext{
-			SocketPath: socketPath,
-			DebugMode:  debugMode,
-			Base:       baseRoute,
-		},
+	context := nmc_client.NewRequesterContext(baseRoute, socketPath, debugMode)
+
+	client := &ApiClient{
+		context:   context,
+		Nodeset:   NewNodesetRequester(context),
+		Validator: NewValidatorRequester(context),
+		Wallet:    NewWalletRequester(context),
+		Status:    NewStatusRequester(context),
 	}
-
-	apiRequester.context.Client = &http.Client{
-		Transport: &http.Transport{
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				return net.Dial("unix", socketPath)
-			},
-		},
-	}
-
-	log := log.NewColorLogger(apiColor)
-	apiRequester.context.Log = &log
-
-	apiRequester.Nodeset = NewNodesetRequester(apiRequester.context)
-	apiRequester.Validator = NewValidatorRequester(apiRequester.context)
-	apiRequester.Wallet = NewWalletRequester(apiRequester.context)
-	apiRequester.Status = NewStatusRequester(apiRequester.context)
-	return apiRequester
+	return client
 }

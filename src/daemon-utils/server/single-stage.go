@@ -11,8 +11,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
 	batch "github.com/rocket-pool/batch-query"
+	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
+	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
 )
 
 // Wrapper for callbacks used by call runners that follow a common single-stage pattern:
@@ -161,7 +162,7 @@ func runSingleStageRoute[DataType any, ConfigType config.IModuleConfig](ctx ISin
 		return nil, fmt.Errorf("error getting wallet status: %w", err)
 	}
 	status := walletResponse.Data.WalletStatus
-	if utils.IsWalletReady(status) {
+	if nmc_wallet.IsWalletReady(status) {
 		opts = signer.GetTransactor(status.Wallet.WalletAddress)
 	}
 

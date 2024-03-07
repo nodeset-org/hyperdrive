@@ -7,7 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
-	"github.com/nodeset-org/hyperdrive/shared/utils/log"
+	"github.com/rocket-pool/node-manager-core/utils/log"
 )
 
 // Config

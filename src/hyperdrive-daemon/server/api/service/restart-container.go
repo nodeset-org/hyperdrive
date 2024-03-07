@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -32,7 +32,7 @@ func (f *serviceRestartContainerContextFactory) Create(args url.Values) (*servic
 }
 
 func (f *serviceRestartContainerContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*serviceRestartContainerContext, api.SuccessData](
+	nmc_server.RegisterQuerylessGet[*serviceRestartContainerContext, nmc_types.SuccessData](
 		router, "restart-container", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -46,7 +46,7 @@ type serviceRestartContainerContext struct {
 	container string
 }
 
-func (c *serviceRestartContainerContext) PrepareData(data *api.SuccessData, opts *bind.TransactOpts) error {
+func (c *serviceRestartContainerContext) PrepareData(data *nmc_types.SuccessData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	cfg := sp.GetConfig()
 	d := sp.GetDocker()

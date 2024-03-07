@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/goccy/go-json"
-	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
+	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -124,20 +124,20 @@ func (w *Wallet) GenerateNewValidatorKey() (*eth2types.BLSPrivateKey, error) {
 }
 
 // Get the private validator key with the corresponding pubkey
-func (w *Wallet) GetPrivateKeyForPubkey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
+func (w *Wallet) GetPrivateKeyForPubkey(pubkey nmc_beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 	return w.stakewiseKeystoreManager.LoadValidatorKey(pubkey)
 }
 
 // Get the private validator key with the corresponding pubkey
-func (w *Wallet) DerivePubKeys(privateKeys []*eth2types.BLSPrivateKey) ([]beacon.ValidatorPubkey, error) {
-	publicKeys := make([]beacon.ValidatorPubkey, 0, len(privateKeys))
+func (w *Wallet) DerivePubKeys(privateKeys []*eth2types.BLSPrivateKey) ([]nmc_beacon.ValidatorPubkey, error) {
+	publicKeys := make([]nmc_beacon.ValidatorPubkey, 0, len(privateKeys))
 
 	for i, privateKey := range privateKeys {
 		if privateKey == nil {
 			return nil, fmt.Errorf("nil private key encountered at index %d", i)
 		}
 
-		validatorPubkey := beacon.ValidatorPubkey(privateKey.PublicKey().Marshal())
+		validatorPubkey := nmc_beacon.ValidatorPubkey(privateKey.PublicKey().Marshal())
 		publicKeys = append(publicKeys, validatorPubkey)
 	}
 
@@ -163,7 +163,7 @@ func (w *Wallet) GetAllPrivateKeys() ([]*eth2types.BLSPrivateKey, error) {
 		// Get the pubkey from the filename
 		trimmed := strings.TrimPrefix(filename, keystorePrefix)
 		trimmed = strings.TrimSuffix(trimmed, keystoreSuffix)
-		pubkey, err := beacon.HexToValidatorPubkey(trimmed)
+		pubkey, err := nmc_beacon.HexToValidatorPubkey(trimmed)
 		if err != nil {
 			return nil, fmt.Errorf("error getting pubkey for keystore file [%s]: %w", filename, err)
 		}

@@ -10,9 +10,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -34,7 +34,7 @@ func (f *txWaitContextFactory) Create(args url.Values) (*txWaitContext, error) {
 }
 
 func (f *txWaitContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*txWaitContext, api.SuccessData](
+	nmc_server.RegisterQuerylessGet[*txWaitContext, nmc_types.SuccessData](
 		router, "wait", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -48,7 +48,7 @@ type txWaitContext struct {
 	hash    common.Hash
 }
 
-func (c *txWaitContext) PrepareData(data *api.SuccessData, opts *bind.TransactOpts) error {
+func (c *txWaitContext) PrepareData(data *nmc_types.SuccessData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 
