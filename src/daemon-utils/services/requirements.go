@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/rocket-pool/node-manager-core/eth"
+	nmc_services "github.com/rocket-pool/node-manager-core/node/services"
 )
 
 const (
@@ -209,7 +210,7 @@ func (sp *ServiceProvider[_]) waitEthClientSynced(ctx context.Context, verbose b
 		} else {
 			// Eth 1 client is not in "syncing" state but may be behind head
 			// Get the latest block it knows about and make sure it's recent compared to system clock time
-			isUpToDate, _, err := IsSyncWithinThreshold(clientToCheck)
+			isUpToDate, _, err := nmc_services.IsSyncWithinThreshold(clientToCheck)
 			if err != nil {
 				return false, err
 			}

@@ -19,6 +19,7 @@ const (
 // A container for all of the various services used by Hyperdrive
 type ServiceProvider[ConfigType config.IModuleConfig] struct {
 	*nmc_services.ServiceProvider
+
 	// Services
 	hdCfg        *config.HyperdriveConfig
 	moduleConfig ConfigType

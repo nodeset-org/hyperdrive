@@ -5,15 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	nmc_config "github.com/rocket-pool/node-manager-core/config"
 	nmc_services "github.com/rocket-pool/node-manager-core/node/services"
-)
-
-const (
-	apiLogColor    color.Attribute = color.FgHiCyan
-	walletLogColor color.Attribute = color.FgYellow
 )
 
 // A container for all of the various services used by Hyperdrive
