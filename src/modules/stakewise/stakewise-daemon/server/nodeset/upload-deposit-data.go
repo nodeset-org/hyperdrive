@@ -48,6 +48,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	ddMgr := sp.GetDepositDataManager()
 	nc := sp.GetNodesetClient()
 	w := sp.GetWallet()
+	ec := sp.GetEthClient()
 
 	// Get the list of registered validators
 	registeredPubkeyMap := map[beacon.ValidatorPubkey]bool{}
@@ -82,6 +83,9 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	if len(unregisteredKeys) == 0 {
 		return nil
 	}
+
+	// Make sure validator has enough funds to pay for the deposit
+	// 300,000 gas unit * 100 gwei = 0.03 ETH / wallet
 
 	// Get the deposit data for those pubkeys
 	depositData, err := ddMgr.GenerateDepositData(unregisteredKeys)
