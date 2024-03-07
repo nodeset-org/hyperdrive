@@ -71,7 +71,7 @@ func (sp *ServiceProvider[_]) WaitBeaconClientSynced(ctx context.Context, verbos
 // TODO: Move this into ec-manager and stop exposing the primary and fallback directly...
 func (sp *ServiceProvider[_]) checkExecutionClientStatus(ctx context.Context) (bool, eth.IExecutionClient, error) {
 	// Check the EC status
-	ecMgr := sp.ecManager
+	ecMgr := sp.GetEthClient()
 	mgrStatus := ecMgr.CheckStatus(ctx)
 	if ecMgr.IsPrimaryReady() {
 		return true, nil, nil
@@ -112,7 +112,7 @@ func (sp *ServiceProvider[_]) checkExecutionClientStatus(ctx context.Context) (b
 // Check if the primary and fallback Beacon clients are synced
 func (sp *ServiceProvider[_]) checkBeaconClientStatus(ctx context.Context) (bool, error) {
 	// Check the BC status
-	bcMgr := sp.bcManager
+	bcMgr := sp.GetBeaconClient()
 	mgrStatus := bcMgr.CheckStatus(ctx)
 	if bcMgr.IsPrimaryReady() {
 		return true, nil
@@ -265,7 +265,7 @@ func (sp *ServiceProvider[_]) waitBeaconClientSynced(ctx context.Context, verbos
 		}
 
 		// Get sync status
-		syncStatus, err := sp.bcManager.GetSyncStatus(ctx)
+		syncStatus, err := sp.GetBeaconClient().GetSyncStatus(ctx)
 		if err != nil {
 			return false, err
 		}

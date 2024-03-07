@@ -4,15 +4,12 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
-	"runtime"
 
-	docker "github.com/docker/docker/client"
 	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/client"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
-	"github.com/nodeset-org/hyperdrive/shared/utils/log"
-	"github.com/rocket-pool/node-manager-core/eth"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	nmc_services "github.com/rocket-pool/node-manager-core/node/services"
 )
 
 const (
@@ -21,20 +18,13 @@ const (
 
 // A container for all of the various services used by Hyperdrive
 type ServiceProvider[ConfigType config.IModuleConfig] struct {
+	*nmc_services.ServiceProvider
 	// Services
 	hdCfg        *config.HyperdriveConfig
 	moduleConfig ConfigType
 	hdClient     *client.ApiClient
-	ecManager    *ExecutionClientManager
-	bcManager    *BeaconClientManager
-	docker       *docker.Client
-	txMgr        *eth.TransactionManager
-	queryMgr     *eth.QueryManager
-	resources    *utils.Resources
+	resources    *nmc_config.NetworkResources
 	signer       *ModuleSigner
-
-	// TODO: find a better place for this than the common service provider
-	apiLogger *log.ColorLogger
 
 	// Path info
 	moduleDir string
@@ -70,47 +60,13 @@ func NewServiceProvider[ConfigType config.IModuleConfig](moduleDir string, facto
 	if !ok {
 		return nil, fmt.Errorf("config section for module [%s] is not a map, it's a %s", moduleName, reflect.TypeOf(modCfgMap))
 	}
-	err = config.Deserialize(moduleCfg, modCfgMap, hdCfg.Network.Value)
+	err = nmc_config.Deserialize(moduleCfg, modCfgMap, hdCfg.Network.Value)
 	if err != nil {
 		return nil, fmt.Errorf("error deserialzing config for module [%s]: %w", moduleName, err)
 	}
 
-	// Logger
-	apiLogger := log.NewColorLogger(apiLogColor)
-
 	// Resources
-	resources := utils.NewResources(hdCfg.Network.Value)
-
-	// EC Manager
-	ecManager, err := NewExecutionClientManager(hdCfg)
-	if err != nil {
-		return nil, fmt.Errorf("error creating executon client manager: %w", err)
-	}
-
-	// Beacon manager
-	bcManager, err := NewBeaconClientManager(hdCfg)
-	if err != nil {
-		return nil, fmt.Errorf("error creating Beacon client manager: %w", err)
-	}
-
-	// Docker client
-	dockerClient, err := docker.NewClientWithOpts(docker.WithVersion(config.DockerApiVersion))
-	if err != nil {
-		return nil, fmt.Errorf("error creating Docker client: %w", err)
-	}
-
-	// TX Manager
-	txMgr, err := eth.NewTransactionManager(ecManager, eth.DefaultSafeGasBuffer, eth.DefaultSafeGasMultiplier)
-	if err != nil {
-		return nil, fmt.Errorf("error creating transaction manager: %w", err)
-	}
-
-	// Query Manager - set the default concurrent run limit to half the CPUs so the EC doesn't get overwhelmed
-	concurrentCallLimit := runtime.NumCPU()
-	if concurrentCallLimit < 1 {
-		concurrentCallLimit = 1
-	}
-	queryMgr := eth.NewQueryManager(ecManager, resources.MulticallAddress, concurrentCallLimit)
+	resources := hdCfg.GetNetworkResources()
 
 	// Signer
 	signer := NewModuleSigner(hdClient)
@@ -122,13 +78,7 @@ func NewServiceProvider[ConfigType config.IModuleConfig](moduleDir string, facto
 		hdCfg:        hdCfg,
 		moduleConfig: moduleCfg,
 		hdClient:     hdClient,
-		ecManager:    ecManager,
-		bcManager:    bcManager,
-		docker:       dockerClient,
 		resources:    resources,
-		txMgr:        txMgr,
-		queryMgr:     queryMgr,
-		apiLogger:    &apiLogger,
 		signer:       signer,
 	}
 	return provider, nil
@@ -158,36 +108,12 @@ func (p *ServiceProvider[_]) GetHyperdriveClient() *client.ApiClient {
 	return p.hdClient
 }
 
-func (p *ServiceProvider[_]) GetEthClient() *ExecutionClientManager {
-	return p.ecManager
-}
-
-func (p *ServiceProvider[_]) GetBeaconClient() *BeaconClientManager {
-	return p.bcManager
-}
-
-func (p *ServiceProvider[_]) GetDocker() *docker.Client {
-	return p.docker
-}
-
-func (p *ServiceProvider[_]) GetResources() *utils.Resources {
+func (p *ServiceProvider[_]) GetResources() *nmc_config.NetworkResources {
 	return p.resources
-}
-
-func (p *ServiceProvider[_]) GetTransactionManager() *eth.TransactionManager {
-	return p.txMgr
-}
-
-func (p *ServiceProvider[_]) GetQueryManager() *eth.QueryManager {
-	return p.queryMgr
 }
 
 func (p *ServiceProvider[_]) GetSigner() *ModuleSigner {
 	return p.signer
-}
-
-func (p *ServiceProvider[_]) GetApiLogger() *log.ColorLogger {
-	return p.apiLogger
 }
 
 func (p *ServiceProvider[_]) IsDebugMode() bool {

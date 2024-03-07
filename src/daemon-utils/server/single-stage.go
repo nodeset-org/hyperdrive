@@ -11,7 +11,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	batch "github.com/rocket-pool/batch-query"
 )
@@ -134,7 +133,7 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 }
 
 // Run a route registered with the common single-stage querying pattern
-func runSingleStageRoute[DataType any, ConfigType config.IModuleConfig](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*api.ApiResponse[DataType], error) {
+func runSingleStageRoute[DataType any, ConfigType config.IModuleConfig](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*nmc_types.ApiResponse[DataType], error) {
 	// Get the services
 	q := serviceProvider.GetQueryManager()
 	hd := serviceProvider.GetHyperdriveClient()
@@ -168,7 +167,7 @@ func runSingleStageRoute[DataType any, ConfigType config.IModuleConfig](ctx ISin
 
 	// Create the response and data
 	data := new(DataType)
-	response := &api.ApiResponse[DataType]{
+	response := &nmc_types.ApiResponse[DataType]{
 		Data: data,
 	}
 

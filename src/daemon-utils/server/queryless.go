@@ -10,7 +10,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
+	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
 
 	"github.com/gorilla/mux"
 )
@@ -149,7 +149,7 @@ func runQuerylessRoute[DataType any, ConfigType config.IModuleConfig](ctx IQuery
 		return nil, fmt.Errorf("error getting wallet status: %w", err)
 	}
 	status := walletResponse.Data.WalletStatus
-	if utils.IsWalletReady(status) {
+	if nmc_wallet.IsWalletReady(status) {
 		opts = signer.GetTransactor(status.Wallet.WalletAddress)
 	}
 

@@ -422,6 +422,8 @@ github.com/rocket-pool/node-manager-core v0.0.0-20240307063852-674b4f5df8d8 h1:1
 github.com/rocket-pool/node-manager-core v0.0.0-20240307063852-674b4f5df8d8/go.mod h1:mUIsrmHwbpBwYo1Gp8nPmQ6SeNGxxgXMssT83eicDso=
 github.com/rocket-pool/node-manager-core v0.0.0-20240307072654-810c143c87aa h1:RM6vZpWR4jyeiGkCNzlmYKXsDPJX2OqFx9Cgk0GF2lk=
 github.com/rocket-pool/node-manager-core v0.0.0-20240307072654-810c143c87aa/go.mod h1:mUIsrmHwbpBwYo1Gp8nPmQ6SeNGxxgXMssT83eicDso=
+github.com/rocket-pool/node-manager-core v0.0.0-20240307080724-cfaa10a1e98a h1:GNhKrCkBDU7QPxvR4AfX5RY72tcDx+XVqaU4d0r/gVM=
+github.com/rocket-pool/node-manager-core v0.0.0-20240307080724-cfaa10a1e98a/go.mod h1:mUIsrmHwbpBwYo1Gp8nPmQ6SeNGxxgXMssT83eicDso=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.11.0 h1:cWPaGQEPrBb5/AsnsZesgZZ9yb1OQ+GOISoDNXVBh4M=

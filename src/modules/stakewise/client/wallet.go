@@ -5,7 +5,6 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/client"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
 type WalletRequester struct {
@@ -29,7 +28,7 @@ func (r *WalletRequester) GetContext() *client.RequesterContext {
 }
 
 // Generate and save new validator keys
-func (r *WalletRequester) GenerateKeys(count uint64, restartVc bool) (*api.ApiResponse[swapi.WalletGenerateKeysData], error) {
+func (r *WalletRequester) GenerateKeys(count uint64, restartVc bool) (*nmc_types.ApiResponse[swapi.WalletGenerateKeysData], error) {
 	args := map[string]string{
 		"count":      strconv.FormatUint(count, 10),
 		"restart-vc": strconv.FormatBool(restartVc),
@@ -38,6 +37,6 @@ func (r *WalletRequester) GenerateKeys(count uint64, restartVc bool) (*api.ApiRe
 }
 
 // Export the wallet in encrypted ETH key format
-func (r *WalletRequester) Initialize() (*api.ApiResponse[swapi.WalletInitializeData], error) {
+func (r *WalletRequester) Initialize() (*nmc_types.ApiResponse[swapi.WalletInitializeData], error) {
 	return client.SendGetRequest[swapi.WalletInitializeData](r, "initialize", "Initialize", nil)
 }

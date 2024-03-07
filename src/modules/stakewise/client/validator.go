@@ -6,7 +6,6 @@ import (
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/client"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
 type ValidatorRequester struct {
@@ -30,7 +29,7 @@ func (r *ValidatorRequester) GetContext() *client.RequesterContext {
 }
 
 // Get signed exit messages for the provided validators, with an optional epoch parameter. If not specified, the epoch from the current chain head will be used.
-func (r *ValidatorRequester) GetSignedExitMessage(pubkeys []beacon.ValidatorPubkey, epoch *uint64, noBroadcastBool bool) (*api.ApiResponse[swapi.ValidatorGetSignedExitMessagesData], error) {
+func (r *ValidatorRequester) GetSignedExitMessage(pubkeys []beacon.ValidatorPubkey, epoch *uint64, noBroadcastBool bool) (*nmc_types.ApiResponse[swapi.ValidatorGetSignedExitMessagesData], error) {
 	args := map[string]string{
 		"pubkeys":      client.MakeBatchArg(pubkeys),
 		"no-broadcast": strconv.FormatBool(noBroadcastBool),

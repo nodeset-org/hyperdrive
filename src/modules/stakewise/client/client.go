@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/client"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils/log"
+	"github.com/rocket-pool/node-manager-core/utils/log"
 )
 
 const (

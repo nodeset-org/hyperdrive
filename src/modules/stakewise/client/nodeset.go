@@ -28,7 +28,7 @@ func (r *NodesetRequester) GetContext() *client.RequesterContext {
 }
 
 // Set the validators root for the NodeSet vault
-func (r *NodesetRequester) SetValidatorsRoot(root common.Hash) (*api.ApiResponse[api.TxInfoData], error) {
+func (r *NodesetRequester) SetValidatorsRoot(root common.Hash) (*nmc_types.ApiResponse[api.TxInfoData], error) {
 	args := map[string]string{
 		"root": root.Hex(),
 	}
@@ -36,6 +36,6 @@ func (r *NodesetRequester) SetValidatorsRoot(root common.Hash) (*api.ApiResponse
 }
 
 // Upload the aggregated deposit data file to NodeSet's servers
-func (r *NodesetRequester) UploadDepositData() (*api.ApiResponse[swapi.NodesetUploadDepositDataData], error) {
+func (r *NodesetRequester) UploadDepositData() (*nmc_types.ApiResponse[swapi.NodesetUploadDepositDataData], error) {
 	return client.SendGetRequest[swapi.NodesetUploadDepositDataData](r, "upload-deposit-data", "UploadDepositData", nil)
 }
