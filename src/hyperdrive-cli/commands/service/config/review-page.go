@@ -8,7 +8,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/rivo/tview"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 // Constants
@@ -17,16 +17,16 @@ const reviewPageID string = "review-settings"
 // The changed settings review page
 type ReviewPage struct {
 	md              *mainDisplay
-	changedSettings []*nmc_config.ChangedSection
+	changedSettings []*config.ChangedSection
 	page            *page
 }
 
 // Create a page to review any changes
 func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *client.GlobalConfig) *ReviewPage {
-	var changedSettings []*nmc_config.ChangedSection
-	var totalAffectedContainers map[nmc_config.ContainerID]bool
+	var changedSettings []*config.ChangedSection
+	var totalAffectedContainers map[config.ContainerID]bool
 	var changeNetworks bool
-	var containersToRestart []nmc_config.ContainerID
+	var containersToRestart []config.ContainerID
 
 	// Create the visual list for all of the changed settings
 	changeBox := tview.NewTextView().
@@ -48,10 +48,10 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 
 		// Add changed containers if this is an update
 		if md.isUpdate {
-			totalAffectedContainers[nmc_config.ContainerID_Daemon] = true
+			totalAffectedContainers[config.ContainerID_Daemon] = true
 
-			if newConfig.Hyperdrive.ClientMode.Value == nmc_config.ClientMode_Local && newConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value != nmc_config.ExecutionClient_Geth {
-				totalAffectedContainers[nmc_config.ContainerID_ExecutionClient] = true
+			if newConfig.Hyperdrive.ClientMode.Value == config.ClientMode_Local && newConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value != config.ExecutionClient_Geth {
+				totalAffectedContainers[config.ContainerID_ExecutionClient] = true
 			}
 			builder.WriteString(fmt.Sprintf("Updated to Hyperdrive v%s (will affect several containers)\n\n", shared.HyperdriveVersion))
 		}
@@ -220,7 +220,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 }
 
 // Add all of the changed parameters to the description builder
-func addChangesToDescription(section *nmc_config.ChangedSection, titlePrefix string, description *strings.Builder) {
+func addChangesToDescription(section *config.ChangedSection, titlePrefix string, description *strings.Builder) {
 	// Get the full section name, including the title
 	var sectionName string
 	if titlePrefix == "" {

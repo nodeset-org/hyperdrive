@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	swshared "github.com/nodeset-org/hyperdrive/modules/stakewise/shared"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 func (c *StakewiseConfig) WalletFilename() string {
@@ -44,15 +44,15 @@ func (cfg *StakewiseConfig) DaemonTag() string {
 func (cfg *StakewiseConfig) GetVcContainerTag() string {
 	bn := cfg.hdCfg.GetSelectedBeaconNode()
 	switch bn {
-	case nmc_config.BeaconNode_Lighthouse:
+	case config.BeaconNode_Lighthouse:
 		return cfg.Lighthouse.ContainerTag.Value
-	case nmc_config.BeaconNode_Lodestar:
+	case config.BeaconNode_Lodestar:
 		return cfg.Lodestar.ContainerTag.Value
-	case nmc_config.BeaconNode_Nimbus:
+	case config.BeaconNode_Nimbus:
 		return cfg.Nimbus.ContainerTag.Value
-	case nmc_config.BeaconNode_Prysm:
+	case config.BeaconNode_Prysm:
 		return cfg.Prysm.ContainerTag.Value
-	case nmc_config.BeaconNode_Teku:
+	case config.BeaconNode_Teku:
 		return cfg.Teku.ContainerTag.Value
 	default:
 		panic(fmt.Sprintf("Unknown Beacon Node %s", bn))
@@ -63,15 +63,15 @@ func (cfg *StakewiseConfig) GetVcContainerTag() string {
 func (cfg *StakewiseConfig) GetVcAdditionalFlags() string {
 	bn := cfg.hdCfg.GetSelectedBeaconNode()
 	switch bn {
-	case nmc_config.BeaconNode_Lighthouse:
+	case config.BeaconNode_Lighthouse:
 		return cfg.Lighthouse.AdditionalFlags.Value
-	case nmc_config.BeaconNode_Lodestar:
+	case config.BeaconNode_Lodestar:
 		return cfg.Lodestar.AdditionalFlags.Value
-	case nmc_config.BeaconNode_Nimbus:
+	case config.BeaconNode_Nimbus:
 		return cfg.Nimbus.AdditionalFlags.Value
-	case nmc_config.BeaconNode_Prysm:
+	case config.BeaconNode_Prysm:
 		return cfg.Prysm.AdditionalFlags.Value
-	case nmc_config.BeaconNode_Teku:
+	case config.BeaconNode_Teku:
 		return cfg.Teku.AdditionalFlags.Value
 	default:
 		panic(fmt.Sprintf("Unknown Beacon Node %s", bn))

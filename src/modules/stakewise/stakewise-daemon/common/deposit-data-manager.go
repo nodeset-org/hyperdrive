@@ -18,7 +18,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 	nmc_utils "github.com/rocket-pool/node-manager-core/node/validator/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
@@ -67,7 +67,7 @@ func (m *DepositDataManager) GenerateDepositData(keys []*eth2types.BLSPrivateKey
 	// Create the new aggregated deposit data for all generated keys
 	dataList := make([]*types.ExtendedDepositData, len(keys))
 	for i, key := range keys {
-		depositData, err := nmc_utils.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, nmc_config.Network(resources.NodesetNetwork))
+		depositData, err := nmc_utils.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, config.Network(resources.NodesetNetwork))
 		if err != nil {
 			pubkey := nmc_beacon.ValidatorPubkey(key.PublicKey().Marshal())
 			return nil, fmt.Errorf("error getting deposit data for key %s: %w", pubkey.HexWithPrefix(), err)

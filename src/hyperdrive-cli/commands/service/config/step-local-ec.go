@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
 	// Make lists of clients that good and bad
-	goodClients := []*nmc_config.ParameterOption[nmc_config.ExecutionClient]{}
-	badClients := []*nmc_config.ParameterOption[nmc_config.ExecutionClient]{}
+	goodClients := []*config.ParameterOption[config.ExecutionClient]{}
+	badClients := []*config.ParameterOption[config.ExecutionClient]{}
 	for _, client := range wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Options {
 		if !strings.HasPrefix(client.Name, "*") {
 			goodClients = append(goodClients, client)
@@ -72,14 +72,14 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 			selectRandomEC(goodClients, wiz, currentStep, totalSteps)
 		} else {
 			buttonLabel = strings.TrimSpace(buttonLabel)
-			selectedClient := nmc_config.ExecutionClient_Unknown
+			selectedClient := config.ExecutionClient_Unknown
 			for _, client := range wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Options {
 				if client.Name == buttonLabel {
 					selectedClient = client.Value
 					break
 				}
 			}
-			if selectedClient == nmc_config.ExecutionClient_Unknown {
+			if selectedClient == config.ExecutionClient_Unknown {
 				panic(fmt.Sprintf("Local EC selection buttons didn't match any known clients, buttonLabel = %s\n", buttonLabel))
 			}
 			wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value = selectedClient
@@ -109,13 +109,13 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 }
 
 // Get a random execution client
-func selectRandomEC(goodOptions []*nmc_config.ParameterOption[nmc_config.ExecutionClient], wiz *wizard, currentStep int, totalSteps int) {
+func selectRandomEC(goodOptions []*config.ParameterOption[config.ExecutionClient], wiz *wizard, currentStep int, totalSteps int) {
 	// Get system specs
 	//totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
 	//isLowPower := (totalMemoryGB < 15 || runtime.GOARCH == "arm64")
 
 	// Filter out the clients based on system specs
-	filteredClients := []nmc_config.ExecutionClient{}
+	filteredClients := []config.ExecutionClient{}
 	for _, clientOption := range goodOptions {
 		client := clientOption.Value
 		switch client {

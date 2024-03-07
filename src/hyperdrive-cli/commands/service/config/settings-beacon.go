@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 	nmc_ids "github.com/rocket-pool/node-manager-core/config/ids"
 )
 
@@ -153,11 +153,11 @@ func (configPage *BeaconConfigPage) handleClientModeChanged() {
 
 	selectedMode := configPage.masterConfig.Hyperdrive.ClientMode.Value
 	switch selectedMode {
-	case nmc_config.ClientMode_Local:
+	case config.ClientMode_Local:
 		// Local (Docker mode)
 		configPage.handleLocalBnChanged()
 
-	case nmc_config.ClientMode_External:
+	case config.ClientMode_External:
 		// External (Hybrid mode)
 		configPage.handleExternalBnChanged()
 	}
@@ -171,15 +171,15 @@ func (configPage *BeaconConfigPage) handleLocalBnChanged() {
 	selectedBn := configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Value
 
 	switch selectedBn {
-	case nmc_config.BeaconNode_Lighthouse:
+	case config.BeaconNode_Lighthouse:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localBnItems, configPage.lighthouseItems, nil)
-	case nmc_config.BeaconNode_Lodestar:
+	case config.BeaconNode_Lodestar:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localBnItems, configPage.lodestarItems, nil)
-	case nmc_config.BeaconNode_Nimbus:
+	case config.BeaconNode_Nimbus:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localBnItems, configPage.nimbusItems, nil)
-	case nmc_config.BeaconNode_Prysm:
+	case config.BeaconNode_Prysm:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localBnItems, configPage.prysmItems, nil)
-	case nmc_config.BeaconNode_Teku:
+	case config.BeaconNode_Teku:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localBnItems, configPage.tekuItems, nil)
 	}
 
@@ -196,7 +196,7 @@ func (configPage *BeaconConfigPage) handleExternalBnChanged() {
 	commonSettings := []*parameterizedFormItem{}
 	prysmSettings := []*parameterizedFormItem{}
 	for _, item := range configPage.externalBnItems {
-		if item.parameter.GetCommon().ID == nmc_config.PrysmRpcUrlID {
+		if item.parameter.GetCommon().ID == config.PrysmRpcUrlID {
 			prysmSettings = append(prysmSettings, item)
 		} else {
 			commonSettings = append(commonSettings, item)
@@ -205,7 +205,7 @@ func (configPage *BeaconConfigPage) handleExternalBnChanged() {
 
 	// Show items based on the client selection
 	configPage.layout.addFormItems(commonSettings)
-	if configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value == nmc_config.BeaconNode_Prysm {
+	if configPage.masterConfig.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value == config.BeaconNode_Prysm {
 		configPage.layout.addFormItems(prysmSettings)
 	}
 

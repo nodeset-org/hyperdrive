@@ -7,8 +7,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/client"
-	"github.com/nodeset-org/hyperdrive/shared/config"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 	nmc_services "github.com/rocket-pool/node-manager-core/node/services"
 )
 
@@ -17,14 +17,14 @@ const (
 )
 
 // A container for all of the various services used by Hyperdrive
-type ServiceProvider[ConfigType config.IModuleConfig] struct {
+type ServiceProvider[ConfigType hdconfig.IModuleConfig] struct {
 	*nmc_services.ServiceProvider
 
 	// Services
-	hdCfg        *config.HyperdriveConfig
+	hdCfg        *hdconfig.HyperdriveConfig
 	moduleConfig ConfigType
 	hdClient     *client.ApiClient
-	resources    *nmc_config.NetworkResources
+	resources    *config.NetworkResources
 	signer       *ModuleSigner
 
 	// Path info
@@ -33,13 +33,13 @@ type ServiceProvider[ConfigType config.IModuleConfig] struct {
 }
 
 // Creates a new ServiceProvider instance
-func NewServiceProvider[ConfigType config.IModuleConfig](moduleDir string, factory func(*config.HyperdriveConfig) ConfigType) (*ServiceProvider[ConfigType], error) {
+func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, factory func(*hdconfig.HyperdriveConfig) ConfigType) (*ServiceProvider[ConfigType], error) {
 	// Create a client for the Hyperdrive daemon
-	hyperdriveSocket := filepath.Join(moduleDir, config.HyperdriveSocketFilename)
-	hdClient := client.NewApiClient(config.HyperdriveDaemonRoute, hyperdriveSocket, false)
+	hyperdriveSocket := filepath.Join(moduleDir, hdconfig.HyperdriveSocketFilename)
+	hdClient := client.NewApiClient(hdconfig.HyperdriveDaemonRoute, hyperdriveSocket, false)
 
 	// Get the Hyperdrive config
-	hdCfg := config.NewHyperdriveConfig("")
+	hdCfg := hdconfig.NewHyperdriveConfig("")
 	cfgResponse, err := hdClient.Service.GetConfig()
 	if err != nil {
 		return nil, fmt.Errorf("error getting config from Hyperdrive server: %w", err)
@@ -61,7 +61,7 @@ func NewServiceProvider[ConfigType config.IModuleConfig](moduleDir string, facto
 	if !ok {
 		return nil, fmt.Errorf("config section for module [%s] is not a map, it's a %s", moduleName, reflect.TypeOf(modCfgMap))
 	}
-	err = nmc_config.Deserialize(moduleCfg, modCfgMap, hdCfg.Network.Value)
+	err = config.Deserialize(moduleCfg, modCfgMap, hdCfg.Network.Value)
 	if err != nil {
 		return nil, fmt.Errorf("error deserialzing config for module [%s]: %w", moduleName, err)
 	}
@@ -97,7 +97,7 @@ func (p *ServiceProvider[_]) GetUserDir() string {
 	return p.userDir
 }
 
-func (p *ServiceProvider[_]) GetHyperdriveConfig() *config.HyperdriveConfig {
+func (p *ServiceProvider[_]) GetHyperdriveConfig() *hdconfig.HyperdriveConfig {
 	return p.hdCfg
 }
 
@@ -109,7 +109,7 @@ func (p *ServiceProvider[_]) GetHyperdriveClient() *client.ApiClient {
 	return p.hdClient
 }
 
-func (p *ServiceProvider[_]) GetResources() *nmc_config.NetworkResources {
+func (p *ServiceProvider[_]) GetResources() *config.NetworkResources {
 	return p.resources
 }
 

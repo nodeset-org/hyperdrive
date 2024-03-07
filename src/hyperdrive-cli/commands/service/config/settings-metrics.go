@@ -4,7 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/rivo/tview"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 // The page wrapper for the metrics config
@@ -129,9 +129,9 @@ func (configPage *MetricsConfigPage) handleLayoutChanged() {
 		configPage.layout.addFormItems(configPage.exporterItems)
 	}
 
-	if configPage.masterConfig.Hyperdrive.ClientMode.Value == nmc_config.ClientMode_Local {
+	if configPage.masterConfig.Hyperdrive.ClientMode.Value == config.ClientMode_Local {
 		switch configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Value {
-		case nmc_config.BeaconNode_Teku, nmc_config.BeaconNode_Lighthouse, nmc_config.BeaconNode_Lodestar:
+		case config.BeaconNode_Teku, config.BeaconNode_Lighthouse, config.BeaconNode_Lodestar:
 			configPage.layout.form.AddFormItem(configPage.enableBitflyNodeMetricsBox.item)
 			if configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value == true {
 				configPage.layout.addFormItems(configPage.bitflyNodeMetricsItems)

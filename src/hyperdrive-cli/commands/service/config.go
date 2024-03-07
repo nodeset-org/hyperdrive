@@ -141,7 +141,7 @@ func configureService(c *cli.Context) error {
 // TODO: HEADLESS MODE
 /*
 // Updates a configuration from the provided CLI arguments headlessly
-func configureHeadless(c *cli.Context, cfg *config.HyperdriveConfig) error {
+func configureHeadless(c *cli.Context, cfg *hdconfig.HyperdriveConfig) error {
 	// Root params
 	for _, param := range cfg.GetParameters() {
 		err := updateConfigParamFromCliArg(c, "", param, cfg)

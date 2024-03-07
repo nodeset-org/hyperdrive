@@ -8,7 +8,7 @@ import (
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,7 +26,7 @@ var (
 )
 
 // Creates CLI argument flags from the parameters of the configuration struct
-func createFlagsFromConfigParams(sectionName string, params []nmc_config.IParameter, configFlags []cli.Flag, network nmc_config.Network) []cli.Flag {
+func createFlagsFromConfigParams(sectionName string, params []config.IParameter, configFlags []cli.Flag, network config.Network) []cli.Flag {
 	for _, param := range params {
 		common := param.GetCommon()
 		var paramName string
@@ -63,7 +63,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 
 	// TODO: HEADLESS MODE
 	/*
-		cfgTemplate := config.NewHyperdriveConfig("")
+		cfgTemplate := hdconfig.NewHyperdriveConfig("")
 		network := cfgTemplate.Network.Value
 		// Root params
 		configFlags = createFlagsFromConfigParams("", cfgTemplate.GetParameters(), configFlags, network)

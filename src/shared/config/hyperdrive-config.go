@@ -12,7 +12,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared/config/migration"
 	"github.com/pbnjay/memory"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 	"gopkg.in/yaml.v3"
 )
 
@@ -41,28 +41,28 @@ const (
 // The master configuration struct
 type HyperdriveConfig struct {
 	// General settings
-	DebugMode          nmc_config.Parameter[bool]
-	Network            nmc_config.Parameter[nmc_config.Network]
-	ClientMode         nmc_config.Parameter[nmc_config.ClientMode]
-	ProjectName        nmc_config.Parameter[string]
-	UserDataPath       nmc_config.Parameter[string]
-	AutoTxMaxFee       nmc_config.Parameter[float64]
-	MaxPriorityFee     nmc_config.Parameter[float64]
-	AutoTxGasThreshold nmc_config.Parameter[float64]
+	DebugMode          config.Parameter[bool]
+	Network            config.Parameter[config.Network]
+	ClientMode         config.Parameter[config.ClientMode]
+	ProjectName        config.Parameter[string]
+	UserDataPath       config.Parameter[string]
+	AutoTxMaxFee       config.Parameter[float64]
+	MaxPriorityFee     config.Parameter[float64]
+	AutoTxGasThreshold config.Parameter[float64]
 
 	// Execution client settings
-	LocalExecutionConfig    *nmc_config.LocalExecutionConfig
-	ExternalExecutionConfig *nmc_config.ExternalExecutionConfig
+	LocalExecutionConfig    *config.LocalExecutionConfig
+	ExternalExecutionConfig *config.ExternalExecutionConfig
 
 	// Beacon node settings
-	LocalBeaconConfig    *nmc_config.LocalBeaconConfig
-	ExternalBeaconConfig *nmc_config.ExternalBeaconConfig
+	LocalBeaconConfig    *config.LocalBeaconConfig
+	ExternalBeaconConfig *config.ExternalBeaconConfig
 
 	// Fallback clients
-	Fallback *nmc_config.FallbackConfig
+	Fallback *config.FallbackConfig
 
 	// Metrics
-	Metrics *nmc_config.MetricsConfig
+	Metrics *config.MetricsConfig
 
 	// Modules
 	Modules map[string]any
@@ -108,144 +108,144 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 		HyperdriveUserDirectory: hdDir,
 		Modules:                 map[string]any{},
 
-		ProjectName: nmc_config.Parameter[string]{
-			ParameterCommon: &nmc_config.ParameterCommon{
+		ProjectName: config.Parameter[string]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 ProjectNameID,
 				Name:               "Project Name",
 				Description:        "This is the prefix that will be attached to all of the Docker containers managed by Hyperdrive.",
-				AffectsContainers:  []nmc_config.ContainerID{nmc_config.ContainerID_BeaconNode, nmc_config.ContainerID_Daemon, nmc_config.ContainerID_ExecutionClient, nmc_config.ContainerID_Exporter, nmc_config.ContainerID_Grafana, nmc_config.ContainerID_Prometheus, nmc_config.ContainerID_ValidatorClient},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_BeaconNode, config.ContainerID_Daemon, config.ContainerID_ExecutionClient, config.ContainerID_Exporter, config.ContainerID_Grafana, config.ContainerID_Prometheus, config.ContainerID_ValidatorClient},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[nmc_config.Network]string{
-				nmc_config.Network_All: "hyperdrive",
+			Default: map[config.Network]string{
+				config.Network_All: "hyperdrive",
 			},
 		},
 
-		Network: nmc_config.Parameter[nmc_config.Network]{
-			ParameterCommon: &nmc_config.ParameterCommon{
+		Network: config.Parameter[config.Network]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 NetworkID,
 				Name:               "Network",
 				Description:        "The Ethereum network you want to use - select Prater Testnet or Holesky Testnet to practice with fake ETH, or Mainnet to stake on the real network using real ETH.",
-				AffectsContainers:  []nmc_config.ContainerID{nmc_config.ContainerID_Daemon, nmc_config.ContainerID_ExecutionClient, nmc_config.ContainerID_BeaconNode, nmc_config.ContainerID_ValidatorClient},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ExecutionClient, config.ContainerID_BeaconNode, config.ContainerID_ValidatorClient},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
 			Options: getNetworkOptions(),
-			Default: map[nmc_config.Network]nmc_config.Network{
-				nmc_config.Network_All: nmc_config.Network_Mainnet,
+			Default: map[config.Network]config.Network{
+				config.Network_All: config.Network_Mainnet,
 			},
 		},
 
-		ClientMode: nmc_config.Parameter[nmc_config.ClientMode]{
-			ParameterCommon: &nmc_config.ParameterCommon{
+		ClientMode: config.Parameter[config.ClientMode]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 ClientModeID,
 				Name:               "Client Mode",
 				Description:        "Choose which mode to use for your Execution Client and Beacon Node - locally managed (Docker Mode), or externally managed (Hybrid Mode).",
-				AffectsContainers:  []nmc_config.ContainerID{nmc_config.ContainerID_Daemon, nmc_config.ContainerID_ExecutionClient, nmc_config.ContainerID_BeaconNode},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ExecutionClient, config.ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Options: []*nmc_config.ParameterOption[nmc_config.ClientMode]{
+			Options: []*config.ParameterOption[config.ClientMode]{
 				{
-					ParameterOptionCommon: &nmc_config.ParameterOptionCommon{
+					ParameterOptionCommon: &config.ParameterOptionCommon{
 						Name:        "Locally Managed",
 						Description: "Allow Hyperdrive to manage the Execution Client and Beacon Node for you (Docker Mode)",
 					},
-					Value: nmc_config.ClientMode_Local,
+					Value: config.ClientMode_Local,
 				}, {
-					ParameterOptionCommon: &nmc_config.ParameterOptionCommon{
+					ParameterOptionCommon: &config.ParameterOptionCommon{
 						Name:        "Externally Managed",
 						Description: "Use an existing Execution Client and Beacon Node that you manage on your own (Hybrid Mode)",
 					},
-					Value: nmc_config.ClientMode_External,
+					Value: config.ClientMode_External,
 				}},
-			Default: map[nmc_config.Network]nmc_config.ClientMode{
-				nmc_config.Network_All: nmc_config.ClientMode_Local,
+			Default: map[config.Network]config.ClientMode{
+				config.Network_All: config.ClientMode_Local,
 			},
 		},
 
-		AutoTxMaxFee: nmc_config.Parameter[float64]{
-			ParameterCommon: &nmc_config.ParameterCommon{
+		AutoTxMaxFee: config.Parameter[float64]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 AutoTxMaxFeeID,
 				Name:               "Auto TX Max Fee",
 				Description:        "Set this if you want all of Hyperdrive's automatic transactions to use this specific max fee value (in gwei), which is the most you'd be willing to pay (*including the priority fee*).\n\nA value of 0 will use the suggested max fee based on the current network conditions.\n\nAny other value will ignore the network suggestion and use this value instead.",
-				AffectsContainers:  []nmc_config.ContainerID{nmc_config.ContainerID_Daemon},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[nmc_config.Network]float64{
-				nmc_config.Network_All: float64(0),
+			Default: map[config.Network]float64{
+				config.Network_All: float64(0),
 			},
 		},
 
-		MaxPriorityFee: nmc_config.Parameter[float64]{
-			ParameterCommon: &nmc_config.ParameterCommon{
+		MaxPriorityFee: config.Parameter[float64]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 MaxPriorityFeeID,
 				Name:               "Max Priority Fee",
 				Description:        "The default value for the priority fee (in gwei) for all of your transactions, including automatic ones. This describes how much you're willing to pay *above the network's current base fee* - the higher this is, the more ETH you give to the validators for including your transaction, which generally means it will be included in a block faster (as long as your max fee is sufficiently high to cover the current network conditions).\n\nMust be larger than 0.",
-				AffectsContainers:  []nmc_config.ContainerID{nmc_config.ContainerID_Daemon},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[nmc_config.Network]float64{
-				nmc_config.Network_All: float64(1),
+			Default: map[config.Network]float64{
+				config.Network_All: float64(1),
 			},
 		},
 
-		AutoTxGasThreshold: nmc_config.Parameter[float64]{
-			ParameterCommon: &nmc_config.ParameterCommon{
+		AutoTxGasThreshold: config.Parameter[float64]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 AutoTxGasThresholdID,
 				Name:               "Automatic TX Gas Threshold",
 				Description:        "The threshold (in gwei) that the recommended network gas price must be under in order for automated transactions to be submitted when due.\n\nA value of 0 will disable non-essential automatic transactions.",
-				AffectsContainers:  []nmc_config.ContainerID{nmc_config.ContainerID_Daemon},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[nmc_config.Network]float64{
-				nmc_config.Network_All: float64(100),
+			Default: map[config.Network]float64{
+				config.Network_All: float64(100),
 			},
 		},
 
-		UserDataPath: nmc_config.Parameter[string]{
-			ParameterCommon: &nmc_config.ParameterCommon{
+		UserDataPath: config.Parameter[string]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 UserDataPathID,
 				Name:               "User Data Path",
 				Description:        "The absolute path of your personal `data` folder that contains secrets such as your node wallet's encrypted file, the password for your node wallet, and all of the validator keys for any Hyperdrive modules.",
-				AffectsContainers:  []nmc_config.ContainerID{nmc_config.ContainerID_Daemon, nmc_config.ContainerID_ValidatorClient},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[nmc_config.Network]string{
-				nmc_config.Network_All: filepath.Join(hdDir, "data"),
+			Default: map[config.Network]string{
+				config.Network_All: filepath.Join(hdDir, "data"),
 			},
 		},
 
-		DebugMode: nmc_config.Parameter[bool]{
-			ParameterCommon: &nmc_config.ParameterCommon{
+		DebugMode: config.Parameter[bool]{
+			ParameterCommon: &config.ParameterCommon{
 				ID:                 DebugModeID,
 				Name:               "Debug Mode",
 				Description:        "Enable debug log printing in the daemon.",
-				AffectsContainers:  []nmc_config.ContainerID{nmc_config.ContainerID_Daemon},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[nmc_config.Network]bool{
-				nmc_config.Network_All: false,
+			Default: map[config.Network]bool{
+				config.Network_All: false,
 			},
 		},
 	}
 
 	// Create the subconfigs
-	cfg.Fallback = nmc_config.NewFallbackConfig()
+	cfg.Fallback = config.NewFallbackConfig()
 	cfg.LocalExecutionConfig = NewLocalExecutionConfig()
-	cfg.ExternalExecutionConfig = nmc_config.NewExternalExecutionConfig()
+	cfg.ExternalExecutionConfig = config.NewExternalExecutionConfig()
 	cfg.LocalBeaconConfig = NewLocalBeaconConfig()
-	cfg.ExternalBeaconConfig = nmc_config.NewExternalBeaconConfig()
+	cfg.ExternalBeaconConfig = config.NewExternalBeaconConfig()
 	cfg.Metrics = NewMetricsConfig()
 
 	// Apply the default values for mainnet
-	cfg.Network.Value = nmc_config.Network_Mainnet
+	cfg.Network.Value = config.Network_Mainnet
 	cfg.applyAllDefaults()
 
 	return cfg
@@ -256,9 +256,9 @@ func (cfg *HyperdriveConfig) GetTitle() string {
 	return "Hyperdrive"
 }
 
-// Get the nmc_config.Parameters for this config
-func (cfg *HyperdriveConfig) GetParameters() []nmc_config.IParameter {
-	return []nmc_config.IParameter{
+// Get the config.Parameters for this config
+func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
+	return []config.IParameter{
 		&cfg.ProjectName,
 		&cfg.Network,
 		&cfg.ClientMode,
@@ -271,8 +271,8 @@ func (cfg *HyperdriveConfig) GetParameters() []nmc_config.IParameter {
 }
 
 // Get the subconfigurations for this config
-func (cfg *HyperdriveConfig) GetSubconfigs() map[string]nmc_config.IConfigSection {
-	return map[string]nmc_config.IConfigSection{
+func (cfg *HyperdriveConfig) GetSubconfigs() map[string]config.IConfigSection {
+	return map[string]config.IConfigSection{
 		"fallback":          cfg.Fallback,
 		"localExecution":    cfg.LocalExecutionConfig,
 		"externalExecution": cfg.ExternalExecutionConfig,
@@ -286,7 +286,7 @@ func (cfg *HyperdriveConfig) GetSubconfigs() map[string]nmc_config.IConfigSectio
 func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig) map[string]any {
 	masterMap := map[string]any{}
 
-	hdMap := nmc_config.Serialize(cfg)
+	hdMap := config.Serialize(cfg)
 	masterMap[userDirectoryKey] = cfg.HyperdriveUserDirectory
 	masterMap[ids.VersionID] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	masterMap[ids.RootConfigID] = hdMap
@@ -299,7 +299,7 @@ func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig) map[string]any {
 	}
 	for _, module := range modules {
 		// Serialize / overwrite them with explictly provided ones
-		modMap := nmc_config.Serialize(module)
+		modMap := config.Serialize(module)
 		modulesMap[module.GetModuleName()] = modMap
 	}
 	masterMap[ModulesName] = modulesMap
@@ -315,7 +315,7 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	}
 
 	// Get the network
-	network := nmc_config.Network_Mainnet
+	network := config.Network_Mainnet
 	hyperdriveParams, exists := masterMap[ids.RootConfigID]
 	if !exists {
 		return fmt.Errorf("config is missing the [%s] section", ids.RootConfigID)
@@ -330,11 +330,11 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 		if !isString {
 			return fmt.Errorf("expected [%s - %s] to be a string but it is not", ids.RootConfigID, cfg.Network.ID)
 		}
-		network = nmc_config.Network(networkString)
+		network = config.Network(networkString)
 	}
 
 	// Deserialize the params and subconfigs
-	err = nmc_config.Deserialize(cfg, hdMap, network)
+	err = config.Deserialize(cfg, hdMap, network)
 	if err != nil {
 		return fmt.Errorf("error deserializing [%s]: %w", ids.RootConfigID, err)
 	}
@@ -342,12 +342,12 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	// Get the special fields
 	udKey, exists := masterMap[userDirectoryKey]
 	if !exists {
-		return fmt.Errorf("expected a user directory nmc_config.Parameter named [%s] but it was not found", userDirectoryKey)
+		return fmt.Errorf("expected a user directory config.Parameter named [%s] but it was not found", userDirectoryKey)
 	}
 	cfg.HyperdriveUserDirectory = udKey.(string)
 	version, exists := masterMap[ids.VersionID]
 	if !exists {
-		return fmt.Errorf("expected a version nmc_config.Parameter named [%s] but it was not found", ids.VersionID)
+		return fmt.Errorf("expected a version config.Parameter named [%s] but it was not found", ids.VersionID)
 	}
 	cfg.Version = version.(string)
 
@@ -373,31 +373,31 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 // Applies all of the defaults to all of the settings that have them defined
 func (cfg *HyperdriveConfig) applyAllDefaults() {
 	network := cfg.Network.Value
-	nmc_config.ApplyDefaults(cfg, network)
+	config.ApplyDefaults(cfg, network)
 }
 
 // Get the list of options for networks to run on
-func getNetworkOptions() []*nmc_config.ParameterOption[nmc_config.Network] {
-	options := []*nmc_config.ParameterOption[nmc_config.Network]{
+func getNetworkOptions() []*config.ParameterOption[config.Network] {
+	options := []*config.ParameterOption[config.Network]{
 		/*{
-			ParameterOptionCommon: &nmc_config.ParameterOptionCommon{
+			ParameterOptionCommon: &config.ParameterOptionCommon{
 				Name:        "Ethereum Mainnet",
 				Description: "This is the real Ethereum main network, using real ETH to make real validators.",
 			},
-			Value: nmc_config.Network_Mainnet,
+			Value: config.Network_Mainnet,
 		},*/
 		{
-			ParameterOptionCommon: &nmc_config.ParameterOptionCommon{
+			ParameterOptionCommon: &config.ParameterOptionCommon{
 				Name:        "Holesky Testnet",
 				Description: "This is the Holešky (Holešovice) test network, which is the next generation of long-lived testnets for Ethereum. It uses free fake ETH to make fake validators.\nUse this if you want to practice running Hyperdrive in a free, safe environment before moving to Mainnet.",
 			},
-			Value: nmc_config.Network_Holesky,
+			Value: config.Network_Holesky,
 		},
 	}
 
 	if strings.HasSuffix(shared.HyperdriveVersion, "-dev") {
-		options = append(options, &nmc_config.ParameterOption[nmc_config.Network]{
-			ParameterOptionCommon: &nmc_config.ParameterOptionCommon{
+		options = append(options, &config.ParameterOption[config.Network]{
+			ParameterOptionCommon: &config.ParameterOptionCommon{
 				Name:        "Devnet",
 				Description: "This is a development network used by Hyperdrive engineers to test new features and contract upgrades before they are promoted to Holesky for staging. You should not use this network unless invited to do so by the developers.",
 			},
@@ -409,14 +409,14 @@ func getNetworkOptions() []*nmc_config.ParameterOption[nmc_config.Network] {
 }
 
 // Get a more verbose client description, including warnings
-func getAugmentedEcDescription(client nmc_config.ExecutionClient, originalDescription string) string {
+func getAugmentedEcDescription(client config.ExecutionClient, originalDescription string) string {
 	switch client {
-	case nmc_config.ExecutionClient_Nethermind:
+	case config.ExecutionClient_Nethermind:
 		totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
 		if totalMemoryGB < 9 {
 			return fmt.Sprintf("%s\n\n[red]WARNING: Nethermind currently requires over 8 GB of RAM to run smoothly. We do not recommend it for your system. This may be improved in a future release.", originalDescription)
 		}
-	case nmc_config.ExecutionClient_Besu:
+	case config.ExecutionClient_Besu:
 		totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
 		if totalMemoryGB < 9 {
 			return fmt.Sprintf("%s\n\n[red]WARNING: Besu currently requires over 8 GB of RAM to run smoothly. We do not recommend it for your system. This may be improved in a future release.", originalDescription)
@@ -442,12 +442,12 @@ func (cfg *HyperdriveConfig) GetPasswordFilePath() string {
 	return filepath.Join(cfg.UserDataPath.Value, UserPasswordFilename)
 }
 
-func (cfg *HyperdriveConfig) GetNetworkResources() *nmc_config.NetworkResources {
+func (cfg *HyperdriveConfig) GetNetworkResources() *config.NetworkResources {
 	switch cfg.Network.Value {
 	case Network_HoleskyDev:
-		return nmc_config.NewResources(nmc_config.Network_Holesky)
+		return config.NewResources(config.Network_Holesky)
 	default:
-		return nmc_config.NewResources(cfg.Network.Value)
+		return config.NewResources(cfg.Network.Value)
 	}
 }
 

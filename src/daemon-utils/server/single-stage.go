@@ -10,7 +10,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	batch "github.com/rocket-pool/batch-query"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
@@ -47,7 +47,7 @@ type ISingleStagePostContextFactory[ContextType ISingleStageCallContext[DataType
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called; use this for typical general-purpose calls
-func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], DataType any, ConfigType config.IModuleConfig](
+func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], DataType any, ConfigType hdconfig.IModuleConfig](
 	router *mux.Router,
 	functionName string,
 	factory ISingleStageGetContextFactory[ContextType, DataType],
@@ -85,7 +85,7 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via POST; use this for typical general-purpose calls
-func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], BodyType any, DataType any, ConfigType config.IModuleConfig](
+func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], BodyType any, DataType any, ConfigType hdconfig.IModuleConfig](
 	router *mux.Router,
 	functionName string,
 	factory ISingleStagePostContextFactory[ContextType, BodyType, DataType],
@@ -135,7 +135,7 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 }
 
 // Run a route registered with the common single-stage querying pattern
-func runSingleStageRoute[DataType any, ConfigType config.IModuleConfig](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*nmc_types.ApiResponse[DataType], error) {
+func runSingleStageRoute[DataType any, ConfigType hdconfig.IModuleConfig](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*nmc_types.ApiResponse[DataType], error) {
 	// Get the services
 	q := serviceProvider.GetQueryManager()
 	hd := serviceProvider.GetHyperdriveClient()

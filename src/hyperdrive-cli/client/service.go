@@ -17,8 +17,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
-	"github.com/nodeset-org/hyperdrive/shared/config"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 const (
@@ -386,12 +386,12 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 	}
 
 	// Check config
-	if cfg.Hyperdrive.ClientMode.Value == nmc_config.ClientMode_Unknown {
+	if cfg.Hyperdrive.ClientMode.Value == config.ClientMode_Unknown {
 		return "", fmt.Errorf("you haven't selected local or external mode for your clients yet.\nPlease run 'hyperdrive service config' before running this command")
-	} else if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value == nmc_config.ExecutionClient_Unknown {
+	} else if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value == config.ExecutionClient_Unknown {
 		return "", errors.New("no Execution Client selected. Please run 'hyperdrive service config' before running this command")
 	}
-	if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == nmc_config.BeaconNode_Unknown {
+	if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == config.BeaconNode_Unknown {
 		return "", errors.New("no Beacon Node selected. Please run 'hyperdrive service config' before running this command")
 	}
 
@@ -448,22 +448,22 @@ func (c *HyperdriveClient) deployTemplates(cfg *GlobalConfig, hyperdriveDir stri
 	deployedContainers := []string{}
 
 	// These containers always run
-	toDeploy := []nmc_config.ContainerID{
-		nmc_config.ContainerID_Daemon,
+	toDeploy := []config.ContainerID{
+		config.ContainerID_Daemon,
 	}
 
 	// Check if we are running the Execution Layer locally
 	if cfg.Hyperdrive.IsLocalMode() {
-		toDeploy = append(toDeploy, nmc_config.ContainerID_ExecutionClient)
-		toDeploy = append(toDeploy, nmc_config.ContainerID_BeaconNode)
+		toDeploy = append(toDeploy, config.ContainerID_ExecutionClient)
+		toDeploy = append(toDeploy, config.ContainerID_BeaconNode)
 	}
 
 	// Check the metrics containers
 	if cfg.Hyperdrive.Metrics.EnableMetrics.Value {
 		toDeploy = append(toDeploy,
-			nmc_config.ContainerID_Grafana,
-			nmc_config.ContainerID_Exporter,
-			nmc_config.ContainerID_Prometheus,
+			config.ContainerID_Grafana,
+			config.ContainerID_Exporter,
+			config.ContainerID_Prometheus,
 		)
 	}
 
@@ -533,12 +533,12 @@ func copyOverrideFiles(sourceDir string, targetDir string) error {
 }
 
 // Handle composing for modules
-func (c *HyperdriveClient) composeModule(global *GlobalConfig, module config.IModuleConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
+func (c *HyperdriveClient) composeModule(global *GlobalConfig, module hdconfig.IModuleConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
 	moduleName := module.GetModuleName()
 	composePaths := template.ComposePaths{
-		RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, config.ModulesName, moduleName),
-		TemplatePath: filepath.Join(templatesDir, config.ModulesName, moduleName),
-		OverridePath: filepath.Join(hyperdriveDir, overrideDir, config.ModulesName, moduleName),
+		RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, hdconfig.ModulesName, moduleName),
+		TemplatePath: filepath.Join(templatesDir, hdconfig.ModulesName, moduleName),
+		OverridePath: filepath.Join(hyperdriveDir, overrideDir, hdconfig.ModulesName, moduleName),
 	}
 
 	// These containers always run

@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
 
@@ -50,7 +50,7 @@ type IQuerylessPostContextFactory[ContextType IQuerylessCallContext[DataType], B
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via GET; use this for typical general-purpose calls
-func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType any, ConfigType config.IModuleConfig](
+func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType any, ConfigType hdconfig.IModuleConfig](
 	router *mux.Router,
 	functionName string,
 	factory IQuerylessGetContextFactory[ContextType, DataType],
@@ -88,7 +88,7 @@ func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType 
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via POST; use this for typical general-purpose calls
-func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType any, DataType any, ConfigType config.IModuleConfig](
+func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType any, DataType any, ConfigType hdconfig.IModuleConfig](
 	router *mux.Router,
 	functionName string,
 	factory IQuerylessPostContextFactory[ContextType, BodyType, DataType],
@@ -138,7 +138,7 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 }
 
 // Run a route registered with no structured chain query pattern
-func runQuerylessRoute[DataType any, ConfigType config.IModuleConfig](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*ApiResponse[DataType], error) {
+func runQuerylessRoute[DataType any, ConfigType hdconfig.IModuleConfig](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*ApiResponse[DataType], error) {
 	// Get the services
 	hd := serviceProvider.GetHyperdriveClient()
 	signer := serviceProvider.GetSigner()

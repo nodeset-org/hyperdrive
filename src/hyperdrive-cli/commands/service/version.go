@@ -5,7 +5,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/urfave/cli/v2"
 )
 
@@ -37,17 +37,17 @@ func serviceVersion(c *cli.Context) error {
 	var beaconNodeString string
 	clientMode := cfg.Hyperdrive.ClientMode.Value
 	switch clientMode {
-	case nmc_config.ClientMode_Local:
+	case config.ClientMode_Local:
 		format := "%s (Locally managed)\n\tImage: %s"
 
 		// Execution client
 		ec := cfg.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value
 		switch ec {
-		case nmc_config.ExecutionClient_Geth:
+		case config.ExecutionClient_Geth:
 			executionClientString = fmt.Sprintf(format, "Geth", cfg.Hyperdrive.LocalExecutionConfig.Geth.ContainerTag.Value)
-		case nmc_config.ExecutionClient_Nethermind:
+		case config.ExecutionClient_Nethermind:
 			executionClientString = fmt.Sprintf(format, "Nethermind", cfg.Hyperdrive.LocalExecutionConfig.Nethermind.ContainerTag.Value)
-		case nmc_config.ExecutionClient_Besu:
+		case config.ExecutionClient_Besu:
 			executionClientString = fmt.Sprintf(format, "Besu", cfg.Hyperdrive.LocalExecutionConfig.Besu.ContainerTag.Value)
 		default:
 			return fmt.Errorf("unknown local execution client [%v]", ec)
@@ -56,31 +56,31 @@ func serviceVersion(c *cli.Context) error {
 		// Beacon node
 		bn := cfg.Hyperdrive.LocalBeaconConfig.BeaconNode.Value
 		switch bn {
-		case nmc_config.BeaconNode_Lighthouse:
+		case config.BeaconNode_Lighthouse:
 			beaconNodeString = fmt.Sprintf(format, "Lighthouse", cfg.Hyperdrive.LocalBeaconConfig.Lighthouse.ContainerTag.Value)
-		case nmc_config.BeaconNode_Lodestar:
+		case config.BeaconNode_Lodestar:
 			beaconNodeString = fmt.Sprintf(format, "Lodestar", cfg.Hyperdrive.LocalBeaconConfig.Lodestar.ContainerTag.Value)
-		case nmc_config.BeaconNode_Nimbus:
+		case config.BeaconNode_Nimbus:
 			beaconNodeString = fmt.Sprintf(format, "Nimbus", cfg.Hyperdrive.LocalBeaconConfig.Nimbus.ContainerTag.Value)
-		case nmc_config.BeaconNode_Prysm:
+		case config.BeaconNode_Prysm:
 			beaconNodeString = fmt.Sprintf(format, "Prysm", cfg.Hyperdrive.LocalBeaconConfig.Prysm.ContainerTag.Value)
-		case nmc_config.BeaconNode_Teku:
+		case config.BeaconNode_Teku:
 			beaconNodeString = fmt.Sprintf(format, "Teku", cfg.Hyperdrive.LocalBeaconConfig.Teku.ContainerTag.Value)
 		default:
 			return fmt.Errorf("unknown local Beacon Node [%v]", bn)
 		}
 
-	case nmc_config.ClientMode_External:
+	case config.ClientMode_External:
 		format := "Externally managed (%s)"
 
 		// Execution client
 		ec := cfg.Hyperdrive.ExternalExecutionConfig.ExecutionClient.Value
 		switch ec {
-		case nmc_config.ExecutionClient_Geth:
+		case config.ExecutionClient_Geth:
 			executionClientString = fmt.Sprintf(format, "Geth")
-		case nmc_config.ExecutionClient_Nethermind:
+		case config.ExecutionClient_Nethermind:
 			executionClientString = fmt.Sprintf(format, "Nethermind")
-		case nmc_config.ExecutionClient_Besu:
+		case config.ExecutionClient_Besu:
 			executionClientString = fmt.Sprintf(format, "Besu")
 		default:
 			return fmt.Errorf("unknown external Execution Client [%v]", ec)
@@ -89,15 +89,15 @@ func serviceVersion(c *cli.Context) error {
 		// Beacon node
 		bn := cfg.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value
 		switch bn {
-		case nmc_config.BeaconNode_Lighthouse:
+		case config.BeaconNode_Lighthouse:
 			beaconNodeString = fmt.Sprintf(format, "Lighthouse")
-		case nmc_config.BeaconNode_Lodestar:
+		case config.BeaconNode_Lodestar:
 			beaconNodeString = fmt.Sprintf(format, "Lodestar")
-		case nmc_config.BeaconNode_Nimbus:
+		case config.BeaconNode_Nimbus:
 			beaconNodeString = fmt.Sprintf(format, "Nimbus")
-		case nmc_config.BeaconNode_Prysm:
+		case config.BeaconNode_Prysm:
 			beaconNodeString = fmt.Sprintf(format, "Prysm")
-		case nmc_config.BeaconNode_Teku:
+		case config.BeaconNode_Teku:
 			beaconNodeString = fmt.Sprintf(format, "Teku")
 		default:
 			return fmt.Errorf("unknown external Beacon Node [%v]", bn)

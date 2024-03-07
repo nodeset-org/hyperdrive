@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 	nmc_services "github.com/rocket-pool/node-manager-core/node/services"
 )
 
@@ -15,8 +15,8 @@ type ServiceProvider struct {
 	*nmc_services.ServiceProvider
 
 	// Services
-	cfg       *config.HyperdriveConfig
-	resources *nmc_config.NetworkResources
+	cfg       *hdconfig.HyperdriveConfig
+	resources *config.NetworkResources
 
 	// Path info
 	userDir string
@@ -25,7 +25,7 @@ type ServiceProvider struct {
 // Creates a new ServiceProvider instance
 func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	// Config
-	cfgPath := filepath.Join(userDir, config.ConfigFilename)
+	cfgPath := filepath.Join(userDir, hdconfig.ConfigFilename)
 	cfg, err := loadConfigFromFile(os.ExpandEnv(cfgPath))
 	if err != nil {
 		return nil, fmt.Errorf("error loading hyperdrive config: %w", err)
@@ -59,11 +59,11 @@ func (p *ServiceProvider) GetUserDir() string {
 	return p.userDir
 }
 
-func (p *ServiceProvider) GetConfig() *config.HyperdriveConfig {
+func (p *ServiceProvider) GetConfig() *hdconfig.HyperdriveConfig {
 	return p.cfg
 }
 
-func (p *ServiceProvider) GetResources() *nmc_config.NetworkResources {
+func (p *ServiceProvider) GetResources() *config.NetworkResources {
 	return p.resources
 }
 
@@ -76,13 +76,13 @@ func (p *ServiceProvider) IsDebugMode() bool {
 // =============
 
 // Loads a Hyperdrive config without updating it if it exists
-func loadConfigFromFile(path string) (*config.HyperdriveConfig, error) {
+func loadConfigFromFile(path string) (*hdconfig.HyperdriveConfig, error) {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		return nil, nil
 	}
 
-	cfg, err := config.LoadFromFile(path)
+	cfg, err := hdconfig.LoadFromFile(path)
 	if err != nil {
 		return nil, err
 	}

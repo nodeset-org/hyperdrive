@@ -11,8 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared/config"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/eth"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
@@ -133,17 +133,17 @@ func PrintDepositMismatchError(rpNetwork, beaconNetwork uint64, rpDepositAddress
 }
 
 // Prints what network you're currently on
-func PrintNetwork(currentNetwork nmc_config.Network, isNew bool) error {
+func PrintNetwork(currentNetwork config.Network, isNew bool) error {
 	if isNew {
 		return fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
 	}
 
 	switch currentNetwork {
-	case nmc_config.Network_Mainnet:
+	case config.Network_Mainnet:
 		fmt.Printf("Hyperdrive is currently using the %sEthereum Mainnet.%s\n\n", terminal.ColorGreen, terminal.ColorReset)
-	case config.Network_HoleskyDev:
+	case hdconfig.Network_HoleskyDev:
 		fmt.Printf("Hyperdrive is currently using the %sHolesky Development Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
-	case nmc_config.Network_Holesky:
+	case config.Network_Holesky:
 		fmt.Printf("Hyperdrive is currently using the %sHolesky Test Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
 	default:
 		fmt.Printf("%sYou are on an unexpected network [%v].%s\n\n", terminal.ColorYellow, currentNetwork, terminal.ColorReset)

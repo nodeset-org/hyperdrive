@@ -1,7 +1,7 @@
 package config
 
 import (
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 const (
@@ -10,12 +10,12 @@ const (
 )
 
 type IModuleConfig interface {
-	nmc_config.IConfigSection
+	config.IConfigSection
 
 	GetModuleName() string
 
 	// A map of the Validator Client IDs to their container tags
-	GetValidatorContainerTagInfo() map[nmc_config.ContainerID]string
+	GetValidatorContainerTagInfo() map[config.ContainerID]string
 
 	// Return if doppelganger detection is enabled for any of the VCs
 	IsDoppelgangerEnabled() bool
@@ -24,5 +24,5 @@ type IModuleConfig interface {
 	IsEnabled() bool
 
 	// Get the list of containers that should be deployed
-	GetContainersToDeploy() []nmc_config.ContainerID
+	GetContainersToDeploy() []config.ContainerID
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet/bip39"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
@@ -147,7 +147,7 @@ func confirmMnemonic(mnemonic string) {
 }
 
 // Check for custom keys, prompt for their passwords, and store them in the custom keys file
-func promptForCustomKeyPasswords(hd *client.HyperdriveClient, cfg *config.HyperdriveConfig, testOnly bool) (string, error) {
+func promptForCustomKeyPasswords(hd *client.HyperdriveClient, cfg *hdconfig.HyperdriveConfig, testOnly bool) (string, error) {
 	// Check for the custom key directory
 	datapath, err := homedir.Expand(cfg.UserDataPath.Value)
 	if err != nil {

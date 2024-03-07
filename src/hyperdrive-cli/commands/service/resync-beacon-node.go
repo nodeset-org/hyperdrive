@@ -6,7 +6,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/urfave/cli/v2"
 )
 
@@ -28,7 +28,7 @@ func resyncBeaconNode(c *cli.Context) error {
 	fmt.Printf("%sYou should only do this if your Beacon Node has failed and can no longer start or sync properly.\nThis is meant to be a last resort.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
 
 	// Check the client mode
-	if cfg.Hyperdrive.ClientMode.Value == nmc_config.ClientMode_External {
+	if cfg.Hyperdrive.ClientMode.Value == config.ClientMode_External {
 		fmt.Println("You use an externally-managed Beacon Node. Hyperdrive cannot resync it for you.")
 		return nil
 	}
@@ -48,7 +48,7 @@ func resyncBeaconNode(c *cli.Context) error {
 	}
 
 	// Stop the BN
-	beaconContainerName := cfg.Hyperdrive.GetDockerArtifactName(string(nmc_config.ContainerID_BeaconNode))
+	beaconContainerName := cfg.Hyperdrive.GetDockerArtifactName(string(config.ContainerID_BeaconNode))
 	fmt.Printf("Stopping %s...\n", beaconContainerName)
 	err = hd.StopContainer(beaconContainerName)
 	if err != nil {

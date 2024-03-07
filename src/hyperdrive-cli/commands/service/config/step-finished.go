@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/rivo/tview"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 func createFinishedStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
@@ -86,10 +86,10 @@ func processConfigAfterQuit(md *mainDisplay) {
 		_, totalAffectedContainers, changeNetworks := md.Config.GetChanges(md.PreviousConfig)
 
 		if md.isUpdate {
-			totalAffectedContainers[nmc_config.ContainerID_Daemon] = true
+			totalAffectedContainers[config.ContainerID_Daemon] = true
 		}
 
-		var containersToRestart []nmc_config.ContainerID
+		var containersToRestart []config.ContainerID
 		for container := range totalAffectedContainers {
 			containersToRestart = append(containersToRestart, container)
 		}

@@ -7,16 +7,16 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	nmc_config "github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 // A form item linked to a Parameter
 type parameterizedFormItem struct {
-	parameter nmc_config.IParameter
+	parameter config.IParameter
 	item      tview.FormItem
 }
 
-func registerEnableCheckbox(param nmc_config.Parameter[bool], checkbox *tview.Checkbox, form *Form, items []*parameterizedFormItem) {
+func registerEnableCheckbox(param config.Parameter[bool], checkbox *tview.Checkbox, form *Form, items []*parameterizedFormItem) {
 	checkbox.SetChangedFunc(func(checked bool) {
 		param.Value = checked
 
@@ -32,7 +32,7 @@ func registerEnableCheckbox(param nmc_config.Parameter[bool], checkbox *tview.Ch
 }
 
 // Create a list of form items based on a set of parameters
-func createParameterizedFormItems(params []nmc_config.IParameter, descriptionBox *tview.TextView) []*parameterizedFormItem {
+func createParameterizedFormItems(params []config.IParameter, descriptionBox *tview.TextView) []*parameterizedFormItem {
 	formItems := []*parameterizedFormItem{}
 	for _, param := range params {
 		item := getTypedFormItem(param, descriptionBox)
@@ -43,33 +43,33 @@ func createParameterizedFormItems(params []nmc_config.IParameter, descriptionBox
 }
 
 // Create a form item binding for a parameter based on its type
-func getTypedFormItem(param nmc_config.IParameter, descriptionBox *tview.TextView) *parameterizedFormItem {
+func getTypedFormItem(param config.IParameter, descriptionBox *tview.TextView) *parameterizedFormItem {
 	if len(param.GetOptions()) > 0 {
 		return createParameterizedDropDown(param, descriptionBox)
 	}
-	if boolParam, ok := param.(*nmc_config.Parameter[bool]); ok {
+	if boolParam, ok := param.(*config.Parameter[bool]); ok {
 		return createParameterizedCheckbox(boolParam)
 	}
-	if intParam, ok := param.(*nmc_config.Parameter[int]); ok {
+	if intParam, ok := param.(*config.Parameter[int]); ok {
 		return createParameterizedIntField(intParam)
 	}
-	if uintParam, ok := param.(*nmc_config.Parameter[uint64]); ok {
+	if uintParam, ok := param.(*config.Parameter[uint64]); ok {
 		return createParameterizedUintField(uintParam)
 	}
-	if uint16Param, ok := param.(*nmc_config.Parameter[uint16]); ok {
+	if uint16Param, ok := param.(*config.Parameter[uint16]); ok {
 		return createParameterizedUint16Field(uint16Param)
 	}
-	if stringParam, ok := param.(*nmc_config.Parameter[string]); ok {
+	if stringParam, ok := param.(*config.Parameter[string]); ok {
 		return createParameterizedStringField(stringParam)
 	}
-	if floatParam, ok := param.(*nmc_config.Parameter[float64]); ok {
+	if floatParam, ok := param.(*config.Parameter[float64]); ok {
 		return createParameterizedFloatField(floatParam)
 	}
 	panic(fmt.Sprintf("param [%s] is not a supported type for form item binding", param.GetCommon().Name))
 }
 
 // Create a standard form checkbox
-func createParameterizedCheckbox(param *nmc_config.Parameter[bool]) *parameterizedFormItem {
+func createParameterizedCheckbox(param *config.Parameter[bool]) *parameterizedFormItem {
 	item := tview.NewCheckbox().
 		SetLabel(param.Name).
 		SetChecked(param.Value == true).
@@ -94,7 +94,7 @@ func createParameterizedCheckbox(param *nmc_config.Parameter[bool]) *parameteriz
 }
 
 // Create a standard int field
-func createParameterizedIntField(param *nmc_config.Parameter[int]) *parameterizedFormItem {
+func createParameterizedIntField(param *config.Parameter[int]) *parameterizedFormItem {
 	item := tview.NewInputField().
 		SetLabel(param.Name).
 		SetAcceptanceFunc(tview.InputFieldInteger)
@@ -129,7 +129,7 @@ func createParameterizedIntField(param *nmc_config.Parameter[int]) *parameterize
 }
 
 // Create a standard uint field
-func createParameterizedUintField(param *nmc_config.Parameter[uint64]) *parameterizedFormItem {
+func createParameterizedUintField(param *config.Parameter[uint64]) *parameterizedFormItem {
 	item := tview.NewInputField().
 		SetLabel(param.Name).
 		SetAcceptanceFunc(tview.InputFieldInteger)
@@ -164,7 +164,7 @@ func createParameterizedUintField(param *nmc_config.Parameter[uint64]) *paramete
 }
 
 // Create a standard uint16 field
-func createParameterizedUint16Field(param *nmc_config.Parameter[uint16]) *parameterizedFormItem {
+func createParameterizedUint16Field(param *config.Parameter[uint16]) *parameterizedFormItem {
 	item := tview.NewInputField().
 		SetLabel(param.Name).
 		SetAcceptanceFunc(tview.InputFieldInteger)
@@ -199,7 +199,7 @@ func createParameterizedUint16Field(param *nmc_config.Parameter[uint16]) *parame
 }
 
 // Create a standard string field
-func createParameterizedStringField(param *nmc_config.Parameter[string]) *parameterizedFormItem {
+func createParameterizedStringField(param *config.Parameter[string]) *parameterizedFormItem {
 	item := tview.NewInputField().
 		SetLabel(param.Name)
 	item.SetDoneFunc(func(key tcell.Key) {
@@ -236,7 +236,7 @@ func createParameterizedStringField(param *nmc_config.Parameter[string]) *parame
 }
 
 // Create a standard float field
-func createParameterizedFloatField(param *nmc_config.Parameter[float64]) *parameterizedFormItem {
+func createParameterizedFloatField(param *config.Parameter[float64]) *parameterizedFormItem {
 	item := tview.NewInputField().
 		SetLabel(param.Name).
 		SetAcceptanceFunc(tview.InputFieldFloat)
@@ -271,7 +271,7 @@ func createParameterizedFloatField(param *nmc_config.Parameter[float64]) *parame
 }
 
 // Create a standard choice field
-func createParameterizedDropDown(param nmc_config.IParameter, descriptionBox *tview.TextView) *parameterizedFormItem {
+func createParameterizedDropDown(param config.IParameter, descriptionBox *tview.TextView) *parameterizedFormItem {
 	// Create the list of options
 	options := []string{}
 	descriptions := []string{}
