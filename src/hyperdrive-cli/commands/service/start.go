@@ -8,10 +8,10 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/urfave/cli/v2"
 )
@@ -36,7 +36,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
 	isUpdate := oldVersion != currentVersion
 	if isUpdate && !ignoreConfigSuggestion {
-		if c.Bool(utils.YesFlag.Name) || utils.Confirm("Hyperdrive upgrade detected - starting will overwrite certain settings with the latest defaults (such as container versions).\nYou may want to run `hyperdrive service config` first to see what's changed.\n\nWould you like to continue starting the service?") {
+		if c.Bool(cliutils.YesFlag.Name) || cliutils.Confirm("Hyperdrive upgrade detected - starting will overwrite certain settings with the latest defaults (such as container versions).\nYou may want to run `hyperdrive service config` first to see what's changed.\n\nWould you like to continue starting the service?") {
 			cfg.UpdateDefaults()
 			hd.SaveConfig(cfg)
 			fmt.Printf("%sUpdated settings successfully.%s\n", terminal.ColorGreen, terminal.ColorReset)
@@ -82,13 +82,13 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 			fmt.Println()
 			fmt.Println("**If you did NOT change clients, you can safely ignore this warning.**")
 			fmt.Println()
-			if !utils.Confirm(fmt.Sprintf("Press y when you understand the above warning, have waited, and are ready to start Hyperdrive:%s", terminal.ColorReset)) {
+			if !cliutils.Confirm(fmt.Sprintf("Press y when you understand the above warning, have waited, and are ready to start Hyperdrive:%s", terminal.ColorReset)) {
 				fmt.Println("Cancelled.")
 				return nil
 			}
 		} else if firstRun {
 			fmt.Println("It looks like this is your first time starting a Validator Client.")
-			existingNode := utils.Confirm("Just to be sure, does your node have any existing, active validators attesting on the Beacon Chain?")
+			existingNode := cliutils.Confirm("Just to be sure, does your node have any existing, active validators attesting on the Beacon Chain?")
 			if !existingNode {
 				fmt.Println("Okay, great! You're safe to start. Have fun!")
 			} else {
@@ -97,7 +97,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 				fmt.Println("This will slash your validator!")
 				fmt.Println("To prevent slashing, you must wait 15 minutes from the time you stopped the clients before starting them again.")
 				fmt.Println()
-				if !utils.Confirm(fmt.Sprintf("Press y when you understand the above warning, have waited, and are ready to start Hyperdrive:%s", terminal.ColorReset)) {
+				if !cliutils.Confirm(fmt.Sprintf("Press y when you understand the above warning, have waited, and are ready to start Hyperdrive:%s", terminal.ColorReset)) {
 					fmt.Println("Cancelled.")
 					return nil
 				}
@@ -154,7 +154,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 
 	// Init
 	fmt.Println("You don't have a node wallet yet.")
-	if c.Bool(utils.YesFlag.Name) || !utils.Confirm("Would you like to create one now?") {
+	if c.Bool(cliutils.YesFlag.Name) || !cliutils.Confirm("Would you like to create one now?") {
 		fmt.Println("Please create one using `hyperdrive wallet init` when you're ready.")
 		return nil
 	}
@@ -175,13 +175,13 @@ func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) error {
 	if passwordString == "" {
 		passwordString = wallet.PromptExistingPassword()
 	}
-	password, err := input.ValidateNodePassword("password", passwordString)
+	password, err := nmc_input.ValidateNodePassword("password", passwordString)
 	if err != nil {
 		return fmt.Errorf("error validating password: %w", err)
 	}
 
 	// Get the save flag
-	savePassword := c.Bool(wallet.SavePasswordFlag.Name) || utils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to repeat this command to manually enter the password after each restart.")
+	savePassword := c.Bool(wallet.SavePasswordFlag.Name) || cliutils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to repeat this command to manually enter the password after each restart.")
 
 	// Run it
 	_, err = hd.Api.Wallet.SetPassword(password, savePassword)

@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -26,7 +26,7 @@ func (f *walletSignTxContextFactory) Create(args url.Values) (*walletSignTxConte
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("tx", args, input.ValidateByteArray, &c.tx),
+		nmc_server.ValidateArg("tx", args, nmc_input.ValidateByteArray, &c.tx),
 	}
 	return c, errors.Join(inputErrs...)
 }

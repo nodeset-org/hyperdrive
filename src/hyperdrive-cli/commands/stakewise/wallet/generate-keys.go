@@ -6,10 +6,10 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	swcmdutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/utils"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -51,8 +51,8 @@ func generateKeys(c *cli.Context) error {
 	// Get the count
 	count := c.Uint64(generateKeysCountFlag.Name)
 	if count == 0 {
-		countString := utils.Prompt("How many keys would you like to generate?", "^\\d+$", "Invalid count, try again")
-		count, err = input.ValidateUint("count", countString)
+		countString := cliutils.Prompt("How many keys would you like to generate?", "^\\d+$", "Invalid count, try again")
+		count, err = nmc_input.ValidateUint("count", countString)
 		if err != nil {
 			return fmt.Errorf("invalid count [%s]: %w", countString, err)
 		}

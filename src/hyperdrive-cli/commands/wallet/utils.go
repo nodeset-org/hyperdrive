@@ -14,8 +14,8 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
 )
@@ -64,8 +64,8 @@ func PromptNewPassword() string {
 	for {
 		password := utils.PromptPassword(
 			"Please enter a password to secure your wallet with:",
-			fmt.Sprintf("^.{%d,}$", input.MinPasswordLength),
-			fmt.Sprintf("Your password must be at least %d characters long. Please try again:", input.MinPasswordLength),
+			fmt.Sprintf("^.{%d,}$", nmc_input.MinPasswordLength),
+			fmt.Sprintf("Your password must be at least %d characters long. Please try again:", nmc_input.MinPasswordLength),
 		)
 		confirmation := utils.PromptPassword("Please confirm your password:", "^.*$", "")
 		if password == confirmation {
@@ -81,8 +81,8 @@ func PromptExistingPassword() string {
 	for {
 		password := utils.PromptPassword(
 			"Please enter the password your wallet was originally secured with:",
-			fmt.Sprintf("^.{%d,}$", input.MinPasswordLength),
-			fmt.Sprintf("Your password must be at least %d characters long. Please try again:", input.MinPasswordLength),
+			fmt.Sprintf("^.{%d,}$", nmc_input.MinPasswordLength),
+			fmt.Sprintf("Your password must be at least %d characters long. Please try again:", nmc_input.MinPasswordLength),
 		)
 		return password
 	}

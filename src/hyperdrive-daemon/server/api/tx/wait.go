@@ -9,9 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -27,7 +27,7 @@ func (f *txWaitContextFactory) Create(args url.Values) (*txWaitContext, error) {
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("hash", args, input.ValidateHash, &c.hash),
+		nmc_server.ValidateArg("hash", args, nmc_input.ValidateHash, &c.hash),
 	}
 	return c, errors.Join(inputErrs...)
 }

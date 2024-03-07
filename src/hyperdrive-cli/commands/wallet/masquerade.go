@@ -6,7 +6,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -33,7 +33,7 @@ func masquerade(c *cli.Context) error {
 	} else {
 		addressString = utils.Prompt("Please enter the address you want to masquerade as:", "^0x[0-9a-fA-F]{40}$", "Invalid address")
 	}
-	address, err := input.ValidateAddress("address", addressString)
+	address, err := nmc_input.ValidateAddress("address", addressString)
 	if err != nil {
 		return err
 	}

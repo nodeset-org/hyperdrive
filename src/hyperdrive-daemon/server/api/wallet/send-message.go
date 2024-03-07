@@ -8,9 +8,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -26,8 +26,8 @@ func (f *walletSendMessageContextFactory) Create(args url.Values) (*walletSendMe
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("message", args, input.ValidateByteArray, &c.message),
-		nmc_server.ValidateArg("address", args, input.ValidateAddress, &c.address),
+		nmc_server.ValidateArg("message", args, nmc_input.ValidateByteArray, &c.message),
+		nmc_server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
 	}
 	return c, errors.Join(inputErrs...)
 }

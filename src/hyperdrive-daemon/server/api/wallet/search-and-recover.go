@@ -9,9 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_wallet "github.com/rocket-pool/node-manager-core/node/wallet"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 const (
@@ -31,10 +31,10 @@ func (f *walletSearchAndRecoverContextFactory) Create(args url.Values) (*walletS
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("mnemonic", args, input.ValidateWalletMnemonic, &c.mnemonic),
-		nmc_server.ValidateArg("address", args, input.ValidateAddress, &c.address),
-		nmc_server.ValidateArg("password", args, input.ValidateNodePassword, &c.password),
-		nmc_server.ValidateArg("save-password", args, input.ValidateBool, &c.savePassword),
+		nmc_server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
+		nmc_server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
+		nmc_server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
+		nmc_server.ValidateArg("save-password", args, nmc_input.ValidateBool, &c.savePassword),
 	}
 	return c, errors.Join(inputErrs...)
 }

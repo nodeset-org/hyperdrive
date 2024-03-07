@@ -11,10 +11,10 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
 	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 	nmc_utils "github.com/rocket-pool/node-manager-core/node/validator/utils"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -35,9 +35,9 @@ func (f *validatorGetSignedExitMessagesContextFactory) Create(args url.Values) (
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateOptionalArg("epoch", args, input.ValidateUint, &c.epoch, &c.isEpochSet),
-		nmc_server.ValidateArgBatch("pubkeys", args, pubkeyLimit, input.ValidatePubkey, &c.pubkeys),
-		nmc_server.ValidateOptionalArg("no-broadcast", args, input.ValidateBool, &c.noBroadcast, nil),
+		nmc_server.ValidateOptionalArg("epoch", args, nmc_input.ValidateUint, &c.epoch, &c.isEpochSet),
+		nmc_server.ValidateArgBatch("pubkeys", args, pubkeyLimit, nmc_input.ValidatePubkey, &c.pubkeys),
+		nmc_server.ValidateOptionalArg("no-broadcast", args, nmc_input.ValidateBool, &c.noBroadcast, nil),
 	}
 	return c, errors.Join(inputErrs...)
 }

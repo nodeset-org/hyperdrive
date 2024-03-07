@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	clituils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/tx"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -24,9 +24,9 @@ func setValidatorsRoot(c *cli.Context) error {
 	// Get the root
 	rootString := c.String(validatorsRootFlag.Name)
 	if rootString == "" {
-		rootString = utils.Prompt("Please enter the root of the aggregated validator deposit data Merkle tree:", "^0x[0-9a-fA-F]{64}$", "Invalid hash format")
+		rootString = clituils.Prompt("Please enter the root of the aggregated validator deposit data Merkle tree:", "^0x[0-9a-fA-F]{64}$", "Invalid hash format")
 	}
-	root, err := input.ValidateHash("root", rootString)
+	root, err := nmc_input.ValidateHash("root", rootString)
 	if err != nil {
 		return err
 	}

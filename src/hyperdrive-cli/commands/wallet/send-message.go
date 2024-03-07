@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/tx"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -29,7 +29,7 @@ func sendMessage(c *cli.Context, toAddressOrEns string, message []byte) error {
 		toAddress = response.Data.Address
 		toAddressString = fmt.Sprintf("%s (%s)", toAddressOrEns, toAddress.Hex())
 	} else {
-		toAddress, err = input.ValidateAddress("to address", toAddressOrEns)
+		toAddress, err = nmc_input.ValidateAddress("to address", toAddressOrEns)
 		if err != nil {
 			return err
 		}
