@@ -5,12 +5,13 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 // A collection of network-specific resources and getters for them
 type StakewiseResources struct {
 	// The Network being used
-	Network config.Network
+	Network nmc_config.Network
 
 	// The address of the Stakewise vault
 	Vault common.Address
@@ -29,7 +30,7 @@ type StakewiseResources struct {
 }
 
 // Creates a new resource collection for the given network
-func NewStakewiseResources(network config.Network) *StakewiseResources {
+func NewStakewiseResources(network nmc_config.Network) *StakewiseResources {
 	// Mainnet
 	mainnetResources := &StakewiseResources{
 		Network:            network,
@@ -61,9 +62,9 @@ func NewStakewiseResources(network config.Network) *StakewiseResources {
 	}
 
 	switch network {
-	case config.Network_Mainnet:
+	case nmc_config.Network_Mainnet:
 		return mainnetResources
-	case config.Network_Holesky:
+	case nmc_config.Network_Holesky:
 		return holeskyResources
 	case config.Network_HoleskyDev:
 		return holeskyDevResources

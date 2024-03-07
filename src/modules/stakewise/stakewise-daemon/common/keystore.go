@@ -13,7 +13,7 @@ import (
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
+	nmc_utils "github.com/rocket-pool/node-manager-core/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
@@ -150,7 +150,7 @@ func (ks *stakewiseKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubk
 // Initializes the Stakewise keystore directory and saves a random password to it
 func initializeKeystorePassword(passwordPath string) (string, error) {
 	// Make a password
-	password, err := utils.GenerateRandomPassword()
+	password, err := nmc_utils.GenerateRandomPassword()
 	if err != nil {
 		return "", err
 	}

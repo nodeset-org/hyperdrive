@@ -15,6 +15,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/log"
+	nmc_services "github.com/rocket-pool/node-manager-core/node/services"
 )
 
 const (
@@ -24,19 +25,10 @@ const (
 
 // A container for all of the various services used by Hyperdrive
 type ServiceProvider struct {
-	// Services
-	cfg        *config.HyperdriveConfig
-	nodeWallet *wallet.Wallet
-	ecManager  *services.ExecutionClientManager
-	bcManager  *services.BeaconClientManager
-	docker     *client.Client
-	txMgr      *eth.TransactionManager
-	queryMgr   *eth.QueryManager
-	resources  *utils.Resources
+	nmc_services.ServiceProvider
 
-	// TODO: find a better place for this than the common service provider
-	apiLogger    *log.ColorLogger
-	walletLogger *log.ColorLogger
+	// Services
+	cfg *config.HyperdriveConfig
 
 	// Path info
 	userDir string
@@ -53,6 +45,8 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("hyperdrive config settings file [%s] not found", cfgPath)
 	}
+
+	// TODO: HERE
 
 	// Loggers
 	apiLogger := log.NewColorLogger(apiLogColor)

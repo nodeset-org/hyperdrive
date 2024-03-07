@@ -1,14 +1,16 @@
 package swconfig
 
-import "github.com/nodeset-org/hyperdrive/shared/config"
+import (
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
+)
 
 const (
 	// The stakewise Hyperdrive daemon
-	ContainerID_StakewiseDaemon config.ContainerID = "sw_daemon"
+	ContainerID_StakewiseDaemon nmc_config.ContainerID = "sw_daemon"
 
 	// The stakewise operator container
-	ContainerID_StakewiseOperator config.ContainerID = "sw_operator"
+	ContainerID_StakewiseOperator nmc_config.ContainerID = "sw_operator"
 
 	// The stakewise Validator client
-	ContainerID_StakewiseValidator config.ContainerID = "sw_vc"
+	ContainerID_StakewiseValidator nmc_config.ContainerID = "sw_vc"
 )

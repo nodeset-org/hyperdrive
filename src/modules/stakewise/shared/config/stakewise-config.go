@@ -3,7 +3,7 @@ package swconfig
 import (
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config/validator"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 const (
@@ -23,24 +23,24 @@ type StakewiseConfig struct {
 	hdCfg *config.HyperdriveConfig
 
 	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
-	Enabled config.Parameter[bool]
+	Enabled nmc_config.Parameter[bool]
 
 	// Toggle for verifying deposit data Merkle roots before saving
-	VerifyDepositsRoot config.Parameter[bool]
+	VerifyDepositsRoot nmc_config.Parameter[bool]
 
 	// The Docker Hub tag for the Stakewise operator
-	OperatorContainerTag config.Parameter[string]
+	OperatorContainerTag nmc_config.Parameter[string]
 
 	// Custom command line flags
-	AdditionalOpFlags config.Parameter[string]
+	AdditionalOpFlags nmc_config.Parameter[string]
 
 	// Validator client configs
-	VcCommon   *validator.ValidatorClientCommonConfig
-	Lighthouse *validator.LighthouseVcConfig
-	Lodestar   *validator.LodestarVcConfig
-	Nimbus     *validator.NimbusVcConfig
-	Prysm      *validator.PrysmVcConfig
-	Teku       *validator.TekuVcConfig
+	VcCommon   *nmc_config.ValidatorClientCommonConfig
+	Lighthouse *nmc_config.LighthouseVcConfig
+	Lodestar   *nmc_config.LodestarVcConfig
+	Nimbus     *nmc_config.NimbusVcConfig
+	Prysm      *nmc_config.PrysmVcConfig
+	Teku       *nmc_config.TekuVcConfig
 }
 
 // Generates a new Stakewise config
@@ -48,69 +48,74 @@ func NewStakewiseConfig(hdCfg *config.HyperdriveConfig) *StakewiseConfig {
 	cfg := &StakewiseConfig{
 		hdCfg: hdCfg,
 
-		Enabled: config.Parameter[bool]{
-			ParameterCommon: &config.ParameterCommon{
+		Enabled: nmc_config.Parameter[bool]{
+			ParameterCommon: &nmc_config.ParameterCommon{
 				ID:                 StakewiseEnableID,
 				Name:               "Enable",
 				Description:        "Enable support for Stakewise (see more at https://docs.nodeset.io).",
-				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseOperator},
+				AffectsContainers:  []nmc_config.ContainerID{ContainerID_StakewiseOperator},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[config.Network]bool{
-				config.Network_All: false,
+			Default: map[nmc_config.Network]bool{
+				nmc_config.Network_All: false,
 			},
 		},
 
-		VerifyDepositsRoot: config.Parameter[bool]{
-			ParameterCommon: &config.ParameterCommon{
+		VerifyDepositsRoot: nmc_config.Parameter[bool]{
+			ParameterCommon: &nmc_config.ParameterCommon{
 				ID:                 VerifyDepositRootsID,
 				Name:               "Verify Deposits Root",
 				Description:        "Enable this to verify that the Merkle root of aggregated deposit data returned by the NodeSet server matches the Merkle root stored in the NodeSet vault contract. This is a safety mechanism to ensure the Stakewise Operator container won't try to submit deposits for validators that the NodeSet vault hasn't verified yet.\n\n[orange]Don't disable this unless you know what you're doing.",
-				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseDaemon},
+				AffectsContainers:  []nmc_config.ContainerID{ContainerID_StakewiseDaemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[config.Network]bool{
-				config.Network_All: true,
+			Default: map[nmc_config.Network]bool{
+				nmc_config.Network_All: true,
 			},
 		},
 
-		OperatorContainerTag: config.Parameter[string]{
-			ParameterCommon: &config.ParameterCommon{
+		OperatorContainerTag: nmc_config.Parameter[string]{
+			ParameterCommon: &nmc_config.ParameterCommon{
 				ID:                 OperatorContainerTagID,
 				Name:               "Operator Container Tag",
 				Description:        "The tag name of the Stakewise Operator image to use. See https://github.com/stakewise/v3-operator#using-docker for more details.",
-				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseOperator},
+				AffectsContainers:  []nmc_config.ContainerID{ContainerID_StakewiseOperator},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: true,
 			},
-			Default: map[config.Network]string{
-				config.Network_All: operatorTag,
+			Default: map[nmc_config.Network]string{
+				nmc_config.Network_All: operatorTag,
 			},
 		},
 
-		AdditionalOpFlags: config.Parameter[string]{
-			ParameterCommon: &config.ParameterCommon{
+		AdditionalOpFlags: nmc_config.Parameter[string]{
+			ParameterCommon: &nmc_config.ParameterCommon{
 				ID:                 AdditionalOpFlagsID,
 				Name:               "Additional Operator Flags",
 				Description:        "Additional custom command line flags you want to pass to the Operator container, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
-				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseOperator},
+				AffectsContainers:  []nmc_config.ContainerID{ContainerID_StakewiseOperator},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[config.Network]string{
-				config.Network_All: "",
+			Default: map[nmc_config.Network]string{
+				nmc_config.Network_All: "",
 			},
 		},
 	}
 
-	cfg.VcCommon = validator.NewValidatorClientCommonConfig()
-	cfg.Lighthouse = validator.NewLighthouseVcConfig()
-	cfg.Lodestar = validator.NewLodestarVcConfig()
-	cfg.Nimbus = validator.NewNimbusVcConfig()
-	cfg.Prysm = validator.NewPrysmVcConfig()
-	cfg.Teku = validator.NewTekuVcConfig()
+	cfg.VcCommon = nmc_config.NewValidatorClientCommonConfig()
+	cfg.Lighthouse = nmc_config.NewLighthouseVcConfig()
+	cfg.Lodestar = nmc_config.NewLodestarVcConfig()
+	cfg.Nimbus = nmc_config.NewNimbusVcConfig()
+	cfg.Prysm = nmc_config.NewPrysmVcConfig()
+	cfg.Teku = nmc_config.NewTekuVcConfig()
+	cfg.Lighthouse.ContainerTag.Default[config.Network_HoleskyDev] = cfg.Lighthouse.ContainerTag.Default[nmc_config.Network_Holesky]
+	cfg.Lodestar.ContainerTag.Default[config.Network_HoleskyDev] = cfg.Lodestar.ContainerTag.Default[nmc_config.Network_Holesky]
+	cfg.Nimbus.ContainerTag.Default[config.Network_HoleskyDev] = cfg.Nimbus.ContainerTag.Default[nmc_config.Network_Holesky]
+	cfg.Prysm.ContainerTag.Default[config.Network_HoleskyDev] = cfg.Prysm.ContainerTag.Default[nmc_config.Network_Holesky]
+	cfg.Teku.ContainerTag.Default[config.Network_HoleskyDev] = cfg.Teku.ContainerTag.Default[nmc_config.Network_Holesky]
 
 	return cfg
 }
@@ -121,8 +126,8 @@ func (cfg *StakewiseConfig) GetTitle() string {
 }
 
 // Get the parameters for this config
-func (cfg *StakewiseConfig) GetParameters() []config.IParameter {
-	return []config.IParameter{
+func (cfg *StakewiseConfig) GetParameters() []nmc_config.IParameter {
+	return []nmc_config.IParameter{
 		&cfg.Enabled,
 		&cfg.VerifyDepositsRoot,
 		&cfg.OperatorContainerTag,
@@ -131,8 +136,8 @@ func (cfg *StakewiseConfig) GetParameters() []config.IParameter {
 }
 
 // Get the sections underneath this one
-func (cfg *StakewiseConfig) GetSubconfigs() map[string]config.IConfigSection {
-	return map[string]config.IConfigSection{
+func (cfg *StakewiseConfig) GetSubconfigs() map[string]nmc_config.IConfigSection {
+	return map[string]nmc_config.IConfigSection{
 		"common":     cfg.VcCommon,
 		"lighthouse": cfg.Lighthouse,
 		"lodestar":   cfg.Lodestar,
@@ -151,14 +156,14 @@ func (cfg *StakewiseConfig) GetModuleName() string {
 	return ModuleName
 }
 
-func (cfg *StakewiseConfig) GetValidatorContainerTagInfo() map[config.ContainerID]string {
-	return map[config.ContainerID]string{
+func (cfg *StakewiseConfig) GetValidatorContainerTagInfo() map[nmc_config.ContainerID]string {
+	return map[nmc_config.ContainerID]string{
 		ContainerID_StakewiseValidator: cfg.GetVcContainerTag(),
 	}
 }
 
-func (cfg *StakewiseConfig) GetContainersToDeploy() []config.ContainerID {
-	return []config.ContainerID{
+func (cfg *StakewiseConfig) GetContainersToDeploy() []nmc_config.ContainerID {
+	return []nmc_config.ContainerID{
 		ContainerID_StakewiseDaemon,
 		ContainerID_StakewiseOperator,
 		ContainerID_StakewiseValidator,

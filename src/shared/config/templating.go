@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/nodeset-org/hyperdrive/shared"
+	nmc_config "github.com/rocket-pool/node-manager-core/config"
 )
 
 // =================
@@ -13,27 +14,27 @@ import (
 // =================
 
 func (c *HyperdriveConfig) BeaconNodeContainerName() string {
-	return string(ContainerID_BeaconNode)
+	return string(nmc_config.ContainerID_BeaconNode)
 }
 
 func (c *HyperdriveConfig) DaemonContainerName() string {
-	return string(ContainerID_Daemon)
+	return string(nmc_config.ContainerID_Daemon)
 }
 
 func (c *HyperdriveConfig) ExecutionClientContainerName() string {
-	return string(ContainerID_ExecutionClient)
+	return string(nmc_config.ContainerID_ExecutionClient)
 }
 
 func (c *HyperdriveConfig) ExporterContainerName() string {
-	return string(ContainerID_Exporter)
+	return string(nmc_config.ContainerID_Exporter)
 }
 
 func (c *HyperdriveConfig) GrafanaContainerName() string {
-	return string(ContainerID_Grafana)
+	return string(nmc_config.ContainerID_Grafana)
 }
 
 func (c *HyperdriveConfig) PrometheusContainerName() string {
-	return string(ContainerID_Prometheus)
+	return string(nmc_config.ContainerID_Prometheus)
 }
 
 func (c *HyperdriveConfig) ExecutionClientDataVolume() string {
@@ -50,7 +51,7 @@ func (c *HyperdriveConfig) BeaconNodeDataVolume() string {
 
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) IsLocalMode() bool {
-	return cfg.ClientMode.Value == ClientMode_Local
+	return cfg.ClientMode.Value == nmc_config.ClientMode_Local
 }
 
 // Gets the full name of the Docker container or volume with the provided suffix (name minus the project ID prefix)
@@ -87,7 +88,7 @@ func (cfg *HyperdriveConfig) BnHttpUrl() (string, error) {
 		}
 	*/
 	if cfg.IsLocalMode() {
-		return fmt.Sprintf("http://%s:%d", ContainerID_BeaconNode, cfg.LocalBeaconConfig.HttpPort.Value), nil
+		return fmt.Sprintf("http://%s:%d", nmc_config.ContainerID_BeaconNode, cfg.LocalBeaconConfig.HttpPort.Value), nil
 	}
 	return cfg.ExternalBeaconConfig.HttpUrl.Value, nil
 }
@@ -110,7 +111,7 @@ func (cfg *HyperdriveConfig) BnRpcUrl() (string, error) {
 		}
 	*/
 	if cfg.IsLocalMode() {
-		return fmt.Sprintf("%s:%d", ContainerID_BeaconNode, cfg.LocalBeaconConfig.Prysm.RpcPort.Value), nil
+		return fmt.Sprintf("%s:%d", nmc_config.ContainerID_BeaconNode, cfg.LocalBeaconConfig.Prysm.RpcPort.Value), nil
 	}
 	return cfg.ExternalBeaconConfig.PrysmRpcUrl.Value, nil
 }
@@ -150,7 +151,7 @@ func (cfg *HyperdriveConfig) GetDaemonContainerTag() string {
 // ========================
 
 // Get the selected Beacon Node
-func (cfg *HyperdriveConfig) GetSelectedExecutionClient() ExecutionClient {
+func (cfg *HyperdriveConfig) GetSelectedExecutionClient() nmc_config.ExecutionClient {
 	if cfg.IsLocalMode() {
 		return cfg.LocalExecutionConfig.ExecutionClient.Value
 	}
@@ -160,39 +161,39 @@ func (cfg *HyperdriveConfig) GetSelectedExecutionClient() ExecutionClient {
 // Gets the port mapping of the ec container
 // Used by text/template to format ec.yml
 func (cfg *HyperdriveConfig) GetEcOpenApiPorts() string {
-	return cfg.LocalExecutionConfig.getOpenApiPortMapping()
+	return cfg.LocalExecutionConfig.GetOpenApiPortMapping()
 }
 
 // Gets the max peers of the ec container
 // Used by text/template to format ec.yml
 func (cfg *HyperdriveConfig) GetEcMaxPeers() (uint16, error) {
-	if cfg.ClientMode.Value != ClientMode_Local {
+	if cfg.ClientMode.Value != nmc_config.ClientMode_Local {
 		return 0, fmt.Errorf("Execution client is external, there is no max peers")
 	}
-	return cfg.LocalExecutionConfig.getMaxPeers(), nil
+	return cfg.LocalExecutionConfig.GetMaxPeers(), nil
 }
 
 // Gets the tag of the ec container
 // Used by text/template to format ec.yml
 func (cfg *HyperdriveConfig) GetEcContainerTag() (string, error) {
-	if cfg.ClientMode.Value != ClientMode_Local {
+	if cfg.ClientMode.Value != nmc_config.ClientMode_Local {
 		return "", fmt.Errorf("Execution client is external, there is no container tag")
 	}
-	return cfg.LocalExecutionConfig.getContainerTag(), nil
+	return cfg.LocalExecutionConfig.GetContainerTag(), nil
 }
 
 // Used by text/template to format ec.yml
 func (cfg *HyperdriveConfig) GetEcAdditionalFlags() (string, error) {
-	if cfg.ClientMode.Value != ClientMode_Local {
+	if cfg.ClientMode.Value != nmc_config.ClientMode_Local {
 		return "", fmt.Errorf("Execution client is external, there are no additional flags")
 	}
-	return cfg.LocalExecutionConfig.getAdditionalFlags(), nil
+	return cfg.LocalExecutionConfig.GetAdditionalFlags(), nil
 }
 
 // Used by text/template to format ec.yml
 func (cfg *HyperdriveConfig) GetExternalIP() string {
 	// Get the external IP address
-	ip, err := getExternalIP()
+	ip, err := nmc_config.GetExternalIP()
 	if err != nil {
 		fmt.Println("Warning: couldn't get external IP address; if you're using Nimbus or Besu, it may have trouble finding peers:")
 		fmt.Println(err.Error())
@@ -208,8 +209,8 @@ func (cfg *HyperdriveConfig) GetExternalIP() string {
 
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) GetEcHttpEndpoint() string {
-	if cfg.ClientMode.Value == ClientMode_Local {
-		return fmt.Sprintf("http://%s:%d", ContainerID_ExecutionClient, cfg.LocalExecutionConfig.HttpPort.Value)
+	if cfg.ClientMode.Value == nmc_config.ClientMode_Local {
+		return fmt.Sprintf("http://%s:%d", nmc_config.ContainerID_ExecutionClient, cfg.LocalExecutionConfig.HttpPort.Value)
 	}
 
 	return cfg.ExternalExecutionConfig.HttpUrl.Value
@@ -230,7 +231,7 @@ func (cfg *HyperdriveConfig) GetEcHttpEndpointsWithFallback() string {
 // ===================
 
 // Get the selected Beacon Node
-func (cfg *HyperdriveConfig) GetSelectedBeaconNode() BeaconNode {
+func (cfg *HyperdriveConfig) GetSelectedBeaconNode() nmc_config.BeaconNode {
 	if cfg.IsLocalMode() {
 		return cfg.LocalBeaconConfig.BeaconNode.Value
 	}
@@ -240,21 +241,21 @@ func (cfg *HyperdriveConfig) GetSelectedBeaconNode() BeaconNode {
 // Gets the tag of the bn container
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) GetBnContainerTag() (string, error) {
-	if cfg.ClientMode.Value != ClientMode_Local {
+	if cfg.ClientMode.Value != nmc_config.ClientMode_Local {
 		return "", fmt.Errorf("Beacon Node is external, there is no container tag")
 	}
-	return cfg.LocalBeaconConfig.getContainerTag(), nil
+	return cfg.LocalBeaconConfig.GetContainerTag(), nil
 }
 
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) GetBnOpenPorts() []string {
-	return cfg.LocalBeaconConfig.getOpenApiPortMapping()
+	return cfg.LocalBeaconConfig.GetOpenApiPortMapping()
 }
 
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) GetEcWsEndpoint() string {
-	if cfg.ClientMode.Value == ClientMode_Local {
-		return fmt.Sprintf("ws://%s:%d", ContainerID_ExecutionClient, cfg.LocalExecutionConfig.WebsocketPort.Value)
+	if cfg.ClientMode.Value == nmc_config.ClientMode_Local {
+		return fmt.Sprintf("ws://%s:%d", nmc_config.ContainerID_ExecutionClient, cfg.LocalExecutionConfig.WebsocketPort.Value)
 	}
 
 	return cfg.ExternalExecutionConfig.WebsocketUrl.Value
@@ -263,24 +264,24 @@ func (cfg *HyperdriveConfig) GetEcWsEndpoint() string {
 // Gets the max peers of the bn container
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) GetBnMaxPeers() (uint16, error) {
-	if cfg.ClientMode.Value != ClientMode_Local {
+	if cfg.ClientMode.Value != nmc_config.ClientMode_Local {
 		return 0, fmt.Errorf("Beacon Node is external, there is no max peers")
 	}
-	return cfg.LocalBeaconConfig.getMaxPeers(), nil
+	return cfg.LocalBeaconConfig.GetMaxPeers(), nil
 }
 
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) GetBnAdditionalFlags() (string, error) {
-	if cfg.ClientMode.Value != ClientMode_Local {
+	if cfg.ClientMode.Value != nmc_config.ClientMode_Local {
 		return "", fmt.Errorf("Beacon Node is external, there is no additional flags")
 	}
-	return cfg.LocalBeaconConfig.getAdditionalFlags(), nil
+	return cfg.LocalBeaconConfig.GetAdditionalFlags(), nil
 }
 
 // Get the HTTP API endpoint for the provided BN
 func (cfg *HyperdriveConfig) GetBnHttpEndpoint() string {
-	if cfg.ClientMode.Value == ClientMode_Local {
-		return fmt.Sprintf("http://%s:%d", ContainerID_BeaconNode, cfg.LocalBeaconConfig.HttpPort.Value)
+	if cfg.ClientMode.Value == nmc_config.ClientMode_Local {
+		return fmt.Sprintf("http://%s:%d", nmc_config.ContainerID_BeaconNode, cfg.LocalBeaconConfig.HttpPort.Value)
 	}
 
 	return cfg.ExternalBeaconConfig.HttpUrl.Value
@@ -330,8 +331,8 @@ func (cfg *HyperdriveConfig) GetPrometheusOpenPorts() string {
 // Gets the hostname portion of the Execution Client's URI.
 // Used by text/template to format prometheus.yml.
 func (cfg *HyperdriveConfig) GetExecutionHostname() (string, error) {
-	if cfg.ClientMode.Value == ClientMode_Local {
-		return string(ContainerID_ExecutionClient), nil
+	if cfg.ClientMode.Value == nmc_config.ClientMode_Local {
+		return string(nmc_config.ContainerID_ExecutionClient), nil
 	}
 	ecUrl, err := url.Parse(cfg.ExternalExecutionConfig.HttpUrl.Value)
 	if err != nil {
@@ -344,8 +345,8 @@ func (cfg *HyperdriveConfig) GetExecutionHostname() (string, error) {
 // Gets the hostname portion of the Beacon Node's URI.
 // Used by text/template to format prometheus.yml.
 func (cfg *HyperdriveConfig) GetBeaconHostname() (string, error) {
-	if cfg.ClientMode.Value == ClientMode_Local {
-		return string(ContainerID_BeaconNode), nil
+	if cfg.ClientMode.Value == nmc_config.ClientMode_Local {
+		return string(nmc_config.ContainerID_BeaconNode), nil
 	}
 	ccUrl, err := url.Parse(cfg.ExternalBeaconConfig.HttpUrl.Value)
 	if err != nil {
@@ -361,8 +362,8 @@ func (cfg *HyperdriveConfig) GraffitiPrefix() string {
 	identifier := ""
 	versionString := fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	if len(versionString) < 8 {
-		var ec ExecutionClient
-		var bn BeaconNode
+		var ec nmc_config.ExecutionClient
+		var bn nmc_config.BeaconNode
 		if cfg.IsLocalMode() {
 			ec = cfg.LocalExecutionConfig.ExecutionClient.Value
 			bn = cfg.LocalBeaconConfig.BeaconNode.Value
@@ -375,7 +376,7 @@ func (cfg *HyperdriveConfig) GraffitiPrefix() string {
 
 		var ccInitial string
 		switch bn {
-		case BeaconNode_Lodestar:
+		case nmc_config.BeaconNode_Lodestar:
 			ccInitial = "S" // Lodestar is special because it conflicts with Lighthouse
 		default:
 			ccInitial = strings.ToUpper(string(bn)[:1])
