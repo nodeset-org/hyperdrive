@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ===============
@@ -27,7 +27,7 @@ func (f *utilsBalanceContextFactory) Create(args url.Values) (*utilsBalanceConte
 }
 
 func (f *utilsBalanceContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*utilsBalanceContext, api.UtilsBalanceData](
+	server.RegisterQuerylessGet[*utilsBalanceContext, api.UtilsBalanceData](
 		router, "balance", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

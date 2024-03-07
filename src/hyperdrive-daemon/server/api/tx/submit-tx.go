@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ===============
@@ -41,7 +41,7 @@ func (f *txSubmitTxContextFactory) Create(body api.SubmitTxBody) (*txSubmitTxCon
 }
 
 func (f *txSubmitTxContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessPost[*txSubmitTxContext, api.SubmitTxBody, api.TxData](
+	server.RegisterQuerylessPost[*txSubmitTxContext, api.SubmitTxBody, api.TxData](
 		router, "submit-tx", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

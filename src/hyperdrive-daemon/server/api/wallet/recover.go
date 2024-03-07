@@ -8,10 +8,10 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
-	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
+	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
 // ===============
@@ -26,18 +26,18 @@ func (f *walletRecoverContextFactory) Create(args url.Values) (*walletRecoverCon
 	c := &walletRecoverContext{
 		handler: f.handler,
 	}
-	nmc_server.GetOptionalStringFromVars("derivation-path", args, &c.derivationPath)
+	server.GetOptionalStringFromVars("derivation-path", args, &c.derivationPath)
 	inputErrs := []error{
-		nmc_server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
-		nmc_server.ValidateOptionalArg("index", args, nmc_input.ValidateUint, &c.index, nil),
-		nmc_server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
-		nmc_server.ValidateArg("save-password", args, nmc_input.ValidateBool, &c.savePassword),
+		server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
+		server.ValidateOptionalArg("index", args, nmc_input.ValidateUint, &c.index, nil),
+		server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
+		server.ValidateArg("save-password", args, nmc_input.ValidateBool, &c.savePassword),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *walletRecoverContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*walletRecoverContext, api.WalletRecoverData](
+	server.RegisterQuerylessGet[*walletRecoverContext, api.WalletRecoverData](
 		router, "recover", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -69,7 +69,7 @@ func (c *walletRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bi
 	}
 
 	// Parse the derivation path
-	path, err := nmc_nodewallet.GetDerivationPath(nmc_wallet.DerivationPath(c.derivationPath))
+	path, err := nmc_nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
 	if err != nil {
 		return err
 	}

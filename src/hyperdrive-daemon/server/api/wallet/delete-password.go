@@ -6,7 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 )
 
@@ -26,7 +26,7 @@ func (f *walletDeletePasswordContextFactory) Create(args url.Values) (*walletDel
 }
 
 func (f *walletDeletePasswordContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*walletDeletePasswordContext, nmc_types.SuccessData](
+	server.RegisterQuerylessGet[*walletDeletePasswordContext, nmc_types.SuccessData](
 		router, "delete-password", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

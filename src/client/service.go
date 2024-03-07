@@ -2,15 +2,15 @@ package client
 
 import (
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_client "github.com/rocket-pool/node-manager-core/api/client"
+	"github.com/rocket-pool/node-manager-core/api/client"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 )
 
 type ServiceRequester struct {
-	context *nmc_client.RequesterContext
+	context *client.RequesterContext
 }
 
-func NewServiceRequester(context *nmc_client.RequesterContext) *ServiceRequester {
+func NewServiceRequester(context *client.RequesterContext) *ServiceRequester {
 	return &ServiceRequester{
 		context: context,
 	}
@@ -22,18 +22,18 @@ func (r *ServiceRequester) GetName() string {
 func (r *ServiceRequester) GetRoute() string {
 	return "service"
 }
-func (r *ServiceRequester) GetContext() *nmc_client.RequesterContext {
+func (r *ServiceRequester) GetContext() *client.RequesterContext {
 	return r.context
 }
 
 // Gets the status of the configured Execution and Beacon clients
 func (r *ServiceRequester) ClientStatus() (*nmc_types.ApiResponse[api.ServiceClientStatusData], error) {
-	return nmc_client.SendGetRequest[api.ServiceClientStatusData](r, "client-status", "ClientStatus", nil)
+	return client.SendGetRequest[api.ServiceClientStatusData](r, "client-status", "ClientStatus", nil)
 }
 
 // Gets the Hyperdrive configuration
 func (r *ServiceRequester) GetConfig() (*nmc_types.ApiResponse[api.ServiceGetConfigData], error) {
-	return nmc_client.SendGetRequest[api.ServiceGetConfigData](r, "get-config", "GetConfig", nil)
+	return client.SendGetRequest[api.ServiceGetConfigData](r, "get-config", "GetConfig", nil)
 }
 
 // Restarts a Docker container
@@ -41,16 +41,16 @@ func (r *ServiceRequester) RestartContainer(container string) (*nmc_types.ApiRes
 	args := map[string]string{
 		"container": container,
 	}
-	return nmc_client.SendGetRequest[nmc_types.SuccessData](r, "restart-container", "RestartContainer", args)
+	return client.SendGetRequest[nmc_types.SuccessData](r, "restart-container", "RestartContainer", args)
 }
 
 // Deletes the data folder including the wallet file, password file, and all validator keys.
 // Don't use this unless you have a very good reason to do it (such as switching from Prater to Mainnet).
 func (r *ServiceRequester) TerminateDataFolder() (*nmc_types.ApiResponse[api.ServiceTerminateDataFolderData], error) {
-	return nmc_client.SendGetRequest[api.ServiceTerminateDataFolderData](r, "terminate-data-folder", "TerminateDataFolder", nil)
+	return client.SendGetRequest[api.ServiceTerminateDataFolderData](r, "terminate-data-folder", "TerminateDataFolder", nil)
 }
 
 // Gets the version of the daemon
 func (r *ServiceRequester) Version() (*nmc_types.ApiResponse[api.ServiceVersionData], error) {
-	return nmc_client.SendGetRequest[api.ServiceVersionData](r, "version", "Version", nil)
+	return client.SendGetRequest[api.ServiceVersionData](r, "version", "Version", nil)
 }

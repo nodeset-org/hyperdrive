@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
+	cliwallet "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
-	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
+	"github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/urfave/cli/v2"
 )
 
@@ -123,7 +123,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	// Check wallet status
 	fmt.Println()
 	fmt.Println("Checking node wallet status...")
-	var status *nmc_wallet.WalletStatus
+	var status *wallet.WalletStatus
 	retries := 5
 	for i := 0; i < retries; i++ {
 		response, err := hd.Api.Wallet.Status()
@@ -158,7 +158,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		fmt.Println("Please create one using `hyperdrive wallet init` when you're ready.")
 		return nil
 	}
-	err = wallet.InitWallet(c, hd)
+	err = cliwallet.InitWallet(c, hd)
 	if err != nil {
 		return fmt.Errorf("error initializing node wallet: %w", err)
 	}
@@ -171,9 +171,9 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) error {
 	fmt.Println("Your node wallet is saved, but the password is not stored on disk so it cannot be loaded automatically.")
 	// Get the password
-	passwordString := c.String(wallet.PasswordFlag.Name)
+	passwordString := c.String(cliwallet.PasswordFlag.Name)
 	if passwordString == "" {
-		passwordString = wallet.PromptExistingPassword()
+		passwordString = cliwallet.PromptExistingPassword()
 	}
 	password, err := nmc_input.ValidateNodePassword("password", passwordString)
 	if err != nil {
@@ -181,7 +181,7 @@ func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) error {
 	}
 
 	// Get the save flag
-	savePassword := c.Bool(wallet.SavePasswordFlag.Name) || cliutils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to repeat this command to manually enter the password after each restart.")
+	savePassword := c.Bool(cliwallet.SavePasswordFlag.Name) || cliutils.Confirm("Would you like to save the password to disk? If you do, your node will be able to handle transactions automatically after a client restart; otherwise, you will have to repeat this command to manually enter the password after each restart.")
 
 	// Run it
 	_, err = hd.Api.Wallet.SetPassword(password, savePassword)

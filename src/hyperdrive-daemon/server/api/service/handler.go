@@ -3,19 +3,19 @@ package service
 import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 type ServiceHandler struct {
 	serviceProvider *common.ServiceProvider
-	factories       []nmc_server.IContextFactory
+	factories       []server.IContextFactory
 }
 
 func NewServiceHandler(serviceProvider *common.ServiceProvider) *ServiceHandler {
 	h := &ServiceHandler{
 		serviceProvider: serviceProvider,
 	}
-	h.factories = []nmc_server.IContextFactory{
+	h.factories = []server.IContextFactory{
 		&serviceClientStatusContextFactory{h},
 		&serviceGetConfigContextFactory{h},
 		&serviceRestartContainerContextFactory{h},

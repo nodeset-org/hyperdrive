@@ -1,12 +1,12 @@
 package swclient
 
 import (
-	nmc_client "github.com/rocket-pool/node-manager-core/api/client"
+	"github.com/rocket-pool/node-manager-core/api/client"
 )
 
 // Binder for the Hyperdrive daemon API server
 type ApiClient struct {
-	context   *nmc_client.RequesterContext
+	context   *client.RequesterContext
 	Nodeset   *NodesetRequester
 	Validator *ValidatorRequester
 	Wallet    *WalletRequester
@@ -15,7 +15,7 @@ type ApiClient struct {
 
 // Creates a new API client instance
 func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClient {
-	context := nmc_client.NewRequesterContext(baseRoute, socketPath, debugMode)
+	context := client.NewRequesterContext(baseRoute, socketPath, debugMode)
 
 	client := &ApiClient{
 		context:   context,

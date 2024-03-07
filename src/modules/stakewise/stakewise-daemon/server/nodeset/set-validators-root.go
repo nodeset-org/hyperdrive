@@ -8,9 +8,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
+	duserver "github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
@@ -28,13 +28,13 @@ func (f *nodesetSetValidatorsRootContextFactory) Create(args url.Values) (*nodes
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("root", args, nmc_input.ValidateHash, &c.root),
+		server.ValidateArg("root", args, nmc_input.ValidateHash, &c.root),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *nodesetSetValidatorsRootContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*nodesetSetValidatorsRootContext, nmc_types.TxInfoData](
+	duserver.RegisterQuerylessGet[*nodesetSetValidatorsRootContext, nmc_types.TxInfoData](
 		router, "set-validators-root", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

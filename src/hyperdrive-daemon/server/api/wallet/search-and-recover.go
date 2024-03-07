@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
-	nmc_wallet "github.com/rocket-pool/node-manager-core/node/wallet"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	wallet "github.com/rocket-pool/node-manager-core/node/wallet"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
 
@@ -31,16 +31,16 @@ func (f *walletSearchAndRecoverContextFactory) Create(args url.Values) (*walletS
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
-		nmc_server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
-		nmc_server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
-		nmc_server.ValidateArg("save-password", args, nmc_input.ValidateBool, &c.savePassword),
+		server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
+		server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
+		server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
+		server.ValidateArg("save-password", args, nmc_input.ValidateBool, &c.savePassword),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *walletSearchAndRecoverContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*walletSearchAndRecoverContext, api.WalletSearchAndRecoverData](
+	server.RegisterQuerylessGet[*walletSearchAndRecoverContext, api.WalletSearchAndRecoverData](
 		router, "search-and-recover", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -73,14 +73,14 @@ func (c *walletSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRec
 
 	// Try each derivation path across all of the iterations
 	paths := []string{
-		nmc_wallet.DefaultNodeKeyPath,
-		nmc_wallet.LedgerLiveNodeKeyPath,
-		nmc_wallet.MyEtherWalletNodeKeyPath,
+		wallet.DefaultNodeKeyPath,
+		wallet.LedgerLiveNodeKeyPath,
+		wallet.MyEtherWalletNodeKeyPath,
 	}
 	for i := uint(0); i < findIterations; i++ {
 		for j := 0; j < len(paths); j++ {
 			derivationPath := paths[j]
-			recoveredWallet, err := nmc_wallet.TestRecovery(derivationPath, i, c.mnemonic, rs.ChainID)
+			recoveredWallet, err := wallet.TestRecovery(derivationPath, i, c.mnemonic, rs.ChainID)
 			if err != nil {
 				return fmt.Errorf("error recovering wallet with path [%s], index [%d]: %w", derivationPath, i, err)
 			}

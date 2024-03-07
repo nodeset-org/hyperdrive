@@ -4,11 +4,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/rocket-pool/node-manager-core/eth"
-	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
+	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
 type WalletStatusData struct {
-	WalletStatus nmc_wallet.WalletStatus `json:"walletStatus"`
+	WalletStatus wallet.WalletStatus `json:"walletStatus"`
 }
 
 type WalletInitializeData struct {

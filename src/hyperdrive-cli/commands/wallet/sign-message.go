@@ -8,7 +8,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	nmc_utils "github.com/rocket-pool/node-manager-core/utils"
-	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
+	"github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/urfave/cli/v2"
 )
 
@@ -40,7 +40,7 @@ func signMessage(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	if !nmc_wallet.IsWalletReady(status.Data.WalletStatus) {
+	if !wallet.IsWalletReady(status.Data.WalletStatus) {
 		fmt.Println("The node wallet is not loaded or your node is in read-only mode. Please run `hyperdrive wallet status` for more details.")
 		return nil
 	}

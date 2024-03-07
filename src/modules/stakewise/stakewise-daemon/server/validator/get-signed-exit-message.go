@@ -9,9 +9,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
+	duserver "github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 	nmc_utils "github.com/rocket-pool/node-manager-core/node/validator/utils"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
@@ -35,15 +35,15 @@ func (f *validatorGetSignedExitMessagesContextFactory) Create(args url.Values) (
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateOptionalArg("epoch", args, nmc_input.ValidateUint, &c.epoch, &c.isEpochSet),
-		nmc_server.ValidateArgBatch("pubkeys", args, pubkeyLimit, nmc_input.ValidatePubkey, &c.pubkeys),
-		nmc_server.ValidateOptionalArg("no-broadcast", args, nmc_input.ValidateBool, &c.noBroadcast, nil),
+		server.ValidateOptionalArg("epoch", args, nmc_input.ValidateUint, &c.epoch, &c.isEpochSet),
+		server.ValidateArgBatch("pubkeys", args, pubkeyLimit, nmc_input.ValidatePubkey, &c.pubkeys),
+		server.ValidateOptionalArg("no-broadcast", args, nmc_input.ValidateBool, &c.noBroadcast, nil),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *validatorGetSignedExitMessagesContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*validatorGetSignedExitMessagesContext, api.ValidatorGetSignedExitMessagesData](
+	duserver.RegisterQuerylessGet[*validatorGetSignedExitMessagesContext, api.ValidatorGetSignedExitMessagesData](
 		router, "get-signed-exit-messages", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

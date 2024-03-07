@@ -12,9 +12,9 @@ import (
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	batch "github.com/rocket-pool/batch-query"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
-	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
+	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
 // Wrapper for callbacks used by call runners that follow a common single-stage pattern:
@@ -66,20 +66,20 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 
 		// Check the method
 		if r.Method != http.MethodGet {
-			nmc_server.HandleInvalidMethod(log, w)
+			server.HandleInvalidMethod(log, w)
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(args)
 		if err != nil {
-			nmc_server.HandleInputError(log, w, err)
+			server.HandleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runSingleStageRoute[DataType](context, serviceProvider)
-		nmc_server.HandleResponse(log, w, response, err, isDebug)
+		server.HandleResponse(log, w, response, err, isDebug)
 	})
 }
 
@@ -99,14 +99,14 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 
 		// Check the method
 		if r.Method != http.MethodPost {
-			nmc_server.HandleInvalidMethod(log, w)
+			server.HandleInvalidMethod(log, w)
 			return
 		}
 
 		// Read the body
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			nmc_server.HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
+			server.HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
 			return
 		}
 		if isDebug {
@@ -117,20 +117,20 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 		var body BodyType
 		err = json.Unmarshal(bodyBytes, &body)
 		if err != nil {
-			nmc_server.HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
+			server.HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(body)
 		if err != nil {
-			nmc_server.HandleInputError(log, w, err)
+			server.HandleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runSingleStageRoute[DataType](context, serviceProvider)
-		nmc_server.HandleResponse(log, w, response, err, isDebug)
+		server.HandleResponse(log, w, response, err, isDebug)
 	})
 }
 
@@ -163,7 +163,7 @@ func runSingleStageRoute[DataType any, ConfigType hdconfig.IModuleConfig](ctx IS
 		return nil, fmt.Errorf("error getting wallet status: %w", err)
 	}
 	status := walletResponse.Data.WalletStatus
-	if nmc_wallet.IsWalletReady(status) {
+	if wallet.IsWalletReady(status) {
 		opts = signer.GetTransactor(status.Wallet.WalletAddress)
 	}
 

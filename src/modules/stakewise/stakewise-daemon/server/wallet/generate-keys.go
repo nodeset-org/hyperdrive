@@ -7,10 +7,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
+	duserver "github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
@@ -28,14 +28,14 @@ func (f *walletGenerateKeysContextFactory) Create(args url.Values) (*walletGener
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("count", args, nmc_input.ValidateUint, &c.count),
-		nmc_server.ValidateArg("restart-vc", args, nmc_input.ValidateBool, &c.restartVc),
+		server.ValidateArg("count", args, nmc_input.ValidateUint, &c.count),
+		server.ValidateArg("restart-vc", args, nmc_input.ValidateBool, &c.restartVc),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *walletGenerateKeysContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*walletGenerateKeysContext, api.WalletGenerateKeysData](
+	duserver.RegisterQuerylessGet[*walletGenerateKeysContext, api.WalletGenerateKeysData](
 		router, "generate-keys", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
@@ -27,14 +27,14 @@ func (f *walletTestSearchAndRecoverContextFactory) Create(args url.Values) (*wal
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
-		nmc_server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
+		server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
+		server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *walletTestSearchAndRecoverContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*walletTestSearchAndRecoverContext, api.WalletSearchAndRecoverData](
+	server.RegisterQuerylessGet[*walletTestSearchAndRecoverContext, api.WalletSearchAndRecoverData](
 		router, "test-search-and-recover", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

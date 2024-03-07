@@ -6,7 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 )
 
@@ -26,7 +26,7 @@ func (f *walletRestoreAddressContextFactory) Create(args url.Values) (*walletRes
 }
 
 func (f *walletRestoreAddressContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*walletRestoreAddressContext, nmc_types.SuccessData](
+	server.RegisterQuerylessGet[*walletRestoreAddressContext, nmc_types.SuccessData](
 		router, "restore-address", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

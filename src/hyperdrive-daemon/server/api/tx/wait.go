@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
@@ -27,13 +27,13 @@ func (f *txWaitContextFactory) Create(args url.Values) (*txWaitContext, error) {
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("hash", args, nmc_input.ValidateHash, &c.hash),
+		server.ValidateArg("hash", args, nmc_input.ValidateHash, &c.hash),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *txWaitContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*txWaitContext, nmc_types.SuccessData](
+	server.RegisterQuerylessGet[*txWaitContext, nmc_types.SuccessData](
 		router, "wait", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

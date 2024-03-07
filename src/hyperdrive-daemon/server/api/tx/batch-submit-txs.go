@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ===============
@@ -46,7 +46,7 @@ func (f *txBatchSubmitTxsContextFactory) Create(body api.BatchSubmitTxsBody) (*t
 }
 
 func (f *txBatchSubmitTxsContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessPost[*txBatchSubmitTxsContext, api.BatchSubmitTxsBody, api.BatchTxData](
+	server.RegisterQuerylessPost[*txBatchSubmitTxsContext, api.BatchSubmitTxsBody, api.BatchTxData](
 		router, "batch-submit-txs", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

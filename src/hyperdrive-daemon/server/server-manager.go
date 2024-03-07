@@ -12,16 +12,16 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/wallet"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ServerManager manages all of the daemon sockets and servers run by the main Hyperdrive daemon
 type ServerManager struct {
 	// The server for the CLI to interact with
-	cliServer *nmc_server.ApiServer
+	cliServer *server.ApiServer
 
 	// The server for the Stakewise module
-	stakewiseServer *nmc_server.ApiServer
+	stakewiseServer *server.ApiServer
 
 	// The daemon's main closing waitgroup
 	stopWg *sync.WaitGroup
@@ -90,15 +90,15 @@ func (m *ServerManager) Stop() {
 }
 
 // Creates a new Hyperdrive API server
-func createServer(sp *common.ServiceProvider, socketPath string) (*nmc_server.ApiServer, error) {
-	handlers := []nmc_server.IHandler{
+func createServer(sp *common.ServiceProvider, socketPath string) (*server.ApiServer, error) {
+	handlers := []server.IHandler{
 		service.NewServiceHandler(sp),
 		tx.NewTxHandler(sp),
 		utils.NewUtilsHandler(sp),
 		wallet.NewWalletHandler(sp),
 	}
 
-	server, err := nmc_server.NewApiServer(socketPath, handlers, config.HyperdriveDaemonRoute)
+	server, err := server.NewApiServer(socketPath, handlers, config.HyperdriveDaemonRoute)
 	if err != nil {
 		return nil, err
 	}

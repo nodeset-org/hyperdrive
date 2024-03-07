@@ -4,16 +4,16 @@ import (
 	"strconv"
 
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
-	nmc_client "github.com/rocket-pool/node-manager-core/api/client"
+	"github.com/rocket-pool/node-manager-core/api/client"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/rocket-pool/node-manager-core/beacon"
 )
 
 type ValidatorRequester struct {
-	context *nmc_client.RequesterContext
+	context *client.RequesterContext
 }
 
-func NewValidatorRequester(context *nmc_client.RequesterContext) *ValidatorRequester {
+func NewValidatorRequester(context *client.RequesterContext) *ValidatorRequester {
 	return &ValidatorRequester{
 		context: context,
 	}
@@ -25,18 +25,18 @@ func (r *ValidatorRequester) GetName() string {
 func (r *ValidatorRequester) GetRoute() string {
 	return "validator"
 }
-func (r *ValidatorRequester) GetContext() *nmc_client.RequesterContext {
+func (r *ValidatorRequester) GetContext() *client.RequesterContext {
 	return r.context
 }
 
 // Get signed exit messages for the provided validators, with an optional epoch parameter. If not specified, the epoch from the current chain head will be used.
 func (r *ValidatorRequester) GetSignedExitMessage(pubkeys []beacon.ValidatorPubkey, epoch *uint64, noBroadcastBool bool) (*nmc_types.ApiResponse[swapi.ValidatorGetSignedExitMessagesData], error) {
 	args := map[string]string{
-		"pubkeys":      nmc_client.MakeBatchArg(pubkeys),
+		"pubkeys":      client.MakeBatchArg(pubkeys),
 		"no-broadcast": strconv.FormatBool(noBroadcastBool),
 	}
 	if epoch != nil {
 		args["epoch"] = strconv.FormatUint(*epoch, 10)
 	}
-	return nmc_client.SendGetRequest[swapi.ValidatorGetSignedExitMessagesData](r, "get-signed-exit-messages", "GetSignedExitMessage", args)
+	return client.SendGetRequest[swapi.ValidatorGetSignedExitMessagesData](r, "get-signed-exit-messages", "GetSignedExitMessage", args)
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	ens "github.com/wealdtech/go-ens/v3"
 )
 
@@ -25,13 +25,13 @@ func (f *walletSetEnsNameContextFactory) Create(args url.Values) (*walletSetEnsN
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.GetStringFromVars("name", args, &c.name),
+		server.GetStringFromVars("name", args, &c.name),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *walletSetEnsNameContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*walletSetEnsNameContext, api.WalletSetEnsNameData](
+	server.RegisterQuerylessGet[*walletSetEnsNameContext, api.WalletSetEnsNameData](
 		router, "set-ens-name", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

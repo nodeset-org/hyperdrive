@@ -8,10 +8,10 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
-	nmc_wallet "github.com/rocket-pool/node-manager-core/wallet"
+	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
 // ===============
@@ -26,18 +26,18 @@ func (f *walletInitializeContextFactory) Create(args url.Values) (*walletInitial
 	c := &walletInitializeContext{
 		handler: f.handler,
 	}
-	nmc_server.GetOptionalStringFromVars("derivation-path", args, &c.derivationPath)
+	server.GetOptionalStringFromVars("derivation-path", args, &c.derivationPath)
 	inputErrs := []error{
-		nmc_server.ValidateOptionalArg("index", args, nmc_input.ValidateUint, &c.index, nil),
-		nmc_server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
-		nmc_server.ValidateArg("save-wallet", args, nmc_input.ValidateBool, &c.saveWallet),
-		nmc_server.ValidateArg("save-password", args, nmc_input.ValidateBool, &c.savePassword),
+		server.ValidateOptionalArg("index", args, nmc_input.ValidateUint, &c.index, nil),
+		server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
+		server.ValidateArg("save-wallet", args, nmc_input.ValidateBool, &c.saveWallet),
+		server.ValidateArg("save-password", args, nmc_input.ValidateBool, &c.savePassword),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *walletInitializeContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*walletInitializeContext, api.WalletInitializeData](
+	server.RegisterQuerylessGet[*walletInitializeContext, api.WalletInitializeData](
 		router, "initialize", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -60,7 +60,7 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 	sp := c.handler.serviceProvider
 
 	// Parse the derivation path
-	path, err := nmc_nodewallet.GetDerivationPath(nmc_wallet.DerivationPath(c.derivationPath))
+	path, err := nmc_nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
 	if err != nil {
 		return err
 	}

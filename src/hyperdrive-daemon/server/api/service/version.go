@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ===============
@@ -26,7 +26,7 @@ func (f *serviceVersionContextFactory) Create(args url.Values) (*serviceVersionC
 }
 
 func (f *serviceVersionContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*serviceVersionContext, api.ServiceVersionData](
+	server.RegisterQuerylessGet[*serviceVersionContext, api.ServiceVersionData](
 		router, "version", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

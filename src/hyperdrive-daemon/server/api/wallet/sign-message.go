@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
 
@@ -26,13 +26,13 @@ func (f *walletSignMessageContextFactory) Create(args url.Values) (*walletSignMe
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("message", args, nmc_input.ValidateByteArray, &c.message),
+		server.ValidateArg("message", args, nmc_input.ValidateByteArray, &c.message),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *walletSignMessageContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*walletSignMessageContext, api.WalletSignMessageData](
+	server.RegisterQuerylessGet[*walletSignMessageContext, api.WalletSignMessageData](
 		router, "sign-message", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

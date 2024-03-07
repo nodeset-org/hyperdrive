@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	nmc_server "github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/server"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
 )
@@ -26,14 +26,14 @@ func (f *walletSendMessageContextFactory) Create(args url.Values) (*walletSendMe
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		nmc_server.ValidateArg("message", args, nmc_input.ValidateByteArray, &c.message),
-		nmc_server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
+		server.ValidateArg("message", args, nmc_input.ValidateByteArray, &c.message),
+		server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *walletSendMessageContextFactory) RegisterRoute(router *mux.Router) {
-	nmc_server.RegisterQuerylessGet[*walletSendMessageContext, nmc_types.TxInfoData](
+	server.RegisterQuerylessGet[*walletSendMessageContext, nmc_types.TxInfoData](
 		router, "send-message", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

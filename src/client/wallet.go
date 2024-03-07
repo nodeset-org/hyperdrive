@@ -7,15 +7,15 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	nmc_client "github.com/rocket-pool/node-manager-core/api/client"
+	"github.com/rocket-pool/node-manager-core/api/client"
 	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
 )
 
 type WalletRequester struct {
-	context *nmc_client.RequesterContext
+	context *client.RequesterContext
 }
 
-func NewWalletRequester(context *nmc_client.RequesterContext) *WalletRequester {
+func NewWalletRequester(context *client.RequesterContext) *WalletRequester {
 	return &WalletRequester{
 		context: context,
 	}
@@ -27,23 +27,23 @@ func (r *WalletRequester) GetName() string {
 func (r *WalletRequester) GetRoute() string {
 	return "wallet"
 }
-func (r *WalletRequester) GetContext() *nmc_client.RequesterContext {
+func (r *WalletRequester) GetContext() *client.RequesterContext {
 	return r.context
 }
 
 // Delete the wallet keystore's password from disk
 func (r *WalletRequester) DeletePassword() (*nmc_types.ApiResponse[nmc_types.SuccessData], error) {
-	return nmc_client.SendGetRequest[nmc_types.SuccessData](r, "delete-password", "DeletePassword", nil)
+	return client.SendGetRequest[nmc_types.SuccessData](r, "delete-password", "DeletePassword", nil)
 }
 
 // Export wallet
 func (r *WalletRequester) Export() (*nmc_types.ApiResponse[api.WalletExportData], error) {
-	return nmc_client.SendGetRequest[api.WalletExportData](r, "export", "Export", nil)
+	return client.SendGetRequest[api.WalletExportData](r, "export", "Export", nil)
 }
 
 // Export the wallet in encrypted ETH key format
 func (r *WalletRequester) ExportEthKey() (*nmc_types.ApiResponse[api.WalletExportEthKeyData], error) {
-	return nmc_client.SendGetRequest[api.WalletExportEthKeyData](r, "export-eth-key", "ExportEthKey", nil)
+	return client.SendGetRequest[api.WalletExportEthKeyData](r, "export-eth-key", "ExportEthKey", nil)
 }
 
 // Generate a validator key derived from the node wallet's seed
@@ -51,7 +51,7 @@ func (r *WalletRequester) GenerateValidatorKey(path string) (*nmc_types.ApiRespo
 	args := map[string]string{
 		"path": path,
 	}
-	return nmc_client.SendGetRequest[api.WalletGenerateValidatorKeyData](r, "generate-validator-key", "GenerateValidatorKey", args)
+	return client.SendGetRequest[api.WalletGenerateValidatorKeyData](r, "generate-validator-key", "GenerateValidatorKey", args)
 }
 
 // Initialize the wallet with a new key
@@ -67,7 +67,7 @@ func (r *WalletRequester) Initialize(derivationPath *string, index *uint64, save
 	if index != nil {
 		args["index"] = fmt.Sprint(*index)
 	}
-	return nmc_client.SendGetRequest[api.WalletInitializeData](r, "initialize", "Initialize", args)
+	return client.SendGetRequest[api.WalletInitializeData](r, "initialize", "Initialize", args)
 }
 
 // Set the node address to an arbitrary address
@@ -75,12 +75,12 @@ func (r *WalletRequester) Masquerade(address common.Address) (*nmc_types.ApiResp
 	args := map[string]string{
 		"address": address.Hex(),
 	}
-	return nmc_client.SendGetRequest[nmc_types.SuccessData](r, "masquerade", "Masquerade", args)
+	return client.SendGetRequest[nmc_types.SuccessData](r, "masquerade", "Masquerade", args)
 }
 
 // Rebuild the validator keys associated with the wallet
 func (r *WalletRequester) Rebuild() (*nmc_types.ApiResponse[api.WalletRebuildData], error) {
-	return nmc_client.SendGetRequest[api.WalletRebuildData](r, "rebuild", "Rebuild", nil)
+	return client.SendGetRequest[api.WalletRebuildData](r, "rebuild", "Rebuild", nil)
 }
 
 // Recover wallet
@@ -98,12 +98,12 @@ func (r *WalletRequester) Recover(derivationPath *string, mnemonic *string, inde
 	if index != nil {
 		args["index"] = fmt.Sprint(*index)
 	}
-	return nmc_client.SendGetRequest[api.WalletRecoverData](r, "recover", "Recover", args)
+	return client.SendGetRequest[api.WalletRecoverData](r, "recover", "Recover", args)
 }
 
 // Set the node address back to the wallet address
 func (r *WalletRequester) RestoreAddress() (*nmc_types.ApiResponse[nmc_types.SuccessData], error) {
-	return nmc_client.SendGetRequest[nmc_types.SuccessData](r, "restore-address", "RestoreAddress", nil)
+	return client.SendGetRequest[nmc_types.SuccessData](r, "restore-address", "RestoreAddress", nil)
 }
 
 // Search and recover wallet
@@ -114,7 +114,7 @@ func (r *WalletRequester) SearchAndRecover(mnemonic string, address common.Addre
 		"password":      password,
 		"save-password": fmt.Sprint(save),
 	}
-	return nmc_client.SendGetRequest[api.WalletSearchAndRecoverData](r, "search-and-recover", "SearchAndRecover", args)
+	return client.SendGetRequest[api.WalletSearchAndRecoverData](r, "search-and-recover", "SearchAndRecover", args)
 }
 
 // Set an ENS reverse record to a name
@@ -122,7 +122,7 @@ func (r *WalletRequester) SetEnsName(name string) (*nmc_types.ApiResponse[api.Wa
 	args := map[string]string{
 		"name": name,
 	}
-	return nmc_client.SendGetRequest[api.WalletSetEnsNameData](r, "set-ens-name", "SetEnsName", args)
+	return client.SendGetRequest[api.WalletSetEnsNameData](r, "set-ens-name", "SetEnsName", args)
 }
 
 // Sets the wallet keystore's password
@@ -131,12 +131,12 @@ func (r *WalletRequester) SetPassword(password string, save bool) (*nmc_types.Ap
 		"password": password,
 		"save":     fmt.Sprint(save),
 	}
-	return nmc_client.SendGetRequest[nmc_types.SuccessData](r, "set-password", "SetPassword", args)
+	return client.SendGetRequest[nmc_types.SuccessData](r, "set-password", "SetPassword", args)
 }
 
 // Get wallet status
 func (r *WalletRequester) Status() (*nmc_types.ApiResponse[api.WalletStatusData], error) {
-	return nmc_client.SendGetRequest[api.WalletStatusData](r, "status", "Status", nil)
+	return client.SendGetRequest[api.WalletStatusData](r, "status", "Status", nil)
 }
 
 // Search for and recover the wallet in test-mode so none of the artifacts are saved
@@ -145,7 +145,7 @@ func (r *WalletRequester) TestSearchAndRecover(mnemonic string, address common.A
 		"mnemonic": mnemonic,
 		"address":  address.Hex(),
 	}
-	return nmc_client.SendGetRequest[api.WalletSearchAndRecoverData](r, "test-search-and-recover", "TestSearchAndRecover", args)
+	return client.SendGetRequest[api.WalletSearchAndRecoverData](r, "test-search-and-recover", "TestSearchAndRecover", args)
 }
 
 // Recover wallet in test-mode so none of the artifacts are saved
@@ -159,7 +159,7 @@ func (r *WalletRequester) TestRecover(derivationPath *string, mnemonic string, i
 	if index != nil {
 		args["index"] = fmt.Sprint(*index)
 	}
-	return nmc_client.SendGetRequest[api.WalletRecoverData](r, "test-recover", "TestRecover", args)
+	return client.SendGetRequest[api.WalletRecoverData](r, "test-recover", "TestRecover", args)
 }
 
 // Sends a zero-value message with a payload
@@ -168,7 +168,7 @@ func (r *WalletRequester) SendMessage(message []byte, address common.Address) (*
 		"message": hex.EncodeToString(message),
 		"address": address.Hex(),
 	}
-	return nmc_client.SendGetRequest[nmc_types.TxInfoData](r, "send-message", "SendMessage", args)
+	return client.SendGetRequest[nmc_types.TxInfoData](r, "send-message", "SendMessage", args)
 }
 
 // Use the node private key to sign an arbitrary message
@@ -176,7 +176,7 @@ func (r *WalletRequester) SignMessage(message []byte) (*nmc_types.ApiResponse[ap
 	args := map[string]string{
 		"message": hex.EncodeToString(message),
 	}
-	return nmc_client.SendGetRequest[api.WalletSignMessageData](r, "sign-message", "SignMessage", args)
+	return client.SendGetRequest[api.WalletSignMessageData](r, "sign-message", "SignMessage", args)
 }
 
 // Use the node private key to sign a transaction
@@ -184,5 +184,5 @@ func (r *WalletRequester) SignTx(message []byte) (*nmc_types.ApiResponse[api.Wal
 	args := map[string]string{
 		"tx": hex.EncodeToString(message),
 	}
-	return nmc_client.SendGetRequest[api.WalletSignTxData](r, "sign-tx", "SignTx", args)
+	return client.SendGetRequest[api.WalletSignTxData](r, "sign-tx", "SignTx", args)
 }
