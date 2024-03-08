@@ -2,6 +2,7 @@ package swnodeset
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"net/url"
@@ -13,6 +14,7 @@ import (
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
+	"github.com/nodeset-org/hyperdrive/shared/utils/input"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -28,7 +30,10 @@ func (f *nodesetUploadDepositDataContextFactory) Create(args url.Values) (*nodes
 	c := &nodesetUploadDepositDataContext{
 		handler: f.handler,
 	}
-	return c, nil
+	inputErrs := []error{
+		server.ValidateArg("bypassBalanceCheck", args, input.ValidateBool, &c.bypassBalanceCheck),
+	}
+	return c, errors.Join(inputErrs...)
 }
 
 func (f *nodesetUploadDepositDataContextFactory) RegisterRoute(router *mux.Router) {
@@ -47,7 +52,9 @@ type nodesetUploadDepositDataContext struct {
 }
 
 func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadDepositDataData, opts *bind.TransactOpts) error {
-	fmt.Printf("!!balanceCheck: %v\n", c.bypassBalanceCheck)
+	fmt.Printf("!!context: %v\n", c)
+	fmt.Printf("!!c.bypassBalanceCheck: %v\n", c.bypassBalanceCheck)
+
 	return fmt.Errorf("balance_check_failed")
 	sp := c.handler.serviceProvider
 	ddMgr := sp.GetDepositDataManager()
