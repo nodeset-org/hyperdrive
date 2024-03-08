@@ -30,7 +30,7 @@ func UploadDepositData(sw *client.StakewiseClient) error {
 		if strings.Contains(err.Error(), "balance_check_failed") {
 			// Prompt the user for decision on balance check error
 			fmt.Printf("%s\n", err.Error())
-			fmt.Println("Are you sure you want to upload these keys regardless? (yes/no)\n")
+			fmt.Println("Are you sure you want to upload these keys regardless? (yes/no)")
 			reader := bufio.NewReader(os.Stdin)
 			input, _ := reader.ReadString('\n')
 			input = strings.TrimSpace(input)
