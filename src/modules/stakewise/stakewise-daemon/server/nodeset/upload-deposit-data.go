@@ -42,10 +42,13 @@ func (f *nodesetUploadDepositDataContextFactory) RegisterRoute(router *mux.Route
 // ===============
 
 type nodesetUploadDepositDataContext struct {
-	handler *NodesetHandler
+	handler            *NodesetHandler
+	bypassBalanceCheck bool
 }
 
 func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadDepositDataData, opts *bind.TransactOpts) error {
+	fmt.Printf("!!balanceCheck: %v\n", c.bypassBalanceCheck)
+	return fmt.Errorf("balance_check_failed")
 	sp := c.handler.serviceProvider
 	ddMgr := sp.GetDepositDataManager()
 	nc := sp.GetNodesetClient()
@@ -97,9 +100,11 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	}
 
 	// Make sure validator has enough funds to pay for the deposit
-	totalCost := new(big.Int).Mul(gasPrice, big.NewInt(int64(len(unregisteredKeys))))
-	if totalCost.Cmp(balance) > 0 {
-		return fmt.Errorf("not enough funds to pay for the deposit transactions. wallet should have at least %s wei", totalCost.String())
+	if !c.bypassBalanceCheck {
+		totalCost := new(big.Int).Mul(gasPrice, big.NewInt(int64(len(unregisteredKeys))))
+		if totalCost.Cmp(balance) > 0 {
+			return fmt.Errorf("balance_check_failed")
+		}
 	}
 
 	// Get the deposit data for those pubkeys
