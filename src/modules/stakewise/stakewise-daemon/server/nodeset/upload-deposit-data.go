@@ -52,10 +52,6 @@ type nodesetUploadDepositDataContext struct {
 }
 
 func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadDepositDataData, opts *bind.TransactOpts) error {
-	fmt.Printf("!!context: %v\n", c)
-	fmt.Printf("!!c.bypassBalanceCheck: %v\n", c.bypassBalanceCheck)
-
-	return fmt.Errorf("balance_check_failed")
 	sp := c.handler.serviceProvider
 	ddMgr := sp.GetDepositDataManager()
 	nc := sp.GetNodesetClient()

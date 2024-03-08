@@ -8,12 +8,23 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
+	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
+
+func printUploadError(err error) {
+	fmt.Println("Error")
+	fmt.Printf("%sWARNING: Error uploading deposit data to NodeSet: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+	fmt.Println("Please upload the deposit data for all of your keys with `hyperdrive stakewise nodeset upload-deposit-data` when you're ready. Without it, NodeSet won't be able to assign new deposits to your validators.")
+	fmt.Println()
+}
 
 // Upload deposit data to the server
 func UploadDepositData(sw *client.StakewiseClient) error {
 	fmt.Printf("Uploading deposit data to the NodeSet server... ")
-	response, err := sw.Api.Nodeset.UploadDepositData(false)
+	var response *api.ApiResponse[swapi.NodesetUploadDepositDataData]
+	var err error
+	response, err = sw.Api.Nodeset.UploadDepositData(false)
 	if err != nil {
 		if strings.Contains(err.Error(), "balance_check_failed") {
 			// Prompt the user for decision on balance check error
@@ -26,18 +37,18 @@ func UploadDepositData(sw *client.StakewiseClient) error {
 				fmt.Println("Operation aborted by the user.")
 				return err
 			} else {
-				response, _ = sw.Api.Nodeset.UploadDepositData(true)
+				response, err = sw.Api.Nodeset.UploadDepositData(true)
+				if err != nil {
+					printUploadError(err)
+					return err
+				}
 			}
 
 		} else {
-			fmt.Println("error")
-			fmt.Printf("%sWARNING: error uploading deposit data to nodeset: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
-			fmt.Println("Please upload the deposit data for all of your keys with `hyperdrive stakewise nodeset upload-deposit-data` when you're ready. Without it, NodeSet won't be able to assign new deposits to your validators.")
-			fmt.Println()
+			printUploadError(err)
 			return err
 		}
 	}
-
 	data := response.Data
 	fmt.Println("done!")
 	if len(data.NewPubkeys) == 0 {

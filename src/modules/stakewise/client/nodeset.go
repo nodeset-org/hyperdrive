@@ -1,7 +1,6 @@
 package swclient
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -40,7 +39,6 @@ func (r *NodesetRequester) SetValidatorsRoot(root common.Hash) (*api.ApiResponse
 
 // Upload the aggregated deposit data file to NodeSet's servers
 func (r *NodesetRequester) UploadDepositData(bypassBalanceCheck bool) (*api.ApiResponse[swapi.NodesetUploadDepositDataData], error) {
-	fmt.Printf("!!bypassBalanceCheck: %v\n", bypassBalanceCheck)
 	args := map[string]string{
 		"bypassBalanceCheck": strconv.FormatBool(bypassBalanceCheck),
 	}
