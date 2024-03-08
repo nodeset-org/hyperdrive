@@ -66,8 +66,6 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	nc := sp.GetNodesetClient()
 	w := sp.GetWallet()
 	ec := sp.GetEthClient()
-	// Note this uses current gas price but this could fluctuate.
-	// Potentially use a hardcoded value like 200 gwei to make sure TX will have a higher likelyhood of going through
 
 	balance, err := ec.BalanceAt(context.Background(), opts.From, nil)
 	if err != nil {
@@ -112,7 +110,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	if !c.bypassBalanceCheck {
 		totalCost := new(big.Int).Mul(big.NewInt(10000000000000000), big.NewInt(int64(len(unregisteredKeys))))
 		if totalCost.Cmp(balance) > 0 {
-			return fmt.Errorf("balance_check_failed: You're attempting to upload %n keys, but you only have %n ETH in your account. We recommend you have at least %n ETH", len(unregisteredKeys), weiToEth(balance), weiToEth(totalCost))
+			return fmt.Errorf("balance_check_failed: You're attempting to upload %v keys, but you only have %v ETH in your account. We recommend you have at least %v ETH", len(unregisteredKeys), weiToEth(balance), weiToEth(totalCost))
 		}
 	}
 

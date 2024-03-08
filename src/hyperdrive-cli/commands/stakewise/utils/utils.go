@@ -21,7 +21,7 @@ func printUploadError(err error) {
 
 // Upload deposit data to the server
 func UploadDepositData(sw *client.StakewiseClient) error {
-	fmt.Printf("Uploading deposit data to the NodeSet server... ")
+	fmt.Printf("Uploading deposit data to the NodeSet server...\n")
 	var response *api.ApiResponse[swapi.NodesetUploadDepositDataData]
 	var err error
 	response, err = sw.Api.Nodeset.UploadDepositData(false)
@@ -29,8 +29,8 @@ func UploadDepositData(sw *client.StakewiseClient) error {
 	if err != nil {
 		if strings.Contains(err.Error(), "balance_check_failed") {
 			// Prompt the user for decision on balance check error
-			fmt.Printf("%s", err.Error())
-			fmt.Println("Are you sure you want to upload these keys regardless? (yes/no)")
+			fmt.Printf("%s\n", err.Error())
+			fmt.Println("Are you sure you want to upload these keys regardless? (yes/no)\n")
 			reader := bufio.NewReader(os.Stdin)
 			input, _ := reader.ReadString('\n')
 			input = strings.TrimSpace(input)
