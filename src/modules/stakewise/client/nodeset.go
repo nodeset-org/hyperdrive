@@ -4,7 +4,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	"github.com/rocket-pool/node-manager-core/api/client"
-	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 type NodesetRequester struct {
@@ -28,14 +28,14 @@ func (r *NodesetRequester) GetContext() *client.RequesterContext {
 }
 
 // Set the validators root for the NodeSet vault
-func (r *NodesetRequester) SetValidatorsRoot(root common.Hash) (*nmc_types.ApiResponse[nmc_types.TxInfoData], error) {
+func (r *NodesetRequester) SetValidatorsRoot(root common.Hash) (*types.ApiResponse[types.TxInfoData], error) {
 	args := map[string]string{
 		"root": root.Hex(),
 	}
-	return client.SendGetRequest[nmc_types.TxInfoData](r, "set-validators-root", "SetValidatorsRoot", args)
+	return client.SendGetRequest[types.TxInfoData](r, "set-validators-root", "SetValidatorsRoot", args)
 }
 
 // Upload the aggregated deposit data file to NodeSet's servers
-func (r *NodesetRequester) UploadDepositData() (*nmc_types.ApiResponse[swapi.NodesetUploadDepositDataData], error) {
+func (r *NodesetRequester) UploadDepositData() (*types.ApiResponse[swapi.NodesetUploadDepositDataData], error) {
 	return client.SendGetRequest[swapi.NodesetUploadDepositDataData](r, "upload-deposit-data", "UploadDepositData", nil)
 }

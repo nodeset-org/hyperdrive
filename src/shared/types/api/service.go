@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 type ServiceTerminateDataFolderData struct {
@@ -14,8 +14,8 @@ type ServiceCreateFeeRecipientFileData struct {
 }
 
 type ServiceClientStatusData struct {
-	EcManagerStatus nmc_types.ClientManagerStatus `json:"ecManagerStatus"`
-	BcManagerStatus nmc_types.ClientManagerStatus `json:"bcManagerStatus"`
+	EcManagerStatus types.ClientManagerStatus `json:"ecManagerStatus"`
+	BcManagerStatus types.ClientManagerStatus `json:"bcManagerStatus"`
 }
 
 type ServiceGetConfigData struct {

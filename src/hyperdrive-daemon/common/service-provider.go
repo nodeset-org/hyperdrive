@@ -7,12 +7,12 @@ import (
 
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
-	nmc_services "github.com/rocket-pool/node-manager-core/node/services"
+	"github.com/rocket-pool/node-manager-core/node/services"
 )
 
 // A container for all of the various services used by Hyperdrive
 type ServiceProvider struct {
-	*nmc_services.ServiceProvider
+	*services.ServiceProvider
 
 	// Services
 	cfg       *hdconfig.HyperdriveConfig
@@ -36,7 +36,7 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	resources := cfg.GetNetworkResources()
 
 	// Core provider
-	sp, err := nmc_services.NewServiceProvider(cfg, config.ClientTimeout, cfg.DebugMode.Value)
+	sp, err := services.NewServiceProvider(cfg, hdconfig.ClientTimeout, cfg.DebugMode.Value)
 	if err != nil {
 		return nil, fmt.Errorf("error creating core service provider: %w", err)
 	}

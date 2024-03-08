@@ -14,7 +14,7 @@ import (
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/eth"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -156,13 +156,13 @@ func PrintNetwork(currentNetwork config.Network, isNew bool) error {
 func ParseFloat(c *cli.Context, name string, value string, isFraction bool) (*big.Int, error) {
 	var floatValue float64
 	if c.Bool(RawFlag.Name) {
-		val, err := nmc_input.ValidateBigInt(name, value)
+		val, err := input.ValidateBigInt(name, value)
 		if err != nil {
 			return nil, err
 		}
 		return val, nil
 	} else if isFraction {
-		val, err := nmc_input.ValidateFraction(name, value)
+		val, err := input.ValidateFraction(name, value)
 		if err != nil {
 			return nil, err
 		}

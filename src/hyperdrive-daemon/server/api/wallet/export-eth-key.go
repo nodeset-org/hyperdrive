@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_utils "github.com/rocket-pool/node-manager-core/utils"
+	"github.com/rocket-pool/node-manager-core/utils"
 )
 
 // ===============
@@ -51,7 +51,7 @@ func (c *walletExportEthKeyContext) PrepareData(data *api.WalletExportEthKeyData
 	}
 
 	// Make a new password
-	password, err := nmc_utils.GenerateRandomPassword()
+	password, err := utils.GenerateRandomPassword()
 	if err != nil {
 		return fmt.Errorf("error generating random password: %w", err)
 	}

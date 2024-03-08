@@ -9,8 +9,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
@@ -28,10 +28,10 @@ func (f *walletInitializeContextFactory) Create(args url.Values) (*walletInitial
 	}
 	server.GetOptionalStringFromVars("derivation-path", args, &c.derivationPath)
 	inputErrs := []error{
-		server.ValidateOptionalArg("index", args, nmc_input.ValidateUint, &c.index, nil),
-		server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
-		server.ValidateArg("save-wallet", args, nmc_input.ValidateBool, &c.saveWallet),
-		server.ValidateArg("save-password", args, nmc_input.ValidateBool, &c.savePassword),
+		server.ValidateOptionalArg("index", args, input.ValidateUint, &c.index, nil),
+		server.ValidateArg("password", args, input.ValidateNodePassword, &c.password),
+		server.ValidateArg("save-wallet", args, input.ValidateBool, &c.saveWallet),
+		server.ValidateArg("save-password", args, input.ValidateBool, &c.savePassword),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -60,21 +60,21 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 	sp := c.handler.serviceProvider
 
 	// Parse the derivation path
-	path, err := nmc_nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
+	path, err := nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
 	if err != nil {
 		return err
 	}
 
-	var w *nmc_nodewallet.Wallet
+	var w *nodewallet.Wallet
 	var mnemonic string
 	if !c.saveWallet {
 		// Make a dummy wallet for the sake of creating a mnemonic and derived address
-		mnemonic, err = nmc_nodewallet.GenerateNewMnemonic()
+		mnemonic, err = nodewallet.GenerateNewMnemonic()
 		if err != nil {
 			return fmt.Errorf("error generating new mnemonic: %w", err)
 		}
 
-		w, err = nmc_nodewallet.TestRecovery(path, uint(c.index), mnemonic, 0)
+		w, err = nodewallet.TestRecovery(path, uint(c.index), mnemonic, 0)
 		if err != nil {
 			return fmt.Errorf("error generating wallet from new mnemonic: %w", err)
 		}

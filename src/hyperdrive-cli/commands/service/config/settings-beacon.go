@@ -4,7 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/rocket-pool/node-manager-core/config"
-	nmc_ids "github.com/rocket-pool/node-manager-core/config/ids"
+	"github.com/rocket-pool/node-manager-core/config/ids"
 )
 
 // The page wrapper for the BN configs
@@ -92,7 +92,7 @@ func (configPage *BeaconConfigPage) createContent() {
 	// Take the client selections out since they're done explicitly
 	localBnItems := []*parameterizedFormItem{}
 	for _, item := range configPage.localBnItems {
-		if item.parameter.GetCommon().ID == nmc_ids.BnID {
+		if item.parameter.GetCommon().ID == ids.BnID {
 			continue
 		}
 		localBnItems = append(localBnItems, item)
@@ -101,7 +101,7 @@ func (configPage *BeaconConfigPage) createContent() {
 
 	externalBnItems := []*parameterizedFormItem{}
 	for _, item := range configPage.externalBnItems {
-		if item.parameter.GetCommon().ID == nmc_ids.BnID {
+		if item.parameter.GetCommon().ID == ids.BnID {
 			continue
 		}
 		externalBnItems = append(externalBnItems, item)

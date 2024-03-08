@@ -11,8 +11,8 @@ import (
 	duserver "github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -28,13 +28,13 @@ func (f *nodesetSetValidatorsRootContextFactory) Create(args url.Values) (*nodes
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("root", args, nmc_input.ValidateHash, &c.root),
+		server.ValidateArg("root", args, input.ValidateHash, &c.root),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *nodesetSetValidatorsRootContextFactory) RegisterRoute(router *mux.Router) {
-	duserver.RegisterQuerylessGet[*nodesetSetValidatorsRootContext, nmc_types.TxInfoData](
+	duserver.RegisterQuerylessGet[*nodesetSetValidatorsRootContext, types.TxInfoData](
 		router, "set-validators-root", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -48,7 +48,7 @@ type nodesetSetValidatorsRootContext struct {
 	root    common.Hash
 }
 
-func (c *nodesetSetValidatorsRootContext) PrepareData(data *nmc_types.TxInfoData, opts *bind.TransactOpts) error {
+func (c *nodesetSetValidatorsRootContext) PrepareData(data *types.TxInfoData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
 	res := sp.GetResources()

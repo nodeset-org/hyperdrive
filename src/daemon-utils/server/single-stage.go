@@ -13,7 +13,7 @@ import (
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	batch "github.com/rocket-pool/batch-query"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
@@ -135,7 +135,7 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 }
 
 // Run a route registered with the common single-stage querying pattern
-func runSingleStageRoute[DataType any, ConfigType hdconfig.IModuleConfig](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*nmc_types.ApiResponse[DataType], error) {
+func runSingleStageRoute[DataType any, ConfigType hdconfig.IModuleConfig](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*types.ApiResponse[DataType], error) {
 	// Get the services
 	q := serviceProvider.GetQueryManager()
 	hd := serviceProvider.GetHyperdriveClient()
@@ -169,7 +169,7 @@ func runSingleStageRoute[DataType any, ConfigType hdconfig.IModuleConfig](ctx IS
 
 	// Create the response and data
 	data := new(DataType)
-	response := &nmc_types.ApiResponse[DataType]{
+	response := &types.ApiResponse[DataType]{
 		Data: data,
 	}
 

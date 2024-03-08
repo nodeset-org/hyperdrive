@@ -9,8 +9,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
@@ -28,8 +28,8 @@ func (f *walletTestRecoverContextFactory) Create(args url.Values) (*walletTestRe
 	}
 	server.GetOptionalStringFromVars("derivation-path", args, &c.derivationPath)
 	inputErrs := []error{
-		server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
-		server.ValidateOptionalArg("index", args, nmc_input.ValidateUint, &c.index, nil),
+		server.ValidateArg("mnemonic", args, input.ValidateWalletMnemonic, &c.mnemonic),
+		server.ValidateOptionalArg("index", args, input.ValidateUint, &c.index, nil),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -56,13 +56,13 @@ func (c *walletTestRecoverContext) PrepareData(data *api.WalletRecoverData, opts
 	rs := sp.GetResources()
 
 	// Parse the derivation path
-	path, err := nmc_nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
+	path, err := nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
 	if err != nil {
 		return err
 	}
 
 	// Recover the wallet
-	w, err := nmc_nodewallet.TestRecovery(path, uint(c.index), c.mnemonic, rs.ChainID)
+	w, err := nodewallet.TestRecovery(path, uint(c.index), c.mnemonic, rs.ChainID)
 	if err != nil {
 		return fmt.Errorf("error recovering wallet: %w", err)
 	}

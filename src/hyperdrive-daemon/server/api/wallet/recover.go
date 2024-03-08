@@ -9,8 +9,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
@@ -28,10 +28,10 @@ func (f *walletRecoverContextFactory) Create(args url.Values) (*walletRecoverCon
 	}
 	server.GetOptionalStringFromVars("derivation-path", args, &c.derivationPath)
 	inputErrs := []error{
-		server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
-		server.ValidateOptionalArg("index", args, nmc_input.ValidateUint, &c.index, nil),
-		server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
-		server.ValidateArg("save-password", args, nmc_input.ValidateBool, &c.savePassword),
+		server.ValidateArg("mnemonic", args, input.ValidateWalletMnemonic, &c.mnemonic),
+		server.ValidateOptionalArg("index", args, input.ValidateUint, &c.index, nil),
+		server.ValidateArg("password", args, input.ValidateNodePassword, &c.password),
+		server.ValidateArg("save-password", args, input.ValidateBool, &c.savePassword),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -69,7 +69,7 @@ func (c *walletRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bi
 	}
 
 	// Parse the derivation path
-	path, err := nmc_nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
+	path, err := nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
 	if err != nil {
 		return err
 	}

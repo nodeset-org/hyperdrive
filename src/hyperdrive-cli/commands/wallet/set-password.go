@@ -5,7 +5,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -38,7 +38,7 @@ func setPassword(c *cli.Context) error {
 			passwordString = PromptNewPassword()
 		}
 	}
-	password, err := nmc_input.ValidateNodePassword("password", passwordString)
+	password, err := input.ValidateNodePassword("password", passwordString)
 	if err != nil {
 		return fmt.Errorf("error validating password: %w", err)
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	ens "github.com/wealdtech/go-ens/v3"
 )
 
@@ -27,7 +27,7 @@ func (f *utilsResolveEnsContextFactory) Create(args url.Values) (*utilsResolveEn
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
+		server.ValidateArg("address", args, input.ValidateAddress, &c.address),
 		server.GetStringFromVars("name", args, &c.name),
 	}
 	return c, errors.Join(inputErrs...)

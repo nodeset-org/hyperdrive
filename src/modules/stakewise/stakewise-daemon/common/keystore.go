@@ -11,8 +11,8 @@ import (
 	"github.com/google/uuid"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
-	nmc_utils "github.com/rocket-pool/node-manager-core/utils"
+	"github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
@@ -68,7 +68,7 @@ func (ks *stakewiseKeystoreManager) GetKeystoreDir() string {
 // Store a validator key
 func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateKey, derivationPath string) error {
 	// Get validator pubkey
-	pubkey := nmc_beacon.ValidatorPubkey(key.PublicKey().Marshal())
+	pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
 
 	// Encrypt key
 	encryptedKey, err := ks.encryptor.Encrypt(key.Marshal(), ks.password)
@@ -77,7 +77,7 @@ func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateK
 	}
 
 	// Create key store
-	keyStore := nmc_beacon.ValidatorKeystore{
+	keyStore := beacon.ValidatorKeystore{
 		Crypto:  encryptedKey,
 		Version: ks.encryptor.Version(),
 		UUID:    uuid.New(),
@@ -104,7 +104,7 @@ func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateK
 }
 
 // Load a private key
-func (ks *stakewiseKeystoreManager) LoadValidatorKey(pubkey nmc_beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
+func (ks *stakewiseKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubkey) (*eth2types.BLSPrivateKey, error) {
 	// Get key file path
 	keyFilePath := filepath.Join(ks.keystoreDir, keystorePrefix+pubkey.HexWithPrefix()+keystoreSuffix)
 
@@ -121,7 +121,7 @@ func (ks *stakewiseKeystoreManager) LoadValidatorKey(pubkey nmc_beacon.Validator
 	}
 
 	// Unmarshal the keystore
-	var keystore nmc_beacon.ValidatorKeystore
+	var keystore beacon.ValidatorKeystore
 	err = json.Unmarshal(bytes, &keystore)
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing Stakewise keystore for pubkey %s: %w", pubkey.HexWithPrefix(), err)
@@ -138,7 +138,7 @@ func (ks *stakewiseKeystoreManager) LoadValidatorKey(pubkey nmc_beacon.Validator
 	}
 
 	// Verify the private key matches the public key
-	reconstructedPubkey := nmc_beacon.ValidatorPubkey(privateKey.PublicKey().Marshal())
+	reconstructedPubkey := beacon.ValidatorPubkey(privateKey.PublicKey().Marshal())
 	if reconstructedPubkey != pubkey {
 		return nil, fmt.Errorf("private keystore file %s claims to be for validator %s but it's for validator %s", keyFilePath, pubkey.HexWithPrefix(), reconstructedPubkey.HexWithPrefix())
 	}
@@ -149,7 +149,7 @@ func (ks *stakewiseKeystoreManager) LoadValidatorKey(pubkey nmc_beacon.Validator
 // Initializes the Stakewise keystore directory and saves a random password to it
 func initializeKeystorePassword(passwordPath string) (string, error) {
 	// Make a password
-	password, err := nmc_utils.GenerateRandomPassword()
+	password, err := utils.GenerateRandomPassword()
 	if err != nil {
 		return "", err
 	}

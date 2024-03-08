@@ -6,7 +6,7 @@ import (
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -50,7 +50,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 
 					// Validate flags
 					if c.String(PasswordFlag.Name) != "" {
-						if _, err := nmc_input.ValidateNodePassword("password", c.String(PasswordFlag.Name)); err != nil {
+						if _, err := input.ValidateNodePassword("password", c.String(PasswordFlag.Name)); err != nil {
 							return err
 						}
 					}
@@ -80,12 +80,12 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 
 					// Validate flags
 					if c.String(PasswordFlag.Name) != "" {
-						if _, err := nmc_input.ValidateNodePassword("password", c.String(PasswordFlag.Name)); err != nil {
+						if _, err := input.ValidateNodePassword("password", c.String(PasswordFlag.Name)); err != nil {
 							return err
 						}
 					}
 					if c.String(mnemonicFlag.Name) != "" {
-						if _, err := nmc_input.ValidateWalletMnemonic("mnemonic", c.String(mnemonicFlag.Name)); err != nil {
+						if _, err := input.ValidateWalletMnemonic("mnemonic", c.String(mnemonicFlag.Name)); err != nil {
 							return err
 						}
 					}
@@ -114,7 +114,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 
 					// Validate flags
 					if c.String(mnemonicFlag.Name) != "" {
-						if _, err := nmc_input.ValidateWalletMnemonic("mnemonic", c.String(mnemonicFlag.Name)); err != nil {
+						if _, err := input.ValidateWalletMnemonic("mnemonic", c.String(mnemonicFlag.Name)); err != nil {
 							return err
 						}
 					}
@@ -246,7 +246,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					if err := sharedutils.ValidateArgCount(c, 2); err != nil {
 						return err
 					}
-					message, err := nmc_input.ValidateByteArray("message", c.Args().Get(1))
+					message, err := input.ValidateByteArray("message", c.Args().Get(1))
 					if err != nil {
 						return err
 					}

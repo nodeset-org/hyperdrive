@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -26,13 +26,13 @@ func (f *walletMasqueradeContextFactory) Create(args url.Values) (*walletMasquer
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
+		server.ValidateArg("address", args, input.ValidateAddress, &c.address),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *walletMasqueradeContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*walletMasqueradeContext, nmc_types.SuccessData](
+	server.RegisterQuerylessGet[*walletMasqueradeContext, types.SuccessData](
 		router, "masquerade", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -46,7 +46,7 @@ type walletMasqueradeContext struct {
 	address common.Address
 }
 
-func (c *walletMasqueradeContext) PrepareData(data *nmc_types.SuccessData, opts *bind.TransactOpts) error {
+func (c *walletMasqueradeContext) PrepareData(data *types.SuccessData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 

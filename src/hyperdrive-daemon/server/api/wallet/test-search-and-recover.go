@@ -10,8 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/node/wallet"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -27,8 +27,8 @@ func (f *walletTestSearchAndRecoverContextFactory) Create(args url.Values) (*wal
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
-		server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
+		server.ValidateArg("mnemonic", args, input.ValidateWalletMnemonic, &c.mnemonic),
+		server.ValidateArg("address", args, input.ValidateAddress, &c.address),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -54,17 +54,17 @@ func (c *walletTestSearchAndRecoverContext) PrepareData(data *api.WalletSearchAn
 	rs := sp.GetResources()
 
 	// Try each derivation path across all of the iterations
-	var recoveredWallet *nmc_nodewallet.Wallet
+	var recoveredWallet *wallet.Wallet
 	paths := []string{
-		nmc_nodewallet.DefaultNodeKeyPath,
-		nmc_nodewallet.LedgerLiveNodeKeyPath,
-		nmc_nodewallet.MyEtherWalletNodeKeyPath,
+		wallet.DefaultNodeKeyPath,
+		wallet.LedgerLiveNodeKeyPath,
+		wallet.MyEtherWalletNodeKeyPath,
 	}
 	for i := uint(0); i < findIterations; i++ {
 		for j := 0; j < len(paths); j++ {
 			var err error
 			derivationPath := paths[j]
-			recoveredWallet, err = nmc_nodewallet.TestRecovery(derivationPath, i, c.mnemonic, rs.ChainID)
+			recoveredWallet, err = wallet.TestRecovery(derivationPath, i, c.mnemonic, rs.ChainID)
 			if err != nil {
 				return fmt.Errorf("error recovering wallet with path [%s], index [%d]: %w", derivationPath, i, err)
 			}

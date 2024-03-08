@@ -9,7 +9,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/client"
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
-	nmc_services "github.com/rocket-pool/node-manager-core/node/services"
+	"github.com/rocket-pool/node-manager-core/node/services"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 
 // A container for all of the various services used by Hyperdrive
 type ServiceProvider[ConfigType hdconfig.IModuleConfig] struct {
-	*nmc_services.ServiceProvider
+	*services.ServiceProvider
 
 	// Services
 	hdCfg        *hdconfig.HyperdriveConfig

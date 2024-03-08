@@ -11,8 +11,8 @@ import (
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -28,8 +28,8 @@ func (f *walletGenerateKeysContextFactory) Create(args url.Values) (*walletGener
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("count", args, nmc_input.ValidateUint, &c.count),
-		server.ValidateArg("restart-vc", args, nmc_input.ValidateBool, &c.restartVc),
+		server.ValidateArg("count", args, input.ValidateUint, &c.count),
+		server.ValidateArg("restart-vc", args, input.ValidateBool, &c.restartVc),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -74,13 +74,13 @@ func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData
 	*/
 
 	// Generate and save the keys
-	pubkeys := make([]nmc_beacon.ValidatorPubkey, c.count)
+	pubkeys := make([]beacon.ValidatorPubkey, c.count)
 	for i := 0; i < int(c.count); i++ {
 		key, err := wallet.GenerateNewValidatorKey()
 		if err != nil {
 			return fmt.Errorf("error generating validator key: %w", err)
 		}
-		pubkeys[i] = nmc_beacon.ValidatorPubkey(key.PublicKey().Marshal())
+		pubkeys[i] = beacon.ValidatorPubkey(key.PublicKey().Marshal())
 	}
 	data.Pubkeys = pubkeys
 

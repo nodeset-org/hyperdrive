@@ -3,7 +3,7 @@ package swclient
 import (
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	"github.com/rocket-pool/node-manager-core/api/client"
-	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 type StatusRequester struct {
@@ -28,6 +28,6 @@ func (r *StatusRequester) GetContext() *client.RequesterContext {
 	return r.context
 }
 
-func (r *StatusRequester) GetActiveValidators() (*nmc_types.ApiResponse[swapi.ActiveValidatorsData], error) {
+func (r *StatusRequester) GetActiveValidators() (*types.ApiResponse[swapi.ActiveValidatorsData], error) {
 	return client.SendGetRequest[swapi.ActiveValidatorsData](r, "status", "Status", nil)
 }

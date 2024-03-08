@@ -11,7 +11,7 @@ import (
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/shared"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/urfave/cli/v2"
 )
@@ -175,7 +175,7 @@ func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) error {
 	if passwordString == "" {
 		passwordString = cliwallet.PromptExistingPassword()
 	}
-	password, err := nmc_input.ValidateNodePassword("password", passwordString)
+	password, err := input.ValidateNodePassword("password", passwordString)
 	if err != nil {
 		return fmt.Errorf("error validating password: %w", err)
 	}

@@ -4,7 +4,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/client"
-	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 type UtilsRequester struct {
@@ -28,7 +28,7 @@ func (r *UtilsRequester) GetContext() *client.RequesterContext {
 }
 
 // Resolves an ENS name or reserve resolves an address
-func (r *UtilsRequester) ResolveEns(address common.Address, name string) (*nmc_types.ApiResponse[api.UtilsResolveEnsData], error) {
+func (r *UtilsRequester) ResolveEns(address common.Address, name string) (*types.ApiResponse[api.UtilsResolveEnsData], error) {
 	args := map[string]string{
 		"address": address.Hex(),
 		"name":    name,
@@ -37,6 +37,6 @@ func (r *UtilsRequester) ResolveEns(address common.Address, name string) (*nmc_t
 }
 
 // Get the node's ETH balance
-func (r *UtilsRequester) Balance() (*nmc_types.ApiResponse[api.UtilsBalanceData], error) {
+func (r *UtilsRequester) Balance() (*types.ApiResponse[api.UtilsBalanceData], error) {
 	return client.SendGetRequest[api.UtilsBalanceData](r, "balance", "Balance", nil)
 }

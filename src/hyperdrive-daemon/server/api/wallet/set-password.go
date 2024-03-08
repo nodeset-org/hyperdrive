@@ -7,8 +7,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -24,14 +24,14 @@ func (f *walletSetPasswordContextFactory) Create(args url.Values) (*walletSetPas
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
-		server.ValidateArg("save", args, nmc_input.ValidateBool, &c.save),
+		server.ValidateArg("password", args, input.ValidateNodePassword, &c.password),
+		server.ValidateArg("save", args, input.ValidateBool, &c.save),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
 func (f *walletSetPasswordContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*walletSetPasswordContext, nmc_types.SuccessData](
+	server.RegisterQuerylessGet[*walletSetPasswordContext, types.SuccessData](
 		router, "set-password", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -46,7 +46,7 @@ type walletSetPasswordContext struct {
 	save     bool
 }
 
-func (c *walletSetPasswordContext) PrepareData(data *nmc_types.SuccessData, opts *bind.TransactOpts) error {
+func (c *walletSetPasswordContext) PrepareData(data *types.SuccessData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 

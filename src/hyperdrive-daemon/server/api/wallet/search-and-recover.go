@@ -10,8 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	wallet "github.com/rocket-pool/node-manager-core/node/wallet"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/node/wallet"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 const (
@@ -31,10 +31,10 @@ func (f *walletSearchAndRecoverContextFactory) Create(args url.Values) (*walletS
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateArg("mnemonic", args, nmc_input.ValidateWalletMnemonic, &c.mnemonic),
-		server.ValidateArg("address", args, nmc_input.ValidateAddress, &c.address),
-		server.ValidateArg("password", args, nmc_input.ValidateNodePassword, &c.password),
-		server.ValidateArg("save-password", args, nmc_input.ValidateBool, &c.savePassword),
+		server.ValidateArg("mnemonic", args, input.ValidateWalletMnemonic, &c.mnemonic),
+		server.ValidateArg("address", args, input.ValidateAddress, &c.address),
+		server.ValidateArg("password", args, input.ValidateNodePassword, &c.password),
+		server.ValidateArg("save-password", args, input.ValidateBool, &c.savePassword),
 	}
 	return c, errors.Join(inputErrs...)
 }

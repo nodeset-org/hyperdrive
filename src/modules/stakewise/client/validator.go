@@ -5,7 +5,7 @@ import (
 
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	"github.com/rocket-pool/node-manager-core/api/client"
-	nmc_types "github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/rocket-pool/node-manager-core/beacon"
 )
 
@@ -30,7 +30,7 @@ func (r *ValidatorRequester) GetContext() *client.RequesterContext {
 }
 
 // Get signed exit messages for the provided validators, with an optional epoch parameter. If not specified, the epoch from the current chain head will be used.
-func (r *ValidatorRequester) GetSignedExitMessage(pubkeys []beacon.ValidatorPubkey, epoch *uint64, noBroadcastBool bool) (*nmc_types.ApiResponse[swapi.ValidatorGetSignedExitMessagesData], error) {
+func (r *ValidatorRequester) GetSignedExitMessage(pubkeys []beacon.ValidatorPubkey, epoch *uint64, noBroadcastBool bool) (*types.ApiResponse[swapi.ValidatorGetSignedExitMessagesData], error) {
 	args := map[string]string{
 		"pubkeys":      client.MakeBatchArg(pubkeys),
 		"no-broadcast": strconv.FormatBool(noBroadcastBool),

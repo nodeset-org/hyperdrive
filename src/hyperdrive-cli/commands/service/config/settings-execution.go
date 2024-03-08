@@ -4,7 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/rocket-pool/node-manager-core/config"
-	nmc_ids "github.com/rocket-pool/node-manager-core/config/ids"
+	"github.com/rocket-pool/node-manager-core/config/ids"
 )
 
 // The page wrapper for the EC config
@@ -88,7 +88,7 @@ func (configPage *ExecutionConfigPage) createContent() {
 	// Take the client selections out since they're done explicitly
 	localEcItems := []*parameterizedFormItem{}
 	for _, item := range configPage.localEcItems {
-		if item.parameter.GetCommon().ID == nmc_ids.EcID {
+		if item.parameter.GetCommon().ID == ids.EcID {
 			continue
 		}
 		localEcItems = append(localEcItems, item)
@@ -97,7 +97,7 @@ func (configPage *ExecutionConfigPage) createContent() {
 
 	externalEcItems := []*parameterizedFormItem{}
 	for _, item := range configPage.externalEcItems {
-		if item.parameter.GetCommon().ID == nmc_ids.EcID {
+		if item.parameter.GetCommon().ID == ids.EcID {
 			continue
 		}
 		externalEcItems = append(externalEcItems, item)

@@ -17,9 +17,9 @@ import (
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types"
-	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/rocket-pool/node-manager-core/config"
-	nmc_utils "github.com/rocket-pool/node-manager-core/node/validator/utils"
+	utils "github.com/rocket-pool/node-manager-core/node/validator/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -62,14 +62,14 @@ func (m *DepositDataManager) GenerateDepositData(keys []*eth2types.BLSPrivateKey
 	resources := m.sp.GetResources()
 
 	// Stakewise uses the same withdrawal creds for each validator
-	withdrawalCreds := nmc_utils.GetWithdrawalCredsFromAddress(resources.Vault)
+	withdrawalCreds := utils.GetWithdrawalCredsFromAddress(resources.Vault)
 
 	// Create the new aggregated deposit data for all generated keys
 	dataList := make([]*types.ExtendedDepositData, len(keys))
 	for i, key := range keys {
-		depositData, err := nmc_utils.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, config.Network(resources.NodesetNetwork))
+		depositData, err := utils.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, config.Network(resources.NodesetNetwork))
 		if err != nil {
-			pubkey := nmc_beacon.ValidatorPubkey(key.PublicKey().Marshal())
+			pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
 			return nil, fmt.Errorf("error getting deposit data for key %s: %w", pubkey.HexWithPrefix(), err)
 		}
 		dataList[i] = &types.ExtendedDepositData{
@@ -126,7 +126,7 @@ func (m *DepositDataManager) ComputeMerkleRoot(data []types.ExtendedDepositData)
 		// Get the deposit data root for this deposit data
 		ddRoot, err := m.regenerateDepositDataRoot(dd)
 		if err != nil {
-			pubkey := nmc_beacon.ValidatorPubkey(dd.PublicKey)
+			pubkey := beacon.ValidatorPubkey(dd.PublicKey)
 			return common.Hash{}, fmt.Errorf("error generating deposit data root for validator %d (%s): %w", i, pubkey.Hex(), err)
 		}
 
@@ -197,7 +197,7 @@ func (m *DepositDataManager) ComputeMerkleRoot(data []types.ExtendedDepositData)
 
 // Regenerate the deposit data hash root from a deposit data object instead of explicitly relying on the deposit data root provided in the EDD
 func (m *DepositDataManager) regenerateDepositDataRoot(dd types.ExtendedDepositData) (common.Hash, error) {
-	var depositData = nmc_beacon.DepositData{
+	var depositData = beacon.DepositData{
 		PublicKey:             dd.PublicKey,
 		WithdrawalCredentials: dd.WithdrawalCredentials,
 		Amount:                StakewiseDepositAmount, // Note: hardcoded here because Stakewise ignores the actual amount in the deposit data and hardcodes it in their tree generation

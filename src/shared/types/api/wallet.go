@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/rocket-pool/node-manager-core/wallet"
 )
@@ -17,20 +17,20 @@ type WalletInitializeData struct {
 }
 
 type WalletRecoverData struct {
-	AccountAddress common.Address               `json:"accountAddress"`
-	ValidatorKeys  []nmc_beacon.ValidatorPubkey `json:"validatorKeys"`
+	AccountAddress common.Address           `json:"accountAddress"`
+	ValidatorKeys  []beacon.ValidatorPubkey `json:"validatorKeys"`
 }
 
 type WalletSearchAndRecoverData struct {
-	FoundWallet    bool                         `json:"foundWallet"`
-	AccountAddress common.Address               `json:"accountAddress"`
-	DerivationPath string                       `json:"derivationPath"`
-	Index          uint                         `json:"index"`
-	ValidatorKeys  []nmc_beacon.ValidatorPubkey `json:"validatorKeys"`
+	FoundWallet    bool                     `json:"foundWallet"`
+	AccountAddress common.Address           `json:"accountAddress"`
+	DerivationPath string                   `json:"derivationPath"`
+	Index          uint                     `json:"index"`
+	ValidatorKeys  []beacon.ValidatorPubkey `json:"validatorKeys"`
 }
 
 type WalletRebuildData struct {
-	ValidatorKeys []nmc_beacon.ValidatorPubkey `json:"validatorKeys"`
+	ValidatorKeys []beacon.ValidatorPubkey `json:"validatorKeys"`
 }
 
 type WalletExportData struct {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
-	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/urfave/cli/v2"
 )
 
@@ -39,7 +39,7 @@ func getSignedExitMessages(c *cli.Context) error {
 
 	activeValidators := activeValidatorResponse.Data.ActiveValidators
 	// Get selected validators
-	options := make([]utils.SelectionOption[nmc_beacon.ValidatorPubkey], len(activeValidators))
+	options := make([]utils.SelectionOption[beacon.ValidatorPubkey], len(activeValidators))
 	for i, pubkey := range activeValidators {
 		option := &options[i]
 		option.Element = &activeValidators[i]
@@ -80,7 +80,7 @@ func getSignedExitMessages(c *cli.Context) error {
 		noBroadcastBool = c.Bool(noBroadcastFlag.Name)
 	}
 	// Get the pubkeys
-	pubkeys := make([]nmc_beacon.ValidatorPubkey, len(selectedValidators))
+	pubkeys := make([]beacon.ValidatorPubkey, len(selectedValidators))
 	for i, validator := range selectedValidators {
 		pubkeys[i] = *validator
 	}

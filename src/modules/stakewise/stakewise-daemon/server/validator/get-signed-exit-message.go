@@ -12,9 +12,9 @@ import (
 	duserver "github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	nmc_beacon "github.com/rocket-pool/node-manager-core/beacon"
-	nmc_utils "github.com/rocket-pool/node-manager-core/node/validator/utils"
-	nmc_input "github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/beacon"
+	utils "github.com/rocket-pool/node-manager-core/node/validator/utils"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -35,9 +35,9 @@ func (f *validatorGetSignedExitMessagesContextFactory) Create(args url.Values) (
 		handler: f.handler,
 	}
 	inputErrs := []error{
-		server.ValidateOptionalArg("epoch", args, nmc_input.ValidateUint, &c.epoch, &c.isEpochSet),
-		server.ValidateArgBatch("pubkeys", args, pubkeyLimit, nmc_input.ValidatePubkey, &c.pubkeys),
-		server.ValidateOptionalArg("no-broadcast", args, nmc_input.ValidateBool, &c.noBroadcast, nil),
+		server.ValidateOptionalArg("epoch", args, input.ValidateUint, &c.epoch, &c.isEpochSet),
+		server.ValidateArgBatch("pubkeys", args, pubkeyLimit, input.ValidatePubkey, &c.pubkeys),
+		server.ValidateOptionalArg("no-broadcast", args, input.ValidateBool, &c.noBroadcast, nil),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -56,7 +56,7 @@ type validatorGetSignedExitMessagesContext struct {
 	handler     *ValidatorHandler
 	epoch       uint64
 	isEpochSet  bool
-	pubkeys     []nmc_beacon.ValidatorPubkey
+	pubkeys     []beacon.ValidatorPubkey
 	noBroadcast bool
 }
 
@@ -111,7 +111,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 		pubkey := c.pubkeys[i]
 		index := statuses[pubkey].Index
 
-		signature, err := nmc_utils.GetSignedExitMessage(key, index, c.epoch, signatureDomain)
+		signature, err := utils.GetSignedExitMessage(key, index, c.epoch, signatureDomain)
 		if err != nil {
 			return fmt.Errorf("error getting exit message signature for validator %s: %w", pubkey.Hex(), err)
 		}
