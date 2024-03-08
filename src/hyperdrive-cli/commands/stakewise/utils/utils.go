@@ -25,11 +25,12 @@ func UploadDepositData(sw *client.StakewiseClient) error {
 	var response *api.ApiResponse[swapi.NodesetUploadDepositDataData]
 	var err error
 	response, err = sw.Api.Nodeset.UploadDepositData(false)
+
 	if err != nil {
 		if strings.Contains(err.Error(), "balance_check_failed") {
 			// Prompt the user for decision on balance check error
-			fmt.Println("balance check failed blah blah")
-			fmt.Println("Do you want to continue regardless? (yes/no)")
+			fmt.Printf("%s", err.Error())
+			fmt.Println("Are you sure you want to upload these keys regardless? (yes/no)")
 			reader := bufio.NewReader(os.Stdin)
 			input, _ := reader.ReadString('\n')
 			input = strings.TrimSpace(input)

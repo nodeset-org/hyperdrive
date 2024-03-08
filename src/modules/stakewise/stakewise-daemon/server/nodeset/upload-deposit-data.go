@@ -51,6 +51,15 @@ type nodesetUploadDepositDataContext struct {
 	bypassBalanceCheck bool
 }
 
+func weiToEth(wei *big.Int) *big.Float {
+	ether := big.NewFloat(1e18)
+
+	weiFloat := new(big.Float).SetInt(wei)
+	ethValue := new(big.Float).Quo(weiFloat, ether)
+
+	return ethValue
+}
+
 func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadDepositDataData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	ddMgr := sp.GetDepositDataManager()
@@ -59,10 +68,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	ec := sp.GetEthClient()
 	// Note this uses current gas price but this could fluctuate.
 	// Potentially use a hardcoded value like 200 gwei to make sure TX will have a higher likelyhood of going through
-	gasPrice, err := ec.SuggestGasPrice(context.Background())
-	if err != nil {
-		return fmt.Errorf("error getting suggested gas price: %w", err)
-	}
+
 	balance, err := ec.BalanceAt(context.Background(), opts.From, nil)
 	if err != nil {
 		return fmt.Errorf("error getting balance: %w", err)
@@ -104,9 +110,9 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 
 	// Make sure validator has enough funds to pay for the deposit
 	if !c.bypassBalanceCheck {
-		totalCost := new(big.Int).Mul(gasPrice, big.NewInt(int64(len(unregisteredKeys))))
+		totalCost := new(big.Int).Mul(big.NewInt(10000000000000000), big.NewInt(int64(len(unregisteredKeys))))
 		if totalCost.Cmp(balance) > 0 {
-			return fmt.Errorf("balance_check_failed")
+			return fmt.Errorf("balance_check_failed: You're attempting to upload %n keys, but you only have %n ETH in your account. We recommend you have at least %n ETH", len(unregisteredKeys), weiToEth(balance), weiToEth(totalCost))
 		}
 	}
 
