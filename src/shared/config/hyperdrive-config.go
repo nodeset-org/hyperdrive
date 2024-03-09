@@ -23,9 +23,6 @@ import (
 const (
 	// Tags
 	hyperdriveTag string = "nodeset/hyperdrive:v" + shared.HyperdriveVersion
-
-	// Internal fields
-	userDirectoryKey string = "hdUserDir"
 )
 
 // The master configuration struct
@@ -277,7 +274,7 @@ func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig) map[string]any {
 	masterMap := map[string]any{}
 
 	hdMap := config.Serialize(cfg)
-	masterMap[userDirectoryKey] = cfg.HyperdriveUserDirectory
+	masterMap[ids.UserDirectoryKey] = cfg.HyperdriveUserDirectory
 	masterMap[ids.VersionID] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	masterMap[ids.RootConfigID] = hdMap
 
@@ -330,9 +327,9 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	}
 
 	// Get the special fields
-	udKey, exists := masterMap[userDirectoryKey]
+	udKey, exists := masterMap[ids.UserDirectoryKey]
 	if !exists {
-		return fmt.Errorf("expected a user directory config.Parameter named [%s] but it was not found", userDirectoryKey)
+		return fmt.Errorf("expected a user directory config.Parameter named [%s] but it was not found", ids.UserDirectoryKey)
 	}
 	cfg.HyperdriveUserDirectory = udKey.(string)
 	version, exists := masterMap[ids.VersionID]
