@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 )
 
 // The page wrapper for the Hyperdrive config
@@ -69,14 +69,14 @@ func (configPage *HyperdriveConfigPage) createContent() {
 	formItems := createParameterizedFormItems(masterConfig.Hyperdrive.GetParameters(), layout.descriptionBox)
 	for _, formItem := range formItems {
 		// Ignore the client mode item since it's presented in the EC / BN sections
-		if formItem.parameter.GetCommon().ID == config.ClientModeID {
+		if formItem.parameter.GetCommon().ID == ids.ClientModeID {
 			continue
 		}
 
 		// Handle the rest
 		layout.form.AddFormItem(formItem.item)
 		layout.parameters[formItem.item] = formItem
-		if formItem.parameter.GetCommon().ID == config.NetworkID {
+		if formItem.parameter.GetCommon().ID == ids.NetworkID {
 			dropDown := formItem.item.(*DropDown)
 			dropDown.SetSelectedFunc(func(text string, index int) {
 				newNetwork := configPage.home.md.Config.Hyperdrive.Network.Options[index].Value
