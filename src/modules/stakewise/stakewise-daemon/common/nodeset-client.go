@@ -101,7 +101,7 @@ func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
 	vault := utils.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
 	params := map[string]string{
 		"vault":   vault,
-		"network": c.res.NodesetNetwork,
+		"network": c.res.EthNetworkName,
 	}
 	response, err := c.submitRequest(http.MethodGet, nil, params, depositDataPath, metaPath)
 	if err != nil {
@@ -121,7 +121,7 @@ func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData
 	vault := utils.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
 	params := map[string]string{
 		"vault":   vault,
-		"network": c.res.NodesetNetwork,
+		"network": c.res.EthNetworkName,
 	}
 	response, err := c.submitRequest(http.MethodGet, nil, params, depositDataPath)
 	if err != nil {

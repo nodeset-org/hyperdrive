@@ -106,7 +106,7 @@ func (cfg *StakewiseConfig) Vault() string {
 
 func (cfg *StakewiseConfig) Network() string {
 	res := swshared.NewStakewiseResources(cfg.hdCfg.Network.Value)
-	return res.NodesetNetwork
+	return res.EthNetworkName
 }
 
 func (cfg *StakewiseConfig) IsEnabled() bool {

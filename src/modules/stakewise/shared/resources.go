@@ -10,8 +10,7 @@ import (
 
 // A collection of network-specific resources and getters for them
 type StakewiseResources struct {
-	// The Network being used
-	Network config.Network
+	*config.NetworkResources
 
 	// The address of the Stakewise vault
 	Vault common.Address
@@ -19,47 +18,36 @@ type StakewiseResources struct {
 	// The address of the NodeSet fee recipient
 	FeeRecipient common.Address
 
-	// The genesis fork version for the network according to the Beacon config for the network
-	GenesisForkVersion []byte
-
 	// The URL for the NodeSet API server
 	NodesetApiUrl string
-
-	// The string to put in requests for the network param
-	NodesetNetwork string
 }
 
 // Creates a new resource collection for the given network
 func NewStakewiseResources(network config.Network) *StakewiseResources {
 	// Mainnet
 	mainnetResources := &StakewiseResources{
-		Network:            network,
-		Vault:              common.HexToAddress(""),
-		FeeRecipient:       common.HexToAddress(""),
-		GenesisForkVersion: common.FromHex("0x00000000"), // https://github.com/eth-clients/eth2-networks/tree/master/shared/mainnet#genesis-information
-		NodesetApiUrl:      "",
-		NodesetNetwork:     "mainnet",
+		NetworkResources: config.NewResources(config.Network_Mainnet),
+		Vault:            common.HexToAddress(""),
+		FeeRecipient:     common.HexToAddress(""),
+		NodesetApiUrl:    "",
 	}
 
 	// Holesky
 	holeskyResources := &StakewiseResources{
-		Network:            network,
-		Vault:              common.HexToAddress("0x646F5285D195e08E309cF9A5aDFDF68D6Fcc51C4"),
-		FeeRecipient:       common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
-		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
-		NodesetApiUrl:      "https://staging.nodeset.io/api",
-		NodesetNetwork:     "holesky",
+		NetworkResources: config.NewResources(config.Network_Holesky),
+		Vault:            common.HexToAddress("0x646F5285D195e08E309cF9A5aDFDF68D6Fcc51C4"),
+		FeeRecipient:     common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
+		NodesetApiUrl:    "https://staging.nodeset.io/api",
 	}
 
 	// Holesky Dev
 	holeskyDevResources := &StakewiseResources{
-		Network:            network,
-		Vault:              common.HexToAddress("0xf8763855473ce978232bBa37ef90fcFc8aAE10d1"),
-		FeeRecipient:       common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
-		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
-		NodesetApiUrl:      "https://staging.nodeset.io/api",
-		NodesetNetwork:     "holesky",
+		NetworkResources: config.NewResources(config.Network_Holesky),
+		Vault:            common.HexToAddress("0xf8763855473ce978232bBa37ef90fcFc8aAE10d1"),
+		FeeRecipient:     common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
+		NodesetApiUrl:    "https://staging.nodeset.io/api",
 	}
+	holeskyDevResources.Network = hdconfig.Network_HoleskyDev
 
 	switch network {
 	case config.Network_Mainnet:
