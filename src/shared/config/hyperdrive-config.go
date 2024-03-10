@@ -113,7 +113,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 			ParameterCommon: &config.ParameterCommon{
 				ID:                 ids.NetworkID,
 				Name:               "Network",
-				Description:        "The Ethereum network you want to use - select Prater Testnet or Holesky Testnet to practice with fake ETH, or Mainnet to stake on the real network using real ETH.",
+				Description:        "The Ethereum network you want to use - select Holesky Testnet to practice with fake ETH, or Mainnet to stake on the real network using real ETH.",
 				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ExecutionClient, config.ContainerID_BeaconNode, config.ContainerID_ValidatorClient},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
@@ -224,11 +224,11 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	}
 
 	// Create the subconfigs
-	cfg.Fallback = config.NewFallbackConfig()
 	cfg.LocalExecutionConfig = NewLocalExecutionConfig()
 	cfg.ExternalExecutionConfig = config.NewExternalExecutionConfig()
 	cfg.LocalBeaconConfig = NewLocalBeaconConfig()
 	cfg.ExternalBeaconConfig = config.NewExternalBeaconConfig()
+	cfg.Fallback = config.NewFallbackConfig()
 	cfg.Metrics = NewMetricsConfig()
 
 	// Apply the default values for mainnet
@@ -260,12 +260,12 @@ func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 // Get the subconfigurations for this config
 func (cfg *HyperdriveConfig) GetSubconfigs() map[string]config.IConfigSection {
 	return map[string]config.IConfigSection{
-		"fallback":          cfg.Fallback,
-		"localExecution":    cfg.LocalExecutionConfig,
-		"externalExecution": cfg.ExternalExecutionConfig,
-		"localBeacon":       cfg.LocalBeaconConfig,
-		"externalBeacon":    cfg.ExternalBeaconConfig,
-		"metrics":           cfg.Metrics,
+		ids.FallbackID:          cfg.Fallback,
+		ids.LocalExecutionID:    cfg.LocalExecutionConfig,
+		ids.ExternalExecutionID: cfg.ExternalExecutionConfig,
+		ids.LocalBeaconID:       cfg.LocalBeaconConfig,
+		ids.ExternalBeaconID:    cfg.ExternalBeaconConfig,
+		ids.MetricsID:           cfg.Metrics,
 	}
 }
 
@@ -447,7 +447,7 @@ func (cfg *HyperdriveConfig) GetExecutionClientUrls() (string, string) {
 	return primaryEcUrl, fallbackEcUrl
 }
 
-func (cfg *HyperdriveConfig) GetBeaconNodeUrls() (string, string) { // Primary BN
+func (cfg *HyperdriveConfig) GetBeaconNodeUrls() (string, string) {
 	primaryBnUrl := cfg.GetBnHttpEndpoint()
 	var fallbackBnUrl string
 	if cfg.Fallback.UseFallbackClients.Value {

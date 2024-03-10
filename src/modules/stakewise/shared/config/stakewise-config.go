@@ -1,18 +1,13 @@
 package swconfig
 
 import (
+	"github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared"
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
 )
 
 const (
-	// Param IDs
-	StakewiseEnableID      string = "enable"
-	OperatorContainerTagID string = "operatorContainerTag"
-	AdditionalOpFlagsID    string = "additionalOpFlags"
-	VerifyDepositRootsID   string = "verifyDepositRoots"
-
 	// Tags
 	daemonTag   string = "nodeset/hyperdrive-stakewise:v" + shared.HyperdriveVersion
 	operatorTag string = "europe-west4-docker.pkg.dev/stakewiselabs/public/v3-operator:v1.0.8"
@@ -50,7 +45,7 @@ func NewStakewiseConfig(hdCfg *hdconfig.HyperdriveConfig) *StakewiseConfig {
 
 		Enabled: config.Parameter[bool]{
 			ParameterCommon: &config.ParameterCommon{
-				ID:                 StakewiseEnableID,
+				ID:                 ids.StakewiseEnableID,
 				Name:               "Enable",
 				Description:        "Enable support for Stakewise (see more at https://docs.nodeset.io).",
 				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseOperator},
@@ -64,7 +59,7 @@ func NewStakewiseConfig(hdCfg *hdconfig.HyperdriveConfig) *StakewiseConfig {
 
 		VerifyDepositsRoot: config.Parameter[bool]{
 			ParameterCommon: &config.ParameterCommon{
-				ID:                 VerifyDepositRootsID,
+				ID:                 ids.VerifyDepositRootsID,
 				Name:               "Verify Deposits Root",
 				Description:        "Enable this to verify that the Merkle root of aggregated deposit data returned by the NodeSet server matches the Merkle root stored in the NodeSet vault contract. This is a safety mechanism to ensure the Stakewise Operator container won't try to submit deposits for validators that the NodeSet vault hasn't verified yet.\n\n[orange]Don't disable this unless you know what you're doing.",
 				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseDaemon},
@@ -78,7 +73,7 @@ func NewStakewiseConfig(hdCfg *hdconfig.HyperdriveConfig) *StakewiseConfig {
 
 		OperatorContainerTag: config.Parameter[string]{
 			ParameterCommon: &config.ParameterCommon{
-				ID:                 OperatorContainerTagID,
+				ID:                 ids.OperatorContainerTagID,
 				Name:               "Operator Container Tag",
 				Description:        "The tag name of the Stakewise Operator image to use. See https://github.com/stakewise/v3-operator#using-docker for more details.",
 				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseOperator},
@@ -92,7 +87,7 @@ func NewStakewiseConfig(hdCfg *hdconfig.HyperdriveConfig) *StakewiseConfig {
 
 		AdditionalOpFlags: config.Parameter[string]{
 			ParameterCommon: &config.ParameterCommon{
-				ID:                 AdditionalOpFlagsID,
+				ID:                 ids.AdditionalOpFlagsID,
 				Name:               "Additional Operator Flags",
 				Description:        "Additional custom command line flags you want to pass to the Operator container, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []config.ContainerID{ContainerID_StakewiseOperator},
@@ -138,12 +133,12 @@ func (cfg *StakewiseConfig) GetParameters() []config.IParameter {
 // Get the sections underneath this one
 func (cfg *StakewiseConfig) GetSubconfigs() map[string]config.IConfigSection {
 	return map[string]config.IConfigSection{
-		"common":     cfg.VcCommon,
-		"lighthouse": cfg.Lighthouse,
-		"lodestar":   cfg.Lodestar,
-		"nimbus":     cfg.Nimbus,
-		"prysm":      cfg.Prysm,
-		"teku":       cfg.Teku,
+		ids.VcCommonID:   cfg.VcCommon,
+		ids.LighthouseID: cfg.Lighthouse,
+		ids.LodestarID:   cfg.Lodestar,
+		ids.NimbusID:     cfg.Nimbus,
+		ids.PrysmID:      cfg.Prysm,
+		ids.TekuID:       cfg.Teku,
 	}
 }
 

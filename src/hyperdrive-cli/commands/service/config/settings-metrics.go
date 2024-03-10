@@ -122,7 +122,7 @@ func (configPage *MetricsConfigPage) handleLayoutChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.enableMetricsBox.item)
 
-	if configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics.Value == true {
+	if configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics.Value {
 		configPage.layout.addFormItems([]*parameterizedFormItem{configPage.ecMetricsPortBox, configPage.bnMetricsPortBox, configPage.daemonMetricsPortBox, configPage.exporterMetricsPortBox})
 		configPage.layout.addFormItems(configPage.grafanaItems)
 		configPage.layout.addFormItems(configPage.prometheusItems)
@@ -133,7 +133,7 @@ func (configPage *MetricsConfigPage) handleLayoutChanged() {
 		switch configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Value {
 		case config.BeaconNode_Teku, config.BeaconNode_Lighthouse, config.BeaconNode_Lodestar:
 			configPage.layout.form.AddFormItem(configPage.enableBitflyNodeMetricsBox.item)
-			if configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value == true {
+			if configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value {
 				configPage.layout.addFormItems(configPage.bitflyNodeMetricsItems)
 			}
 		}

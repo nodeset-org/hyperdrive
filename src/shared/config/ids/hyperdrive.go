@@ -1,7 +1,7 @@
 package ids
 
 const (
-	// Hyperdrive IDs
+	// Hyperdrive parameter IDs
 	RootConfigID         string = "hyperdrive"
 	VersionID            string = "version"
 	UserDirectoryKey     string = "hdUserDir"
@@ -13,4 +13,12 @@ const (
 	AutoTxMaxFeeID       string = "autoTxMaxFee"
 	MaxPriorityFeeID     string = "maxPriorityFee"
 	AutoTxGasThresholdID string = "autoTxGasThreshold"
+
+	// Subconfig IDs
+	FallbackID          string = "fallback"
+	LocalExecutionID    string = "localExecution"
+	ExternalExecutionID string = "externalExecution"
+	LocalBeaconID       string = "localBeacon"
+	ExternalBeaconID    string = "externalBeacon"
+	MetricsID           string = "metrics"
 )

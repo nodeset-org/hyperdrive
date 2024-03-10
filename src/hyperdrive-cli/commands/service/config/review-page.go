@@ -68,7 +68,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 			builder.WriteString("<No changes>")
 		} else {
 			builder.WriteString("The following containers must be restarted for these changes to take effect:")
-			for container, _ := range totalAffectedContainers {
+			for container := range totalAffectedContainers {
 				containerName := oldConfig.Hyperdrive.GetDockerArtifactName(string(container))
 				builder.WriteString(fmt.Sprintf("\n\t%s", containerName))
 				containersToRestart = append(containersToRestart, container)

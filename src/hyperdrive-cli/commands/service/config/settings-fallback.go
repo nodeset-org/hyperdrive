@@ -106,7 +106,7 @@ func (configPage *FallbackConfigPage) handleUseFallbackChanged() {
 	configPage.layout.form.AddFormItem(configPage.useFallbackBox.item)
 
 	// Only add the supporting stuff if external clients are enabled
-	if configPage.masterConfig.Hyperdrive.Fallback.UseFallbackClients.Value == false {
+	if !configPage.masterConfig.Hyperdrive.Fallback.UseFallbackClients.Value {
 		return
 	}
 
