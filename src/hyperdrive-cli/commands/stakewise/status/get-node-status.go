@@ -9,17 +9,22 @@ import (
 
 func getNodeStatus(c *cli.Context) error {
 	sw := client.NewStakewiseClientFromCtx(c)
-	response, err := sw.Api.Status.GetActiveValidators()
+	response, err := sw.Api.Status.GetValidatorStatuses()
 	if err != nil {
-		fmt.Printf("error fetching active validators: %v\n", err)
+		fmt.Printf("error fetching validator statuses: %v\n", err)
 		return err
 	}
 
-	fmt.Printf("Active Validator Pubkeys: \n")
-
-	for _, validator := range response.Data.ActiveValidators {
-		fmt.Printf("%v\n", validator.HexWithPrefix())
+	fmt.Printf("Beacon Statuses:\n")
+	for pubKey, status := range response.Data.BeaconStatus {
+		fmt.Printf("%v: %v\n", pubKey, status)
 	}
+
+	// TODO: Uncomment once implemented
+	// fmt.Printf("\n\nNodeset Statuses:\n")
+	// for pubKey, status := range response.Data.NodesetStatus {
+	// 	fmt.Printf("%v: %v\n", pubKey, status)
+	// }
 
 	return nil
 }
