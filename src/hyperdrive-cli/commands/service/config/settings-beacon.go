@@ -196,7 +196,7 @@ func (configPage *BeaconConfigPage) handleExternalBnChanged() {
 	commonSettings := []*parameterizedFormItem{}
 	prysmSettings := []*parameterizedFormItem{}
 	for _, item := range configPage.externalBnItems {
-		if item.parameter.GetCommon().ID == ids.ExternalBnPrysmRpcUrlID {
+		if item.parameter.GetCommon().ID == ids.PrysmRpcUrlID {
 			prysmSettings = append(prysmSettings, item)
 		} else {
 			commonSettings = append(commonSettings, item)
