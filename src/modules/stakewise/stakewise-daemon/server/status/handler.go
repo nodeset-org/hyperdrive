@@ -16,7 +16,7 @@ func NewStatusHandler(serviceProvider *swcommon.StakewiseServiceProvider) *Statu
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{
-		&statusGetActiveValidatorsContextFactory{h},
+		&statusGetValidatorsStatusesContextFactory{h},
 	}
 	return h
 }
