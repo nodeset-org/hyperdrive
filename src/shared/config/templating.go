@@ -87,10 +87,7 @@ func (cfg *HyperdriveConfig) BnHttpUrl() (string, error) {
 			return overrides.CcApiEndpoint, nil
 		}
 	*/
-	if cfg.IsLocalMode() {
-		return fmt.Sprintf("http://%s:%d", config.ContainerID_BeaconNode, cfg.LocalBeaconConfig.HttpPort.Value), nil
-	}
-	return cfg.ExternalBeaconConfig.HttpUrl.Value, nil
+	return cfg.GetBnHttpEndpoint(), nil
 }
 
 func (cfg *HyperdriveConfig) BnRpcUrl() (string, error) {
@@ -280,7 +277,7 @@ func (cfg *HyperdriveConfig) GetBnAdditionalFlags() (string, error) {
 
 // Get the HTTP API endpoint for the provided BN
 func (cfg *HyperdriveConfig) GetBnHttpEndpoint() string {
-	if cfg.ClientMode.Value == config.ClientMode_Local {
+	if cfg.IsLocalMode() {
 		return fmt.Sprintf("http://%s:%d", config.ContainerID_BeaconNode, cfg.LocalBeaconConfig.HttpPort.Value)
 	}
 
