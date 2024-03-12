@@ -3,10 +3,14 @@ package wallet
 import (
 	"fmt"
 	"net/url"
+	"strings"
 	_ "time/tzdata"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
+	localABI "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/service/abi"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
@@ -35,6 +39,8 @@ func (f *walletClaimRewardsContextFactory) RegisterRoute(router *mux.Router) {
 	)
 }
 
+const YieldDistributorContractAddress = "0x"
+
 // ===============
 // === Context ===
 // ===============
@@ -46,11 +52,20 @@ type walletClaimRewardsContext struct {
 
 func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bind.TransactOpts) error {
 	fmt.Printf("Preparing data for claim reward\n")
-	// sp := c.handler.serviceProvider
+	sp := c.handler.serviceProvider
 	// w := sp.GetWallet()
 	// TODO: HUY!!!
-	// ec := sp.GetEthClient()
+	ec := sp.GetEthClient()
+
+	abi, err := abi.JSON(strings.NewReader(localABI.YieldDistributorABI))
+	if err != nil {
+		return err
+	}
+
+	contractAddress := common.HexToAddress(YieldDistributorContractAddress)
+	boundContract := bind.NewBoundContract(contractAddress, abi, ec, ec, ec)
+	fmt.Printf("Bound contract: %v\n", boundContract)
 	// ec.SendTransaction(opts, w.Address)
 
-	return nil // w.ClaimRewards(c.address)
+	return nil
 }
