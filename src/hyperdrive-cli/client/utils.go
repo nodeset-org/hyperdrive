@@ -44,7 +44,7 @@ func LoadConfigFromFile(path string) (*GlobalConfig, error) {
 }
 
 // Saves a config
-func SaveConfig(cfg *GlobalConfig, directory, filename string) error {
+func SaveConfig(cfg *GlobalConfig, directory string, filename string) error {
 	path := filepath.Join(directory, filename)
 
 	settings := cfg.Serialize()
@@ -104,7 +104,6 @@ func SaveConfig(cfg *GlobalConfig, directory, filename string) error {
 	}
 
 	return nil
-
 }
 
 // Get the external IP address. Try finding an IPv4 address first to:

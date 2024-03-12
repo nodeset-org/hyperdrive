@@ -1,16 +1,11 @@
 package utils
 
 import (
-	"fmt"
-
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
 // Validate command argument count
 func ValidateArgCount(c *cli.Context, expectedCount int) error {
-	argCount := c.Args().Len()
-	if argCount != expectedCount {
-		return fmt.Errorf("incorrect argument count; expected %d but have %d", expectedCount, argCount)
-	}
-	return nil
+	return input.ValidateArgCount(c.Args().Len(), expectedCount)
 }
