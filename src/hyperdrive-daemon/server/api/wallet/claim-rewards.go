@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/contract"
 	localABI "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/service/abi"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
@@ -64,8 +65,12 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bin
 
 	contractAddress := common.HexToAddress(YieldDistributorContractAddress)
 	boundContract := bind.NewBoundContract(contractAddress, abi, ec, ec, ec)
-	fmt.Printf("Bound contract: %v\n", boundContract)
-	// ec.SendTransaction(opts, w.Address)
-
+	contractInstance := &contract.Contract{
+		Contract: boundContract,
+		Address:  &contractAddress,
+		ABI:      &abi,
+		Client:   ec,
+	}
+	fmt.Printf("Contract instance: %v\n", contractInstance)
 	return nil
 }
