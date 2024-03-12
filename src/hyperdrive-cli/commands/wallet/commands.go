@@ -58,6 +58,34 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					return InitWallet(c, nil)
 				},
 			},
+			{
+				Name:    "claim-rewards",
+				Aliases: []string{"cr"},
+				Usage:   "Claim rewards",
+				Flags:   []cli.Flag{},
+				Action: func(c *cli.Context) error {
+					// // Validate args
+					// if err := input.ValidateArgCount(c, 0); err != nil {
+					// 	return err
+					// }
+
+					// // Validate flags
+					// if c.String(PasswordFlag.Name) != "" {
+					// 	if _, err := input.ValidateNodePassword("password", c.String(PasswordFlag.Name)); err != nil {
+					// 		return err
+					// 	}
+					// }
+					// if c.String(mnemonicFlag.Name) != "" {
+					// 	if _, err := input.ValidateWalletMnemonic("mnemonic", c.String(mnemonicFlag.Name)); err != nil {
+					// 		return err
+					// 	}
+					// }
+
+					// // Run
+					// return recoverWallet(c)
+					return nil
+				},
+			},
 
 			{
 				Name:    "recover",
