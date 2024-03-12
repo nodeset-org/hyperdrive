@@ -4,6 +4,16 @@ import (
 	"github.com/rocket-pool/node-manager-core/beacon"
 )
 
-type ActiveValidatorsData struct {
-	ActiveValidators []beacon.ValidatorPubkey `json:"pubkeys"`
+type NodesetStatus string
+
+const (
+	RegisteredToStakewise NodesetStatus = "RegisteredToStakewise"
+	UploadedStakewise     NodesetStatus = "UploadedStakewise"
+	UploadedToNodeset     NodesetStatus = "UploadedToNodeset"
+	Generated             NodesetStatus = "Generated"
+)
+
+type ValidatorStatusData struct {
+	BeaconStatus  map[beacon.ValidatorPubkey]beacon.ValidatorState `json:"beaconStatus"`
+	NodesetStatus map[beacon.ValidatorPubkey]NodesetStatus         `json:"nodesetStatus"`
 }

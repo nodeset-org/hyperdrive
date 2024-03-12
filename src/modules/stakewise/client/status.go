@@ -28,6 +28,6 @@ func (r *StatusRequester) GetContext() *client.RequesterContext {
 	return r.context
 }
 
-func (r *StatusRequester) GetActiveValidators() (*types.ApiResponse[swapi.ActiveValidatorsData], error) {
-	return client.SendGetRequest[swapi.ActiveValidatorsData](r, "status", "Status", nil)
+func (r *StatusRequester) GetValidatorStatuses() (*types.ApiResponse[swapi.ValidatorStatusData], error) {
+	return client.SendGetRequest[swapi.ValidatorStatusData](r, "status", "Status", nil)
 }
