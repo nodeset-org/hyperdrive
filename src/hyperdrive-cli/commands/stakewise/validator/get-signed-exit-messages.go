@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nodeset-org/hyperdrive/shared/types"
+
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
@@ -32,18 +34,24 @@ func getSignedExitMessages(c *cli.Context) error {
 	// Get the client
 	sw := client.NewStakewiseClientFromCtx(c)
 
-	activeValidatorResponse, err := sw.Api.Status.GetActiveValidators()
+	activeValidatorResponse, err := sw.Api.Status.GetValidatorStatuses()
 	if err != nil {
 		return fmt.Errorf("error while getting active validators: %w", err)
 	}
+	var activeValidators []beacon.ValidatorPubkey
+	for pubKey, status := range activeValidatorResponse.Data.BeaconStatus {
+		if status == types.ValidatorState_ActiveOngoing {
+			activeValidators = append(activeValidators, pubKey)
+		}
+	}
 
-	activeValidators := activeValidatorResponse.Data.ActiveValidators
 	// Get selected validators
 	options := make([]utils.SelectionOption[beacon.ValidatorPubkey], len(activeValidators))
 	for i, pubkey := range activeValidators {
+		pubKey := activeValidators[i]
 		option := &options[i]
-		option.Element = &activeValidators[i]
-		option.ID = activeValidators[i].HexWithPrefix()
+		option.Element = &pubKey
+		option.ID = pubkey.HexWithPrefix()
 		option.Display = fmt.Sprintf("%s (active since %s)", pubkey, time.Unix(0, 0)) // Placeholder, fill in with status details
 	}
 	selectedValidators, err := utils.GetMultiselectIndices(c, pubkeysFlag.Name, options, "Please select a validator to get the signed exit for:")

@@ -782,7 +782,10 @@ func (c *StandardHttpClient) postWithdrawalCredentialsChange(ctx context.Context
 func (c *StandardHttpClient) getRequestReader(ctx context.Context, requestPath string) (io.ReadCloser, int, error) {
 	// Make the request
 	path := fmt.Sprintf(RequestUrlFormat, c.providerAddress, requestPath)
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, path, nil)
+	req.Header.Set("Content-Type", RequestContentType)
+
 	if err != nil {
 		return nil, 0, fmt.Errorf("error creating GET request to [%s]: %w", path, err)
 	}
@@ -800,6 +803,7 @@ func (c *StandardHttpClient) getRequest(ctx context.Context, requestPath string)
 
 	// Send request
 	reader, status, err := c.getRequestReader(ctx, requestPath)
+
 	if err != nil {
 		return []byte{}, 0, err
 	}
@@ -828,7 +832,10 @@ func (c *StandardHttpClient) postRequest(ctx context.Context, requestPath string
 
 	// Create the request
 	path := fmt.Sprintf(RequestUrlFormat, c.providerAddress, requestPath)
+
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, path, requestBodyReader)
+	request.Header.Set("Content-Type", RequestContentType)
+
 	if err != nil {
 		return nil, 0, fmt.Errorf("error creating POST request to [%s]: %w", path, err)
 	}
