@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"fmt"
+	"math/big"
 	"net/url"
 	"strings"
 	_ "time/tzdata"
@@ -55,6 +56,7 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bin
 	fmt.Printf("Preparing data for claim reward\n")
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
+	walletAddress, _ := w.GetAddress()
 	// TODO: HUY!!!
 	ec := sp.GetEthClient()
 
@@ -76,7 +78,7 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bin
 		return err
 	}
 	fmt.Printf("Contract instance: %v\n", contractInstance)
-	tx, err := contractInstance.Transact(opts, "claimRewards")
+	tx, err := contractInstance.Transact(opts, "harvest", walletAddress, big.NewInt(1), big.NewInt(2))
 	if err != nil {
 		return err
 	}
