@@ -1,15 +1,12 @@
 package swcmdutils
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strings"
 
+	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
 func printUploadError(err error) {
@@ -21,36 +18,30 @@ func printUploadError(err error) {
 
 // Upload deposit data to the server
 func UploadDepositData(sw *client.StakewiseClient) error {
-	fmt.Printf("Uploading deposit data to the NodeSet server...\n")
-	var response *api.ApiResponse[swapi.NodesetUploadDepositDataData]
-	var err error
-	response, err = sw.Api.Nodeset.UploadDepositData(false)
-
+	fmt.Println("Uploading deposit data to the NodeSet server...")
+	response, err := sw.Api.Nodeset.UploadDepositData(false)
 	if err != nil {
-		if strings.Contains(err.Error(), "balance_check_failed") {
-			// Prompt the user for decision on balance check error
-			fmt.Printf("%s\n", err.Error())
-			fmt.Println("Are you sure you want to upload these keys regardless? (yes/no)")
-			reader := bufio.NewReader(os.Stdin)
-			input, _ := reader.ReadString('\n')
-			input = strings.TrimSpace(input)
-			if strings.ToLower(input) != "yes" {
-				fmt.Println("Operation aborted by the user.")
-				return err
-			} else {
-				response, err = sw.Api.Nodeset.UploadDepositData(true)
-				if err != nil {
-					printUploadError(err)
-					return err
-				}
-			}
+		printUploadError(err)
+		return nil
+	}
 
-		} else {
+	data := response.Data
+	if !data.SufficientBalance {
+		// Prompt the user to upload anyway
+		fmt.Printf("You're attempting to upload %d keys, but you only have %.6f ETH in your account. We recommend you have at least %.6f ETH", data.UnregisteredKeyCount, eth.WeiToEth(data.Balance), eth.WeiToEth(data.RequiredBalance))
+		if !utils.Confirm("Do you want to upload these keys anyway? You may not be able to register them if your wallet doesn't have sufficient ETH in it!") {
+			fmt.Println("Cancelled.")
+			return nil
+		}
+
+		response, err = sw.Api.Nodeset.UploadDepositData(true)
+		if err != nil {
 			printUploadError(err)
-			return err
+			return nil
 		}
 	}
-	data := response.Data
+
+	data = response.Data
 	fmt.Println("done!")
 	if len(data.NewPubkeys) == 0 {
 		fmt.Println("All of your validator keys were already registered.")
@@ -58,13 +49,12 @@ func UploadDepositData(sw *client.StakewiseClient) error {
 		fmt.Printf("Server returned: %s\n", string(data.ServerResponse))
 		fmt.Println()
 		fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, len(data.NewPubkeys), terminal.ColorReset)
-		for _, key := range response.Data.NewPubkeys {
+		for _, key := range data.NewPubkeys {
 			fmt.Println(key.HexWithPrefix())
 		}
 		fmt.Println()
 	}
 
 	fmt.Printf("Total keys registered: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
-
 	return nil
 }

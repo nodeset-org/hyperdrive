@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/eth-utils/beacon"
+	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	"github.com/nodeset-org/hyperdrive/shared/utils/input"
@@ -51,15 +52,6 @@ type nodesetUploadDepositDataContext struct {
 	bypassBalanceCheck bool
 }
 
-func weiToEth(wei *big.Int) *big.Float {
-	ether := big.NewFloat(1e18)
-
-	weiFloat := new(big.Float).SetInt(wei)
-	ethValue := new(big.Float).Quo(weiFloat, ether)
-
-	return ethValue
-}
-
 func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadDepositDataData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	ddMgr := sp.GetDepositDataManager()
@@ -71,6 +63,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	if err != nil {
 		return fmt.Errorf("error getting balance: %w", err)
 	}
+	data.Balance = balance
 
 	// Get the list of registered validators
 	registeredPubkeyMap := map[beacon.ValidatorPubkey]bool{}
@@ -91,6 +84,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 
 	// Find the ones that haven't been uploaded yet
 	unregisteredKeys := []*eth2types.BLSPrivateKey{}
+	data.UnregisteredKeyCount = len(unregisteredKeys)
 	newPubkeys := []beacon.ValidatorPubkey{}
 	for _, key := range keys {
 		pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
@@ -108,9 +102,13 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 
 	// Make sure validator has enough funds to pay for the deposit
 	if !c.bypassBalanceCheck {
-		totalCost := new(big.Int).Mul(big.NewInt(10000000000000000), big.NewInt(int64(len(unregisteredKeys))))
-		if totalCost.Cmp(balance) > 0 {
-			return fmt.Errorf("balance_check_failed: You're attempting to upload %v keys, but you only have %v ETH in your account. We recommend you have at least %v ETH", len(unregisteredKeys), weiToEth(balance), weiToEth(totalCost))
+		totalCost := big.NewInt(int64(len(unregisteredKeys)))
+		totalCost.Mul(totalCost, eth.EthToWei(0.01))
+		data.RequiredBalance = totalCost
+
+		data.SufficientBalance = (totalCost.Cmp(balance) > 0)
+		if !data.SufficientBalance {
+			return nil
 		}
 	}
 
