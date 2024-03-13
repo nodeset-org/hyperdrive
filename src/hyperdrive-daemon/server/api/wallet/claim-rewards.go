@@ -54,7 +54,7 @@ type walletClaimRewardsContext struct {
 func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bind.TransactOpts) error {
 	fmt.Printf("Preparing data for claim reward\n")
 	sp := c.handler.serviceProvider
-	// w := sp.GetWallet()
+	w := sp.GetWallet()
 	// TODO: HUY!!!
 	ec := sp.GetEthClient()
 
@@ -71,6 +71,15 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bin
 		ABI:      &abi,
 		Client:   ec,
 	}
+	opts, err = w.GetTransactor()
+	if err != nil {
+		return err
+	}
 	fmt.Printf("Contract instance: %v\n", contractInstance)
+	tx, err := contractInstance.Transact(opts, "claimRewards")
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Transaction: %v\n", tx)
 	return nil
 }
