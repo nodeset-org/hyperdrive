@@ -60,7 +60,7 @@ func NewStakewiseVault(address common.Address, ec eth.IExecutionClient, txMgr *e
 
 // Get the current validators root in the contracts
 func (c *StakewiseVault) GetValidatorsRoot(mc *batch.MultiCaller, out *common.Hash) {
-	eth.AddCallToMulicaller(mc, c.contract, out, "validatorsRoot")
+	eth.AddCallToMulticaller(mc, c.contract, out, "validatorsRoot")
 }
 
 // ====================
