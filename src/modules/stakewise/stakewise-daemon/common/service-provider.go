@@ -2,6 +2,7 @@ package swcommon
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	swshared "github.com/nodeset-org/hyperdrive/modules/stakewise/shared"
@@ -9,7 +10,8 @@ import (
 )
 
 type StakewiseServiceProvider struct {
-	*services.ServiceProvider[*swconfig.StakewiseConfig]
+	*services.ServiceProvider
+	swCfg              *swconfig.StakewiseConfig
 	wallet             *Wallet
 	resources          *swshared.StakewiseResources
 	depositDataManager *DepositDataManager
@@ -17,7 +19,7 @@ type StakewiseServiceProvider struct {
 }
 
 // Create a new service provider with Stakewise daemon-specific features
-func NewStakewiseServiceProvider(sp *services.ServiceProvider[*swconfig.StakewiseConfig]) (*StakewiseServiceProvider, error) {
+func NewStakewiseServiceProvider(sp *services.ServiceProvider) (*StakewiseServiceProvider, error) {
 	// Create the wallet
 	wallet, err := NewWallet(sp)
 	if err != nil {
@@ -27,10 +29,15 @@ func NewStakewiseServiceProvider(sp *services.ServiceProvider[*swconfig.Stakewis
 	// Create the resources
 	cfg := sp.GetHyperdriveConfig()
 	res := swshared.NewStakewiseResources(cfg.Network.Value)
+	swCfg, ok := sp.GetModuleConfig().(*swconfig.StakewiseConfig)
+	if !ok {
+		return nil, fmt.Errorf("stakewise config is not the correct type, it's a %s", reflect.TypeOf(swCfg))
+	}
 
 	// Make the provider
 	stakewiseSp := &StakewiseServiceProvider{
 		ServiceProvider: sp,
+		swCfg:           swCfg,
 		wallet:          wallet,
 		resources:       res,
 	}
@@ -46,6 +53,10 @@ func NewStakewiseServiceProvider(sp *services.ServiceProvider[*swconfig.Stakewis
 	nc := NewNodesetClient(stakewiseSp)
 	stakewiseSp.nodesetClient = nc
 	return stakewiseSp, nil
+}
+
+func (s *StakewiseServiceProvider) GetModuleConfig() *swconfig.StakewiseConfig {
+	return s.swCfg
 }
 
 func (s *StakewiseServiceProvider) GetWallet() *Wallet {

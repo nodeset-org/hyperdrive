@@ -68,7 +68,7 @@ func main() {
 		stopWg.Add(1)
 
 		// Create the service provider
-		sp, err := services.NewServiceProvider(moduleDir, swconfig.NewStakewiseConfig)
+		sp, err := services.NewServiceProvider(moduleDir, swconfig.ModuleName, swconfig.NewStakewiseConfig, config.ClientTimeout)
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}

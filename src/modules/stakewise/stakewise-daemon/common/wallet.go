@@ -10,7 +10,6 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
-	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/beacon"
@@ -36,11 +35,11 @@ type Wallet struct {
 	validatorManager         *validator.ValidatorManager
 	stakewiseKeystoreManager *stakewiseKeystoreManager
 	data                     stakewiseWalletData
-	sp                       *services.ServiceProvider[*swconfig.StakewiseConfig]
+	sp                       *services.ServiceProvider
 }
 
 // Create a new wallet
-func NewWallet(sp *services.ServiceProvider[*swconfig.StakewiseConfig]) (*Wallet, error) {
+func NewWallet(sp *services.ServiceProvider) (*Wallet, error) {
 	moduleDir := sp.GetModuleDir()
 	validatorPath := filepath.Join(moduleDir, config.ValidatorsDirectory)
 	wallet := &Wallet{

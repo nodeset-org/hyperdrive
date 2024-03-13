@@ -48,7 +48,6 @@ func (t *TaskLoop) Run() error {
 	// Run the loop
 	go func() {
 		for {
-			// Check the EC status
 			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
 			if err != nil {
 				errorLog.Println(err)
