@@ -13,7 +13,7 @@ import (
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/beacon"
-	utils "github.com/rocket-pool/node-manager-core/node/validator/utils"
+	"github.com/rocket-pool/node-manager-core/node/validator"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
@@ -111,7 +111,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 		pubkey := c.pubkeys[i]
 		index := statuses[pubkey].Index
 
-		signature, err := utils.GetSignedExitMessage(key, index, c.epoch, signatureDomain)
+		signature, err := validator.GetSignedExitMessage(key, index, c.epoch, signatureDomain)
 		if err != nil {
 			return fmt.Errorf("error getting exit message signature for validator %s: %w", pubkey.Hex(), err)
 		}
