@@ -41,7 +41,7 @@ func (f *walletClaimRewardsContextFactory) RegisterRoute(router *mux.Router) {
 	)
 }
 
-const YieldDistributorContractAddress = "0x"
+const YieldDistributorContractAddress = "0xF6107a0707161ff7b1c832eCA754E7972Be7DB86"
 
 // ===============
 // === Context ===
