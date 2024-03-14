@@ -1,4 +1,4 @@
-package swshared
+package swconfig
 
 import (
 	"fmt"

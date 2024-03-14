@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
-	swshared "github.com/nodeset-org/hyperdrive/modules/stakewise/shared"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 )
 
@@ -13,7 +12,7 @@ type StakewiseServiceProvider struct {
 	*services.ServiceProvider
 	swCfg              *swconfig.StakewiseConfig
 	wallet             *Wallet
-	resources          *swshared.StakewiseResources
+	resources          *swconfig.StakewiseResources
 	depositDataManager *DepositDataManager
 	nodesetClient      *NodesetClient
 }
@@ -28,7 +27,7 @@ func NewStakewiseServiceProvider(sp *services.ServiceProvider) (*StakewiseServic
 
 	// Create the resources
 	cfg := sp.GetHyperdriveConfig()
-	res := swshared.NewStakewiseResources(cfg.Network.Value)
+	res := swconfig.NewStakewiseResources(cfg.Network.Value)
 	swCfg, ok := sp.GetModuleConfig().(*swconfig.StakewiseConfig)
 	if !ok {
 		return nil, fmt.Errorf("stakewise config is not the correct type, it's a %s", reflect.TypeOf(swCfg))
@@ -63,7 +62,7 @@ func (s *StakewiseServiceProvider) GetWallet() *Wallet {
 	return s.wallet
 }
 
-func (s *StakewiseServiceProvider) GetResources() *swshared.StakewiseResources {
+func (s *StakewiseServiceProvider) GetResources() *swconfig.StakewiseResources {
 	return s.resources
 }
 

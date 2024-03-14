@@ -3,7 +3,6 @@ package swconfig
 import (
 	"fmt"
 
-	swshared "github.com/nodeset-org/hyperdrive/modules/stakewise/shared"
 	"github.com/rocket-pool/node-manager-core/config"
 )
 
@@ -95,17 +94,17 @@ func (cfg *StakewiseConfig) Graffiti() (string, error) {
 }
 
 func (cfg *StakewiseConfig) FeeRecipient() string {
-	res := swshared.NewStakewiseResources(cfg.hdCfg.Network.Value)
+	res := NewStakewiseResources(cfg.hdCfg.Network.Value)
 	return res.FeeRecipient.Hex()
 }
 
 func (cfg *StakewiseConfig) Vault() string {
-	res := swshared.NewStakewiseResources(cfg.hdCfg.Network.Value)
+	res := NewStakewiseResources(cfg.hdCfg.Network.Value)
 	return res.Vault.Hex()
 }
 
 func (cfg *StakewiseConfig) Network() string {
-	res := swshared.NewStakewiseResources(cfg.hdCfg.Network.Value)
+	res := NewStakewiseResources(cfg.hdCfg.Network.Value)
 	return res.EthNetworkName
 }
 

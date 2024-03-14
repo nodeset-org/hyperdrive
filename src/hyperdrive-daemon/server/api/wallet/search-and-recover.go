@@ -60,7 +60,7 @@ type walletSearchAndRecoverContext struct {
 func (c *walletSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRecoverData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
-	rs := sp.GetResources()
+	rs := sp.GetConfig().GetNetworkResources()
 
 	// Requirements
 	status, err := w.GetStatus()

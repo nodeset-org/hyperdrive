@@ -53,7 +53,7 @@ type walletTestRecoverContext struct {
 
 func (c *walletTestRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
-	rs := sp.GetResources()
+	rs := sp.GetConfig().GetNetworkResources()
 
 	// Parse the derivation path
 	path, err := nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))

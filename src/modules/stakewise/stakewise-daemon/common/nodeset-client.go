@@ -10,7 +10,7 @@ import (
 
 	"github.com/goccy/go-json"
 
-	swshared "github.com/nodeset-org/hyperdrive/modules/stakewise/shared"
+	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/rocket-pool/node-manager-core/utils"
@@ -56,7 +56,7 @@ type ValidatorsResponse struct {
 // Client for interacting with the Nodeset server
 type NodesetClient struct {
 	sp            *StakewiseServiceProvider
-	res           *swshared.StakewiseResources
+	res           *swconfig.StakewiseResources
 	debug         bool
 	authSignature []byte
 }

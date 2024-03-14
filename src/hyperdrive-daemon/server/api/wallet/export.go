@@ -71,6 +71,5 @@ func (c *walletExportContext) PrepareData(data *api.WalletExportData, opts *bind
 	if err != nil {
 		return fmt.Errorf("error getting node wallet private key: %w", err)
 	}
-
 	return nil
 }

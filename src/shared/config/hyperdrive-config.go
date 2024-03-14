@@ -57,6 +57,7 @@ type HyperdriveConfig struct {
 	// Internal fields
 	Version                 string
 	HyperdriveUserDirectory string
+	resources               *config.NetworkResources
 }
 
 // Load configuration settings from a file
@@ -350,7 +351,22 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 		cfg.Modules = map[string]any{}
 	}
 
+	cfg.updateResources()
 	return nil
+}
+
+// Changes the current network, propagating new parameter settings if they are affected
+func (cfg *HyperdriveConfig) ChangeNetwork(newNetwork config.Network) {
+	// Get the current network
+	oldNetwork := cfg.Network.Value
+	if oldNetwork == newNetwork {
+		return
+	}
+	cfg.Network.Value = newNetwork
+
+	// Run the changes
+	config.ChangeNetwork(cfg, oldNetwork, newNetwork)
+	cfg.updateResources()
 }
 
 // =====================
@@ -413,6 +429,15 @@ func getAugmentedEcDescription(client config.ExecutionClient, originalDescriptio
 	return originalDescription
 }
 
+func (cfg *HyperdriveConfig) updateResources() {
+	switch cfg.Network.Value {
+	case Network_HoleskyDev:
+		cfg.resources = config.NewResources(config.Network_Holesky)
+	default:
+		cfg.resources = config.NewResources(cfg.Network.Value)
+	}
+}
+
 // ==============================
 // === IConfig Implementation ===
 // ==============================
@@ -430,12 +455,7 @@ func (cfg *HyperdriveConfig) GetPasswordFilePath() string {
 }
 
 func (cfg *HyperdriveConfig) GetNetworkResources() *config.NetworkResources {
-	switch cfg.Network.Value {
-	case Network_HoleskyDev:
-		return config.NewResources(config.Network_Holesky)
-	default:
-		return config.NewResources(cfg.Network.Value)
-	}
+	return cfg.resources
 }
 
 func (cfg *HyperdriveConfig) GetExecutionClientUrls() (string, string) {

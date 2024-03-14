@@ -11,8 +11,10 @@ import (
 )
 
 // Config
-var tasksInterval, _ = time.ParseDuration("5m")
-var taskCooldown, _ = time.ParseDuration("10s")
+const (
+	tasksInterval time.Duration = time.Minute * 5
+	taskCooldown  time.Duration = time.Second * 10
+)
 
 const (
 	ErrorColor             = color.FgRed

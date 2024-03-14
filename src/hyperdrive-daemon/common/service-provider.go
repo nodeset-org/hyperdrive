@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/node/services"
 )
 
@@ -15,8 +14,7 @@ type ServiceProvider struct {
 	*services.ServiceProvider
 
 	// Services
-	cfg       *hdconfig.HyperdriveConfig
-	resources *config.NetworkResources
+	cfg *hdconfig.HyperdriveConfig
 
 	// Path info
 	userDir string
@@ -33,7 +31,6 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("hyperdrive config settings file [%s] not found", cfgPath)
 	}
-	resources := cfg.GetNetworkResources()
 
 	// Core provider
 	sp, err := services.NewServiceProvider(cfg, hdconfig.ClientTimeout, cfg.DebugMode.Value)
@@ -46,7 +43,6 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 		ServiceProvider: sp,
 		userDir:         userDir,
 		cfg:             cfg,
-		resources:       resources,
 	}
 	return provider, nil
 }
@@ -61,10 +57,6 @@ func (p *ServiceProvider) GetUserDir() string {
 
 func (p *ServiceProvider) GetConfig() *hdconfig.HyperdriveConfig {
 	return p.cfg
-}
-
-func (p *ServiceProvider) GetResources() *config.NetworkResources {
-	return p.resources
 }
 
 func (p *ServiceProvider) IsDebugMode() bool {

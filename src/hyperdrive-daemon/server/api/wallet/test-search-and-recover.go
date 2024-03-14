@@ -51,7 +51,7 @@ type walletTestSearchAndRecoverContext struct {
 
 func (c *walletTestSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRecoverData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
-	rs := sp.GetResources()
+	rs := sp.GetConfig().GetNetworkResources()
 
 	// Try each derivation path across all of the iterations
 	var recoveredWallet *wallet.Wallet

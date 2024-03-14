@@ -85,7 +85,7 @@ func (c *GlobalConfig) ChangeNetwork(newNetwork config.Network) {
 	c.Hyperdrive.Network.Value = newNetwork
 
 	// Run the changes
-	config.ChangeNetwork(c.Hyperdrive, oldNetwork, newNetwork)
+	c.Hyperdrive.ChangeNetwork(newNetwork)
 	for _, module := range c.GetAllModuleConfigs() {
 		config.ChangeNetwork(module, oldNetwork, newNetwork)
 	}
