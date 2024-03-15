@@ -4,20 +4,26 @@ import (
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/tx"
 	"github.com/urfave/cli/v2"
 )
 
 func claimRewards(c *cli.Context) error {
-	// Get Hyperdrive client
-	// address := hd.Config.NodeAddress
-	// hd.Api.Rewards.ClaimRewards()
-
 	fmt.Printf("Claiming rewards...\n")
+	hd := client.NewHyperdriveClientFromCtx(c)
 	sw := client.NewStakewiseClientFromCtx(c)
 	resp, err := sw.Api.Wallet.ClaimRewards()
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Claimed rewards resp: %v\n", resp)
+	err = tx.HandleTx(c, hd, resp.Data.TxInfo,
+		"Are you sure you want to set the validators root?",
+		"setting validators root",
+		"Setting the validators root...",
+	)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Rewards successfully claimed.")
 	return nil
 }
