@@ -1,7 +1,6 @@
 package swapi
 
 import (
-	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
@@ -15,6 +14,6 @@ const (
 )
 
 type ValidatorStatusData struct {
-	BeaconStatus  map[beacon.ValidatorPubkey]types.ValidatorState `json:"beaconStatus"`
-	NodesetStatus map[beacon.ValidatorPubkey]NodesetStatus        `json:"nodesetStatus"`
+	BeaconStatus  map[string]types.ValidatorState `json:"beaconStatus"`  // string => beacon.ValidatorPubkey
+	NodesetStatus map[string]NodesetStatus        `json:"nodesetStatus"` // string => beacon.ValidatorPubkey
 }
