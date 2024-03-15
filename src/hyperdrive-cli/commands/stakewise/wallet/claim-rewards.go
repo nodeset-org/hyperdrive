@@ -13,8 +13,8 @@ func claimRewards(c *cli.Context) error {
 	// hd.Api.Rewards.ClaimRewards()
 
 	fmt.Printf("Claiming rewards...\n")
-	sc := client.NewStakewiseClientFromCtx(c)
-	resp, err := sc.Api.Wallet.ClaimRewards()
+	sw := client.NewStakewiseClientFromCtx(c)
+	resp, err := sw.Api.Wallet.ClaimRewards()
 	if err != nil {
 		return err
 	}
