@@ -41,7 +41,7 @@ func (f *walletClaimRewardsContextFactory) RegisterRoute(router *mux.Router) {
 	)
 }
 
-const YieldDistributorContractAddress = "0xF6107a0707161ff7b1c832eCA754E7972Be7DB86"
+const SplitMainAddress = "0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"
 
 // ===============
 // === Context ===
@@ -60,12 +60,12 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bin
 	// TODO: HUY!!!
 	ec := sp.GetEthClient()
 
-	abi, err := abi.JSON(strings.NewReader(localABI.YieldDistributorABI))
+	abi, err := abi.JSON(strings.NewReader(localABI.SplitMainABI))
 	if err != nil {
 		return err
 	}
 
-	contractAddress := common.HexToAddress(YieldDistributorContractAddress)
+	contractAddress := common.HexToAddress(SplitMainAddress)
 	boundContract := bind.NewBoundContract(contractAddress, abi, ec, ec, ec)
 	contractInstance := &contract.Contract{
 		Contract: boundContract,
@@ -78,10 +78,10 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bin
 		return err
 	}
 	fmt.Printf("Contract instance: %v\n", contractInstance)
-	tx, err := contractInstance.Transact(opts, "harvest", walletAddress, big.NewInt(1), big.NewInt(2))
+	tx, err := contractInstance.Transact(opts, "withdraw", walletAddress, big.NewInt(0), []common.Address{})
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Transaction: %v\n", tx)
+	fmt.Printf("Transaction: %s\n", tx)
 	return nil
 }
