@@ -26,6 +26,9 @@ type StakewiseResources struct {
 
 	// The string to put in requests for the network param
 	NodesetNetwork string
+
+	// The address of the SplitMain contract
+	Splitmain common.Address
 }
 
 // Creates a new resource collection for the given network
@@ -38,6 +41,7 @@ func NewStakewiseResources(network config.Network) *StakewiseResources {
 		GenesisForkVersion: common.FromHex("0x00000000"), // https://github.com/eth-clients/eth2-networks/tree/master/shared/mainnet#genesis-information
 		NodesetApiUrl:      "",
 		NodesetNetwork:     "mainnet",
+		Splitmain:          common.HexToAddress(""),
 	}
 
 	// Holesky
@@ -48,6 +52,7 @@ func NewStakewiseResources(network config.Network) *StakewiseResources {
 		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
 		NodesetApiUrl:      "https://staging.nodeset.io/api",
 		NodesetNetwork:     "holesky",
+		Splitmain:          common.HexToAddress("0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"),
 	}
 
 	// Holesky Dev
@@ -58,6 +63,7 @@ func NewStakewiseResources(network config.Network) *StakewiseResources {
 		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
 		NodesetApiUrl:      "https://staging.nodeset.io/api",
 		NodesetNetwork:     "holesky",
+		Splitmain:          common.HexToAddress("0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"),
 	}
 
 	switch network {

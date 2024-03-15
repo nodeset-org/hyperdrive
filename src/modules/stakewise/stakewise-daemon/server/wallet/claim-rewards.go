@@ -6,7 +6,6 @@ import (
 	_ "time/tzdata"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcontracts "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common/contracts"
@@ -37,8 +36,6 @@ func (f *walletClaimRewardsContextFactory) RegisterRoute(router *mux.Router) {
 	)
 }
 
-const SplitMainAddress = "0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"
-
 // ===============
 // === Context ===
 // ===============
@@ -57,7 +54,7 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.TxInfoData, opts *bind
 	res := sp.GetResources()
 	txMgr := sp.GetTransactionManager()
 
-	splitMainContract, err := swcontracts.NewSplitMain(common.HexToAddress(SplitMainAddress), ec, txMgr)
+	splitMainContract, err := swcontracts.NewSplitMain(res.Splitmain, ec, txMgr)
 	if err != nil {
 		return fmt.Errorf("error creating Stakewise Vault binding: %w", err)
 	}
