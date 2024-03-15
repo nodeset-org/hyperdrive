@@ -17,9 +17,9 @@ func claimRewards(c *cli.Context) error {
 		return err
 	}
 	err = tx.HandleTx(c, hd, resp.Data.TxInfo,
-		"Are you sure you want to set the validators root?",
-		"setting validators root",
-		"Setting the validators root...",
+		"Are you sure you want to claim rewards?",
+		"claiming rewards",
+		"Claiming rewards...",
 	)
 	if err != nil {
 		return err
