@@ -2,18 +2,15 @@ package swwallet
 
 import (
 	"fmt"
-	"math/big"
 	"net/url"
 	"strings"
 	_ "time/tzdata"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	localABI "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api/abi"
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api/contract"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
@@ -36,7 +33,7 @@ func (f *walletClaimRewardsContextFactory) Create(args url.Values) (*walletClaim
 }
 
 func (f *walletClaimRewardsContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*walletClaimRewardsContext, api.SuccessData](
+	server.RegisterQuerylessGet[*walletClaimRewardsContext, api.TxInfoData](
 		router, "claim-rewards", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -52,12 +49,11 @@ type walletClaimRewardsContext struct {
 	// address common.Address
 }
 
-func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bind.TransactOpts) error {
+// Return the transaction data
+func (c *walletClaimRewardsContext) PrepareData(data *api.TxInfoData, opts *bind.TransactOpts) error {
 	fmt.Printf("Preparing data for claim reward\n")
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
-	walletAddress, _ := w.GetAddress()
-	// TODO: HUY!!!
 	ec := sp.GetEthClient()
 
 	abi, err := abi.JSON(strings.NewReader(localABI.SplitMainABI))
@@ -65,23 +61,39 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bin
 		return err
 	}
 
-	contractAddress := common.HexToAddress(SplitMainAddress)
-	boundContract := bind.NewBoundContract(contractAddress, abi, ec, ec, ec)
-	contractInstance := &contract.Contract{
-		Contract: boundContract,
-		Address:  &contractAddress,
-		ABI:      &abi,
-		Client:   ec,
-	}
-	opts, err = w.GetTransactor()
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Contract instance: %v\n", contractInstance)
-	tx, err := contractInstance.Transact(opts, "withdraw", "0xwalletAddress", big.NewInt(0), []common.Address{})
-	if err != nil {
-		return err
-	}
-	fmt.Printf("Transaction: %s\n", tx)
+	// contractAddress := common.HexToAddress(SplitMainAddress)
+	// boundContract := bind.NewBoundContract(contractAddress, abi, ec, ec, ec)
+	// contractInstance := &contract.Contract{
+	// 	Contract: boundContract,
+	// 	Address:  &contractAddress,
+	// 	ABI:      &abi,
+	// 	Client:   ec,
+	// }
+
+	// fmt.Printf("Contract instance: %v\n", contractInstance)
+	// tx, err := contractInstance.Transact(opts, "withdraw", "0xwalletAddress", big.NewInt(0), []common.Address{})
+	// if err != nil {
+	// 	return err
+	// }
+	// fmt.Printf("Transaction: %s\n", tx)
+	tx, _ := SplitMain.GenerateTxInfo()
+	data.TxInfo = tx
 	return nil
+
+	// USE THIS AS TEMPLATE
+	// sp := c.handler.serviceProvider
+	// ec := sp.GetEthClient()
+	// res := sp.GetResources()
+	// txMgr := sp.GetTransactionManager()
+
+	// vault, err := swcommon.NewStakewiseVault(res.Vault, ec, txMgr)
+	// if err != nil {
+	// 	return fmt.Errorf("error creating Stakewise Vault binding: %w", err)
+	// }
+
+	// data.TxInfo, err = vault.SetDepositDataRoot(c.root, opts)
+	// if err != nil {
+	// 	return fmt.Errorf("error creating SetDepositDataRoot TX: %w", err)
+	// }
+	// return nil
 }
