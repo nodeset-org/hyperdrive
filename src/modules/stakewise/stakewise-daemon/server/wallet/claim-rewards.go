@@ -18,7 +18,7 @@ import (
 // ===============
 
 type walletClaimRewardsContextFactory struct {
-	handler WalletHandler
+	handler *WalletHandler
 }
 
 func (f *walletClaimRewardsContextFactory) Create(args url.Values) (*walletClaimRewardsContext, error) {
@@ -44,7 +44,7 @@ const SplitMainAddress = "0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"
 // ===============
 
 type walletClaimRewardsContext struct {
-	handler WalletHandler
+	handler *WalletHandler
 	// address common.Address
 }
 
