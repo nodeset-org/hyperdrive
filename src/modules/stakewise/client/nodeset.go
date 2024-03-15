@@ -1,6 +1,8 @@
 package swclient
 
 import (
+	"strconv"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/client"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
@@ -36,6 +38,9 @@ func (r *NodesetRequester) SetValidatorsRoot(root common.Hash) (*api.ApiResponse
 }
 
 // Upload the aggregated deposit data file to NodeSet's servers
-func (r *NodesetRequester) UploadDepositData() (*api.ApiResponse[swapi.NodesetUploadDepositDataData], error) {
-	return client.SendGetRequest[swapi.NodesetUploadDepositDataData](r, "upload-deposit-data", "UploadDepositData", nil)
+func (r *NodesetRequester) UploadDepositData(bypassBalanceCheck bool) (*api.ApiResponse[swapi.NodesetUploadDepositDataData], error) {
+	args := map[string]string{
+		"bypassBalanceCheck": strconv.FormatBool(bypassBalanceCheck),
+	}
+	return client.SendGetRequest[swapi.NodesetUploadDepositDataData](r, "upload-deposit-data", "UploadDepositData", args)
 }
