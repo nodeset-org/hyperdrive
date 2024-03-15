@@ -58,19 +58,9 @@ func NewSplitMain(address common.Address, ec eth.IExecutionClient, txMgr *eth.Tr
 // === Calls ===
 // =============
 
-// Get the current validators root in the contracts
-// func (c *SplitMain) GetValidatorsRoot(mc *batch.MultiCaller, out *common.Hash) {
-// 	eth.AddCallToMulicaller(mc, c.contract, out, "validatorsRoot")
-// }
-
 // ====================
 // === Transactions ===
 // ====================
-
-// Set the validator deposit data root for the vault
-// func (c *SplitMain) SetDepositDataRoot(dataRoot common.Hash, opts *bind.TransactOpts) (*eth.TransactionInfo, error) {
-// 	return c.txMgr.CreateTransactionInfo(c.contract, "setValidatorsRoot", opts, dataRoot)
-// }
 
 func (c *SplitMain) SetWithdraw(address common.Address, opts *bind.TransactOpts) (*eth.TransactionInfo, error) {
 	return c.txMgr.CreateTransactionInfo(c.contract, "withdraw", opts, address, big.NewInt(0), []common.Address{})
