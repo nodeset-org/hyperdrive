@@ -206,26 +206,3 @@ func (w *Wallet) saveData() error {
 	}
 	return nil
 }
-
-func (w *Wallet) GetAddress() (string, error) {
-	if w.data.NextAccount == 0 {
-		return "", fmt.Errorf("no validator keys have been generated yet")
-	}
-
-	// Assuming the last account index is the current one
-	currentAccountIndex := w.data.NextAccount - 1
-	path := fmt.Sprintf(types.StakewiseValidatorPath, currentAccountIndex)
-
-	// Assuming a method exists to fetch the public key or address directly
-	// This part of the code is hypothetical and needs to be adapted based on the actual implementation
-	publicKey, err := w.validatorManager.GetPublicKey(path)
-	if err != nil {
-		return "", fmt.Errorf("error fetching public key for account index %d: %w", currentAccountIndex, err)
-	}
-
-	// Convert the public key to an Ethereum address
-	// This conversion process is dependent on the specific implementation and Ethereum standards
-	address := ConvertPublicKeyToEthAddress(publicKey)
-
-	return address, nil
-}
