@@ -20,13 +20,13 @@ const (
 var splitMainAbi abi.ABI
 var splitMainOnce sync.Once
 
-// Binding for Stakewise vaults
+// Binding for Splitmain
 type SplitMain struct {
 	contract *eth.Contract
 	txMgr    *eth.TransactionManager
 }
 
-// Create a new Stakewise vault instance
+// Create a new Splitmain instance
 func NewSplitMain(address common.Address, ec eth.IExecutionClient, txMgr *eth.TransactionManager) (*SplitMain, error) {
 	// Parse the ABI
 	var err error
