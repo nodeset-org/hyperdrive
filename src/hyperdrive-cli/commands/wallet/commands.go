@@ -59,17 +59,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				},
 			},
 			{
-				Name:    "claim-rewards",
-				Aliases: []string{"cr"},
-				Usage:   "Claim rewards",
-				Flags:   []cli.Flag{},
-				Action: func(c *cli.Context) error {
-					// Run
-					return claimRewards(c)
-				},
-			},
-
-			{
 				Name:    "recover",
 				Aliases: []string{"r"},
 				Usage:   "Recover a node wallet from a mnemonic phrase",

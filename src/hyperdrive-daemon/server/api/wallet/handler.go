@@ -33,7 +33,6 @@ func NewWalletHandler(serviceProvider *common.ServiceProvider) *WalletHandler {
 		&walletStatusFactory{h},
 		&walletTestRecoverContextFactory{h},
 		&walletTestSearchAndRecoverContextFactory{h},
-		&walletClaimRewardsContextFactory{h},
 	}
 	return h
 }

@@ -1,4 +1,4 @@
-package wallet
+package swwallet
 
 import (
 	"fmt"
@@ -11,9 +11,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/contract"
-	localABI "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/service/abi"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
+	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
+	localABI "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api/abi"
+	"github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api/contract"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 )
 
@@ -22,7 +22,7 @@ import (
 // ===============
 
 type walletClaimRewardsContextFactory struct {
-	handler *WalletHandler
+	handler WalletHandler
 }
 
 func (f *walletClaimRewardsContextFactory) Create(args url.Values) (*walletClaimRewardsContext, error) {
@@ -36,8 +36,8 @@ func (f *walletClaimRewardsContextFactory) Create(args url.Values) (*walletClaim
 }
 
 func (f *walletClaimRewardsContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletClaimRewardsContext, api.SuccessData](
-		router, "claim-rewards", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*walletClaimRewardsContext, api.SuccessData](
+		router, "claim-rewards", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -48,7 +48,7 @@ const SplitMainAddress = "0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"
 // ===============
 
 type walletClaimRewardsContext struct {
-	handler *WalletHandler
+	handler WalletHandler
 	// address common.Address
 }
 
@@ -78,7 +78,7 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.SuccessData, opts *bin
 		return err
 	}
 	fmt.Printf("Contract instance: %v\n", contractInstance)
-	tx, err := contractInstance.Transact(opts, "withdraw", walletAddress, big.NewInt(0), []common.Address{})
+	tx, err := contractInstance.Transact(opts, "withdraw", "0xwalletAddress", big.NewInt(0), []common.Address{})
 	if err != nil {
 		return err
 	}
