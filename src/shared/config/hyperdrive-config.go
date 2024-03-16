@@ -225,9 +225,9 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	}
 
 	// Create the subconfigs
-	cfg.LocalExecutionClient = NewLocalExecutionConfig()
+	cfg.LocalExecutionClient = NewLocalExecutionClient()
 	cfg.ExternalExecutionClient = config.NewExternalExecutionConfig()
-	cfg.LocalBeaconClient = NewLocalBeaconConfig()
+	cfg.LocalBeaconClient = NewLocalBeaconClient()
 	cfg.ExternalBeaconClient = config.NewExternalBeaconConfig()
 	cfg.Fallback = config.NewFallbackConfig()
 	cfg.Metrics = NewMetricsConfig()

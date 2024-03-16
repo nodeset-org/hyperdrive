@@ -164,7 +164,7 @@ func (cfg *HyperdriveConfig) GetEcOpenApiPorts() string {
 // Gets the max peers of the ec container
 // Used by text/template to format ec.yml
 func (cfg *HyperdriveConfig) GetEcMaxPeers() (uint16, error) {
-	if cfg.ClientMode.Value != config.ClientMode_Local {
+	if !cfg.IsLocalMode() {
 		return 0, fmt.Errorf("Execution client is external, there is no max peers")
 	}
 	return cfg.LocalExecutionClient.GetMaxPeers(), nil
@@ -173,7 +173,7 @@ func (cfg *HyperdriveConfig) GetEcMaxPeers() (uint16, error) {
 // Gets the tag of the ec container
 // Used by text/template to format ec.yml
 func (cfg *HyperdriveConfig) GetEcContainerTag() (string, error) {
-	if cfg.ClientMode.Value != config.ClientMode_Local {
+	if !cfg.IsLocalMode() {
 		return "", fmt.Errorf("Execution client is external, there is no container tag")
 	}
 	return cfg.LocalExecutionClient.GetContainerTag(), nil
@@ -181,7 +181,7 @@ func (cfg *HyperdriveConfig) GetEcContainerTag() (string, error) {
 
 // Used by text/template to format ec.yml
 func (cfg *HyperdriveConfig) GetEcAdditionalFlags() (string, error) {
-	if cfg.ClientMode.Value != config.ClientMode_Local {
+	if !cfg.IsLocalMode() {
 		return "", fmt.Errorf("Execution client is external, there are no additional flags")
 	}
 	return cfg.LocalExecutionClient.GetAdditionalFlags(), nil

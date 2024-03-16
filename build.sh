@@ -123,7 +123,7 @@ usage() {
 # Parse arguments
 while getopts "actpdslv:" FLAG; do
     case "$FLAG" in
-        a) CLI=true DISTRO=true PACKAGES=true SW_DAEMON=true DAEMON=true MANIFEST=true LATEST=true ;;
+        a) CLI=true DISTRO=true PACKAGES=true DAEMON=true SW_DAEMON=true ;;
         c) CLI=true ;;
         t) DISTRO=true ;;
         p) PACKAGES=true ;;
