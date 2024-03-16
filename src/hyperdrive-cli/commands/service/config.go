@@ -78,7 +78,7 @@ func configureService(c *cli.Context) error {
 		prefix := fmt.Sprint(md.PreviousConfig.Hyperdrive.ProjectName.Value)
 		if md.ChangeNetworks {
 			// Remove the checkpoint sync provider
-			md.Config.Hyperdrive.LocalBeaconConfig.CheckpointSyncProvider.Value = ""
+			md.Config.Hyperdrive.LocalBeaconClient.CheckpointSyncProvider.Value = ""
 			err = hd.SaveConfig(md.Config)
 			if err != nil {
 				return fmt.Errorf("error saving config: %w", err)

@@ -17,7 +17,7 @@ import (
 func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.SimulationResult) (*big.Int, *big.Int, error) {
 	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
-		return nil, nil, fmt.Errorf("Error getting Hyperdrive configuration: %w", err)
+		return nil, nil, fmt.Errorf("error getting Hyperdrive configuration: %w", err)
 	}
 	if isNew {
 		return nil, nil, fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
@@ -32,7 +32,7 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 		maxPriorityFee := eth.GweiToWei(cfg.Hyperdrive.MaxPriorityFee.Value)
 		if maxPriorityFee == nil || maxPriorityFee.Uint64() == 0 {
 			defaultFee := cfg.Hyperdrive.MaxPriorityFee.Default[cfg.Hyperdrive.Network.Value]
-			fmt.Printf("%sNOTE: max priority fee not set or set to 0, defaulting to %d gwei%s\n", terminal.ColorYellow, defaultFee, terminal.ColorReset)
+			fmt.Printf("%sNOTE: max priority fee not set or set to 0, defaulting to %.4f gwei%s\n", terminal.ColorYellow, defaultFee, terminal.ColorReset)
 			maxPriorityFeeGwei = defaultFee
 		} else {
 			maxPriorityFeeGwei = eth.WeiToGwei(maxPriorityFee)

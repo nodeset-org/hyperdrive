@@ -136,7 +136,7 @@ func setDefaultPaths() {
 	// Get the home directory
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Printf("Cannot get user's home directory: %w\n", err)
+		fmt.Printf("Cannot get user's home directory: %s\n", err.Error())
 		os.Exit(1)
 	}
 

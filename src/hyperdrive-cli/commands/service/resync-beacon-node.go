@@ -34,7 +34,7 @@ func resyncBeaconNode(c *cli.Context) error {
 	}
 
 	// Get the current checkpoint sync URL
-	checkpointSyncUrl := cfg.Hyperdrive.LocalBeaconConfig.CheckpointSyncProvider.Value
+	checkpointSyncUrl := cfg.Hyperdrive.LocalBeaconClient.CheckpointSyncProvider.Value
 	if checkpointSyncUrl == "" {
 		fmt.Printf("%sYou do not have a checkpoint sync provider configured.\nIf you have active validators, they %swill be considered offline and will lose ETH%s%s until your Beacon Node finishes syncing.\nWe strongly recommend you configure a checkpoint sync provider with `hyperdrive service config` so it syncs instantly before running this.%s\n\n", terminal.ColorRed, terminal.ColorBold, terminal.ColorReset, terminal.ColorRed, terminal.ColorReset)
 	} else {

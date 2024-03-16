@@ -24,7 +24,6 @@ func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClien
 		Utils:   NewUtilsRequester(context),
 		Wallet:  NewWalletRequester(context),
 	}
-
 	return client
 }
 

@@ -123,19 +123,19 @@ func (c *GlobalConfig) Validate() []string {
 
 	// Ensure the selected port numbers are unique. Keeps track of all the errors
 	portMap := make(map[uint16]bool)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconConfig.HttpPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconConfig.P2pPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionConfig.HttpPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionConfig.WebsocketPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionConfig.EnginePort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionConfig.P2pPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.HttpPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.P2pPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.HttpPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.WebsocketPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.EnginePort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.P2pPort, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.EcMetricsPort, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.BnMetricsPort, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.Prometheus.Port, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.ExporterMetricsPort, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.Grafana.Port, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.DaemonMetricsPort, errors)
-	_, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconConfig.Lighthouse.P2pQuicPort, errors)
+	_, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.Lighthouse.P2pQuicPort, errors)
 
 	return errors
 }

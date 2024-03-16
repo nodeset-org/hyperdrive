@@ -17,7 +17,7 @@ type settingsHome struct {
 	hyperdrivePage   *HyperdriveConfigPage
 	ecPage           *ExecutionConfigPage
 	fallbackPage     *FallbackConfigPage
-	ccPage           *BeaconConfigPage
+	bnPage           *BeaconConfigPage
 	metricsPage      *MetricsConfigPage
 	modulesPage      *ModulesPage
 	categoryList     *tview.List
@@ -39,14 +39,14 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 	// Create the settings subpages
 	home.hyperdrivePage = NewHyperdriveConfigPage(home)
 	home.ecPage = NewExecutionConfigPage(home)
-	home.ccPage = NewBeaconConfigPage(home)
+	home.bnPage = NewBeaconConfigPage(home)
 	home.fallbackPage = NewFallbackConfigPage(home)
 	home.metricsPage = NewMetricsConfigPage(home)
 	home.modulesPage = NewModulesPage(home)
 	settingsSubpages := []settingsPage{
 		home.hyperdrivePage,
 		home.ecPage,
-		home.ccPage,
+		home.bnPage,
 		home.fallbackPage,
 		home.metricsPage,
 		home.modulesPage,
@@ -214,8 +214,8 @@ func (home *settingsHome) refresh() {
 		home.ecPage.layout.refresh()
 	}
 
-	if home.ccPage != nil {
-		home.ccPage.layout.refresh()
+	if home.bnPage != nil {
+		home.bnPage.layout.refresh()
 	}
 
 	if home.fallbackPage != nil {

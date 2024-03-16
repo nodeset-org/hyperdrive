@@ -20,7 +20,6 @@ type standardLayout struct {
 
 // Creates a new StandardLayout instance, which includes the grid and description box preconstructed.
 func newStandardLayout() *standardLayout {
-
 	// Create the main display grid
 	grid := tview.NewGrid().
 		SetColumns(-5, 2, -3).
@@ -42,13 +41,11 @@ func newStandardLayout() *standardLayout {
 		grid:           grid,
 		descriptionBox: descriptionBox,
 	}
-
 }
 
 // Sets the main content (the box on the left side of the screen) for this layout,
 // applying the default styles to it.
 func (layout *standardLayout) setContent(content tview.Primitive, contentBox *tview.Box, title string) {
-
 	// Set the standard properties for the content (border and title)
 	contentBox.SetBorder(true)
 	contentBox.SetBorderPadding(1, 1, 1, 1)
@@ -61,7 +58,6 @@ func (layout *standardLayout) setContent(content tview.Primitive, contentBox *tv
 
 // Sets the footer for this layout.
 func (layout *standardLayout) setFooter(footer tview.Primitive, height int) {
-
 	if footer == nil {
 		layout.grid.SetRows(0, 1)
 	} else {
@@ -70,12 +66,10 @@ func (layout *standardLayout) setFooter(footer tview.Primitive, height int) {
 		layout.grid.SetRows(0, 1, height)
 		layout.grid.AddItem(footer, 2, 0, 1, 3, 0, 0, false)
 	}
-
 }
 
 // Create a standard form for this layout (for settings pages)
 func (layout *standardLayout) createForm(networkParam *config.Parameter[config.Network], title string) {
-
 	layout.parameters = map[tview.FormItem]*parameterizedFormItem{}
 
 	// Create the form
@@ -104,7 +98,6 @@ func (layout *standardLayout) createForm(networkParam *config.Parameter[config.N
 
 // Refreshes all of the form items to show the current configured values
 func (layout *standardLayout) refresh() {
-
 	for i := 0; i < layout.form.GetFormItemCount(); i++ {
 		formItem := layout.form.GetFormItem(i)
 		param := layout.parameters[formItem].parameter
@@ -128,12 +121,10 @@ func (layout *standardLayout) refresh() {
 
 	// Focus the first element
 	layout.form.SetFocus(0)
-
 }
 
 // Create the footer, including the nav bar
 func (layout *standardLayout) createSettingFooter() {
-
 	// Nav bar
 	navString1 := "Arrow keys: Navigate   Space/Enter: Change Setting"
 	navTextView1 := tview.NewTextView().
@@ -163,7 +154,6 @@ func (layout *standardLayout) createSettingFooter() {
 			1, 1, false)
 
 	layout.setFooter(navBar, 2)
-
 }
 
 // Add a collection of form items to this layout's form
@@ -176,7 +166,6 @@ func (layout *standardLayout) addFormItems(params []*parameterizedFormItem) {
 // Add a collection of "common" and "specific" form items to this layout's form, where some of the common
 // items may not be valid and should be excluded
 func (layout *standardLayout) addFormItemsWithCommonParams(commonParams []*parameterizedFormItem, specificParams []*parameterizedFormItem, unsupportedCommonParams []string) {
-
 	// Add the common params if they aren't in the unsupported list
 	for _, commonParam := range commonParams {
 		isSupported := true
@@ -198,7 +187,6 @@ func (layout *standardLayout) addFormItemsWithCommonParams(commonParams []*param
 	for _, specificParam := range specificParams {
 		layout.form.AddFormItem(specificParam.item)
 	}
-
 }
 
 func (layout *standardLayout) mapParameterizedFormItems(params ...*parameterizedFormItem) {

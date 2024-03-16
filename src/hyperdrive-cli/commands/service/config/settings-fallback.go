@@ -19,7 +19,6 @@ type FallbackConfigPage struct {
 
 // Creates a new page for the fallback client settings
 func NewFallbackConfigPage(home *settingsHome) *FallbackConfigPage {
-
 	configPage := &FallbackConfigPage{
 		home:         home,
 		masterConfig: home.md.Config,
@@ -35,7 +34,6 @@ func NewFallbackConfigPage(home *settingsHome) *FallbackConfigPage {
 	)
 
 	return configPage
-
 }
 
 // Get the underlying page
@@ -45,7 +43,6 @@ func (configPage *FallbackConfigPage) getPage() *page {
 
 // Creates the content for the fallback client settings page
 func (configPage *FallbackConfigPage) createContent() {
-
 	// Create the layout
 	configPage.layout = newStandardLayout()
 	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Fallback Client Settings")

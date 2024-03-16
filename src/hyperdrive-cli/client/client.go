@@ -21,8 +21,6 @@ const (
 
 	SettingsFile       string = "user-settings.yml"
 	BackupSettingsFile string = "user-settings-backup.yml"
-
-	nethermindAdminUrl string = "http://127.0.0.1:7434"
 )
 
 // Hyperdrive client
@@ -44,11 +42,11 @@ type StakewiseClient struct {
 // Only use this function from commands that may work if the Daemon service doesn't exist
 // Most users should call NewHyperdriveClientFromCtx(c).WithStatus() or NewHyperdriveClientFromCtx(c).WithReady()
 func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
-	snCtx := context.GetHyperdriveContext(c)
-	socketPath := filepath.Join(snCtx.ConfigPath, config.HyperdriveSocketFilename)
+	hdCtx := context.GetHyperdriveContext(c)
+	socketPath := filepath.Join(hdCtx.ConfigPath, config.HyperdriveSocketFilename)
 	client := &HyperdriveClient{
-		Api:     client.NewApiClient(config.HyperdriveDaemonRoute, socketPath, snCtx.DebugEnabled),
-		Context: snCtx,
+		Api:     client.NewApiClient(config.HyperdriveDaemonRoute, socketPath, hdCtx.DebugEnabled),
+		Context: hdCtx,
 	}
 	return client
 }
@@ -56,26 +54,13 @@ func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
 // Create new Stakewise client from CLI context without checking for sync status
 // Only use this function from commands that may work if the Daemon service doesn't exist
 func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
-	snCtx := context.GetHyperdriveContext(c)
-	socketPath := filepath.Join(snCtx.ConfigPath, swconfig.SocketFilename)
+	hdCtx := context.GetHyperdriveContext(c)
+	socketPath := filepath.Join(hdCtx.ConfigPath, swconfig.SocketFilename)
 	client := &StakewiseClient{
-		Api:     swclient.NewApiClient(swconfig.ModuleName, socketPath, snCtx.DebugEnabled),
-		Context: snCtx,
+		Api:     swclient.NewApiClient(swconfig.ModuleName, socketPath, hdCtx.DebugEnabled),
+		Context: hdCtx,
 	}
 	return client
-}
-
-// Get the Docker client
-func (c *HyperdriveClient) GetDocker() (*docker.Client, error) {
-	if c.docker == nil {
-		var err error
-		c.docker, err = docker.NewClientWithOpts(docker.WithAPIVersionNegotiation())
-		if err != nil {
-			return nil, fmt.Errorf("error creating Docker client: %w", err)
-		}
-	}
-
-	return c.docker, nil
 }
 
 // Check the status of a newly created client and return it
@@ -102,6 +87,19 @@ func (c *HyperdriveClient) WithReady() (*HyperdriveClient, error) {
 	}
 
 	return c, nil
+}
+
+// Get the Docker client
+func (c *HyperdriveClient) GetDocker() (*docker.Client, error) {
+	if c.docker == nil {
+		var err error
+		c.docker, err = docker.NewClientWithOpts(docker.WithAPIVersionNegotiation())
+		if err != nil {
+			return nil, fmt.Errorf("error creating Docker client: %w", err)
+		}
+	}
+
+	return c.docker, nil
 }
 
 // Check the status of the Execution and Beacon Node(s) and provision the API with them

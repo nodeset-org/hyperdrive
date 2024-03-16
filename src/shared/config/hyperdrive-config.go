@@ -38,12 +38,12 @@ type HyperdriveConfig struct {
 	AutoTxGasThreshold config.Parameter[float64]
 
 	// Execution client settings
-	LocalExecutionConfig    *config.LocalExecutionConfig
-	ExternalExecutionConfig *config.ExternalExecutionConfig
+	LocalExecutionClient    *config.LocalExecutionConfig
+	ExternalExecutionClient *config.ExternalExecutionConfig
 
 	// Beacon node settings
-	LocalBeaconConfig    *config.LocalBeaconConfig
-	ExternalBeaconConfig *config.ExternalBeaconConfig
+	LocalBeaconClient    *config.LocalBeaconConfig
+	ExternalBeaconClient *config.ExternalBeaconConfig
 
 	// Fallback clients
 	Fallback *config.FallbackConfig
@@ -225,10 +225,10 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	}
 
 	// Create the subconfigs
-	cfg.LocalExecutionConfig = NewLocalExecutionConfig()
-	cfg.ExternalExecutionConfig = config.NewExternalExecutionConfig()
-	cfg.LocalBeaconConfig = NewLocalBeaconConfig()
-	cfg.ExternalBeaconConfig = config.NewExternalBeaconConfig()
+	cfg.LocalExecutionClient = NewLocalExecutionConfig()
+	cfg.ExternalExecutionClient = config.NewExternalExecutionConfig()
+	cfg.LocalBeaconClient = NewLocalBeaconConfig()
+	cfg.ExternalBeaconClient = config.NewExternalBeaconConfig()
 	cfg.Fallback = config.NewFallbackConfig()
 	cfg.Metrics = NewMetricsConfig()
 
@@ -262,10 +262,10 @@ func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 func (cfg *HyperdriveConfig) GetSubconfigs() map[string]config.IConfigSection {
 	return map[string]config.IConfigSection{
 		ids.FallbackID:          cfg.Fallback,
-		ids.LocalExecutionID:    cfg.LocalExecutionConfig,
-		ids.ExternalExecutionID: cfg.ExternalExecutionConfig,
-		ids.LocalBeaconID:       cfg.LocalBeaconConfig,
-		ids.ExternalBeaconID:    cfg.ExternalBeaconConfig,
+		ids.LocalExecutionID:    cfg.LocalExecutionClient,
+		ids.ExternalExecutionID: cfg.ExternalExecutionClient,
+		ids.LocalBeaconID:       cfg.LocalBeaconClient,
+		ids.ExternalBeaconID:    cfg.ExternalBeaconClient,
 		ids.MetricsID:           cfg.Metrics,
 	}
 }

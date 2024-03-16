@@ -24,6 +24,7 @@ import (
 const (
 	debugColor                    color.Attribute = color.FgYellow
 	nethermindPruneStarterCommand string          = "DELETE_ME"
+	nethermindAdminUrl            string          = "http://127.0.0.1:7434"
 
 	templatesDir       string = "/usr/share/hyperdrive/templates"
 	overrideSourceDir  string = "/usr/share/hyperdrive/override"
@@ -388,10 +389,10 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 	// Check config
 	if cfg.Hyperdrive.ClientMode.Value == config.ClientMode_Unknown {
 		return "", fmt.Errorf("you haven't selected local or external mode for your clients yet.\nPlease run 'hyperdrive service config' before running this command")
-	} else if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value == config.ExecutionClient_Unknown {
+	} else if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalExecutionClient.ExecutionClient.Value == config.ExecutionClient_Unknown {
 		return "", errors.New("no Execution Client selected. Please run 'hyperdrive service config' before running this command")
 	}
-	if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == config.BeaconNode_Unknown {
+	if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalBeaconClient.BeaconNode.Value == config.BeaconNode_Unknown {
 		return "", errors.New("no Beacon Node selected. Please run 'hyperdrive service config' before running this command")
 	}
 

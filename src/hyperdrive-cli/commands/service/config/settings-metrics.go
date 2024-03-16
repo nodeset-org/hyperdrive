@@ -27,7 +27,6 @@ type MetricsConfigPage struct {
 
 // Creates a new page for the metrics / stats settings
 func NewMetricsConfigPage(home *settingsHome) *MetricsConfigPage {
-
 	configPage := &MetricsConfigPage{
 		home:         home,
 		masterConfig: home.md.Config,
@@ -43,7 +42,6 @@ func NewMetricsConfigPage(home *settingsHome) *MetricsConfigPage {
 	)
 
 	return configPage
-
 }
 
 // Get the underlying page
@@ -53,7 +51,6 @@ func (configPage *MetricsConfigPage) getPage() *page {
 
 // Creates the content for the monitoring / stats settings page
 func (configPage *MetricsConfigPage) createContent() {
-
 	// Create the layout
 	configPage.layout = newStandardLayout()
 	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Monitoring / Metrics Settings")
@@ -123,14 +120,17 @@ func (configPage *MetricsConfigPage) handleLayoutChanged() {
 	configPage.layout.form.AddFormItem(configPage.enableMetricsBox.item)
 
 	if configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics.Value {
-		configPage.layout.addFormItems([]*parameterizedFormItem{configPage.ecMetricsPortBox, configPage.bnMetricsPortBox, configPage.daemonMetricsPortBox, configPage.exporterMetricsPortBox})
+		if configPage.masterConfig.Hyperdrive.IsLocalMode() {
+			configPage.layout.addFormItems([]*parameterizedFormItem{configPage.ecMetricsPortBox, configPage.bnMetricsPortBox})
+		}
+		configPage.layout.addFormItems([]*parameterizedFormItem{configPage.daemonMetricsPortBox, configPage.exporterMetricsPortBox})
 		configPage.layout.addFormItems(configPage.grafanaItems)
 		configPage.layout.addFormItems(configPage.prometheusItems)
 		configPage.layout.addFormItems(configPage.exporterItems)
 	}
 
-	if configPage.masterConfig.Hyperdrive.ClientMode.Value == config.ClientMode_Local {
-		switch configPage.masterConfig.Hyperdrive.LocalBeaconConfig.BeaconNode.Value {
+	if configPage.masterConfig.Hyperdrive.IsLocalMode() {
+		switch configPage.masterConfig.Hyperdrive.LocalBeaconClient.BeaconNode.Value {
 		case config.BeaconNode_Teku, config.BeaconNode_Lighthouse, config.BeaconNode_Lodestar:
 			configPage.layout.form.AddFormItem(configPage.enableBitflyNodeMetricsBox.item)
 			if configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value {

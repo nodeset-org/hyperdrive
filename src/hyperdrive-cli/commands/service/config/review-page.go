@@ -49,10 +49,6 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 		// Add changed containers if this is an update
 		if md.isUpdate {
 			totalAffectedContainers[config.ContainerID_Daemon] = true
-
-			if newConfig.Hyperdrive.ClientMode.Value == config.ClientMode_Local && newConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value != config.ExecutionClient_Geth {
-				totalAffectedContainers[config.ContainerID_ExecutionClient] = true
-			}
 			builder.WriteString(fmt.Sprintf("Updated to Hyperdrive v%s (will affect several containers)\n\n", shared.HyperdriveVersion))
 		}
 

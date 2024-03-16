@@ -14,7 +14,6 @@ type HyperdriveConfigPage struct {
 
 // Creates a new page for the Hyperdrive settings
 func NewHyperdriveConfigPage(home *settingsHome) *HyperdriveConfigPage {
-
 	configPage := &HyperdriveConfigPage{
 		home: home,
 	}
@@ -29,7 +28,6 @@ func NewHyperdriveConfigPage(home *settingsHome) *HyperdriveConfigPage {
 	)
 
 	return configPage
-
 }
 
 // Get the underlying page

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/rocket-pool/node-manager-core/config"
 )
@@ -13,7 +12,7 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 	// Make lists of clients that good and bad
 	goodClients := []*config.ParameterOption[config.ExecutionClient]{}
 	badClients := []*config.ParameterOption[config.ExecutionClient]{}
-	for _, client := range wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Options {
+	for _, client := range wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Options {
 		if !strings.HasPrefix(client.Name, "*") {
 			goodClients = append(goodClients, client)
 		} else {
@@ -34,7 +33,7 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 	}
 
 	// Create the button names and descriptions from the config
-	clients := wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Options
+	clients := wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Options
 	clientNames := []string{"Random (Recommended)"}
 	clientDescriptions := []string{randomDesc.String()}
 	for _, client := range clients {
@@ -50,8 +49,8 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 
 		if !wiz.md.isNew {
 			var ecName string
-			for _, option := range wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Options {
-				if option.Value == wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value {
+			for _, option := range wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Options {
+				if option.Value == wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Value {
 					ecName = option.Name
 					break
 				}
@@ -73,7 +72,7 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 		} else {
 			buttonLabel = strings.TrimSpace(buttonLabel)
 			selectedClient := config.ExecutionClient_Unknown
-			for _, client := range wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Options {
+			for _, client := range wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Options {
 				if client.Name == buttonLabel {
 					selectedClient = client.Value
 					break
@@ -82,8 +81,8 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 			if selectedClient == config.ExecutionClient_Unknown {
 				panic(fmt.Sprintf("Local EC selection buttons didn't match any known clients, buttonLabel = %s\n", buttonLabel))
 			}
-			wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value = selectedClient
-			wiz.bnLocalModal.show()
+			wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Value = selectedClient
+			wiz.localBnModal.show()
 		}
 	}
 
@@ -125,11 +124,10 @@ func selectRandomEC(goodOptions []*config.ParameterOption[config.ExecutionClient
 	}
 
 	// Select a random client
-	rand.Seed(time.Now().UnixNano())
 	selectedClient := filteredClients[rand.Intn(len(filteredClients))]
-	wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value = selectedClient
+	wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Value = selectedClient
 
 	// Show the selection page
-	wiz.executionLocalRandomModal = createRandomEcStep(wiz, currentStep, totalSteps, goodOptions)
-	wiz.executionLocalRandomModal.show()
+	wiz.localEcRandomModal = createRandomEcStep(wiz, currentStep, totalSteps, goodOptions)
+	wiz.localEcRandomModal.show()
 }

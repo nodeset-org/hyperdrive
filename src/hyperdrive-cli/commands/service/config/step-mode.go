@@ -34,7 +34,7 @@ func createModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardS
 		wiz.md.Config.Hyperdrive.ClientMode.Value = modes[buttonIndex].Value
 		switch modes[buttonIndex].Value {
 		case config.ClientMode_Local:
-			wiz.ecLocalModal.show()
+			wiz.localEcModal.show()
 		case config.ClientMode_External:
 			wiz.externalEcSelectModal.show()
 		default:
