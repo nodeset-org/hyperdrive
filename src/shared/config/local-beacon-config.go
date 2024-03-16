@@ -5,8 +5,8 @@ import (
 )
 
 // Create a new LocalBeaconClient struct
-func NewLocalBeaconClient() *config.LocalBeaconClient {
-	cfg := config.NewLocalBeaconClient()
+func NewLocalBeaconClient() *config.LocalBeaconConfig {
+	cfg := config.NewLocalBeaconConfig()
 	cfg.Lighthouse.ContainerTag.Default[Network_HoleskyDev] = cfg.Lighthouse.ContainerTag.Default[config.Network_Holesky]
 	cfg.Lodestar.ContainerTag.Default[Network_HoleskyDev] = cfg.Lodestar.ContainerTag.Default[config.Network_Holesky]
 	cfg.Nimbus.ContainerTag.Default[Network_HoleskyDev] = cfg.Nimbus.ContainerTag.Default[config.Network_Holesky]
