@@ -27,7 +27,7 @@ func createExternalBnSelectStep(wiz *wizard, currentStep int, totalSteps int) *c
 	done := func(buttonIndex int, buttonLabel string) {
 		selectedClient := clients[buttonIndex].Value
 		wiz.md.Config.Hyperdrive.ExternalBeaconClient.BeaconNode.Value = selectedClient
-		switch wiz.md.Config.Hyperdrive.ExternalBeaconClient.BeaconNode.Value {
+		switch selectedClient {
 		case config.BeaconNode_Prysm:
 			wiz.externalPrysmSettingsModal.show()
 		default:
