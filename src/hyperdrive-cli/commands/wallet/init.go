@@ -96,7 +96,7 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	}
 
 	// Do a recover to verify and save the wallet
-	recoverResponse, err := hd.Api.Wallet.Recover(derivationPath, &response.Data.Mnemonic, walletIndex, password, savePassword)
+	recoverResponse, err := hd.Api.Wallet.Recover(derivationPath, response.Data.Mnemonic, walletIndex, password, savePassword)
 	if err != nil {
 		return fmt.Errorf("error saving wallet: %w", err)
 	}

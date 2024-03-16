@@ -67,7 +67,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Flags: []cli.Flag{
 					PasswordFlag,
 					mnemonicFlag,
-					skipValidatorRecoveryFlag,
 					derivationPathFlag,
 					walletIndexFlag,
 					addressFlag,
@@ -101,7 +100,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "Test recovering a node wallet without actually generating any of the node wallet or validator key files to ensure the process works as expected",
 				Flags: []cli.Flag{
 					mnemonicFlag,
-					skipValidatorRecoveryFlag,
 					derivationPathFlag,
 					walletIndexFlag,
 					addressFlag,

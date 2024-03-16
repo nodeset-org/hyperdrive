@@ -58,6 +58,7 @@ func configureService(c *cli.Context) error {
 		*/
 	}
 
+	// Run the TUI
 	app := tview.NewApplication()
 	md := cliconfig.NewMainDisplay(app, oldCfg, cfg, isNew, isUpdate)
 	err = app.Run()

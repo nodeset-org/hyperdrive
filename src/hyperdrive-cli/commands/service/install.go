@@ -74,7 +74,7 @@ func installService(c *cli.Context) error {
 	fmt.Println("")
 	fmt.Println("The Hyperdrive service was successfully installed!")
 
-	printPatchNotes(c)
+	printPatchNotes()
 
 	// Reload the config after installation
 	_, isNew, err := hd.LoadConfig()
@@ -98,8 +98,7 @@ func installService(c *cli.Context) error {
 
 // Print the latest patch notes for this release
 // TODO: get this from an external source and don't hardcode it into the CLI
-func printPatchNotes(c *cli.Context) {
-
+func printPatchNotes() {
 	fmt.Println()
 	fmt.Println(shared.Logo)
 	fmt.Printf("%s=== Hyperdrive v%s ===%s\n\n", terminal.ColorGreen, shared.HyperdriveVersion, terminal.ColorReset)

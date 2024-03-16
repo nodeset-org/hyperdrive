@@ -47,8 +47,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Update the Prometheus and Grafana config templates with the assigned ports
-	metricsEnabled := cfg.Hyperdrive.Metrics.EnableMetrics.Value
-	if metricsEnabled {
+	if cfg.Hyperdrive.Metrics.EnableMetrics.Value {
 		err := hd.UpdatePrometheusConfiguration(cfg)
 		if err != nil {
 			return err
@@ -70,7 +69,6 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		return nil
 	}
 
-	// TODO: SLASHING DELAY
 	if !c.Bool(ignoreSlashTimerFlag.Name) {
 		// Do the client swap check
 		firstRun, err := checkForValidatorChange(hd, cfg)
@@ -264,12 +262,12 @@ func checkValidatorClient(hd *client.HyperdriveClient, vcName string, newTagMap 
 	if err != nil {
 		return 0, fmt.Errorf("error getting Docker image tag for [%s]: %w", vcName, err)
 	}
-	currentVcType, err := getDockerImageName(hd, currentTag)
+	currentVcType, err := getDockerImageName(currentTag)
 	if err != nil {
 		return 0, fmt.Errorf("error parsing current Docker image tag [%s] for [%s]: %w", currentTag, vcName, err)
 	}
 	pendingTag := newTagMap[vcName]
-	pendingVcType, err := getDockerImageName(hd, pendingTag)
+	pendingVcType, err := getDockerImageName(pendingTag)
 	if err != nil {
 		return 0, fmt.Errorf("error parsing pending Docker image tag [%s] for [%s]: %w", pendingTag, vcName, err)
 	}
@@ -366,7 +364,7 @@ func getVcContainerTagParamMap(cfg *client.GlobalConfig, vcs []string) (map[stri
 }
 
 // Extract the image name from a Docker image string
-func getDockerImageName(hd *client.HyperdriveClient, image string) (string, error) {
+func getDockerImageName(image string) (string, error) {
 	// Return the empty string if the validator didn't exist (probably because this is the first time starting it up)
 	if image == "" {
 		return "", nil
@@ -375,11 +373,11 @@ func getDockerImageName(hd *client.HyperdriveClient, image string) (string, erro
 	reg := regexp.MustCompile(dockerImageRegex)
 	matches := reg.FindStringSubmatch(image)
 	if matches == nil {
-		return "", fmt.Errorf("Couldn't parse the Docker image string [%s]", image)
+		return "", fmt.Errorf("error parsing the Docker image string [%s]", image)
 	}
 	imageIndex := reg.SubexpIndex("image")
 	if imageIndex == -1 {
-		return "", fmt.Errorf("Image name not found in Docker image [%s]", image)
+		return "", fmt.Errorf("image name not found in Docker image [%s]", image)
 	}
 
 	imageName := matches[imageIndex]

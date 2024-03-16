@@ -47,11 +47,6 @@ var (
 		Aliases: []string{"m"},
 		Usage:   "The mnemonic phrase to recover the wallet from",
 	}
-	skipValidatorRecoveryFlag *cli.BoolFlag = &cli.BoolFlag{
-		Name:    "skip-validator-key-recovery",
-		Aliases: []string{"k"},
-		Usage:   "Recover the node wallet, but do not regenerate its validator keys",
-	}
 	addressFlag *cli.StringFlag = &cli.StringFlag{
 		Name:    "address",
 		Aliases: []string{"a"},

@@ -24,6 +24,12 @@ func resyncExecutionClient(c *cli.Context) error {
 		return fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
 	}
 
+	// Check the client mode
+	if !cfg.Hyperdrive.IsLocalMode() {
+		fmt.Println("You use an externally-managed Execution Client. Hyperdrive cannot resync it for you.")
+		return nil
+	}
+
 	fmt.Println("This will delete the chain data of your primary Execution client and resync it from scratch.")
 	fmt.Printf("%sYou should only do this if your Execution client has failed and can no longer start or sync properly.\nThis is meant to be a last resort.%s\n", terminal.ColorYellow, terminal.ColorReset)
 
@@ -38,7 +44,7 @@ func resyncExecutionClient(c *cli.Context) error {
 	fmt.Printf("Stopping %s...\n", executionContainerName)
 	err = hd.StopContainer(executionContainerName)
 	if err != nil {
-		fmt.Printf("%sWARNING: Stopping main Execution container failed: %s%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
+		fmt.Printf("%sWARNING: Stopping main Execution client container failed: %s%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
 	}
 
 	// Get Execution volume name

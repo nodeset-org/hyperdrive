@@ -78,22 +78,15 @@ func (r *WalletRequester) Masquerade(address common.Address) (*types.ApiResponse
 	return client.SendGetRequest[types.SuccessData](r, "masquerade", "Masquerade", args)
 }
 
-// Rebuild the validator keys associated with the wallet
-func (r *WalletRequester) Rebuild() (*types.ApiResponse[api.WalletRebuildData], error) {
-	return client.SendGetRequest[api.WalletRebuildData](r, "rebuild", "Rebuild", nil)
-}
-
 // Recover wallet
-func (r *WalletRequester) Recover(derivationPath *string, mnemonic *string, index *uint64, password string, save bool) (*types.ApiResponse[api.WalletRecoverData], error) {
+func (r *WalletRequester) Recover(derivationPath *string, mnemonic string, index *uint64, password string, save bool) (*types.ApiResponse[api.WalletRecoverData], error) {
 	args := map[string]string{
 		"password":      password,
 		"save-password": fmt.Sprint(save),
+		"mnemonic":      mnemonic,
 	}
 	if derivationPath != nil {
 		args["derivation-path"] = *derivationPath
-	}
-	if mnemonic != nil {
-		args["mnemonic"] = *mnemonic
 	}
 	if index != nil {
 		args["index"] = fmt.Sprint(*index)
@@ -112,7 +105,7 @@ func (r *WalletRequester) SearchAndRecover(mnemonic string, address common.Addre
 		"mnemonic":      mnemonic,
 		"address":       address.Hex(),
 		"password":      password,
-		"save-password": fmt.Sprint(save),
+		"save-password": strconv.FormatBool(save),
 	}
 	return client.SendGetRequest[api.WalletSearchAndRecoverData](r, "search-and-recover", "SearchAndRecover", args)
 }
@@ -139,15 +132,6 @@ func (r *WalletRequester) Status() (*types.ApiResponse[api.WalletStatusData], er
 	return client.SendGetRequest[api.WalletStatusData](r, "status", "Status", nil)
 }
 
-// Search for and recover the wallet in test-mode so none of the artifacts are saved
-func (r *WalletRequester) TestSearchAndRecover(mnemonic string, address common.Address) (*types.ApiResponse[api.WalletSearchAndRecoverData], error) {
-	args := map[string]string{
-		"mnemonic": mnemonic,
-		"address":  address.Hex(),
-	}
-	return client.SendGetRequest[api.WalletSearchAndRecoverData](r, "test-search-and-recover", "TestSearchAndRecover", args)
-}
-
 // Recover wallet in test-mode so none of the artifacts are saved
 func (r *WalletRequester) TestRecover(derivationPath *string, mnemonic string, index *uint64) (*types.ApiResponse[api.WalletRecoverData], error) {
 	args := map[string]string{
@@ -160,6 +144,15 @@ func (r *WalletRequester) TestRecover(derivationPath *string, mnemonic string, i
 		args["index"] = fmt.Sprint(*index)
 	}
 	return client.SendGetRequest[api.WalletRecoverData](r, "test-recover", "TestRecover", args)
+}
+
+// Search for and recover the wallet in test-mode so none of the artifacts are saved
+func (r *WalletRequester) TestSearchAndRecover(mnemonic string, address common.Address) (*types.ApiResponse[api.WalletSearchAndRecoverData], error) {
+	args := map[string]string{
+		"mnemonic": mnemonic,
+		"address":  address.Hex(),
+	}
+	return client.SendGetRequest[api.WalletSearchAndRecoverData](r, "test-search-and-recover", "TestSearchAndRecover", args)
 }
 
 // Sends a zero-value message with a payload
