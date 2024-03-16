@@ -66,26 +66,26 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}
 
-	beaconStatuses := make(map[beacon.ValidatorPubkey]beacon.ValidatorState)
-	nodesetStatuses := make(map[beacon.ValidatorPubkey]swapi.NodesetStatus)
+	beaconStatuses := make(map[string]beacon.ValidatorState)
+	nodesetStatuses := make(map[string]swapi.NodesetStatus)
 
 	for _, pubKey := range publicKeys {
 		status, exists := statuses[pubKey]
 		if exists {
-			beaconStatuses[pubKey] = status.Status
+			beaconStatuses[pubKey.HexWithPrefix()] = status.Status
 		}
 	}
 
 	for _, pubKey := range publicKeys {
 		switch {
 		case IsRegisteredToStakewise(pubKey, statuses):
-			nodesetStatuses[pubKey] = swapi.RegisteredToStakewise
+			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.RegisteredToStakewise
 		case IsUploadedStakewise(pubKey, statuses):
-			nodesetStatuses[pubKey] = swapi.UploadedStakewise
+			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.UploadedStakewise
 		case IsUploadedToNodeset(pubKey, statuses, registeredPubkeys):
-			nodesetStatuses[pubKey] = swapi.UploadedToNodeset
+			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.UploadedToNodeset
 		default:
-			nodesetStatuses[pubKey] = swapi.Generated
+			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.Generated
 		}
 	}
 
