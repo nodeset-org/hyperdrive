@@ -31,7 +31,7 @@ services:
       - net
     environment:
       - NETWORK={{.Hyperdrive.Network}}
-      - CC_CLIENT={{.Hyperdrive.LocalBeaconClient.BeaconNode}}
+      - CLIENT={{.Hyperdrive.LocalBeaconClient.BeaconNode}}
       - EC_HTTP_ENDPOINT={{.Hyperdrive.GetEcHttpEndpoint}}
       - EC_WS_ENDPOINT={{.Hyperdrive.GetEcWsEndpoint}}
       - EC_ENGINE_ENDPOINT=http://{{.Hyperdrive.GetExecutionHostname}}:{{.Hyperdrive.LocalExecutionClient.EnginePort}}

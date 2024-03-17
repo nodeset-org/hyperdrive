@@ -39,11 +39,11 @@ services:
       - BESU_JVM_HEAP_SIZE={{.Hyperdrive.LocalExecutionClient.Besu.JvmHeapSize}}
       {{- else if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "nethermind"}}
       - EC_CACHE_SIZE={{.Hyperdrive.LocalExecutionClient.Nethermind.CacheSize}}
-      - RP_NETHERMIND_PRUNE_MEM_SIZE={{.Hyperdrive.LocalExecutionClient.Nethermind.PruneMemSize}}
-      - RP_NETHERMIND_ADDITIONAL_MODULES={{.Hyperdrive.LocalExecutionClient.Nethermind.AdditionalModules}}
-      - RP_NETHERMIND_ADDITIONAL_URLS={{.Hyperdrive.LocalExecutionClient.Nethermind.AdditionalUrls}}
+      - HD_NETHERMIND_PRUNE_MEM_SIZE={{.Hyperdrive.LocalExecutionClient.Nethermind.PruneMemSize}}
+      - HD_NETHERMIND_ADDITIONAL_MODULES={{.Hyperdrive.LocalExecutionClient.Nethermind.AdditionalModules}}
+      - HD_NETHERMIND_ADDITIONAL_URLS={{.Hyperdrive.LocalExecutionClient.Nethermind.AdditionalUrls}}
       {{- else if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "geth"}}
-      - RP_GETH_ENABLE_PBSS={{.Hyperdrive.LocalExecutionClient.Geth.EnablePbss}}
+      - HD_GETH_ENABLE_PBSS={{.Hyperdrive.LocalExecutionClient.Geth.EnablePbss}}
       {{- end}}
     entrypoint: sh
     command: "/usr/share/hyperdrive/scripts/{{.Hyperdrive.GetEcStartScript}}"

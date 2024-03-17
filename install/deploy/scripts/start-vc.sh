@@ -29,12 +29,12 @@ fi
 
 
 # Lighthouse startup
-if [ "$CC_CLIENT" = "lighthouse" ]; then
+if [ "$CLIENT" = "lighthouse" ]; then
 
     # Set up the CC + fallback string
-    CC_URL_STRING=$CC_API_ENDPOINT
-    if [ ! -z "$FALLBACK_CC_API_ENDPOINT" ]; then
-        CC_URL_STRING="$CC_API_ENDPOINT,$FALLBACK_CC_API_ENDPOINT"
+    BN_URL_STRING=$BN_API_ENDPOINT
+    if [ ! -z "$FALLBACK_BN_API_ENDPOINT" ]; then
+        BN_URL_STRING="$BN_API_ENDPOINT,$FALLBACK_BN_API_ENDPOINT"
     fi
 
     CMD="/usr/local/bin/lighthouse validator \
@@ -42,7 +42,7 @@ if [ "$CC_CLIENT" = "lighthouse" ]; then
         --datadir /validators/lighthouse \
         --init-slashing-protection \
         --logfile-max-number 0 \
-        --beacon-nodes $CC_URL_STRING \
+        --beacon-nodes $BN_URL_STRING \
         --suggested-fee-recipient $FEE_RECIPIENT \
         $VC_ADDITIONAL_FLAGS"
 
@@ -72,22 +72,22 @@ if [ "$CC_CLIENT" = "lighthouse" ]; then
 fi
 
 # Lodestar startup
-if [ "$CC_CLIENT" = "lodestar" ]; then
+if [ "$CLIENT" = "lodestar" ]; then
 
     # Remove any lock files that were left over accidentally after an unclean shutdown
     find /validators/lodestar/validators -name voting-keystore.json.lock -delete
 
     # Set up the CC + fallback string
-    CC_URL_STRING=$CC_API_ENDPOINT
-    if [ ! -z "$FALLBACK_CC_API_ENDPOINT" ]; then
-        CC_URL_STRING="$CC_API_ENDPOINT,$FALLBACK_CC_API_ENDPOINT"
+    BN_URL_STRING=$BN_API_ENDPOINT
+    if [ ! -z "$FALLBACK_BN_API_ENDPOINT" ]; then
+        BN_URL_STRING="$BN_API_ENDPOINT,$FALLBACK_BN_API_ENDPOINT"
     fi
 
     CMD="/usr/app/node_modules/.bin/lodestar validator \
         --network $LODESTAR_NETWORK \
         --dataDir /validators/lodestar \
-        --beacon-nodes $CC_URL_STRING \
-        $FALLBACK_CC_STRING \
+        --beacon-nodes $BN_URL_STRING \
+        $FALLBACK_BN_STRING \
         --keystoresDir /validators/lodestar/validators \
         --secretsDir /validators/lodestar/secrets \
         --suggestedFeeRecipient $FEE_RECIPIENT \
@@ -115,20 +115,20 @@ fi
 
 
 # Nimbus startup
-if [ "$CC_CLIENT" = "nimbus" ]; then
+if [ "$CLIENT" = "nimbus" ]; then
 
     # Nimbus won't start unless the validator directories already exist
     mkdir -p /validators/nimbus/validators
     mkdir -p /validators/nimbus/secrets
 
     # Set up the fallback arg
-    if [ ! -z "$FALLBACK_CC_API_ENDPOINT" ]; then
-        FALLBACK_CC_ARG="--beacon-node=$FALLBACK_CC_API_ENDPOINT"
+    if [ ! -z "$FALLBACK_BN_API_ENDPOINT" ]; then
+        FALLBACK_BN_ARG="--beacon-node=$FALLBACK_BN_API_ENDPOINT"
     fi
 
     CMD="/home/user/nimbus_validator_client \
         --non-interactive \
-        --beacon-node=$CC_API_ENDPOINT $FALLBACK_CC_ARG \
+        --beacon-node=$BN_API_ENDPOINT $FALLBACK_BN_ARG \
         --data-dir=/ethclient/nimbus_vc \
         --validators-dir=/validators/nimbus/validators \
         --secrets-dir=/validators/nimbus/secrets \
@@ -152,21 +152,21 @@ fi
 
 
 # Prysm startup
-if [ "$CC_CLIENT" = "prysm" ]; then
+if [ "$CLIENT" = "prysm" ]; then
 
     # Make the Prysm dir
     mkdir -p /validators/prysm-non-hd/
 
     # Get rid of the protocol prefix
-    CC_RPC_ENDPOINT=$(echo $CC_RPC_ENDPOINT | sed -E 's/.*\:\/\/(.*)/\1/')
-    if [ ! -z "$FALLBACK_CC_RPC_ENDPOINT" ]; then
-        FALLBACK_CC_RPC_ENDPOINT=$(echo $FALLBACK_CC_RPC_ENDPOINT | sed -E 's/.*\:\/\/(.*)/\1/')
+    BN_RPC_ENDPOINT=$(echo $BN_RPC_ENDPOINT | sed -E 's/.*\:\/\/(.*)/\1/')
+    if [ ! -z "$FALLBACK_BN_RPC_ENDPOINT" ]; then
+        FALLBACK_BN_RPC_ENDPOINT=$(echo $FALLBACK_BN_RPC_ENDPOINT | sed -E 's/.*\:\/\/(.*)/\1/')
     fi
 
     # Set up the CC + fallback string
-    CC_URL_STRING=$CC_RPC_ENDPOINT
-    if [ ! -z "$FALLBACK_CC_RPC_ENDPOINT" ]; then
-        CC_URL_STRING="$CC_RPC_ENDPOINT,$FALLBACK_CC_RPC_ENDPOINT"
+    BN_URL_STRING=$BN_RPC_ENDPOINT
+    if [ ! -z "$FALLBACK_BN_RPC_ENDPOINT" ]; then
+        BN_URL_STRING="$BN_RPC_ENDPOINT,$FALLBACK_BN_RPC_ENDPOINT"
     fi
 
     CMD="/app/cmd/validator/validator \
@@ -174,7 +174,7 @@ if [ "$CC_CLIENT" = "prysm" ]; then
         $PRYSM_NETWORK \
         --wallet-dir /validators/prysm-non-hd \
         --wallet-password-file /validators/prysm-non-hd/direct/accounts/secret \
-        --beacon-rpc-provider $CC_URL_STRING \
+        --beacon-rpc-provider $BN_URL_STRING \
         --suggested-fee-recipient $FEE_RECIPIENT \
         $VC_ADDITIONAL_FLAGS"
 
@@ -203,7 +203,7 @@ fi
 
 
 # Teku startup
-if [ "$CC_CLIENT" = "teku" ]; then
+if [ "$CLIENT" = "teku" ]; then
 
     # Teku won't start unless the validator directories already exist
     mkdir -p /validators/teku/keys
@@ -213,16 +213,16 @@ if [ "$CC_CLIENT" = "teku" ]; then
     rm -f /validators/teku/keys/*.lock
 
     # Set up the CC + fallback string
-    CC_URL_STRING=$CC_API_ENDPOINT
-    if [ ! -z "$FALLBACK_CC_API_ENDPOINT" ]; then
-        CC_URL_STRING="$CC_API_ENDPOINT,$FALLBACK_CC_API_ENDPOINT"
+    BN_URL_STRING=$BN_API_ENDPOINT
+    if [ ! -z "$FALLBACK_BN_API_ENDPOINT" ]; then
+        BN_URL_STRING="$BN_API_ENDPOINT,$FALLBACK_BN_API_ENDPOINT"
     fi
 
     CMD="/opt/teku/bin/teku validator-client \
         --network=$TEKU_NETWORK \
         --data-path=/validators/teku \
         --validator-keys=/validators/teku/keys:/validators/teku/passwords \
-        --beacon-node-api-endpoints=$CC_URL_STRING \
+        --beacon-node-api-endpoints=$BN_URL_STRING \
         --validators-keystore-locking-enabled=false \
         --log-destination=CONSOLE \
         --validators-proposer-default-fee-recipient=$FEE_RECIPIENT \

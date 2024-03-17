@@ -345,12 +345,12 @@ func (cfg *HyperdriveConfig) GetBeaconHostname() (string, error) {
 	if cfg.ClientMode.Value == config.ClientMode_Local {
 		return string(config.ContainerID_BeaconNode), nil
 	}
-	ccUrl, err := url.Parse(cfg.ExternalBeaconClient.HttpUrl.Value)
+	bnUrl, err := url.Parse(cfg.ExternalBeaconClient.HttpUrl.Value)
 	if err != nil {
 		return "", fmt.Errorf("Invalid External Consensus URL %s: %w", cfg.ExternalBeaconClient.HttpUrl.Value, err)
 	}
 
-	return ccUrl.Hostname(), nil
+	return bnUrl.Hostname(), nil
 }
 
 // Used by text/template to format validator.yml
@@ -359,26 +359,24 @@ func (cfg *HyperdriveConfig) GraffitiPrefix() string {
 	identifier := ""
 	versionString := fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	if len(versionString) < 8 {
-		var ec config.ExecutionClient
-		var bn config.BeaconNode
-		if cfg.IsLocalMode() {
-			ec = cfg.LocalExecutionClient.ExecutionClient.Value
-			bn = cfg.LocalBeaconClient.BeaconNode.Value
-		} else {
-			ec = cfg.ExternalExecutionClient.ExecutionClient.Value
-			bn = cfg.ExternalBeaconClient.BeaconNode.Value
-		}
+		ecInitial := strings.ToUpper(string(cfg.GetSelectedExecutionClient())[:1])
 
-		ecInitial := strings.ToUpper(string(ec)[:1])
-
-		var ccInitial string
+		var bnInitial string
+		bn := cfg.GetSelectedBeaconNode()
 		switch bn {
 		case config.BeaconNode_Lodestar:
-			ccInitial = "S" // Lodestar is special because it conflicts with Lighthouse
+			bnInitial = "S" // Lodestar is special because it conflicts with Lighthouse
 		default:
-			ccInitial = strings.ToUpper(string(bn)[:1])
+			bnInitial = strings.ToUpper(string(bn)[:1])
 		}
-		identifier = fmt.Sprintf("-%s%s", ecInitial, ccInitial)
+
+		var modeFlag string
+		if cfg.IsLocalMode() {
+			modeFlag = "L"
+		} else {
+			modeFlag = "X"
+		}
+		identifier = fmt.Sprintf("%s%s%s", ecInitial, bnInitial, modeFlag)
 	}
 
 	return fmt.Sprintf("HD%s %s", identifier, versionString)
