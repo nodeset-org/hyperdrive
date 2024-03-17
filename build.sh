@@ -35,6 +35,7 @@ build_distro_packages() {
 
     echo -n "Building deb packages..."
     docker buildx build --rm -f install/packages/debian/package.dockerfile --output ../$VERSION --target package . || fail "Error building deb packages."
+    rm ../$VERSION/*.build ../$VERSION/*.buildinfo ../$VERSION/*.changes
     echo "done!"
 
     cd ..
