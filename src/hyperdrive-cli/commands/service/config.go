@@ -14,6 +14,14 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var (
+	configUpdateDefaultsFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "update-defaults",
+		Aliases: []string{"u"},
+		Usage:   "Certain configuration values are reset when Hyperdrive is updated, such as Docker container tags; use this flag to force that reset, even if Hyperdrive hasn't been updated",
+	}
+)
+
 // Configure the service
 func configureService(c *cli.Context) error {
 	// Get Hyperdrive client
@@ -36,7 +44,7 @@ func configureService(c *cli.Context) error {
 	// Check if this is an update
 	oldVersion := strings.TrimPrefix(cfg.Hyperdrive.Version, "v")
 	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
-	isUpdate := c.Bool(installUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
+	isUpdate := c.Bool(configUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
 
 	// For upgrades, move the config to the old one and create a new upgraded copy
 	if isUpdate {

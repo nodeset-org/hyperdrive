@@ -59,7 +59,9 @@ func createFlagsFromConfigParams(sectionName string, params []config.IParameter,
 
 // Register commands
 func RegisterCommands(app *cli.App, name string, aliases []string) {
-	configFlags := []cli.Flag{}
+	configFlags := []cli.Flag{
+		configUpdateDefaultsFlag,
+	}
 
 	// TODO: HEADLESS MODE
 	/*
@@ -92,7 +94,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					installNoDepsFlag,
 					installPathFlag,
 					installVersionFlag,
-					installUpdateDefaultsFlag,
 					installLocalFlag,
 				},
 				Action: func(c *cli.Context) error {
