@@ -54,17 +54,17 @@ func configureService(c *cli.Context) error {
 	}
 
 	// Save the config and exit in headless mode
-	if c.NumFlags() > 0 {
-		return fmt.Errorf("NYI")
-		// TODO: HEADLESS MODE
-		/*
-			err := configureHeadless(c, cfg)
-			if err != nil {
-				return fmt.Errorf("error updating config from provided arguments: %w", err)
-			}
-			return hd.SaveConfig(cfg)
-		*/
-	}
+	/*
+		if c.NumFlags() > 0 {
+			return fmt.Errorf("NYI")
+			// TODO: HEADLESS MODE
+				err := configureHeadless(c, cfg)
+				if err != nil {
+					return fmt.Errorf("error updating config from provided arguments: %w", err)
+				}
+				return hd.SaveConfig(cfg)
+		}
+	*/
 
 	// Run the TUI
 	app := tview.NewApplication()
