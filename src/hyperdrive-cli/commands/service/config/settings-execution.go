@@ -20,6 +20,7 @@ type ExecutionConfigPage struct {
 	gethItems          []*parameterizedFormItem
 	nethermindItems    []*parameterizedFormItem
 	besuItems          []*parameterizedFormItem
+	rethItems          []*parameterizedFormItem
 	externalEcItems    []*parameterizedFormItem
 }
 
@@ -80,6 +81,7 @@ func (configPage *ExecutionConfigPage) createContent() {
 	configPage.gethItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalExecutionClient.Geth.GetParameters(), configPage.layout.descriptionBox)
 	configPage.nethermindItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalExecutionClient.Nethermind.GetParameters(), configPage.layout.descriptionBox)
 	configPage.besuItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalExecutionClient.Besu.GetParameters(), configPage.layout.descriptionBox)
+	configPage.rethItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalExecutionClient.Reth.GetParameters(), configPage.layout.descriptionBox)
 	configPage.externalEcItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.ExternalExecutionClient.GetParameters(), configPage.layout.descriptionBox)
 
 	// Take the client selections out since they're done explicitly
@@ -107,6 +109,7 @@ func (configPage *ExecutionConfigPage) createContent() {
 	configPage.layout.mapParameterizedFormItems(configPage.gethItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.nethermindItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.besuItems...)
+	configPage.layout.mapParameterizedFormItems(configPage.rethItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.externalEcItems...)
 
 	// Set up the setting callbacks
@@ -167,6 +170,8 @@ func (configPage *ExecutionConfigPage) handleLocalEcChanged() {
 		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.nethermindItems, nil)
 	case config.ExecutionClient_Besu:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.besuItems, nil)
+	case config.ExecutionClient_Reth:
+		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.rethItems, nil)
 	}
 
 	configPage.layout.refresh()

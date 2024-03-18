@@ -111,7 +111,7 @@ func (c *HyperdriveClient) RemoveContainer(containerName string) error {
 	return d.ContainerRemove(context.Background(), containerName, dt.ContainerRemoveOptions{})
 }
 
-// Deletes a container
+// Deletes a volume
 func (c *HyperdriveClient) DeleteVolume(volumeName string) error {
 	d, err := c.GetDocker()
 	if err != nil {

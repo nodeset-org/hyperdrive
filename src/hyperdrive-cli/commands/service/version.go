@@ -49,6 +49,8 @@ func serviceVersion(c *cli.Context) error {
 			executionClientString = fmt.Sprintf(format, "Nethermind", cfg.Hyperdrive.LocalExecutionClient.Nethermind.ContainerTag.Value)
 		case config.ExecutionClient_Besu:
 			executionClientString = fmt.Sprintf(format, "Besu", cfg.Hyperdrive.LocalExecutionClient.Besu.ContainerTag.Value)
+		case config.ExecutionClient_Reth:
+			executionClientString = fmt.Sprintf(format, "Reth", cfg.Hyperdrive.LocalExecutionClient.Reth.ContainerTag.Value)
 		default:
 			return fmt.Errorf("unknown local execution client [%v]", ec)
 		}
@@ -82,6 +84,8 @@ func serviceVersion(c *cli.Context) error {
 			executionClientString = fmt.Sprintf(format, "Nethermind")
 		case config.ExecutionClient_Besu:
 			executionClientString = fmt.Sprintf(format, "Besu")
+		case config.ExecutionClient_Reth:
+			executionClientString = fmt.Sprintf(format, "Reth")
 		default:
 			return fmt.Errorf("unknown external Execution Client [%v]", ec)
 		}
