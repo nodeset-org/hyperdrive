@@ -138,7 +138,10 @@ func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData
 
 // Get a list of all of the pubkeys that have already been registered with NodeSet for this node
 func (c *NodesetClient) GetRegisteredValidators() ([]beacon.ValidatorPubkey, error) {
-	response, err := c.submitRequest(http.MethodGet, nil, nil, validatorsPath)
+	queryParams := map[string]string{
+		"network": c.res.NodesetNetwork,
+	}
+	response, err := c.submitRequest(http.MethodGet, nil, queryParams, validatorsPath)
 	if err != nil {
 		return nil, fmt.Errorf("error getting registered validators: %w", err)
 	}
