@@ -21,10 +21,10 @@ func getNodeStatus(c *cli.Context) error {
 	}
 
 	// TODO: Uncomment once implemented
-	// fmt.Printf("\n\nNodeset Statuses:\n")
-	// for pubKey, status := range response.Data.NodesetStatus {
-	// 	fmt.Printf("%v: %v\n", pubKey, status)
-	// }
+	fmt.Printf("\n\nNodeset Statuses:\n")
+	for pubKey, status := range response.Data.NodesetStatus {
+		fmt.Printf("%v: %v\n", pubKey, status)
+	}
 
 	return nil
 }
