@@ -50,10 +50,11 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
 	nc := sp.GetNodesetClient()
-	registeredPubkeys, err := nc.GetRegisteredValidators()
+	nodesetStatusResponse, err := nc.GetRegisteredValidators()
 	if err != nil {
-		return fmt.Errorf("error getting registered validators: %w", err)
+		return fmt.Errorf("error getting nodeset statuses: %w", err)
 	}
+	fmt.Printf("!!! Nodeset statuses: %v\n", nodesetStatusResponse)
 	privateKeys, err := w.GetAllPrivateKeys()
 	if err != nil {
 		return fmt.Errorf("error getting private keys: %w", err)
@@ -66,11 +67,11 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	if err != nil {
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}
-	nodesetStatusResponse, err := nc.GetRegisteredValidators()
-	if err != nil {
-		return fmt.Errorf("error getting nodeset statuses: %w", err)
+
+	registeredPubkeys := make([]beacon.ValidatorPubkey, 0)
+	for _, pubkeyStatus := range nodesetStatusResponse {
+		registeredPubkeys = append(registeredPubkeys, pubkeyStatus.Pubkey)
 	}
-	fmt.Printf("!!! Nodeset statuses: %v\n", nodesetStatusResponse)
 
 	beaconStatuses := make(map[string]types.ValidatorState)
 	nodesetStatuses := make(map[string]swapi.NodesetStatus)
