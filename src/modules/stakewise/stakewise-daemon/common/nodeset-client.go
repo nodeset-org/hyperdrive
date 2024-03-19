@@ -26,7 +26,7 @@ const (
 	// API paths
 	depositDataPath string = "deposit-data"
 	metaPath        string = "meta"
-	validatorsPath  string = "validators"
+	validatorsPath  string = "dev/validators"
 )
 
 // =================
