@@ -9,7 +9,6 @@ import (
 )
 
 func claimRewards(c *cli.Context) error {
-	fmt.Printf("Claiming rewards...\n")
 	hd := client.NewHyperdriveClientFromCtx(c)
 	sw := client.NewStakewiseClientFromCtx(c)
 	resp, err := sw.Api.Wallet.ClaimRewards()

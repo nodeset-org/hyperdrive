@@ -24,9 +24,7 @@ func (f *walletClaimRewardsContextFactory) Create(args url.Values) (*walletClaim
 	c := &walletClaimRewardsContext{
 		handler: f.handler,
 	}
-	// inputErrs := []error{
-	// 	server.ValidateArg("address", args, input.ValidateAddress, &c.address),
-	// }
+
 	return c, nil
 }
 
@@ -59,9 +57,9 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.TxInfoData, opts *bind
 		return fmt.Errorf("error creating Stakewise Vault binding: %w", err)
 	}
 
-	data.TxInfo, err = splitMainContract.SetWithdraw(res.Vault, opts)
+	data.TxInfo, err = splitMainContract.Withdraw(res.Vault, opts)
 	if err != nil {
-		return fmt.Errorf("error creating SetWithdraw TX: %w", err)
+		return fmt.Errorf("error creating Withdraw TX: %w", err)
 	}
 	return nil
 }

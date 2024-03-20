@@ -62,6 +62,6 @@ func NewSplitMain(address common.Address, ec eth.IExecutionClient, txMgr *eth.Tr
 // === Transactions ===
 // ====================
 
-func (c *SplitMain) SetWithdraw(address common.Address, opts *bind.TransactOpts) (*eth.TransactionInfo, error) {
+func (c *SplitMain) Withdraw(address common.Address, opts *bind.TransactOpts) (*eth.TransactionInfo, error) {
 	return c.txMgr.CreateTransactionInfo(c.contract, "withdraw", opts, address, big.NewInt(0), []common.Address{})
 }

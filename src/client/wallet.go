@@ -184,8 +184,3 @@ func (r *WalletRequester) SignTx(message []byte) (*api.ApiResponse[api.WalletSig
 	}
 	return SendGetRequest[api.WalletSignTxData](r, "sign-tx", "SignTx", args)
 }
-
-func (r *WalletRequester) ClaimRewards() (*api.ApiResponse[api.SuccessData], error) {
-	args := map[string]string{}
-	return SendGetRequest[api.SuccessData](r, "claim-rewards", "ClaimRewards", args)
-}
