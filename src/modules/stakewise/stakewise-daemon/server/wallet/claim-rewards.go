@@ -57,7 +57,7 @@ func (c *walletClaimRewardsContext) PrepareData(data *api.TxInfoData, opts *bind
 		return fmt.Errorf("error creating Stakewise Vault binding: %w", err)
 	}
 
-	data.TxInfo, err = splitMainContract.Withdraw(res.Vault, opts)
+	data.TxInfo, err = splitMainContract.Withdraw(res.Vault, *res.ClaimEthAmount, res.ClaimTokenList, opts)
 	if err != nil {
 		return fmt.Errorf("error creating Withdraw TX: %w", err)
 	}
