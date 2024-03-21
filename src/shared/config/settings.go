@@ -3,10 +3,13 @@ package config
 import "time"
 
 const (
-	EventLogInterval         int    = 1000
-	HyperdriveDaemonRoute    string = "hyperdrive"
-	HyperdriveSocketFilename string = HyperdriveDaemonRoute + ".sock"
-	ConfigFilename           string = "user-settings.yml"
+	EventLogInterval            int    = 1000
+	HyperdriveDaemonRoute       string = "hyperdrive"
+	HyperdriveApiVersion        string = "1"
+	HyperdriveApiClientRoute    string = HyperdriveDaemonRoute + "/api/v" + HyperdriveApiVersion
+	HyperdriveCliSocketFilename string = HyperdriveDaemonRoute + "-cli.sock"
+	HyperdriveNetSocketFilename string = HyperdriveDaemonRoute + "-net.sock"
+	ConfigFilename              string = "user-settings.yml"
 
 	// Wallet
 	UserAddressFilename    string = "address"

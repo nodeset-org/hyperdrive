@@ -7,6 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
+	"github.com/rocket-pool/node-manager-core/utils"
 	"github.com/rocket-pool/node-manager-core/utils/log"
 )
 
@@ -14,9 +15,7 @@ import (
 const (
 	tasksInterval time.Duration = time.Minute * 5
 	taskCooldown  time.Duration = time.Second * 10
-)
 
-const (
 	ErrorColor             = color.FgRed
 	WarningColor           = color.FgYellow
 	UpdateDepositDataColor = color.FgHiWhite
@@ -54,7 +53,7 @@ func (t *TaskLoop) Run() error {
 			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
 			if err != nil {
 				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
+				if utils.SleepWithCancel(t.ctx, taskCooldown) {
 					break
 				}
 				continue
@@ -64,7 +63,7 @@ func (t *TaskLoop) Run() error {
 			err = t.sp.WaitBeaconClientSynced(t.ctx, false) // Force refresh the primary / fallback BC status
 			if err != nil {
 				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
+				if utils.SleepWithCancel(t.ctx, taskCooldown) {
 					break
 				}
 				continue
@@ -72,7 +71,7 @@ func (t *TaskLoop) Run() error {
 
 			// Tasks go here
 
-			if t.sleepAndCheckIfCancelled(tasksInterval) {
+			if utils.SleepWithCancel(t.ctx, tasksInterval) {
 				break
 			}
 		}
@@ -97,18 +96,4 @@ func (t *TaskLoop) Run() error {
 
 func (t *TaskLoop) Stop() {
 	t.cancel()
-}
-
-func (t *TaskLoop) sleepAndCheckIfCancelled(duration time.Duration) bool {
-	timer := time.NewTimer(duration)
-	select {
-	case <-t.ctx.Done():
-		// Cancel occurred
-		timer.Stop()
-		return true
-
-	case <-timer.C:
-		// Duration has passed without a cancel
-		return false
-	}
 }

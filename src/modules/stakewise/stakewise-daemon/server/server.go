@@ -18,14 +18,14 @@ type StakewiseServer struct {
 }
 
 func NewStakewiseServer(sp *swcommon.StakewiseServiceProvider) (*StakewiseServer, error) {
-	socketPath := filepath.Join(sp.GetUserDir(), swconfig.SocketFilename)
+	socketPath := filepath.Join(sp.GetUserDir(), swconfig.CliSocketFilename)
 	handlers := []server.IHandler{
 		swnodeset.NewNodesetHandler(sp),
 		swvalidator.NewValidatorHandler(sp),
 		swwallet.NewWalletHandler(sp),
 		swstatus.NewStatusHandler(sp),
 	}
-	server, err := server.NewApiServer(socketPath, handlers, swconfig.ModuleName)
+	server, err := server.NewApiServer(socketPath, handlers, swconfig.DaemonBaseRoute, swconfig.ApiVersion)
 	if err != nil {
 		return nil, err
 	}

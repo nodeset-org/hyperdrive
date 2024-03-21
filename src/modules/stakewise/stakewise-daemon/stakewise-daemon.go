@@ -56,7 +56,7 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 		// Get the config file
 		moduleDir := c.String(moduleDirFlag.Name)
-		hyperdriveSocketPath := filepath.Join(moduleDir, config.HyperdriveSocketFilename)
+		hyperdriveSocketPath := filepath.Join(moduleDir, config.HyperdriveCliSocketFilename)
 		_, err := os.Stat(hyperdriveSocketPath)
 		if errors.Is(err, fs.ErrNotExist) {
 			fmt.Printf("Hyperdrive socket not found at [%s].", hyperdriveSocketPath)

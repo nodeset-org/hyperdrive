@@ -43,9 +43,9 @@ type StakewiseClient struct {
 // Most users should call NewHyperdriveClientFromCtx(c).WithStatus() or NewHyperdriveClientFromCtx(c).WithReady()
 func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
 	hdCtx := context.GetHyperdriveContext(c)
-	socketPath := filepath.Join(hdCtx.ConfigPath, config.HyperdriveSocketFilename)
+	socketPath := filepath.Join(hdCtx.ConfigPath, config.HyperdriveCliSocketFilename)
 	client := &HyperdriveClient{
-		Api:     client.NewApiClient(config.HyperdriveDaemonRoute, socketPath, hdCtx.DebugEnabled),
+		Api:     client.NewApiClient(config.HyperdriveApiClientRoute, socketPath, hdCtx.DebugEnabled),
 		Context: hdCtx,
 	}
 	return client
@@ -55,9 +55,9 @@ func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
 // Only use this function from commands that may work if the Daemon service doesn't exist
 func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
 	hdCtx := context.GetHyperdriveContext(c)
-	socketPath := filepath.Join(hdCtx.ConfigPath, swconfig.SocketFilename)
+	socketPath := filepath.Join(hdCtx.ConfigPath, swconfig.CliSocketFilename)
 	client := &StakewiseClient{
-		Api:     swclient.NewApiClient(swconfig.ModuleName, socketPath, hdCtx.DebugEnabled),
+		Api:     swclient.NewApiClient(swconfig.ApiClientRoute, socketPath, hdCtx.DebugEnabled),
 		Context: hdCtx,
 	}
 	return client

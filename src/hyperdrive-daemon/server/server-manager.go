@@ -41,7 +41,7 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 	}
 
 	// Start the CLI server
-	cliSocketPath := filepath.Join(sp.GetUserDir(), config.HyperdriveSocketFilename)
+	cliSocketPath := filepath.Join(sp.GetUserDir(), config.HyperdriveCliSocketFilename)
 	cliServer, err := createServer(sp, cliSocketPath)
 	if err != nil {
 		return nil, fmt.Errorf("error creating CLI server: %w", err)
@@ -56,7 +56,7 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 	// Handle each module server
 	for _, module := range moduleNames {
 		modulesDir := filepath.Join(sp.GetConfig().UserDataPath.Value, config.ModulesName)
-		moduleSocketPath := filepath.Join(modulesDir, module, config.HyperdriveSocketFilename)
+		moduleSocketPath := filepath.Join(modulesDir, module, config.HyperdriveCliSocketFilename)
 		server, err := createServer(sp, moduleSocketPath)
 		if err != nil {
 			return nil, fmt.Errorf("error creating server for module [%s]: %w", module, err)
@@ -98,7 +98,7 @@ func createServer(sp *common.ServiceProvider, socketPath string) (*server.ApiSer
 		wallet.NewWalletHandler(sp),
 	}
 
-	server, err := server.NewApiServer(socketPath, handlers, config.HyperdriveDaemonRoute)
+	server, err := server.NewApiServer(socketPath, handlers, config.HyperdriveDaemonRoute, config.HyperdriveApiVersion)
 	if err != nil {
 		return nil, err
 	}

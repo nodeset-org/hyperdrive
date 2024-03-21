@@ -42,8 +42,8 @@ type ServiceProvider struct {
 // Creates a new ServiceProvider instance
 func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, moduleName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, clientTimeout time.Duration) (*ServiceProvider, error) {
 	// Create a client for the Hyperdrive daemon
-	hyperdriveSocket := filepath.Join(moduleDir, hdconfig.HyperdriveSocketFilename)
-	hdClient := client.NewApiClient(hdconfig.HyperdriveDaemonRoute, hyperdriveSocket, false)
+	hyperdriveSocket := filepath.Join(moduleDir, hdconfig.HyperdriveCliSocketFilename)
+	hdClient := client.NewApiClient(hdconfig.HyperdriveApiClientRoute, hyperdriveSocket, false)
 
 	// Get the Hyperdrive config
 	hdCfg := hdconfig.NewHyperdriveConfig("")
