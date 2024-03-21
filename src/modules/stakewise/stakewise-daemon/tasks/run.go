@@ -18,6 +18,7 @@ const (
 	ErrorColor             = color.FgRed
 	WarningColor           = color.FgYellow
 	UpdateDepositDataColor = color.FgHiWhite
+	SendExitDataColor      = color.FgGreen
 )
 
 type TaskLoop struct {
@@ -83,6 +84,44 @@ func (t *TaskLoop) Run() error {
 	}()
 
 	// Initialize send exit data to Nodeset task
+	sendExitData := NewSendExitData(t.sp, log.NewColorLogger(SendExitDataColor))
+	// Run the loop
+	go func() {
+		for {
+			// Check the EC status
+			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
+			if err != nil {
+				errorLog.Println(err)
+				if t.sleepAndCheckIfCancelled(taskCooldown) {
+					break
+				}
+				continue
+			}
+
+			// Check the BC status
+			err = t.sp.WaitBeaconClientSynced(t.ctx, false) // Force refresh the primary / fallback BC status
+			if err != nil {
+				errorLog.Println(err)
+				if t.sleepAndCheckIfCancelled(taskCooldown) {
+					break
+				}
+				continue
+			}
+
+			// Update deposit data from the NodeSet server
+			if err := sendExitData.Run(); err != nil {
+				errorLog.Println(err)
+			}
+			// time.Sleep(taskCooldown)
+
+			if t.sleepAndCheckIfCancelled(tasksInterval) {
+				break
+			}
+		}
+
+		// Signal the task loop is done
+		t.wg.Done()
+	}()
 
 	/*
 		// Run metrics loop
