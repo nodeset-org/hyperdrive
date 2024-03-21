@@ -59,7 +59,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					return InitWallet(c, nil)
 				},
 			},
-
 			{
 				Name:    "recover",
 				Aliases: []string{"r"},

@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 	duserver "github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	swcontracts "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common/contracts"
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/rocket-pool/node-manager-core/utils/input"
@@ -54,7 +54,7 @@ func (c *nodesetSetValidatorsRootContext) PrepareData(data *types.TxInfoData, op
 	res := sp.GetResources()
 	txMgr := sp.GetTransactionManager()
 
-	vault, err := swcommon.NewStakewiseVault(res.Vault, ec, txMgr)
+	vault, err := swcontracts.NewStakewiseVault(res.Vault, ec, txMgr)
 	if err != nil {
 		return fmt.Errorf("error creating Stakewise Vault binding: %w", err)
 	}

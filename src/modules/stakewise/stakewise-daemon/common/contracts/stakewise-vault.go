@@ -1,4 +1,4 @@
-package swcommon
+package swcontracts
 
 import (
 	"fmt"
