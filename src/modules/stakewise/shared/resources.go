@@ -2,6 +2,7 @@ package swshared
 
 import (
 	"fmt"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/shared/config"
@@ -26,6 +27,15 @@ type StakewiseResources struct {
 
 	// The string to put in requests for the network param
 	NodesetNetwork string
+
+	// The address of the SplitMain contract
+	Splitmain common.Address
+
+	// The amount of ETH to claim
+	ClaimEthAmount *big.Int
+
+	// The list of token addresses to claim
+	ClaimTokenList []common.Address
 }
 
 // Creates a new resource collection for the given network
@@ -38,6 +48,9 @@ func NewStakewiseResources(network config.Network) *StakewiseResources {
 		GenesisForkVersion: common.FromHex("0x00000000"), // https://github.com/eth-clients/eth2-networks/tree/master/shared/mainnet#genesis-information
 		NodesetApiUrl:      "",
 		NodesetNetwork:     "mainnet",
+		Splitmain:          common.HexToAddress(""),
+		ClaimEthAmount:     big.NewInt(0),      // 0 => claim all
+		ClaimTokenList:     []common.Address{}, // TODO: Get list from Wander
 	}
 
 	// Holesky
@@ -48,6 +61,9 @@ func NewStakewiseResources(network config.Network) *StakewiseResources {
 		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
 		NodesetApiUrl:      "https://staging.nodeset.io/api",
 		NodesetNetwork:     "holesky",
+		Splitmain:          common.HexToAddress("0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"),
+		ClaimEthAmount:     big.NewInt(0),      // 0 => claim all
+		ClaimTokenList:     []common.Address{}, // TODO: Get list from Wander
 	}
 
 	// Holesky Dev
@@ -58,6 +74,9 @@ func NewStakewiseResources(network config.Network) *StakewiseResources {
 		GenesisForkVersion: common.FromHex("0x01017000"), // https://github.com/eth-clients/holesky
 		NodesetApiUrl:      "https://staging.nodeset.io/api",
 		NodesetNetwork:     "holesky",
+		Splitmain:          common.HexToAddress("0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"),
+		ClaimEthAmount:     big.NewInt(0),      // 0 => claim all
+		ClaimTokenList:     []common.Address{}, // TODO: Get list from Wander
 	}
 
 	switch network {

@@ -3,6 +3,8 @@ package swtasks
 import (
 	"fmt"
 
+	swcontracts "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common/contracts"
+
 	"github.com/ethereum/go-ethereum/common"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
@@ -107,7 +109,7 @@ func (t *UpdateDepositData) verifyDepositsRoot(depositData []types.ExtendedDepos
 	t.log.Printlnf("Computed Merkle root:   %s", localRoot.Hex())
 
 	// Get the Merkle root from the vault
-	vault, err := swcommon.NewStakewiseVault(res.Vault, ec, txMgr)
+	vault, err := swcontracts.NewStakewiseVault(res.Vault, ec, txMgr)
 	if err != nil {
 		return false, fmt.Errorf("error creating Stakewise Vault binding: %w", err)
 	}

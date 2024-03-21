@@ -61,7 +61,7 @@ func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData
 	}
 	status := response.Data.WalletStatus
 	if !status.Wallet.IsLoaded {
-		return fmt.Errorf("Hyperdrive does not currently have a wallet ready")
+		return fmt.Errorf("hyperdrive does not currently have a wallet ready")
 	}
 
 	// Requirements
