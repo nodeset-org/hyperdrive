@@ -42,9 +42,8 @@ func (t *TaskLoop) Run() error {
 	// Initialize loggers
 	errorLog := log.NewColorLogger(ErrorColor)
 
-	// Initialize tasks
+	// Initialize fetch and update local deposit data task
 	updateDepositData := NewUpdateDepositData(t.sp, log.NewColorLogger(UpdateDepositDataColor))
-
 	// Run the loop
 	go func() {
 		for {
@@ -82,6 +81,8 @@ func (t *TaskLoop) Run() error {
 		// Signal the task loop is done
 		t.wg.Done()
 	}()
+
+	// Initialize send exit data to Nodeset task
 
 	/*
 		// Run metrics loop
