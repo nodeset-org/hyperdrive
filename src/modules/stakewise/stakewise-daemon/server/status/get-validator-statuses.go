@@ -50,10 +50,11 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
 	nc := sp.GetNodesetClient()
-	registeredPubkeys, err := nc.GetRegisteredValidators()
+	nodesetStatusResponse, err := nc.GetRegisteredValidators()
 	if err != nil {
-		return fmt.Errorf("error getting registered validators: %w", err)
+		return fmt.Errorf("error getting nodeset statuses: %w", err)
 	}
+	fmt.Printf("!!! Nodeset statuses: %v\n", nodesetStatusResponse)
 	privateKeys, err := w.GetAllPrivateKeys()
 	if err != nil {
 		return fmt.Errorf("error getting private keys: %w", err)
@@ -62,16 +63,21 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	if err != nil {
 		return fmt.Errorf("error getting public keys: %w", err)
 	}
-	statuses, err := bc.GetValidatorStatuses(context.Background(), publicKeys, nil)
+	statusResponse, err := bc.GetValidatorStatuses(context.Background(), publicKeys, nil)
 	if err != nil {
 		return fmt.Errorf("error getting validator statuses: %w", err)
+	}
+
+	registeredPubkeys := make([]beacon.ValidatorPubkey, 0)
+	for _, pubkeyStatus := range nodesetStatusResponse {
+		registeredPubkeys = append(registeredPubkeys, pubkeyStatus.Pubkey)
 	}
 
 	beaconStatuses := make(map[string]types.ValidatorState)
 	nodesetStatuses := make(map[string]swapi.NodesetStatus)
 
 	for _, pubKey := range publicKeys {
-		status, exists := statuses[pubKey]
+		status, exists := statusResponse[pubKey]
 		if exists {
 			beaconStatuses[pubKey.HexWithPrefix()] = status.Status
 		}
@@ -79,11 +85,11 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 
 	for _, pubKey := range publicKeys {
 		switch {
-		case IsRegisteredToStakewise(pubKey, statuses):
+		case IsRegisteredToStakewise(pubKey, statusResponse):
 			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.RegisteredToStakewise
-		case IsUploadedStakewise(pubKey, statuses):
+		case IsUploadedStakewise(pubKey, statusResponse):
 			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.UploadedStakewise
-		case IsUploadedToNodeset(pubKey, statuses, registeredPubkeys):
+		case IsUploadedToNodeset(pubKey, statusResponse, registeredPubkeys):
 			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.UploadedToNodeset
 		default:
 			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.Generated

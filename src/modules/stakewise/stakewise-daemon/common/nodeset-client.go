@@ -45,8 +45,14 @@ type DepositDataResponse struct {
 }
 
 // api/validators
+type ValidatorPubkeyStatus struct {
+	Pubkey   beacon.ValidatorPubkey `json:"pubkey"`
+	Status   string                 `json:"status"`
+	Uploaded bool                   `json:"uploaded"`
+}
+
 type ValidatorsResponse struct {
-	Data []beacon.ValidatorPubkey `json:"data"`
+	Data []ValidatorPubkeyStatus `json:"data"`
 }
 
 // ==============
@@ -116,15 +122,6 @@ func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
 	return body.Version, nil
 }
 
-func (c *NodesetClient) GetExitDataStatus(vault string) (int, error) {
-	response, err := c.submitRequest(http.MethodGet, nil, nil, "exit-data", "status")
-	if err != nil {
-		return 0, fmt.Errorf("error getting exit data status: %w", err)
-	}
-	fmt.Printf("Exit data status: %s\n", response)
-	return 0, nil
-}
-
 // Get the aggregated deposit data from the server
 func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData, error) {
 	vault := common.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
@@ -146,8 +143,11 @@ func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData
 }
 
 // Get a list of all of the pubkeys that have already been registered with NodeSet for this node
-func (c *NodesetClient) GetRegisteredValidators() ([]beacon.ValidatorPubkey, error) {
-	response, err := c.submitRequest(http.MethodGet, nil, nil, validatorsPath)
+func (c *NodesetClient) GetRegisteredValidators() ([]ValidatorPubkeyStatus, error) {
+	queryParams := map[string]string{
+		"network": c.res.NodesetNetwork,
+	}
+	response, err := c.submitRequest(http.MethodGet, nil, queryParams, validatorsPath)
 	if err != nil {
 		return nil, fmt.Errorf("error getting registered validators: %w", err)
 	}
