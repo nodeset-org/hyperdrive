@@ -25,12 +25,6 @@ if [ "$NETWORK" = "mainnet" ]; then
     PRYSM_NETWORK="--mainnet"
     TEKU_NETWORK="mainnet"
     PRYSM_GENESIS_STATE=""
-elif [ "$NETWORK" = "prater" ]; then
-    LH_NETWORK="prater"
-    LODESTAR_NETWORK="goerli"
-    NIMBUS_NETWORK="prater"
-    PRYSM_NETWORK="--prater"
-    TEKU_NETWORK="prater"
 elif [ "$NETWORK" = "holesky-dev" ]; then
     LH_NETWORK="holesky"
     LODESTAR_NETWORK="holesky"
@@ -234,6 +228,7 @@ if [ "$CLIENT" = "prysm" ]; then
         --eth1-header-req-limit 150 \
         --jwt-secret=/secrets/jwtsecret \
         --api-timeout 600 \
+        --enable-experimental-backfill \
         $BN_ADDITIONAL_FLAGS"
 
     if [ ! -z "$MEV_BOOST_URL" ]; then

@@ -5,7 +5,6 @@
 # See https://docs.docker.com/compose/extends/#adding-and-overriding-configuration
 # for more information on overriding specific parameters of docker-compose files.
 
-version: "3.7"
 services:
   {{.Hyperdrive.ExecutionClientContainerName}}:
     image: {{.Hyperdrive.GetEcContainerTag}}
@@ -37,11 +36,14 @@ services:
       {{- if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "besu"}}
       - BESU_MAX_BACK_LAYERS={{.Hyperdrive.LocalExecutionClient.Besu.MaxBackLayers}}
       - BESU_JVM_HEAP_SIZE={{.Hyperdrive.LocalExecutionClient.Besu.JvmHeapSize}}
+      - BESU_ARCHIVE_MODE={{.Hyperdrive.LocalExecutionClient.Besu.ArchiveMode}}
       {{- else if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "nethermind"}}
       - EC_CACHE_SIZE={{.Hyperdrive.LocalExecutionClient.Nethermind.CacheSize}}
       - HD_NETHERMIND_PRUNE_MEM_SIZE={{.Hyperdrive.LocalExecutionClient.Nethermind.PruneMemSize}}
       - HD_NETHERMIND_ADDITIONAL_MODULES={{.Hyperdrive.LocalExecutionClient.Nethermind.AdditionalModules}}
       - HD_NETHERMIND_ADDITIONAL_URLS={{.Hyperdrive.LocalExecutionClient.Nethermind.AdditionalUrls}}
+      - HD_NETHERMIND_FULL_PRUNE_MEMORY_BUDGET={{.Hyperdrive.LocalExecutionClient.Nethermind.FullPruneMemoryBudget}}
+      - HD_NETHERMIND_FULL_PRUNING_THRESHOLD_MB={{.Hyperdrive.LocalExecutionClient.Nethermind.FullPruningThresholdMb}}
       {{- else if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "geth"}}
       - HD_GETH_ENABLE_PBSS={{.Hyperdrive.LocalExecutionClient.Geth.EnablePbss}}
       {{- end}}

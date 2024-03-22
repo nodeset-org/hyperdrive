@@ -192,7 +192,7 @@ func (sp *ServiceProvider) waitEthClientSynced(ctx context.Context, verbose bool
 		}
 
 		// Get sync progress
-		progress, err := clientToCheck.SyncProgress(context.Background())
+		progress, err := clientToCheck.SyncProgress(ctx)
 		if err != nil {
 			return false, err
 		}
