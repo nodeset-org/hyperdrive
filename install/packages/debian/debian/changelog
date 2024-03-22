@@ -1,5 +1,12 @@
-hyperdrive (0.3.0) UNRELEASED; urgency=medium
+hyperdrive (0.4.0) UNRELEASED; urgency=medium
+
+  * Migrated to the node-manager-core
+
+ -- NodeSet LLC <info@nodeset.io>  Fri, 22 Mar 2024 02:00:21 +0000
+
+hyperdrive (0.3.0) unstable; urgency=medium
 
   * Testing release with package manager support.
+  * PLACEHOLDER
 
- -- NodeSet LLC <info@nodeset.io>  Mon, 19 Feb 2024 15:50:39 -0500
+ -- NodeSet LLC <info@nodeset.io>  Fri, 22 Mar 2024 01:59:11 +0000

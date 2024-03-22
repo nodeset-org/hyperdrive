@@ -106,7 +106,6 @@ func main() {
 			<-termListener
 			fmt.Println("Shutting down daemon...")
 			serverMgr.Stop()
-			taskLoop.Stop()
 		}()
 
 		// Run the daemon until closed

@@ -1,7 +1,6 @@
 package swnodeset
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"math/big"
@@ -59,8 +58,9 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	nc := sp.GetNodesetClient()
 	w := sp.GetWallet()
 	ec := sp.GetEthClient()
+	ctx := sp.GetContext()
 
-	balance, err := ec.BalanceAt(context.Background(), opts.From, nil)
+	balance, err := ec.BalanceAt(ctx, opts.From, nil)
 	if err != nil {
 		return fmt.Errorf("error getting balance: %w", err)
 	}

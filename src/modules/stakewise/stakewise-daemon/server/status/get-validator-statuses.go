@@ -1,7 +1,6 @@
 package swstatus
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -49,6 +48,8 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
 	nc := sp.GetNodesetClient()
+	ctx := sp.GetContext()
+
 	registeredPubkeys, err := nc.GetRegisteredValidators()
 	if err != nil {
 		return fmt.Errorf("error getting registered validators: %w", err)
@@ -61,7 +62,7 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	if err != nil {
 		return fmt.Errorf("error getting public keys: %w", err)
 	}
-	statuses, err := bc.GetValidatorStatuses(context.Background(), publicKeys, nil)
+	statuses, err := bc.GetValidatorStatuses(ctx, publicKeys, nil)
 	if err != nil {
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}

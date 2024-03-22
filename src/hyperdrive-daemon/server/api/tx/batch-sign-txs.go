@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -65,6 +64,7 @@ func (c *txBatchSignTxsContext) PrepareData(data *api.TxBatchSignTxData, opts *b
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
 	txMgr := sp.GetTransactionManager()
+	ctx := sp.GetContext()
 	nodeAddress, _ := sp.GetWallet().GetAddress()
 
 	err := errors.Join(
@@ -79,7 +79,7 @@ func (c *txBatchSignTxsContext) PrepareData(data *api.TxBatchSignTxData, opts *b
 	if c.body.FirstNonce != nil {
 		currentNonce = c.body.FirstNonce
 	} else {
-		nonce, err := ec.NonceAt(context.Background(), nodeAddress, nil)
+		nonce, err := ec.NonceAt(ctx, nodeAddress, nil)
 		if err != nil {
 			return fmt.Errorf("error getting latest nonce for node: %w", err)
 		}

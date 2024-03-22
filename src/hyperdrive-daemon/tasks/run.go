@@ -22,19 +22,16 @@ const (
 )
 
 type TaskLoop struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-	sp     *common.ServiceProvider
-	wg     *sync.WaitGroup
+	ctx context.Context
+	sp  *common.ServiceProvider
+	wg  *sync.WaitGroup
 }
 
 func NewTaskLoop(sp *common.ServiceProvider, wg *sync.WaitGroup) *TaskLoop {
-	ctx, cancel := context.WithCancel(context.Background())
 	return &TaskLoop{
-		ctx:    ctx,
-		cancel: cancel,
-		sp:     sp,
-		wg:     wg,
+		sp:  sp,
+		ctx: sp.GetContext(),
+		wg:  wg,
 	}
 }
 
@@ -47,6 +44,7 @@ func (t *TaskLoop) Run() error {
 	// Nothing here yet
 
 	// Run the loop
+	t.wg.Add(1)
 	go func() {
 		for {
 			// Check the EC status
@@ -79,7 +77,6 @@ func (t *TaskLoop) Run() error {
 		// Signal the task loop is done
 		t.wg.Done()
 	}()
-	t.wg.Add(1)
 
 	/*
 		// Run metrics loop
@@ -92,8 +89,4 @@ func (t *TaskLoop) Run() error {
 		}()
 	*/
 	return nil
-}
-
-func (t *TaskLoop) Stop() {
-	t.cancel()
 }

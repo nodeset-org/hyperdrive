@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"math/big"
@@ -64,6 +63,7 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 	ec := sp.GetEthClient()
+	ctx := sp.GetContext()
 	nodeAddress, _ := sp.GetWallet().GetAddress()
 
 	err := errors.Join(
@@ -78,7 +78,7 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 	if c.body.FirstNonce != nil {
 		currentNonce = c.body.FirstNonce
 	} else {
-		nonce, err := ec.NonceAt(context.Background(), nodeAddress, nil)
+		nonce, err := ec.NonceAt(ctx, nodeAddress, nil)
 		if err != nil {
 			return fmt.Errorf("error getting latest nonce for node: %w", err)
 		}

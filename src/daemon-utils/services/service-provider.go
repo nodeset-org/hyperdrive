@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -33,6 +34,8 @@ type ServiceProvider struct {
 	txMgr        *eth.TransactionManager
 	queryMgr     *eth.QueryManager
 	apiLogger    *log.ColorLogger
+	ctx          context.Context
+	cancel       context.CancelFunc
 
 	// Path info
 	moduleDir string
@@ -108,6 +111,9 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, mod
 	}
 	queryMgr := eth.NewQueryManager(ecManager, resources.MulticallAddress, concurrentCallLimit)
 
+	// Context for handling task cancellation during shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+
 	// Create the provider
 	provider := &ServiceProvider{
 		moduleDir:    moduleDir,
@@ -122,6 +128,8 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, mod
 		txMgr:        txMgr,
 		queryMgr:     queryMgr,
 		apiLogger:    &apiLogger,
+		ctx:          ctx,
+		cancel:       cancel,
 	}
 	return provider, nil
 }
@@ -180,4 +188,12 @@ func (p *ServiceProvider) GetApiLogger() *log.ColorLogger {
 
 func (p *ServiceProvider) IsDebugMode() bool {
 	return p.hdCfg.DebugMode.Value
+}
+
+func (p *ServiceProvider) GetContext() context.Context {
+	return p.ctx
+}
+
+func (p *ServiceProvider) CancelContextOnShutdown() {
+	p.cancel()
 }

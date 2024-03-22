@@ -115,7 +115,6 @@ func main() {
 				fmt.Printf("WARNING: daemon didn't shutdown cleanly: %s\n", err.Error())
 				stopWg.Done()
 			}
-			taskLoop.Stop()
 		}()
 
 		// Run the daemon until closed

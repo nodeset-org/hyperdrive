@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"context"
 	"fmt"
 	"net/url"
 
@@ -43,6 +42,7 @@ type utilsBalanceContext struct {
 func (c *utilsBalanceContext) PrepareData(data *api.UtilsBalanceData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
+	ctx := sp.GetContext()
 	nodeAddress, _ := sp.GetWallet().GetAddress()
 
 	// Requirements
@@ -51,7 +51,7 @@ func (c *utilsBalanceContext) PrepareData(data *api.UtilsBalanceData, opts *bind
 		return err
 	}
 
-	data.Balance, err = ec.BalanceAt(context.Background(), nodeAddress, nil)
+	data.Balance, err = ec.BalanceAt(ctx, nodeAddress, nil)
 	if err != nil {
 		return fmt.Errorf("error getting ETH balance of node %s: %w", nodeAddress.Hex(), err)
 	}

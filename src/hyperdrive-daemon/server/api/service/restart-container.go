@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"errors"
 	"net/url"
 
@@ -49,7 +48,8 @@ func (c *serviceRestartContainerContext) PrepareData(data *types.SuccessData, op
 	sp := c.handler.serviceProvider
 	cfg := sp.GetConfig()
 	d := sp.GetDocker()
+	ctx := sp.GetContext()
 
 	id := cfg.GetDockerArtifactName(c.container)
-	return d.ContainerRestart(context.Background(), id, container.StopOptions{})
+	return d.ContainerRestart(ctx, id, container.StopOptions{})
 }

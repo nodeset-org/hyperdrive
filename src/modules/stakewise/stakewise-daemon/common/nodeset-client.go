@@ -2,6 +2,7 @@ package swcommon
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -59,6 +60,7 @@ type NodesetClient struct {
 	res           *swconfig.StakewiseResources
 	debug         bool
 	authSignature []byte
+	ctx           context.Context
 }
 
 // Creates a new Nodeset client
@@ -68,6 +70,7 @@ func NewNodesetClient(sp *StakewiseServiceProvider) *NodesetClient {
 		sp:    sp,
 		res:   sp.GetResources(),
 		debug: cfg.DebugMode.Value,
+		ctx:   sp.GetContext(),
 	}
 }
 
@@ -158,7 +161,7 @@ func (c *NodesetClient) submitRequest(method string, body io.Reader, queryParams
 	if err != nil {
 		return nil, fmt.Errorf("error joining path [%v]: %w", subroutes, err)
 	}
-	request, err := http.NewRequest(method, path, body)
+	request, err := http.NewRequestWithContext(c.ctx, method, path, body)
 	if err != nil {
 		return nil, fmt.Errorf("error generating request to [%s]: %w", path, err)
 	}

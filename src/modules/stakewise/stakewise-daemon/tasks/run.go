@@ -22,19 +22,16 @@ const (
 )
 
 type TaskLoop struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-	sp     *swcommon.StakewiseServiceProvider
-	wg     *sync.WaitGroup
+	ctx context.Context
+	sp  *swcommon.StakewiseServiceProvider
+	wg  *sync.WaitGroup
 }
 
 func NewTaskLoop(sp *swcommon.StakewiseServiceProvider, wg *sync.WaitGroup) *TaskLoop {
-	ctx, cancel := context.WithCancel(context.Background())
 	return &TaskLoop{
-		ctx:    ctx,
-		cancel: cancel,
-		sp:     sp,
-		wg:     wg,
+		sp:  sp,
+		ctx: sp.GetContext(),
+		wg:  wg,
 	}
 }
 
@@ -47,6 +44,7 @@ func (t *TaskLoop) Run() error {
 	updateDepositData := NewUpdateDepositData(t.sp, log.NewColorLogger(UpdateDepositDataColor))
 
 	// Run the loop
+	t.wg.Add(1)
 	go func() {
 		for {
 			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
@@ -94,8 +92,4 @@ func (t *TaskLoop) Run() error {
 		}()
 	*/
 	return nil
-}
-
-func (t *TaskLoop) Stop() {
-	t.cancel()
 }

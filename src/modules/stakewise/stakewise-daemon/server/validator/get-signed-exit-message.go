@@ -1,7 +1,6 @@
 package swvalidator
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -64,6 +63,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 	sp := c.handler.serviceProvider
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
+	ctx := sp.GetContext()
 	data.ExitInfos = map[string]api.ValidatorExitInfo{}
 
 	if len(c.pubkeys) == 0 {
@@ -71,7 +71,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 	}
 
 	// Requirements
-	err := sp.RequireBeaconClientSynced(context.Background())
+	err := sp.RequireBeaconClientSynced(ctx)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 
 	// Get the epoch of the chain head if needed
 	if !c.isEpochSet {
-		head, err := bc.GetBeaconHead(context.Background())
+		head, err := bc.GetBeaconHead(ctx)
 		if err != nil {
 			return fmt.Errorf("error getting beacon head: %w", err)
 		}
@@ -96,12 +96,12 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 	}
 
 	// Get the BlsToExecutionChange signature domain
-	signatureDomain, err := bc.GetDomainData(context.Background(), eth2types.DomainVoluntaryExit[:], c.epoch, false)
+	signatureDomain, err := bc.GetDomainData(ctx, eth2types.DomainVoluntaryExit[:], c.epoch, false)
 	if err != nil {
 		return fmt.Errorf("error getting Beacon domain data: %w", err)
 	}
 	// Get the statuses (indices) of each validator
-	statuses, err := bc.GetValidatorStatuses(context.Background(), c.pubkeys, nil)
+	statuses, err := bc.GetValidatorStatuses(ctx, c.pubkeys, nil)
 	if err != nil {
 		return fmt.Errorf("error getting validator indices: %w", err)
 	}
@@ -122,7 +122,7 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 			Signature: signature,
 		}
 		if !c.noBroadcast {
-			err = bc.ExitValidator(context.Background(), index, c.epoch, signature)
+			err = bc.ExitValidator(ctx, index, c.epoch, signature)
 			if err != nil {
 				return fmt.Errorf("error exiting validator %s: %w", pubkey.Hex(), err)
 			}
