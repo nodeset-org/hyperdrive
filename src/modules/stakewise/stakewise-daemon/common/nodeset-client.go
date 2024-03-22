@@ -45,14 +45,14 @@ type DepositDataResponse struct {
 }
 
 // api/validators
-type ValidatorPubkeyStatus struct {
+type ValidatorStatus struct {
 	Pubkey   beacon.ValidatorPubkey `json:"pubkey"`
 	Status   string                 `json:"status"`
 	Uploaded bool                   `json:"uploaded"`
 }
 
 type ValidatorsResponse struct {
-	Data []ValidatorPubkeyStatus `json:"data"`
+	Data []ValidatorStatus `json:"data"`
 }
 
 // ==============
@@ -143,7 +143,7 @@ func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData
 }
 
 // Get a list of all of the pubkeys that have already been registered with NodeSet for this node
-func (c *NodesetClient) GetRegisteredValidators() ([]ValidatorPubkeyStatus, error) {
+func (c *NodesetClient) GetRegisteredValidators() ([]ValidatorStatus, error) {
 	queryParams := map[string]string{
 		"network": c.res.NodesetNetwork,
 	}
