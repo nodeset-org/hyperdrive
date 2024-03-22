@@ -30,6 +30,24 @@ const (
 )
 
 // =================
+// === Requests  ===
+// =================
+type ExitMessageDetails struct {
+	Epoch          string `json:"epoch"`
+	ValidatorIndex string `json:"validator_index"`
+}
+
+type ExitMessage struct {
+	Message   ExitMessageDetails `json:"message"`
+	Signature string             `json:"signature"`
+}
+
+type ExitData struct {
+	Pubkey      string      `json:"pubkey"`
+	ExitMessage ExitMessage `json:"exitMessage"`
+}
+
+// =================
 // === Responses ===
 // =================
 
@@ -99,6 +117,29 @@ func (c *NodesetClient) UploadDepositData(depositData []byte) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error uploading deposit data: %w", err)
 	}
+	return response, nil
+}
+
+// Post exit data to Nodeset
+func (c *NodesetClient) PostExitData(exitData []ExitData) ([]byte, error) {
+	// Ensure authorization signature exists
+	err := c.EnsureAuthSignatureExists()
+	if err != nil {
+		return nil, fmt.Errorf("error ensuring auth signature: %w", err)
+	}
+
+	// Serialize the exit data into JSON
+	jsonData, err := json.Marshal(exitData)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling exit data to JSON: %w", err)
+	}
+
+	// Submit the POST request with the serialized JSON
+	response, err := c.submitRequest(http.MethodPut, bytes.NewBuffer(jsonData), nil, validatorsPath)
+	if err != nil {
+		return nil, fmt.Errorf("error posting exit data: %w", err)
+	}
+
 	return response, nil
 }
 

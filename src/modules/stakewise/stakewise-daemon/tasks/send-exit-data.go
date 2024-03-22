@@ -32,7 +32,7 @@ func (t *SendExitData) Run() error {
 	w := t.sp.GetWallet()
 	// hd := t.sp.GetHyperdriveClient()
 	ns := t.sp.GetNodesetClient()
-	ddMgr := t.sp.GetDepositDataManager()
+	// ddMgr := t.sp.GetDepositDataManager()
 	// cfg := t.sp.GetModuleConfig()
 	bc := t.sp.GetBeaconClient()
 
@@ -67,10 +67,10 @@ func (t *SendExitData) Run() error {
 			if err != nil {
 				return fmt.Errorf("error getting signed exit message: %w", err)
 			}
-			// TODO: Post to Nodeset API
+			// TODO: Generate Body for Post to Nodeset API
 		}
 	}
-
+	// Post at the very end
 	fmt.Printf("Registered validators: %v\n", resp)
 	return nil
 }
