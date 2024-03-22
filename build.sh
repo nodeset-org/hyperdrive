@@ -62,12 +62,26 @@ build_install_packages() {
 build_daemon() {
     cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
 
-    # Make a multiarch builder, ignore if it's already there
-    docker buildx create --name multiarch-builder --driver docker-container --use > /dev/null 2>&1
-
-    echo "Building and pushing Docker Hyperdrive image..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile --push . || fail "Error building Hyperdrive daemon image."
+    echo "Building Hyperdrive binaries..."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/daemon-build.dockerfile --output ../$VERSION --target daemon . || fail "Error building Hyperdrive daemon binaries."
     echo "done!"
+
+    # Copy the daemon binaries to a build folder so the image can access them
+    mkdir -p ./build
+    cp ../$VERSION/linux_amd64/* ./build
+    cp ../$VERSION/linux_arm64/* ./build
+    echo "done!"
+
+    echo "Building Hyperdrive Docker image..."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile --push . || fail "Error building Hyperdrive Docker image."
+    echo "done!"
+
+    # Cleanup
+    mv ../$VERSION/linux_amd64/* ../$VERSION
+    mv ../$VERSION/linux_arm64/* ../$VERSION
+    rm -rf ../$VERSION/linux_amd64/
+    rm -rf ../$VERSION/linux_arm64/
+    rm -rf ./build
 
     cd ..
 }
@@ -78,12 +92,26 @@ build_daemon() {
 build_sw_daemon() {
     cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
 
-    # Make a multiarch builder, ignore if it's already there
-    docker buildx create --name multiarch-builder --driver docker-container --use > /dev/null 2>&1
-
-    echo "Building and pushing Docker Hyperdrive image..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-stakewise:$VERSION -f docker/modules/stakewise/sw_daemon.dockerfile --push . || fail "Error building Stakewise daemon image."
+    echo "Building Stakewise daemon binaries..."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/modules/stakewise/sw_daemon-build.dockerfile --output ../$VERSION --target daemon . || fail "Error building Stakewise daemon binaries."
     echo "done!"
+
+    # Copy the daemon binaries to a build folder so the image can access them
+    mkdir -p ./build
+    cp ../$VERSION/linux_amd64/* ./build
+    cp ../$VERSION/linux_arm64/* ./build
+    echo "done!"
+
+    echo "Building Stakewise Docker image..."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-stakewise:$VERSION -f docker/modules/stakewise/sw_daemon.dockerfile --push . || fail "Error building Stakewise Docker image."
+    echo "done!"
+
+    # Cleanup
+    mv ../$VERSION/linux_amd64/* ../$VERSION
+    mv ../$VERSION/linux_arm64/* ../$VERSION
+    rm -rf ../$VERSION/linux_amd64/
+    rm -rf ../$VERSION/linux_arm64/
+    rm -rf ./build
 
     cd ..
 }
@@ -142,6 +170,9 @@ fi
 # Cleanup old artifacts
 rm -rf ./$VERSION/*
 mkdir -p ./$VERSION
+
+# Make a multiarch builder, ignore if it's already there
+docker buildx create --name multiarch-builder --driver docker-container --use > /dev/null 2>&1
 
 # Build the artifacts
 if [ "$CLI" = true ]; then

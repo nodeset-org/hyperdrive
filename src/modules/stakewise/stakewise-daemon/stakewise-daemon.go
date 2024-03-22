@@ -110,6 +110,7 @@ func main() {
 		go func() {
 			<-termListener
 			fmt.Println("Shutting down daemon...")
+			stakewiseSp.CancelContextOnShutdown()
 			err := apiServer.Stop()
 			if err != nil {
 				fmt.Printf("WARNING: daemon didn't shutdown cleanly: %s\n", err.Error())

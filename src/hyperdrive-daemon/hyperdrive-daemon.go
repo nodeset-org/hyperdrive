@@ -105,6 +105,7 @@ func main() {
 		go func() {
 			<-termListener
 			fmt.Println("Shutting down daemon...")
+			sp.CancelContextOnShutdown()
 			serverMgr.Stop()
 		}()
 
