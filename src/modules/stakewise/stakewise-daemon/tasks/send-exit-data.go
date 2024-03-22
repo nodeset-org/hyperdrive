@@ -30,10 +30,7 @@ func NewSendExitData(sp *swcommon.StakewiseServiceProvider, logger log.ColorLogg
 func (t *SendExitData) Run() error {
 	t.log.Println("Checking Nodeset API...")
 	w := t.sp.GetWallet()
-	// hd := t.sp.GetHyperdriveClient()
 	ns := t.sp.GetNodesetClient()
-	// ddMgr := t.sp.GetDepositDataManager()
-	// cfg := t.sp.GetModuleConfig()
 	bc := t.sp.GetBeaconClient()
 
 	resp, err := ns.GetRegisteredValidators()
@@ -52,7 +49,7 @@ func (t *SendExitData) Run() error {
 
 	epoch := head.Epoch
 	signatureDomain, err := bc.GetDomainData(context.Background(), eth2types.DomainVoluntaryExit[:], epoch, false)
-
+	exitData := []swcommon.ExitData{}
 	for _, v := range resp {
 		fmt.Printf("Validator: %v\n", v)
 		if !v.Uploaded {
@@ -67,10 +64,19 @@ func (t *SendExitData) Run() error {
 			if err != nil {
 				return fmt.Errorf("error getting signed exit message: %w", err)
 			}
-			// TODO: Generate Body for Post to Nodeset API
+			exitData = append(exitData, swcommon.ExitData{
+				Pubkey: v.Pubkey.HexWithPrefix(),
+				ExitMessage: swcommon.ExitMessage{
+					Message: swcommon.ExitMessageDetails{
+						Epoch:          string(epoch),
+						ValidatorIndex: index,
+					},
+					Signature: signature.HexWithPrefix(),
+				},
+			})
 		}
 	}
-	// Post at the very end
+	ns.PostExitData(exitData)
 	fmt.Printf("Registered validators: %v\n", resp)
 	return nil
 }
