@@ -26,6 +26,10 @@ func UploadDepositData(sw *client.StakewiseClient) error {
 	}
 
 	data := response.Data
+	if len(data.NewPubkeys) == 0 {
+		fmt.Println("All of your validator keys were already registered.")
+		return nil
+	}
 	if !data.SufficientBalance {
 		// Prompt the user to upload anyway
 		fmt.Printf("You're attempting to upload %d keys, but you only have %.6f ETH in your account. We recommend you have at least %.6f ETH", data.UnregisteredKeyCount, eth.WeiToEth(data.Balance), eth.WeiToEth(data.RequiredBalance))
@@ -34,6 +38,7 @@ func UploadDepositData(sw *client.StakewiseClient) error {
 			return nil
 		}
 
+		fmt.Println("Uploading deposit data to the NodeSet server...")
 		response, err = sw.Api.Nodeset.UploadDepositData(true)
 		if err != nil {
 			printUploadError(err)
@@ -42,18 +47,13 @@ func UploadDepositData(sw *client.StakewiseClient) error {
 	}
 
 	data = response.Data
-	fmt.Println("done!")
-	if len(data.NewPubkeys) == 0 {
-		fmt.Println("All of your validator keys were already registered.")
-	} else {
-		fmt.Printf("Server returned: %s\n", string(data.ServerResponse))
-		fmt.Println()
-		fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, len(data.NewPubkeys), terminal.ColorReset)
-		for _, key := range data.NewPubkeys {
-			fmt.Println(key.HexWithPrefix())
-		}
-		fmt.Println()
+	fmt.Printf("Server returned: %s\n", string(data.ServerResponse))
+	fmt.Println()
+	fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, len(data.NewPubkeys), terminal.ColorReset)
+	for _, key := range data.NewPubkeys {
+		fmt.Println(key.HexWithPrefix())
 	}
+	fmt.Println()
 
 	fmt.Printf("Total keys registered: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
 	return nil

@@ -60,12 +60,6 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	ec := sp.GetEthClient()
 	ctx := sp.GetContext()
 
-	balance, err := ec.BalanceAt(ctx, opts.From, nil)
-	if err != nil {
-		return fmt.Errorf("error getting balance: %w", err)
-	}
-	data.Balance = balance
-
 	// Get the list of registered validators
 	registeredPubkeyMap := map[beacon.ValidatorPubkey]bool{}
 	registeredPubkeys, err := nc.GetRegisteredValidators()
@@ -103,11 +97,17 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 
 	// Make sure validator has enough funds to pay for the deposit
 	if !c.bypassBalanceCheck {
+		balance, err := ec.BalanceAt(ctx, opts.From, nil)
+		if err != nil {
+			return fmt.Errorf("error getting balance: %w", err)
+		}
+		data.Balance = balance
+
 		totalCost := big.NewInt(int64(len(unregisteredKeys)))
 		totalCost.Mul(totalCost, eth.EthToWei(0.01))
 		data.RequiredBalance = totalCost
 
-		data.SufficientBalance = (totalCost.Cmp(balance) > 0)
+		data.SufficientBalance = (totalCost.Cmp(balance) < 0)
 		if !data.SufficientBalance {
 			return nil
 		}
