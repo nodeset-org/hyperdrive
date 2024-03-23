@@ -294,7 +294,7 @@ func (c *HyperdriveClient) PurgeData(composeFiles []string) error {
 		return fmt.Errorf("error loading data path: %w", err)
 	}
 	fmt.Println("Deleting data...")
-	cmd := fmt.Sprintf("%s rm -f %s", rootCmd, dataPath)
+	cmd := fmt.Sprintf("%s rm -rf %s", rootCmd, dataPath)
 	_, err = c.readOutput(cmd)
 	if err != nil {
 		return fmt.Errorf("error deleting data: %w", err)

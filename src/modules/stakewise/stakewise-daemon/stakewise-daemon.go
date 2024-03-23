@@ -65,7 +65,6 @@ func main() {
 
 		// Wait group to handle the API server (separate because of error handling)
 		stopWg := new(sync.WaitGroup)
-		stopWg.Add(1)
 
 		// Create the service provider
 		sp, err := services.NewServiceProvider(moduleDir, swconfig.ModuleName, swconfig.NewStakewiseConfig, config.ClientTimeout)
