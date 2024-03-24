@@ -38,23 +38,19 @@ func getSignedExitMessages(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("error while getting active validators: %w", err)
 	}
-	var activeValidators []string // []beacon.ValidatorPubkey.HexWithPrefix()
-	for pubKey, status := range activeValidatorResponse.Data.BeaconStatus {
-		if status == types.ValidatorState_ActiveOngoing {
-			activeValidators = append(activeValidators, pubKey)
+	var activeValidators []beacon.ValidatorPubkey
+	for _, state := range activeValidatorResponse.Data.States {
+		if state.BeaconStatus == types.ValidatorState_ActiveOngoing {
+			activeValidators = append(activeValidators, state.Pubkey)
 		}
 	}
 
 	// Get selected validators
 	options := make([]utils.SelectionOption[beacon.ValidatorPubkey], len(activeValidators))
 	for i, pubkey := range activeValidators {
-		pubKey, err := beacon.HexToValidatorPubkey(activeValidators[i])
-		if err != nil {
-			return fmt.Errorf("error while converting validator pubkey: %w", err)
-		}
 		option := &options[i]
-		option.Element = &pubKey
-		option.ID = activeValidators[i]
+		option.Element = &activeValidators[i]
+		option.ID = activeValidators[i].HexWithPrefix()
 		option.Display = fmt.Sprintf("%s (active since %s)", pubkey, time.Unix(0, 0)) // Placeholder, fill in with status details
 	}
 	selectedValidators, err := utils.GetMultiselectIndices(c, pubkeysFlag.Name, options, "Please select a validator to get the signed exit for:")
