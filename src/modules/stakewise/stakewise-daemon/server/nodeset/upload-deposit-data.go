@@ -67,9 +67,13 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 
 	// Get the list of registered validators
 	registeredPubkeyMap := map[beacon.ValidatorPubkey]bool{}
-	registeredPubkeys, err := nc.GetRegisteredValidators()
+	pubkeyStatusResponse, err := nc.GetRegisteredValidators()
 	if err != nil {
 		return fmt.Errorf("error getting registered validators: %w", err)
+	}
+	registeredPubkeys := []beacon.ValidatorPubkey{}
+	for _, pubkeyStatus := range pubkeyStatusResponse {
+		registeredPubkeys = append(registeredPubkeys, pubkeyStatus.Pubkey)
 	}
 	for _, pubkey := range registeredPubkeys {
 		registeredPubkeyMap[pubkey] = true

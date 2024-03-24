@@ -8,6 +8,7 @@ import (
 
 	"github.com/nodeset-org/eth-utils/beacon"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
+	swtypes "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -50,63 +51,74 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
 	nc := sp.GetNodesetClient()
-	registeredPubkeys, err := nc.GetRegisteredValidators()
+
+	nodesetStatusResponse, err := nc.GetRegisteredValidators()
 	if err != nil {
-		return fmt.Errorf("error getting registered validators: %w", err)
+		return fmt.Errorf("error getting nodeset statuses: %w", err)
 	}
+
 	privateKeys, err := w.GetAllPrivateKeys()
 	if err != nil {
 		return fmt.Errorf("error getting private keys: %w", err)
 	}
+
 	publicKeys, err := w.DerivePubKeys(privateKeys)
 	if err != nil {
 		return fmt.Errorf("error getting public keys: %w", err)
 	}
-	statuses, err := bc.GetValidatorStatuses(context.Background(), publicKeys, nil)
+
+	beaconStatusResponse, err := bc.GetValidatorStatuses(context.Background(), publicKeys, nil)
 	if err != nil {
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}
 
-	beaconStatuses := make(map[string]types.ValidatorState)
-	nodesetStatuses := make(map[string]swapi.NodesetStatus)
+	registeredPubkeys := make([]beacon.ValidatorPubkey, 0)
+	for _, pubkeyStatus := range nodesetStatusResponse {
+		registeredPubkeys = append(registeredPubkeys, pubkeyStatus.Pubkey)
+	}
 
-	for _, pubKey := range publicKeys {
-		status, exists := statuses[pubKey]
+	// Get status info for each pubkey
+	data.States = make([]swapi.ValidatorStateInfo, len(publicKeys))
+	for i, pubkey := range publicKeys {
+		state := &data.States[i]
+		state.Pubkey = pubkey
+
+		// Beacon status
+		status, exists := beaconStatusResponse[pubkey]
 		if exists {
-			beaconStatuses[pubKey.HexWithPrefix()] = status.Status
+			state.BeaconStatus = status.Status
+			state.Index = status.Index
+		} else {
+			state.BeaconStatus = ""
 		}
-	}
 
-	for _, pubKey := range publicKeys {
+		// NodeSet status
 		switch {
-		case IsRegisteredToStakewise(pubKey, statuses):
-			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.RegisteredToStakewise
-		case IsUploadedStakewise(pubKey, statuses):
-			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.UploadedStakewise
-		case IsUploadedToNodeset(pubKey, statuses, registeredPubkeys):
-			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.UploadedToNodeset
+		case isRegisteredToStakewise(pubkey, beaconStatusResponse):
+			state.NodesetStatus = swtypes.NodesetStatus_RegisteredToStakewise
+		case isUploadedStakewise(pubkey, beaconStatusResponse):
+			state.NodesetStatus = swtypes.NodesetStatus_UploadedStakewise
+		case isUploadedToNodeset(pubkey, registeredPubkeys):
+			state.NodesetStatus = swtypes.NodesetStatus_UploadedToNodeset
 		default:
-			nodesetStatuses[pubKey.HexWithPrefix()] = swapi.Generated
+			state.NodesetStatus = swtypes.NodesetStatus_Generated
 		}
 	}
-
-	data.BeaconStatus = beaconStatuses
-	data.NodesetStatus = nodesetStatuses
 
 	return nil
 }
 
-func IsRegisteredToStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+func isRegisteredToStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO: Implement
 	return false
 }
 
-func IsUploadedStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+func isUploadedStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
 	// TODO: Implement
 	return false
 }
 
-func IsUploadedToNodeset(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus, registeredPubkeys []beacon.ValidatorPubkey) bool {
+func isUploadedToNodeset(pubKey beacon.ValidatorPubkey, registeredPubkeys []beacon.ValidatorPubkey) bool {
 	for _, registeredPubKey := range registeredPubkeys {
 		if registeredPubKey == pubKey {
 			return true
