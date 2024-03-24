@@ -1,19 +1,18 @@
 package swapi
 
 import (
+	"github.com/nodeset-org/eth-utils/beacon"
+	swtypes "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/types"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 )
 
-type NodesetStatus string
-
-const (
-	RegisteredToStakewise NodesetStatus = "RegisteredToStakewise"
-	UploadedStakewise     NodesetStatus = "UploadedStakewise"
-	UploadedToNodeset     NodesetStatus = "UploadedToNodeset"
-	Generated             NodesetStatus = "Generated"
-)
+type ValidatorStateInfo struct {
+	Pubkey        beacon.ValidatorPubkey `json:"pubkey"`
+	Index         string                 `json:"index"`
+	BeaconStatus  types.ValidatorState   `json:"beaconStatus"`
+	NodesetStatus swtypes.NodesetStatus  `json:"nodesetStatus"`
+}
 
 type ValidatorStatusData struct {
-	BeaconStatus  map[string]types.ValidatorState `json:"beaconStatus"`  // string => beacon.ValidatorPubkey
-	NodesetStatus map[string]NodesetStatus        `json:"nodesetStatus"` // string => beacon.ValidatorPubkey
+	States []ValidatorStateInfo `json:"states"`
 }
