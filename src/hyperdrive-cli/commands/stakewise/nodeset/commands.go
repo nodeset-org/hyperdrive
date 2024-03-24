@@ -1,7 +1,7 @@
 package nodeset
 
 import (
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -38,7 +38,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Usage:   "Uploads the combined deposit data for all of your validator keys to NodeSet's Stakewise vault, so they can be assigned new deposits.",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 

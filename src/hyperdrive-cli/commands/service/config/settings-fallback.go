@@ -3,8 +3,8 @@ package config
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
+	"github.com/rocket-pool/node-manager-core/config/ids"
 )
 
 // The page wrapper for the fallback config
@@ -19,7 +19,6 @@ type FallbackConfigPage struct {
 
 // Creates a new page for the fallback client settings
 func NewFallbackConfigPage(home *settingsHome) *FallbackConfigPage {
-
 	configPage := &FallbackConfigPage{
 		home:         home,
 		masterConfig: home.md.Config,
@@ -35,7 +34,6 @@ func NewFallbackConfigPage(home *settingsHome) *FallbackConfigPage {
 	)
 
 	return configPage
-
 }
 
 // Get the underlying page
@@ -45,7 +43,6 @@ func (configPage *FallbackConfigPage) getPage() *page {
 
 // Creates the content for the fallback client settings page
 func (configPage *FallbackConfigPage) createContent() {
-
 	// Create the layout
 	configPage.layout = newStandardLayout()
 	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Fallback Client Settings")
@@ -76,7 +73,7 @@ func (configPage *FallbackConfigPage) createContent() {
 	// Take the enable out since it's done explicitly
 	fallbackItems := []*parameterizedFormItem{}
 	for _, item := range configPage.fallbackItems {
-		if item.parameter.GetCommon().ID == config.UseFallbackClientsID {
+		if item.parameter.GetCommon().ID == ids.FallbackUseFallbackClientsID {
 			continue
 		}
 		fallbackItems = append(fallbackItems, item)
@@ -106,7 +103,7 @@ func (configPage *FallbackConfigPage) handleUseFallbackChanged() {
 	configPage.layout.form.AddFormItem(configPage.useFallbackBox.item)
 
 	// Only add the supporting stuff if external clients are enabled
-	if configPage.masterConfig.Hyperdrive.Fallback.UseFallbackClients.Value == false {
+	if !configPage.masterConfig.Hyperdrive.Fallback.UseFallbackClients.Value {
 		return
 	}
 

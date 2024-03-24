@@ -81,8 +81,8 @@ install() {
         esac
     done
 
-    PACKAGE_NAME="hyperdrive-install.tar.xz"
     # Get package files URL
+    PACKAGE_NAME="hyperdrive-install.tar.xz"
     if [ "$PACKAGE_VERSION" = "latest" ]; then
         PACKAGE_URL="https://github.com/nodeset-org/hyperdrive/releases/latest/download/$PACKAGE_NAME"
     else
@@ -103,8 +103,6 @@ install() {
 
     # OS dependencies
     if [ -z "$NO_DEPS" ]; then
-
-    >&2 get_escalation_cmd
 
     case "$PLATFORM" in
 
@@ -250,7 +248,6 @@ install() {
                 progress 3 "Checking if docker-compose-plugin is installed..."
                 dpkg-query -W -f='${Status}' docker-compose-plugin 2>&1 | grep -q -P '^install ok installed$' > /dev/null
                 if [ $? != "0" ]; then
-                    >&2 get_escalation_cmd
                     echo "Installing docker-compose-plugin..."
                     if [ ! -f /etc/apt/sources.list.d/docker.list ]; then
                         # Install the Docker repo, removing the legacy one if it exists
@@ -275,7 +272,6 @@ install() {
                 progress 3 "Checking if docker-compose-plugin is installed..."
                 yum -q list installed docker-compose-plugin 2>/dev/null 1>/dev/null
                 if [ $? != "0" ]; then
-                    >&2 get_escalation_cmd
                     echo "Installing docker-compose-plugin..."
                     { yum install -y docker-compose-plugin || fail "Could not install docker-compose-plugin."; } >&2
                     { systemctl restart docker || fail "Could not restart docker daemon."; } >&2
@@ -292,7 +288,6 @@ install() {
                 progress 3 "Checking if docker-compose-plugin is installed..."
                 dnf -q list installed docker-compose-plugin 2>/dev/null 1>/dev/null
                 if [ $? != "0" ]; then
-                    >&2 get_escalation_cmd
                     echo "Installing docker-compose-plugin..."
                     { dnf install -y docker-compose-plugin || fail "Could not install docker-compose-plugin."; } >&2
                     { systemctl restart docker || fail "Could not restart docker daemon."; } >&2
@@ -349,7 +344,7 @@ install() {
     { test -d "$PACKAGE_FILES_PATH" || fail "Could not extract the Hyperdrive package files."; } >&2
 
     # Copy package files
-    progress 6 "Copying package files to Hyperdrive user data directory..."
+    progress 6 "Copying package files to Hyperdrive system directory..."
     { cp -r "$PACKAGE_FILES_PATH/override" "$HD_SHARE_PATH" || fail "Could not copy override folder to the Hyperdrive system directory."; } >&2
     { cp -r "$PACKAGE_FILES_PATH/scripts" "$HD_SHARE_PATH" || fail "Could not copy scripts folder to the Hyperdrive system directory."; } >&2
     { cp -r "$PACKAGE_FILES_PATH/templates" "$HD_SHARE_PATH" || fail "Could not copy templates folder to the Hyperdrive system directory."; } >&2

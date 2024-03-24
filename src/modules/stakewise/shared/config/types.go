@@ -1,6 +1,8 @@
 package swconfig
 
-import "github.com/nodeset-org/hyperdrive/shared/config"
+import (
+	"github.com/rocket-pool/node-manager-core/config"
+)
 
 const (
 	// The stakewise Hyperdrive daemon

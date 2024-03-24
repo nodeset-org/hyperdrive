@@ -17,12 +17,14 @@ import (
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 const (
 	debugColor                    color.Attribute = color.FgYellow
 	nethermindPruneStarterCommand string          = "DELETE_ME"
+	nethermindAdminUrl            string          = "http://127.0.0.1:7434"
 
 	templatesDir       string = "/usr/share/hyperdrive/templates"
 	overrideSourceDir  string = "/usr/share/hyperdrive/override"
@@ -292,7 +294,7 @@ func (c *HyperdriveClient) PurgeData(composeFiles []string) error {
 		return fmt.Errorf("error loading data path: %w", err)
 	}
 	fmt.Println("Deleting data...")
-	cmd := fmt.Sprintf("%s rm -f %s", rootCmd, dataPath)
+	cmd := fmt.Sprintf("%s rm -rf %s", rootCmd, dataPath)
 	_, err = c.readOutput(cmd)
 	if err != nil {
 		return fmt.Errorf("error deleting data: %w", err)
@@ -387,10 +389,10 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 	// Check config
 	if cfg.Hyperdrive.ClientMode.Value == config.ClientMode_Unknown {
 		return "", fmt.Errorf("you haven't selected local or external mode for your clients yet.\nPlease run 'hyperdrive service config' before running this command")
-	} else if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value == config.ExecutionClient_Unknown {
+	} else if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalExecutionClient.ExecutionClient.Value == config.ExecutionClient_Unknown {
 		return "", errors.New("no Execution Client selected. Please run 'hyperdrive service config' before running this command")
 	}
-	if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == config.BeaconNode_Unknown {
+	if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalBeaconClient.BeaconNode.Value == config.BeaconNode_Unknown {
 		return "", errors.New("no Beacon Node selected. Please run 'hyperdrive service config' before running this command")
 	}
 
@@ -532,12 +534,12 @@ func copyOverrideFiles(sourceDir string, targetDir string) error {
 }
 
 // Handle composing for modules
-func (c *HyperdriveClient) composeModule(global *GlobalConfig, module config.IModuleConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
+func (c *HyperdriveClient) composeModule(global *GlobalConfig, module hdconfig.IModuleConfig, hyperdriveDir string, deployedContainers []string) ([]string, error) {
 	moduleName := module.GetModuleName()
 	composePaths := template.ComposePaths{
-		RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, config.ModulesName, moduleName),
-		TemplatePath: filepath.Join(templatesDir, config.ModulesName, moduleName),
-		OverridePath: filepath.Join(hyperdriveDir, overrideDir, config.ModulesName, moduleName),
+		RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, hdconfig.ModulesName, moduleName),
+		TemplatePath: filepath.Join(templatesDir, hdconfig.ModulesName, moduleName),
+		OverridePath: filepath.Join(hyperdriveDir, overrideDir, hdconfig.ModulesName, moduleName),
 	}
 
 	// These containers always run

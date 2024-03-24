@@ -3,14 +3,14 @@ package config
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 const randomEcID string = "step-random-ec"
 
 func createRandomEcStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []*config.ParameterOption[config.ExecutionClient]) *choiceWizardStep {
 	var selectedClientName string
-	selectedClient := wiz.md.Config.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value
+	selectedClient := wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Value
 	for _, clientOption := range goodOptions {
 		if clientOption.Value == selectedClient {
 			selectedClientName = clientOption.Name
@@ -18,7 +18,7 @@ func createRandomEcStep(wiz *wizard, currentStep int, totalSteps int, goodOption
 		}
 	}
 
-	helperText := fmt.Sprintf("You have been randomly assigned to %s for your Execution client.", selectedClientName)
+	helperText := fmt.Sprintf("You have been randomly assigned to %s for your Execution Client.", selectedClientName)
 
 	show := func(modal *choiceModalLayout) {
 		wiz.md.setPage(modal.page)
@@ -26,11 +26,11 @@ func createRandomEcStep(wiz *wizard, currentStep int, totalSteps int, goodOption
 	}
 
 	done := func(buttonIndex int, buttonLabel string) {
-		wiz.bnLocalModal.show()
+		wiz.localBnModal.show()
 	}
 
 	back := func() {
-		wiz.ecLocalModal.show()
+		wiz.localEcModal.show()
 	}
 
 	return newChoiceStep(

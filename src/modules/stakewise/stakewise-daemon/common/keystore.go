@@ -9,11 +9,10 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/google/uuid"
-	"github.com/nodeset-org/eth-utils/beacon"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
+	"github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/utils"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 	eth2ks "github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4"
 )
@@ -78,7 +77,7 @@ func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateK
 	}
 
 	// Create key store
-	keyStore := types.ValidatorKeystore{
+	keyStore := beacon.ValidatorKeystore{
 		Crypto:  encryptedKey,
 		Version: ks.encryptor.Version(),
 		UUID:    uuid.New(),
@@ -122,7 +121,7 @@ func (ks *stakewiseKeystoreManager) LoadValidatorKey(pubkey beacon.ValidatorPubk
 	}
 
 	// Unmarshal the keystore
-	var keystore types.ValidatorKeystore
+	var keystore beacon.ValidatorKeystore
 	err = json.Unmarshal(bytes, &keystore)
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing Stakewise keystore for pubkey %s: %w", pubkey.HexWithPrefix(), err)

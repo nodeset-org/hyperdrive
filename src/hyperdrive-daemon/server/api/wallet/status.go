@@ -5,8 +5,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ===============
@@ -25,8 +25,8 @@ func (f *walletStatusFactory) Create(args url.Values) (*walletStatusContext, err
 }
 
 func (f *walletStatusFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletStatusContext, api.WalletStatusData](
-		router, "status", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*walletStatusContext, api.WalletStatusData](
+		router, "status", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

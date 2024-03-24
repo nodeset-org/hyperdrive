@@ -5,7 +5,6 @@
 # See https://docs.docker.com/compose/extends/#adding-and-overriding-configuration
 # for more information on overriding specific parameters of docker-compose files.
 
-version: "3.7"
 services:
   {{.Stakewise.VcContainerName}}:
     image: {{.Stakewise.GetVcContainerTag}}
@@ -16,17 +15,16 @@ services:
 {{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .Stakewise.GetModuleName)}}
     volumes:
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
-      - {{$module_dir}}/{{.ValidatorsDirectory}}:/validators
+      - {{$module_dir}}/{{.ValidatorsDirectory}}:/{{.ValidatorsDirectory}}
     networks:
       - net
     environment:
       - NETWORK={{.Hyperdrive.Network}}
-      - EC_CLIENT={{.Hyperdrive.GetSelectedExecutionClient}}
-      - CC_CLIENT={{.Hyperdrive.GetSelectedBeaconNode}}
-      - CC_API_ENDPOINT={{.Hyperdrive.BnHttpUrl}}
-      - CC_RPC_ENDPOINT={{.Hyperdrive.BnRpcUrl}}
-      - FALLBACK_CC_API_ENDPOINT={{.Hyperdrive.FallbackBnHttpUrl}}
-      - FALLBACK_CC_RPC_ENDPOINT={{.Hyperdrive.FallbackBnRpcUrl}}
+      - CLIENT={{.Hyperdrive.GetSelectedBeaconNode}}
+      - BN_API_ENDPOINT={{.Hyperdrive.BnHttpUrl}}
+      - BN_RPC_ENDPOINT={{.Hyperdrive.BnRpcUrl}}
+      - FALLBACK_BN_API_ENDPOINT={{.Hyperdrive.FallbackBnHttpUrl}}
+      - FALLBACK_BN_RPC_ENDPOINT={{.Hyperdrive.FallbackBnRpcUrl}}
       - FEE_RECIPIENT={{.Stakewise.FeeRecipient}}
       - ENABLE_METRICS={{.Hyperdrive.Metrics.EnableMetrics}}
       - VC_METRICS_PORT={{.Stakewise.VcCommon.MetricsPort}}

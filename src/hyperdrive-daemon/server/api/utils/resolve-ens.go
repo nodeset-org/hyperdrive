@@ -8,10 +8,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	ens "github.com/wealdtech/go-ens/v3"
 )
 
@@ -35,8 +34,8 @@ func (f *utilsResolveEnsContextFactory) Create(args url.Values) (*utilsResolveEn
 }
 
 func (f *utilsResolveEnsContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*utilsResolveEnsContext, api.UtilsResolveEnsData](
-		router, "resolve-ens", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*utilsResolveEnsContext, api.UtilsResolveEnsData](
+		router, "resolve-ens", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

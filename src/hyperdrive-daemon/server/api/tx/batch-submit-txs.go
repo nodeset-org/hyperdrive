@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"math/big"
@@ -10,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ===============
@@ -46,8 +45,8 @@ func (f *txBatchSubmitTxsContextFactory) Create(body api.BatchSubmitTxsBody) (*t
 }
 
 func (f *txBatchSubmitTxsContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessPost[*txBatchSubmitTxsContext, api.BatchSubmitTxsBody, api.BatchTxData](
-		router, "batch-submit-txs", f, f.handler.serviceProvider,
+	server.RegisterQuerylessPost[*txBatchSubmitTxsContext, api.BatchSubmitTxsBody, api.BatchTxData](
+		router, "batch-submit-txs", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -64,6 +63,7 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 	ec := sp.GetEthClient()
+	ctx := sp.GetContext()
 	nodeAddress, _ := sp.GetWallet().GetAddress()
 
 	err := errors.Join(
@@ -78,7 +78,7 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 	if c.body.FirstNonce != nil {
 		currentNonce = c.body.FirstNonce
 	} else {
-		nonce, err := ec.NonceAt(context.Background(), nodeAddress, nil)
+		nonce, err := ec.NonceAt(ctx, nodeAddress, nil)
 		if err != nil {
 			return fmt.Errorf("error getting latest nonce for node: %w", err)
 		}

@@ -14,6 +14,14 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var (
+	configUpdateDefaultsFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "update-defaults",
+		Aliases: []string{"u"},
+		Usage:   "Certain configuration values are reset when Hyperdrive is updated, such as Docker container tags; use this flag to force that reset, even if Hyperdrive hasn't been updated",
+	}
+)
+
 // Configure the service
 func configureService(c *cli.Context) error {
 	// Get Hyperdrive client
@@ -36,7 +44,7 @@ func configureService(c *cli.Context) error {
 	// Check if this is an update
 	oldVersion := strings.TrimPrefix(cfg.Hyperdrive.Version, "v")
 	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
-	isUpdate := c.Bool(installUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
+	isUpdate := c.Bool(configUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
 
 	// For upgrades, move the config to the old one and create a new upgraded copy
 	if isUpdate {
@@ -46,18 +54,19 @@ func configureService(c *cli.Context) error {
 	}
 
 	// Save the config and exit in headless mode
-	if c.NumFlags() > 0 {
-		return fmt.Errorf("NYI")
-		// TODO: HEADLESS MODE
-		/*
-			err := configureHeadless(c, cfg)
-			if err != nil {
-				return fmt.Errorf("error updating config from provided arguments: %w", err)
-			}
-			return hd.SaveConfig(cfg)
-		*/
-	}
+	/*
+		if c.NumFlags() > 0 {
+			return fmt.Errorf("NYI")
+			// TODO: HEADLESS MODE
+				err := configureHeadless(c, cfg)
+				if err != nil {
+					return fmt.Errorf("error updating config from provided arguments: %w", err)
+				}
+				return hd.SaveConfig(cfg)
+		}
+	*/
 
+	// Run the TUI
 	app := tview.NewApplication()
 	md := cliconfig.NewMainDisplay(app, oldCfg, cfg, isNew, isUpdate)
 	err = app.Run()
@@ -78,7 +87,7 @@ func configureService(c *cli.Context) error {
 		prefix := fmt.Sprint(md.PreviousConfig.Hyperdrive.ProjectName.Value)
 		if md.ChangeNetworks {
 			// Remove the checkpoint sync provider
-			md.Config.Hyperdrive.LocalBeaconConfig.CheckpointSyncProvider.Value = ""
+			md.Config.Hyperdrive.LocalBeaconClient.CheckpointSyncProvider.Value = ""
 			err = hd.SaveConfig(md.Config)
 			if err != nil {
 				return fmt.Errorf("error saving config: %w", err)
@@ -141,7 +150,7 @@ func configureService(c *cli.Context) error {
 // TODO: HEADLESS MODE
 /*
 // Updates a configuration from the provided CLI arguments headlessly
-func configureHeadless(c *cli.Context, cfg *config.HyperdriveConfig) error {
+func configureHeadless(c *cli.Context, cfg *hdconfig.HyperdriveConfig) error {
 	// Root params
 	for _, param := range cfg.GetParameters() {
 		err := updateConfigParamFromCliArg(c, "", param, cfg)

@@ -5,7 +5,6 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/term"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/urfave/cli/v2"
 )
@@ -97,7 +96,7 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	}
 
 	// Do a recover to verify and save the wallet
-	recoverResponse, err := hd.Api.Wallet.Recover(derivationPath, &response.Data.Mnemonic, walletIndex, password, savePassword)
+	recoverResponse, err := hd.Api.Wallet.Recover(derivationPath, response.Data.Mnemonic, walletIndex, password, savePassword)
 	if err != nil {
 		return fmt.Errorf("error saving wallet: %w", err)
 	}
@@ -108,7 +107,7 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	}
 
 	// Clear terminal output
-	_ = term.Clear()
+	_ = utils.ClearTerminal()
 
 	fmt.Println("The node wallet was successfully initialized.")
 	fmt.Printf("Node account: %s%s%s\n", terminal.ColorBlue, response.Data.AccountAddress.Hex(), terminal.ColorReset)

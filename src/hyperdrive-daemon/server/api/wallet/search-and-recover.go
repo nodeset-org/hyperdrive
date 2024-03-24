@@ -8,11 +8,10 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/node/wallet"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 const (
@@ -41,8 +40,8 @@ func (f *walletSearchAndRecoverContextFactory) Create(args url.Values) (*walletS
 }
 
 func (f *walletSearchAndRecoverContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletSearchAndRecoverContext, api.WalletSearchAndRecoverData](
-		router, "search-and-recover", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*walletSearchAndRecoverContext, api.WalletSearchAndRecoverData](
+		router, "search-and-recover", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -61,7 +60,7 @@ type walletSearchAndRecoverContext struct {
 func (c *walletSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRecoverData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
-	rs := sp.GetResources()
+	rs := sp.GetConfig().GetNetworkResources()
 
 	// Requirements
 	status, err := w.GetStatus()

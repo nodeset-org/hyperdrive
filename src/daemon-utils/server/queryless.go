@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
-	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/wallet"
 
 	"github.com/gorilla/mux"
 )
@@ -49,11 +49,11 @@ type IQuerylessPostContextFactory[ContextType IQuerylessCallContext[DataType], B
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via GET; use this for typical general-purpose calls
-func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType any, ConfigType config.IModuleConfig](
+func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType any](
 	router *mux.Router,
 	functionName string,
 	factory IQuerylessGetContextFactory[ContextType, DataType],
-	serviceProvider *services.ServiceProvider[ConfigType],
+	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -68,30 +68,30 @@ func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType 
 
 		// Check the method
 		if r.Method != http.MethodGet {
-			HandleInvalidMethod(log, w)
+			server.HandleInvalidMethod(log, w)
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(args)
 		if err != nil {
-			HandleInputError(log, w, err)
+			server.HandleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runQuerylessRoute[DataType](context, serviceProvider)
-		HandleResponse(log, w, response, err, isDebug)
+		server.HandleResponse(log, w, response, err, isDebug)
 	})
 }
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via POST; use this for typical general-purpose calls
-func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType any, DataType any, ConfigType config.IModuleConfig](
+func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType any, DataType any](
 	router *mux.Router,
 	functionName string,
 	factory IQuerylessPostContextFactory[ContextType, BodyType, DataType],
-	serviceProvider *services.ServiceProvider[ConfigType],
+	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -101,14 +101,14 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 
 		// Check the method
 		if r.Method != http.MethodPost {
-			HandleInvalidMethod(log, w)
+			server.HandleInvalidMethod(log, w)
 			return
 		}
 
 		// Read the body
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
+			server.HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
 			return
 		}
 		if isDebug {
@@ -119,25 +119,25 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 		var body BodyType
 		err = json.Unmarshal(bodyBytes, &body)
 		if err != nil {
-			HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
+			server.HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(body)
 		if err != nil {
-			HandleInputError(log, w, err)
+			server.HandleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runQuerylessRoute[DataType](context, serviceProvider)
-		HandleResponse(log, w, response, err, isDebug)
+		server.HandleResponse(log, w, response, err, isDebug)
 	})
 }
 
 // Run a route registered with no structured chain query pattern
-func runQuerylessRoute[DataType any, ConfigType config.IModuleConfig](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*ApiResponse[DataType], error) {
+func runQuerylessRoute[DataType any](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider) (*ApiResponse[DataType], error) {
 	// Get the services
 	hd := serviceProvider.GetHyperdriveClient()
 	signer := serviceProvider.GetSigner()
@@ -149,7 +149,7 @@ func runQuerylessRoute[DataType any, ConfigType config.IModuleConfig](ctx IQuery
 		return nil, fmt.Errorf("error getting wallet status: %w", err)
 	}
 	status := walletResponse.Data.WalletStatus
-	if utils.IsWalletReady(status) {
+	if wallet.IsWalletReady(status) {
 		opts = signer.GetTransactor(status.Wallet.WalletAddress)
 	}
 

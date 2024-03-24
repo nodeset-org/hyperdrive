@@ -6,7 +6,6 @@
 # for more information on overriding specific parameters of docker-compose files.
 
 {{$port := (or .Hyperdrive.Metrics.Grafana.Port.Value 3100) -}}
-version: "3.7"
 services:
   {{.Hyperdrive.GrafanaContainerName}}:
     image: {{.Hyperdrive.Metrics.Grafana.ContainerTag}}

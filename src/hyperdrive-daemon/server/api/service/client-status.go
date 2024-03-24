@@ -1,14 +1,13 @@
 package service
 
 import (
-	"context"
 	"net/url"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 // ===============
@@ -27,8 +26,8 @@ func (f *serviceClientStatusContextFactory) Create(args url.Values) (*serviceCli
 }
 
 func (f *serviceClientStatusContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*serviceClientStatusContext, api.ServiceClientStatusData](
-		router, "client-status", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*serviceClientStatusContext, api.ServiceClientStatusData](
+		router, "client-status", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -44,20 +43,21 @@ func (c *serviceClientStatusContext) PrepareData(data *api.ServiceClientStatusDa
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
 	bc := sp.GetBeaconClient()
+	ctx := sp.GetContext()
 
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
 	// Get the EC manager status
 	go func() {
-		ecMgrStatus := ec.CheckStatus(context.Background())
+		ecMgrStatus := ec.CheckStatus(ctx)
 		data.EcManagerStatus = *ecMgrStatus
 		wg.Done()
 	}()
 
 	// Get the BC manager status
 	go func() {
-		bcMgrStatus := bc.CheckStatus(context.Background())
+		bcMgrStatus := bc.CheckStatus(ctx)
 		data.BcManagerStatus = *bcMgrStatus
 		wg.Done()
 	}()

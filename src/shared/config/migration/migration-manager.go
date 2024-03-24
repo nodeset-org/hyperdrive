@@ -2,6 +2,7 @@ package migration
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/hashicorp/go-version"
@@ -51,9 +52,14 @@ func UpdateConfig(serializedConfig map[string]any) error {
 
 // Get the Hyperdrive version that the given config was built with
 func getVersionFromConfig(serializedConfig map[string]any) (*version.Version, error) {
-	configVersionString, exists := serializedConfig[ids.VersionID].(string)
+	configVersionEntry, exists := serializedConfig[ids.VersionID]
 	if !exists {
 		return nil, fmt.Errorf("expected a top-level setting named '%s' but it didn't exist", ids.VersionID)
+	}
+
+	configVersionString, ok := configVersionEntry.(string)
+	if !ok {
+		return nil, fmt.Errorf("config has an entry named [%s] but it is not a string, it's a %s", ids.VersionID, reflect.TypeOf(configVersionEntry))
 	}
 
 	configVersion, err := version.NewVersion(strings.TrimPrefix(configVersionString, "v"))

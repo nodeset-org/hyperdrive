@@ -11,5 +11,6 @@ func uploadDepositData(c *cli.Context) error {
 	sw := client.NewStakewiseClientFromCtx(c)
 
 	// Upload to the server
-	return swcmdutils.UploadDepositData(sw)
+	_, err := swcmdutils.UploadDepositData(sw)
+	return err
 }

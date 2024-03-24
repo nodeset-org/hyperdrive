@@ -2,8 +2,8 @@ package swvalidator
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 type ValidatorHandler struct {
@@ -16,7 +16,7 @@ func NewValidatorHandler(serviceProvider *swcommon.StakewiseServiceProvider) *Va
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{
-		&validatorGetSignedExitMessagesContextFactory{h},
+		&validatorExitContextFactory{h},
 	}
 	return h
 }

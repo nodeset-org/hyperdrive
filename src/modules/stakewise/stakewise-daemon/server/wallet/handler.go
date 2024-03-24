@@ -2,8 +2,8 @@ package swwallet
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
 type WalletHandler struct {

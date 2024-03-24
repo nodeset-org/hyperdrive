@@ -5,20 +5,19 @@ import (
 	"math/rand"
 	"runtime"
 	"strings"
-	"time"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/pbnjay/memory"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 const localBnStepID string = "step-local-bn"
 
-func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
+func createLocalBnStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
 	// Create the button names and descriptions from the config
 	clientNames := []string{"Random (Recommended)"}
 	clientDescriptions := []string{"Select a client randomly to help promote the diversity of the Beacon Chain. We recommend you do this unless you have a strong reason to pick a specific client. To learn more about why client diversity is important, please visit https://clientdiversity.org for an explanation."}
 	clients := []*config.ParameterOption[config.BeaconNode]{}
-	for _, client := range wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Options {
+	for _, client := range wiz.md.Config.Hyperdrive.LocalBeaconClient.BeaconNode.Options {
 		clientNames = append(clientNames, client.Name)
 		clientDescriptions = append(clientDescriptions, getAugmentedBnDescription(client.Value, client.Description))
 		clients = append(clients, client)
@@ -32,8 +31,8 @@ func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 
 		if !wiz.md.isNew {
 			var bnName string
-			for _, option := range wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Options {
-				if option.Value == wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value {
+			for _, option := range wiz.md.Config.Hyperdrive.LocalBeaconClient.BeaconNode.Options {
+				if option.Value == wiz.md.Config.Hyperdrive.LocalBeaconClient.BeaconNode.Value {
 					bnName = option.Name
 					break
 				}
@@ -55,7 +54,7 @@ func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 		} else {
 			buttonLabel = strings.TrimSpace(buttonLabel)
 			selectedClient := config.BeaconNode_Unknown
-			for _, client := range wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Options {
+			for _, client := range wiz.md.Config.Hyperdrive.LocalBeaconClient.BeaconNode.Options {
 				if client.Name == buttonLabel {
 					selectedClient = client.Value
 					break
@@ -64,14 +63,14 @@ func createLocalCcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 			if selectedClient == config.BeaconNode_Unknown {
 				panic(fmt.Sprintf("Local BN selection buttons didn't match any known clients, buttonLabel = %s\n", buttonLabel))
 			}
-			wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value = selectedClient
+			wiz.md.Config.Hyperdrive.LocalBeaconClient.BeaconNode.Value = selectedClient
 			switch selectedClient {
 			//case config.ConsensusClient_Prysm:
 			//	wiz.consensusLocalPrysmWarning.show()
 			case config.BeaconNode_Teku:
 				totalMemoryGB := memory.TotalMemory() / 1024 / 1024 / 1024
 				if runtime.GOARCH == "arm64" || totalMemoryGB < 15 {
-					wiz.bnLocalTekuWarning.show()
+					wiz.localBnTekuWarning.show()
 				} else {
 					wiz.checkpointSyncProviderModal.show()
 				}
@@ -129,9 +128,8 @@ func selectRandomBn(goodOptions []*config.ParameterOption[config.BeaconNode], in
 	}
 
 	// Select a random client
-	rand.Seed(time.Now().UnixNano())
 	selectedClient := filteredClients[rand.Intn(len(filteredClients))]
-	wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value = selectedClient
+	wiz.md.Config.Hyperdrive.LocalBeaconClient.BeaconNode.Value = selectedClient
 
 	// Show the selection page
 	/*
@@ -143,8 +141,8 @@ func selectRandomBn(goodOptions []*config.ParameterOption[config.BeaconNode], in
 			wiz.consensusLocalRandomModal.show()
 		}
 	*/
-	wiz.bnLocalRandomModal = createRandomBnStep(wiz, currentStep, totalSteps, goodOptions)
-	wiz.bnLocalRandomModal.show()
+	wiz.localBnRandomModal = createRandomBnStep(wiz, currentStep, totalSteps, goodOptions)
+	wiz.localBnRandomModal.show()
 }
 
 // Get a more verbose client description, including warnings

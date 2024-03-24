@@ -10,14 +10,14 @@ func createPrysmWarningStep(wiz *wizard, currentStep int, totalSteps int) *choic
 
 	done := func(buttonIndex int, buttonLabel string) {
 		if buttonIndex == 0 {
-			wiz.bnLocalModal.show()
+			wiz.localBnModal.show()
 		} else {
 			wiz.checkpointSyncProviderModal.show()
 		}
 	}
 
 	back := func() {
-		wiz.bnLocalModal.show()
+		wiz.localBnModal.show()
 	}
 
 	return newChoiceStep(
@@ -47,14 +47,14 @@ func createTekuWarningStep(wiz *wizard, currentStep int, totalSteps int) *choice
 
 	done := func(buttonIndex int, buttonLabel string) {
 		if buttonIndex == 0 {
-			wiz.bnLocalModal.show()
+			wiz.localBnModal.show()
 		} else {
 			wiz.checkpointSyncProviderModal.show()
 		}
 	}
 
 	back := func() {
-		wiz.bnLocalModal.show()
+		wiz.localBnModal.show()
 	}
 
 	return newChoiceStep(

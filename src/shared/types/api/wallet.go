@@ -2,13 +2,13 @@ package api
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/nodeset-org/eth-utils/beacon"
-	"github.com/nodeset-org/eth-utils/eth"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/eth"
+	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
 type WalletStatusData struct {
-	WalletStatus types.WalletStatus `json:"walletStatus"`
+	WalletStatus wallet.WalletStatus `json:"walletStatus"`
 }
 
 type WalletInitializeData struct {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,7 +25,7 @@ const (
 	ethClientRecentBlockThreshold time.Duration = 5 * time.Minute
 )
 
-func printClientStatus(status *api.ClientStatus, name string) {
+func printClientStatus(status *types.ClientStatus, name string) {
 
 	if status.Error != "" {
 		fmt.Printf("Your %s is unavailable (%s).\n", name, status.Error)
@@ -43,7 +43,7 @@ func printClientStatus(status *api.ClientStatus, name string) {
 	}
 }
 
-func printSyncProgress(status *api.ClientManagerStatus, name string) {
+func printSyncProgress(status *types.ClientManagerStatus, name string) {
 
 	// Print primary client status
 	printClientStatus(&status.PrimaryClientStatus, fmt.Sprintf("primary %s client", name))

@@ -5,10 +5,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
-	commonutils "github.com/nodeset-org/eth-utils/common"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
-	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
+	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	"github.com/rocket-pool/node-manager-core/utils"
+	"github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/urfave/cli/v2"
 )
 
@@ -40,7 +40,7 @@ func signMessage(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	if !sharedutils.IsWalletReady(status.Data.WalletStatus) {
+	if !wallet.IsWalletReady(status.Data.WalletStatus) {
 		fmt.Println("The node wallet is not loaded or your node is in read-only mode. Please run `hyperdrive wallet status` for more details.")
 		return nil
 	}
@@ -48,7 +48,7 @@ func signMessage(c *cli.Context) error {
 	// Get the message
 	message := c.String(signMessageFlag.Name)
 	for message == "" {
-		message = utils.Prompt("Please enter the message you want to sign: (EIP-191 personal_sign)", "^.+$", "Please enter the message you want to sign: (EIP-191 personal_sign)")
+		message = cliutils.Prompt("Please enter the message you want to sign: (EIP-191 personal_sign)", "^.+$", "Please enter the message you want to sign: (EIP-191 personal_sign)")
 	}
 
 	// Build the TX
@@ -61,7 +61,7 @@ func signMessage(c *cli.Context) error {
 	formattedSignature := PersonalSignature{
 		Address:   status.Data.WalletStatus.Wallet.WalletAddress,
 		Message:   message,
-		Signature: commonutils.EncodeHexWithPrefix(response.Data.SignedMessage),
+		Signature: utils.EncodeHexWithPrefix(response.Data.SignedMessage),
 		Version:   fmt.Sprint(signatureVersion),
 	}
 	bytes, err := json.MarshalIndent(formattedSignature, "", "    ")

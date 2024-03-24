@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcontracts "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common/contracts"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -29,7 +29,7 @@ func (f *walletClaimRewardsContextFactory) Create(args url.Values) (*walletClaim
 }
 
 func (f *walletClaimRewardsContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*walletClaimRewardsContext, api.TxInfoData](
+	server.RegisterQuerylessGet[*walletClaimRewardsContext, types.TxInfoData](
 		router, "claim-rewards", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -44,7 +44,7 @@ type walletClaimRewardsContext struct {
 }
 
 // Return the transaction data
-func (c *walletClaimRewardsContext) PrepareData(data *api.TxInfoData, opts *bind.TransactOpts) error {
+func (c *walletClaimRewardsContext) PrepareData(data *types.TxInfoData, opts *bind.TransactOpts) error {
 	fmt.Printf("Preparing data for claim reward\n")
 
 	sp := c.handler.serviceProvider

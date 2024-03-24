@@ -14,17 +14,17 @@ type wizard struct {
 	modeModal *choiceWizardStep
 
 	// Step 4 - EC settings
-	ecLocalModal              *choiceWizardStep
-	executionLocalRandomModal *choiceWizardStep
-	externalEcSelectModal     *choiceWizardStep
-	externalEcSettingsModal   *textBoxWizardStep
+	localEcModal            *choiceWizardStep
+	localEcRandomModal      *choiceWizardStep
+	externalEcSelectModal   *choiceWizardStep
+	externalEcSettingsModal *textBoxWizardStep
 
 	// Step 5 - BN settings
-	bnLocalModal                *choiceWizardStep
-	bnLocalRandomModal          *choiceWizardStep
-	bnLocalRandomPrysmModal     *choiceWizardStep
-	bnLocalPrysmWarning         *choiceWizardStep
-	bnLocalTekuWarning          *choiceWizardStep
+	localBnModal                *choiceWizardStep
+	localBnRandomModal          *choiceWizardStep
+	localBnRandomPrysmModal     *choiceWizardStep
+	localBnPrysmWarning         *choiceWizardStep
+	localBnTekuWarning          *choiceWizardStep
 	checkpointSyncProviderModal *textBoxWizardStep
 	externalBnSelectModal       *choiceWizardStep
 	externalBnSettingsModal     *textBoxWizardStep
@@ -63,14 +63,14 @@ func newWizard(md *mainDisplay) *wizard {
 	wiz.modeModal = createModeStep(wiz, 3, totalSteps)
 
 	// Step 4 - EC settings
-	wiz.ecLocalModal = createLocalEcStep(wiz, 4, totalSteps)
+	wiz.localEcModal = createLocalEcStep(wiz, 4, totalSteps)
 	wiz.externalEcSelectModal = createExternalEcSelectStep(wiz, 4, totalSteps)
 	wiz.externalEcSettingsModal = createExternalEcSettingsStep(wiz, 4, totalSteps)
 
 	// Step 5 - BN settings
-	wiz.bnLocalModal = createLocalCcStep(wiz, 5, totalSteps)
-	wiz.bnLocalPrysmWarning = createPrysmWarningStep(wiz, 5, totalSteps)
-	wiz.bnLocalTekuWarning = createTekuWarningStep(wiz, 5, totalSteps)
+	wiz.localBnModal = createLocalBnStep(wiz, 5, totalSteps)
+	wiz.localBnPrysmWarning = createPrysmWarningStep(wiz, 5, totalSteps)
+	wiz.localBnTekuWarning = createTekuWarningStep(wiz, 5, totalSteps)
 	wiz.checkpointSyncProviderModal = createCheckpointSyncStep(wiz, 5, totalSteps)
 	wiz.externalBnSelectModal = createExternalBnSelectStep(wiz, 5, totalSteps)
 	wiz.externalBnSettingsModal = createExternalBnSettingsStep(wiz, 5, totalSteps)

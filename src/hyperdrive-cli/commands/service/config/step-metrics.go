@@ -5,7 +5,7 @@ func createMetricsStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 
 	show := func(modal *choiceModalLayout) {
 		wiz.md.setPage(modal.page)
-		if wiz.md.Config.Hyperdrive.Metrics.EnableMetrics.Value == false {
+		if !wiz.md.Config.Hyperdrive.Metrics.EnableMetrics.Value {
 			modal.focus(0)
 		} else {
 			modal.focus(1)

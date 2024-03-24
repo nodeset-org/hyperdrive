@@ -10,10 +10,10 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
-	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
 	batch "github.com/rocket-pool/batch-query"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
 // Wrapper for callbacks used by call runners that follow a common single-stage pattern:
@@ -46,11 +46,11 @@ type ISingleStagePostContextFactory[ContextType ISingleStageCallContext[DataType
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called; use this for typical general-purpose calls
-func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], DataType any, ConfigType config.IModuleConfig](
+func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], DataType any](
 	router *mux.Router,
 	functionName string,
 	factory ISingleStageGetContextFactory[ContextType, DataType],
-	serviceProvider *services.ServiceProvider[ConfigType],
+	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -65,30 +65,30 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 
 		// Check the method
 		if r.Method != http.MethodGet {
-			HandleInvalidMethod(log, w)
+			server.HandleInvalidMethod(log, w)
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(args)
 		if err != nil {
-			HandleInputError(log, w, err)
+			server.HandleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runSingleStageRoute[DataType](context, serviceProvider)
-		HandleResponse(log, w, response, err, isDebug)
+		server.HandleResponse(log, w, response, err, isDebug)
 	})
 }
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via POST; use this for typical general-purpose calls
-func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], BodyType any, DataType any, ConfigType config.IModuleConfig](
+func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], BodyType any, DataType any](
 	router *mux.Router,
 	functionName string,
 	factory ISingleStagePostContextFactory[ContextType, BodyType, DataType],
-	serviceProvider *services.ServiceProvider[ConfigType],
+	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -98,14 +98,14 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 
 		// Check the method
 		if r.Method != http.MethodPost {
-			HandleInvalidMethod(log, w)
+			server.HandleInvalidMethod(log, w)
 			return
 		}
 
 		// Read the body
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
+			server.HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
 			return
 		}
 		if isDebug {
@@ -116,25 +116,25 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 		var body BodyType
 		err = json.Unmarshal(bodyBytes, &body)
 		if err != nil {
-			HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
+			server.HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(body)
 		if err != nil {
-			HandleInputError(log, w, err)
+			server.HandleInputError(log, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		response, err := runSingleStageRoute[DataType](context, serviceProvider)
-		HandleResponse(log, w, response, err, isDebug)
+		server.HandleResponse(log, w, response, err, isDebug)
 	})
 }
 
 // Run a route registered with the common single-stage querying pattern
-func runSingleStageRoute[DataType any, ConfigType config.IModuleConfig](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*api.ApiResponse[DataType], error) {
+func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider) (*types.ApiResponse[DataType], error) {
 	// Get the services
 	q := serviceProvider.GetQueryManager()
 	hd := serviceProvider.GetHyperdriveClient()
@@ -162,13 +162,13 @@ func runSingleStageRoute[DataType any, ConfigType config.IModuleConfig](ctx ISin
 		return nil, fmt.Errorf("error getting wallet status: %w", err)
 	}
 	status := walletResponse.Data.WalletStatus
-	if utils.IsWalletReady(status) {
+	if wallet.IsWalletReady(status) {
 		opts = signer.GetTransactor(status.Wallet.WalletAddress)
 	}
 
 	// Create the response and data
 	data := new(DataType)
-	response := &api.ApiResponse[DataType]{
+	response := &types.ApiResponse[DataType]{
 		Data: data,
 	}
 

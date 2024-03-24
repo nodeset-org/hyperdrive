@@ -8,11 +8,10 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common/wallet"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/node/wallet"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -35,8 +34,8 @@ func (f *walletTestSearchAndRecoverContextFactory) Create(args url.Values) (*wal
 }
 
 func (f *walletTestSearchAndRecoverContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletTestSearchAndRecoverContext, api.WalletSearchAndRecoverData](
-		router, "test-search-and-recover", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*walletTestSearchAndRecoverContext, api.WalletSearchAndRecoverData](
+		router, "test-search-and-recover", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -52,7 +51,7 @@ type walletTestSearchAndRecoverContext struct {
 
 func (c *walletTestSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRecoverData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
-	rs := sp.GetResources()
+	rs := sp.GetConfig().GetNetworkResources()
 
 	// Try each derivation path across all of the iterations
 	var recoveredWallet *wallet.Wallet

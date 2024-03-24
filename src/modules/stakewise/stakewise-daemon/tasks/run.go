@@ -7,33 +7,31 @@ import (
 
 	"github.com/fatih/color"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
-	"github.com/nodeset-org/hyperdrive/shared/utils/log"
+	"github.com/rocket-pool/node-manager-core/utils"
+	"github.com/rocket-pool/node-manager-core/utils/log"
 )
 
 // Config
-var tasksInterval, _ = time.ParseDuration("5m")
-var taskCooldown, _ = time.ParseDuration("10s")
-
 const (
+	tasksInterval time.Duration = time.Minute * 5
+	taskCooldown  time.Duration = time.Second * 10
+
 	ErrorColor             = color.FgRed
 	WarningColor           = color.FgYellow
 	UpdateDepositDataColor = color.FgHiWhite
 )
 
 type TaskLoop struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-	sp     *swcommon.StakewiseServiceProvider
-	wg     *sync.WaitGroup
+	ctx context.Context
+	sp  *swcommon.StakewiseServiceProvider
+	wg  *sync.WaitGroup
 }
 
 func NewTaskLoop(sp *swcommon.StakewiseServiceProvider, wg *sync.WaitGroup) *TaskLoop {
-	ctx, cancel := context.WithCancel(context.Background())
 	return &TaskLoop{
-		ctx:    ctx,
-		cancel: cancel,
-		sp:     sp,
-		wg:     wg,
+		sp:  sp,
+		ctx: sp.GetContext(),
+		wg:  wg,
 	}
 }
 
@@ -46,13 +44,13 @@ func (t *TaskLoop) Run() error {
 	updateDepositData := NewUpdateDepositData(t.sp, log.NewColorLogger(UpdateDepositDataColor))
 
 	// Run the loop
+	t.wg.Add(1)
 	go func() {
 		for {
-			// Check the EC status
 			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
 			if err != nil {
 				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
+				if utils.SleepWithCancel(t.ctx, taskCooldown) {
 					break
 				}
 				continue
@@ -62,7 +60,7 @@ func (t *TaskLoop) Run() error {
 			err = t.sp.WaitBeaconClientSynced(t.ctx, false) // Force refresh the primary / fallback BC status
 			if err != nil {
 				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
+				if utils.SleepWithCancel(t.ctx, taskCooldown) {
 					break
 				}
 				continue
@@ -74,7 +72,7 @@ func (t *TaskLoop) Run() error {
 			}
 			// time.Sleep(taskCooldown)
 
-			if t.sleepAndCheckIfCancelled(tasksInterval) {
+			if utils.SleepWithCancel(t.ctx, tasksInterval) {
 				break
 			}
 		}
@@ -94,22 +92,4 @@ func (t *TaskLoop) Run() error {
 		}()
 	*/
 	return nil
-}
-
-func (t *TaskLoop) Stop() {
-	t.cancel()
-}
-
-func (t *TaskLoop) sleepAndCheckIfCancelled(duration time.Duration) bool {
-	timer := time.NewTimer(duration)
-	select {
-	case <-t.ctx.Done():
-		// Cancel occurred
-		timer.Stop()
-		return true
-
-	case <-timer.C:
-		// Duration has passed without a cancel
-		return false
-	}
 }

@@ -7,11 +7,12 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/eth-utils/beacon"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
+	duserver "github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -34,7 +35,7 @@ func (f *walletGenerateKeysContextFactory) Create(args url.Values) (*walletGener
 }
 
 func (f *walletGenerateKeysContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*walletGenerateKeysContext, api.WalletGenerateKeysData](
+	duserver.RegisterQuerylessGet[*walletGenerateKeysContext, api.WalletGenerateKeysData](
 		router, "generate-keys", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }

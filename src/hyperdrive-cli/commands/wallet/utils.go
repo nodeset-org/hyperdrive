@@ -9,14 +9,13 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/mitchellh/go-homedir"
-	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet/bip39"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
 )
@@ -47,11 +46,6 @@ var (
 		Name:    "mnemonic",
 		Aliases: []string{"m"},
 		Usage:   "The mnemonic phrase to recover the wallet from",
-	}
-	skipValidatorRecoveryFlag *cli.BoolFlag = &cli.BoolFlag{
-		Name:    "skip-validator-key-recovery",
-		Aliases: []string{"k"},
-		Usage:   "Recover the node wallet, but do not regenerate its validator keys",
 	}
 	addressFlag *cli.StringFlag = &cli.StringFlag{
 		Name:    "address",
@@ -148,7 +142,7 @@ func confirmMnemonic(mnemonic string) {
 }
 
 // Check for custom keys, prompt for their passwords, and store them in the custom keys file
-func promptForCustomKeyPasswords(hd *client.HyperdriveClient, cfg *config.HyperdriveConfig, testOnly bool) (string, error) {
+func promptForCustomKeyPasswords(hd *client.HyperdriveClient, cfg *hdconfig.HyperdriveConfig, testOnly bool) (string, error) {
 	// Check for the custom key directory
 	datapath, err := homedir.Expand(cfg.UserDataPath.Value)
 	if err != nil {
@@ -189,7 +183,7 @@ func promptForCustomKeyPasswords(hd *client.HyperdriveClient, cfg *config.Hyperd
 		}
 
 		// Deserialize it
-		keystore := types.ValidatorKeystore{}
+		keystore := beacon.ValidatorKeystore{}
 		err = json.Unmarshal(bytes, &keystore)
 		if err != nil {
 			return "", fmt.Errorf("error deserializing custom keystore %s: %w", file.Name(), err)
