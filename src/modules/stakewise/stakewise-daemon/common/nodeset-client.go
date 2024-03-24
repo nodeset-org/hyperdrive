@@ -25,6 +25,7 @@ const (
 	authHeader string = "Authorization"
 
 	// API paths
+	devPath         string = "dev"
 	depositDataPath string = "deposit-data"
 	metaPath        string = "meta"
 	validatorsPath  string = "validators"
@@ -45,12 +46,12 @@ type DepositDataResponse struct {
 	Data    []types.ExtendedDepositData `json:"data"`
 }
 
-// api/validators
 type ValidatorPubkeyStatus struct {
 	Pubkey beacon.ValidatorPubkey `json:"pubkey"`
 	Status string                 `json:"status"`
 }
 
+// api/dev/validators
 type ValidatorsResponse struct {
 	Data []ValidatorPubkeyStatus `json:"data"`
 }
@@ -149,7 +150,7 @@ func (c *NodesetClient) GetRegisteredValidators() ([]ValidatorPubkeyStatus, erro
 	queryParams := map[string]string{
 		"network": c.res.EthNetworkName,
 	}
-	response, err := c.submitRequest(http.MethodGet, nil, queryParams, validatorsPath)
+	response, err := c.submitRequest(http.MethodGet, nil, queryParams, devPath, validatorsPath)
 	if err != nil {
 		return nil, fmt.Errorf("error getting registered validators: %w", err)
 	}
