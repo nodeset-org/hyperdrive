@@ -63,7 +63,7 @@ func exit(c *cli.Context) error {
 		option.ID = activeValidators[i]
 		option.Display = fmt.Sprintf("%s (active since %s)", pubkey, time.Unix(0, 0)) // Placeholder, fill in with status details
 	}
-	selectedValidators, err := utils.GetMultiselectIndices(c, pubkeysFlag.Name, options, "Please select a validator to get the signed exit for:")
+	selectedValidators, err := utils.GetMultiselectIndices(c, pubkeysFlag.Name, options, "Please select a validator to exit:")
 	if err != nil {
 		return fmt.Errorf("error determining validator selection: %w", err)
 	}
