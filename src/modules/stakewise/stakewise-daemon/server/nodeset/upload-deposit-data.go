@@ -79,7 +79,6 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 
 	// Find the ones that haven't been uploaded yet
 	unregisteredKeys := []*eth2types.BLSPrivateKey{}
-	data.UnregisteredKeyCount = len(unregisteredKeys)
 	newPubkeys := []beacon.ValidatorPubkey{}
 	for _, key := range keys {
 		pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
@@ -89,7 +88,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 			newPubkeys = append(newPubkeys, pubkey)
 		}
 	}
-	data.NewPubkeys = newPubkeys
+	data.UnregisteredPubkeys = newPubkeys
 
 	if len(unregisteredKeys) == 0 {
 		return nil
