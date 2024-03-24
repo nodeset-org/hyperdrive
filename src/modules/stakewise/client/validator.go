@@ -29,8 +29,9 @@ func (r *ValidatorRequester) GetContext() *client.RequesterContext {
 	return r.context
 }
 
-// Get signed exit messages for the provided validators, with an optional epoch parameter. If not specified, the epoch from the current chain head will be used.
-func (r *ValidatorRequester) GetSignedExitMessage(pubkeys []beacon.ValidatorPubkey, epoch *uint64, noBroadcastBool bool) (*types.ApiResponse[swapi.ValidatorGetSignedExitMessagesData], error) {
+// Exit the provided validators from the Beacon Chain (or simply return their signed exit messages for later use without broadcasting),
+// with an optional epoch parameter. If not specified, the epoch from the current chain head will be used.
+func (r *ValidatorRequester) Exit(pubkeys []beacon.ValidatorPubkey, epoch *uint64, noBroadcastBool bool) (*types.ApiResponse[swapi.ValidatorExitData], error) {
 	args := map[string]string{
 		"pubkeys":      client.MakeBatchArg(pubkeys),
 		"no-broadcast": strconv.FormatBool(noBroadcastBool),
@@ -38,5 +39,5 @@ func (r *ValidatorRequester) GetSignedExitMessage(pubkeys []beacon.ValidatorPubk
 	if epoch != nil {
 		args["epoch"] = strconv.FormatUint(*epoch, 10)
 	}
-	return client.SendGetRequest[swapi.ValidatorGetSignedExitMessagesData](r, "get-signed-exit-messages", "GetSignedExitMessage", args)
+	return client.SendGetRequest[swapi.ValidatorExitData](r, "exit", "Exit", args)
 }

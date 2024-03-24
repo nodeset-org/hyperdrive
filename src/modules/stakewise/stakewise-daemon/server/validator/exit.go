@@ -25,25 +25,25 @@ const (
 // === Factory ===
 // ===============
 
-type validatorGetSignedExitMessagesContextFactory struct {
+type validatorExitContextFactory struct {
 	handler *ValidatorHandler
 }
 
-func (f *validatorGetSignedExitMessagesContextFactory) Create(args url.Values) (*validatorGetSignedExitMessagesContext, error) {
-	c := &validatorGetSignedExitMessagesContext{
+func (f *validatorExitContextFactory) Create(args url.Values) (*validatorExitContext, error) {
+	c := &validatorExitContext{
 		handler: f.handler,
 	}
 	inputErrs := []error{
 		server.ValidateOptionalArg("epoch", args, input.ValidateUint, &c.epoch, &c.isEpochSet),
 		server.ValidateArgBatch("pubkeys", args, pubkeyLimit, input.ValidatePubkey, &c.pubkeys),
-		server.ValidateOptionalArg("no-broadcast", args, input.ValidateBool, &c.noBroadcast, nil),
+		server.ValidateArg("no-broadcast", args, input.ValidateBool, &c.noBroadcast),
 	}
 	return c, errors.Join(inputErrs...)
 }
 
-func (f *validatorGetSignedExitMessagesContextFactory) RegisterRoute(router *mux.Router) {
-	duserver.RegisterQuerylessGet[*validatorGetSignedExitMessagesContext, api.ValidatorGetSignedExitMessagesData](
-		router, "get-signed-exit-messages", f, f.handler.serviceProvider.ServiceProvider,
+func (f *validatorExitContextFactory) RegisterRoute(router *mux.Router) {
+	duserver.RegisterQuerylessGet[*validatorExitContext, api.ValidatorExitData](
+		router, "exit", f, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -51,7 +51,7 @@ func (f *validatorGetSignedExitMessagesContextFactory) RegisterRoute(router *mux
 // === Context ===
 // ===============
 
-type validatorGetSignedExitMessagesContext struct {
+type validatorExitContext struct {
 	handler     *ValidatorHandler
 	epoch       uint64
 	isEpochSet  bool
@@ -59,12 +59,11 @@ type validatorGetSignedExitMessagesContext struct {
 	noBroadcast bool
 }
 
-func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorGetSignedExitMessagesData, opts *bind.TransactOpts) error {
+func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
 	ctx := sp.GetContext()
-	data.ExitInfos = map[string]api.ValidatorExitInfo{}
 
 	if len(c.pubkeys) == 0 {
 		return nil
@@ -100,12 +99,15 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 	if err != nil {
 		return fmt.Errorf("error getting Beacon domain data: %w", err)
 	}
+
 	// Get the statuses (indices) of each validator
 	statuses, err := bc.GetValidatorStatuses(ctx, c.pubkeys, nil)
 	if err != nil {
 		return fmt.Errorf("error getting validator indices: %w", err)
 	}
+
 	// Get the signatures
+	data.ExitInfos = make([]api.ValidatorExitInfo, len(keys))
 	for i, key := range keys {
 		// Get signed voluntary exit message
 		pubkey := c.pubkeys[i]
@@ -117,7 +119,8 @@ func (c *validatorGetSignedExitMessagesContext) PrepareData(data *api.ValidatorG
 		}
 		indexUint, _ := strconv.ParseUint(index, 10, 64)
 
-		data.ExitInfos[pubkey.HexWithPrefix()] = api.ValidatorExitInfo{
+		data.ExitInfos[i] = api.ValidatorExitInfo{
+			Pubkey:    pubkey,
 			Index:     indexUint,
 			Signature: signature,
 		}

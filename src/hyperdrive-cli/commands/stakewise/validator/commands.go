@@ -28,7 +28,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 					}
 
 					// Run
-					return getSignedExitMessages(c)
+					return exit(c)
 				},
 			},
 		},
