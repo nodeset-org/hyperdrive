@@ -13,6 +13,8 @@ import (
 // Config
 var tasksInterval, _ = time.ParseDuration("5m")
 var taskCooldown, _ = time.ParseDuration("10s")
+var sendExitTaskInterval, _ = time.ParseDuration("6h")
+var sendExitTaskCooldown, _ = time.ParseDuration("6h")
 
 const (
 	ErrorColor             = color.FgRed
@@ -92,7 +94,7 @@ func (t *TaskLoop) Run() error {
 			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
 			if err != nil {
 				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
+				if t.sleepAndCheckIfCancelled(sendExitTaskCooldown) {
 					break
 				}
 				continue
@@ -102,7 +104,7 @@ func (t *TaskLoop) Run() error {
 			err = t.sp.WaitBeaconClientSynced(t.ctx, false) // Force refresh the primary / fallback BC status
 			if err != nil {
 				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
+				if t.sleepAndCheckIfCancelled(sendExitTaskCooldown) {
 					break
 				}
 				continue
@@ -112,9 +114,8 @@ func (t *TaskLoop) Run() error {
 			if err := sendExitData.Run(); err != nil {
 				errorLog.Println(err)
 			}
-			// time.Sleep(taskCooldown)
 
-			if t.sleepAndCheckIfCancelled(tasksInterval) {
+			if t.sleepAndCheckIfCancelled(sendExitTaskInterval) {
 				break
 			}
 		}
