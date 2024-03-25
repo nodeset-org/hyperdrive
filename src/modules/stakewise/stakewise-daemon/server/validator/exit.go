@@ -104,7 +104,7 @@ func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bi
 		return fmt.Errorf("error getting validator indices: %w", err)
 	}
 	// Get the signatures
-	data.ExitInfos = []api.ValidatorExitInfo{}
+	data.ExitInfos = make([]api.ValidatorExitInfo, len(keys))
 	for i, key := range keys {
 		// Get signed voluntary exit message
 		pubkey := c.pubkeys[i]
