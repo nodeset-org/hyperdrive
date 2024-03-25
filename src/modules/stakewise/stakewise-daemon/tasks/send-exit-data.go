@@ -46,23 +46,30 @@ func (t *SendExitData) Run() error {
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}
 	head, err := bc.GetBeaconHead(context.Background())
+	if err != nil {
+		return fmt.Errorf("error getting beacon head: %w", err)
+	}
 
 	epoch := head.Epoch
 	signatureDomain, err := bc.GetDomainData(context.Background(), eth2types.DomainVoluntaryExit[:], epoch, false)
+	if err != nil {
+		return fmt.Errorf("error getting domain data: %w", err)
+	}
+
 	exitData := []swcommon.ExitData{}
 	for _, v := range resp {
-		fmt.Printf("Validator: %v\n", v)
 		if !v.Uploaded {
 			fmt.Printf("Validator %v has not been uploaded\n", v.Pubkey)
-			fmt.Printf("Attempting to generate exit data for validator %v\n", v.Pubkey)
 			key, err := w.GetPrivateKeyForPubkey(v.Pubkey)
 			if err != nil {
-				return fmt.Errorf("error getting private key for pubkey %v: %w", v.Pubkey, err)
+				fmt.Printf("error getting private key for pubkey %v: %w", v.Pubkey, err)
+				continue
 			}
 			index := statuses[v.Pubkey].Index
 			signature, err := utils.GetSignedExitMessage(key, index, epoch, signatureDomain)
 			if err != nil {
-				return fmt.Errorf("error getting signed exit message: %w", err)
+				fmt.Printf("error getting signed exit message: %w", err)
+				continue
 			}
 			exitData = append(exitData, swcommon.ExitData{
 				Pubkey: v.Pubkey.HexWithPrefix(),
@@ -77,6 +84,10 @@ func (t *SendExitData) Run() error {
 		}
 	}
 	ns.PostExitData(exitData)
-	fmt.Printf("Registered validators: %v\n", resp)
+	newPubkeys := []string{}
+	for _, d := range exitData {
+		newPubkeys = append(newPubkeys, d.Pubkey)
+	}
+	fmt.Printf("Registered validators: %v\n", newPubkeys)
 	return nil
 }
