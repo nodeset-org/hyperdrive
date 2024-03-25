@@ -28,15 +28,20 @@ func NewSendExitData(sp *swcommon.StakewiseServiceProvider, logger log.ColorLogg
 
 // Update Exit data
 func (t *SendExitData) Run() error {
-	t.log.Println("Checking Nodeset API...")
+	t.log.Println("Checking Nodeset API for Exit data status...")
+
+	// Get services
 	w := t.sp.GetWallet()
 	ns := t.sp.GetNodesetClient()
 	bc := t.sp.GetBeaconClient()
 
+	// Get registered validators
 	resp, err := ns.GetRegisteredValidators()
 	if err != nil {
 		return fmt.Errorf("error getting registered validators: %w", err)
 	}
+
+	// Get validator statuses
 	pubkeys := []beacon.ValidatorPubkey{}
 	for _, v := range resp {
 		pubkeys = append(pubkeys, v.Pubkey)
@@ -45,11 +50,12 @@ func (t *SendExitData) Run() error {
 	if err != nil {
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}
+
+	// Get beacon head and domain data
 	head, err := bc.GetBeaconHead(context.Background())
 	if err != nil {
 		return fmt.Errorf("error getting beacon head: %w", err)
 	}
-
 	epoch := head.Epoch
 	signatureDomain, err := bc.GetDomainData(context.Background(), eth2types.DomainVoluntaryExit[:], epoch, false)
 	if err != nil {
@@ -62,12 +68,15 @@ func (t *SendExitData) Run() error {
 			fmt.Printf("Validator %v has not been uploaded\n", v.Pubkey)
 			key, err := w.GetPrivateKeyForPubkey(v.Pubkey)
 			if err != nil {
+				// Print message and continue because we don't want to stop the loop
 				fmt.Printf("error getting private key for pubkey %v: %w", v.Pubkey, err)
 				continue
 			}
 			index := statuses[v.Pubkey].Index
 			signature, err := utils.GetSignedExitMessage(key, index, epoch, signatureDomain)
 			if err != nil {
+				// Print message and continue because we don't want to stop the loop
+				// Index might not be ready
 				fmt.Printf("error getting signed exit message: %w", err)
 				continue
 			}
@@ -83,7 +92,10 @@ func (t *SendExitData) Run() error {
 			})
 		}
 	}
+
+	// Post exit data
 	ns.PostExitData(exitData)
+
 	newPubkeys := []string{}
 	for _, d := range exitData {
 		newPubkeys = append(newPubkeys, d.Pubkey)
