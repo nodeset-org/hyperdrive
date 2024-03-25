@@ -116,7 +116,7 @@ func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bi
 		}
 		indexUint, _ := strconv.ParseUint(index, 10, 64)
 
-		data.ExitInfos[indexUint] = api.ValidatorExitInfo{
+		data.ExitInfos[i] = api.ValidatorExitInfo{
 			Pubkey:    pubkey,
 			Index:     indexUint,
 			Signature: signature,
