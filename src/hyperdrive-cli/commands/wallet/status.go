@@ -31,7 +31,7 @@ func getStatus(c *cli.Context) error {
 		return err
 	}
 
-	// Print status and return
+	// Print status & return
 	status := response.Data.WalletStatus
 	if !status.Address.HasAddress {
 		fmt.Println("The node wallet has not been initialized with an address yet.")
