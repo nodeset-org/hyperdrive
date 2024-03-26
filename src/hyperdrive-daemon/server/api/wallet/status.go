@@ -2,8 +2,6 @@ package wallet
 
 import (
 	"context"
-	"math"
-	"math/big"
 	"net/url"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -56,10 +54,8 @@ func (c *walletStatusContext) PrepareData(data *api.WalletStatusData, opts *bind
 	if err != nil {
 		return err
 	}
-	weiInEth := new(big.Float).SetInt(balance)
-	ethValue := new(big.Float).Quo(weiInEth, big.NewFloat(math.Pow10(18)))
 
-	status.Wallet.WalletBalance = *ethValue
+	status.Wallet.WalletBalance = *balance
 	data.WalletStatus = status
 	return nil
 }

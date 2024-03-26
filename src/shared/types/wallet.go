@@ -18,7 +18,7 @@ type WalletStatus struct {
 		IsLoaded      bool           `json:"isLoaded"`
 		IsOnDisk      bool           `json:"isOnDisk"`
 		WalletAddress common.Address `json:"walletAddress"`
-		WalletBalance big.Float      `json:"walletBalance"`
+		WalletBalance big.Int        `json:"walletBalance"`
 	} `json:"wallet"`
 
 	Password struct {
