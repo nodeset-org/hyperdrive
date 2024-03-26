@@ -43,7 +43,6 @@ type walletStatusContext struct {
 
 func (c *walletStatusContext) PrepareData(data *api.WalletStatusData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
-	// TODO: HUY
 	w := sp.GetWallet()
 	ec := sp.GetEthClient()
 	nodeAddress, _ := w.GetAddress()
