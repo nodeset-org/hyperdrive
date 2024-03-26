@@ -54,12 +54,12 @@ func getStatus(c *cli.Context) error {
 	if status.Address.NodeAddress != status.Wallet.WalletAddress {
 		fmt.Printf("The node wallet is initialized, but you are currently masquerading as %s%s%s.\n", terminal.ColorBlue, status.Address.NodeAddress.Hex(), terminal.ColorReset)
 		fmt.Printf("Your node wallet is for %s%s%s.\n", terminal.ColorBlue, status.Wallet.WalletAddress.Hex(), terminal.ColorReset)
-		fmt.Printf("The node wallet balance is: %s%s%s ETH. \n", terminal.ColorGreen, status.Wallet.WalletBalance.String(), terminal.ColorReset)
+		fmt.Printf("The node wallet balance is: %s%s%s ETH.\n", terminal.ColorGreen, status.Wallet.WalletBalance.String(), terminal.ColorReset)
 		fmt.Printf("%sDue to this mismatch, your node is running in 'read-only' mode and cannot submit transactions.%s\n", terminal.ColorYellow, terminal.ColorReset)
 	} else {
 		fmt.Println("The node wallet is initialized and ready.")
 		fmt.Printf("Node account: %s%s%s\n", terminal.ColorGreen, status.Wallet.WalletAddress.Hex(), terminal.ColorReset)
-		fmt.Printf("The node wallet balance is: %s%s%s ETH. \n", terminal.ColorGreen, status.Wallet.WalletBalance.String(), terminal.ColorReset)
+		fmt.Printf("The node wallet balance is: %s%s%s ETH.\n", terminal.ColorGreen, status.Wallet.WalletBalance.String(), terminal.ColorReset)
 		fmt.Printf("%sThe node's wallet keystore matches this address; it will be able to submit transactions.%s", terminal.ColorGreen, terminal.ColorReset)
 	}
 
