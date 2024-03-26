@@ -12,7 +12,6 @@ import (
 func getStatus(c *cli.Context) error {
 	// Get Hyperdrive client
 	hd := client.NewHyperdriveClientFromCtx(c)
-
 	// Get the config
 	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
@@ -24,14 +23,14 @@ func getStatus(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-
+	// TODO: HUY
 	// Get wallet response
 	response, err := hd.Api.Wallet.Status()
 	if err != nil {
 		return err
 	}
 
-	// Print status & return
+	// Print status
 	status := response.Data.WalletStatus
 	if !status.Address.HasAddress {
 		fmt.Println("The node wallet has not been initialized with an address yet.")
@@ -70,5 +69,8 @@ func getStatus(c *cli.Context) error {
 		fmt.Println("You will have to manually re-enter it with `hyperdrive wallet set-password` after a restart to be able to submit transactions.")
 	}
 
+	// Print the wallet balance
+	fmt.Println()
+	fmt.Printf("Wallet balance: %s%v%s\n", terminal.ColorGreen, status.Wallet.WalletBalance.String(), terminal.ColorReset)
 	return nil
 }

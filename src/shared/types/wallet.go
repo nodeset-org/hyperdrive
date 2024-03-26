@@ -1,6 +1,8 @@
 package types
 
 import (
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/google/uuid"
 )
@@ -16,6 +18,7 @@ type WalletStatus struct {
 		IsLoaded      bool           `json:"isLoaded"`
 		IsOnDisk      bool           `json:"isOnDisk"`
 		WalletAddress common.Address `json:"walletAddress"`
+		WalletBalance big.Float      `json:"walletBalance"`
 	} `json:"wallet"`
 
 	Password struct {

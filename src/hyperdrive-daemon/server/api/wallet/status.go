@@ -1,6 +1,9 @@
 package wallet
 
 import (
+	"context"
+	"math"
+	"math/big"
 	"net/url"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -40,12 +43,24 @@ type walletStatusContext struct {
 
 func (c *walletStatusContext) PrepareData(data *api.WalletStatusData, opts *bind.TransactOpts) error {
 	sp := c.handler.serviceProvider
+	// TODO: HUY
 	w := sp.GetWallet()
+	ec := sp.GetEthClient()
+	nodeAddress, _ := w.GetAddress()
+
+	balance, err := ec.BalanceAt(context.Background(), nodeAddress, nil)
+	if err != nil {
+		return err
+	}
 
 	status, err := w.GetStatus()
 	if err != nil {
 		return err
 	}
+	weiInEth := new(big.Float).SetInt(balance)
+	ethValue := new(big.Float).Quo(weiInEth, big.NewFloat(math.Pow10(18)))
+
+	status.Wallet.WalletBalance = *ethValue
 	data.WalletStatus = status
 	return nil
 }
