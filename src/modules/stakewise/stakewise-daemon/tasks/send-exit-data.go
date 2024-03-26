@@ -94,12 +94,16 @@ func (t *SendExitData) Run() error {
 	}
 
 	// Post exit data
-	ns.PostExitData(exitData)
+	if len(exitData) != 0 {
+		ns.PostExitData(exitData)
 
-	newPubkeys := []string{}
-	for _, d := range exitData {
-		newPubkeys = append(newPubkeys, d.Pubkey)
+		newPubkeys := []string{}
+		for _, d := range exitData {
+			newPubkeys = append(newPubkeys, d.Pubkey)
+		}
+		fmt.Printf("Registered validators: %v\n", newPubkeys)
 	}
-	fmt.Printf("Registered validators: %v\n", newPubkeys)
+
+	fmt.Printf("No new validators to upload\n")
 	return nil
 }
