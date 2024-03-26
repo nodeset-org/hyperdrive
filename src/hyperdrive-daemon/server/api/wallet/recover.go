@@ -66,7 +66,7 @@ func (c *walletRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bi
 		return types.ResponseStatus_Error, fmt.Errorf("error getting wallet status: %w", err)
 	}
 	if status.Wallet.IsOnDisk {
-		return types.ResponseStatus_ResourceExists, fmt.Errorf("a wallet is already present")
+		return types.ResponseStatus_ResourceConflict, fmt.Errorf("a wallet is already present")
 	}
 
 	// Parse the derivation path
