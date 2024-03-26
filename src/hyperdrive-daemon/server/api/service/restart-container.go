@@ -44,12 +44,16 @@ type serviceRestartContainerContext struct {
 	container string
 }
 
-func (c *serviceRestartContainerContext) PrepareData(data *types.SuccessData, opts *bind.TransactOpts) error {
+func (c *serviceRestartContainerContext) PrepareData(data *types.SuccessData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	cfg := sp.GetConfig()
 	d := sp.GetDocker()
 	ctx := sp.GetContext()
 
 	id := cfg.GetDockerArtifactName(c.container)
-	return d.ContainerRestart(ctx, id, container.StopOptions{})
+	err := d.ContainerRestart(ctx, id, container.StopOptions{})
+	if err != nil {
+		return types.ResponseStatus_Error, err
+	}
+	return types.ResponseStatus_Success, nil
 }

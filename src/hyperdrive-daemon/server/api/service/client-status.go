@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -39,7 +40,7 @@ type serviceClientStatusContext struct {
 	handler *ServiceHandler
 }
 
-func (c *serviceClientStatusContext) PrepareData(data *api.ServiceClientStatusData, opts *bind.TransactOpts) error {
+func (c *serviceClientStatusContext) PrepareData(data *api.ServiceClientStatusData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
 	bc := sp.GetBeaconClient()
@@ -63,5 +64,5 @@ func (c *serviceClientStatusContext) PrepareData(data *api.ServiceClientStatusDa
 	}()
 
 	wg.Wait()
-	return nil
+	return types.ResponseStatus_Success, nil
 }

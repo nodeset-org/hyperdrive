@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/rocket-pool/node-manager-core/node/wallet"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 )
@@ -57,7 +58,7 @@ type walletSearchAndRecoverContext struct {
 	savePassword bool
 }
 
-func (c *walletSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRecoverData, opts *bind.TransactOpts) error {
+func (c *walletSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRecoverData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 	rs := sp.GetConfig().GetNetworkResources()
@@ -65,10 +66,10 @@ func (c *walletSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRec
 	// Requirements
 	status, err := w.GetStatus()
 	if err != nil {
-		return fmt.Errorf("error getting wallet status: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting wallet status: %w", err)
 	}
 	if status.Wallet.IsOnDisk {
-		return fmt.Errorf("a wallet is already present")
+		return types.ResponseStatus_ResourceExists, fmt.Errorf("a wallet is already present")
 	}
 
 	// Try each derivation path across all of the iterations
@@ -82,7 +83,7 @@ func (c *walletSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRec
 			derivationPath := paths[j]
 			recoveredWallet, err := wallet.TestRecovery(derivationPath, i, c.mnemonic, rs.ChainID)
 			if err != nil {
-				return fmt.Errorf("error recovering wallet with path [%s], index [%d]: %w", derivationPath, i, err)
+				return types.ResponseStatus_Error, fmt.Errorf("error recovering wallet with path [%s], index [%d]: %w", derivationPath, i, err)
 			}
 
 			// Get recovered account
@@ -101,14 +102,14 @@ func (c *walletSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRec
 	}
 
 	if !data.FoundWallet {
-		return fmt.Errorf("exhausted all derivation paths and indices from 0 to %d, wallet not found", findIterations)
+		return types.ResponseStatus_ResourceNotFound, fmt.Errorf("exhausted all derivation paths and indices from 0 to %d, wallet not found", findIterations)
 	}
 
 	// Recover the wallet
 	err = w.Recover(data.DerivationPath, data.Index, c.mnemonic, c.password, c.savePassword, false)
 	if err != nil {
-		return fmt.Errorf("error recovering wallet: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error recovering wallet: %w", err)
 	}
 	data.AccountAddress, _ = w.GetAddress()
-	return nil
+	return types.ResponseStatus_Success, nil
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -60,7 +61,7 @@ type txBatchSignTxsContext struct {
 	body    api.BatchSubmitTxsBody
 }
 
-func (c *txBatchSignTxsContext) PrepareData(data *api.TxBatchSignTxData, opts *bind.TransactOpts) error {
+func (c *txBatchSignTxsContext) PrepareData(data *api.TxBatchSignTxData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
 	txMgr := sp.GetTransactionManager()
@@ -71,7 +72,7 @@ func (c *txBatchSignTxsContext) PrepareData(data *api.TxBatchSignTxData, opts *b
 		sp.RequireWalletReady(),
 	)
 	if err != nil {
-		return err
+		return types.ResponseStatus_WalletNotReady, err
 	}
 
 	// Get the first nonce
@@ -81,7 +82,7 @@ func (c *txBatchSignTxsContext) PrepareData(data *api.TxBatchSignTxData, opts *b
 	} else {
 		nonce, err := ec.NonceAt(ctx, nodeAddress, nil)
 		if err != nil {
-			return fmt.Errorf("error getting latest nonce for node: %w", err)
+			return types.ResponseStatus_Error, fmt.Errorf("error getting latest nonce for node: %w", err)
 		}
 		currentNonce = big.NewInt(0).SetUint64(nonce)
 	}
@@ -95,11 +96,11 @@ func (c *txBatchSignTxsContext) PrepareData(data *api.TxBatchSignTxData, opts *b
 
 		tx, err := txMgr.SignTransaction(submission.TxInfo, opts)
 		if err != nil {
-			return fmt.Errorf("error signing transaction %d: %w", i, err)
+			return types.ResponseStatus_Error, fmt.Errorf("error signing transaction %d: %w", i, err)
 		}
 		bytes, err := tx.MarshalBinary()
 		if err != nil {
-			return fmt.Errorf("error marshalling transaction: %w", err)
+			return types.ResponseStatus_Error, fmt.Errorf("error marshalling transaction: %w", err)
 		}
 		encodedString := hex.EncodeToString(bytes)
 		signedTxs = append(signedTxs, encodedString)
@@ -109,5 +110,5 @@ func (c *txBatchSignTxsContext) PrepareData(data *api.TxBatchSignTxData, opts *b
 	}
 
 	data.SignedTxs = signedTxs
-	return nil
+	return types.ResponseStatus_Success, nil
 }

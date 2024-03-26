@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
@@ -46,7 +47,7 @@ type walletSignMessageContext struct {
 	message []byte
 }
 
-func (c *walletSignMessageContext) PrepareData(data *api.WalletSignMessageData, opts *bind.TransactOpts) error {
+func (c *walletSignMessageContext) PrepareData(data *api.WalletSignMessageData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 
@@ -54,13 +55,13 @@ func (c *walletSignMessageContext) PrepareData(data *api.WalletSignMessageData, 
 		sp.RequireWalletReady(),
 	)
 	if err != nil {
-		return err
+		return types.ResponseStatus_WalletNotReady, err
 	}
 
 	signedBytes, err := w.SignMessage(c.message)
 	if err != nil {
-		return fmt.Errorf("error signing message: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error signing message: %w", err)
 	}
 	data.SignedMessage = signedBytes
-	return nil
+	return types.ResponseStatus_Success, nil
 }

@@ -11,6 +11,7 @@ import (
 	duserver "github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/rocket-pool/node-manager-core/node/validator"
 	"github.com/rocket-pool/node-manager-core/utils/input"
@@ -59,20 +60,20 @@ type validatorExitContext struct {
 	noBroadcast bool
 }
 
-func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bind.TransactOpts) error {
+func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
 	ctx := sp.GetContext()
 
 	if len(c.pubkeys) == 0 {
-		return nil
+		return types.ResponseStatus_Success, nil
 	}
 
 	// Requirements
 	err := sp.RequireBeaconClientSynced(ctx)
 	if err != nil {
-		return err
+		return types.ResponseStatus_ClientsNotSynced, err
 	}
 
 	// Load the keys
@@ -80,7 +81,7 @@ func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bi
 	for i, pubkey := range c.pubkeys {
 		key, err := w.GetPrivateKeyForPubkey(pubkey)
 		if err != nil {
-			return err
+			return types.ResponseStatus_Error, err
 		}
 		keys[i] = key
 	}
@@ -89,7 +90,7 @@ func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bi
 	if !c.isEpochSet {
 		head, err := bc.GetBeaconHead(ctx)
 		if err != nil {
-			return fmt.Errorf("error getting beacon head: %w", err)
+			return types.ResponseStatus_Error, fmt.Errorf("error getting beacon head: %w", err)
 		}
 		c.epoch = head.Epoch
 	}
@@ -97,13 +98,13 @@ func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bi
 	// Get the BlsToExecutionChange signature domain
 	signatureDomain, err := bc.GetDomainData(ctx, eth2types.DomainVoluntaryExit[:], c.epoch, false)
 	if err != nil {
-		return fmt.Errorf("error getting Beacon domain data: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting Beacon domain data: %w", err)
 	}
 
 	// Get the statuses (indices) of each validator
 	statuses, err := bc.GetValidatorStatuses(ctx, c.pubkeys, nil)
 	if err != nil {
-		return fmt.Errorf("error getting validator indices: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting validator indices: %w", err)
 	}
 
 	// Get the signatures
@@ -115,7 +116,7 @@ func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bi
 
 		signature, err := validator.GetSignedExitMessage(key, index, c.epoch, signatureDomain)
 		if err != nil {
-			return fmt.Errorf("error getting exit message signature for validator %s: %w", pubkey.Hex(), err)
+			return types.ResponseStatus_Error, fmt.Errorf("error getting exit message signature for validator %s: %w", pubkey.Hex(), err)
 		}
 		indexUint, _ := strconv.ParseUint(index, 10, 64)
 
@@ -127,10 +128,10 @@ func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bi
 		if !c.noBroadcast {
 			err = bc.ExitValidator(ctx, index, c.epoch, signature)
 			if err != nil {
-				return fmt.Errorf("error exiting validator %s: %w", pubkey.Hex(), err)
+				return types.ResponseStatus_Error, fmt.Errorf("error exiting validator %s: %w", pubkey.Hex(), err)
 			}
 		}
 	}
 
-	return nil
+	return types.ResponseStatus_Success, nil
 }

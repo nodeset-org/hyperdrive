@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/rocket-pool/node-manager-core/wallet"
@@ -55,30 +56,30 @@ type walletRecoverContext struct {
 	savePassword   bool
 }
 
-func (c *walletRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bind.TransactOpts) error {
+func (c *walletRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 
 	// Requirements
 	status, err := w.GetStatus()
 	if err != nil {
-		return fmt.Errorf("error getting wallet status: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting wallet status: %w", err)
 	}
 	if status.Wallet.IsOnDisk {
-		return fmt.Errorf("a wallet is already present")
+		return types.ResponseStatus_ResourceExists, fmt.Errorf("a wallet is already present")
 	}
 
 	// Parse the derivation path
 	path, err := nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
 	if err != nil {
-		return err
+		return types.ResponseStatus_InvalidArguments, err
 	}
 
 	// Recover the wallet
 	err = w.Recover(path, uint(c.index), c.mnemonic, c.password, c.savePassword, false)
 	if err != nil {
-		return fmt.Errorf("error recovering wallet: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error recovering wallet: %w", err)
 	}
 	data.AccountAddress, _ = w.GetAddress()
-	return nil
+	return types.ResponseStatus_Success, nil
 }

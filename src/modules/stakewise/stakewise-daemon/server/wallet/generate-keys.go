@@ -11,6 +11,7 @@ import (
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 )
@@ -50,7 +51,7 @@ type walletGenerateKeysContext struct {
 	restartVc bool
 }
 
-func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData, opts *bind.TransactOpts) error {
+func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	client := sp.GetHyperdriveClient()
 	wallet := sp.GetWallet()
@@ -58,11 +59,11 @@ func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData
 	// Get the wallet status
 	response, err := client.Wallet.Status()
 	if err != nil {
-		return fmt.Errorf("error getting wallet status: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting wallet status: %w", err)
 	}
 	status := response.Data.WalletStatus
 	if !status.Wallet.IsLoaded {
-		return fmt.Errorf("hyperdrive does not currently have a wallet ready")
+		return types.ResponseStatus_WalletNotReady, fmt.Errorf("hyperdrive does not currently have a wallet ready")
 	}
 
 	// Requirements
@@ -78,7 +79,7 @@ func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData
 	for i := 0; i < int(c.count); i++ {
 		key, err := wallet.GenerateNewValidatorKey()
 		if err != nil {
-			return fmt.Errorf("error generating validator key: %w", err)
+			return types.ResponseStatus_Error, fmt.Errorf("error generating validator key: %w", err)
 		}
 		pubkeys[i] = beacon.ValidatorPubkey(key.PublicKey().Marshal())
 	}
@@ -88,8 +89,8 @@ func (c *walletGenerateKeysContext) PrepareData(data *api.WalletGenerateKeysData
 	if c.restartVc {
 		_, err = client.Service.RestartContainer(string(swconfig.ContainerID_StakewiseValidator))
 		if err != nil {
-			return err
+			return types.ResponseStatus_Error, err
 		}
 	}
-	return nil
+	return types.ResponseStatus_Success, nil
 }

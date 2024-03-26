@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -38,10 +39,10 @@ type serviceGetConfigContext struct {
 	handler *ServiceHandler
 }
 
-func (c *serviceGetConfigContext) PrepareData(data *api.ServiceGetConfigData, opts *bind.TransactOpts) error {
+func (c *serviceGetConfigContext) PrepareData(data *api.ServiceGetConfigData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	cfg := sp.GetConfig()
 
 	data.Config = cfg.Serialize(nil)
-	return nil
+	return types.ResponseStatus_Success, nil
 }

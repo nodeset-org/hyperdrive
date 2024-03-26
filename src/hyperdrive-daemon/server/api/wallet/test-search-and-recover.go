@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/rocket-pool/node-manager-core/node/wallet"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 )
@@ -49,7 +50,7 @@ type walletTestSearchAndRecoverContext struct {
 	address  common.Address
 }
 
-func (c *walletTestSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRecoverData, opts *bind.TransactOpts) error {
+func (c *walletTestSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRecoverData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	rs := sp.GetConfig().GetNetworkResources()
 
@@ -66,7 +67,7 @@ func (c *walletTestSearchAndRecoverContext) PrepareData(data *api.WalletSearchAn
 			derivationPath := paths[j]
 			recoveredWallet, err = wallet.TestRecovery(derivationPath, i, c.mnemonic, rs.ChainID)
 			if err != nil {
-				return fmt.Errorf("error recovering wallet with path [%s], index [%d]: %w", derivationPath, i, err)
+				return types.ResponseStatus_Error, fmt.Errorf("error recovering wallet with path [%s], index [%d]: %w", derivationPath, i, err)
 			}
 
 			// Get recovered account
@@ -85,8 +86,8 @@ func (c *walletTestSearchAndRecoverContext) PrepareData(data *api.WalletSearchAn
 	}
 
 	if !data.FoundWallet {
-		return fmt.Errorf("exhausted all derivation paths and indices from 0 to %d, wallet not found", findIterations)
+		return types.ResponseStatus_ResourceNotFound, fmt.Errorf("exhausted all derivation paths and indices from 0 to %d, wallet not found", findIterations)
 	}
 	data.AccountAddress, _ = recoveredWallet.GetAddress()
-	return nil
+	return types.ResponseStatus_Success, nil
 }

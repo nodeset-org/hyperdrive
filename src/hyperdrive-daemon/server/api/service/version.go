@@ -8,6 +8,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -39,7 +40,7 @@ type serviceVersionContext struct {
 	handler *ServiceHandler
 }
 
-func (c *serviceVersionContext) PrepareData(data *api.ServiceVersionData, opts *bind.TransactOpts) error {
+func (c *serviceVersionContext) PrepareData(data *api.ServiceVersionData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	data.Version = shared.HyperdriveVersion
-	return nil
+	return types.ResponseStatus_Success, nil
 }

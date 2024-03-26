@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -59,7 +60,7 @@ type txBatchSubmitTxsContext struct {
 	body    api.BatchSubmitTxsBody
 }
 
-func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.TransactOpts) error {
+func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 	ec := sp.GetEthClient()
@@ -70,7 +71,7 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 		sp.RequireWalletReady(),
 	)
 	if err != nil {
-		return err
+		return types.ResponseStatus_WalletNotReady, err
 	}
 
 	// Get the first nonce
@@ -80,7 +81,7 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 	} else {
 		nonce, err := ec.NonceAt(ctx, nodeAddress, nil)
 		if err != nil {
-			return fmt.Errorf("error getting latest nonce for node: %w", err)
+			return types.ResponseStatus_Error, fmt.Errorf("error getting latest nonce for node: %w", err)
 		}
 		currentNonce = big.NewInt(0).SetUint64(nonce)
 	}
@@ -94,7 +95,7 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 
 		tx, err := txMgr.ExecuteTransaction(submission.TxInfo, opts)
 		if err != nil {
-			return fmt.Errorf("error submitting transaction %d: %w", i, err)
+			return types.ResponseStatus_Error, fmt.Errorf("error submitting transaction %d: %w", i, err)
 		}
 		txHashes[i] = tx.Hash()
 
@@ -103,5 +104,5 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 	}
 
 	data.TxHashes = txHashes
-	return nil
+	return types.ResponseStatus_Success, nil
 }

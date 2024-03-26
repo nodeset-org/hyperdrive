@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -45,15 +46,15 @@ type walletGenerateValidatorKeyContext struct {
 	path    string
 }
 
-func (c *walletGenerateValidatorKeyContext) PrepareData(data *api.WalletGenerateValidatorKeyData, opts *bind.TransactOpts) error {
+func (c *walletGenerateValidatorKeyContext) PrepareData(data *api.WalletGenerateValidatorKeyData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 
 	key, err := w.GenerateValidatorKey(c.path)
 	if err != nil {
-		return fmt.Errorf("error generating validator key: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error generating validator key: %w", err)
 	}
 
 	data.PrivateKey = key
-	return nil
+	return types.ResponseStatus_Success, nil
 }

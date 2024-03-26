@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -38,14 +39,14 @@ type walletStatusContext struct {
 	handler *WalletHandler
 }
 
-func (c *walletStatusContext) PrepareData(data *api.WalletStatusData, opts *bind.TransactOpts) error {
+func (c *walletStatusContext) PrepareData(data *api.WalletStatusData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 
 	status, err := w.GetStatus()
 	if err != nil {
-		return err
+		return types.ResponseStatus_Error, err
 	}
 	data.WalletStatus = status
-	return nil
+	return types.ResponseStatus_Success, nil
 }

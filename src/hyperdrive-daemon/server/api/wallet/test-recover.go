@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/rocket-pool/node-manager-core/wallet"
@@ -51,21 +52,21 @@ type walletTestRecoverContext struct {
 	index          uint64
 }
 
-func (c *walletTestRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bind.TransactOpts) error {
+func (c *walletTestRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	rs := sp.GetConfig().GetNetworkResources()
 
 	// Parse the derivation path
 	path, err := nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
 	if err != nil {
-		return err
+		return types.ResponseStatus_InvalidArguments, err
 	}
 
 	// Recover the wallet
 	w, err := nodewallet.TestRecovery(path, uint(c.index), c.mnemonic, rs.ChainID)
 	if err != nil {
-		return fmt.Errorf("error recovering wallet: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error recovering wallet: %w", err)
 	}
 	data.AccountAddress, _ = w.GetAddress()
-	return nil
+	return types.ResponseStatus_Success, nil
 }

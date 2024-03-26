@@ -48,7 +48,7 @@ type nodesetSetValidatorsRootContext struct {
 	root    common.Hash
 }
 
-func (c *nodesetSetValidatorsRootContext) PrepareData(data *types.TxInfoData, opts *bind.TransactOpts) error {
+func (c *nodesetSetValidatorsRootContext) PrepareData(data *types.TxInfoData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
 	res := sp.GetResources()
@@ -56,12 +56,12 @@ func (c *nodesetSetValidatorsRootContext) PrepareData(data *types.TxInfoData, op
 
 	vault, err := swcontracts.NewStakewiseVault(res.Vault, ec, txMgr)
 	if err != nil {
-		return fmt.Errorf("error creating Stakewise Vault binding: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error creating Stakewise Vault binding: %w", err)
 	}
 
 	data.TxInfo, err = vault.SetDepositDataRoot(c.root, opts)
 	if err != nil {
-		return fmt.Errorf("error creating SetDepositDataRoot TX: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error creating SetDepositDataRoot TX: %w", err)
 	}
-	return nil
+	return types.ResponseStatus_Success, nil
 }
