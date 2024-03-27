@@ -76,10 +76,10 @@ func getStatus(c *cli.Context) error {
 	return nil
 }
 
-// Converts Wei to ETH by dividing the balance by 10^18 and returns it as a string.
+// Converts Wei to ETH as a string.
 func weiToEth(wei *big.Int) string {
-	ethValue := new(big.Float).SetInt(wei)              // Convert *big.Int to *big.Float
-	ethInWei := new(big.Float).SetFloat64(1e18)         // Define 1 ETH in Wei
-	ethAmount := new(big.Float).Quo(ethValue, ethInWei) // Divide Wei by 1e18 to get ETH
-	return ethAmount.Text('f', 18)                      // Convert to string with 18 decimal places
+	ethValue := new(big.Float).SetInt(wei)
+	ethInWei := new(big.Float).SetFloat64(1e18)
+	ethAmount := new(big.Float).Quo(ethValue, ethInWei)
+	return ethAmount.Text('f', 18)
 }
