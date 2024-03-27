@@ -70,17 +70,22 @@ func (t *TaskLoop) Run() error {
 				continue
 			}
 
+			// Tasks start here
+
 			// Update deposit data from the NodeSet server
 			if err := updateDepositData.Run(); err != nil {
 				errorLog.Println(err)
 			}
-			time.Sleep(taskCooldown)
+			if t.sleepAndCheckIfCancelled(taskCooldown) {
+				break
+			}
 
 			// Submit missing exit messages to the NodeSet server
 			if err := sendExitData.Run(); err != nil {
 				errorLog.Println(err)
 			}
-			// time.Sleep(taskCooldown)
+
+			// Tasks end here
 
 			if t.sleepAndCheckIfCancelled(tasksInterval) {
 				break
