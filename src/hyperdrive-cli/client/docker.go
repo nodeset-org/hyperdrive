@@ -26,7 +26,7 @@ func (c *HyperdriveClient) GetValidatorContainers(projectName string) ([]string,
 	if err != nil {
 		return nil, err
 	}
-	cl, err := d.ContainerList(context.Background(), dt.ContainerListOptions{All: true})
+	cl, err := d.ContainerList(context.Background(), dtc.ListOptions{All: true})
 	if err != nil {
 		return nil, fmt.Errorf("error getting container list: %w", err)
 	}
@@ -90,7 +90,7 @@ func (c *HyperdriveClient) StartContainer(containerName string) error {
 	if err != nil {
 		return err
 	}
-	return d.ContainerStart(context.Background(), containerName, dt.ContainerStartOptions{})
+	return d.ContainerStart(context.Background(), containerName, dtc.StartOptions{})
 }
 
 // Restart a container
@@ -108,7 +108,7 @@ func (c *HyperdriveClient) RemoveContainer(containerName string) error {
 	if err != nil {
 		return err
 	}
-	return d.ContainerRemove(context.Background(), containerName, dt.ContainerRemoveOptions{})
+	return d.ContainerRemove(context.Background(), containerName, dtc.RemoveOptions{})
 }
 
 // Deletes a volume
