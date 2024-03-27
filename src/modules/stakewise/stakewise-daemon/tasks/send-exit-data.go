@@ -49,7 +49,7 @@ func (t *SendExitData) Run() error {
 			continue
 		}
 		missingExitPubkeys = append(missingExitPubkeys, v.Pubkey)
-		fmt.Printf("Validator %v is missing a signed exit message.\n", v.Pubkey)
+		fmt.Printf("Validator %s is missing a signed exit message.\n", v.Pubkey.HexWithPrefix())
 	}
 	if len(missingExitPubkeys) == 0 {
 		return nil
@@ -108,7 +108,7 @@ func (t *SendExitData) Run() error {
 			return fmt.Errorf("error uploading signed exit messages to NodeSet: %w", err)
 		}
 
-		fmt.Println("Registered validators:")
+		fmt.Println("Uploaded exit messages for validators:")
 		for _, d := range exitData {
 			fmt.Printf("\t%s\n", d.Pubkey)
 		}

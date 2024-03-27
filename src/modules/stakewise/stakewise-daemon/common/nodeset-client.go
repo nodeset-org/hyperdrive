@@ -122,12 +122,6 @@ func (c *NodesetClient) UploadDepositData(depositData []byte) ([]byte, error) {
 
 // Submit signed exit data to Nodeset
 func (c *NodesetClient) UploadSignedExitData(exitData []ExitData) ([]byte, error) {
-	// Ensure authorization signature exists
-	err := c.EnsureAuthSignatureExists()
-	if err != nil {
-		return nil, fmt.Errorf("error ensuring auth signature: %w", err)
-	}
-
 	// Serialize the exit data into JSON
 	jsonData, err := json.Marshal(exitData)
 	if err != nil {
