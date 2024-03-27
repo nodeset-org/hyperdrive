@@ -43,8 +43,10 @@ func (t *TaskLoop) Run() error {
 	// Initialize loggers
 	errorLog := log.NewColorLogger(ErrorColor)
 
-	// Initialize fetch and update local deposit data task
+	// Initialize tasks
 	updateDepositData := NewUpdateDepositData(t.sp, log.NewColorLogger(UpdateDepositDataColor))
+	sendExitData := NewSendExitData(t.sp, log.NewColorLogger(SendExitDataColor))
+
 	// Run the loop
 	go func() {
 		for {
@@ -72,50 +74,13 @@ func (t *TaskLoop) Run() error {
 			if err := updateDepositData.Run(); err != nil {
 				errorLog.Println(err)
 			}
-			// time.Sleep(taskCooldown)
+			time.Sleep(taskCooldown)
 
-			if t.sleepAndCheckIfCancelled(tasksInterval) {
-				break
-			}
-		}
-
-		// Signal the task loop is done
-		t.wg.Done()
-	}()
-
-	// Initialize send exit data to Nodeset task
-	sendExitData := NewSendExitData(t.sp, log.NewColorLogger(SendExitDataColor))
-	// Run the loop
-	go func() {
-		for {
-			// Check the EC status
-			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
-			if err != nil {
-				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
-					break
-				}
-				continue
-			}
-
-			// Check the BC status
-			err = t.sp.WaitBeaconClientSynced(t.ctx, false) // Force refresh the primary / fallback BC status
-			if err != nil {
-				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
-					break
-				}
-				continue
-			}
-
-			// Update deposit data from the NodeSet server
+			// Submit missing exit messages to the NodeSet server
 			if err := sendExitData.Run(); err != nil {
 				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
-					break
-				}
-				continue
 			}
+			// time.Sleep(taskCooldown)
 
 			if t.sleepAndCheckIfCancelled(tasksInterval) {
 				break

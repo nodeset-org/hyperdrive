@@ -120,8 +120,8 @@ func (c *NodesetClient) UploadDepositData(depositData []byte) ([]byte, error) {
 	return response, nil
 }
 
-// Post exit data to Nodeset
-func (c *NodesetClient) PostExitData(exitData []ExitData) ([]byte, error) {
+// Submit signed exit data to Nodeset
+func (c *NodesetClient) UploadSignedExitData(exitData []ExitData) ([]byte, error) {
 	// Ensure authorization signature exists
 	err := c.EnsureAuthSignatureExists()
 	if err != nil {

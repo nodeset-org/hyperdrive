@@ -3,6 +3,7 @@ package swtasks
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/validator/utils"
@@ -28,7 +29,7 @@ func NewSendExitData(sp *swcommon.StakewiseServiceProvider, logger log.ColorLogg
 
 // Update Exit data
 func (t *SendExitData) Run() error {
-	t.log.Println("Checking Nodeset API for Exit data status...")
+	t.log.Println("Checking for missing signed exit data...")
 
 	// Get services
 	w := t.sp.GetWallet()
@@ -41,12 +42,21 @@ func (t *SendExitData) Run() error {
 		return fmt.Errorf("error getting registered validators: %w", err)
 	}
 
-	// Get validator statuses
-	pubkeys := []beacon.ValidatorPubkey{}
+	// Check for any that are missing signed exits
+	missingExitPubkeys := []beacon.ValidatorPubkey{}
 	for _, v := range resp {
-		pubkeys = append(pubkeys, v.Pubkey)
+		if v.Uploaded {
+			continue
+		}
+		missingExitPubkeys = append(missingExitPubkeys, v.Pubkey)
+		fmt.Printf("Validator %v is missing a signed exit message.\n", v.Pubkey)
 	}
-	statuses, err := bc.GetValidatorStatuses(context.Background(), pubkeys, nil)
+	if len(missingExitPubkeys) == 0 {
+		return nil
+	}
+
+	// Get statuses for validators with missing exits
+	statuses, err := bc.GetValidatorStatuses(context.Background(), missingExitPubkeys, nil)
 	if err != nil {
 		return fmt.Errorf("error getting validator statuses: %w", err)
 	}
@@ -62,48 +72,47 @@ func (t *SendExitData) Run() error {
 		return fmt.Errorf("error getting domain data: %w", err)
 	}
 
+	// Get signed exit messages
 	exitData := []swcommon.ExitData{}
-	for _, v := range resp {
-		if !v.Uploaded {
-			fmt.Printf("Validator %v has not been uploaded\n", v.Pubkey)
-			key, err := w.GetPrivateKeyForPubkey(v.Pubkey)
-			if err != nil {
-				// Print message and continue because we don't want to stop the loop
-				fmt.Printf("error getting private key for pubkey %v: %w", v.Pubkey, err)
-				continue
-			}
-			index := statuses[v.Pubkey].Index
-			signature, err := utils.GetSignedExitMessage(key, index, epoch, signatureDomain)
-			if err != nil {
-				// Print message and continue because we don't want to stop the loop
-				// Index might not be ready
-				fmt.Printf("error getting signed exit message: %w", err)
-				continue
-			}
-			exitData = append(exitData, swcommon.ExitData{
-				Pubkey: v.Pubkey.HexWithPrefix(),
-				ExitMessage: swcommon.ExitMessage{
-					Message: swcommon.ExitMessageDetails{
-						Epoch:          string(epoch),
-						ValidatorIndex: index,
-					},
-					Signature: signature.HexWithPrefix(),
+	for _, pubkey := range missingExitPubkeys {
+		key, err := w.GetPrivateKeyForPubkey(pubkey)
+		if err != nil {
+			// Print message and continue because we don't want to stop the loop
+			fmt.Printf("WARNING: error getting private key for pubkey %s: %s\n", pubkey.HexWithPrefix(), err.Error())
+			continue
+		}
+		index := statuses[pubkey].Index
+		signature, err := utils.GetSignedExitMessage(key, index, epoch, signatureDomain)
+		if err != nil {
+			// Print message and continue because we don't want to stop the loop
+			// Index might not be ready
+			fmt.Printf("WARNING: error getting signed exit message for pubkey %s: %s", pubkey.HexWithPrefix(), err.Error())
+			continue
+		}
+		exitData = append(exitData, swcommon.ExitData{
+			Pubkey: pubkey.HexWithPrefix(),
+			ExitMessage: swcommon.ExitMessage{
+				Message: swcommon.ExitMessageDetails{
+					Epoch:          strconv.FormatUint(epoch, 10),
+					ValidatorIndex: index,
 				},
-			})
-		}
+				Signature: signature.HexWithPrefix(),
+			},
+		})
 	}
 
-	// Post exit data
-	if len(exitData) != 0 {
-		ns.PostExitData(exitData)
+	// Upload the messages to Nodeset
+	if len(exitData) > 0 {
+		_, err := ns.UploadSignedExitData(exitData)
+		if err != nil {
+			return fmt.Errorf("error uploading signed exit messages to NodeSet: %w", err)
+		}
 
-		newPubkeys := []string{}
+		fmt.Println("Registered validators:")
 		for _, d := range exitData {
-			newPubkeys = append(newPubkeys, d.Pubkey)
+			fmt.Printf("\t%s\n", d.Pubkey)
 		}
-		fmt.Printf("Registered validators: %v\n", newPubkeys)
 	}
 
-	fmt.Printf("No new validators to upload\n")
 	return nil
 }
