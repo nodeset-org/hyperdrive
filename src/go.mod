@@ -96,7 +96,7 @@ require (
 	golang.org/x/tools v0.17.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.56.3 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gotest.tools/v3 v3.5.1 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
@@ -105,7 +105,7 @@ require (
 require (
 	github.com/alessio/shellescape v1.4.2
 	github.com/btcsuite/btcd/btcutil v1.1.5
-	github.com/docker/docker v24.0.7+incompatible
+	github.com/docker/docker v24.0.9+incompatible
 	github.com/fatih/color v1.16.0
 	github.com/glendc/go-external-ip v0.1.0
 	github.com/goccy/go-json v0.10.2
