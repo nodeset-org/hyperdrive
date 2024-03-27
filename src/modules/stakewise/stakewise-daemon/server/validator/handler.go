@@ -16,7 +16,7 @@ func NewValidatorHandler(serviceProvider *swcommon.StakewiseServiceProvider) *Va
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{
-		&validatorGetSignedExitMessagesContextFactory{h},
+		&validatorExitContextFactory{h},
 	}
 	return h
 }
