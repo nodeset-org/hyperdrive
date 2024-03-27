@@ -95,6 +95,8 @@ func main() {
 		maxFeeFlag,
 		maxPriorityFeeFlag,
 		nonceFlag,
+		utils.PrintTxDataFlag,
+		utils.SignTxOnlyFlag,
 		debugFlag,
 		secureSessionFlag,
 	}

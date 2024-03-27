@@ -38,13 +38,16 @@ func setValidatorsRoot(c *cli.Context) error {
 	}
 
 	// Run the TX
-	err = tx.HandleTx(c, hd, response.Data.TxInfo,
+	validated, err := tx.HandleTx(c, hd, response.Data.TxInfo,
 		"Are you sure you want to set the validators root?",
 		"setting validators root",
 		"Setting the validators root...",
 	)
 	if err != nil {
 		return err
+	}
+	if !validated {
+		return nil
 	}
 
 	// Log & return

@@ -15,7 +15,7 @@ func claimRewards(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	err = tx.HandleTx(c, hd, resp.Data.TxInfo,
+	validated, err := tx.HandleTx(c, hd, resp.Data.TxInfo,
 		"Are you sure you want to claim rewards?",
 		"claiming rewards",
 		"Claiming rewards...",
@@ -23,6 +23,10 @@ func claimRewards(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	if !validated {
+		return nil
+	}
+
 	fmt.Println("Rewards successfully claimed.")
 	return nil
 }
