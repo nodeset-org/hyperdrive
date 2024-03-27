@@ -105,7 +105,7 @@ require (
 require (
 	github.com/alessio/shellescape v1.4.2
 	github.com/btcsuite/btcd/btcutil v1.1.5
-	github.com/docker/docker v24.0.7+incompatible
+	github.com/docker/docker v24.0.9+incompatible
 	github.com/fatih/color v1.16.0
 	github.com/glendc/go-external-ip v0.1.0
 	github.com/goccy/go-json v0.10.2
