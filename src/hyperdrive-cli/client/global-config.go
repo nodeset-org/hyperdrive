@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"reflect"
 
+	constconfig "github.com/nodeset-org/hyperdrive/modules/constellation/shared/config"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
+
 	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 // Wrapper for global configuration
 type GlobalConfig struct {
-	Hyperdrive *config.HyperdriveConfig
-	Stakewise  *swconfig.StakewiseConfig
-	// Constellation *constconfig.ConstellationConfig
+	Hyperdrive    *config.HyperdriveConfig
+	Stakewise     *swconfig.StakewiseConfig
+	Constellation *constconfig.ConstellationConfig
 }
 
 // Make a new global config
