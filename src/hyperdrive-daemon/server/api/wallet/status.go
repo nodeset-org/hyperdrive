@@ -13,18 +13,18 @@ import (
 // === Factory ===
 // ===============
 
-type walletStatusFactory struct {
+type walletStatusContextFactory struct {
 	handler *WalletHandler
 }
 
-func (f *walletStatusFactory) Create(args url.Values) (*walletStatusContext, error) {
+func (f *walletStatusContextFactory) Create(args url.Values) (*walletStatusContext, error) {
 	c := &walletStatusContext{
 		handler: f.handler,
 	}
 	return c, nil
 }
 
-func (f *walletStatusFactory) RegisterRoute(router *mux.Router) {
+func (f *walletStatusContextFactory) RegisterRoute(router *mux.Router) {
 	utils.RegisterQuerylessGet[*walletStatusContext, api.WalletStatusData](
 		router, "status", f, f.handler.serviceProvider,
 	)
@@ -46,6 +46,7 @@ func (c *walletStatusContext) PrepareData(data *api.WalletStatusData, opts *bind
 	if err != nil {
 		return err
 	}
+
 	data.WalletStatus = status
 	return nil
 }

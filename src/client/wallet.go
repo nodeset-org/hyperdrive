@@ -29,6 +29,11 @@ func (r *WalletRequester) GetContext() *RequesterContext {
 	return r.context
 }
 
+// Get the node address's ETH balance
+func (r *WalletRequester) Balance() (*api.ApiResponse[api.WalletBalanceData], error) {
+	return SendGetRequest[api.WalletBalanceData](r, "balance", "Balance", nil)
+}
+
 // Delete the wallet keystore's password from disk
 func (r *WalletRequester) DeletePassword() (*api.ApiResponse[api.SuccessData], error) {
 	return SendGetRequest[api.SuccessData](r, "delete-password", "DeletePassword", nil)
