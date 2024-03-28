@@ -51,12 +51,10 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
 	nc := sp.GetNodesetClient()
-
 	nodesetStatusResponse, err := nc.GetRegisteredValidators()
 	if err != nil {
 		return fmt.Errorf("error getting nodeset statuses: %w", err)
 	}
-
 	privateKeys, err := w.GetAllPrivateKeys()
 	if err != nil {
 		return fmt.Errorf("error getting private keys: %w", err)
