@@ -1,6 +1,8 @@
 package api
 
 import (
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/eth-utils/eth"
@@ -9,6 +11,10 @@ import (
 
 type WalletStatusData struct {
 	WalletStatus types.WalletStatus `json:"walletStatus"`
+}
+
+type WalletBalanceData struct {
+	Balance *big.Int `json:"balance"`
 }
 
 type WalletInitializeData struct {

@@ -2,8 +2,8 @@ package wallet
 
 import (
 	"fmt"
-	"math/big"
 
+	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
@@ -55,12 +55,10 @@ func getStatus(c *cli.Context) error {
 	if status.Address.NodeAddress != status.Wallet.WalletAddress {
 		fmt.Printf("The node wallet is initialized, but you are currently masquerading as %s%s%s.\n", terminal.ColorBlue, status.Address.NodeAddress.Hex(), terminal.ColorReset)
 		fmt.Printf("Your node wallet is for %s%s%s.\n", terminal.ColorBlue, status.Wallet.WalletAddress.Hex(), terminal.ColorReset)
-		fmt.Printf("The node wallet balance is: %s%s%s ETH.\n", terminal.ColorGreen, weiToEth(&status.Wallet.WalletBalance), terminal.ColorReset)
 		fmt.Printf("%sDue to this mismatch, your node is running in 'read-only' mode and cannot submit transactions.%s\n", terminal.ColorYellow, terminal.ColorReset)
 	} else {
 		fmt.Println("The node wallet is initialized and ready.")
 		fmt.Printf("Node account: %s%s%s\n", terminal.ColorGreen, status.Wallet.WalletAddress.Hex(), terminal.ColorReset)
-		fmt.Printf("The node wallet balance is: %s%s%s ETH.\n", terminal.ColorGreen, weiToEth(&status.Wallet.WalletBalance), terminal.ColorReset)
 		fmt.Printf("%sThe node's wallet keystore matches this address; it will be able to submit transactions.%s", terminal.ColorGreen, terminal.ColorReset)
 	}
 
@@ -73,13 +71,18 @@ func getStatus(c *cli.Context) error {
 		fmt.Println("You will have to manually re-enter it with `hyperdrive wallet set-password` after a restart to be able to submit transactions.")
 	}
 
-	return nil
-}
+	// Try to get the wallet balance
+	balanceResponse, err := hd.Api.Wallet.Balance()
+	if err != nil {
+		if hd.Context.DebugEnabled {
+			fmt.Printf("The node address's ETH balance is currently unavailable (%s).\n", err.Error())
+		} else {
+			fmt.Println("The node address's ETH balance is currently unavailable.")
+		}
+		return nil
+	}
 
-// Converts Wei to ETH as a string.
-func weiToEth(wei *big.Int) string {
-	ethValue := new(big.Float).SetInt(wei)
-	ethInWei := new(big.Float).SetFloat64(1e18)
-	ethAmount := new(big.Float).Quo(ethValue, ethInWei)
-	return ethAmount.Text('f', 18)
+	fmt.Printf("Address %s%s%s's balance is %s%.6f%s ETH.\n", terminal.ColorBlue, status.Address.NodeAddress.Hex(), terminal.ColorReset, terminal.ColorGreen, eth.WeiToEth(balanceResponse.Data.Balance), terminal.ColorReset)
+
+	return nil
 }
