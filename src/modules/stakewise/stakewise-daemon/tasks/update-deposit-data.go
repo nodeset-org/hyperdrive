@@ -8,7 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
-	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	batch "github.com/rocket-pool/batch-query"
 	"github.com/rocket-pool/node-manager-core/utils/log"
@@ -17,7 +16,6 @@ import (
 // Update deposit data task
 type UpdateDepositData struct {
 	sp  *swcommon.StakewiseServiceProvider
-	cfg *hdconfig.HyperdriveConfig
 	log log.ColorLogger
 }
 
