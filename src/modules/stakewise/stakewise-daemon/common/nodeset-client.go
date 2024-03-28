@@ -30,6 +30,24 @@ const (
 )
 
 // =================
+// === Requests  ===
+// =================
+type ExitMessageDetails struct {
+	Epoch          string `json:"epoch"`
+	ValidatorIndex string `json:"validator_index"`
+}
+
+type ExitMessage struct {
+	Message   ExitMessageDetails `json:"message"`
+	Signature string             `json:"signature"`
+}
+
+type ExitData struct {
+	Pubkey      string      `json:"pubkey"`
+	ExitMessage ExitMessage `json:"exitMessage"`
+}
+
+// =================
 // === Responses ===
 // =================
 
@@ -45,13 +63,14 @@ type DepositDataResponse struct {
 }
 
 // api/validators
-type ValidatorPubkeyStatus struct {
-	Pubkey beacon.ValidatorPubkey `json:"pubkey"`
-	Status string                 `json:"status"`
+type ValidatorStatus struct {
+	Pubkey   beacon.ValidatorPubkey `json:"pubkey"`
+	Status   string                 `json:"status"`
+	Uploaded bool                   `json:"uploaded"`
 }
 
 type ValidatorsResponse struct {
-	Data []ValidatorPubkeyStatus `json:"data"`
+	Data []ValidatorStatus `json:"data"`
 }
 
 // ==============
@@ -101,6 +120,23 @@ func (c *NodesetClient) UploadDepositData(depositData []byte) ([]byte, error) {
 	return response, nil
 }
 
+// Submit signed exit data to Nodeset
+func (c *NodesetClient) UploadSignedExitData(exitData []ExitData) ([]byte, error) {
+	// Serialize the exit data into JSON
+	jsonData, err := json.Marshal(exitData)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling exit data to JSON: %w", err)
+	}
+
+	// Submit the POST request with the serialized JSON
+	response, err := c.submitRequest(http.MethodPut, bytes.NewBuffer(jsonData), nil, validatorsPath)
+	if err != nil {
+		return nil, fmt.Errorf("error posting exit data: %w", err)
+	}
+
+	return response, nil
+}
+
 // Get the current version of the aggregated deposit data on the server
 func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
 	vault := common.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
@@ -142,7 +178,7 @@ func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData
 }
 
 // Get a list of all of the pubkeys that have already been registered with NodeSet for this node
-func (c *NodesetClient) GetRegisteredValidators() ([]ValidatorPubkeyStatus, error) {
+func (c *NodesetClient) GetRegisteredValidators() ([]ValidatorStatus, error) {
 	queryParams := map[string]string{
 		"network": c.res.NodesetNetwork,
 	}

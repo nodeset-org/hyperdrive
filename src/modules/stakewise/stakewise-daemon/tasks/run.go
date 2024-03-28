@@ -18,6 +18,7 @@ const (
 	ErrorColor             = color.FgRed
 	WarningColor           = color.FgYellow
 	UpdateDepositDataColor = color.FgHiWhite
+	SendExitDataColor      = color.FgGreen
 )
 
 type TaskLoop struct {
@@ -44,6 +45,7 @@ func (t *TaskLoop) Run() error {
 
 	// Initialize tasks
 	updateDepositData := NewUpdateDepositData(t.sp, log.NewColorLogger(UpdateDepositDataColor))
+	sendExitData := NewSendExitData(t.sp, log.NewColorLogger(SendExitDataColor))
 
 	// Run the loop
 	go func() {
@@ -68,11 +70,22 @@ func (t *TaskLoop) Run() error {
 				continue
 			}
 
+			// Tasks start here
+
 			// Update deposit data from the NodeSet server
 			if err := updateDepositData.Run(); err != nil {
 				errorLog.Println(err)
 			}
-			// time.Sleep(taskCooldown)
+			if t.sleepAndCheckIfCancelled(taskCooldown) {
+				break
+			}
+
+			// Submit missing exit messages to the NodeSet server
+			if err := sendExitData.Run(); err != nil {
+				errorLog.Println(err)
+			}
+
+			// Tasks end here
 
 			if t.sleepAndCheckIfCancelled(tasksInterval) {
 				break
