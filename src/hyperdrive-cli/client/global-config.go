@@ -12,6 +12,7 @@ import (
 type GlobalConfig struct {
 	Hyperdrive *config.HyperdriveConfig
 	Stakewise  *swconfig.StakewiseConfig
+	// Constellation *constconfig.ConstellationConfig
 }
 
 // Make a new global config

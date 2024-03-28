@@ -5,6 +5,9 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 	stakewiseCfg := wiz.md.Config.Stakewise
 	stakewiseLabel := stakewiseCfg.GetTitle()
 
+	constellationCfg := wiz.md.Config.Constellation
+	constellationLabel := constellationCfg.GetTitle()
+
 	helperText := "Select the NodeSet modules you would like to enable below."
 
 	show := func(modal *checkBoxModalLayout) {
