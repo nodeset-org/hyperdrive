@@ -17,6 +17,9 @@ const (
 type ConstellationConfig struct {
 	hdCfg *config.HyperdriveConfig
 
+	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
+	Enabled config.Parameter[bool]
+
 	// Custom command line flags
 	AdditionalOpFlags config.Parameter[string]
 
