@@ -52,7 +52,6 @@ type walletInitializeContext struct {
 	derivationPath string
 	index          uint64
 	password       string
-	passwordExists bool
 	savePassword   bool
 	saveWallet     bool
 }
