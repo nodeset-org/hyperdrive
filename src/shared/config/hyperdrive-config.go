@@ -443,11 +443,11 @@ func (cfg *HyperdriveConfig) updateResources() {
 // ==============================
 
 func (cfg *HyperdriveConfig) GetApiLogFilePath() string {
-	return filepath.Join(cfg.UserDataPath.Value, LogDir, ApiLogName)
+	return filepath.Join(cfg.HyperdriveUserDirectory, LogDir, ApiLogName)
 }
 
 func (cfg *HyperdriveConfig) GetTasksLogFilePath() string {
-	return filepath.Join(cfg.UserDataPath.Value, LogDir, TasksLogName)
+	return filepath.Join(cfg.HyperdriveUserDirectory, LogDir, TasksLogName)
 }
 
 func (cfg *HyperdriveConfig) GetNodeAddressFilePath() string {
