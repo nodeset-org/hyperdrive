@@ -26,6 +26,7 @@ func NewServiceHandler(logger *log.Logger, ctx context.Context, serviceProvider 
 		&serviceClientStatusContextFactory{h},
 		&serviceGetConfigContextFactory{h},
 		&serviceRestartContainerContextFactory{h},
+		&serviceRotateLogsContextFactory{h},
 		&serviceVersionContextFactory{h},
 	}
 	return h

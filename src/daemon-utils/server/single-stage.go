@@ -59,7 +59,7 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 		// Log
 		args := r.URL.Query()
 		logger.Info("Request", slog.String(log.MethodKey, r.Method), slog.String(log.PathKey, r.URL.Path))
-		logger.Debug("Full query", slog.String(log.QueryKey, r.URL.String()))
+		logger.Debug("Params", slog.String(log.QueryKey, r.URL.RawQuery))
 
 		// Check the method
 		if r.Method != http.MethodGet {

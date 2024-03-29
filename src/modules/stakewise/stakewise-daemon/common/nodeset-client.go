@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	"github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/utils"
 )
 
@@ -66,7 +68,6 @@ type NodesetClient struct {
 	res           *swconfig.StakewiseResources
 	debug         bool
 	authSignature []byte
-	ctx           context.Context
 }
 
 // Creates a new Nodeset client
@@ -76,7 +77,6 @@ func NewNodesetClient(sp *StakewiseServiceProvider) *NodesetClient {
 		sp:    sp,
 		res:   sp.GetResources(),
 		debug: cfg.DebugMode.Value,
-		ctx:   sp.GetBaseContext(),
 	}
 }
 
@@ -97,8 +97,8 @@ func (c *NodesetClient) EnsureAuthSignatureExists() error {
 }
 
 // Uploads deposit data to Nodeset
-func (c *NodesetClient) UploadDepositData(depositData []byte) ([]byte, error) {
-	response, err := c.submitRequest(http.MethodPost, bytes.NewBuffer(depositData), nil, depositDataPath)
+func (c *NodesetClient) UploadDepositData(ctx context.Context, depositData []byte) ([]byte, error) {
+	response, err := c.submitRequest(ctx, http.MethodPost, bytes.NewBuffer(depositData), nil, depositDataPath)
 	if err != nil {
 		return nil, fmt.Errorf("error uploading deposit data: %w", err)
 	}
@@ -106,13 +106,13 @@ func (c *NodesetClient) UploadDepositData(depositData []byte) ([]byte, error) {
 }
 
 // Get the current version of the aggregated deposit data on the server
-func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
+func (c *NodesetClient) GetServerDepositDataVersion(ctx context.Context) (int, error) {
 	vault := utils.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
 	params := map[string]string{
 		"vault":   vault,
 		"network": c.res.EthNetworkName,
 	}
-	response, err := c.submitRequest(http.MethodGet, nil, params, depositDataPath, metaPath)
+	response, err := c.submitRequest(ctx, http.MethodGet, nil, params, depositDataPath, metaPath)
 	if err != nil {
 		return 0, fmt.Errorf("error getting deposit data version: %w", err)
 	}
@@ -126,13 +126,13 @@ func (c *NodesetClient) GetServerDepositDataVersion() (int, error) {
 }
 
 // Get the aggregated deposit data from the server
-func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData, error) {
+func (c *NodesetClient) GetServerDepositData(ctx context.Context) (int, []types.ExtendedDepositData, error) {
 	vault := utils.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
 	params := map[string]string{
 		"vault":   vault,
 		"network": c.res.EthNetworkName,
 	}
-	response, err := c.submitRequest(http.MethodGet, nil, params, depositDataPath)
+	response, err := c.submitRequest(ctx, http.MethodGet, nil, params, depositDataPath)
 	if err != nil {
 		return 0, nil, fmt.Errorf("error getting deposit data: %w", err)
 	}
@@ -146,11 +146,11 @@ func (c *NodesetClient) GetServerDepositData() (int, []types.ExtendedDepositData
 }
 
 // Get a list of all of the pubkeys that have already been registered with NodeSet for this node
-func (c *NodesetClient) GetRegisteredValidators() ([]ValidatorPubkeyStatus, error) {
+func (c *NodesetClient) GetRegisteredValidators(ctx context.Context) ([]ValidatorPubkeyStatus, error) {
 	queryParams := map[string]string{
 		"network": c.res.EthNetworkName,
 	}
-	response, err := c.submitRequest(http.MethodGet, nil, queryParams, devPath, validatorsPath)
+	response, err := c.submitRequest(ctx, http.MethodGet, nil, queryParams, devPath, validatorsPath)
 	if err != nil {
 		return nil, fmt.Errorf("error getting registered validators: %w", err)
 	}
@@ -164,13 +164,19 @@ func (c *NodesetClient) GetRegisteredValidators() ([]ValidatorPubkeyStatus, erro
 }
 
 // Send a request to the server and read the response
-func (c *NodesetClient) submitRequest(method string, body io.Reader, queryParams map[string]string, subroutes ...string) ([]byte, error) {
+func (c *NodesetClient) submitRequest(ctx context.Context, method string, body io.Reader, queryParams map[string]string, subroutes ...string) ([]byte, error) {
+	// Get the logger
+	logger, exists := log.FromContext(ctx)
+	if !exists {
+		panic("context didn't have a logger!")
+	}
+
 	// Make the request
 	path, err := url.JoinPath(c.res.NodesetApiUrl, subroutes...)
 	if err != nil {
 		return nil, fmt.Errorf("error joining path [%v]: %w", subroutes, err)
 	}
-	request, err := http.NewRequestWithContext(c.ctx, method, path, body)
+	request, err := http.NewRequestWithContext(ctx, method, path, body)
 	if err != nil {
 		return nil, fmt.Errorf("error generating request to [%s]: %w", path, err)
 	}
@@ -189,9 +195,8 @@ func (c *NodesetClient) submitRequest(method string, body io.Reader, queryParams
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Upload it to the server
-	if c.debug {
-		fmt.Printf("Sending NodeSet server request => %s\n", request.URL)
-	}
+	logger.Debug("Sending NodeSet server request", slog.String(log.QueryKey, request.URL.String()))
+
 	client := &http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
@@ -215,8 +220,6 @@ func (c *NodesetClient) submitRequest(method string, body io.Reader, queryParams
 	}
 
 	// Debug log
-	if c.debug {
-		fmt.Printf("NodeSet response <= %s\n", string(bytes))
-	}
+	logger.Debug("NodeSet response:", slog.String(log.CodeKey, resp.Status), slog.String(log.BodyKey, string(bytes)))
 	return bytes, nil
 }

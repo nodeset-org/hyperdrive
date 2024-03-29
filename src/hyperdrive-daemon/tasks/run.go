@@ -29,12 +29,13 @@ type TaskLoop struct {
 }
 
 func NewTaskLoop(sp *common.ServiceProvider, wg *sync.WaitGroup) *TaskLoop {
-	return &TaskLoop{
+	taskLoop := &TaskLoop{
 		sp:     sp,
 		logger: sp.GetTasksLogger(),
-		ctx:    sp.GetBaseContext(),
 		wg:     wg,
 	}
+	taskLoop.ctx = taskLoop.logger.CreateContextWithLogger(sp.GetBaseContext())
+	return taskLoop
 }
 
 // Run daemon

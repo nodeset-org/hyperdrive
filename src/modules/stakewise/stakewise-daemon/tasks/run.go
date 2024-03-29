@@ -29,18 +29,19 @@ type TaskLoop struct {
 }
 
 func NewTaskLoop(sp *swcommon.StakewiseServiceProvider, wg *sync.WaitGroup) *TaskLoop {
-	return &TaskLoop{
+	taskLoop := &TaskLoop{
 		sp:     sp,
 		logger: sp.GetTasksLogger(),
-		ctx:    sp.GetBaseContext(),
 		wg:     wg,
 	}
+	taskLoop.ctx = taskLoop.logger.CreateContextWithLogger(sp.GetBaseContext())
+	return taskLoop
 }
 
 // Run daemon
 func (t *TaskLoop) Run() error {
 	// Initialize tasks
-	updateDepositData := NewUpdateDepositData(t.sp, t.logger)
+	updateDepositData := NewUpdateDepositData(t.ctx, t.sp, t.logger)
 
 	// Run the loop
 	t.wg.Add(1)

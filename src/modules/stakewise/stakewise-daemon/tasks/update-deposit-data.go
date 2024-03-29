@@ -1,6 +1,7 @@
 package swtasks
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 
@@ -16,13 +17,15 @@ import (
 
 // Update deposit data task
 type UpdateDepositData struct {
+	ctx    context.Context
 	sp     *swcommon.StakewiseServiceProvider
 	logger *log.Logger
 }
 
 // Create update deposit data task
-func NewUpdateDepositData(sp *swcommon.StakewiseServiceProvider, logger *log.Logger) *UpdateDepositData {
+func NewUpdateDepositData(ctx context.Context, sp *swcommon.StakewiseServiceProvider, logger *log.Logger) *UpdateDepositData {
 	return &UpdateDepositData{
+		ctx:    ctx,
 		sp:     sp,
 		logger: logger,
 	}
@@ -38,9 +41,10 @@ func (t *UpdateDepositData) Run() error {
 	ns := t.sp.GetNodesetClient()
 	ddMgr := t.sp.GetDepositDataManager()
 	cfg := t.sp.GetModuleConfig()
+	ctx := t.ctx
 
 	// Get the version on the server
-	remoteVersion, err := ns.GetServerDepositDataVersion()
+	remoteVersion, err := ns.GetServerDepositDataVersion(ctx)
 	if err != nil {
 		return fmt.Errorf("error getting latest deposit data version: %w", err)
 	}
@@ -54,7 +58,7 @@ func (t *UpdateDepositData) Run() error {
 
 	// Get the new data
 	t.logger.Info("Deposit data is out of date retrieving latest data...", slog.Int("localVersion", localVersion), slog.Int("remoteVersion", remoteVersion))
-	_, depositData, err := ns.GetServerDepositData()
+	_, depositData, err := ns.GetServerDepositData(ctx)
 	if err != nil {
 		return fmt.Errorf("error getting latest deposit data: %w", err)
 	}

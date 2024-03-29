@@ -63,7 +63,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 
 	// Get the list of registered validators
 	registeredPubkeyMap := map[beacon.ValidatorPubkey]bool{}
-	pubkeyStatusResponse, err := nc.GetRegisteredValidators()
+	pubkeyStatusResponse, err := nc.GetRegisteredValidators(ctx)
 	if err != nil {
 		return types.ResponseStatus_Error, fmt.Errorf("error getting registered validators: %w", err)
 	}
@@ -130,7 +130,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	}
 
 	// Submit the upload
-	response, err := nc.UploadDepositData(bytes)
+	response, err := nc.UploadDepositData(ctx, bytes)
 	if err != nil {
 		return types.ResponseStatus_Error, err
 	}

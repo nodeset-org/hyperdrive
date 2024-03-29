@@ -132,6 +132,11 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, mod
 	// Context for handling task cancellation during shutdown
 	ctx, cancel := context.WithCancel(context.Background())
 
+	// Log startup
+	clientLogger.Info("Starting Hyperdrive Client logger.")
+	apiLogger.Info("Starting API logger.")
+	tasksLogger.Info("Starting Tasks logger.")
+
 	// Create the provider
 	provider := &ServiceProvider{
 		moduleDir:    moduleDir,
