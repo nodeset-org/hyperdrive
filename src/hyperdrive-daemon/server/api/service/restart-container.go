@@ -31,7 +31,7 @@ func (f *serviceRestartContainerContextFactory) Create(args url.Values) (*servic
 
 func (f *serviceRestartContainerContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*serviceRestartContainerContext, types.SuccessData](
-		router, "restart-container", f, f.handler.serviceProvider.ServiceProvider,
+		router, "restart-container", f, f.handler.logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -48,7 +48,7 @@ func (c *serviceRestartContainerContext) PrepareData(data *types.SuccessData, op
 	sp := c.handler.serviceProvider
 	cfg := sp.GetConfig()
 	d := sp.GetDocker()
-	ctx := sp.GetContext()
+	ctx := c.handler.ctx
 
 	id := cfg.GetDockerArtifactName(c.container)
 	err := d.ContainerRestart(ctx, id, container.StopOptions{})

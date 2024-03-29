@@ -3,22 +3,18 @@ package services
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/client"
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/eth"
+	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/node/services"
-	"github.com/rocket-pool/node-manager-core/utils/log"
-)
-
-const (
-	apiLogColor color.Attribute = color.FgHiCyan
 )
 
 // A container for all of the various services used by Hyperdrive
@@ -33,9 +29,13 @@ type ServiceProvider struct {
 	signer       *ModuleSigner
 	txMgr        *eth.TransactionManager
 	queryMgr     *eth.QueryManager
-	apiLogger    *log.ColorLogger
 	ctx          context.Context
 	cancel       context.CancelFunc
+
+	// Logging
+	clientLogger *log.Logger
+	apiLogger    *log.Logger
+	tasksLogger  *log.Logger
 
 	// Path info
 	moduleDir string
@@ -43,10 +43,11 @@ type ServiceProvider struct {
 }
 
 // Creates a new ServiceProvider instance
-func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, moduleName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, clientTimeout time.Duration) (*ServiceProvider, error) {
+func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, clientTimeout time.Duration) (*ServiceProvider, error) {
 	// Create a client for the Hyperdrive daemon
+	defaultLogger := slog.Default()
 	hyperdriveSocket := filepath.Join(moduleDir, hdconfig.HyperdriveCliSocketFilename)
-	hdClient := client.NewApiClient(hdconfig.HyperdriveApiClientRoute, hyperdriveSocket, false)
+	hdClient := client.NewApiClient(hdconfig.HyperdriveApiClientRoute, hyperdriveSocket, defaultLogger)
 
 	// Get the Hyperdrive config
 	hdCfg := hdconfig.NewHyperdriveConfig("")
@@ -58,7 +59,13 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, mod
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing Hyperdrive config: %w", err)
 	}
-	hdClient.SetDebug(hdCfg.DebugMode.Value)
+
+	// Set up the client logger
+	debugMode := hdCfg.DebugMode.Value
+	moduleLogDir := filepath.Join(hdCfg.HyperdriveUserDirectory, hdconfig.LogDir, moduleName)
+	logPath := filepath.Join(moduleLogDir, clientLogName)
+	clientLogger, err := log.NewLogger(logPath, debugMode, false)
+	hdClient.SetLogger(clientLogger.Logger)
 
 	// Get the module config
 	moduleCfg := factory(hdCfg)
@@ -75,8 +82,19 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, mod
 		return nil, fmt.Errorf("error deserialzing config for module [%s]: %w", moduleName, err)
 	}
 
-	// Loggers
-	apiLogger := log.NewColorLogger(apiLogColor)
+	// Make the API logger
+	apiLogPath := filepath.Join(moduleLogDir, moduleCfg.GetApiLogFileName())
+	apiLogger, err := log.NewLogger(apiLogPath, debugMode, false)
+	if err != nil {
+		return nil, fmt.Errorf("error creating API logger: %w", err)
+	}
+
+	// Make the tasks logger
+	tasksLogPath := filepath.Join(moduleLogDir, moduleCfg.GetTasksLogFileName())
+	tasksLogger, err := log.NewLogger(tasksLogPath, debugMode, false)
+	if err != nil {
+		return nil, fmt.Errorf("error creating tasks logger: %w", err)
+	}
 
 	// Resources
 	resources := hdCfg.GetNetworkResources()
@@ -127,11 +145,20 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, mod
 		signer:       signer,
 		txMgr:        txMgr,
 		queryMgr:     queryMgr,
-		apiLogger:    &apiLogger,
+		clientLogger: clientLogger,
+		apiLogger:    apiLogger,
+		tasksLogger:  tasksLogger,
 		ctx:          ctx,
 		cancel:       cancel,
 	}
 	return provider, nil
+}
+
+// Closes the service provider and its underlying services
+func (p *ServiceProvider) Close() {
+	p.clientLogger.Close()
+	p.apiLogger.Close()
+	p.tasksLogger.Close()
 }
 
 // ===============
@@ -182,15 +209,19 @@ func (p *ServiceProvider) GetQueryManager() *eth.QueryManager {
 	return p.queryMgr
 }
 
-func (p *ServiceProvider) GetApiLogger() *log.ColorLogger {
+func (p *ServiceProvider) GetApiLogger() *log.Logger {
 	return p.apiLogger
+}
+
+func (p *ServiceProvider) GetTasksLogger() *log.Logger {
+	return p.tasksLogger
 }
 
 func (p *ServiceProvider) IsDebugMode() bool {
 	return p.hdCfg.DebugMode.Value
 }
 
-func (p *ServiceProvider) GetContext() context.Context {
+func (p *ServiceProvider) GetBaseContext() context.Context {
 	return p.ctx
 }
 

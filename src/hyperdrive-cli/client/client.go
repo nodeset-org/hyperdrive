@@ -2,6 +2,8 @@ package client
 
 import (
 	"fmt"
+	"log/slog"
+	"os"
 	"path/filepath"
 
 	docker "github.com/docker/docker/client"
@@ -11,6 +13,7 @@ import (
 	swclient "github.com/nodeset-org/hyperdrive/modules/stakewise/client"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/urfave/cli/v2"
 )
 
@@ -44,8 +47,21 @@ type StakewiseClient struct {
 func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
 	hdCtx := context.GetHyperdriveContext(c)
 	socketPath := filepath.Join(hdCtx.ConfigPath, config.HyperdriveCliSocketFilename)
+
+	// Set up the logger
+	opts := &slog.HandlerOptions{
+		Level:       slog.LevelInfo,
+		ReplaceAttr: log.ReplaceTime,
+	}
+	if hdCtx.DebugEnabled {
+		opts.Level = slog.LevelDebug
+	}
+
+	// Make the client
 	client := &HyperdriveClient{
-		Api:     client.NewApiClient(config.HyperdriveApiClientRoute, socketPath, hdCtx.DebugEnabled),
+		Api: client.NewApiClient(config.HyperdriveApiClientRoute, socketPath, slog.New(slog.NewTextHandler(os.Stdout, opts).WithAttrs([]slog.Attr{
+			slog.String(log.OriginKey, config.HyperdriveDaemonRoute),
+		}))),
 		Context: hdCtx,
 	}
 	return client
@@ -56,8 +72,21 @@ func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
 func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
 	hdCtx := context.GetHyperdriveContext(c)
 	socketPath := filepath.Join(hdCtx.ConfigPath, swconfig.CliSocketFilename)
+
+	// Set up the logger
+	opts := &slog.HandlerOptions{
+		Level:       slog.LevelInfo,
+		ReplaceAttr: log.ReplaceTime,
+	}
+	if hdCtx.DebugEnabled {
+		opts.Level = slog.LevelDebug
+	}
+
+	// Make the client
 	client := &StakewiseClient{
-		Api:     swclient.NewApiClient(swconfig.ApiClientRoute, socketPath, hdCtx.DebugEnabled),
+		Api: swclient.NewApiClient(swconfig.ApiClientRoute, socketPath, slog.New(slog.NewTextHandler(os.Stdout, opts).WithAttrs([]slog.Attr{
+			slog.String(log.OriginKey, swconfig.ModuleName),
+		}))),
 		Context: hdCtx,
 	}
 	return client

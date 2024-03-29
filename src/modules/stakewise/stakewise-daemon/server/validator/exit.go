@@ -44,7 +44,7 @@ func (f *validatorExitContextFactory) Create(args url.Values) (*validatorExitCon
 
 func (f *validatorExitContextFactory) RegisterRoute(router *mux.Router) {
 	duserver.RegisterQuerylessGet[*validatorExitContext, api.ValidatorExitData](
-		router, "exit", f, f.handler.serviceProvider.ServiceProvider,
+		router, "exit", f, f.handler.logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -64,7 +64,7 @@ func (c *validatorExitContext) PrepareData(data *api.ValidatorExitData, opts *bi
 	sp := c.handler.serviceProvider
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
-	ctx := sp.GetContext()
+	ctx := c.handler.ctx
 
 	if len(c.pubkeys) == 0 {
 		return types.ResponseStatus_Success, nil

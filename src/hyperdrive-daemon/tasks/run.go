@@ -7,8 +7,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
+	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/utils"
-	"github.com/rocket-pool/node-manager-core/utils/log"
 )
 
 // Config
@@ -22,26 +22,24 @@ const (
 )
 
 type TaskLoop struct {
-	ctx context.Context
-	sp  *common.ServiceProvider
-	wg  *sync.WaitGroup
+	ctx    context.Context
+	logger *log.Logger
+	sp     *common.ServiceProvider
+	wg     *sync.WaitGroup
 }
 
 func NewTaskLoop(sp *common.ServiceProvider, wg *sync.WaitGroup) *TaskLoop {
 	return &TaskLoop{
-		sp:  sp,
-		ctx: sp.GetContext(),
-		wg:  wg,
+		sp:     sp,
+		logger: sp.GetTasksLogger(),
+		ctx:    sp.GetBaseContext(),
+		wg:     wg,
 	}
 }
 
 // Run daemon
 func (t *TaskLoop) Run() error {
-	// Initialize loggers
-	errorLog := log.NewColorLogger(ErrorColor)
-
 	// Initialize tasks
-	// Nothing here yet
 
 	// Run the loop
 	t.wg.Add(1)
@@ -50,7 +48,7 @@ func (t *TaskLoop) Run() error {
 			// Check the EC status
 			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
 			if err != nil {
-				errorLog.Println(err)
+				t.logger.Error(err.Error())
 				if utils.SleepWithCancel(t.ctx, taskCooldown) {
 					break
 				}
@@ -60,7 +58,7 @@ func (t *TaskLoop) Run() error {
 			// Check the BC status
 			err = t.sp.WaitBeaconClientSynced(t.ctx, false) // Force refresh the primary / fallback BC status
 			if err != nil {
-				errorLog.Println(err)
+				t.logger.Error(err.Error())
 				if utils.SleepWithCancel(t.ctx, taskCooldown) {
 					break
 				}

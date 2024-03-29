@@ -11,4 +11,5 @@ const (
 	PasswordFilename     string = "password.txt"
 	KeystorePasswordFile string = "secret.txt"
 	DepositDataFile      string = "deposit-data.json"
+	ClientLogName        string = "hd-client.log"
 )

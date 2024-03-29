@@ -2,6 +2,7 @@ package swtasks
 
 import (
 	"fmt"
+	"log/slog"
 
 	swcontracts "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common/contracts"
 
@@ -10,26 +11,26 @@ import (
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
 	"github.com/nodeset-org/hyperdrive/shared/types"
 	batch "github.com/rocket-pool/batch-query"
-	"github.com/rocket-pool/node-manager-core/utils/log"
+	"github.com/rocket-pool/node-manager-core/log"
 )
 
 // Update deposit data task
 type UpdateDepositData struct {
-	sp  *swcommon.StakewiseServiceProvider
-	log log.ColorLogger
+	sp     *swcommon.StakewiseServiceProvider
+	logger *log.Logger
 }
 
 // Create update deposit data task
-func NewUpdateDepositData(sp *swcommon.StakewiseServiceProvider, logger log.ColorLogger) *UpdateDepositData {
+func NewUpdateDepositData(sp *swcommon.StakewiseServiceProvider, logger *log.Logger) *UpdateDepositData {
 	return &UpdateDepositData{
-		sp:  sp,
-		log: logger,
+		sp:     sp,
+		logger: logger,
 	}
 }
 
 // Update deposit data
 func (t *UpdateDepositData) Run() error {
-	t.log.Println("Checking version of NodeSet data on disk...")
+	t.logger.Info("Checking version of NodeSet data on disk...")
 
 	// Get services
 	w := t.sp.GetWallet()
@@ -47,12 +48,12 @@ func (t *UpdateDepositData) Run() error {
 	// Compare versions
 	localVersion := w.GetLatestDepositDataVersion()
 	if remoteVersion == localVersion {
-		t.log.Printlnf("Local data is up to date (version %d).", localVersion)
+		t.logger.Info("Local data is up to date", slog.Int("version", localVersion))
 		return nil
 	}
 
 	// Get the new data
-	t.log.Printlnf("Latest data version is %d but we have %d, retrieving latest data...", remoteVersion, localVersion)
+	t.logger.Info("Deposit data is out of date retrieving latest data...", slog.Int("localVersion", localVersion), slog.Int("remoteVersion", remoteVersion))
 	_, depositData, err := ns.GetServerDepositData()
 	if err != nil {
 		return fmt.Errorf("error getting latest deposit data: %w", err)
@@ -80,13 +81,13 @@ func (t *UpdateDepositData) Run() error {
 	}
 
 	// Restart the Stakewise op container
-	t.log.Printlnf("Restarting Stakewise operator...")
+	t.logger.Info("Restarting Stakewise operator...")
 	_, err = hd.Service.RestartContainer(string(swconfig.ContainerID_StakewiseOperator))
 	if err != nil {
 		return fmt.Errorf("error restarting %s container: %w", swconfig.ContainerID_StakewiseOperator, err)
 	}
 
-	t.log.Println("Done! Your deposit data is now up to date.")
+	t.logger.Info("Done! Your deposit data is now up to date.")
 	return nil
 }
 
@@ -104,7 +105,7 @@ func (t *UpdateDepositData) verifyDepositsRoot(depositData []types.ExtendedDepos
 	if err != nil {
 		return false, fmt.Errorf("error computing Merkle root from deposit data: %w", err)
 	}
-	t.log.Printlnf("Computed Merkle root:   %s", localRoot.Hex())
+	t.logger.Info("Computed Merkle root", slog.String("root", localRoot.Hex()))
 
 	// Get the Merkle root from the vault
 	vault, err := swcontracts.NewStakewiseVault(res.Vault, ec, txMgr)
@@ -119,14 +120,14 @@ func (t *UpdateDepositData) verifyDepositsRoot(depositData []types.ExtendedDepos
 	if err != nil {
 		return false, fmt.Errorf("error getting canonical deposit root from the Stakewise Vault: %w", err)
 	}
-	t.log.Printlnf("Contract's Merkle root: %s", contractRoot.Hex())
+	t.logger.Info("Retrieved contract's Merkle root", slog.String("root", contractRoot.Hex()))
 
 	// Compare them
 	if localRoot != contractRoot {
-		t.log.Printlnf("WARNING: Locally computed deposits data root does not match the value stored on chain, refusing to save for safety!")
+		t.logger.Warn("Locally computed deposits data root does not match the value stored on chain, refusing to save for safety!")
 		return false, nil
 	} else {
-		t.log.Println("Locally computed deposits data root matches the root stored on-chain, updating may proceed.")
+		t.logger.Info("Locally computed deposits data root matches the root stored on-chain, updating may proceed.")
 	}
 	return true, nil
 }

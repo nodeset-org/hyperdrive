@@ -33,7 +33,7 @@ func (f *statusGetValidatorsStatusesContextFactory) Create(args url.Values) (*st
 
 func (f *statusGetValidatorsStatusesContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*statusGetValidatorsStatusesContext, swapi.ValidatorStatusData](
-		router, "status", f, f.handler.serviceProvider.ServiceProvider,
+		router, "status", f, f.handler.logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -50,7 +50,7 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
 	nc := sp.GetNodesetClient()
-	ctx := sp.GetContext()
+	ctx := c.handler.ctx
 
 	nodesetStatusResponse, err := nc.GetRegisteredValidators()
 	if err != nil {

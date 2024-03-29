@@ -129,13 +129,13 @@ func (sp *ServiceProvider) checkExecutionClientStatus(ctx context.Context) (bool
 	// Is the primary working and syncing? If so, wait for it
 	if mgrStatus.PrimaryClientStatus.IsWorking && mgrStatus.PrimaryClientStatus.Error == "" {
 		log.Printf("Fallback execution client is not configured or unavailable, waiting for primary execution client to finish syncing (%.2f%%)\n", mgrStatus.PrimaryClientStatus.SyncProgress*100)
-		return false, ecMgr.GetPrimaryExecutionClient(), nil
+		return false, ecMgr.GetPrimaryClient(), nil
 	}
 
 	// Is the fallback working and syncing? If so, wait for it
 	if mgrStatus.FallbackEnabled && mgrStatus.FallbackClientStatus.IsWorking && mgrStatus.FallbackClientStatus.Error == "" {
 		log.Printf("Primary execution client is unavailable (%s), waiting for the fallback execution client to finish syncing (%.2f%%)\n", mgrStatus.PrimaryClientStatus.Error, mgrStatus.FallbackClientStatus.SyncProgress*100)
-		return false, ecMgr.GetFallbackExecutionClient(), nil
+		return false, ecMgr.GetFallbackClient(), nil
 	}
 
 	// If neither client is working, report the errors

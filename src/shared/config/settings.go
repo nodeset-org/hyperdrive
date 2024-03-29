@@ -27,4 +27,9 @@ const (
 	// Volumes
 	ExecutionClientDataVolume string = "ecdata"
 	BeaconNodeDataVolume      string = "bndata"
+
+	// Logging
+	LogDir       string = "logs"
+	ApiLogName   string = "api.log"
+	TasksLogName string = "tasks.log"
 )

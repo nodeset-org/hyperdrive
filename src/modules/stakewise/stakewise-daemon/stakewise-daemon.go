@@ -67,7 +67,7 @@ func main() {
 		stopWg := new(sync.WaitGroup)
 
 		// Create the service provider
-		sp, err := services.NewServiceProvider(moduleDir, swconfig.ModuleName, swconfig.NewStakewiseConfig, config.ClientTimeout)
+		sp, err := services.NewServiceProvider(moduleDir, swconfig.ModuleName, swconfig.ClientLogName, swconfig.NewStakewiseConfig, config.ClientTimeout)
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}
@@ -84,7 +84,7 @@ func main() {
 		}
 
 		// Start the server
-		apiServer, err := server.NewStakewiseServer(stakewiseSp)
+		apiServer, err := server.NewStakewiseServer(server.CliOrigin, stakewiseSp)
 		if err != nil {
 			return fmt.Errorf("error creating Stakewise server: %w", err)
 		}

@@ -1,18 +1,25 @@
 package tx
 
 import (
+	"context"
+
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/log"
 )
 
 type TxHandler struct {
+	logger          *log.Logger
+	ctx             context.Context
 	serviceProvider *common.ServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewTxHandler(serviceProvider *common.ServiceProvider) *TxHandler {
+func NewTxHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.ServiceProvider) *TxHandler {
 	h := &TxHandler{
+		logger:          logger,
+		ctx:             ctx,
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{

@@ -442,6 +442,14 @@ func (cfg *HyperdriveConfig) updateResources() {
 // === IConfig Implementation ===
 // ==============================
 
+func (cfg *HyperdriveConfig) GetApiLogFilePath() string {
+	return filepath.Join(cfg.UserDataPath.Value, LogDir, ApiLogName)
+}
+
+func (cfg *HyperdriveConfig) GetTasksLogFilePath() string {
+	return filepath.Join(cfg.UserDataPath.Value, LogDir, TasksLogName)
+}
+
 func (cfg *HyperdriveConfig) GetNodeAddressFilePath() string {
 	return filepath.Join(cfg.UserDataPath.Value, UserAddressFilename)
 }

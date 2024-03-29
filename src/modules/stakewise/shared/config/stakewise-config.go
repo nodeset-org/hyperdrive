@@ -146,6 +146,14 @@ func (cfg *StakewiseConfig) GetSubconfigs() map[string]config.IConfigSection {
 // === Module Info ===
 // ===================
 
+func (cfg *StakewiseConfig) GetApiLogFileName() string {
+	return hdconfig.ApiLogName
+}
+
+func (cfg *StakewiseConfig) GetTasksLogFileName() string {
+	return hdconfig.TasksLogName
+}
+
 // The module name
 func (cfg *StakewiseConfig) GetModuleName() string {
 	return ModuleName

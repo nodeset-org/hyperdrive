@@ -47,7 +47,7 @@ func (f *txBatchSubmitTxsContextFactory) Create(body api.BatchSubmitTxsBody) (*t
 
 func (f *txBatchSubmitTxsContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessPost[*txBatchSubmitTxsContext, api.BatchSubmitTxsBody, api.BatchTxData](
-		router, "batch-submit-txs", f, f.handler.serviceProvider.ServiceProvider,
+		router, "batch-submit-txs", f, f.handler.logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -64,7 +64,7 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 	ec := sp.GetEthClient()
-	ctx := sp.GetContext()
+	ctx := c.handler.ctx
 	nodeAddress, _ := sp.GetWallet().GetAddress()
 
 	err := errors.Join(

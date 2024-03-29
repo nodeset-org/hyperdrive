@@ -76,7 +76,7 @@ func NewNodesetClient(sp *StakewiseServiceProvider) *NodesetClient {
 		sp:    sp,
 		res:   sp.GetResources(),
 		debug: cfg.DebugMode.Value,
-		ctx:   sp.GetContext(),
+		ctx:   sp.GetBaseContext(),
 	}
 }
 
