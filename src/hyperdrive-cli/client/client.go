@@ -3,10 +3,10 @@ package client
 import (
 	"fmt"
 	"log/slog"
-	"os"
 	"path/filepath"
 
 	docker "github.com/docker/docker/client"
+	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
@@ -24,12 +24,15 @@ const (
 
 	SettingsFile       string = "user-settings.yml"
 	BackupSettingsFile string = "user-settings-backup.yml"
+
+	terminalLogColor color.Attribute = color.FgHiYellow
 )
 
 // Hyperdrive client
 type HyperdriveClient struct {
 	Api      *client.ApiClient
 	Context  *context.HyperdriveContext
+	Logger   *slog.Logger
 	docker   *docker.Client
 	cfg      *GlobalConfig
 	isNewCfg bool
@@ -39,6 +42,7 @@ type HyperdriveClient struct {
 type StakewiseClient struct {
 	Api     *swclient.ApiClient
 	Context *context.HyperdriveContext
+	Logger  *slog.Logger
 }
 
 // Create new Hyperdrive client from CLI context without checking for sync status
@@ -48,21 +52,12 @@ func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
 	hdCtx := context.GetHyperdriveContext(c)
 	socketPath := filepath.Join(hdCtx.ConfigPath, config.HyperdriveCliSocketFilename)
 
-	// Set up the logger
-	opts := &slog.HandlerOptions{
-		Level:       slog.LevelInfo,
-		ReplaceAttr: log.ReplaceTime,
-	}
-	if hdCtx.DebugEnabled {
-		opts.Level = slog.LevelDebug
-	}
-
 	// Make the client
+	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, config.HyperdriveDaemonRoute))
 	client := &HyperdriveClient{
-		Api: client.NewApiClient(config.HyperdriveApiClientRoute, socketPath, slog.New(slog.NewTextHandler(os.Stdout, opts).WithAttrs([]slog.Attr{
-			slog.String(log.OriginKey, config.HyperdriveDaemonRoute),
-		}))),
+		Api:     client.NewApiClient(config.HyperdriveApiClientRoute, socketPath, logger),
 		Context: hdCtx,
+		Logger:  logger,
 	}
 	return client
 }
@@ -73,21 +68,12 @@ func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
 	hdCtx := context.GetHyperdriveContext(c)
 	socketPath := filepath.Join(hdCtx.ConfigPath, swconfig.CliSocketFilename)
 
-	// Set up the logger
-	opts := &slog.HandlerOptions{
-		Level:       slog.LevelInfo,
-		ReplaceAttr: log.ReplaceTime,
-	}
-	if hdCtx.DebugEnabled {
-		opts.Level = slog.LevelDebug
-	}
-
 	// Make the client
+	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, swconfig.ModuleName))
 	client := &StakewiseClient{
-		Api: swclient.NewApiClient(swconfig.ApiClientRoute, socketPath, slog.New(slog.NewTextHandler(os.Stdout, opts).WithAttrs([]slog.Attr{
-			slog.String(log.OriginKey, swconfig.ModuleName),
-		}))),
+		Api:     swclient.NewApiClient(swconfig.ApiClientRoute, socketPath, logger),
 		Context: hdCtx,
+		Logger:  logger,
 	}
 	return client
 }
