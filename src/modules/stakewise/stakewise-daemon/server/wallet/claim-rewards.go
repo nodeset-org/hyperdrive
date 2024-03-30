@@ -45,13 +45,13 @@ type walletClaimRewardsContext struct {
 
 // Return the transaction data
 func (c *walletClaimRewardsContext) PrepareData(data *types.TxInfoData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
-	fmt.Printf("Preparing data for claim reward\n")
-
+	logger := c.handler.logger
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
 	res := sp.GetResources()
 	txMgr := sp.GetTransactionManager()
 
+	logger.Debug("Preparing data for claim reward")
 	splitMainContract, err := swcontracts.NewSplitMain(res.Splitmain, ec, txMgr)
 	if err != nil {
 		return types.ResponseStatus_Error, fmt.Errorf("error creating Stakewise Vault binding: %w", err)
