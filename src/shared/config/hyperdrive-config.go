@@ -29,7 +29,6 @@ const (
 // The master configuration struct
 type HyperdriveConfig struct {
 	// General settings
-	DebugMode          config.Parameter[bool]
 	Network            config.Parameter[config.Network]
 	ClientMode         config.Parameter[config.ClientMode]
 	ProjectName        config.Parameter[string]
@@ -212,20 +211,6 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				config.Network_All: filepath.Join(hdDir, "data"),
 			},
 		},
-
-		DebugMode: config.Parameter[bool]{
-			ParameterCommon: &config.ParameterCommon{
-				ID:                 ids.DebugModeID,
-				Name:               "Debug Mode",
-				Description:        "Enable debug log printing in the daemon.",
-				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
-				CanBeBlank:         false,
-				OverwriteOnUpgrade: false,
-			},
-			Default: map[config.Network]bool{
-				config.Network_All: false,
-			},
-		},
 	}
 
 	// Create the subconfigs
@@ -259,7 +244,6 @@ func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 		&cfg.MaxPriorityFee,
 		&cfg.AutoTxGasThreshold,
 		&cfg.UserDataPath,
-		&cfg.DebugMode,
 	}
 }
 

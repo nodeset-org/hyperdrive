@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.1.1-0.20240330060246-4c1f09225b20
+	github.com/rocket-pool/node-manager-core v0.1.1-0.20240330061059-60df93fdf96b
 	github.com/shirou/gopsutil/v3 v3.24.2
 	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.18.0

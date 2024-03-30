@@ -66,17 +66,14 @@ type ValidatorsResponse struct {
 type NodesetClient struct {
 	sp            *StakewiseServiceProvider
 	res           *swconfig.StakewiseResources
-	debug         bool
 	authSignature []byte
 }
 
 // Creates a new Nodeset client
 func NewNodesetClient(sp *StakewiseServiceProvider) *NodesetClient {
-	cfg := sp.GetHyperdriveConfig()
 	return &NodesetClient{
-		sp:    sp,
-		res:   sp.GetResources(),
-		debug: cfg.DebugMode.Value,
+		sp:  sp,
+		res: sp.GetResources(),
 	}
 }
 

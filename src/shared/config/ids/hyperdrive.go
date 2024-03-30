@@ -5,7 +5,6 @@ const (
 	RootConfigID         string = "hyperdrive"
 	VersionID            string = "version"
 	UserDirectoryKey     string = "hdUserDir"
-	DebugModeID          string = "debugMode"
 	NetworkID            string = "network"
 	ClientModeID         string = "clientMode"
 	UserDataPathID       string = "hdUserDataDir"

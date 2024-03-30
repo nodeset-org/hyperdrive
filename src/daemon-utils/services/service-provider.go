@@ -224,10 +224,6 @@ func (p *ServiceProvider) GetTasksLogger() *log.Logger {
 	return p.tasksLogger
 }
 
-func (p *ServiceProvider) IsDebugMode() bool {
-	return p.hdCfg.DebugMode.Value
-}
-
 func (p *ServiceProvider) GetBaseContext() context.Context {
 	return p.ctx
 }
