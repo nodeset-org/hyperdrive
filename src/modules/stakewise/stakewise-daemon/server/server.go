@@ -34,7 +34,7 @@ func NewStakewiseServer(origin string, sp *swcommon.StakewiseServiceProvider) (*
 		swwallet.NewWalletHandler(subLogger, ctx, sp),
 		swstatus.NewStatusHandler(subLogger, ctx, sp),
 	}
-	server, err := server.NewApiServer(subLogger, socketPath, handlers, swconfig.DaemonBaseRoute, swconfig.ApiVersion)
+	server, err := server.NewApiServer(subLogger.Logger, socketPath, handlers, swconfig.DaemonBaseRoute, swconfig.ApiVersion)
 	if err != nil {
 		return nil, err
 	}

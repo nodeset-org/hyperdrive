@@ -40,7 +40,7 @@ func (f *nodesetUploadDepositDataContextFactory) Create(args url.Values) (*nodes
 
 func (f *nodesetUploadDepositDataContextFactory) RegisterRoute(router *mux.Router) {
 	duserver.RegisterQuerylessGet[*nodesetUploadDepositDataContext, swapi.NodesetUploadDepositDataData](
-		router, "upload-deposit-data", f, f.handler.logger, f.handler.serviceProvider.ServiceProvider,
+		router, "upload-deposit-data", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

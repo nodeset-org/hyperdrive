@@ -37,7 +37,7 @@ func (f *walletGenerateKeysContextFactory) Create(args url.Values) (*walletGener
 
 func (f *walletGenerateKeysContextFactory) RegisterRoute(router *mux.Router) {
 	duserver.RegisterQuerylessGet[*walletGenerateKeysContext, api.WalletGenerateKeysData](
-		router, "generate-keys", f, f.handler.logger, f.handler.serviceProvider.ServiceProvider,
+		router, "generate-keys", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

@@ -52,7 +52,7 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 	router *mux.Router,
 	functionName string,
 	factory ISingleStageGetContextFactory[ContextType, DataType],
-	logger *log.Logger,
+	logger *slog.Logger,
 	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +86,7 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 	router *mux.Router,
 	functionName string,
 	factory ISingleStagePostContextFactory[ContextType, BodyType, DataType],
-	logger *log.Logger,
+	logger *slog.Logger,
 	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {

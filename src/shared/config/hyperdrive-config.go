@@ -13,6 +13,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/config/migration"
 	"github.com/pbnjay/memory"
 	"github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/log"
 	"gopkg.in/yaml.v3"
 )
 
@@ -36,6 +37,9 @@ type HyperdriveConfig struct {
 	AutoTxMaxFee       config.Parameter[float64]
 	MaxPriorityFee     config.Parameter[float64]
 	AutoTxGasThreshold config.Parameter[float64]
+
+	// Logging
+	Logging *config.LoggerConfig
 
 	// Execution client settings
 	LocalExecutionClient    *config.LocalExecutionConfig
@@ -225,6 +229,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	}
 
 	// Create the subconfigs
+	cfg.Logging = config.NewLoggerConfig()
 	cfg.LocalExecutionClient = NewLocalExecutionClient()
 	cfg.ExternalExecutionClient = config.NewExternalExecutionConfig()
 	cfg.LocalBeaconClient = NewLocalBeaconClient()
@@ -261,6 +266,7 @@ func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 // Get the subconfigurations for this config
 func (cfg *HyperdriveConfig) GetSubconfigs() map[string]config.IConfigSection {
 	return map[string]config.IConfigSection{
+		ids.LoggingID:           cfg.Logging,
 		ids.FallbackID:          cfg.Fallback,
 		ids.LocalExecutionID:    cfg.LocalExecutionClient,
 		ids.ExternalExecutionID: cfg.ExternalExecutionClient,
@@ -482,4 +488,8 @@ func (cfg *HyperdriveConfig) GetBeaconNodeUrls() (string, string) {
 		fallbackBnUrl = cfg.Fallback.BnHttpUrl.Value
 	}
 	return primaryBnUrl, fallbackBnUrl
+}
+
+func (cfg *HyperdriveConfig) GetLoggerOptions() log.LoggerOptions {
+	return cfg.Logging.GetOptions()
 }

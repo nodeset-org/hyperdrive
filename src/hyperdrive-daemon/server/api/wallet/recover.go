@@ -39,7 +39,7 @@ func (f *walletRecoverContextFactory) Create(args url.Values) (*walletRecoverCon
 
 func (f *walletRecoverContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*walletRecoverContext, api.WalletRecoverData](
-		router, "recover", f, f.handler.logger, f.handler.serviceProvider.ServiceProvider,
+		router, "recover", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

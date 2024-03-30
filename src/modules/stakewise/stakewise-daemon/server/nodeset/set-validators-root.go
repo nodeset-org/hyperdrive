@@ -35,7 +35,7 @@ func (f *nodesetSetValidatorsRootContextFactory) Create(args url.Values) (*nodes
 
 func (f *nodesetSetValidatorsRootContextFactory) RegisterRoute(router *mux.Router) {
 	duserver.RegisterQuerylessGet[*nodesetSetValidatorsRootContext, types.TxInfoData](
-		router, "set-validators-root", f, f.handler.logger, f.handler.serviceProvider.ServiceProvider,
+		router, "set-validators-root", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

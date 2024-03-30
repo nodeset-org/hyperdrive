@@ -42,7 +42,7 @@ func (f *walletSearchAndRecoverContextFactory) Create(args url.Values) (*walletS
 
 func (f *walletSearchAndRecoverContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*walletSearchAndRecoverContext, api.WalletSearchAndRecoverData](
-		router, "search-and-recover", f, f.handler.logger, f.handler.serviceProvider.ServiceProvider,
+		router, "search-and-recover", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

@@ -44,7 +44,7 @@ func (f *validatorExitContextFactory) Create(args url.Values) (*validatorExitCon
 
 func (f *validatorExitContextFactory) RegisterRoute(router *mux.Router) {
 	duserver.RegisterQuerylessGet[*validatorExitContext, api.ValidatorExitData](
-		router, "exit", f, f.handler.logger, f.handler.serviceProvider.ServiceProvider,
+		router, "exit", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 

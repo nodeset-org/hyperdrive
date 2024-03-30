@@ -107,7 +107,7 @@ func createServer(origin string, sp *common.ServiceProvider, socketPath string) 
 		wallet.NewWalletHandler(subLogger, ctx, sp),
 	}
 
-	server, err := server.NewApiServer(subLogger, socketPath, handlers, config.HyperdriveDaemonRoute, config.HyperdriveApiVersion)
+	server, err := server.NewApiServer(subLogger.Logger, socketPath, handlers, config.HyperdriveDaemonRoute, config.HyperdriveApiVersion)
 	if err != nil {
 		return nil, err
 	}
