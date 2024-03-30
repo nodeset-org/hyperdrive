@@ -19,6 +19,7 @@ const (
 	ErrorColor             = color.FgRed
 	WarningColor           = color.FgYellow
 	UpdateDepositDataColor = color.FgHiWhite
+	SendExitDataColor      = color.FgGreen
 )
 
 type TaskLoop struct {
@@ -41,7 +42,8 @@ func NewTaskLoop(sp *swcommon.StakewiseServiceProvider, wg *sync.WaitGroup) *Tas
 // Run daemon
 func (t *TaskLoop) Run() error {
 	// Initialize tasks
-	updateDepositData := NewUpdateDepositData(t.ctx, t.sp, t.logger)
+	updateDepositData := NewUpdateDepositDataTask(t.ctx, t.sp, t.logger)
+	sendExitData := NewSendExitData(t.ctx, t.sp, t.logger)
 
 	// Run the loop
 	t.wg.Add(1)
@@ -66,11 +68,22 @@ func (t *TaskLoop) Run() error {
 				continue
 			}
 
+			// Tasks start here
+
 			// Update deposit data from the NodeSet server
 			if err := updateDepositData.Run(); err != nil {
 				t.logger.Error(err.Error())
 			}
-			// time.Sleep(taskCooldown)
+			if utils.SleepWithCancel(t.ctx, taskCooldown) {
+				break
+			}
+
+			// Submit missing exit messages to the NodeSet server
+			if err := sendExitData.Run(); err != nil {
+				t.logger.Error(err.Error())
+			}
+
+			// Tasks end here
 
 			if utils.SleepWithCancel(t.ctx, tasksInterval) {
 				break

@@ -29,7 +29,7 @@ type UpdateDepositDataTask struct {
 }
 
 // Create update deposit data task
-func NewUpdateDepositData(ctx context.Context, sp *swcommon.StakewiseServiceProvider, logger *log.Logger) *UpdateDepositDataTask {
+func NewUpdateDepositDataTask(ctx context.Context, sp *swcommon.StakewiseServiceProvider, logger *log.Logger) *UpdateDepositDataTask {
 	return &UpdateDepositDataTask{
 		logger: logger,
 		ctx:    ctx,

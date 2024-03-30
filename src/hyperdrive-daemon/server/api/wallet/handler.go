@@ -23,6 +23,7 @@ func NewWalletHandler(logger *log.Logger, ctx context.Context, serviceProvider *
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{
+		&walletBalanceContextFactory{h},
 		&walletDeletePasswordContextFactory{h},
 		&walletExportContextFactory{h},
 		&walletExportEthKeyContextFactory{h},
@@ -37,7 +38,7 @@ func NewWalletHandler(logger *log.Logger, ctx context.Context, serviceProvider *
 		&walletSetPasswordContextFactory{h},
 		&walletSignMessageContextFactory{h},
 		&walletSignTxContextFactory{h},
-		&walletStatusFactory{h},
+		&walletStatusContextFactory{h},
 		&walletTestRecoverContextFactory{h},
 		&walletTestSearchAndRecoverContextFactory{h},
 	}

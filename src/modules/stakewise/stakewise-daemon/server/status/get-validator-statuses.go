@@ -56,7 +56,6 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 	if err != nil {
 		return types.ResponseStatus_Error, fmt.Errorf("error getting nodeset statuses: %w", err)
 	}
-
 	privateKeys, err := w.GetAllPrivateKeys()
 	if err != nil {
 		return types.ResponseStatus_Error, fmt.Errorf("error getting private keys: %w", err)

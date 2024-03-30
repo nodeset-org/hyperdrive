@@ -34,6 +34,24 @@ const (
 )
 
 // =================
+// === Requests  ===
+// =================
+type ExitMessageDetails struct {
+	Epoch          string `json:"epoch"`
+	ValidatorIndex string `json:"validator_index"`
+}
+
+type ExitMessage struct {
+	Message   ExitMessageDetails `json:"message"`
+	Signature string             `json:"signature"`
+}
+
+type ExitData struct {
+	Pubkey      string      `json:"pubkey"`
+	ExitMessage ExitMessage `json:"exitMessage"`
+}
+
+// =================
 // === Responses ===
 // =================
 
@@ -48,14 +66,16 @@ type DepositDataResponse struct {
 	Data    []types.ExtendedDepositData `json:"data"`
 }
 
-type ValidatorPubkeyStatus struct {
-	Pubkey beacon.ValidatorPubkey `json:"pubkey"`
-	Status string                 `json:"status"`
+// api/validators
+type ValidatorStatus struct {
+	Pubkey   beacon.ValidatorPubkey `json:"pubkey"`
+	Status   string                 `json:"status"`
+	Uploaded bool                   `json:"uploaded"`
 }
 
 // api/dev/validators
 type ValidatorsResponse struct {
-	Data []ValidatorPubkeyStatus `json:"data"`
+	Data []ValidatorStatus `json:"data"`
 }
 
 // ==============
@@ -102,6 +122,23 @@ func (c *NodesetClient) UploadDepositData(ctx context.Context, depositData []byt
 	return response, nil
 }
 
+// Submit signed exit data to Nodeset
+func (c *NodesetClient) UploadSignedExitData(ctx context.Context, exitData []ExitData) ([]byte, error) {
+	// Serialize the exit data into JSON
+	jsonData, err := json.Marshal(exitData)
+	if err != nil {
+		return nil, fmt.Errorf("error marshalling exit data to JSON: %w", err)
+	}
+
+	// Submit the POST request with the serialized JSON
+	response, err := c.submitRequest(ctx, http.MethodPut, bytes.NewBuffer(jsonData), nil, validatorsPath)
+	if err != nil {
+		return nil, fmt.Errorf("error posting exit data: %w", err)
+	}
+
+	return response, nil
+}
+
 // Get the current version of the aggregated deposit data on the server
 func (c *NodesetClient) GetServerDepositDataVersion(ctx context.Context) (int, error) {
 	vault := utils.RemovePrefix(strings.ToLower(c.res.Vault.Hex()))
@@ -143,7 +180,7 @@ func (c *NodesetClient) GetServerDepositData(ctx context.Context) (int, []types.
 }
 
 // Get a list of all of the pubkeys that have already been registered with NodeSet for this node
-func (c *NodesetClient) GetRegisteredValidators(ctx context.Context) ([]ValidatorPubkeyStatus, error) {
+func (c *NodesetClient) GetRegisteredValidators(ctx context.Context) ([]ValidatorStatus, error) {
 	queryParams := map[string]string{
 		"network": c.res.EthNetworkName,
 	}

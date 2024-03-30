@@ -73,7 +73,7 @@ func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateK
 	// Encrypt key
 	encryptedKey, err := ks.encryptor.Encrypt(key.Marshal(), ks.password)
 	if err != nil {
-		return fmt.Errorf("Could not encrypt validator key: %w", err)
+		return fmt.Errorf("could not encrypt validator key: %w", err)
 	}
 
 	// Create key store
@@ -88,7 +88,7 @@ func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateK
 	// Encode key store
 	keyStoreBytes, err := json.Marshal(keyStore)
 	if err != nil {
-		return fmt.Errorf("Could not encode validator key: %w", err)
+		return fmt.Errorf("could not encode validator key: %w", err)
 	}
 
 	// Get key file path
@@ -96,7 +96,7 @@ func (ks *stakewiseKeystoreManager) StoreValidatorKey(key *eth2types.BLSPrivateK
 
 	// Write key store to disk
 	if err := os.WriteFile(keyFilePath, keyStoreBytes, fileMode); err != nil {
-		return fmt.Errorf("Could not write validator key to disk: %w", err)
+		return fmt.Errorf("could not write validator key to disk: %w", err)
 	}
 
 	// Return
