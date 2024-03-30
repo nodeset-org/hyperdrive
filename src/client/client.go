@@ -1,6 +1,8 @@
 package client
 
 import (
+	"log/slog"
+
 	"github.com/rocket-pool/node-manager-core/api/client"
 )
 
@@ -14,8 +16,8 @@ type ApiClient struct {
 }
 
 // Creates a new API client instance
-func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClient {
-	context := client.NewRequesterContext(baseRoute, socketPath, debugMode)
+func NewApiClient(baseRoute string, socketPath string, logger *slog.Logger) *ApiClient {
+	context := client.NewRequesterContext(baseRoute, socketPath, logger)
 
 	client := &ApiClient{
 		context: context,
@@ -28,6 +30,6 @@ func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClien
 }
 
 // Set debug mode
-func (c *ApiClient) SetDebug(debug bool) {
-	c.context.DebugMode = debug
+func (c *ApiClient) SetLogger(logger *slog.Logger) {
+	c.context.SetLogger(logger)
 }

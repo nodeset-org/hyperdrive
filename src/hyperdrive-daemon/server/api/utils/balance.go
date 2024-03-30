@@ -28,7 +28,7 @@ func (f *utilsBalanceContextFactory) Create(args url.Values) (*utilsBalanceConte
 
 func (f *utilsBalanceContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*utilsBalanceContext, api.UtilsBalanceData](
-		router, "balance", f, f.handler.serviceProvider.ServiceProvider,
+		router, "balance", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -43,7 +43,7 @@ type utilsBalanceContext struct {
 func (c *utilsBalanceContext) PrepareData(data *api.UtilsBalanceData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
-	ctx := sp.GetContext()
+	ctx := c.handler.ctx
 	nodeAddress, _ := sp.GetWallet().GetAddress()
 
 	// Requirements

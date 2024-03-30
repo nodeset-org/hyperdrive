@@ -40,7 +40,7 @@ func (f *nodesetUploadDepositDataContextFactory) Create(args url.Values) (*nodes
 
 func (f *nodesetUploadDepositDataContextFactory) RegisterRoute(router *mux.Router) {
 	duserver.RegisterQuerylessGet[*nodesetUploadDepositDataContext, swapi.NodesetUploadDepositDataData](
-		router, "upload-deposit-data", f, f.handler.serviceProvider.ServiceProvider,
+		router, "upload-deposit-data", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -59,11 +59,11 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	nc := sp.GetNodesetClient()
 	w := sp.GetWallet()
 	ec := sp.GetEthClient()
-	ctx := sp.GetContext()
+	ctx := c.handler.ctx
 
 	// Get the list of registered validators
 	registeredPubkeyMap := map[beacon.ValidatorPubkey]bool{}
-	pubkeyStatusResponse, err := nc.GetRegisteredValidators()
+	pubkeyStatusResponse, err := nc.GetRegisteredValidators(ctx)
 	if err != nil {
 		return types.ResponseStatus_Error, fmt.Errorf("error getting registered validators: %w", err)
 	}
@@ -130,7 +130,7 @@ func (c *nodesetUploadDepositDataContext) PrepareData(data *swapi.NodesetUploadD
 	}
 
 	// Submit the upload
-	response, err := nc.UploadDepositData(bytes)
+	response, err := nc.UploadDepositData(ctx, bytes)
 	if err != nil {
 		return types.ResponseStatus_Error, err
 	}

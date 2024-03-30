@@ -12,20 +12,29 @@ import (
 	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
+const (
+	CliOrigin string = "cli"
+	WebOrigin string = "net"
+)
+
 type StakewiseServer struct {
 	*server.ApiServer
 	socketPath string
 }
 
-func NewStakewiseServer(sp *swcommon.StakewiseServiceProvider) (*StakewiseServer, error) {
+func NewStakewiseServer(origin string, sp *swcommon.StakewiseServiceProvider) (*StakewiseServer, error) {
+	apiLogger := sp.GetApiLogger()
+	subLogger := apiLogger.CreateSubLogger(origin)
+	ctx := subLogger.CreateContextWithLogger(sp.GetBaseContext())
+
 	socketPath := filepath.Join(sp.GetUserDir(), swconfig.CliSocketFilename)
 	handlers := []server.IHandler{
-		swnodeset.NewNodesetHandler(sp),
-		swvalidator.NewValidatorHandler(sp),
-		swwallet.NewWalletHandler(sp),
-		swstatus.NewStatusHandler(sp),
+		swnodeset.NewNodesetHandler(subLogger, ctx, sp),
+		swvalidator.NewValidatorHandler(subLogger, ctx, sp),
+		swwallet.NewWalletHandler(subLogger, ctx, sp),
+		swstatus.NewStatusHandler(subLogger, ctx, sp),
 	}
-	server, err := server.NewApiServer(socketPath, handlers, swconfig.DaemonBaseRoute, swconfig.ApiVersion)
+	server, err := server.NewApiServer(subLogger.Logger, socketPath, handlers, swconfig.DaemonBaseRoute, swconfig.ApiVersion)
 	if err != nil {
 		return nil, err
 	}

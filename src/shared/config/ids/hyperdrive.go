@@ -5,7 +5,6 @@ const (
 	RootConfigID         string = "hyperdrive"
 	VersionID            string = "version"
 	UserDirectoryKey     string = "hdUserDir"
-	DebugModeID          string = "debugMode"
 	NetworkID            string = "network"
 	ClientModeID         string = "clientMode"
 	UserDataPathID       string = "hdUserDataDir"
@@ -15,6 +14,7 @@ const (
 	AutoTxGasThresholdID string = "autoTxGasThreshold"
 
 	// Subconfig IDs
+	LoggingID           string = "logging"
 	FallbackID          string = "fallback"
 	LocalExecutionID    string = "localExecution"
 	ExternalExecutionID string = "externalExecution"

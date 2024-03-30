@@ -33,7 +33,7 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	}
 
 	// Core provider
-	sp, err := services.NewServiceProvider(cfg, hdconfig.ClientTimeout, cfg.DebugMode.Value)
+	sp, err := services.NewServiceProvider(cfg, hdconfig.ClientTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("error creating core service provider: %w", err)
 	}
@@ -57,10 +57,6 @@ func (p *ServiceProvider) GetUserDir() string {
 
 func (p *ServiceProvider) GetConfig() *hdconfig.HyperdriveConfig {
 	return p.cfg
-}
-
-func (p *ServiceProvider) IsDebugMode() bool {
-	return p.cfg.DebugMode.Value
 }
 
 // =============

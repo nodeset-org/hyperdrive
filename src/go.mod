@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.1.1-0.20240328053944-1ccea4c12c57
+	github.com/rocket-pool/node-manager-core v0.1.1-0.20240330061059-60df93fdf96b
 	github.com/shirou/gopsutil/v3 v3.24.2
 	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.18.0
@@ -129,6 +129,9 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240325203815-454cdb8f5daa // indirect
 	google.golang.org/grpc v1.62.1 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
+
+// replace github.com/rocket-pool/node-manager-core => ../../../rocketpool/node-manager-core

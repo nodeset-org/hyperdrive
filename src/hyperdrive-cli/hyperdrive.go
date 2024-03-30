@@ -89,7 +89,6 @@ func main() {
 
 	// Set application flags
 	app.Flags = []cli.Flag{
-		utils.PrintTxDataFlag,
 		allowRootFlag,
 		configPathFlag,
 		maxFeeFlag,

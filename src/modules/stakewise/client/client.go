@@ -1,6 +1,8 @@
 package swclient
 
 import (
+	"log/slog"
+
 	"github.com/rocket-pool/node-manager-core/api/client"
 )
 
@@ -14,8 +16,8 @@ type ApiClient struct {
 }
 
 // Creates a new API client instance
-func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClient {
-	context := client.NewRequesterContext(baseRoute, socketPath, debugMode)
+func NewApiClient(baseRoute string, socketPath string, logger *slog.Logger) *ApiClient {
+	context := client.NewRequesterContext(baseRoute, socketPath, logger)
 
 	client := &ApiClient{
 		context:   context,

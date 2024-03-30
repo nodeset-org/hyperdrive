@@ -7,8 +7,8 @@ import (
 
 	"github.com/fatih/color"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/utils"
-	"github.com/rocket-pool/node-manager-core/utils/log"
 )
 
 // Config
@@ -22,26 +22,26 @@ const (
 )
 
 type TaskLoop struct {
-	ctx context.Context
-	sp  *swcommon.StakewiseServiceProvider
-	wg  *sync.WaitGroup
+	ctx    context.Context
+	logger *log.Logger
+	sp     *swcommon.StakewiseServiceProvider
+	wg     *sync.WaitGroup
 }
 
 func NewTaskLoop(sp *swcommon.StakewiseServiceProvider, wg *sync.WaitGroup) *TaskLoop {
-	return &TaskLoop{
-		sp:  sp,
-		ctx: sp.GetContext(),
-		wg:  wg,
+	taskLoop := &TaskLoop{
+		sp:     sp,
+		logger: sp.GetTasksLogger(),
+		wg:     wg,
 	}
+	taskLoop.ctx = taskLoop.logger.CreateContextWithLogger(sp.GetBaseContext())
+	return taskLoop
 }
 
 // Run daemon
 func (t *TaskLoop) Run() error {
-	// Initialize loggers
-	errorLog := log.NewColorLogger(ErrorColor)
-
 	// Initialize tasks
-	updateDepositData := NewUpdateDepositData(t.sp, log.NewColorLogger(UpdateDepositDataColor))
+	updateDepositData := NewUpdateDepositData(t.ctx, t.sp, t.logger)
 
 	// Run the loop
 	t.wg.Add(1)
@@ -49,7 +49,7 @@ func (t *TaskLoop) Run() error {
 		for {
 			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
 			if err != nil {
-				errorLog.Println(err)
+				t.logger.Error(err.Error())
 				if utils.SleepWithCancel(t.ctx, taskCooldown) {
 					break
 				}
@@ -59,7 +59,7 @@ func (t *TaskLoop) Run() error {
 			// Check the BC status
 			err = t.sp.WaitBeaconClientSynced(t.ctx, false) // Force refresh the primary / fallback BC status
 			if err != nil {
-				errorLog.Println(err)
+				t.logger.Error(err.Error())
 				if utils.SleepWithCancel(t.ctx, taskCooldown) {
 					break
 				}
@@ -68,7 +68,7 @@ func (t *TaskLoop) Run() error {
 
 			// Update deposit data from the NodeSet server
 			if err := updateDepositData.Run(); err != nil {
-				errorLog.Println(err)
+				t.logger.Error(err.Error())
 			}
 			// time.Sleep(taskCooldown)
 

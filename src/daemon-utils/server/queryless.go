@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 
@@ -11,18 +12,11 @@ import (
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/wallet"
 
 	"github.com/gorilla/mux"
 )
-
-type ApiResponse[Data any] struct {
-	Data *Data `json:"data"`
-}
-
-type SuccessData struct {
-	Success bool `json:"success"`
-}
 
 // Wrapper for callbacks used by call runners that simply run without following a structured pattern of
 // querying the chain. This is the most general form of context and can be used by anything as it doesn't
@@ -54,35 +48,31 @@ func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType 
 	router *mux.Router,
 	functionName string,
 	factory IQuerylessGetContextFactory[ContextType, DataType],
+	logger *slog.Logger,
 	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
 		args := r.URL.Query()
-		isDebug := serviceProvider.IsDebugMode()
-		log := serviceProvider.GetApiLogger()
-		if isDebug {
-			log.Printlnf("[%s] => %s", r.Method, r.URL.String())
-		} else {
-			log.Printlnf("[%s] => %s", r.Method, r.URL.Path)
-		}
+		logger.Info("Request", slog.String(log.MethodKey, r.Method), slog.String(log.PathKey, r.URL.Path))
+		logger.Debug("Params", slog.String(log.QueryKey, r.URL.RawQuery))
 
 		// Check the method
 		if r.Method != http.MethodGet {
-			server.HandleInvalidMethod(log, w)
+			server.HandleInvalidMethod(logger, w)
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(args)
 		if err != nil {
-			server.HandleInputError(log, w, err)
+			server.HandleInputError(logger, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		status, response, err := runQuerylessRoute[DataType](context, serviceProvider)
-		server.HandleResponse(log, w, status, response, err, isDebug)
+		server.HandleResponse(logger, w, status, response, err)
 	})
 }
 
@@ -92,53 +82,50 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 	router *mux.Router,
 	functionName string,
 	factory IQuerylessPostContextFactory[ContextType, BodyType, DataType],
+	logger *slog.Logger,
 	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
-		log := serviceProvider.GetApiLogger()
-		isDebug := serviceProvider.IsDebugMode()
-		log.Printlnf("[%s] => %s", r.Method, r.URL.Path)
+		logger.Info("Request", slog.String(log.MethodKey, r.Method), slog.String(log.PathKey, r.URL.Path))
 
 		// Check the method
 		if r.Method != http.MethodPost {
-			server.HandleInvalidMethod(log, w)
+			server.HandleInvalidMethod(logger, w)
 			return
 		}
 
 		// Read the body
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			server.HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
+			server.HandleInputError(logger, w, fmt.Errorf("error reading request body: %w", err))
 			return
 		}
-		if isDebug {
-			log.Printlnf("BODY: %s", string(bodyBytes))
-		}
+		logger.Debug("Body", slog.String(log.BodyKey, string(bodyBytes)))
 
 		// Deserialize the body
 		var body BodyType
 		err = json.Unmarshal(bodyBytes, &body)
 		if err != nil {
-			server.HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
+			server.HandleInputError(logger, w, fmt.Errorf("error deserializing request body: %w", err))
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(body)
 		if err != nil {
-			server.HandleInputError(log, w, err)
+			server.HandleInputError(logger, w, err)
 			return
 		}
 
 		// Run the context's processing routine
 		status, response, err := runQuerylessRoute[DataType](context, serviceProvider)
-		server.HandleResponse(log, w, status, response, err, isDebug)
+		server.HandleResponse(logger, w, status, response, err)
 	})
 }
 
 // Run a route registered with no structured chain query pattern
-func runQuerylessRoute[DataType any](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider) (types.ResponseStatus, *ApiResponse[DataType], error) {
+func runQuerylessRoute[DataType any](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider) (types.ResponseStatus, *types.ApiResponse[DataType], error) {
 	// Get the services
 	hd := serviceProvider.GetHyperdriveClient()
 	signer := serviceProvider.GetSigner()
@@ -156,7 +143,7 @@ func runQuerylessRoute[DataType any](ctx IQuerylessCallContext[DataType], servic
 
 	// Create the response and data
 	data := new(DataType)
-	response := &ApiResponse[DataType]{
+	response := &types.ApiResponse[DataType]{
 		Data: data,
 	}
 

@@ -13,6 +13,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/config/migration"
 	"github.com/pbnjay/memory"
 	"github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/log"
 	"gopkg.in/yaml.v3"
 )
 
@@ -28,7 +29,6 @@ const (
 // The master configuration struct
 type HyperdriveConfig struct {
 	// General settings
-	DebugMode          config.Parameter[bool]
 	Network            config.Parameter[config.Network]
 	ClientMode         config.Parameter[config.ClientMode]
 	ProjectName        config.Parameter[string]
@@ -36,6 +36,9 @@ type HyperdriveConfig struct {
 	AutoTxMaxFee       config.Parameter[float64]
 	MaxPriorityFee     config.Parameter[float64]
 	AutoTxGasThreshold config.Parameter[float64]
+
+	// Logging
+	Logging *config.LoggerConfig
 
 	// Execution client settings
 	LocalExecutionClient    *config.LocalExecutionConfig
@@ -208,23 +211,10 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				config.Network_All: filepath.Join(hdDir, "data"),
 			},
 		},
-
-		DebugMode: config.Parameter[bool]{
-			ParameterCommon: &config.ParameterCommon{
-				ID:                 ids.DebugModeID,
-				Name:               "Debug Mode",
-				Description:        "Enable debug log printing in the daemon.",
-				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
-				CanBeBlank:         false,
-				OverwriteOnUpgrade: false,
-			},
-			Default: map[config.Network]bool{
-				config.Network_All: false,
-			},
-		},
 	}
 
 	// Create the subconfigs
+	cfg.Logging = config.NewLoggerConfig()
 	cfg.LocalExecutionClient = NewLocalExecutionClient()
 	cfg.ExternalExecutionClient = config.NewExternalExecutionConfig()
 	cfg.LocalBeaconClient = NewLocalBeaconClient()
@@ -254,13 +244,13 @@ func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 		&cfg.MaxPriorityFee,
 		&cfg.AutoTxGasThreshold,
 		&cfg.UserDataPath,
-		&cfg.DebugMode,
 	}
 }
 
 // Get the subconfigurations for this config
 func (cfg *HyperdriveConfig) GetSubconfigs() map[string]config.IConfigSection {
 	return map[string]config.IConfigSection{
+		ids.LoggingID:           cfg.Logging,
 		ids.FallbackID:          cfg.Fallback,
 		ids.LocalExecutionID:    cfg.LocalExecutionClient,
 		ids.ExternalExecutionID: cfg.ExternalExecutionClient,
@@ -442,6 +432,14 @@ func (cfg *HyperdriveConfig) updateResources() {
 // === IConfig Implementation ===
 // ==============================
 
+func (cfg *HyperdriveConfig) GetApiLogFilePath() string {
+	return filepath.Join(cfg.HyperdriveUserDirectory, LogDir, ApiLogName)
+}
+
+func (cfg *HyperdriveConfig) GetTasksLogFilePath() string {
+	return filepath.Join(cfg.HyperdriveUserDirectory, LogDir, TasksLogName)
+}
+
 func (cfg *HyperdriveConfig) GetNodeAddressFilePath() string {
 	return filepath.Join(cfg.UserDataPath.Value, UserAddressFilename)
 }
@@ -474,4 +472,8 @@ func (cfg *HyperdriveConfig) GetBeaconNodeUrls() (string, string) {
 		fallbackBnUrl = cfg.Fallback.BnHttpUrl.Value
 	}
 	return primaryBnUrl, fallbackBnUrl
+}
+
+func (cfg *HyperdriveConfig) GetLoggerOptions() log.LoggerOptions {
+	return cfg.Logging.GetOptions()
 }

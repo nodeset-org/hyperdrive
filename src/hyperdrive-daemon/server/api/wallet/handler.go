@@ -1,18 +1,25 @@
 package wallet
 
 import (
+	"context"
+
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
 	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/log"
 )
 
 type WalletHandler struct {
+	logger          *log.Logger
+	ctx             context.Context
 	serviceProvider *common.ServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewWalletHandler(serviceProvider *common.ServiceProvider) *WalletHandler {
+func NewWalletHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.ServiceProvider) *WalletHandler {
 	h := &WalletHandler{
+		logger:          logger,
+		ctx:             ctx,
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{
