@@ -1,18 +1,25 @@
 package swstatus
 
 import (
+	"context"
+
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/log"
 )
 
 type StatusHandler struct {
+	logger          *log.Logger
+	ctx             context.Context
 	serviceProvider *swcommon.StakewiseServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewStatusHandler(serviceProvider *swcommon.StakewiseServiceProvider) *StatusHandler {
+func NewStatusHandler(logger *log.Logger, ctx context.Context, serviceProvider *swcommon.StakewiseServiceProvider) *StatusHandler {
 	h := &StatusHandler{
+		logger:          logger,
+		ctx:             ctx,
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{

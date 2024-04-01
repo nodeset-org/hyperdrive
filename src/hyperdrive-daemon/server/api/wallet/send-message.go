@@ -8,10 +8,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -34,8 +33,8 @@ func (f *walletSendMessageContextFactory) Create(args url.Values) (*walletSendMe
 }
 
 func (f *walletSendMessageContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletSendMessageContext, api.TxInfoData](
-		router, "send-message", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*walletSendMessageContext, types.TxInfoData](
+		router, "send-message", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -49,7 +48,7 @@ type walletSendMessageContext struct {
 	address common.Address
 }
 
-func (c *walletSendMessageContext) PrepareData(data *api.TxInfoData, opts *bind.TransactOpts) error {
+func (c *walletSendMessageContext) PrepareData(data *types.TxInfoData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 
@@ -57,10 +56,10 @@ func (c *walletSendMessageContext) PrepareData(data *api.TxInfoData, opts *bind.
 		sp.RequireWalletReady(),
 	)
 	if err != nil {
-		return err
+		return types.ResponseStatus_WalletNotReady, err
 	}
 
 	txInfo := txMgr.CreateTransactionInfoRaw(c.address, c.message, opts)
 	data.TxInfo = txInfo
-	return nil
+	return types.ResponseStatus_Success, nil
 }

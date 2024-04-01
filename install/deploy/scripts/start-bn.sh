@@ -25,12 +25,6 @@ if [ "$NETWORK" = "mainnet" ]; then
     PRYSM_NETWORK="--mainnet"
     TEKU_NETWORK="mainnet"
     PRYSM_GENESIS_STATE=""
-elif [ "$NETWORK" = "prater" ]; then
-    LH_NETWORK="prater"
-    LODESTAR_NETWORK="goerli"
-    NIMBUS_NETWORK="prater"
-    PRYSM_NETWORK="--prater"
-    TEKU_NETWORK="prater"
 elif [ "$NETWORK" = "holesky-dev" ]; then
     LH_NETWORK="holesky"
     LODESTAR_NETWORK="holesky"
@@ -55,7 +49,7 @@ if [ ! -f "/secrets/jwtsecret" ]; then
 fi
 
 # Lighthouse startup
-if [ "$CC_CLIENT" = "lighthouse" ]; then
+if [ "$CLIENT" = "lighthouse" ]; then
 
     CMD="$PERF_PREFIX /usr/local/bin/lighthouse beacon \
         --network $LH_NETWORK \
@@ -106,7 +100,7 @@ if [ "$CC_CLIENT" = "lighthouse" ]; then
 fi
 
 # Lodestar startup
-if [ "$CC_CLIENT" = "lodestar" ]; then
+if [ "$CLIENT" = "lodestar" ]; then
 
     CMD="$PERF_PREFIX /usr/local/bin/node --max-http-header-size=65536 /usr/app/packages/cli/bin/lodestar beacon \
         --network $LODESTAR_NETWORK \
@@ -152,7 +146,7 @@ if [ "$CC_CLIENT" = "lodestar" ]; then
 fi
 
 # Nimbus startup
-if [ "$CC_CLIENT" = "nimbus" ]; then
+if [ "$CLIENT" = "nimbus" ]; then
 
     # Handle checkpoint syncing
     if [ ! -z "$CHECKPOINT_SYNC_URL" ]; then
@@ -205,7 +199,7 @@ if [ "$CC_CLIENT" = "nimbus" ]; then
 fi
 
 # Prysm startup
-if [ "$CC_CLIENT" = "prysm" ]; then
+if [ "$CLIENT" = "prysm" ]; then
 
     # Grab the Holesky genesis state if needed
     if [ "$NETWORK" = "holesky" -o "$NETWORK" = "holesky-dev" ]; then
@@ -234,6 +228,7 @@ if [ "$CC_CLIENT" = "prysm" ]; then
         --eth1-header-req-limit 150 \
         --jwt-secret=/secrets/jwtsecret \
         --api-timeout 600 \
+        --enable-experimental-backfill \
         $BN_ADDITIONAL_FLAGS"
 
     if [ ! -z "$MEV_BOOST_URL" ]; then
@@ -263,7 +258,7 @@ if [ "$CC_CLIENT" = "prysm" ]; then
 fi
 
 # Teku startup
-if [ "$CC_CLIENT" = "teku" ]; then
+if [ "$CLIENT" = "teku" ]; then
 
     CMD="$PERF_PREFIX /opt/teku/bin/teku \
         --network=$TEKU_NETWORK \

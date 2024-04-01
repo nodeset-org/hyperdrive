@@ -14,11 +14,11 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/goccy/go-json"
-	"github.com/nodeset-org/eth-utils/beacon"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/validator/utils"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/node/validator"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -61,17 +61,20 @@ func (m *DepositDataManager) GenerateDepositData(keys []*eth2types.BLSPrivateKey
 	resources := m.sp.GetResources()
 
 	// Stakewise uses the same withdrawal creds for each validator
-	withdrawalCreds := utils.GetWithdrawalCredsFromAddress(resources.Vault)
+	withdrawalCreds := validator.GetWithdrawalCredsFromAddress(resources.Vault)
 
 	// Create the new aggregated deposit data for all generated keys
 	dataList := make([]*types.ExtendedDepositData, len(keys))
 	for i, key := range keys {
-		depositData, err := utils.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, config.Network(resources.NodesetNetwork))
+		depositData, err := validator.GetDepositData(key, withdrawalCreds, resources.GenesisForkVersion, StakewiseDepositAmount, resources.EthNetworkName)
 		if err != nil {
 			pubkey := beacon.ValidatorPubkey(key.PublicKey().Marshal())
 			return nil, fmt.Errorf("error getting deposit data for key %s: %w", pubkey.HexWithPrefix(), err)
 		}
-		dataList[i] = &depositData
+		dataList[i] = &types.ExtendedDepositData{
+			ExtendedDepositData: depositData,
+			HyperdriveVersion:   shared.HyperdriveVersion,
+		}
 	}
 	return dataList, nil
 }

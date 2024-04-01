@@ -6,10 +6,10 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	swcmdutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/utils"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -51,7 +51,7 @@ func generateKeys(c *cli.Context) error {
 	// Get the count
 	count := c.Uint64(generateKeysCountFlag.Name)
 	if count == 0 {
-		countString := utils.Prompt("How many keys would you like to generate?", "^\\d+$", "Invalid count, try again")
+		countString := cliutils.Prompt("How many keys would you like to generate?", "^\\d+$", "Invalid count, try again")
 		count, err = input.ValidateUint("count", countString)
 		if err != nil {
 			return fmt.Errorf("invalid count [%s]: %w", countString, err)
@@ -114,16 +114,18 @@ func generateKeys(c *cli.Context) error {
 	fmt.Println()
 
 	// Upload to the server
-	err = swcmdutils.UploadDepositData(sw)
+	newKeysUploaded, err := swcmdutils.UploadDepositData(sw)
 	if err != nil {
 		return err
 	}
 
-	if !noRestart {
-		fmt.Println()
-		fmt.Println("Your new keys are now ready for use. When one of them is selected for activation, your system will deposit it and begin attesting automatically.")
-	} else {
-		fmt.Println("Your new keys are uploaded, but you *must* restart your Validator Client at your earliest convenience to begin attesting once they are selected for depositing.")
+	if newKeysUploaded {
+		if !noRestart {
+			fmt.Println()
+			fmt.Println("Your new keys are now ready for use. When one of them is selected for activation, your system will deposit it and begin attesting automatically.")
+		} else {
+			fmt.Println("Your new keys are uploaded, but you *must* restart your Validator Client at your earliest convenience to begin attesting once they are selected for depositing.")
+		}
 	}
 
 	return nil

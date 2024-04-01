@@ -7,8 +7,8 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 // Constants
@@ -49,10 +49,6 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 		// Add changed containers if this is an update
 		if md.isUpdate {
 			totalAffectedContainers[config.ContainerID_Daemon] = true
-
-			if newConfig.Hyperdrive.ClientMode.Value == config.ClientMode_Local && newConfig.Hyperdrive.LocalExecutionConfig.ExecutionClient.Value != config.ExecutionClient_Geth {
-				totalAffectedContainers[config.ContainerID_ExecutionClient] = true
-			}
 			builder.WriteString(fmt.Sprintf("Updated to Hyperdrive v%s (will affect several containers)\n\n", shared.HyperdriveVersion))
 		}
 
@@ -68,7 +64,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 			builder.WriteString("<No changes>")
 		} else {
 			builder.WriteString("The following containers must be restarted for these changes to take effect:")
-			for container, _ := range totalAffectedContainers {
+			for container := range totalAffectedContainers {
 				containerName := oldConfig.Hyperdrive.GetDockerArtifactName(string(container))
 				builder.WriteString(fmt.Sprintf("\n\t%s", containerName))
 				containersToRestart = append(containersToRestart, container)

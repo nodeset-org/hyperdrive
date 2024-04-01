@@ -5,9 +5,8 @@ import (
 )
 
 const (
-	SignTxOnlyFlag string = "sign-tx-only"
-	NoRestartFlag  string = "no-restart"
-	MnemonicFlag   string = "mnemonic"
+	NoRestartFlag string = "no-restart"
+	MnemonicFlag  string = "mnemonic"
 )
 
 var (
@@ -18,8 +17,13 @@ var (
 	}
 	PrintTxDataFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name:    "print-tx-data",
-		Aliases: []string{"pd"},
-		Usage:   "Print the TX data for transactions without signing or submitting them. Useful for masquerade mode or offline wallet operations.",
+		Aliases: []string{"pt"},
+		Usage:   "Print any TX data for transactions without signing or submitting them. Useful for masquerade mode or offline wallet operations.",
+	}
+	SignTxOnlyFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "sign-tx-only",
+		Aliases: []string{"st"},
+		Usage:   "Sign any TXs and print the results, but don't submit it to the network. Useful if you want to save a TX for later or bundle it up with a service like Flashbots.",
 	}
 	RawFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name: "raw",

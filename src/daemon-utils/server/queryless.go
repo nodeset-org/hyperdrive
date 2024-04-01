@@ -3,25 +3,20 @@ package server
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
-	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/log"
+	"github.com/rocket-pool/node-manager-core/wallet"
 
 	"github.com/gorilla/mux"
 )
-
-type ApiResponse[Data any] struct {
-	Data *Data `json:"data"`
-}
-
-type SuccessData struct {
-	Success bool `json:"success"`
-}
 
 // Wrapper for callbacks used by call runners that simply run without following a structured pattern of
 // querying the chain. This is the most general form of context and can be used by anything as it doesn't
@@ -30,7 +25,7 @@ type SuccessData struct {
 type IQuerylessCallContext[DataType any] interface {
 	// Prepare the response data in whatever way the context needs to do
 	//PrepareData(data *DataType, opts *bind.TransactOpts) error
-	PrepareData(data *DataType, opts *bind.TransactOpts) error
+	PrepareData(data *DataType, opts *bind.TransactOpts) (types.ResponseStatus, error)
 }
 
 // Interface for queryless call context factories that handle GET calls.
@@ -49,95 +44,88 @@ type IQuerylessPostContextFactory[ContextType IQuerylessCallContext[DataType], B
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via GET; use this for typical general-purpose calls
-func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType any, ConfigType config.IModuleConfig](
+func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType any](
 	router *mux.Router,
 	functionName string,
 	factory IQuerylessGetContextFactory[ContextType, DataType],
-	serviceProvider *services.ServiceProvider[ConfigType],
+	logger *slog.Logger,
+	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
 		args := r.URL.Query()
-		isDebug := serviceProvider.IsDebugMode()
-		log := serviceProvider.GetApiLogger()
-		if isDebug {
-			log.Printlnf("[%s] => %s", r.Method, r.URL.String())
-		} else {
-			log.Printlnf("[%s] => %s", r.Method, r.URL.Path)
-		}
+		logger.Info("Request", slog.String(log.MethodKey, r.Method), slog.String(log.PathKey, r.URL.Path))
+		logger.Debug("Params", slog.String(log.QueryKey, r.URL.RawQuery))
 
 		// Check the method
 		if r.Method != http.MethodGet {
-			HandleInvalidMethod(log, w)
+			server.HandleInvalidMethod(logger, w)
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(args)
 		if err != nil {
-			HandleInputError(log, w, err)
+			server.HandleInputError(logger, w, err)
 			return
 		}
 
 		// Run the context's processing routine
-		response, err := runQuerylessRoute[DataType](context, serviceProvider)
-		HandleResponse(log, w, response, err, isDebug)
+		status, response, err := runQuerylessRoute[DataType](context, serviceProvider)
+		server.HandleResponse(logger, w, status, response, err)
 	})
 }
 
 // Registers a new route with the router, which will invoke the provided factory to create and execute the context
 // for the route when it's called via POST; use this for typical general-purpose calls
-func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType any, DataType any, ConfigType config.IModuleConfig](
+func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType any, DataType any](
 	router *mux.Router,
 	functionName string,
 	factory IQuerylessPostContextFactory[ContextType, BodyType, DataType],
-	serviceProvider *services.ServiceProvider[ConfigType],
+	logger *slog.Logger,
+	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
-		log := serviceProvider.GetApiLogger()
-		isDebug := serviceProvider.IsDebugMode()
-		log.Printlnf("[%s] => %s", r.Method, r.URL.Path)
+		logger.Info("Request", slog.String(log.MethodKey, r.Method), slog.String(log.PathKey, r.URL.Path))
 
 		// Check the method
 		if r.Method != http.MethodPost {
-			HandleInvalidMethod(log, w)
+			server.HandleInvalidMethod(logger, w)
 			return
 		}
 
 		// Read the body
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			HandleInputError(log, w, fmt.Errorf("error reading request body: %w", err))
+			server.HandleInputError(logger, w, fmt.Errorf("error reading request body: %w", err))
 			return
 		}
-		if isDebug {
-			log.Printlnf("BODY: %s", string(bodyBytes))
-		}
+		logger.Debug("Body", slog.String(log.BodyKey, string(bodyBytes)))
 
 		// Deserialize the body
 		var body BodyType
 		err = json.Unmarshal(bodyBytes, &body)
 		if err != nil {
-			HandleInputError(log, w, fmt.Errorf("error deserializing request body: %w", err))
+			server.HandleInputError(logger, w, fmt.Errorf("error deserializing request body: %w", err))
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(body)
 		if err != nil {
-			HandleInputError(log, w, err)
+			server.HandleInputError(logger, w, err)
 			return
 		}
 
 		// Run the context's processing routine
-		response, err := runQuerylessRoute[DataType](context, serviceProvider)
-		HandleResponse(log, w, response, err, isDebug)
+		status, response, err := runQuerylessRoute[DataType](context, serviceProvider)
+		server.HandleResponse(logger, w, status, response, err)
 	})
 }
 
 // Run a route registered with no structured chain query pattern
-func runQuerylessRoute[DataType any, ConfigType config.IModuleConfig](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider[ConfigType]) (*ApiResponse[DataType], error) {
+func runQuerylessRoute[DataType any](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider) (types.ResponseStatus, *types.ApiResponse[DataType], error) {
 	// Get the services
 	hd := serviceProvider.GetHyperdriveClient()
 	signer := serviceProvider.GetSigner()
@@ -146,25 +134,20 @@ func runQuerylessRoute[DataType any, ConfigType config.IModuleConfig](ctx IQuery
 	var opts *bind.TransactOpts
 	walletResponse, err := hd.Wallet.Status()
 	if err != nil {
-		return nil, fmt.Errorf("error getting wallet status: %w", err)
+		return types.ResponseStatus_Error, nil, fmt.Errorf("error getting wallet status: %w", err)
 	}
-	status := walletResponse.Data.WalletStatus
-	if utils.IsWalletReady(status) {
-		opts = signer.GetTransactor(status.Wallet.WalletAddress)
+	walletStatus := walletResponse.Data.WalletStatus
+	if wallet.IsWalletReady(walletStatus) {
+		opts = signer.GetTransactor(walletStatus.Wallet.WalletAddress)
 	}
 
 	// Create the response and data
 	data := new(DataType)
-	response := &ApiResponse[DataType]{
+	response := &types.ApiResponse[DataType]{
 		Data: data,
 	}
 
 	// Prep the data with the context-specific behavior
-	err = ctx.PrepareData(data, opts)
-	if err != nil {
-		return nil, err
-	}
-
-	// Return
-	return response, nil
+	status, err := ctx.PrepareData(data, opts)
+	return status, response, err
 }

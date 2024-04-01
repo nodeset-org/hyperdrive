@@ -32,11 +32,6 @@ var (
 		Usage:   "The Hyperdrive package version to install",
 		Value:   fmt.Sprintf("v%s", shared.HyperdriveVersion),
 	}
-	installUpdateDefaultsFlag *cli.BoolFlag = &cli.BoolFlag{
-		Name:    "update-defaults",
-		Aliases: []string{"u"},
-		Usage:   "Certain configuration values are reset when Hyperdrive is updated, such as Docker container tags; use this flag to force that reset, even if Hyperdrive hasn't been updated",
-	}
 	installLocalFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name:    "local-script",
 		Aliases: []string{"l"},
@@ -74,7 +69,7 @@ func installService(c *cli.Context) error {
 	fmt.Println("")
 	fmt.Println("The Hyperdrive service was successfully installed!")
 
-	printPatchNotes(c)
+	printPatchNotes()
 
 	// Reload the config after installation
 	_, isNew, err := hd.LoadConfig()
@@ -98,8 +93,7 @@ func installService(c *cli.Context) error {
 
 // Print the latest patch notes for this release
 // TODO: get this from an external source and don't hardcode it into the CLI
-func printPatchNotes(c *cli.Context) {
-
+func printPatchNotes() {
 	fmt.Println()
 	fmt.Println(shared.Logo)
 	fmt.Printf("%s=== Hyperdrive v%s ===%s\n\n", terminal.ColorGreen, shared.HyperdriveVersion, terminal.ColorReset)

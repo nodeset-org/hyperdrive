@@ -3,16 +3,18 @@ package utils
 import (
 	"fmt"
 	"math/big"
+	"os"
+	"os/exec"
 	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/eth"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -86,7 +88,7 @@ func getTxWatchUrl(hd *client.HyperdriveClient) string {
 		fmt.Print("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
 		return ""
 	}
-	resources := utils.NewResources(cfg.Hyperdrive.Network.Value)
+	resources := cfg.Hyperdrive.GetNetworkResources()
 	return resources.TxWatchUrl
 }
 
@@ -139,7 +141,7 @@ func PrintNetwork(currentNetwork config.Network, isNew bool) error {
 	switch currentNetwork {
 	case config.Network_Mainnet:
 		fmt.Printf("Hyperdrive is currently using the %sEthereum Mainnet.%s\n\n", terminal.ColorGreen, terminal.ColorReset)
-	case config.Network_HoleskyDev:
+	case hdconfig.Network_HoleskyDev:
 		fmt.Printf("Hyperdrive is currently using the %sHolesky Development Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
 	case config.Network_Holesky:
 		fmt.Printf("Hyperdrive is currently using the %sHolesky Test Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
@@ -180,4 +182,11 @@ func ParseFloat(c *cli.Context, name string, value string, isFraction bool) (*bi
 		return nil, nil
 	}
 	return trueVal, nil
+}
+
+// Clear terminal output
+func ClearTerminal() error {
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	return cmd.Run()
 }

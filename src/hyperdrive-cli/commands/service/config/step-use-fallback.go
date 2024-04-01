@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
@@ -9,7 +9,7 @@ func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choice
 
 	show := func(modal *choiceModalLayout) {
 		wiz.md.setPage(modal.page)
-		if wiz.md.Config.Hyperdrive.Fallback.UseFallbackClients.Value == false {
+		if !wiz.md.Config.Hyperdrive.Fallback.UseFallbackClients.Value {
 			modal.focus(0)
 		} else {
 			modal.focus(1)
@@ -19,10 +19,11 @@ func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choice
 	done := func(buttonIndex int, buttonLabel string) {
 		if buttonIndex == 1 {
 			wiz.md.Config.Hyperdrive.Fallback.UseFallbackClients.Value = true
-			if (wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_Local && wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value == config.BeaconNode_Prysm) ||
-				(wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_External && wiz.md.Config.Hyperdrive.ExternalBeaconConfig.BeaconNode.Value == config.BeaconNode_Prysm) {
+			bn := wiz.md.Config.Hyperdrive.GetSelectedBeaconNode()
+			switch bn {
+			case config.BeaconNode_Prysm:
 				wiz.fallbackPrysmModal.show()
-			} else {
+			default:
 				wiz.fallbackNormalModal.show()
 			}
 		} else {

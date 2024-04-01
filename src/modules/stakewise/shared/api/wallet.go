@@ -2,7 +2,7 @@ package swapi
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/nodeset-org/eth-utils/beacon"
+	"github.com/rocket-pool/node-manager-core/beacon"
 )
 
 type WalletInitializeData struct {
