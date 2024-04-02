@@ -1,8 +1,14 @@
-hyperdrive (0.4.0) UNRELEASED; urgency=medium
+hyperdrive (0.5.0) UNRELEASED; urgency=medium
+
+  * Added constellation support
+
+ -- NodeSet LLC <info@nodeset.io>  Tue, 02 Apr 2024 21:04:48 +0000
+
+hyperdrive (0.4.0) unstable; urgency=medium
 
   * Migrated to the node-manager-core
 
- -- NodeSet LLC <info@nodeset.io>  Fri, 22 Mar 2024 02:00:21 +0000
+ -- NodeSet LLC <info@nodeset.io>  Tue, 02 Apr 2024 21:04:29 +0000
 
 hyperdrive (0.3.0) unstable; urgency=medium
 
