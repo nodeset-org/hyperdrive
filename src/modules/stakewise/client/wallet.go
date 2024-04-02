@@ -3,9 +3,9 @@ package swclient
 import (
 	"strconv"
 
-	"github.com/nodeset-org/hyperdrive/client"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/client"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 type WalletRequester struct {
@@ -29,7 +29,7 @@ func (r *WalletRequester) GetContext() *client.RequesterContext {
 }
 
 // Generate and save new validator keys
-func (r *WalletRequester) GenerateKeys(count uint64, restartVc bool) (*api.ApiResponse[swapi.WalletGenerateKeysData], error) {
+func (r *WalletRequester) GenerateKeys(count uint64, restartVc bool) (*types.ApiResponse[swapi.WalletGenerateKeysData], error) {
 	args := map[string]string{
 		"count":      strconv.FormatUint(count, 10),
 		"restart-vc": strconv.FormatBool(restartVc),
@@ -37,11 +37,11 @@ func (r *WalletRequester) GenerateKeys(count uint64, restartVc bool) (*api.ApiRe
 	return client.SendGetRequest[swapi.WalletGenerateKeysData](r, "generate-keys", "GenerateKeys", args)
 }
 
-func (r *WalletRequester) ClaimRewards() (*api.ApiResponse[api.TxInfoData], error) {
-	return client.SendGetRequest[api.TxInfoData](r, "claim-rewards", "ClaimRewards", nil)
+func (r *WalletRequester) ClaimRewards() (*types.ApiResponse[types.TxInfoData], error) {
+	return client.SendGetRequest[types.TxInfoData](r, "claim-rewards", "ClaimRewards", nil)
 }
 
 // Export the wallet in encrypted ETH key format
-func (r *WalletRequester) Initialize() (*api.ApiResponse[swapi.WalletInitializeData], error) {
+func (r *WalletRequester) Initialize() (*types.ApiResponse[swapi.WalletInitializeData], error) {
 	return client.SendGetRequest[swapi.WalletInitializeData](r, "initialize", "Initialize", nil)
 }

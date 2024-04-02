@@ -1,15 +1,14 @@
 package swstatus
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/url"
 
-	"github.com/nodeset-org/eth-utils/beacon"
 	swapi "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	swtypes "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/types"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/beacon"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
@@ -34,7 +33,7 @@ func (f *statusGetValidatorsStatusesContextFactory) Create(args url.Values) (*st
 
 func (f *statusGetValidatorsStatusesContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*statusGetValidatorsStatusesContext, swapi.ValidatorStatusData](
-		router, "status", f, f.handler.serviceProvider.ServiceProvider,
+		router, "status", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -46,30 +45,30 @@ type statusGetValidatorsStatusesContext struct {
 	handler *StatusHandler
 }
 
-func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorStatusData, opts *bind.TransactOpts) error {
+func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorStatusData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	bc := sp.GetBeaconClient()
 	w := sp.GetWallet()
 	nc := sp.GetNodesetClient()
+	ctx := c.handler.ctx
 
-	nodesetStatusResponse, err := nc.GetRegisteredValidators()
+	nodesetStatusResponse, err := nc.GetRegisteredValidators(ctx)
 	if err != nil {
-		return fmt.Errorf("error getting nodeset statuses: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting nodeset statuses: %w", err)
 	}
-
 	privateKeys, err := w.GetAllPrivateKeys()
 	if err != nil {
-		return fmt.Errorf("error getting private keys: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting private keys: %w", err)
 	}
 
 	publicKeys, err := w.DerivePubKeys(privateKeys)
 	if err != nil {
-		return fmt.Errorf("error getting public keys: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting public keys: %w", err)
 	}
 
-	beaconStatusResponse, err := bc.GetValidatorStatuses(context.Background(), publicKeys, nil)
+	beaconStatusResponse, err := bc.GetValidatorStatuses(ctx, publicKeys, nil)
 	if err != nil {
-		return fmt.Errorf("error getting validator statuses: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting validator statuses: %w", err)
 	}
 
 	registeredPubkeys := make([]beacon.ValidatorPubkey, 0)
@@ -105,15 +104,15 @@ func (c *statusGetValidatorsStatusesContext) PrepareData(data *swapi.ValidatorSt
 		}
 	}
 
-	return nil
+	return types.ResponseStatus_Success, nil
 }
 
-func isRegisteredToStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+func isRegisteredToStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]beacon.ValidatorStatus) bool {
 	// TODO: Implement
 	return false
 }
 
-func isUploadedStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]types.ValidatorStatus) bool {
+func isUploadedStakewise(pubKey beacon.ValidatorPubkey, statuses map[beacon.ValidatorPubkey]beacon.ValidatorStatus) bool {
 	// TODO: Implement
 	return false
 }

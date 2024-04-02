@@ -89,12 +89,13 @@ func main() {
 
 	// Set application flags
 	app.Flags = []cli.Flag{
-		utils.PrintTxDataFlag,
 		allowRootFlag,
 		configPathFlag,
 		maxFeeFlag,
 		maxPriorityFeeFlag,
 		nonceFlag,
+		utils.PrintTxDataFlag,
+		utils.SignTxOnlyFlag,
 		debugFlag,
 		secureSessionFlag,
 	}
@@ -117,7 +118,7 @@ func main() {
 
 		err := validateFlags(c)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, err.Error())
+			fmt.Fprint(os.Stderr, err.Error())
 			os.Exit(1)
 		}
 		return nil
@@ -136,7 +137,7 @@ func setDefaultPaths() {
 	// Get the home directory
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Printf("Cannot get user's home directory: %w\n", err)
+		fmt.Printf("Cannot get user's home directory: %s\n", err.Error())
 		os.Exit(1)
 	}
 

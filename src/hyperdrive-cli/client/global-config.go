@@ -6,19 +6,19 @@ import (
 
 	constconfig "github.com/nodeset-org/hyperdrive/modules/constellation/shared/config"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 // Wrapper for global configuration
 type GlobalConfig struct {
-	Hyperdrive    *config.HyperdriveConfig
+	Hyperdrive    *hdconfig.HyperdriveConfig
 	Stakewise     *swconfig.StakewiseConfig
 	Constellation *constconfig.ConstellationConfig
 }
 
 // Make a new global config
-func NewGlobalConfig(hdCfg *config.HyperdriveConfig) *GlobalConfig {
+func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig) *GlobalConfig {
 	cfg := &GlobalConfig{
 		Hyperdrive:    hdCfg,
 		Stakewise:     swconfig.NewStakewiseConfig(hdCfg),
@@ -32,8 +32,8 @@ func NewGlobalConfig(hdCfg *config.HyperdriveConfig) *GlobalConfig {
 }
 
 // Get the configs for all of the modules in the system
-func (c *GlobalConfig) GetAllModuleConfigs() []config.IModuleConfig {
-	return []config.IModuleConfig{
+func (c *GlobalConfig) GetAllModuleConfigs() []hdconfig.IModuleConfig {
+	return []hdconfig.IModuleConfig{
 		c.Stakewise, c.Constellation,
 	}
 }
@@ -65,7 +65,7 @@ func (c *GlobalConfig) DeserializeModules() error {
 func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 	// Hyperdrive
 	network := c.Hyperdrive.Network.Value
-	hdCopy := config.NewHyperdriveConfig(c.Hyperdrive.HyperdriveUserDirectory)
+	hdCopy := hdconfig.NewHyperdriveConfig(c.Hyperdrive.HyperdriveUserDirectory)
 	config.Clone(c.Hyperdrive, hdCopy, network)
 
 	// Stakewise
@@ -88,7 +88,7 @@ func (c *GlobalConfig) ChangeNetwork(newNetwork config.Network) {
 	c.Hyperdrive.Network.Value = newNetwork
 
 	// Run the changes
-	config.ChangeNetwork(c.Hyperdrive, oldNetwork, newNetwork)
+	c.Hyperdrive.ChangeNetwork(newNetwork)
 	for _, module := range c.GetAllModuleConfigs() {
 		config.ChangeNetwork(module, oldNetwork, newNetwork)
 	}
@@ -126,19 +126,19 @@ func (c *GlobalConfig) Validate() []string {
 
 	// Ensure the selected port numbers are unique. Keeps track of all the errors
 	portMap := make(map[uint16]bool)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconConfig.HttpPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconConfig.P2pPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionConfig.HttpPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionConfig.WebsocketPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionConfig.EnginePort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionConfig.P2pPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.HttpPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.P2pPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.HttpPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.WebsocketPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.EnginePort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.P2pPort, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.EcMetricsPort, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.BnMetricsPort, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.Prometheus.Port, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.ExporterMetricsPort, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.Grafana.Port, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.DaemonMetricsPort, errors)
-	_, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconConfig.Lighthouse.P2pQuicPort, errors)
+	_, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.Lighthouse.P2pQuicPort, errors)
 
 	return errors
 }
@@ -153,8 +153,8 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 	sectionList = getChanges(oldConfig.Stakewise, c.Stakewise, sectionList, changedContainers)
 
 	// Add all VCs to the list of changed containers if any change requires a VC change
-	if changedContainers[config.ContainerID_ValidatorClients] {
-		delete(changedContainers, config.ContainerID_ValidatorClients)
+	if changedContainers[config.ContainerID_ValidatorClient] {
+		delete(changedContainers, config.ContainerID_ValidatorClient)
 		for _, module := range c.GetAllModuleConfigs() {
 			vcInfo := module.GetValidatorContainerTagInfo()
 			for name := range vcInfo {

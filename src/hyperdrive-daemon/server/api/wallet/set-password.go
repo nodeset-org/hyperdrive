@@ -6,10 +6,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -32,8 +31,8 @@ func (f *walletSetPasswordContextFactory) Create(args url.Values) (*walletSetPas
 }
 
 func (f *walletSetPasswordContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletSetPasswordContext, api.SuccessData](
-		router, "set-password", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*walletSetPasswordContext, types.SuccessData](
+		router, "set-password", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -47,9 +46,13 @@ type walletSetPasswordContext struct {
 	save     bool
 }
 
-func (c *walletSetPasswordContext) PrepareData(data *api.SuccessData, opts *bind.TransactOpts) error {
+func (c *walletSetPasswordContext) PrepareData(data *types.SuccessData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 
-	return w.SetPassword(c.password, c.save)
+	err := w.SetPassword(c.password, c.save)
+	if err != nil {
+		return types.ResponseStatus_Error, err
+	}
+	return types.ResponseStatus_Success, nil
 }

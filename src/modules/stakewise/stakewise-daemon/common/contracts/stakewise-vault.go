@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/nodeset-org/eth-utils/eth"
 	batch "github.com/rocket-pool/batch-query"
+	"github.com/rocket-pool/node-manager-core/eth"
 )
 
 const (
@@ -60,7 +60,7 @@ func NewStakewiseVault(address common.Address, ec eth.IExecutionClient, txMgr *e
 
 // Get the current validators root in the contracts
 func (c *StakewiseVault) GetValidatorsRoot(mc *batch.MultiCaller, out *common.Hash) {
-	eth.AddCallToMulicaller(mc, c.contract, out, "validatorsRoot")
+	eth.AddCallToMulticaller(mc, c.contract, out, "validatorsRoot")
 }
 
 // ====================

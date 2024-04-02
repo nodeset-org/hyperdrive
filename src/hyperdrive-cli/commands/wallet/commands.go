@@ -3,9 +3,10 @@ package wallet
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
 
@@ -22,7 +23,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "Get the node wallet status",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -43,7 +44,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -65,14 +66,13 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Flags: []cli.Flag{
 					PasswordFlag,
 					mnemonicFlag,
-					skipValidatorRecoveryFlag,
 					derivationPathFlag,
 					walletIndexFlag,
 					addressFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -99,14 +99,13 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "Test recovering a node wallet without actually generating any of the node wallet or validator key files to ensure the process works as expected",
 				Flags: []cli.Flag{
 					mnemonicFlag,
-					skipValidatorRecoveryFlag,
 					derivationPathFlag,
 					walletIndexFlag,
 					addressFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -132,7 +131,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -146,11 +145,11 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Aliases: []string{"dp"},
 				Usage:   "Delete the node wallet password from disk, so it will need to be re-entered manually after each service or node restart.",
 				Flags: []cli.Flag{
-					utils.YesFlag,
+					cliutils.YesFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -165,7 +164,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "Export the node wallet in JSON format",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -180,7 +179,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "Print the node wallet (encrypted with the wallet's password) in the JSON format used by eth-account and other tools for interoperability",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -196,7 +195,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				ArgsUsage: "name",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 1); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 1); err != nil {
 						return err
 					}
 
@@ -210,7 +209,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage: fmt.Sprintf("%sDeletes your node wallet, your validator keys, and restarts your Validator Client while preserving your chain data. WARNING: Only use this if you want to stop validating with this machine!%s", terminal.ColorRed, terminal.ColorReset),
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -237,11 +236,11 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:     "Send a zero-ETH transaction to the target address (or ENS) with the provided hex-encoded message as the data payload",
 				ArgsUsage: "to-address hex-message",
 				Flags: []cli.Flag{
-					utils.YesFlag,
+					cliutils.YesFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 2); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 2); err != nil {
 						return err
 					}
 					message, err := input.ValidateByteArray("message", c.Args().Get(1))
@@ -259,12 +258,12 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Aliases: []string{"m"},
 				Usage:   "Change your node's effective address to a different one, so your daemon will act as though you were that address. Your node will be in read-only mode while masquerading since you don't have the corresponding wallet's private key.",
 				Flags: []cli.Flag{
-					utils.YesFlag,
+					cliutils.YesFlag,
 					masqueradeAddressFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -279,11 +278,11 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:     "Restore your node's effective address back to your wallet address, ending a masquerade if you have one active. This will take it out of read-only mode.",
 				ArgsUsage: "to-address hex-message",
 				Flags: []cli.Flag{
-					utils.YesFlag,
+					cliutils.YesFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := input.ValidateArgCount(c, 0); err != nil {
+					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 

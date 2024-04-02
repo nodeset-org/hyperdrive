@@ -9,10 +9,11 @@ import (
 	"strings"
 
 	"github.com/goccy/go-json"
-	"github.com/nodeset-org/eth-utils/beacon"
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
-	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/node/validator"
 	eth2types "github.com/wealdtech/go-eth2-types/v2"
 )
 
@@ -31,18 +32,19 @@ type stakewiseWalletData struct {
 
 // Wallet manager for the Stakewise daemon
 type Wallet struct {
-	validatorManager         *services.ValidatorManager
+	validatorManager         *validator.ValidatorManager
 	stakewiseKeystoreManager *stakewiseKeystoreManager
 	data                     stakewiseWalletData
-	sp                       *services.ServiceProvider[*swconfig.StakewiseConfig]
+	sp                       *services.ServiceProvider
 }
 
 // Create a new wallet
-func NewWallet(sp *services.ServiceProvider[*swconfig.StakewiseConfig]) (*Wallet, error) {
+func NewWallet(sp *services.ServiceProvider) (*Wallet, error) {
 	moduleDir := sp.GetModuleDir()
+	validatorPath := filepath.Join(moduleDir, config.ValidatorsDirectory)
 	wallet := &Wallet{
 		sp:               sp,
-		validatorManager: services.NewValidatorManager(moduleDir),
+		validatorManager: validator.NewValidatorManager(validatorPath),
 	}
 
 	// Check if the wallet data exists
@@ -89,7 +91,7 @@ func NewWallet(sp *services.ServiceProvider[*swconfig.StakewiseConfig]) (*Wallet
 // Generate a new validator key and save it
 func (w *Wallet) GenerateNewValidatorKey() (*eth2types.BLSPrivateKey, error) {
 	// Get the path for the next validator key
-	path := fmt.Sprintf(types.StakewiseValidatorPath, w.data.NextAccount)
+	path := fmt.Sprintf(shared.StakewiseValidatorPath, w.data.NextAccount)
 
 	// Ask the HD daemon to generate the key
 	client := w.sp.GetHyperdriveClient()

@@ -6,19 +6,18 @@ import (
 	"math/big"
 	"strconv"
 
-	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared/utils/gas/etherchain"
-	"github.com/nodeset-org/hyperdrive/shared/utils/gas/etherscan"
+	"github.com/rocket-pool/node-manager-core/eth"
+	"github.com/rocket-pool/node-manager-core/gas"
 	"github.com/urfave/cli/v2"
 )
 
 func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.SimulationResult) (*big.Int, *big.Int, error) {
 	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
-		return nil, nil, fmt.Errorf("Error getting Hyperdrive configuration: %w", err)
+		return nil, nil, fmt.Errorf("error getting Hyperdrive configuration: %w", err)
 	}
 	if isNew {
 		return nil, nil, fmt.Errorf("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
@@ -33,7 +32,7 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 		maxPriorityFee := eth.GweiToWei(cfg.Hyperdrive.MaxPriorityFee.Value)
 		if maxPriorityFee == nil || maxPriorityFee.Uint64() == 0 {
 			defaultFee := cfg.Hyperdrive.MaxPriorityFee.Default[cfg.Hyperdrive.Network.Value]
-			fmt.Printf("%sNOTE: max priority fee not set or set to 0, defaulting to %d gwei%s\n", terminal.ColorYellow, defaultFee, terminal.ColorReset)
+			fmt.Printf("%sNOTE: max priority fee not set or set to 0, defaulting to %.4f gwei%s\n", terminal.ColorYellow, defaultFee, terminal.ColorReset)
 			maxPriorityFeeGwei = defaultFee
 		} else {
 			maxPriorityFeeGwei = eth.WeiToGwei(maxPriorityFee)
@@ -55,7 +54,7 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 			maxFeeGwei = eth.WeiToGwei(maxFeeWei)
 		} else {
 			// Try to get the latest gas prices from Etherchain
-			etherchainData, err := etherchain.GetGasPrices()
+			etherchainData, err := gas.GetEtherchainGasPrices()
 			if err == nil {
 				// Print the Etherchain data and ask for an amount
 				maxFeeGwei = handleEtherchainGasPrices(etherchainData, simResult, maxPriorityFeeGwei, simResult.SafeGasLimit)
@@ -63,7 +62,7 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 			} else {
 				// Fallback to Etherscan
 				fmt.Printf("%sWarning: couldn't get gas estimates from Etherchain - %s\nFalling back to Etherscan%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
-				etherscanData, err := etherscan.GetGasPrices()
+				etherscanData, err := gas.GetEtherscanGasPrices()
 				if err == nil {
 					// Print the Etherscan data and ask for an amount
 					maxFeeGwei = handleEtherscanGasPrices(etherscanData, simResult, maxPriorityFeeGwei, simResult.SafeGasLimit)
@@ -95,13 +94,13 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 
 // Get the suggested max fee for service operations
 func GetHeadlessMaxFeeWei() (*big.Int, error) {
-	etherchainData, err := etherchain.GetGasPrices()
+	etherchainData, err := gas.GetEtherchainGasPrices()
 	if err == nil {
 		return etherchainData.RapidWei, nil
 	}
 
 	fmt.Printf("%sWARNING: couldn't get gas estimates from Etherchain - %s\nFalling back to Etherscan%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
-	etherscanData, err := etherscan.GetGasPrices()
+	etherscanData, err := gas.GetEtherscanGasPrices()
 	if err == nil {
 		return eth.GweiToWei(etherscanData.FastGwei), nil
 	}
@@ -109,8 +108,7 @@ func GetHeadlessMaxFeeWei() (*big.Int, error) {
 	return nil, fmt.Errorf("error getting gas price suggestions: %w", err)
 }
 
-func handleEtherchainGasPrices(gasSuggestion etherchain.GasFeeSuggestion, simResult eth.SimulationResult, priorityFee float64, gasLimit uint64) float64 {
-
+func handleEtherchainGasPrices(gasSuggestion gas.EtherchainGasFeeSuggestion, simResult eth.SimulationResult, priorityFee float64, gasLimit uint64) float64 {
 	rapidGwei := math.Ceil(eth.WeiToGwei(gasSuggestion.RapidWei) + priorityFee)
 	rapidEth := eth.WeiToEth(gasSuggestion.RapidWei)
 
@@ -199,10 +197,9 @@ func handleEtherchainGasPrices(gasSuggestion etherchain.GasFeeSuggestion, simRes
 
 		return desiredPriceFloat
 	}
-
 }
 
-func handleEtherscanGasPrices(gasSuggestion etherscan.GasFeeSuggestion, simResult eth.SimulationResult, priorityFee float64, gasLimit uint64) float64 {
+func handleEtherscanGasPrices(gasSuggestion gas.EtherscanGasFeeSuggestion, simResult eth.SimulationResult, priorityFee float64, gasLimit uint64) float64 {
 	fastGwei := math.Ceil(gasSuggestion.FastGwei + priorityFee)
 	fastEth := gasSuggestion.FastGwei / eth.WeiPerGwei
 

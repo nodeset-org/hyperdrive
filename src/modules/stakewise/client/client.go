@@ -1,55 +1,30 @@
 package swclient
 
 import (
-	"context"
-	"net"
-	"net/http"
+	"log/slog"
 
-	"github.com/fatih/color"
-	"github.com/nodeset-org/hyperdrive/client"
-	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils/log"
-)
-
-const (
-	baseUrl         string          = "http://" + swconfig.ModuleName + "/%s"
-	jsonContentType string          = "application/json"
-	apiColor        color.Attribute = color.FgHiCyan
+	"github.com/rocket-pool/node-manager-core/api/client"
 )
 
 // Binder for the Hyperdrive daemon API server
 type ApiClient struct {
+	context   *client.RequesterContext
 	Nodeset   *NodesetRequester
 	Validator *ValidatorRequester
 	Wallet    *WalletRequester
 	Status    *StatusRequester
-	context   *client.RequesterContext
 }
 
 // Creates a new API client instance
-func NewApiClient(baseRoute string, socketPath string, debugMode bool) *ApiClient {
-	apiRequester := &ApiClient{
-		context: &client.RequesterContext{
-			SocketPath: socketPath,
-			DebugMode:  debugMode,
-			Base:       baseRoute,
-		},
+func NewApiClient(baseRoute string, socketPath string, logger *slog.Logger) *ApiClient {
+	context := client.NewRequesterContext(baseRoute, socketPath, logger)
+
+	client := &ApiClient{
+		context:   context,
+		Nodeset:   NewNodesetRequester(context),
+		Validator: NewValidatorRequester(context),
+		Wallet:    NewWalletRequester(context),
+		Status:    NewStatusRequester(context),
 	}
-
-	apiRequester.context.Client = &http.Client{
-		Transport: &http.Transport{
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				return net.Dial("unix", socketPath)
-			},
-		},
-	}
-
-	log := log.NewColorLogger(apiColor)
-	apiRequester.context.Log = &log
-
-	apiRequester.Nodeset = NewNodesetRequester(apiRequester.context)
-	apiRequester.Validator = NewValidatorRequester(apiRequester.context)
-	apiRequester.Wallet = NewWalletRequester(apiRequester.context)
-	apiRequester.Status = NewStatusRequester(apiRequester.context)
-	return apiRequester
+	return client
 }

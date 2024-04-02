@@ -8,8 +8,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -42,8 +43,8 @@ func (f *txSignTxContextFactory) Create(body api.SubmitTxBody) (*txSignTxContext
 }
 
 func (f *txSignTxContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessPost[*txSignTxContext, api.SubmitTxBody, api.TxSignTxData](
-		router, "sign-tx", f, f.handler.serviceProvider,
+	server.RegisterQuerylessPost[*txSignTxContext, api.SubmitTxBody, api.TxSignTxData](
+		router, "sign-tx", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -56,7 +57,7 @@ type txSignTxContext struct {
 	body    api.SubmitTxBody
 }
 
-func (c *txSignTxContext) PrepareData(data *api.TxSignTxData, opts *bind.TransactOpts) error {
+func (c *txSignTxContext) PrepareData(data *api.TxSignTxData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 
@@ -64,7 +65,7 @@ func (c *txSignTxContext) PrepareData(data *api.TxSignTxData, opts *bind.Transac
 		sp.RequireWalletReady(),
 	)
 	if err != nil {
-		return err
+		return types.ResponseStatus_WalletNotReady, err
 	}
 
 	if c.body.Nonce != nil {
@@ -76,13 +77,13 @@ func (c *txSignTxContext) PrepareData(data *api.TxSignTxData, opts *bind.Transac
 
 	tx, err := txMgr.SignTransaction(c.body.Submission.TxInfo, opts)
 	if err != nil {
-		return fmt.Errorf("error signing transaction: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error signing transaction: %w", err)
 	}
 
 	bytes, err := tx.MarshalBinary()
 	if err != nil {
-		return fmt.Errorf("error marshalling transaction: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error marshalling transaction: %w", err)
 	}
 	data.SignedTx = hex.EncodeToString(bytes)
-	return nil
+	return types.ResponseStatus_Success, nil
 }

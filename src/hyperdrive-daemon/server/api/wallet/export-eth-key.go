@@ -6,9 +6,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/utils"
 )
 
 // ===============
@@ -27,8 +28,8 @@ func (f *walletExportEthKeyContextFactory) Create(args url.Values) (*walletExpor
 }
 
 func (f *walletExportEthKeyContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletExportEthKeyContext, api.WalletExportEthKeyData](
-		router, "export-eth-key", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*walletExportEthKeyContext, api.WalletExportEthKeyData](
+		router, "export-eth-key", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -40,27 +41,27 @@ type walletExportEthKeyContext struct {
 	handler *WalletHandler
 }
 
-func (c *walletExportEthKeyContext) PrepareData(data *api.WalletExportEthKeyData, opts *bind.TransactOpts) error {
+func (c *walletExportEthKeyContext) PrepareData(data *api.WalletExportEthKeyData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 
 	// Requirements
 	err := sp.RequireWalletReady()
 	if err != nil {
-		return err
+		return types.ResponseStatus_WalletNotReady, err
 	}
 
 	// Make a new password
-	password, err := sharedutils.GenerateRandomPassword()
+	password, err := utils.GenerateRandomPassword()
 	if err != nil {
-		return fmt.Errorf("error generating random password: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error generating random password: %w", err)
 	}
 
 	ethkey, err := w.GetEthKeystore(password)
 	if err != nil {
-		return fmt.Errorf("error getting eth-style keystore: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting eth-style keystore: %w", err)
 	}
 	data.EthKeyJson = ethkey
 	data.Password = password
-	return nil
+	return types.ResponseStatus_Success, nil
 }

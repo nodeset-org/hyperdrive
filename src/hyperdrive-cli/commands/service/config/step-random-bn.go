@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 const randomBnPrysmID string = "step-random-bn-prysm"
@@ -26,7 +26,7 @@ func createRandomPrysmStep(wiz *wizard, currentStep int, totalSteps int, goodOpt
 	}
 
 	back := func() {
-		wiz.bnLocalModal.show()
+		wiz.localBnModal.show()
 	}
 
 	return newChoiceStep(
@@ -48,7 +48,7 @@ func createRandomPrysmStep(wiz *wizard, currentStep int, totalSteps int, goodOpt
 
 func createRandomBnStep(wiz *wizard, currentStep int, totalSteps int, goodOptions []*config.ParameterOption[config.BeaconNode]) *choiceWizardStep {
 	var selectedClientName string
-	selectedClient := wiz.md.Config.Hyperdrive.LocalBeaconConfig.BeaconNode.Value
+	selectedClient := wiz.md.Config.Hyperdrive.LocalBeaconClient.BeaconNode.Value
 	for _, clientOption := range goodOptions {
 		if clientOption.Value == selectedClient {
 			selectedClientName = clientOption.Name
@@ -68,7 +68,7 @@ func createRandomBnStep(wiz *wizard, currentStep int, totalSteps int, goodOption
 	}
 
 	back := func() {
-		wiz.bnLocalModal.show()
+		wiz.localBnModal.show()
 	}
 
 	return newChoiceStep(

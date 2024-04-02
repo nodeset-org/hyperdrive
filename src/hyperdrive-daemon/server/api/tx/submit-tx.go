@@ -7,8 +7,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -41,8 +42,8 @@ func (f *txSubmitTxContextFactory) Create(body api.SubmitTxBody) (*txSubmitTxCon
 }
 
 func (f *txSubmitTxContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessPost[*txSubmitTxContext, api.SubmitTxBody, api.TxData](
-		router, "submit-tx", f, f.handler.serviceProvider,
+	server.RegisterQuerylessPost[*txSubmitTxContext, api.SubmitTxBody, api.TxData](
+		router, "submit-tx", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -55,7 +56,7 @@ type txSubmitTxContext struct {
 	body    api.SubmitTxBody
 }
 
-func (c *txSubmitTxContext) PrepareData(data *api.TxData, opts *bind.TransactOpts) error {
+func (c *txSubmitTxContext) PrepareData(data *api.TxData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 
@@ -63,7 +64,7 @@ func (c *txSubmitTxContext) PrepareData(data *api.TxData, opts *bind.TransactOpt
 		sp.RequireWalletReady(),
 	)
 	if err != nil {
-		return err
+		return types.ResponseStatus_WalletNotReady, err
 	}
 
 	if c.body.Nonce != nil {
@@ -75,8 +76,8 @@ func (c *txSubmitTxContext) PrepareData(data *api.TxData, opts *bind.TransactOpt
 
 	tx, err := txMgr.ExecuteTransaction(c.body.Submission.TxInfo, opts)
 	if err != nil {
-		return fmt.Errorf("error submitting transaction: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error submitting transaction: %w", err)
 	}
 	data.TxHash = tx.Hash()
-	return nil
+	return types.ResponseStatus_Success, nil
 }

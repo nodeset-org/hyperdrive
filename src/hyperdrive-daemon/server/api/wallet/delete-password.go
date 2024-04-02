@@ -6,8 +6,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -26,8 +26,8 @@ func (f *walletDeletePasswordContextFactory) Create(args url.Values) (*walletDel
 }
 
 func (f *walletDeletePasswordContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletDeletePasswordContext, api.SuccessData](
-		router, "delete-password", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*walletDeletePasswordContext, types.SuccessData](
+		router, "delete-password", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -36,18 +36,16 @@ func (f *walletDeletePasswordContextFactory) RegisterRoute(router *mux.Router) {
 // ===============
 
 type walletDeletePasswordContext struct {
-	handler  *WalletHandler
-	password []byte
-	save     bool
+	handler *WalletHandler
 }
 
-func (c *walletDeletePasswordContext) PrepareData(data *api.SuccessData, opts *bind.TransactOpts) error {
+func (c *walletDeletePasswordContext) PrepareData(data *types.SuccessData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 
 	err := w.DeletePassword()
 	if err != nil {
-		return fmt.Errorf("error deleting wallet password from disk: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error deleting wallet password from disk: %w", err)
 	}
-	return nil
+	return types.ResponseStatus_Success, nil
 }

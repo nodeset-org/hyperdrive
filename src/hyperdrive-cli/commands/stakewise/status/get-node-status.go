@@ -5,7 +5,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	swtypes "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/types"
-	"github.com/nodeset-org/hyperdrive/shared/types"
+	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/urfave/cli/v2"
 )
 
@@ -41,25 +41,25 @@ func getNodeStatus(c *cli.Context) error {
 	return nil
 }
 
-func getBeaconStatusLabel(state types.ValidatorState) string {
+func getBeaconStatusLabel(state beacon.ValidatorState) string {
 	switch state {
-	case types.ValidatorState_ActiveExiting:
+	case beacon.ValidatorState_ActiveExiting:
 		return "Active (Exiting in Progress)"
-	case types.ValidatorState_ActiveOngoing:
+	case beacon.ValidatorState_ActiveOngoing:
 		return "Active"
-	case types.ValidatorState_ActiveSlashed:
+	case beacon.ValidatorState_ActiveSlashed:
 		return "Slashed (Exit in Progress)"
-	case types.ValidatorState_ExitedSlashed:
+	case beacon.ValidatorState_ExitedSlashed:
 		return "Slashed (Exited)"
-	case types.ValidatorState_ExitedUnslashed:
+	case beacon.ValidatorState_ExitedUnslashed:
 		return "Exited (Withdrawal Pending)"
-	case types.ValidatorState_PendingInitialized:
+	case beacon.ValidatorState_PendingInitialized:
 		return "Seen on Beacon, Waiting for More Deposits"
-	case types.ValidatorState_PendingQueued:
+	case beacon.ValidatorState_PendingQueued:
 		return "In Beacon Activation Queue"
-	case types.ValidatorState_WithdrawalDone:
+	case beacon.ValidatorState_WithdrawalDone:
 		return "Exited and Withdrawn"
-	case types.ValidatorState_WithdrawalPossible:
+	case beacon.ValidatorState_WithdrawalPossible:
 		return "Exited (Waiting for Wihdrawal)"
 	default:
 		return fmt.Sprintf("<Unknown Beacon Status: %s>", state)

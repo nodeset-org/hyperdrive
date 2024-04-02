@@ -1,21 +1,29 @@
 package wallet
 
 import (
+	"context"
+
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/log"
 )
 
 type WalletHandler struct {
+	logger          *log.Logger
+	ctx             context.Context
 	serviceProvider *common.ServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewWalletHandler(serviceProvider *common.ServiceProvider) *WalletHandler {
+func NewWalletHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.ServiceProvider) *WalletHandler {
 	h := &WalletHandler{
+		logger:          logger,
+		ctx:             ctx,
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{
+		&walletBalanceContextFactory{h},
 		&walletDeletePasswordContextFactory{h},
 		&walletExportContextFactory{h},
 		&walletExportEthKeyContextFactory{h},
@@ -30,7 +38,7 @@ func NewWalletHandler(serviceProvider *common.ServiceProvider) *WalletHandler {
 		&walletSetPasswordContextFactory{h},
 		&walletSignMessageContextFactory{h},
 		&walletSignTxContextFactory{h},
-		&walletStatusFactory{h},
+		&walletStatusContextFactory{h},
 		&walletTestRecoverContextFactory{h},
 		&walletTestSearchAndRecoverContextFactory{h},
 	}

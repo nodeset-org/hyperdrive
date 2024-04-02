@@ -1,16 +1,14 @@
 package service
 
 import (
-	"context"
 	"errors"
 	"net/url"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -32,8 +30,8 @@ func (f *serviceRestartContainerContextFactory) Create(args url.Values) (*servic
 }
 
 func (f *serviceRestartContainerContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*serviceRestartContainerContext, api.SuccessData](
-		router, "restart-container", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*serviceRestartContainerContext, types.SuccessData](
+		router, "restart-container", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -46,11 +44,16 @@ type serviceRestartContainerContext struct {
 	container string
 }
 
-func (c *serviceRestartContainerContext) PrepareData(data *api.SuccessData, opts *bind.TransactOpts) error {
+func (c *serviceRestartContainerContext) PrepareData(data *types.SuccessData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	cfg := sp.GetConfig()
 	d := sp.GetDocker()
+	ctx := c.handler.ctx
 
 	id := cfg.GetDockerArtifactName(c.container)
-	return d.ContainerRestart(context.Background(), id, container.StopOptions{})
+	err := d.ContainerRestart(ctx, id, container.StopOptions{})
+	if err != nil {
+		return types.ResponseStatus_Error, err
+	}
+	return types.ResponseStatus_Success, nil
 }

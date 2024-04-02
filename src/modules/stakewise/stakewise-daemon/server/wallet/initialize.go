@@ -11,6 +11,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
 	api "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/api"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -30,7 +31,7 @@ func (f *walletInitializeContextFactory) Create(args url.Values) (*walletInitial
 
 func (f *walletInitializeContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*walletInitializeContext, api.WalletInitializeData](
-		router, "initialize", f, f.handler.serviceProvider.ServiceProvider,
+		router, "initialize", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -42,18 +43,18 @@ type walletInitializeContext struct {
 	handler *WalletHandler
 }
 
-func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, opts *bind.TransactOpts) error {
+func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	client := sp.GetHyperdriveClient()
 
 	// Get the wallet status
 	response, err := client.Wallet.Status()
 	if err != nil {
-		return fmt.Errorf("error getting wallet status: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting wallet status: %w", err)
 	}
 	status := response.Data.WalletStatus
 	if !status.Wallet.IsLoaded {
-		return fmt.Errorf("hyperdrive does not currently have a wallet ready")
+		return types.ResponseStatus_WalletNotReady, fmt.Errorf("hyperdrive does not currently have a wallet ready")
 	}
 
 	// Requirements
@@ -67,7 +68,7 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 	// Get the Geth keystore in JSON format
 	ethkeyResponse, err := client.Wallet.ExportEthKey()
 	if err != nil {
-		return fmt.Errorf("error getting geth-style keystore: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting geth-style keystore: %w", err)
 	}
 	ethKey := ethkeyResponse.Data.EthKeyJson
 	password := ethkeyResponse.Data.Password
@@ -77,16 +78,16 @@ func (c *walletInitializeContext) PrepareData(data *api.WalletInitializeData, op
 	walletPath := filepath.Join(moduleDir, swconfig.WalletFilename)
 	err = os.WriteFile(walletPath, ethKey, 0600)
 	if err != nil {
-		return fmt.Errorf("error saving wallet keystore to disk: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error saving wallet keystore to disk: %w", err)
 	}
 
 	// Write the password to disk
 	passwordPath := filepath.Join(moduleDir, swconfig.PasswordFilename)
 	err = os.WriteFile(passwordPath, []byte(password), 0600)
 	if err != nil {
-		return fmt.Errorf("error saving wallet password to disk: %w", err)
+		return types.ResponseStatus_Error, fmt.Errorf("error saving wallet password to disk: %w", err)
 	}
 
 	data.AccountAddress = status.Wallet.WalletAddress
-	return nil
+	return types.ResponseStatus_Success, nil
 }

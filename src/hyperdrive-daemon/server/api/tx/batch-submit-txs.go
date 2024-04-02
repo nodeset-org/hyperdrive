@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"math/big"
@@ -10,8 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -46,8 +46,8 @@ func (f *txBatchSubmitTxsContextFactory) Create(body api.BatchSubmitTxsBody) (*t
 }
 
 func (f *txBatchSubmitTxsContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessPost[*txBatchSubmitTxsContext, api.BatchSubmitTxsBody, api.BatchTxData](
-		router, "batch-submit-txs", f, f.handler.serviceProvider,
+	server.RegisterQuerylessPost[*txBatchSubmitTxsContext, api.BatchSubmitTxsBody, api.BatchTxData](
+		router, "batch-submit-txs", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -60,17 +60,18 @@ type txBatchSubmitTxsContext struct {
 	body    api.BatchSubmitTxsBody
 }
 
-func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.TransactOpts) error {
+func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 	ec := sp.GetEthClient()
+	ctx := c.handler.ctx
 	nodeAddress, _ := sp.GetWallet().GetAddress()
 
 	err := errors.Join(
 		sp.RequireWalletReady(),
 	)
 	if err != nil {
-		return err
+		return types.ResponseStatus_WalletNotReady, err
 	}
 
 	// Get the first nonce
@@ -78,9 +79,9 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 	if c.body.FirstNonce != nil {
 		currentNonce = c.body.FirstNonce
 	} else {
-		nonce, err := ec.NonceAt(context.Background(), nodeAddress, nil)
+		nonce, err := ec.NonceAt(ctx, nodeAddress, nil)
 		if err != nil {
-			return fmt.Errorf("error getting latest nonce for node: %w", err)
+			return types.ResponseStatus_Error, fmt.Errorf("error getting latest nonce for node: %w", err)
 		}
 		currentNonce = big.NewInt(0).SetUint64(nonce)
 	}
@@ -94,7 +95,7 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 
 		tx, err := txMgr.ExecuteTransaction(submission.TxInfo, opts)
 		if err != nil {
-			return fmt.Errorf("error submitting transaction %d: %w", i, err)
+			return types.ResponseStatus_Error, fmt.Errorf("error submitting transaction %d: %w", i, err)
 		}
 		txHashes[i] = tx.Hash()
 
@@ -103,5 +104,5 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 	}
 
 	data.TxHashes = txHashes
-	return nil
+	return types.ResponseStatus_Success, nil
 }

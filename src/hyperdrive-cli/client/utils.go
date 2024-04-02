@@ -10,7 +10,7 @@ import (
 
 	"github.com/alessio/shellescape"
 	"github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -44,7 +44,7 @@ func LoadConfigFromFile(path string) (*GlobalConfig, error) {
 }
 
 // Saves a config
-func SaveConfig(cfg *GlobalConfig, directory, filename string) error {
+func SaveConfig(cfg *GlobalConfig, directory string, filename string) error {
 	path := filepath.Join(directory, filename)
 
 	settings := cfg.Serialize()
@@ -104,7 +104,6 @@ func SaveConfig(cfg *GlobalConfig, directory, filename string) error {
 	}
 
 	return nil
-
 }
 
 // Get the external IP address. Try finding an IPv4 address first to:
@@ -125,7 +124,7 @@ func SaveConfig(cfg *GlobalConfig, directory, filename string) error {
 // }
 
 // Parse and augment the status of a client into a human-readable format
-func getClientStatusString(clientStatus api.ClientStatus) string {
+func getClientStatusString(clientStatus types.ClientStatus) string {
 	if clientStatus.IsSynced {
 		return "synced and ready"
 	}
