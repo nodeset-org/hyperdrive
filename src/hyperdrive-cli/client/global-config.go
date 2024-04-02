@@ -47,6 +47,7 @@ func (c *GlobalConfig) Serialize() map[string]any {
 func (c *GlobalConfig) DeserializeModules() error {
 	// Load Stakewise
 	stakewiseName := c.Stakewise.GetModuleName()
+
 	section, exists := c.Hyperdrive.Modules[stakewiseName]
 	if exists {
 		configMap, ok := section.(map[string]any)
@@ -56,6 +57,20 @@ func (c *GlobalConfig) DeserializeModules() error {
 		err := config.Deserialize(c.Stakewise, configMap, c.Hyperdrive.Network.Value)
 		if err != nil {
 			return fmt.Errorf("error deserializing stakewise configuration: %w", err)
+		}
+	}
+
+	// Load Constellation
+	constellationName := c.Constellation.GetModuleName()
+	constSection, constExists := c.Hyperdrive.Modules[constellationName]
+	if constExists {
+		configMap, ok := constSection.(map[string]any)
+		if !ok {
+			return fmt.Errorf("config module section [%s] is not a map, it's a %s", constellationName, reflect.TypeOf(constSection))
+		}
+		err := config.Deserialize(c.Constellation, configMap, c.Hyperdrive.Network.Value)
+		if err != nil {
+			return fmt.Errorf("error deserializing constellation configuration: %w", err)
 		}
 	}
 	return nil
@@ -72,9 +87,14 @@ func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 	swCopy := swconfig.NewStakewiseConfig(hdCopy)
 	config.Clone(c.Stakewise, swCopy, network)
 
+	// Constellation
+	constCopy := constconfig.NewConstellationConfig(hdCopy)
+	config.Clone(c.Constellation, constCopy, network)
+
 	return &GlobalConfig{
-		Hyperdrive: hdCopy,
-		Stakewise:  swCopy,
+		Hyperdrive:    hdCopy,
+		Stakewise:     swCopy,
+		Constellation: constCopy,
 	}
 }
 
@@ -151,6 +171,7 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 	// Process all configs for changes
 	sectionList = getChanges(oldConfig.Hyperdrive, c.Hyperdrive, sectionList, changedContainers)
 	sectionList = getChanges(oldConfig.Stakewise, c.Stakewise, sectionList, changedContainers)
+	sectionList = getChanges(oldConfig.Constellation, c.Constellation, sectionList, changedContainers)
 
 	// Add all VCs to the list of changed containers if any change requires a VC change
 	if changedContainers[config.ContainerID_ValidatorClient] {
