@@ -1,7 +1,7 @@
 package constconfig
 
 import (
-	"github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config/ids"
+	"github.com/nodeset-org/hyperdrive/modules/constellation/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared"
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 
@@ -19,9 +19,6 @@ type ConstellationConfig struct {
 
 	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
 	Enabled config.Parameter[bool]
-
-	// Custom command line flags
-	AdditionalOpFlags config.Parameter[string]
 
 	// Validator client configs
 	VcCommon   *config.ValidatorClientCommonConfig
@@ -41,7 +38,6 @@ func (cfg *ConstellationConfig) GetTitle() string {
 func (cfg *ConstellationConfig) GetParameters() []config.IParameter {
 	return []config.IParameter{
 		&cfg.Enabled,
-		&cfg.AdditionalOpFlags,
 	}
 }
 
@@ -52,28 +48,15 @@ func NewConstellationConfig(hdCfg *hdconfig.HyperdriveConfig) *ConstellationConf
 
 		Enabled: config.Parameter[bool]{
 			ParameterCommon: &config.ParameterCommon{
+				ID:                 ids.ConstellationEnableID,
 				Name:               "Enable",
-				Description:        "Enable support for Stakewise (see more at https://docs.nodeset.io).",
+				Description:        "Enable support for Constellation (see more at https://docs.nodeset.io).",
 				AffectsContainers:  []config.ContainerID{ContainerID_ConstellationDaemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
 			Default: map[config.Network]bool{
 				config.Network_All: false,
-			},
-		},
-
-		AdditionalOpFlags: config.Parameter[string]{
-			ParameterCommon: &config.ParameterCommon{
-				ID:                 ids.AdditionalOpFlagsID,
-				Name:               "Additional Operator Flags",
-				Description:        "Additional custom command line flags you want to pass to the Operator container, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
-				AffectsContainers:  []config.ContainerID{ContainerID_ConstellationDaemon},
-				CanBeBlank:         true,
-				OverwriteOnUpgrade: false,
-			},
-			Default: map[config.Network]string{
-				config.Network_All: "",
 			},
 		},
 	}

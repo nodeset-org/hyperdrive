@@ -2,10 +2,7 @@ package ids
 
 const (
 	// Param IDs
-	ConstellationEnableID  string = "enable"
-	OperatorContainerTagID string = "operatorContainerTag"
-	AdditionalOpFlagsID    string = "additionalOpFlags"
-	VerifyDepositRootsID   string = "verifyDepositRoots"
+	ConstellationEnableID string = "enable"
 
 	// Subconfig IDs
 	VcCommonID   string = "common"
