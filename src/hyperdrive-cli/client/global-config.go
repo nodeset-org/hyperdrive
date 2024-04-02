@@ -20,8 +20,9 @@ type GlobalConfig struct {
 // Make a new global config
 func NewGlobalConfig(hdCfg *config.HyperdriveConfig) *GlobalConfig {
 	cfg := &GlobalConfig{
-		Hyperdrive: hdCfg,
-		Stakewise:  swconfig.NewStakewiseConfig(hdCfg),
+		Hyperdrive:    hdCfg,
+		Stakewise:     swconfig.NewStakewiseConfig(hdCfg),
+		Constellation: constconfig.NewConstellationConfig(hdCfg),
 	}
 
 	for _, module := range cfg.GetAllModuleConfigs() {
@@ -33,7 +34,7 @@ func NewGlobalConfig(hdCfg *config.HyperdriveConfig) *GlobalConfig {
 // Get the configs for all of the modules in the system
 func (c *GlobalConfig) GetAllModuleConfigs() []config.IModuleConfig {
 	return []config.IModuleConfig{
-		c.Stakewise,
+		c.Stakewise, c.Constellation,
 	}
 }
 
