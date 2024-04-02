@@ -1,23 +1,21 @@
 package constconfig
 
 import (
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config/ids"
+	"github.com/nodeset-org/hyperdrive/shared"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 const (
-	// Param IDs
-	// OperatorContainerTagID string = "operatorContainerTag"
-	AdditionalOpFlagsID string = "additionalOpFlags"
-	// VerifyDepositRootsID   string = "verifyDepositRoots"
-
 	// Tags
-	// daemonTag   string = "nodeset/hyperdrive-stakewise:v" + shared.HyperdriveVersion
-	// operatorTag string = "europe-west4-docker.pkg.dev/stakewiselabs/public/v3-operator:v1.0.8"
+	daemonTag string = "nodeset/hyperdrive-constellation:v" + shared.HyperdriveVersion
 )
 
 // Configuration for Constellation
 type ConstellationConfig struct {
-	hdCfg *config.HyperdriveConfig
+	hdCfg *hdconfig.HyperdriveConfig
 
 	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
 	Enabled config.Parameter[bool]
@@ -32,7 +30,7 @@ func (cfg *ConstellationConfig) GetTitle() string {
 }
 
 // Generates a new Constellation config
-func NewConstellationConfig(hdCfg *config.HyperdriveConfig) *ConstellationConfig {
+func NewConstellationConfig(hdCfg *hdconfig.HyperdriveConfig) *ConstellationConfig {
 	cfg := &ConstellationConfig{
 		hdCfg: hdCfg,
 
@@ -51,7 +49,7 @@ func NewConstellationConfig(hdCfg *config.HyperdriveConfig) *ConstellationConfig
 
 		AdditionalOpFlags: config.Parameter[string]{
 			ParameterCommon: &config.ParameterCommon{
-				ID:                 AdditionalOpFlagsID,
+				ID:                 ids.AdditionalOpFlagsID,
 				Name:               "Additional Operator Flags",
 				Description:        "Additional custom command line flags you want to pass to the Operator container, to take advantage of other settings that Hyperdrive's configuration doesn't cover.",
 				AffectsContainers:  []config.ContainerID{ContainerID_ConstellationDaemon},
@@ -80,7 +78,6 @@ func (cfg *ConstellationConfig) GetValidatorContainerTagInfo() map[config.Contai
 func (cfg *ConstellationConfig) GetContainersToDeploy() []config.ContainerID {
 	return []config.ContainerID{
 		ContainerID_ConstellationDaemon,
-		// ContainerID_ConstellationOperator,
 		ContainerID_ConstellationValidator,
 	}
 }

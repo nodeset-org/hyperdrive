@@ -3,7 +3,7 @@ package constconfig
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 func (c *ConstellationConfig) WalletFilename() string {
@@ -20,10 +20,6 @@ func (c *ConstellationConfig) KeystorePasswordFile() string {
 
 func (c *ConstellationConfig) DaemonContainerName() string {
 	return string(ContainerID_ConstellationDaemon)
-}
-
-func (c *ConstellationConfig) OperatorContainerName() string {
-	return string(ContainerID_ConstellationOperator)
 }
 
 func (c *ConstellationConfig) VcContainerName() string {
@@ -93,19 +89,9 @@ func (cfg *ConstellationConfig) Graffiti() (string, error) {
 	return fmt.Sprintf("%s (%s)", prefix, customGraffiti), nil
 }
 
-func (cfg *ConstellationConfig) FeeRecipient() string {
-	res := swshared.NewConstellationResources(cfg.hdCfg.Network.Value)
-	return res.FeeRecipient.Hex()
-}
-
-func (cfg *ConstellationConfig) Vault() string {
-	res := swshared.NewConstellationResources(cfg.hdCfg.Network.Value)
-	return res.Vault.Hex()
-}
-
 func (cfg *ConstellationConfig) Network() string {
-	res := swshared.NewConstellationResources(cfg.hdCfg.Network.Value)
-	return res.NodesetNetwork
+	res := NewConstellationResources(cfg.hdCfg.Network.Value)
+	return res.EthNetworkName
 }
 
 func (cfg *ConstellationConfig) IsEnabled() bool {
