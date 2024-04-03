@@ -34,7 +34,7 @@ func NewModulesPage(home *settingsHome) *ModulesPage {
 		"Manage the different Hyperdrive modules, enabling and configuring the ones you want to use.",
 		nil,
 	)
-
+	// TODO: HUY!!
 	// Create the addon subpages
 	modulesPage.stakewisePage = NewStakewiseConfigPage(modulesPage)
 	moduleSubpages := []settingsPage{
