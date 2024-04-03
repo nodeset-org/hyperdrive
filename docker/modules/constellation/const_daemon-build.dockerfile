@@ -12,7 +12,7 @@ RUN if [ "$BUILDPLATFORM" = "linux/amd64" -a "$TARGETARCH" = "arm64" ]; then \
         apt update && apt install -y gcc-x86-64-linux-gnu g++-x86-64-linux-gnu && \
         export CC=x86_64-linux-gnu-gcc && export CC_FOR_TARGET=gcc-x86-64-linux-gnu; \
     fi && \
-    cd /hyperdrive/src/modules/constellation/const-daemon && \
+    cd /hyperdrive/src/modules/constellation/constellation-daemon && \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /build/hyperdrive-const-daemon-${TARGETOS}-${TARGETARCH}
 
 # Copy the output
