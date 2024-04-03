@@ -116,6 +116,35 @@ build_sw_daemon() {
     cd ..
 }
 
+# Builds the Constellation daemon image and pushes it to Docker Hub
+# NOTE: You must install qemu first; e.g. sudo apt-get install -y qemu qemu-user-static
+build_constellation_daemon() {
+    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
+
+    echo "Building Constellation daemon binaries..."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/modules/constellation/const_daemon-build.dockerfile --output ../$VERSION --target daemon . || fail "Error building Constellation daemon binaries."
+    echo "done!"
+
+    # Copy the daemon binaries to a build folder so the image can access them
+    mkdir -p ./build
+    cp ../$VERSION/linux_amd64/* ./build
+    cp ../$VERSION/linux_arm64/* ./build
+    echo "done!"
+
+    echo "Building Constellation Docker image..."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-constellation:$VERSION -f docker/modules/constellation/const_daemon.dockerfile --push . || fail "Error building Constellation Docker image."
+    echo "done!"
+
+    # Cleanup
+    mv ../$VERSION/linux_amd64/* ../$VERSION
+    mv ../$VERSION/linux_arm64/* ../$VERSION
+    rm -rf ../$VERSION/linux_amd64/
+    rm -rf ../$VERSION/linux_arm64/
+    rm -rf ./build
+
+    cd ..
+}
+
 
 # Tags the 'latest' Docker Hub image
 tag_latest() {
@@ -140,6 +169,7 @@ usage() {
     echo $'\t-p\tBuild the Hyperdrive installer packages'
     echo $'\t-d\tBuild the Hyperdrive daemon image, and push it to Docker Hub'
     echo $'\t-s\tBuild the Hyperdrive Stakewise daemon image, and push it to Docker Hub'
+    echo $'\t-x\tBuild the Hyperdrive Constellation daemon image, and push it to Docker Hub'
     echo $'\t-l\tTag the given version as "latest" on Docker Hub'
     exit 0
 }
@@ -150,15 +180,16 @@ usage() {
 # =================
 
 # Parse arguments
-while getopts "actpdslv:" FLAG; do
+while getopts "actpdsxlv:" FLAG; do
     case "$FLAG" in
-        a) CLI=true DISTRO=true PACKAGES=true DAEMON=true SW_DAEMON=true ;;
+        a) CLI=true DISTRO=true PACKAGES=true DAEMON=true SW_DAEMON=true CONST_DAEMON=true;;
         c) CLI=true ;;
-        t) DISTRO=true ;;
-        p) PACKAGES=true ;;
         d) DAEMON=true ;;
-        s) SW_DAEMON=true ;;
         l) LATEST=true ;;
+        x) CONST_DAEMON=true ;;
+        p) PACKAGES=true ;;
+        s) SW_DAEMON=true ;;
+        t) DISTRO=true ;;
         v) VERSION="$OPTARG" ;;
         *) usage ;;
     esac
@@ -189,6 +220,9 @@ if [ "$DAEMON" = true ]; then
 fi
 if [ "$SW_DAEMON" = true ]; then
     build_sw_daemon
+fi
+if [ "$CONST_DAEMON" = true ]; then
+    build_constellation_daemon
 fi
 if [ "$LATEST" = true ]; then
     tag_latest
