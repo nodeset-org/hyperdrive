@@ -48,7 +48,7 @@ type ExitMessage struct {
 
 type ExitData struct {
 	Pubkey      string      `json:"pubkey"`
-	ExitMessage ExitMessage `json:"exitMessage"`
+	ExitMessage ExitMessage `json:"exit_message"`
 }
 
 // =================
@@ -68,9 +68,9 @@ type DepositDataResponse struct {
 
 // api/validators
 type ValidatorStatus struct {
-	Pubkey   beacon.ValidatorPubkey `json:"pubkey"`
-	Status   string                 `json:"status"`
-	Uploaded bool                   `json:"uploaded"`
+	Pubkey              beacon.ValidatorPubkey `json:"pubkey"`
+	Status              string                 `json:"status"`
+	ExitMessageUploaded bool                   `json:"exitMessage"`
 }
 
 // api/dev/validators
@@ -130,8 +130,8 @@ func (c *NodesetClient) UploadSignedExitData(ctx context.Context, exitData []Exi
 		return nil, fmt.Errorf("error marshalling exit data to JSON: %w", err)
 	}
 
-	// Submit the POST request with the serialized JSON
-	response, err := c.submitRequest(ctx, http.MethodPut, bytes.NewBuffer(jsonData), nil, validatorsPath)
+	// Submit the PATCH request with the serialized JSON
+	response, err := c.submitRequest(ctx, http.MethodPatch, bytes.NewBuffer(jsonData), nil, validatorsPath)
 	if err != nil {
 		return nil, fmt.Errorf("error posting exit data: %w", err)
 	}

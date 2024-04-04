@@ -33,6 +33,8 @@ type stakewiseKeystoreManager struct {
 func newStakewiseKeystoreManager(moduleDir string) (*stakewiseKeystoreManager, error) {
 	keystoreDir := filepath.Join(moduleDir, config.ValidatorsDirectory, swconfig.ModuleName)
 	passwordPath := filepath.Join(keystoreDir, swconfig.KeystorePasswordFile)
+	fmt.Printf("!!! keystoreDir: %s\n", keystoreDir)
+	fmt.Printf("!!! passwordPath: %s\n", passwordPath)
 
 	// Read the password file
 	var password string

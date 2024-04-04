@@ -48,11 +48,18 @@ func (t *SendExitData) Run() error {
 	if err != nil {
 		return fmt.Errorf("error getting registered validators: %w", err)
 	}
+	for _, status := range resp {
+		t.logger.Debug(
+			"Retrieved registered validator",
+			slog.String(PubkeyKey, status.Pubkey.HexWithPrefix()),
+			slog.Bool("uploaded", status.ExitMessageUploaded),
+		)
+	}
 
 	// Check for any that are missing signed exits
 	missingExitPubkeys := []beacon.ValidatorPubkey{}
 	for _, v := range resp {
-		if v.Uploaded {
+		if v.ExitMessageUploaded {
 			continue
 		}
 		missingExitPubkeys = append(missingExitPubkeys, v.Pubkey)
@@ -82,13 +89,25 @@ func (t *SendExitData) Run() error {
 	// Get signed exit messages
 	exitData := []swcommon.ExitData{}
 	for _, pubkey := range missingExitPubkeys {
+		t.logger.Warn("!!! pubkey: %v", pubkey)
+
 		key, err := t.w.GetPrivateKeyForPubkey(pubkey)
 		if err != nil {
 			// Print message and continue because we don't want to stop the loop
 			t.logger.Warn("Error getting private key", slog.String(PubkeyKey, pubkey.HexWithPrefix()), log.Err(err))
 			continue
 		}
+		if key == nil {
+			t.logger.Warn("Private key is nil", slog.String(PubkeyKey, pubkey.HexWithPrefix()))
+			continue
+		}
 		index := statuses[pubkey].Index
+		if index == "" {
+			t.logger.Warn("Validator index is empty", slog.String(PubkeyKey, pubkey.HexWithPrefix()))
+			continue
+		}
+		t.logger.Warn("!!! key: %v", key)
+
 		signature, err := validator.GetSignedExitMessage(key, index, epoch, signatureDomain)
 		if err != nil {
 			// Print message and continue because we don't want to stop the loop
@@ -110,6 +129,7 @@ func (t *SendExitData) Run() error {
 
 	// Upload the messages to Nodeset
 	if len(exitData) > 0 {
+		t.logger.Warn("!!! SEND EXIT DATA")
 		_, err := t.ns.UploadSignedExitData(t.ctx, exitData)
 		if err != nil {
 			return fmt.Errorf("error uploading signed exit messages to NodeSet: %w", err)
