@@ -129,11 +129,13 @@ func (c *NodesetClient) UploadSignedExitData(ctx context.Context, exitData []Exi
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling exit data to JSON: %w", err)
 	}
-
+	params := map[string]string{
+		"network": c.res.EthNetworkName,
+	}
 	// Submit the PATCH request with the serialized JSON
-	response, err := c.submitRequest(ctx, http.MethodPatch, bytes.NewBuffer(jsonData), nil, validatorsPath)
+	response, err := c.submitRequest(ctx, http.MethodPatch, bytes.NewBuffer(jsonData), params, devPath, validatorsPath)
 	if err != nil {
-		return nil, fmt.Errorf("error posting exit data: %w", err)
+		return nil, fmt.Errorf("error submitting exit data: %w", err)
 	}
 
 	return response, nil
