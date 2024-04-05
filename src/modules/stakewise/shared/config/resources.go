@@ -51,7 +51,7 @@ func NewStakewiseResources(network config.Network) *StakewiseResources {
 		Vault:            common.HexToAddress("0x646F5285D195e08E309cF9A5aDFDF68D6Fcc51C4"),
 		FeeRecipient:     common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
 		NodesetApiUrl:    "https://staging.nodeset.io/api",
-		Splitmain:        common.HexToAddress("0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"),
+		Splitmain:        common.HexToAddress("0xfC8a305728051367797DADE6Aa0344E0987f5286"),
 		ClaimEthAmount:   big.NewInt(0),      // 0 => claim all
 		ClaimTokenList:   []common.Address{}, // TODO: Get list from Wander
 	}
@@ -62,7 +62,7 @@ func NewStakewiseResources(network config.Network) *StakewiseResources {
 		Vault:            common.HexToAddress("0xf8763855473ce978232bBa37ef90fcFc8aAE10d1"),
 		FeeRecipient:     common.HexToAddress("0xc98F25BcAA6B812a07460f18da77AF8385be7b56"),
 		NodesetApiUrl:    "https://staging.nodeset.io/api",
-		Splitmain:        common.HexToAddress("0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE"),
+		Splitmain:        common.HexToAddress("0xfC8a305728051367797DADE6Aa0344E0987f5286"),
 		ClaimEthAmount:   big.NewInt(0),      // 0 => claim all
 		ClaimTokenList:   []common.Address{}, // TODO: Get list from Wander
 	}
