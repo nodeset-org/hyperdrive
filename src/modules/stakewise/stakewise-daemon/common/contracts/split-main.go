@@ -6,8 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/rocket-pool/node-manager-core/log"
-
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -64,11 +62,6 @@ func NewSplitMain(address common.Address, ec eth.IExecutionClient, txMgr *eth.Tr
 // === Transactions ===
 // ====================
 
-func (c *SplitMain) Withdraw(logger *log.Logger, address common.Address, ethAmountWithdraw big.Int, claimTokenList []common.Address, opts *bind.TransactOpts) (*eth.TransactionInfo, error) {
-	logger.Debug("!!! Withdraw")
-	logger.Debug("!!! address: ", address)
-	logger.Debug("!!! ethAmountWithdraw: ", ethAmountWithdraw)
-	logger.Debug("!!! claimTokenList: ", claimTokenList)
-	logger.Debug("!!! opts: ", opts)
-	return c.txMgr.CreateTransactionInfo(c.contract, "withdraw", opts, address, ethAmountWithdraw, claimTokenList)
+func (c *SplitMain) Withdraw(address common.Address, ethAmountWithdraw big.Int, claimTokenList []common.Address, opts *bind.TransactOpts) (*eth.TransactionInfo, error) {
+	return c.txMgr.CreateTransactionInfo(c.contract, "withdraw", opts, address, &ethAmountWithdraw, claimTokenList)
 }
