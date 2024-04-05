@@ -96,7 +96,7 @@ func (t *SendExitData) Run() error {
 			continue
 		}
 		if key == nil {
-			t.logger.Debug("Private key is nil", slog.String(PubkeyKey, pubkey.HexWithPrefix()))
+			t.logger.Debug("Private key not found", slog.String(PubkeyKey, pubkey.HexWithPrefix()))
 			continue
 		}
 		index := statuses[pubkey].Index
