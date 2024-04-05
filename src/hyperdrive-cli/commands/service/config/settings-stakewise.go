@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	swids "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config/ids"
 	"github.com/rivo/tview"
@@ -57,25 +56,7 @@ func (configPage *StakewiseConfigPage) createContent() {
 	// Create the layout
 	configPage.layout = newStandardLayout()
 	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Stakewise Settings")
-
-	// Return to the home page after pressing Escape
-	configPage.layout.form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		// Return to the modules page
-		if event.Key() == tcell.KeyEsc {
-			// Close all dropdowns and break if one was open
-			for _, param := range configPage.layout.parameters {
-				dropDown, ok := param.item.(*DropDown)
-				if ok && dropDown.open {
-					dropDown.CloseList(configPage.modulesPage.home.md.app)
-					return nil
-				}
-			}
-
-			configPage.modulesPage.home.md.setPage(configPage.modulesPage.home.homePage)
-			return nil
-		}
-		return event
-	})
+	configPage.layout.setupEscapeReturnHomeHandler(configPage.modulesPage.home.md, configPage.modulesPage.page)
 
 	// Set up the form items
 	configPage.enableStakewiseBox = createParameterizedCheckbox(&configPage.masterConfig.Stakewise.Enabled)
