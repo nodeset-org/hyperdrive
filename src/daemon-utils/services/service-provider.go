@@ -61,8 +61,7 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, mod
 	}
 
 	// Set up the client logger
-	moduleLogDir := filepath.Join(hdCfg.HyperdriveUserDirectory, hdconfig.LogDir, moduleName)
-	logPath := filepath.Join(moduleLogDir, clientLogName)
+	logPath := hdCfg.GetModuleLogFilePath(moduleName, clientLogName)
 	clientLogger, err := log.NewLogger(logPath, hdCfg.GetLoggerOptions())
 	if err != nil {
 		return nil, fmt.Errorf("error creating HD Client logger: %w", err)
@@ -85,14 +84,14 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, mod
 	}
 
 	// Make the API logger
-	apiLogPath := filepath.Join(moduleLogDir, moduleCfg.GetApiLogFileName())
+	apiLogPath := hdCfg.GetModuleLogFilePath(moduleName, moduleCfg.GetApiLogFileName())
 	apiLogger, err := log.NewLogger(apiLogPath, hdCfg.GetLoggerOptions())
 	if err != nil {
 		return nil, fmt.Errorf("error creating API logger: %w", err)
 	}
 
 	// Make the tasks logger
-	tasksLogPath := filepath.Join(moduleLogDir, moduleCfg.GetTasksLogFileName())
+	tasksLogPath := hdCfg.GetModuleLogFilePath(moduleName, moduleCfg.GetTasksLogFileName())
 	tasksLogger, err := log.NewLogger(tasksLogPath, hdCfg.GetLoggerOptions())
 	if err != nil {
 		return nil, fmt.Errorf("error creating tasks logger: %w", err)

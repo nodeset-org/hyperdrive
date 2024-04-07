@@ -15,11 +15,20 @@ type IModuleConfig interface {
 	// Get the name of the module
 	GetModuleName() string
 
+	// Get the short name of the module, for things like prefixing
+	GetShortName() string
+
+	// The name to use for the Hyperdrive Client log file
+	GetHdClientLogFileName() string
+
 	// The name to use for the API log file
 	GetApiLogFileName() string
 
 	// The name to use for the tasks log file
 	GetTasksLogFileName() string
+
+	// Get the list of all log file names used by the module
+	GetLogNames() []string
 
 	// A map of the Validator Client IDs to their container tags
 	GetValidatorContainerTagInfo() map[config.ContainerID]string

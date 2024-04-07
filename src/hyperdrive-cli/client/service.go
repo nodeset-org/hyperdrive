@@ -218,6 +218,12 @@ func (c *HyperdriveClient) PrintServiceLogs(composeFiles []string, tail string, 
 	return c.printOutput(cmd)
 }
 
+// Print the Hyperdrive daemon logs
+func (c *HyperdriveClient) PrintDaemonLogs(composeFiles []string, tail string, logPaths ...string) error {
+	cmd := fmt.Sprintf("tail -f %s %s", tail, strings.Join(logPaths, " "))
+	return c.printOutput(cmd)
+}
+
 // Print the Hyperdrive service stats
 func (c *HyperdriveClient) PrintServiceStats(composeFiles []string) error {
 	// Get service container IDs

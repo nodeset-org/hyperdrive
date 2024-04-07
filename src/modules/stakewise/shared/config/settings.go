@@ -2,6 +2,7 @@ package swconfig
 
 const (
 	ModuleName           string = "stakewise"
+	ShortModuleName      string = "sw"
 	DaemonBaseRoute      string = ModuleName
 	ApiVersion           string = "1"
 	ApiClientRoute       string = DaemonBaseRoute + "/api/v" + ApiVersion
@@ -11,5 +12,7 @@ const (
 	PasswordFilename     string = "password.txt"
 	KeystorePasswordFile string = "secret.txt"
 	DepositDataFile      string = "deposit-data.json"
-	ClientLogName        string = "hd-client.log"
+
+	// Logging
+	ClientLogName string = "hd.log"
 )

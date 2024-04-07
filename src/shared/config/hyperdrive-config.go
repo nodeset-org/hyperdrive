@@ -477,3 +477,7 @@ func (cfg *HyperdriveConfig) GetBeaconNodeUrls() (string, string) {
 func (cfg *HyperdriveConfig) GetLoggerOptions() log.LoggerOptions {
 	return cfg.Logging.GetOptions()
 }
+
+func (cfg *HyperdriveConfig) GetModuleLogFilePath(moduleName string, moduleLogName string) string {
+	return filepath.Join(cfg.HyperdriveUserDirectory, LogDir, moduleName, moduleLogName)
+}

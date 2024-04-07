@@ -146,6 +146,10 @@ func (cfg *StakewiseConfig) GetSubconfigs() map[string]config.IConfigSection {
 // === Module Info ===
 // ===================
 
+func (cfg *StakewiseConfig) GetHdClientLogFileName() string {
+	return ClientLogName
+}
+
 func (cfg *StakewiseConfig) GetApiLogFileName() string {
 	return hdconfig.ApiLogName
 }
@@ -154,9 +158,22 @@ func (cfg *StakewiseConfig) GetTasksLogFileName() string {
 	return hdconfig.TasksLogName
 }
 
+func (cfg *StakewiseConfig) GetLogNames() []string {
+	return []string{
+		cfg.GetHdClientLogFileName(),
+		cfg.GetApiLogFileName(),
+		cfg.GetTasksLogFileName(),
+	}
+}
+
 // The module name
 func (cfg *StakewiseConfig) GetModuleName() string {
 	return ModuleName
+}
+
+// The module name
+func (cfg *StakewiseConfig) GetShortName() string {
+	return ShortModuleName
 }
 
 func (cfg *StakewiseConfig) GetValidatorContainerTagInfo() map[config.ContainerID]string {
