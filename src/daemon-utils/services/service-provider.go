@@ -215,6 +215,10 @@ func (p *ServiceProvider) GetQueryManager() *eth.QueryManager {
 	return p.queryMgr
 }
 
+func (p *ServiceProvider) GetClientLogger() *log.Logger {
+	return p.clientLogger
+}
+
 func (p *ServiceProvider) GetApiLogger() *log.Logger {
 	return p.apiLogger
 }

@@ -119,8 +119,10 @@ func main() {
 
 		// Run the daemon until closed
 		fmt.Println("Daemon online.")
+		fmt.Printf("HD client calls are being logged to: %s\n", sp.GetClientLogger().GetFilePath())
 		fmt.Printf("API calls are being logged to: %s\n", sp.GetApiLogger().GetFilePath())
 		fmt.Printf("Tasks are being logged to:     %s\n", sp.GetTasksLogger().GetFilePath())
+		fmt.Println("To view them, use `hyperdrive service daemon-logs [sw-hd | sw-api | sw-tasks].") // TODO: don't hardcode
 		stopWg.Wait()
 		sp.Close()
 		fmt.Println("Daemon stopped.")
