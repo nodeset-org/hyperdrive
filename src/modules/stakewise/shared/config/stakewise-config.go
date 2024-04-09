@@ -4,6 +4,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/shared"
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	hdids "github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/rocket-pool/node-manager-core/config"
 )
 
@@ -15,8 +16,6 @@ const (
 
 // Configuration for Stakewise
 type StakewiseConfig struct {
-	hdCfg *hdconfig.HyperdriveConfig
-
 	// Toggle for enabling access to the root filesystem (for multiple disk usage metrics)
 	Enabled config.Parameter[bool]
 
@@ -36,6 +35,11 @@ type StakewiseConfig struct {
 	Nimbus     *config.NimbusVcConfig
 	Prysm      *config.PrysmVcConfig
 	Teku       *config.TekuVcConfig
+
+	// Internal fields
+	Version   string
+	hdCfg     *hdconfig.HyperdriveConfig
+	resources *StakewiseResources
 }
 
 // Generates a new Stakewise config
@@ -112,6 +116,10 @@ func NewStakewiseConfig(hdCfg *hdconfig.HyperdriveConfig) *StakewiseConfig {
 	cfg.Prysm.ContainerTag.Default[hdconfig.Network_HoleskyDev] = cfg.Prysm.ContainerTag.Default[config.Network_Holesky]
 	cfg.Teku.ContainerTag.Default[hdconfig.Network_HoleskyDev] = cfg.Teku.ContainerTag.Default[config.Network_Holesky]
 
+	// Apply the default values for mainnet
+	config.ApplyDefaults(cfg, hdCfg.Network.Value)
+	cfg.updateResources()
+
 	return cfg
 }
 
@@ -140,6 +148,74 @@ func (cfg *StakewiseConfig) GetSubconfigs() map[string]config.IConfigSection {
 		ids.PrysmID:      cfg.Prysm,
 		ids.TekuID:       cfg.Teku,
 	}
+}
+
+// Changes the current network, propagating new parameter settings if they are affected
+func (cfg *StakewiseConfig) ChangeNetwork(oldNetwork config.Network, newNetwork config.Network) {
+	// Run the changes
+	config.ChangeNetwork(cfg, oldNetwork, newNetwork)
+	cfg.updateResources()
+}
+
+// Creates a copy of the configuration
+func (cfg *StakewiseConfig) Clone() hdconfig.IModuleConfig {
+	clone := NewStakewiseConfig(cfg.hdCfg)
+	config.Clone(cfg, clone, cfg.hdCfg.Network.Value)
+	clone.Version = cfg.Version
+	clone.updateResources()
+	return clone
+}
+
+// Get the Stakewise resources for the selected network
+func (cfg *StakewiseConfig) GetStakewiseResources() *StakewiseResources {
+	return cfg.resources
+}
+
+// Updates the default parameters based on the current network value
+func (cfg *StakewiseConfig) UpdateDefaults(network config.Network) {
+	config.UpdateDefaults(cfg, network)
+}
+
+// Checks to see if the current configuration is valid; if not, returns a list of errors
+func (cfg *StakewiseConfig) Validate() []string {
+	errors := []string{}
+	return errors
+}
+
+// Serialize the module config to a map
+func (cfg *StakewiseConfig) Serialize() map[string]any {
+	cfgMap := config.Serialize(cfg)
+	cfgMap[hdids.VersionID] = cfg.Version
+	return cfgMap
+}
+
+// Deserialize the module config from a map
+func (cfg *StakewiseConfig) Deserialize(configMap map[string]any, network config.Network) error {
+	err := config.Deserialize(cfg, configMap, network)
+	if err != nil {
+		return err
+	}
+	version, exists := configMap[hdids.VersionID]
+	if !exists {
+		// Handle pre-version configs
+		version = "0.0.1"
+	}
+	cfg.Version = version.(string)
+	return nil
+}
+
+// Get the version of the module config
+func (cfg *StakewiseConfig) GetVersion() string {
+	return cfg.Version
+}
+
+// =====================
+// === Field Helpers ===
+// =====================
+
+// Update the config's resource cache
+func (cfg *StakewiseConfig) updateResources() {
+	cfg.resources = newStakewiseResources(cfg.hdCfg.Network.Value)
 }
 
 // ===================

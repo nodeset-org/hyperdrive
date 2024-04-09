@@ -33,7 +33,7 @@ type StakewiseResources struct {
 }
 
 // Creates a new resource collection for the given network
-func NewStakewiseResources(network config.Network) *StakewiseResources {
+func newStakewiseResources(network config.Network) *StakewiseResources {
 	// Mainnet
 	mainnetResources := &StakewiseResources{
 		NetworkResources: config.NewResources(config.Network_Mainnet),

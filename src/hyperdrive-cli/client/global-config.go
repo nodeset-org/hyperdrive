@@ -50,7 +50,7 @@ func (c *GlobalConfig) DeserializeModules() error {
 		if !ok {
 			return fmt.Errorf("config module section [%s] is not a map, it's a %s", stakewiseName, reflect.TypeOf(section))
 		}
-		err := config.Deserialize(c.Stakewise, configMap, c.Hyperdrive.Network.Value)
+		err := c.Stakewise.Deserialize(configMap, c.Hyperdrive.Network.Value)
 		if err != nil {
 			return fmt.Errorf("error deserializing stakewise configuration: %w", err)
 		}
@@ -61,13 +61,10 @@ func (c *GlobalConfig) DeserializeModules() error {
 // Creates a copy of the configuration
 func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 	// Hyperdrive
-	network := c.Hyperdrive.Network.Value
-	hdCopy := hdconfig.NewHyperdriveConfig(c.Hyperdrive.HyperdriveUserDirectory)
-	config.Clone(c.Hyperdrive, hdCopy, network)
+	hdCopy := c.Hyperdrive.Clone()
 
 	// Stakewise
-	swCopy := swconfig.NewStakewiseConfig(hdCopy)
-	config.Clone(c.Stakewise, swCopy, network)
+	swCopy := c.Stakewise.Clone().(*swconfig.StakewiseConfig)
 
 	return &GlobalConfig{
 		Hyperdrive: hdCopy,
@@ -87,7 +84,7 @@ func (c *GlobalConfig) ChangeNetwork(newNetwork config.Network) {
 	// Run the changes
 	c.Hyperdrive.ChangeNetwork(newNetwork)
 	for _, module := range c.GetAllModuleConfigs() {
-		config.ChangeNetwork(module, oldNetwork, newNetwork)
+		module.ChangeNetwork(oldNetwork, newNetwork)
 	}
 }
 
@@ -96,7 +93,7 @@ func (c *GlobalConfig) UpdateDefaults() {
 	network := c.Hyperdrive.Network.Value
 	config.UpdateDefaults(c.Hyperdrive, network)
 	for _, module := range c.GetAllModuleConfigs() {
-		config.UpdateDefaults(module, network)
+		module.UpdateDefaults(network)
 	}
 }
 

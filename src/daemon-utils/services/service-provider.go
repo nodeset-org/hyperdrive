@@ -141,7 +141,7 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](moduleDir string, mod
 	// Create the provider
 	provider := &ServiceProvider{
 		moduleDir:    moduleDir,
-		userDir:      hdCfg.HyperdriveUserDirectory,
+		userDir:      hdCfg.GetUserDirectory(),
 		hdCfg:        hdCfg,
 		moduleConfig: moduleCfg,
 		ecManager:    ecManager,

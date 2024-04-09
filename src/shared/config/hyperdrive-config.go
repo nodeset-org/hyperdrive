@@ -59,7 +59,7 @@ type HyperdriveConfig struct {
 
 	// Internal fields
 	Version                 string
-	HyperdriveUserDirectory string
+	hyperdriveUserDirectory string
 	resources               *config.NetworkResources
 }
 
@@ -96,7 +96,7 @@ func LoadFromFile(path string) (*HyperdriveConfig, error) {
 // Creates a new Hyperdrive configuration instance
 func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg := &HyperdriveConfig{
-		HyperdriveUserDirectory: hdDir,
+		hyperdriveUserDirectory: hdDir,
 		Modules:                 map[string]any{},
 
 		ProjectName: config.Parameter[string]{
@@ -265,7 +265,6 @@ func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig) map[string]any {
 	masterMap := map[string]any{}
 
 	hdMap := config.Serialize(cfg)
-	masterMap[ids.UserDirectoryKey] = cfg.HyperdriveUserDirectory
 	masterMap[ids.VersionID] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	masterMap[ids.RootConfigID] = hdMap
 
@@ -277,7 +276,8 @@ func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig) map[string]any {
 	}
 	for _, module := range modules {
 		// Serialize / overwrite them with explictly provided ones
-		modMap := config.Serialize(module)
+		modMap := module.Serialize()
+		modMap[ids.VersionID] = module.GetVersion()
 		modulesMap[module.GetModuleName()] = modMap
 	}
 	masterMap[ModulesName] = modulesMap
@@ -318,11 +318,6 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	}
 
 	// Get the special fields
-	udKey, exists := masterMap[ids.UserDirectoryKey]
-	if !exists {
-		return fmt.Errorf("expected a user directory config.Parameter named [%s] but it was not found", ids.UserDirectoryKey)
-	}
-	cfg.HyperdriveUserDirectory = udKey.(string)
 	version, exists := masterMap[ids.VersionID]
 	if !exists {
 		return fmt.Errorf("expected a version config.Parameter named [%s] but it was not found", ids.VersionID)
@@ -357,6 +352,15 @@ func (cfg *HyperdriveConfig) ChangeNetwork(newNetwork config.Network) {
 	// Run the changes
 	config.ChangeNetwork(cfg, oldNetwork, newNetwork)
 	cfg.updateResources()
+}
+
+// Creates a copy of the configuration
+func (cfg *HyperdriveConfig) Clone() *HyperdriveConfig {
+	clone := NewHyperdriveConfig(cfg.hyperdriveUserDirectory)
+	config.Clone(cfg, clone, cfg.Network.Value)
+	clone.updateResources()
+	clone.Version = cfg.Version
+	return clone
 }
 
 // =====================
@@ -428,16 +432,20 @@ func (cfg *HyperdriveConfig) updateResources() {
 	}
 }
 
+func (cfg *HyperdriveConfig) GetUserDirectory() string {
+	return cfg.hyperdriveUserDirectory
+}
+
 // ==============================
 // === IConfig Implementation ===
 // ==============================
 
 func (cfg *HyperdriveConfig) GetApiLogFilePath() string {
-	return filepath.Join(cfg.HyperdriveUserDirectory, LogDir, ApiLogName)
+	return filepath.Join(cfg.hyperdriveUserDirectory, LogDir, ApiLogName)
 }
 
 func (cfg *HyperdriveConfig) GetTasksLogFilePath() string {
-	return filepath.Join(cfg.HyperdriveUserDirectory, LogDir, TasksLogName)
+	return filepath.Join(cfg.hyperdriveUserDirectory, LogDir, TasksLogName)
 }
 
 func (cfg *HyperdriveConfig) GetNodeAddressFilePath() string {
@@ -479,5 +487,5 @@ func (cfg *HyperdriveConfig) GetLoggerOptions() log.LoggerOptions {
 }
 
 func (cfg *HyperdriveConfig) GetModuleLogFilePath(moduleName string, moduleLogName string) string {
-	return filepath.Join(cfg.HyperdriveUserDirectory, LogDir, moduleName, moduleLogName)
+	return filepath.Join(cfg.hyperdriveUserDirectory, LogDir, moduleName, moduleLogName)
 }

@@ -38,6 +38,7 @@ hyperdrive-daemon/hyperdrive-daemon
 build/
 *.build
 *.dsc
+*.dch
 *.tar.gz
 *debhelper*
 install/packages/debian/hyperdrive

@@ -41,4 +41,25 @@ type IModuleConfig interface {
 
 	// Get the list of containers that should be deployed
 	GetContainersToDeploy() []config.ContainerID
+
+	// Handle a network change, for example by updating the default parameters
+	ChangeNetwork(oldNetwork config.Network, newNetwork config.Network)
+
+	// Create a copy of this config
+	Clone() IModuleConfig
+
+	// Update the default parameters based on the Hyperdrive config's current network value
+	UpdateDefaults(network config.Network)
+
+	// Verify the current settings and publish a list of errors that must be resolved before saving
+	Validate() []string
+
+	// Serialize the module config to a map
+	Serialize() map[string]any
+
+	// Deserialize the module config from a map
+	Deserialize(configMap map[string]any, network config.Network) error
+
+	// Get the version of the module config
+	GetVersion() string
 }

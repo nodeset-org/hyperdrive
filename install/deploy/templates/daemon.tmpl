@@ -12,14 +12,14 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - {{.Hyperdrive.HyperdriveUserDirectory}}:{{.Hyperdrive.HyperdriveUserDirectory}}
+      - {{.Hyperdrive.GetUserDirectory}}:{{.Hyperdrive.GetUserDirectory}}
       - {{.Hyperdrive.UserDataPath}}:{{.Hyperdrive.UserDataPath}}
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - /var/lib/hyperdrive/global:/var/lib/hyperdrive/global
       - /var/lib/hyperdrive/data/{{.Hyperdrive.ProjectName}}:/var/lib/hyperdrive/data/{{.Hyperdrive.ProjectName}}
     command:
       - --user-dir
-      - "{{.Hyperdrive.HyperdriveUserDirectory}}"
+      - "{{.Hyperdrive.GetUserDirectory}}"
       {{- range $module := .GetEnabledModuleConfigNames}}
       - -m
       - "{{$module}}"

@@ -26,12 +26,11 @@ func NewStakewiseServiceProvider(sp *services.ServiceProvider) (*StakewiseServic
 	}
 
 	// Create the resources
-	cfg := sp.GetHyperdriveConfig()
-	res := swconfig.NewStakewiseResources(cfg.Network.Value)
 	swCfg, ok := sp.GetModuleConfig().(*swconfig.StakewiseConfig)
 	if !ok {
 		return nil, fmt.Errorf("stakewise config is not the correct type, it's a %s", reflect.TypeOf(swCfg))
 	}
+	res := swCfg.GetStakewiseResources()
 
 	// Make the provider
 	stakewiseSp := &StakewiseServiceProvider{

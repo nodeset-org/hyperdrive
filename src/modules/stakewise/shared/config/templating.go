@@ -94,18 +94,15 @@ func (cfg *StakewiseConfig) Graffiti() (string, error) {
 }
 
 func (cfg *StakewiseConfig) FeeRecipient() string {
-	res := NewStakewiseResources(cfg.hdCfg.Network.Value)
-	return res.FeeRecipient.Hex()
+	return cfg.resources.FeeRecipient.Hex()
 }
 
 func (cfg *StakewiseConfig) Vault() string {
-	res := NewStakewiseResources(cfg.hdCfg.Network.Value)
-	return res.Vault.Hex()
+	return cfg.resources.Vault.Hex()
 }
 
 func (cfg *StakewiseConfig) Network() string {
-	res := NewStakewiseResources(cfg.hdCfg.Network.Value)
-	return res.EthNetworkName
+	return cfg.resources.EthNetworkName
 }
 
 func (cfg *StakewiseConfig) IsEnabled() bool {

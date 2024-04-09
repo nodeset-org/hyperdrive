@@ -16,7 +16,7 @@ services:
     ports: 
       - "{{$port}}:{{$port}}/tcp"
     volumes:
-      - "{{.Hyperdrive.HyperdriveUserDirectory}}/grafana-prometheus-datasource.yml:/etc/grafana/provisioning/datasources/prometheus.yml"
+      - "{{.Hyperdrive.GetUserDirectory}}/grafana-prometheus-datasource.yml:/etc/grafana/provisioning/datasources/prometheus.yml"
       - "grafana-storage:/var/lib/grafana"
     networks:
       - net
