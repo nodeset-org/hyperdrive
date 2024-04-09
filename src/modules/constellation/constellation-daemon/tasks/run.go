@@ -6,13 +6,15 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/rocket-pool/node-manager-core/beacon"
+	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/rocketpool-go/rocketpool"
 	"github.com/rocket-pool/smartnode/v2/rocketpool-daemon/node"
 	"github.com/rocket-pool/smartnode/v2/rocketpool-daemon/node/collectors"
 	"github.com/rocket-pool/smartnode/v2/shared/config"
+
+	constcommon "github.com/nodeset-org/hyperdrive/modules/constellation/constellation-daemon/common"
 )
 
 // Config
