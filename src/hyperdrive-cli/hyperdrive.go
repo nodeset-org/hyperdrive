@@ -108,7 +108,6 @@ func main() {
 	service.RegisterCommands(app, "service", []string{"s"})
 	swcmd.RegisterCommands(app, "stakewise", []string{"sw"})
 	constcmd.RegisterCommands(app, "constellation", []string{"c"})
-
 	wallet.RegisterCommands(app, "wallet", []string{"w"})
 
 	app.Before = func(c *cli.Context) error {

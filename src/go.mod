@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.1.1-0.20240330061059-60df93fdf96b
+	github.com/rocket-pool/node-manager-core v0.2.1-0.20240409114034-a519fd37c290
 	github.com/shirou/gopsutil/v3 v3.24.2
 	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.18.0
@@ -132,6 +132,50 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
+)
+
+require (
+	github.com/alecthomas/units v0.0.0-20231202071711-9a357b53e9c9 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
+	github.com/crackcomm/go-gitignore v0.0.0-20231225121904-e25f5bc08668 // indirect
+	github.com/go-openapi/analysis v0.23.0 // indirect
+	github.com/go-openapi/errors v0.22.0 // indirect
+	github.com/go-openapi/jsonpointer v0.21.0 // indirect
+	github.com/go-openapi/jsonreference v0.21.0 // indirect
+	github.com/go-openapi/loads v0.22.0 // indirect
+	github.com/go-openapi/runtime v0.28.0 // indirect
+	github.com/go-openapi/spec v0.21.0 // indirect
+	github.com/go-openapi/strfmt v0.23.0 // indirect
+	github.com/go-openapi/swag v0.23.0 // indirect
+	github.com/go-openapi/validate v0.24.0 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
+	github.com/ipfs/bbloom v0.0.4 // indirect
+	github.com/ipfs/boxo v0.18.0 // indirect
+	github.com/ipfs/go-bitfield v1.1.0 // indirect
+	github.com/ipfs/go-block-format v0.2.0 // indirect
+	github.com/ipfs/go-datastore v0.6.0 // indirect
+	github.com/ipfs/go-ipfs-util v0.0.3 // indirect
+	github.com/ipfs/go-ipld-format v0.6.0 // indirect
+	github.com/ipfs/go-ipld-legacy v0.2.1 // indirect
+	github.com/ipfs/go-log/v2 v2.5.1 // indirect
+	github.com/ipfs/go-metrics-interface v0.0.1 // indirect
+	github.com/ipld/go-codec-dagpb v1.6.0 // indirect
+	github.com/ipld/go-ipld-prime v0.21.0 // indirect
+	github.com/jbenet/goprocess v0.1.4 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
+	github.com/klauspost/compress v1.17.7 // indirect
+	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/oklog/ulid v1.3.1 // indirect
+	github.com/opentracing/opentracing-go v1.2.0 // indirect
+	github.com/polydawn/refmt v0.89.0 // indirect
+	github.com/rocket-pool/rocketpool-go/v2 v2.0.0-20240409150201-8ba8644d8892 // indirect
+	github.com/rocket-pool/smartnode/v2 v2.0.0-dev2.0.20240409162256-820dddd71f9c
+	github.com/wealdtech/go-merkletree v1.0.1-0.20190605192610-2bb163c2ea2a // indirect
+	github.com/whyrusleeping/chunker v0.0.0-20181014151217-fe64bd25879f // indirect
+	go.mongodb.org/mongo-driver v1.14.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
+	go.uber.org/zap v1.27.0 // indirect
 )
 
 // replace github.com/rocket-pool/node-manager-core => ../../../rocketpool/node-manager-core
