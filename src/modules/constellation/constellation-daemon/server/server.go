@@ -19,11 +19,11 @@ type ConstellationServer struct {
 }
 
 func NewConstellationServer(origin string, sp *constcommon.ConstellationServiceProvider) (*ConstellationServer, error) {
-	apiLogger := sp.GetApiLogger()
+	apiLogger := sp.ServiceProvider.GetApiLogger()
 	subLogger := apiLogger.CreateSubLogger(origin)
 	// ctx := subLogger.CreateContextWithLogger(sp.GetBaseContext())
 
-	socketPath := filepath.Join(sp.GetUserDir(), constconfig.CliSocketFilename)
+	socketPath := filepath.Join(sp.ServiceProvider.GetUserDir(), constconfig.CliSocketFilename)
 	handlers := []server.IHandler{
 		// constnodeset.NewNodesetHandler(subLogger, ctx, sp),
 		// constvalidator.NewValidatorHandler(subLogger, ctx, sp),

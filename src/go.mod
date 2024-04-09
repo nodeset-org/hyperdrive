@@ -178,4 +178,6 @@ require (
 	go.uber.org/zap v1.27.0 // indirect
 )
 
+require github.com/rocket-pool/rocketpool-go v1.10.0
+
 // replace github.com/rocket-pool/node-manager-core => ../../../rocketpool/node-manager-core

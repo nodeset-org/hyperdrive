@@ -43,12 +43,12 @@ type TaskLoop struct {
 
 func NewTaskLoop(sp *constcommon.ConstellationServiceProvider, wg *sync.WaitGroup) *TaskLoop {
 	taskLoop := &TaskLoop{
-		// sp:                      sp,
-		logger:                  sp.GetTasksLogger(),
+		sp:                      sp,
+		logger:                  sp.ServiceProvider.GetTasksLogger(),
 		wg:                      wg,
-		stakePrelaunchMinipools: node.NewStakePrelaunchMinipools(sp, logger),
+		stakePrelaunchMinipools: node.NewStakePrelaunchMinipools(sp.RpServiceProvider, sp.ServiceProvider.GetTasksLogger()),
 	}
-	taskLoop.ctx = taskLoop.logger.CreateContextWithLogger(sp.GetBaseContext())
+	taskLoop.ctx = taskLoop.logger.CreateContextWithLogger(sp.ServiceProvider.GetBaseContext())
 	return taskLoop
 }
 

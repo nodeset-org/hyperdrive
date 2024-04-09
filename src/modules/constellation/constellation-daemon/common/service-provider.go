@@ -5,11 +5,15 @@ import (
 	"reflect"
 
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
+	rpservices "github.com/rocket-pool/smartnode/v2/rocketpool-daemon/common/services"
+
 	swconfig "github.com/nodeset-org/hyperdrive/modules/constellation/shared/config"
 )
 
 type ConstellationServiceProvider struct {
-	*services.ServiceProvider
+	ServiceProvider   *services.ServiceProvider
+	RpServiceProvider *rpservices.ServiceProvider
+
 	swCfg     *swconfig.ConstellationConfig
 	resources *swconfig.ConstellationResources
 }
