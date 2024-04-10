@@ -10,6 +10,8 @@ import (
 	"sync"
 	"syscall"
 
+	consttasks "github.com/nodeset-org/hyperdrive/modules/constellation/constellation-daemon/tasks"
+
 	"github.com/nodeset-org/hyperdrive/daemon-utils/services"
 	constcommon "github.com/nodeset-org/hyperdrive/modules/constellation/constellation-daemon/common"
 	constserver "github.com/nodeset-org/hyperdrive/modules/constellation/constellation-daemon/server"
@@ -70,7 +72,7 @@ func main() {
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}
-		stakewiseSp, err := constcommon.NewConstellationServiceProvider(sp)
+		constellationSp, err := constcommon.NewConstellationServiceProvider(sp)
 		if err != nil {
 			return fmt.Errorf("error creating Stakewise service provider: %w", err)
 		}
@@ -83,7 +85,7 @@ func main() {
 		}
 
 		// Start the server
-		apiServer, err := constserver.NewConstellationServer(constserver.CliOrigin, stakewiseSp)
+		apiServer, err := constserver.NewConstellationServer(constserver.CliOrigin, constellationSp)
 		if err != nil {
 			return fmt.Errorf("error creating Stakewise server: %w", err)
 		}
@@ -93,13 +95,20 @@ func main() {
 		}
 		fmt.Printf("Started daemon on %s.\n", apiServer.GetSocketPath())
 
+		// Start the task loop
+		taskLoop := consttasks.NewTaskLoop(constellationSp, stopWg)
+		err = taskLoop.Run()
+		if err != nil {
+			return fmt.Errorf("error starting task loop: %w", err)
+		}
+
 		// Handle process closures
 		termListener := make(chan os.Signal, 1)
 		signal.Notify(termListener, os.Interrupt, syscall.SIGTERM)
 		go func() {
 			<-termListener
 			fmt.Println("Shutting down daemon...")
-			stakewiseSp.ServiceProvider.CancelContextOnShutdown()
+			constellationSp.ServiceProvider.CancelContextOnShutdown()
 			err := apiServer.Stop()
 			if err != nil {
 				fmt.Printf("WARNING: daemon didn't shutdown cleanly: %s\n", err.Error())
