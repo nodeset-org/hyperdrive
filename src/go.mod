@@ -180,4 +180,6 @@ require (
 
 require github.com/rocket-pool/rocketpool-go v1.10.0
 
+replace github.com/wealdtech/go-merkletree v1.0.1-0.20190605192610-2bb163c2ea2a => github.com/rocket-pool/go-merkletree v1.0.1-0.20220406020931-c262d9b976dd
+
 // replace github.com/rocket-pool/node-manager-core => ../../../rocketpool/node-manager-core

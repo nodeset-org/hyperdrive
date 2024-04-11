@@ -54,6 +54,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		moduleDirFlag,
 	}
+
 	app.Action = func(c *cli.Context) error {
 		// Get the config file
 		moduleDir := c.String(moduleDirFlag.Name)
@@ -69,12 +70,13 @@ func main() {
 
 		// Create the service provider
 		sp, err := services.NewServiceProvider(moduleDir, constconfig.ModuleName, constconfig.ClientLogName, constconfig.NewConstellationConfig, config.ClientTimeout)
+		fmt.Printf("!!! user dir: %s\n", sp.GetUserDir())
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}
 		constellationSp, err := constcommon.NewConstellationServiceProvider(sp)
 		if err != nil {
-			return fmt.Errorf("error creating Stakewise service provider: %w", err)
+			return fmt.Errorf("error creating Constellation service provider: %w", err)
 		}
 
 		// Get the owner of the Hyperdrive socket
@@ -87,7 +89,7 @@ func main() {
 		// Start the server
 		apiServer, err := constserver.NewConstellationServer(constserver.CliOrigin, constellationSp)
 		if err != nil {
-			return fmt.Errorf("error creating Stakewise server: %w", err)
+			return fmt.Errorf("error creating Constellation server: %w", err)
 		}
 		err = apiServer.Start(stopWg, hdSocketStat.Uid, hdSocketStat.Gid)
 		if err != nil {
@@ -95,6 +97,7 @@ func main() {
 		}
 		fmt.Printf("Started daemon on %s.\n", apiServer.GetSocketPath())
 
+		fmt.Printf("Starting task loop...\n")
 		// Start the task loop
 		taskLoop := consttasks.NewTaskLoop(constellationSp, stopWg)
 		err = taskLoop.Run()

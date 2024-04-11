@@ -97,3 +97,8 @@ func (cfg *ConstellationConfig) Network() string {
 func (cfg *ConstellationConfig) IsEnabled() bool {
 	return cfg.Enabled.Value
 }
+
+func (cfg *ConstellationConfig) FeeRecipient() string {
+	res := NewConstellationResources(cfg.hdCfg.Network.Value)
+	return res.FeeRecipient.Hex()
+}
