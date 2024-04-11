@@ -11,10 +11,7 @@ import (
 
 func setEnsName(c *cli.Context, name string) error {
 	// Get Hyperdrive client
-	hd, err := client.NewHyperdriveClientFromCtx(c).WithReady()
-	if err != nil {
-		return err
-	}
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	fmt.Printf("This will confirm the node's ENS name as '%s'.\n\n%sNOTE: to confirm your name, you must first register it with the ENS application at https://app.ens.domains.\nWe recommend using a hardware wallet as the base domain, and registering your node as a subdomain of it.%s\n\n", name, terminal.ColorYellow, terminal.ColorReset)
 

@@ -11,10 +11,7 @@ import (
 
 func restoreAddress(c *cli.Context) error {
 	// Get Hyperdrive client
-	hd, err := client.NewHyperdriveClientFromCtx(c).WithReady()
-	if err != nil {
-		return err
-	}
+	hd := client.NewHyperdriveClientFromCtx(c)
 
 	// Get the wallet status
 	response, err := hd.Api.Wallet.Status()
