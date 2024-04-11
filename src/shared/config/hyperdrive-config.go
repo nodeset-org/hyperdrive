@@ -277,7 +277,6 @@ func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig) map[string]any {
 	for _, module := range modules {
 		// Serialize / overwrite them with explictly provided ones
 		modMap := module.Serialize()
-		modMap[ids.VersionID] = module.GetVersion()
 		modulesMap[module.GetModuleName()] = modMap
 	}
 	masterMap[ModulesName] = modulesMap
