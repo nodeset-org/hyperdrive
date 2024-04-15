@@ -85,8 +85,7 @@ func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 	swCopy := c.Stakewise.Clone().(*swconfig.StakewiseConfig)
 
 	// Constellation
-	constCopy := constconfig.NewConstellationConfig(hdCopy)
-	config.Clone(c.Constellation, constCopy, network)
+	constCopy := c.Constellation.Clone().(*constconfig.ConstellationConfig)
 
 	return &GlobalConfig{
 		Hyperdrive:    hdCopy,

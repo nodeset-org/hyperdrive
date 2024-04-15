@@ -2,6 +2,7 @@ package constconfig
 
 const (
 	ModuleName           string = "constellation"
+	ShortModuleName      string = "const"
 	DaemonBaseRoute      string = ModuleName
 	ApiVersion           string = "1"
 	CliSocketFilename    string = ModuleName + "-cli.sock"
