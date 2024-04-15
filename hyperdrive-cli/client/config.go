@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
+	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
-	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 const (

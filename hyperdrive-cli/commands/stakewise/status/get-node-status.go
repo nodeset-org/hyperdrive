@@ -3,8 +3,8 @@ package status
 import (
 	"fmt"
 
+	swtypes "github.com/nodeset-org/hyperdrive-stakewise/shared/types"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	swtypes "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/types"
 	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/urfave/cli/v2"
 )

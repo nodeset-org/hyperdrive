@@ -5,9 +5,8 @@ import (
 	"strings"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
-	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	sharedutils "github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/urfave/cli/v2"
 )
@@ -81,7 +80,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 		Aliases: aliases,
 		Usage:   "Manage Hyperdrive service",
 		Flags: []cli.Flag{
-			cliutils.ComposeFileFlag,
+			utils.ComposeFileFlag,
 		},
 		Subcommands: []*cli.Command{
 			{
@@ -89,7 +88,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Aliases: []string{"i"},
 				Usage:   "Install the Hyperdrive service",
 				Flags: []cli.Flag{
-					cliutils.YesFlag,
+					utils.YesFlag,
 					installVerboseFlag,
 					installNoDepsFlag,
 					installPathFlag,
@@ -98,7 +97,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -114,7 +113,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Flags:   configFlags,
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -129,7 +128,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "Get the sync progress of the Execution and Beacon Nodes",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -144,7 +143,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "View the Hyperdrive service status",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -161,11 +160,11 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					ignoreSlashTimerFlag,
 					wallet.PasswordFlag,
 					wallet.SavePasswordFlag,
-					cliutils.YesFlag,
+					utils.YesFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -179,11 +178,11 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Aliases: []string{"pause", "p"},
 				Usage:   "Pause the Hyperdrive service",
 				Flags: []cli.Flag{
-					cliutils.YesFlag,
+					utils.YesFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -226,7 +225,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "View the Hyperdrive service stats",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -240,7 +239,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage: "View the Hyperdrive service docker compose config",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -255,7 +254,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "View the Hyperdrive service version information",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -286,7 +285,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "Checks if your CPU supports all of the features required by the \"modern\" version of certain client images. If not, it prints what features are missing.",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -300,7 +299,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage: "Generate YAML that shows the current configuration schema, including all of the parameters and their descriptions",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -354,7 +353,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   fmt.Sprintf("%sDeletes the main Execution client's chain data and resyncs it from scratch. Only use this as a last resort!%s", terminal.ColorRed, terminal.ColorReset),
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -369,7 +368,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   fmt.Sprintf("%sDeletes the Beacon Node's chain data and resyncs it from scratch. Only use this as a last resort!%s", terminal.ColorRed, terminal.ColorReset),
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 
@@ -383,11 +382,11 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Aliases: []string{"t"},
 				Usage:   fmt.Sprintf("%sDeletes all of the Hyperdrive Docker containers and volumes, including your Execution Client and Beacon Node chain data and your Prometheus database (if metrics are enabled). Also removes your entire `.hyperdrive` configuration folder, including your wallet, password, and validator keys. Only use this if you are cleaning up Hyperdrive and want to start over!%s", terminal.ColorRed, terminal.ColorReset),
 				Flags: []cli.Flag{
-					cliutils.YesFlag,
+					utils.YesFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := sharedutils.ValidateArgCount(c, 0); err != nil {
+					if err := utils.ValidateArgCount(c, 0); err != nil {
 						return err
 					}
 

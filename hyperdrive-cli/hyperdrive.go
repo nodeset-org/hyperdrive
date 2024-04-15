@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
 	swcmd "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
-	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/urfave/cli/v2"
 )
 
