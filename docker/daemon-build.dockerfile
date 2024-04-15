@@ -13,9 +13,9 @@ RUN if [ "$BUILDPLATFORM" = "linux/amd64" -a "$TARGETARCH" = "arm64" ]; then \
     export CC=x86_64-linux-gnu-gcc && export CC_FOR_TARGET=gcc-x86-64-linux-gnu; \
     fi && \
     cd /hyperdrive/hyperdrive-daemon && \
-    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /build/hyperdrive-daemon-${TARGETOS}-${TARGETARCH}
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /build/hyperdrive-daemon
 
 # Copy the output
 FROM scratch AS daemon
 ARG TARGETOS TARGETARCH
-COPY --from=builder /build/hyperdrive-daemon-${TARGETOS}-${TARGETARCH} /
+COPY --from=builder /build/hyperdrive-daemon /hyperdrive-daemon
