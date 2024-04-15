@@ -11,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.2.1-0.20240407161311-95eaf78834a0
+	github.com/rocket-pool/node-manager-core v0.2.1-0.20240414212301-586ea27e9ef4
 	github.com/shirou/gopsutil/v3 v3.24.2
 	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.18.0
@@ -90,7 +90,7 @@ require (
 	github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44 // indirect
 	github.com/prysmaticlabs/go-bitfield v0.0.0-20210809151128-385d8c5e3fb7 // indirect
 	github.com/prysmaticlabs/gohashtree v0.0.4-beta // indirect
-	github.com/prysmaticlabs/prysm/v5 v5.0.2 // indirect
+	github.com/prysmaticlabs/prysm/v5 v5.0.3 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sethvargo/go-password v0.2.0 // indirect
