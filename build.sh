@@ -101,8 +101,8 @@ build_constellation_daemon() {
 
 
     # Flatted the folders to make it easier to upload artifacts to github
-    mv build/$VERSION/linux_amd64/hyperdrive-const-daemon build/$VERSION/hyperdrive-const-daemon-linux-amd64
-    mv build/$VERSION/linux_arm64/hyperdrive-const-daemon build/$VERSION/hyperdrive-const-daemon-linux-arm64
+    mv build/$VERSION/linux_amd64/hyperdrive-constellation-daemon build/$VERSION/hyperdrive-constellation-daemon-linux-amd64
+    mv build/$VERSION/linux_arm64/hyperdrive-constellation-daemon build/$VERSION/hyperdrive-constellation-daemon-linux-arm64
 
     # Clean up the empty directories
     rmdir build/$VERSION/linux_amd64 build/$VERSION/linux_arm64
