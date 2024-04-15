@@ -150,8 +150,8 @@ if [ -z "$VERSION" ]; then
 fi
 
 # Cleanup old artifacts
-rm -rf ./$VERSION/*
-mkdir -p ./$VERSION
+rm -rf build/$VERSION/*
+mkdir -p build/$VERSION
 
 # Make a multiarch builder, ignore if it's already there
 docker buildx create --name multiarch-builder --driver docker-container --use > /dev/null 2>&1
