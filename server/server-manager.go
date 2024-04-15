@@ -11,7 +11,7 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/server/api/tx"
 	"github.com/nodeset-org/hyperdrive-daemon/server/api/utils"
 	"github.com/nodeset-org/hyperdrive-daemon/server/api/wallet"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/rocket-pool/node-manager-core/api/server"
 )
 

@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/client"
 	"github.com/rocket-pool/node-manager-core/api/types"
 )

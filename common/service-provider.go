@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/rocket-pool/node-manager-core/node/services"
 )
 

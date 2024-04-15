@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/rocket-pool/node-manager-core/config"
 )
 

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
-	"github.com/nodeset-org/hyperdrive/shared/config/ids"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/config/ids"
 )
 
 type ConfigUpgrader struct {
