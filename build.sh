@@ -95,30 +95,45 @@ build_sw_daemon() {
 # Builds the Constellation daemon image and pushes it to Docker Hub
 # NOTE: You must install qemu first; e.g. sudo apt-get install -y qemu qemu-user-static
 build_constellation_daemon() {
-    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
-
     echo "Building Constellation daemon binaries..."
     docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/modules/constellation/const_daemon-build.dockerfile --output ../$VERSION --target daemon . || fail "Error building Constellation daemon binaries."
     echo "done!"
 
-    # Copy the daemon binaries to a build folder so the image can access them
-    mkdir -p ./build
-    cp ../$VERSION/linux_amd64/* ./build
-    cp ../$VERSION/linux_arm64/* ./build
-    echo "done!"
+
+    # Flatted the folders to make it easier to upload artifacts to github
+    mv build/$VERSION/linux_amd64/hyperdrive-const-daemon build/$VERSION/hyperdrive-const-daemon-linux-amd64
+    mv build/$VERSION/linux_arm64/hyperdrive-const-daemon build/$VERSION/hyperdrive-const-daemon-linux-arm64
+
+    # Clean up the empty directories
+    rmdir build/$VERSION/linux_amd64 build/$VERSION/linux_arm64
 
     echo "Building Constellation Docker image..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-constellation:$VERSION -f docker/modules/constellation/const_daemon.dockerfile --push . || fail "Error building Constellation Docker image."
+    # If uploading, make and push a manifest
+    if [ "$UPLOAD" = true ]; then
+        docker buildx build --rm --platform=linux/amd64,linux/arm64 --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive-constellation:$VERSION -f docker/modules/constellation/const_daemon.dockerfile --push . || fail "Error building Constellation Docker image."
+    else
+        docker buildx build --rm --load --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive-constellation:$VERSION -f docker/modules/constellation/const_daemon.dockerfile . || fail "Error building Constellation Docker image."
+    fi
     echo "done!"
 
-    # Cleanup
-    mv ../$VERSION/linux_amd64/* ../$VERSION
-    mv ../$VERSION/linux_arm64/* ../$VERSION
-    rm -rf ../$VERSION/linux_amd64/
-    rm -rf ../$VERSION/linux_arm64/
-    rm -rf ./build
+    # # Copy the daemon binaries to a build folder so the image can access them
+    # mkdir -p ./build
+    # cp ../$VERSION/linux_amd64/* ./build
+    # cp ../$VERSION/linux_arm64/* ./build
+    # echo "done!"
 
-    cd ..
+    # echo "Building Constellation Docker image..."
+    # docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-constellation:$VERSION -f docker/modules/constellation/const_daemon.dockerfile --push . || fail "Error building Constellation Docker image."
+    # echo "done!"
+
+    # # Cleanup
+    # mv ../$VERSION/linux_amd64/* ../$VERSION
+    # mv ../$VERSION/linux_arm64/* ../$VERSION
+    # rm -rf ../$VERSION/linux_amd64/
+    # rm -rf ../$VERSION/linux_arm64/
+    # rm -rf ./build
+
+    # cd ..
 }
 
 
