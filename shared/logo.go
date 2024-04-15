@@ -1,4 +1,4 @@
-package main
+package shared
 
 const (
 	Logo string = `{::} NodeSet

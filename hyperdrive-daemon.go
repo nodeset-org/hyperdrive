@@ -22,7 +22,7 @@ import (
 func main() {
 	// Add logo and attribution to application help template
 	attribution := "ATTRIBUTION:\n   Adapted from the Rocket Pool Smart Node (https://github.com/rocketpool/smartnode) with love."
-	cli.AppHelpTemplate = fmt.Sprintf("\n%s\n\n%s\n%s\n", Logo, cli.AppHelpTemplate, attribution)
+	cli.AppHelpTemplate = fmt.Sprintf("\n%s\n\n%s\n%s\n", shared.Logo, cli.AppHelpTemplate, attribution)
 	cli.CommandHelpTemplate = fmt.Sprintf("%s\n%s\n", cli.CommandHelpTemplate, attribution)
 	cli.SubcommandHelpTemplate = fmt.Sprintf("%s\n%s\n", cli.SubcommandHelpTemplate, attribution)
 
