@@ -1,2 +1,2 @@
-# hyperdrive-cli
-Command line interface for the Hyperdrive daemon
+# hyperdrive-daemon
+Base daemon for the Hyperdrive service
