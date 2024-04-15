@@ -19,101 +19,77 @@ fail() {
 
 # Builds all of the CLI binaries
 build_cli() {
-    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
-
     echo -n "Building CLI binaries... "
-    docker buildx build --rm -f docker/cli.dockerfile --output ../$VERSION --target cli . || fail "Error building CLI binaries."
+    docker buildx build --rm -f docker/cli.dockerfile --output build/$VERSION --target cli . || fail "Error building CLI binaries."
     echo "done!"
-
-    cd ..
 }
 
 
 # Builds the hyperdrive distro packages
 build_distro_packages() {
-    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
-
     echo -n "Building deb packages..."
-    docker buildx build --rm -f install/packages/debian/package.dockerfile --output ../$VERSION --target package . || fail "Error building deb packages."
-    rm ../$VERSION/*.build ../$VERSION/*.buildinfo ../$VERSION/*.changes
+    docker buildx build --rm -f install/packages/debian/package.dockerfile --output build/$VERSION --target package . || fail "Error building deb packages."
+    rm build/$VERSION/*.build build/$VERSION/*.buildinfo build/$VERSION/*.changes
     echo "done!"
-
-    cd ..
 }
 
 
 # Builds the .tar.xz file packages with the HD configuration files
 build_install_packages() {
-    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
-    rm -f hyperdrive-install.tar.xz
-
     echo -n "Building Hyperdrive installer packages... "
-    tar cfJ hyperdrive-install.tar.xz install || fail "Error building installer package."
-    mv hyperdrive-install.tar.xz ../$VERSION
-    cp install/install.sh ../$VERSION
+    tar cfJ build/$VERSION/hyperdrive-install.tar.xz install || fail "Error building installer package."
+    cp install/install.sh build/$VERSION
     echo "done!"
-
-    cd ..
 }
 
 
 # Builds the Hyperdrive image and pushes it to Docker Hub
 # NOTE: You must install qemu first; e.g. sudo apt-get install -y qemu qemu-user-static
 build_daemon() {
-    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
-
     echo "Building Hyperdrive binaries..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/daemon-build.dockerfile --output ../$VERSION --target daemon . || fail "Error building Hyperdrive daemon binaries."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/daemon-build.dockerfile --output build/$VERSION --target daemon . || fail "Error building Hyperdrive daemon binaries."
     echo "done!"
 
-    # Copy the daemon binaries to a build folder so the image can access them
-    mkdir -p ./build
-    cp ../$VERSION/linux_amd64/* ./build
-    cp ../$VERSION/linux_arm64/* ./build
-    echo "done!"
+    # Flatted the folders to make it easier to upload artifacts to github
+    mv build/$VERSION/linux_amd64/hyperdrive-daemon build/$VERSION/hyperdrive-daemon-linux-amd64
+    mv build/$VERSION/linux_arm64/hyperdrive-daemon build/$VERSION/hyperdrive-daemon-linux-arm64
+
+    # Clean up the empty directories
+    rmdir build/$VERSION/linux_amd64 build/$VERSION/linux_arm64
 
     echo "Building Hyperdrive Docker image..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile --push . || fail "Error building Hyperdrive Docker image."
+    # If uploading, make and push a manifest
+    if [ "$UPLOAD" = true ]; then
+        docker buildx build --rm --platform=linux/amd64,linux/arm64 --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile --push . || fail "Error building Hyperdrive Docker image."
+    else
+        docker buildx build --rm --load --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile . || fail "Error building Hyperdrive Docker image."
+    fi
     echo "done!"
-
-    # Cleanup
-    mv ../$VERSION/linux_amd64/* ../$VERSION
-    mv ../$VERSION/linux_arm64/* ../$VERSION
-    rm -rf ../$VERSION/linux_amd64/
-    rm -rf ../$VERSION/linux_arm64/
-    rm -rf ./build
-
-    cd ..
 }
 
 
 # Builds the Stakewise daemon image and pushes it to Docker Hub
 # NOTE: You must install qemu first; e.g. sudo apt-get install -y qemu qemu-user-static
 build_sw_daemon() {
-    cd hyperdrive || fail "Directory ${PWD}/hyperdrive does not exist or you don't have permissions to access it."
-
     echo "Building Stakewise daemon binaries..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/modules/stakewise/sw_daemon-build.dockerfile --output ../$VERSION --target daemon . || fail "Error building Stakewise daemon binaries."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/modules/stakewise/sw_daemon-build.dockerfile --output build/$VERSION --target daemon . || fail "Error building Stakewise daemon binaries."
     echo "done!"
 
-    # Copy the daemon binaries to a build folder so the image can access them
-    mkdir -p ./build
-    cp ../$VERSION/linux_amd64/* ./build
-    cp ../$VERSION/linux_arm64/* ./build
-    echo "done!"
+    # Flatted the folders to make it easier to upload artifacts to github
+    mv build/$VERSION/linux_amd64/hyperdrive-stakewise-daemon build/$VERSION/hyperdrive-stakewise-daemon-linux-amd64
+    mv build/$VERSION/linux_arm64/hyperdrive-stakewise-daemon build/$VERSION/hyperdrive-stakewise-daemon-linux-arm64
+
+    # Clean up the empty directories
+    rmdir build/$VERSION/linux_amd64 build/$VERSION/linux_arm64
 
     echo "Building Stakewise Docker image..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-stakewise:$VERSION -f docker/modules/stakewise/sw_daemon.dockerfile --push . || fail "Error building Stakewise Docker image."
+    # If uploading, make and push a manifest
+    if [ "$UPLOAD" = true ]; then
+        docker buildx build --rm --platform=linux/amd64,linux/arm64 --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive-stakewise:$VERSION -f docker/modules/stakewise/sw_daemon.dockerfile --push . || fail "Error building Stakewise Docker image."
+    else
+        docker buildx build --rm --load --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive-stakewise:$VERSION -f docker/modules/stakewise/sw_daemon.dockerfile . || fail "Error building Stakewise Docker image."
+    fi
     echo "done!"
-
-    # Cleanup
-    mv ../$VERSION/linux_amd64/* ../$VERSION
-    mv ../$VERSION/linux_arm64/* ../$VERSION
-    rm -rf ../$VERSION/linux_amd64/
-    rm -rf ../$VERSION/linux_arm64/
-    rm -rf ./build
-
-    cd ..
 }
 
 # Builds the Constellation daemon image and pushes it to Docker Hub
@@ -152,15 +128,19 @@ tag_latest() {
     docker tag nodeset/hyperdrive:$VERSION nodeset/hyperdrive:latest
     echo "done!"
 
-    echo -n "Pushing to Docker Hub... "
-    docker push nodeset/hyperdrive:latest
-    echo "done!"
+    if [ "$UPLOAD" = true ]; then
+        echo -n "Pushing to Docker Hub... "
+        docker push nodeset/hyperdrive:latest
+        echo "done!"
+    else
+        echo "The image tag only exists locally. Rerun with -u to upload to Docker Hub."
+    fi
 }
 
 
 # Print usage
 usage() {
-    echo "Usage: build-release.sh [options] -v <version number>"
+    echo "Usage: build.sh [options] -v <version number>"
     echo "This script assumes it is in a directory that contains subdirectories for all of the Hyperdrive repositories."
     echo "Options:"
     echo $'\t-a\tBuild all of the artifacts'
@@ -171,6 +151,7 @@ usage() {
     echo $'\t-s\tBuild the Hyperdrive Stakewise daemon image, and push it to Docker Hub'
     echo $'\t-x\tBuild the Hyperdrive Constellation daemon image, and push it to Docker Hub'
     echo $'\t-l\tTag the given version as "latest" on Docker Hub'
+    echo $'\t-u\tWhen passed with a build, upload the resulting image tags to Docker Hub'
     exit 0
 }
 
@@ -180,7 +161,7 @@ usage() {
 # =================
 
 # Parse arguments
-while getopts "actpdsxlv:" FLAG; do
+while getopts "actpdsxluv:" FLAG; do
     case "$FLAG" in
         a) CLI=true DISTRO=true PACKAGES=true DAEMON=true SW_DAEMON=true CONST_DAEMON=true;;
         c) CLI=true ;;
@@ -190,6 +171,7 @@ while getopts "actpdsxlv:" FLAG; do
         p) PACKAGES=true ;;
         s) SW_DAEMON=true ;;
         t) DISTRO=true ;;
+        u) UPLOAD=true ;;
         v) VERSION="$OPTARG" ;;
         *) usage ;;
     esac
@@ -199,8 +181,8 @@ if [ -z "$VERSION" ]; then
 fi
 
 # Cleanup old artifacts
-rm -rf ./$VERSION/*
-mkdir -p ./$VERSION
+rm -rf build/$VERSION/*
+mkdir -p build/$VERSION
 
 # Make a multiarch builder, ignore if it's already there
 docker buildx create --name multiarch-builder --driver docker-container --use > /dev/null 2>&1
