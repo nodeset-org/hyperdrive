@@ -1,6 +1,7 @@
-hyperdrive (0.4.0) UNRELEASED; urgency=medium
+hyperdrive (0.4.1) UNRELEASED; urgency=medium
 
   * Migrated to the node-manager-core
+  * Modularized daemons
 
  -- NodeSet LLC <info@nodeset.io>  Fri, 22 Mar 2024 02:00:21 +0000
 
