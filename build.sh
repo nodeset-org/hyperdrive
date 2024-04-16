@@ -42,31 +42,6 @@ build_install_packages() {
 }
 
 
-# Builds the Hyperdrive image and pushes it to Docker Hub
-# NOTE: You must install qemu first; e.g. sudo apt-get install -y qemu qemu-user-static
-build_daemon() {
-    echo "Building Hyperdrive binaries..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/daemon-build.dockerfile --output build/$VERSION --target daemon . || fail "Error building Hyperdrive daemon binaries."
-    echo "done!"
-
-    # Flatted the folders to make it easier to upload artifacts to github
-    mv build/$VERSION/linux_amd64/hyperdrive-daemon build/$VERSION/hyperdrive-daemon-linux-amd64
-    mv build/$VERSION/linux_arm64/hyperdrive-daemon build/$VERSION/hyperdrive-daemon-linux-arm64
-
-    # Clean up the empty directories
-    rmdir build/$VERSION/linux_amd64 build/$VERSION/linux_arm64
-
-    echo "Building Hyperdrive Docker image..."
-    # If uploading, make and push a manifest
-    if [ "$UPLOAD" = true ]; then
-        docker buildx build --rm --platform=linux/amd64,linux/arm64 --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile --push . || fail "Error building Hyperdrive Docker image."
-    else
-        docker buildx build --rm --load --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile . || fail "Error building Hyperdrive Docker image."
-    fi
-    echo "done!"
-}
-
-
 # Print usage
 usage() {
     echo "Usage: build.sh [options] -v <version number>"
@@ -76,10 +51,6 @@ usage() {
     echo $'\t-c\tBuild the CLI binaries for all platforms'
     echo $'\t-t\tBuild the distro packages (.deb)'
     echo $'\t-p\tBuild the Hyperdrive installer packages'
-    echo $'\t-d\tBuild the Hyperdrive daemon image, and push it to Docker Hub'
-    echo $'\t-s\tBuild the Hyperdrive Stakewise daemon image, and push it to Docker Hub'
-    echo $'\t-l\tTag the given version as "latest" on Docker Hub'
-    echo $'\t-u\tWhen passed with a build, upload the resulting image tags to Docker Hub'
     exit 0
 }
 
@@ -89,16 +60,12 @@ usage() {
 # =================
 
 # Parse arguments
-while getopts "actpdsluv:" FLAG; do
+while getopts "actpv:" FLAG; do
     case "$FLAG" in
-        a) CLI=true DISTRO=true PACKAGES=true DAEMON=true SW_DAEMON=true ;;
+        a) CLI=true DISTRO=true PACKAGES=true ;;
         c) CLI=true ;;
         t) DISTRO=true ;;
         p) PACKAGES=true ;;
-        d) DAEMON=true ;;
-        s) SW_DAEMON=true ;;
-        l) LATEST=true ;;
-        u) UPLOAD=true ;;
         v) VERSION="$OPTARG" ;;
         *) usage ;;
     esac
@@ -123,15 +90,6 @@ if [ "$DISTRO" = true ]; then
 fi
 if [ "$PACKAGES" = true ]; then
     build_install_packages
-fi
-if [ "$DAEMON" = true ]; then
-    build_daemon
-fi
-if [ "$SW_DAEMON" = true ]; then
-    build_sw_daemon
-fi
-if [ "$LATEST" = true ]; then
-    tag_latest
 fi
 
 
