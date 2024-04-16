@@ -20,5 +20,8 @@
 # Go workspace file
 go.work
 
+# Build artifacts
+build/
+
 # Binaries
 hyperdrive-daemon
