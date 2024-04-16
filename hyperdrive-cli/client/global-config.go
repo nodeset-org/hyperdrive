@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	constconfig "github.com/nodeset-org/hyperdrive/modules/constellation/shared/config"
+	csconfig "github.com/nodeset-org/hyperdrive/modules/constellation/shared/config"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
@@ -14,7 +14,7 @@ import (
 type GlobalConfig struct {
 	Hyperdrive    *hdconfig.HyperdriveConfig
 	Stakewise     *swconfig.StakewiseConfig
-	Constellation *constconfig.ConstellationConfig
+	Constellation *csconfig.ConstellationConfig
 }
 
 // Make a new global config
@@ -22,7 +22,7 @@ func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig) *GlobalConfig {
 	cfg := &GlobalConfig{
 		Hyperdrive:    hdCfg,
 		Stakewise:     swconfig.NewStakewiseConfig(hdCfg),
-		Constellation: constconfig.NewConstellationConfig(hdCfg),
+		Constellation: csconfig.NewConstellationConfig(hdCfg),
 	}
 
 	for _, module := range cfg.GetAllModuleConfigs() {
@@ -85,7 +85,7 @@ func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 	swCopy := c.Stakewise.Clone().(*swconfig.StakewiseConfig)
 
 	// Constellation
-	constCopy := c.Constellation.Clone().(*constconfig.ConstellationConfig)
+	constCopy := c.Constellation.Clone().(*csconfig.ConstellationConfig)
 
 	return &GlobalConfig{
 		Hyperdrive:    hdCopy,

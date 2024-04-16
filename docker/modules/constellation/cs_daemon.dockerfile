@@ -1,7 +1,7 @@
 # The daemon image
 FROM debian:bookworm-slim
 ARG TARGETOS TARGETARCH
-COPY ./build/hyperdrive-constellation-daemon-${TARGETOS}-${TARGETARCH} /usr/bin/hyperdrive-const-daemon
+COPY ./build/hyperdrive-constellation-daemon-${TARGETOS}-${TARGETARCH} /usr/bin/hyperdrive-constellation-daemon
 RUN apt update && \
     apt install ca-certificates -y && \
 	# Cleanup

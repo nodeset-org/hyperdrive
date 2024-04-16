@@ -6,7 +6,7 @@ import (
 
 const (
 	// The Constellation Hyperdrive daemon
-	ContainerID_ConstellationDaemon config.ContainerID = "const_daemon"
+	ContainerID_ConstellationDaemon config.ContainerID = "cs_daemon"
 	// The constellation Validator client
-	ContainerID_ConstellationValidator config.ContainerID = "const_vc"
+	ContainerID_ConstellationValidator config.ContainerID = "cs_vc"
 )

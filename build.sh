@@ -96,7 +96,7 @@ build_sw_daemon() {
 # NOTE: You must install qemu first; e.g. sudo apt-get install -y qemu qemu-user-static
 build_constellation_daemon() {
     echo "Building Constellation daemon binaries..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/modules/constellation/const_daemon-build.dockerfile --output ../$VERSION --target daemon . || fail "Error building Constellation daemon binaries."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/modules/constellation/cs_daemon-build.dockerfile --output ../$VERSION --target daemon . || fail "Error building Constellation daemon binaries."
     echo "done!"
 
 
@@ -110,30 +110,11 @@ build_constellation_daemon() {
     echo "Building Constellation Docker image..."
     # If uploading, make and push a manifest
     if [ "$UPLOAD" = true ]; then
-        docker buildx build --rm --platform=linux/amd64,linux/arm64 --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive-constellation:$VERSION -f docker/modules/constellation/const_daemon.dockerfile --push . || fail "Error building Constellation Docker image."
+        docker buildx build --rm --platform=linux/amd64,linux/arm64 --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive-constellation:$VERSION -f docker/modules/constellation/cs_daemon.dockerfile --push . || fail "Error building Constellation Docker image."
     else
-        docker buildx build --rm --load --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive-constellation:$VERSION -f docker/modules/constellation/const_daemon.dockerfile . || fail "Error building Constellation Docker image."
+        docker buildx build --rm --load --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive-constellation:$VERSION -f docker/modules/constellation/cs_daemon.dockerfile . || fail "Error building Constellation Docker image."
     fi
     echo "done!"
-
-    # # Copy the daemon binaries to a build folder so the image can access them
-    # mkdir -p ./build
-    # cp ../$VERSION/linux_amd64/* ./build
-    # cp ../$VERSION/linux_arm64/* ./build
-    # echo "done!"
-
-    # echo "Building Constellation Docker image..."
-    # docker buildx build --rm --platform=linux/amd64,linux/arm64 -t nodeset/hyperdrive-constellation:$VERSION -f docker/modules/constellation/const_daemon.dockerfile --push . || fail "Error building Constellation Docker image."
-    # echo "done!"
-
-    # # Cleanup
-    # mv ../$VERSION/linux_amd64/* ../$VERSION
-    # mv ../$VERSION/linux_arm64/* ../$VERSION
-    # rm -rf ../$VERSION/linux_amd64/
-    # rm -rf ../$VERSION/linux_arm64/
-    # rm -rf ./build
-
-    # cd ..
 }
 
 
@@ -178,11 +159,11 @@ usage() {
 # Parse arguments
 while getopts "actpdsxluv:" FLAG; do
     case "$FLAG" in
-        a) CLI=true DISTRO=true PACKAGES=true DAEMON=true SW_DAEMON=true CONST_DAEMON=true;;
+        a) CLI=true DISTRO=true PACKAGES=true DAEMON=true SW_DAEMON=true CS_DAEMON=true;;
         c) CLI=true ;;
         d) DAEMON=true ;;
         l) LATEST=true ;;
-        x) CONST_DAEMON=true ;;
+        x) CS_DAEMON=true ;;
         p) PACKAGES=true ;;
         s) SW_DAEMON=true ;;
         t) DISTRO=true ;;
@@ -218,7 +199,7 @@ fi
 if [ "$SW_DAEMON" = true ]; then
     build_sw_daemon
 fi
-if [ "$CONST_DAEMON" = true ]; then
+if [ "$CS_DAEMON" = true ]; then
     build_constellation_daemon
 fi
 if [ "$LATEST" = true ]; then

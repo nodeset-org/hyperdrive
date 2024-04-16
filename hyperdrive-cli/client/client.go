@@ -9,7 +9,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
-	constclient "github.com/nodeset-org/hyperdrive/modules/constellation/client"
+	csclient "github.com/nodeset-org/hyperdrive/modules/constellation/client"
 	swclient "github.com/nodeset-org/hyperdrive/modules/stakewise/client"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
@@ -47,7 +47,7 @@ type StakewiseClient struct {
 
 // Constellation client
 type ConstellationClient struct {
-	Api     *constclient.ApiClient
+	Api     *csclient.ApiClient
 	Context *context.HyperdriveContext
 	Logger  *slog.Logger
 }

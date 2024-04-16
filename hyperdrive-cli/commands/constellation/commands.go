@@ -1,4 +1,4 @@
-package constcmd
+package cscmd
 
 import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/constellation/validator"

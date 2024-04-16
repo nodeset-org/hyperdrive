@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
-	constcmd "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/constellation"
+	cscmd "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/constellation"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
 	swcmd "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
@@ -107,7 +107,7 @@ func main() {
 	// Register commands
 	service.RegisterCommands(app, "service", []string{"s"})
 	swcmd.RegisterCommands(app, "stakewise", []string{"sw"})
-	constcmd.RegisterCommands(app, "constellation", []string{"c"})
+	cscmd.RegisterCommands(app, "constellation", []string{"c"})
 	wallet.RegisterCommands(app, "wallet", []string{"w"})
 
 	app.Before = func(c *cli.Context) error {
