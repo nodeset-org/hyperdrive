@@ -4,6 +4,7 @@ const (
 	// Hyperdrive parameter IDs
 	RootConfigID         string = "hyperdrive"
 	VersionID            string = "version"
+	UserDirID            string = "hdUserDir"
 	NetworkID            string = "network"
 	ClientModeID         string = "clientMode"
 	UserDataPathID       string = "hdUserDataDir"

@@ -43,6 +43,6 @@ func (c *serviceGetConfigContext) PrepareData(data *api.ServiceGetConfigData, op
 	sp := c.handler.serviceProvider
 	cfg := sp.GetConfig()
 
-	data.Config = cfg.Serialize(nil)
+	data.Config = cfg.Serialize(nil, true)
 	return types.ResponseStatus_Success, nil
 }

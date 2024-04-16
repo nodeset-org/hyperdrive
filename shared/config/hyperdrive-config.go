@@ -261,12 +261,16 @@ func (cfg *HyperdriveConfig) GetSubconfigs() map[string]config.IConfigSection {
 }
 
 // Serializes the configuration into a map of maps, compatible with a settings file
-func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig) map[string]any {
+func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig, includeUserDir bool) map[string]any {
 	masterMap := map[string]any{}
 
 	hdMap := config.Serialize(cfg)
 	masterMap[ids.VersionID] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	masterMap[ids.RootConfigID] = hdMap
+
+	if includeUserDir {
+		masterMap[ids.UserDirID] = cfg.hyperdriveUserDirectory
+	}
 
 	// Handle modules
 	modulesMap := map[string]any{}
@@ -322,6 +326,10 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 		return fmt.Errorf("expected a version config.Parameter named [%s] but it was not found", ids.VersionID)
 	}
 	cfg.Version = version.(string)
+	userDir, exists := masterMap[ids.UserDirID]
+	if exists {
+		cfg.hyperdriveUserDirectory = userDir.(string)
+	}
 
 	// Handle modules
 	modules, exists := masterMap[ModulesName]
