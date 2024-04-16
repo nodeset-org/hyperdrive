@@ -96,7 +96,7 @@ build_sw_daemon() {
 # NOTE: You must install qemu first; e.g. sudo apt-get install -y qemu qemu-user-static
 build_constellation_daemon() {
     echo "Building Constellation daemon binaries..."
-    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/modules/constellation/cs_daemon-build.dockerfile --output ../$VERSION --target daemon . || fail "Error building Constellation daemon binaries."
+    docker buildx build --rm --platform=linux/amd64,linux/arm64 -f docker/modules/constellation/cs_daemon-build.dockerfile --output build/$VERSION --target daemon . || fail "Error building Constellation daemon binaries."
     echo "done!"
 
 
