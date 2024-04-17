@@ -9,10 +9,12 @@ require (
 	github.com/docker/docker v26.0.0+incompatible
 	github.com/ethereum/go-ethereum v1.13.14
 	github.com/fatih/color v1.16.0
+	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
-	github.com/rocket-pool/node-manager-core v0.2.1-0.20240414212301-586ea27e9ef4
+	github.com/rocket-pool/batch-query v1.0.0
+	github.com/rocket-pool/node-manager-core v0.2.1-0.20240417132624-0e7d87e82ec8
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/wealdtech/go-ens/v3 v3.6.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -45,7 +47,6 @@ require (
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -81,7 +82,6 @@ require (
 	github.com/prysmaticlabs/gohashtree v0.0.4-beta // indirect
 	github.com/prysmaticlabs/prysm/v5 v5.0.3 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/rocket-pool/batch-query v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sethvargo/go-password v0.2.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
