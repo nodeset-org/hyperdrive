@@ -24,8 +24,7 @@ import (
 // Structs implementing this will handle the caller-specific functionality.
 type IQuerylessCallContext[DataType any] interface {
 	// Prepare the response data in whatever way the context needs to do
-	//PrepareData(data *DataType, opts *bind.TransactOpts) error
-	PrepareData(data *DataType, opts *bind.TransactOpts) (types.ResponseStatus, error)
+	PrepareData(data *DataType, walletStatus wallet.WalletStatus, opts *bind.TransactOpts) (types.ResponseStatus, error)
 }
 
 // Interface for queryless call context factories that handle GET calls.
@@ -148,6 +147,6 @@ func runQuerylessRoute[DataType any](ctx IQuerylessCallContext[DataType], servic
 	}
 
 	// Prep the data with the context-specific behavior
-	status, err := ctx.PrepareData(data, opts)
+	status, err := ctx.PrepareData(data, walletStatus, opts)
 	return status, response, err
 }

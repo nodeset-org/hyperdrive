@@ -23,7 +23,7 @@ import (
 // Structs implementing this will handle the caller-specific functionality.
 type ISingleStageCallContext[DataType any] interface {
 	// Initialize the context with any bootstrapping, requirements checks, or bindings it needs to set up
-	Initialize() (types.ResponseStatus, error)
+	Initialize(walletStatus wallet.WalletStatus) (types.ResponseStatus, error)
 
 	// Used to get any supplemental state required during initialization - anything in here will be fed into an hd.Query() multicall
 	GetState(mc *batch.MultiCaller)
@@ -135,8 +135,16 @@ func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], se
 	hd := serviceProvider.GetHyperdriveClient()
 	signer := serviceProvider.GetSigner()
 
+	// Get the wallet status
+	var opts *bind.TransactOpts
+	walletResponse, err := hd.Wallet.Status()
+	if err != nil {
+		return types.ResponseStatus_Error, nil, fmt.Errorf("error getting wallet status: %w", err)
+	}
+	walletStatus := walletResponse.Data.WalletStatus
+
 	// Initialize the context with any bootstrapping, requirements checks, or bindings it needs to set up
-	status, err := ctx.Initialize()
+	status, err := ctx.Initialize(walletStatus)
 	if err != nil {
 		return status, nil, err
 	}
@@ -151,12 +159,6 @@ func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], se
 	}
 
 	// Get the transact opts if this node is ready for transaction
-	var opts *bind.TransactOpts
-	walletResponse, err := hd.Wallet.Status()
-	if err != nil {
-		return types.ResponseStatus_Error, nil, fmt.Errorf("error getting wallet status: %w", err)
-	}
-	walletStatus := walletResponse.Data.WalletStatus
 	if wallet.IsWalletReady(walletStatus) {
 		opts = signer.GetTransactor(walletStatus.Wallet.WalletAddress)
 	}
