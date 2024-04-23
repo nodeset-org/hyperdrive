@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive-constellation/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/modules/constellation/shared/config/ids"
 	"github.com/rivo/tview"
 	"github.com/rocket-pool/node-manager-core/config"
 )

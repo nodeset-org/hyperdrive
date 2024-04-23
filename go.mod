@@ -104,5 +104,35 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
+require (
+	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/btcsuite/btcd v0.24.0 // indirect
+	github.com/btcsuite/btcd/btcutil v1.1.5 // indirect
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
+	github.com/herumi/bls-eth-go-binary v1.33.0 // indirect
+	github.com/minio/highwayhash v1.0.2 // indirect
+	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240423212926-2cb4b75605ae // indirect
+	github.com/prometheus/client_golang v1.19.0 // indirect
+	github.com/prometheus/client_model v0.6.0 // indirect
+	github.com/prometheus/common v0.51.1 // indirect
+	github.com/prometheus/procfs v0.13.0 // indirect
+	github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44 // indirect
+	github.com/prysmaticlabs/gohashtree v0.0.4-beta // indirect
+	github.com/prysmaticlabs/prysm/v5 v5.0.3 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
+	github.com/thomaso-mirodin/intmath v0.0.0-20160323211736-5dc6d854e46e // indirect
+	github.com/wealdtech/go-bytesutil v1.2.1 // indirect
+	github.com/wealdtech/go-eth2-types/v2 v2.8.2 // indirect
+	github.com/wealdtech/go-eth2-util v1.8.2 // indirect
+	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.4.1 // indirect
+	google.golang.org/grpc v1.62.1 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
+)
+
 // replace github.com/rocket-pool/node-manager-core => ../../../rocketpool/node-manager-core
 // replace github.com/wealdtech/go-merkletree v1.0.1-0.20190605192610-2bb163c2ea2a => github.com/rocket-pool/go-merkletree v1.0.1-0.20220406020931-c262d9b976dd

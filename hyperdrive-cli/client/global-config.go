@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"reflect"
 
-	csconfig "github.com/nodeset-org/hyperdrive/modules/constellation/shared/config"
-	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
 )
 

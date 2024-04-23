@@ -7,13 +7,12 @@ import (
 
 	docker "github.com/docker/docker/client"
 	"github.com/fatih/color"
+	csclient "github.com/nodeset-org/hyperdrive-constellation/client"
 	"github.com/nodeset-org/hyperdrive-daemon/client"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	swclient "github.com/nodeset-org/hyperdrive-stakewise/client"
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
-	csclient "github.com/nodeset-org/hyperdrive/modules/constellation/client"
-	swclient "github.com/nodeset-org/hyperdrive/modules/stakewise/client"
-	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/urfave/cli/v2"
 )
