@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	cliwallet "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/urfave/cli/v2"

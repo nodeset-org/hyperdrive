@@ -40,7 +40,7 @@ func (c *GlobalConfig) GetAllModuleConfigs() []hdconfig.IModuleConfig {
 
 // Serialize the config and all modules
 func (c *GlobalConfig) Serialize() map[string]any {
-	return c.Hyperdrive.Serialize(c.GetAllModuleConfigs())
+	return c.Hyperdrive.Serialize(c.GetAllModuleConfigs(), false)
 }
 
 // Deserialize the config's modules (assumes the Hyperdrive config itself has already been deserialized)

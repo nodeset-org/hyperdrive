@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/alessio/shellescape"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/rocket-pool/node-manager-core/api/types"
 	"gopkg.in/yaml.v2"
 )

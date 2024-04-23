@@ -1,8 +1,8 @@
 package config
 
 import (
+	swids "github.com/nodeset-org/hyperdrive-stakewise/shared/config/ids"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	swids "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config/ids"
 	"github.com/rivo/tview"
 	"github.com/rocket-pool/node-manager-core/config"
 )

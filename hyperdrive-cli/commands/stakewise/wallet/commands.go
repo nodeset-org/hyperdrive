@@ -1,7 +1,7 @@
 package wallet
 
 import (
-	"github.com/nodeset-org/hyperdrive/shared/utils"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/urfave/cli/v2"
 )
 

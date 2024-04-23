@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # This script will build all of the artifacts involved in a new Hyperdrive release.
-# NOTE: You MUST put this in a directory that has the `hyperdrive` repository cloned as a subdirectory.
 
 # =================
 # === Functions ===
@@ -137,7 +136,7 @@ tag_latest() {
 # Print usage
 usage() {
     echo "Usage: build.sh [options] -v <version number>"
-    echo "This script assumes it is in a directory that contains subdirectories for all of the Hyperdrive repositories."
+    echo "This script assumes it is in the hyperdrive repository directory."
     echo "Options:"
     echo $'\t-a\tBuild all of the artifacts'
     echo $'\t-c\tBuild the CLI binaries for all platforms'

@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 
-	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
 )

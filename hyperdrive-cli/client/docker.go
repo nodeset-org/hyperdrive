@@ -8,7 +8,7 @@ import (
 
 	dt "github.com/docker/docker/api/types"
 	dtc "github.com/docker/docker/api/types/container"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 )
 
 // Get the current Docker image used by the given container

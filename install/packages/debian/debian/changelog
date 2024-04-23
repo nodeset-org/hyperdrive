@@ -7,6 +7,7 @@ hyperdrive (0.5.0) UNRELEASED; urgency=medium
 hyperdrive (0.4.0) unstable; urgency=medium
 
   * Migrated to the node-manager-core
+  * Modularized daemons
 
  -- NodeSet LLC <info@nodeset.io>  Tue, 02 Apr 2024 21:04:29 +0000
 
