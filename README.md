@@ -9,6 +9,7 @@ Check [the NodeSet docs pages](https://nodeset-org.gitbook.io/nodeset/node-opera
 We provide packaged versions of each release so you can manage your installation via your system package manager. If you've never installed Hyperdrive before, first you should add our package repository to your list.
 
 E.g. for Debian:
+
 `sudo add-apt-repository 'deb https://packagecloud.io/nodeset/hyperdrive'`
 
 `sudo apt-get update`
