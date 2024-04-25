@@ -10,7 +10,9 @@ We provide packaged versions of each release so you can manage your installation
 
 E.g. for Debian:
 `sudo add-apt-repository 'deb https://packagecloud.io/nodeset/hyperdrive'`
+
 `sudo apt-get update`
+
 `sudo apt-get install hyperdrive`
 
 To finalize the installation, define your configuration by running `hyperdrive service install`, then `hyperdrive service config`.
