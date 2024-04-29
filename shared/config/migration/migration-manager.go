@@ -70,6 +70,8 @@ func getVersionFromConfig(serializedConfig map[string]any) (*version.Version, er
 }
 
 // Parses a version string into a semantic version
+// NOTE: resurrect this once migration is ready
+/*
 func parseVersion(versionString string) (*version.Version, error) {
 	parsedVersion, err := version.NewSemver(versionString)
 	if err != nil {
@@ -77,3 +79,4 @@ func parseVersion(versionString string) (*version.Version, error) {
 	}
 	return parsedVersion, nil
 }
+*/
