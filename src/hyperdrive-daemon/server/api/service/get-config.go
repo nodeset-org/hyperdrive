@@ -5,8 +5,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -25,8 +26,8 @@ func (f *serviceGetConfigContextFactory) Create(args url.Values) (*serviceGetCon
 }
 
 func (f *serviceGetConfigContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*serviceGetConfigContext, api.ServiceGetConfigData](
-		router, "get-config", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*serviceGetConfigContext, api.ServiceGetConfigData](
+		router, "get-config", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -38,10 +39,10 @@ type serviceGetConfigContext struct {
 	handler *ServiceHandler
 }
 
-func (c *serviceGetConfigContext) PrepareData(data *api.ServiceGetConfigData, opts *bind.TransactOpts) error {
+func (c *serviceGetConfigContext) PrepareData(data *api.ServiceGetConfigData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	cfg := sp.GetConfig()
 
 	data.Config = cfg.Serialize(nil)
-	return nil
+	return types.ResponseStatus_Success, nil
 }

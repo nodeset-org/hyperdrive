@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 // A form item linked to a Parameter
@@ -19,7 +19,6 @@ type parameterizedFormItem struct {
 func registerEnableCheckbox(param config.Parameter[bool], checkbox *tview.Checkbox, form *Form, items []*parameterizedFormItem) {
 	checkbox.SetChangedFunc(func(checked bool) {
 		param.Value = checked
-
 		if !checked {
 			form.Clear(true)
 			form.AddFormItem(checkbox)
@@ -38,7 +37,6 @@ func createParameterizedFormItems(params []config.IParameter, descriptionBox *tv
 		item := getTypedFormItem(param, descriptionBox)
 		formItems = append(formItems, item)
 	}
-
 	return formItems
 }
 
@@ -72,7 +70,7 @@ func getTypedFormItem(param config.IParameter, descriptionBox *tview.TextView) *
 func createParameterizedCheckbox(param *config.Parameter[bool]) *parameterizedFormItem {
 	item := tview.NewCheckbox().
 		SetLabel(param.Name).
-		SetChecked(param.Value == true).
+		SetChecked(param.Value).
 		SetChangedFunc(func(checked bool) {
 			param.Value = checked
 		})

@@ -7,52 +7,52 @@ import (
 
 	"github.com/fatih/color"
 	swcommon "github.com/nodeset-org/hyperdrive/modules/stakewise/stakewise-daemon/common"
-	"github.com/nodeset-org/hyperdrive/shared/utils/log"
+	"github.com/rocket-pool/node-manager-core/log"
+	"github.com/rocket-pool/node-manager-core/utils"
 )
 
 // Config
-var tasksInterval, _ = time.ParseDuration("5m")
-var taskCooldown, _ = time.ParseDuration("10s")
-
 const (
+	tasksInterval time.Duration = time.Minute * 5
+	taskCooldown  time.Duration = time.Second * 10
+
 	ErrorColor             = color.FgRed
 	WarningColor           = color.FgYellow
 	UpdateDepositDataColor = color.FgHiWhite
+	SendExitDataColor      = color.FgGreen
 )
 
 type TaskLoop struct {
 	ctx    context.Context
-	cancel context.CancelFunc
+	logger *log.Logger
 	sp     *swcommon.StakewiseServiceProvider
 	wg     *sync.WaitGroup
 }
 
 func NewTaskLoop(sp *swcommon.StakewiseServiceProvider, wg *sync.WaitGroup) *TaskLoop {
-	ctx, cancel := context.WithCancel(context.Background())
-	return &TaskLoop{
-		ctx:    ctx,
-		cancel: cancel,
+	taskLoop := &TaskLoop{
 		sp:     sp,
+		logger: sp.GetTasksLogger(),
 		wg:     wg,
 	}
+	taskLoop.ctx = taskLoop.logger.CreateContextWithLogger(sp.GetBaseContext())
+	return taskLoop
 }
 
 // Run daemon
 func (t *TaskLoop) Run() error {
-	// Initialize loggers
-	errorLog := log.NewColorLogger(ErrorColor)
-
 	// Initialize tasks
-	updateDepositData := NewUpdateDepositData(t.sp, log.NewColorLogger(UpdateDepositDataColor))
+	updateDepositData := NewUpdateDepositDataTask(t.ctx, t.sp, t.logger)
+	sendExitData := NewSendExitData(t.ctx, t.sp, t.logger)
 
 	// Run the loop
+	t.wg.Add(1)
 	go func() {
 		for {
-			// Check the EC status
 			err := t.sp.WaitEthClientSynced(t.ctx, false) // Force refresh the primary / fallback EC status
 			if err != nil {
-				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
+				t.logger.Error(err.Error())
+				if utils.SleepWithCancel(t.ctx, taskCooldown) {
 					break
 				}
 				continue
@@ -61,20 +61,31 @@ func (t *TaskLoop) Run() error {
 			// Check the BC status
 			err = t.sp.WaitBeaconClientSynced(t.ctx, false) // Force refresh the primary / fallback BC status
 			if err != nil {
-				errorLog.Println(err)
-				if t.sleepAndCheckIfCancelled(taskCooldown) {
+				t.logger.Error(err.Error())
+				if utils.SleepWithCancel(t.ctx, taskCooldown) {
 					break
 				}
 				continue
 			}
 
+			// Tasks start here
+
 			// Update deposit data from the NodeSet server
 			if err := updateDepositData.Run(); err != nil {
-				errorLog.Println(err)
+				t.logger.Error(err.Error())
 			}
-			// time.Sleep(taskCooldown)
+			if utils.SleepWithCancel(t.ctx, taskCooldown) {
+				break
+			}
 
-			if t.sleepAndCheckIfCancelled(tasksInterval) {
+			// Submit missing exit messages to the NodeSet server
+			if err := sendExitData.Run(); err != nil {
+				t.logger.Error(err.Error())
+			}
+
+			// Tasks end here
+
+			if utils.SleepWithCancel(t.ctx, tasksInterval) {
 				break
 			}
 		}
@@ -94,22 +105,4 @@ func (t *TaskLoop) Run() error {
 		}()
 	*/
 	return nil
-}
-
-func (t *TaskLoop) Stop() {
-	t.cancel()
-}
-
-func (t *TaskLoop) sleepAndCheckIfCancelled(duration time.Duration) bool {
-	timer := time.NewTimer(duration)
-	select {
-	case <-t.ctx.Done():
-		// Cancel occurred
-		timer.Stop()
-		return true
-
-	case <-timer.C:
-		// Duration has passed without a cancel
-		return false
-	}
 }

@@ -6,7 +6,7 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 const (
@@ -41,7 +41,7 @@ func (c *HyperdriveClient) LoadConfig() (*GlobalConfig, bool, error) {
 	}
 
 	// Config wasn't loaded, but there was no error- we should create one.
-	hdCfg := config.NewHyperdriveConfig(c.Context.ConfigPath)
+	hdCfg := hdconfig.NewHyperdriveConfig(c.Context.ConfigPath)
 	c.cfg = NewGlobalConfig(hdCfg)
 	c.isNewCfg = true
 	return c.cfg, true, nil

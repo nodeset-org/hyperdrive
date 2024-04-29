@@ -7,16 +7,26 @@ import (
 	"syscall"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/common"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/service"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/tx"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/utils"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/api/wallet"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/api/server"
+)
+
+const (
+	cliOrigin string = "cli"
+	webOrigin string = "net"
 )
 
 // ServerManager manages all of the daemon sockets and servers run by the main Hyperdrive daemon
 type ServerManager struct {
 	// The server for the CLI to interact with
-	cliServer *HyperdriveServer
+	cliServer *server.ApiServer
 
 	// The server for the Stakewise module
-	stakewiseServer *HyperdriveServer
+	stakewiseServer *server.ApiServer
 
 	// The daemon's main closing waitgroup
 	stopWg *sync.WaitGroup
@@ -36,8 +46,8 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 	}
 
 	// Start the CLI server
-	cliSocketPath := filepath.Join(sp.GetUserDir(), config.HyperdriveSocketFilename)
-	cliServer, err := NewHyperdriveServer(sp, cliSocketPath)
+	cliSocketPath := filepath.Join(sp.GetUserDir(), config.HyperdriveCliSocketFilename)
+	cliServer, err := createServer(cliOrigin, sp, cliSocketPath)
 	if err != nil {
 		return nil, fmt.Errorf("error creating CLI server: %w", err)
 	}
@@ -51,8 +61,8 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 	// Handle each module server
 	for _, module := range moduleNames {
 		modulesDir := filepath.Join(sp.GetConfig().UserDataPath.Value, config.ModulesName)
-		moduleSocketPath := filepath.Join(modulesDir, module, config.HyperdriveSocketFilename)
-		server, err := NewHyperdriveServer(sp, moduleSocketPath)
+		moduleSocketPath := filepath.Join(modulesDir, module, config.HyperdriveCliSocketFilename)
+		server, err := createServer(module, sp, moduleSocketPath)
 		if err != nil {
 			return nil, fmt.Errorf("error creating server for module [%s]: %w", module, err)
 		}
@@ -82,4 +92,24 @@ func (m *ServerManager) Stop() {
 			m.stopWg.Done()
 		}
 	}
+}
+
+// Creates a new Hyperdrive API server
+func createServer(origin string, sp *common.ServiceProvider, socketPath string) (*server.ApiServer, error) {
+	apiLogger := sp.GetApiLogger()
+	subLogger := apiLogger.CreateSubLogger(origin)
+	ctx := subLogger.CreateContextWithLogger(sp.GetBaseContext())
+
+	handlers := []server.IHandler{
+		service.NewServiceHandler(subLogger, ctx, sp),
+		tx.NewTxHandler(subLogger, ctx, sp),
+		utils.NewUtilsHandler(subLogger, ctx, sp),
+		wallet.NewWalletHandler(subLogger, ctx, sp),
+	}
+
+	server, err := server.NewApiServer(subLogger.Logger, socketPath, handlers, config.HyperdriveDaemonRoute, config.HyperdriveApiVersion)
+	if err != nil {
+		return nil, err
+	}
+	return server, nil
 }

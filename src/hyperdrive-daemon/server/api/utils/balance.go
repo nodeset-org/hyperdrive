@@ -1,14 +1,14 @@
 package utils
 
 import (
-	"context"
 	"fmt"
 	"net/url"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
@@ -27,8 +27,8 @@ func (f *utilsBalanceContextFactory) Create(args url.Values) (*utilsBalanceConte
 }
 
 func (f *utilsBalanceContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*utilsBalanceContext, api.UtilsBalanceData](
-		router, "balance", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*utilsBalanceContext, api.UtilsBalanceData](
+		router, "balance", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -40,20 +40,21 @@ type utilsBalanceContext struct {
 	handler *UtilsHandler
 }
 
-func (c *utilsBalanceContext) PrepareData(data *api.UtilsBalanceData, opts *bind.TransactOpts) error {
+func (c *utilsBalanceContext) PrepareData(data *api.UtilsBalanceData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
+	ctx := c.handler.ctx
 	nodeAddress, _ := sp.GetWallet().GetAddress()
 
 	// Requirements
 	err := sp.RequireNodeAddress()
 	if err != nil {
-		return err
+		return types.ResponseStatus_AddressNotPresent, err
 	}
 
-	data.Balance, err = ec.BalanceAt(context.Background(), nodeAddress, nil)
+	data.Balance, err = ec.BalanceAt(ctx, nodeAddress, nil)
 	if err != nil {
-		return fmt.Errorf("error getting ETH balance of node %s: %w", nodeAddress.Hex(), err)
+		return types.ResponseStatus_Error, fmt.Errorf("error getting ETH balance of node %s: %w", nodeAddress.Hex(), err)
 	}
-	return nil
+	return types.ResponseStatus_Success, nil
 }

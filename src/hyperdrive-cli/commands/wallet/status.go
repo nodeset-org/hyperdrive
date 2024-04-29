@@ -6,6 +6,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/urfave/cli/v2"
 )
 
@@ -69,6 +70,19 @@ func getStatus(c *cli.Context) error {
 		fmt.Printf("The node wallet's password %sis not saved to disk%s.\n", terminal.ColorYellow, terminal.ColorReset)
 		fmt.Println("You will have to manually re-enter it with `hyperdrive wallet set-password` after a restart to be able to submit transactions.")
 	}
+
+	// Try to get the wallet balance
+	balanceResponse, err := hd.Api.Wallet.Balance()
+	if err != nil {
+		if hd.Context.DebugEnabled {
+			fmt.Printf("The node address's ETH balance is currently unavailable (%s).\n", err.Error())
+		} else {
+			fmt.Println("The node address's ETH balance is currently unavailable.")
+		}
+		return nil
+	}
+
+	fmt.Printf("Address %s%s%s's balance is %s%.6f%s ETH.\n", terminal.ColorBlue, status.Address.NodeAddress.Hex(), terminal.ColorReset, terminal.ColorGreen, eth.WeiToEth(balanceResponse.Data.Balance), terminal.ColorReset)
 
 	return nil
 }

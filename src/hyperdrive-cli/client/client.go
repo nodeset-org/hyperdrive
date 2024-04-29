@@ -2,15 +2,18 @@ package client
 
 import (
 	"fmt"
+	"log/slog"
 	"path/filepath"
 
 	docker "github.com/docker/docker/client"
+	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	swclient "github.com/nodeset-org/hyperdrive/modules/stakewise/client"
 	swconfig "github.com/nodeset-org/hyperdrive/modules/stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/urfave/cli/v2"
 )
 
@@ -22,13 +25,14 @@ const (
 	SettingsFile       string = "user-settings.yml"
 	BackupSettingsFile string = "user-settings-backup.yml"
 
-	nethermindAdminUrl string = "http://127.0.0.1:7434"
+	terminalLogColor color.Attribute = color.FgHiYellow
 )
 
 // Hyperdrive client
 type HyperdriveClient struct {
 	Api      *client.ApiClient
 	Context  *context.HyperdriveContext
+	Logger   *slog.Logger
 	docker   *docker.Client
 	cfg      *GlobalConfig
 	isNewCfg bool
@@ -38,17 +42,22 @@ type HyperdriveClient struct {
 type StakewiseClient struct {
 	Api     *swclient.ApiClient
 	Context *context.HyperdriveContext
+	Logger  *slog.Logger
 }
 
 // Create new Hyperdrive client from CLI context without checking for sync status
 // Only use this function from commands that may work if the Daemon service doesn't exist
 // Most users should call NewHyperdriveClientFromCtx(c).WithStatus() or NewHyperdriveClientFromCtx(c).WithReady()
 func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
-	snCtx := context.GetHyperdriveContext(c)
-	socketPath := filepath.Join(snCtx.ConfigPath, config.HyperdriveSocketFilename)
+	hdCtx := context.GetHyperdriveContext(c)
+	socketPath := filepath.Join(hdCtx.ConfigPath, config.HyperdriveCliSocketFilename)
+
+	// Make the client
+	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, config.HyperdriveDaemonRoute))
 	client := &HyperdriveClient{
-		Api:     client.NewApiClient(config.HyperdriveDaemonRoute, socketPath, snCtx.DebugEnabled),
-		Context: snCtx,
+		Api:     client.NewApiClient(config.HyperdriveApiClientRoute, socketPath, logger),
+		Context: hdCtx,
+		Logger:  logger,
 	}
 	return client
 }
@@ -56,26 +65,17 @@ func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
 // Create new Stakewise client from CLI context without checking for sync status
 // Only use this function from commands that may work if the Daemon service doesn't exist
 func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
-	snCtx := context.GetHyperdriveContext(c)
-	socketPath := filepath.Join(snCtx.ConfigPath, swconfig.SocketFilename)
+	hdCtx := context.GetHyperdriveContext(c)
+	socketPath := filepath.Join(hdCtx.ConfigPath, swconfig.CliSocketFilename)
+
+	// Make the client
+	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, swconfig.ModuleName))
 	client := &StakewiseClient{
-		Api:     swclient.NewApiClient(swconfig.ModuleName, socketPath, snCtx.DebugEnabled),
-		Context: snCtx,
+		Api:     swclient.NewApiClient(swconfig.ApiClientRoute, socketPath, logger),
+		Context: hdCtx,
+		Logger:  logger,
 	}
 	return client
-}
-
-// Get the Docker client
-func (c *HyperdriveClient) GetDocker() (*docker.Client, error) {
-	if c.docker == nil {
-		var err error
-		c.docker, err = docker.NewClientWithOpts(docker.WithAPIVersionNegotiation())
-		if err != nil {
-			return nil, fmt.Errorf("error creating Docker client: %w", err)
-		}
-	}
-
-	return c.docker, nil
 }
 
 // Check the status of a newly created client and return it
@@ -102,6 +102,19 @@ func (c *HyperdriveClient) WithReady() (*HyperdriveClient, error) {
 	}
 
 	return c, nil
+}
+
+// Get the Docker client
+func (c *HyperdriveClient) GetDocker() (*docker.Client, error) {
+	if c.docker == nil {
+		var err error
+		c.docker, err = docker.NewClientWithOpts(docker.WithAPIVersionNegotiation())
+		if err != nil {
+			return nil, fmt.Errorf("error creating Docker client: %w", err)
+		}
+	}
+
+	return c.docker, nil
 }
 
 // Check the status of the Execution and Beacon Node(s) and provision the API with them

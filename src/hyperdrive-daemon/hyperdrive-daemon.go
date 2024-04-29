@@ -105,13 +105,16 @@ func main() {
 		go func() {
 			<-termListener
 			fmt.Println("Shutting down daemon...")
+			sp.CancelContextOnShutdown()
 			serverMgr.Stop()
-			taskLoop.Stop()
 		}()
 
 		// Run the daemon until closed
 		fmt.Println("Daemon online.")
+		fmt.Printf("API calls are being logged to: %s\n", sp.GetApiLogger().GetFilePath())
+		fmt.Printf("Tasks are being logged to:     %s\n", sp.GetTasksLogger().GetFilePath())
 		stopWg.Wait()
+		sp.Close()
 		fmt.Println("Daemon stopped.")
 		return nil
 	}

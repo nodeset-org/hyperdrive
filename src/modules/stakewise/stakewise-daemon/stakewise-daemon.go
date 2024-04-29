@@ -56,7 +56,7 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 		// Get the config file
 		moduleDir := c.String(moduleDirFlag.Name)
-		hyperdriveSocketPath := filepath.Join(moduleDir, config.HyperdriveSocketFilename)
+		hyperdriveSocketPath := filepath.Join(moduleDir, config.HyperdriveCliSocketFilename)
 		_, err := os.Stat(hyperdriveSocketPath)
 		if errors.Is(err, fs.ErrNotExist) {
 			fmt.Printf("Hyperdrive socket not found at [%s].", hyperdriveSocketPath)
@@ -65,10 +65,9 @@ func main() {
 
 		// Wait group to handle the API server (separate because of error handling)
 		stopWg := new(sync.WaitGroup)
-		stopWg.Add(1)
 
 		// Create the service provider
-		sp, err := services.NewServiceProvider(moduleDir, swconfig.NewStakewiseConfig)
+		sp, err := services.NewServiceProvider(moduleDir, swconfig.ModuleName, swconfig.ClientLogName, swconfig.NewStakewiseConfig, config.ClientTimeout)
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}
@@ -85,7 +84,7 @@ func main() {
 		}
 
 		// Start the server
-		apiServer, err := server.NewStakewiseServer(stakewiseSp)
+		apiServer, err := server.NewStakewiseServer(server.CliOrigin, stakewiseSp)
 		if err != nil {
 			return fmt.Errorf("error creating Stakewise server: %w", err)
 		}
@@ -110,17 +109,20 @@ func main() {
 		go func() {
 			<-termListener
 			fmt.Println("Shutting down daemon...")
+			stakewiseSp.CancelContextOnShutdown()
 			err := apiServer.Stop()
 			if err != nil {
 				fmt.Printf("WARNING: daemon didn't shutdown cleanly: %s\n", err.Error())
 				stopWg.Done()
 			}
-			taskLoop.Stop()
 		}()
 
 		// Run the daemon until closed
 		fmt.Println("Daemon online.")
+		fmt.Printf("API calls are being logged to: %s\n", sp.GetApiLogger().GetFilePath())
+		fmt.Printf("Tasks are being logged to:     %s\n", sp.GetTasksLogger().GetFilePath())
 		stopWg.Wait()
+		sp.Close()
 		fmt.Println("Daemon stopped.")
 		return nil
 	}

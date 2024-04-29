@@ -31,6 +31,8 @@ src/hyperdrive-cli/hyperdrive-cli
 src/hyperdrive-daemon/hyperdrive-daemon
 src/modules/stakewise/stakewise
 src/modules/stakewise/stakewise-daemon/stakewise-daemon
+hyperdrive-cli/hyperdrive-cli
+hyperdrive-daemon/hyperdrive-daemon
 
 # Packaging
 build/

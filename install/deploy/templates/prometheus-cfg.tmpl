@@ -16,14 +16,14 @@ scrape_configs:
       # We have to use 'hosts.docker.internal' to refer to it due to this configuration
       - targets: ['host.docker.internal:{{or .Hyperdrive.Metrics.ExporterMetricsPort.Value "9103"}}']
 
-  - job_name: '{{if (eq .Hyperdrive.LocalExecutionConfig.ExecutionClient.String "geth")}}geth{{else}}ec{{end}}'
+  - job_name: '{{if (eq .Hyperdrive.GetSelectedExecutionClient "geth")}}geth{{else}}{{.Hyperdrive.ExecutionClientContainerName}}{{end}}'
     static_configs:
       - targets: ['{{.Hyperdrive.GetExecutionHostname}}:{{or .Hyperdrive.Metrics.EcMetricsPort.Value "9105"}}']
-    {{- if (eq .Hyperdrive.LocalExecutionConfig.ExecutionClient.String "geth")}}
+    {{- if (eq .Hyperdrive.GetSelectedExecutionClient "geth")}}
     metrics_path: /debug/metrics/prometheus
     {{- end}}
 
-  - job_name: 'bn'
+  - job_name: '{{.Hyperdrive.BeaconNodeContainerName}}'
     static_configs:
       - targets: ['{{.Hyperdrive.GetBeaconHostname}}:{{or .Hyperdrive.Metrics.BnMetricsPort.Value "9100"}}']
 
@@ -31,7 +31,7 @@ scrape_configs:
     scrape_interval: 5m
     scrape_timeout: 5m
     static_configs:
-      - targets: ['daemon:{{or .Hyperdrive.Metrics.DaemonMetricsPort.Value "9102"}}']
+      - targets: ['{{.Hyperdrive.DaemonContainerName}}:{{or .Hyperdrive.Metrics.DaemonMetricsPort.Value "9102"}}']
 
   - job_name: 'custom_jobs' # Mandatory field, but will be ignored.
     file_sd_configs:

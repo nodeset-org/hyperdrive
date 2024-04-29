@@ -73,7 +73,7 @@ func recoverWallet(c *cli.Context) error {
 		derivationPathString := c.String(derivationPathFlag.Name)
 		var derivationPath *string
 		if derivationPathString != "" {
-			fmt.Printf("Using a custom derivation path (%s).\n", derivationPath)
+			fmt.Printf("Using a custom derivation path (%s).\n", derivationPathString)
 			derivationPath = &derivationPathString
 		}
 
@@ -89,7 +89,7 @@ func recoverWallet(c *cli.Context) error {
 		fmt.Println("Recovering node wallet...")
 
 		// Recover wallet
-		response, err := hd.Api.Wallet.Recover(derivationPath, &mnemonic, walletIndex, password, savePassword)
+		response, err := hd.Api.Wallet.Recover(derivationPath, mnemonic, walletIndex, password, savePassword)
 		if err != nil {
 			return err
 		}

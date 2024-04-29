@@ -5,28 +5,29 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
 // ===============
 // === Factory ===
 // ===============
 
-type walletStatusFactory struct {
+type walletStatusContextFactory struct {
 	handler *WalletHandler
 }
 
-func (f *walletStatusFactory) Create(args url.Values) (*walletStatusContext, error) {
+func (f *walletStatusContextFactory) Create(args url.Values) (*walletStatusContext, error) {
 	c := &walletStatusContext{
 		handler: f.handler,
 	}
 	return c, nil
 }
 
-func (f *walletStatusFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*walletStatusContext, api.WalletStatusData](
-		router, "status", f, f.handler.serviceProvider,
+func (f *walletStatusContextFactory) RegisterRoute(router *mux.Router) {
+	server.RegisterQuerylessGet[*walletStatusContext, api.WalletStatusData](
+		router, "status", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -38,14 +39,15 @@ type walletStatusContext struct {
 	handler *WalletHandler
 }
 
-func (c *walletStatusContext) PrepareData(data *api.WalletStatusData, opts *bind.TransactOpts) error {
+func (c *walletStatusContext) PrepareData(data *api.WalletStatusData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 
 	status, err := w.GetStatus()
 	if err != nil {
-		return err
+		return types.ResponseStatus_Error, err
 	}
+
 	data.WalletStatus = status
-	return nil
+	return types.ResponseStatus_Success, nil
 }

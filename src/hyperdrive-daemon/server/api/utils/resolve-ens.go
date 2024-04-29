@@ -8,10 +8,10 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
-	"github.com/nodeset-org/hyperdrive/daemon-utils/server"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-daemon/server/utils"
 	"github.com/nodeset-org/hyperdrive/shared/types/api"
-	"github.com/nodeset-org/hyperdrive/shared/utils/input"
+	"github.com/rocket-pool/node-manager-core/api/server"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 	ens "github.com/wealdtech/go-ens/v3"
 )
 
@@ -35,8 +35,8 @@ func (f *utilsResolveEnsContextFactory) Create(args url.Values) (*utilsResolveEn
 }
 
 func (f *utilsResolveEnsContextFactory) RegisterRoute(router *mux.Router) {
-	utils.RegisterQuerylessGet[*utilsResolveEnsContext, api.UtilsResolveEnsData](
-		router, "resolve-ens", f, f.handler.serviceProvider,
+	server.RegisterQuerylessGet[*utilsResolveEnsContext, api.UtilsResolveEnsData](
+		router, "resolve-ens", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
 
@@ -50,7 +50,7 @@ type utilsResolveEnsContext struct {
 	name    string
 }
 
-func (c *utilsResolveEnsContext) PrepareData(data *api.UtilsResolveEnsData, opts *bind.TransactOpts) error {
+func (c *utilsResolveEnsContext) PrepareData(data *api.UtilsResolveEnsData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	ec := sp.GetEthClient()
 
@@ -68,13 +68,13 @@ func (c *utilsResolveEnsContext) PrepareData(data *api.UtilsResolveEnsData, opts
 		data.EnsName = c.name
 		address, err := ens.Resolve(ec, c.name)
 		if err != nil {
-			return fmt.Errorf("error resolving ENS address for [%s]: %w", c.name, err)
+			return types.ResponseStatus_Error, fmt.Errorf("error resolving ENS address for [%s]: %w", c.name, err)
 		}
 		data.Address = address
 		data.FormattedName = fmt.Sprintf("%s (%s)", c.name, data.Address.Hex())
 	} else {
-		return fmt.Errorf("either address or name must not be empty")
+		return types.ResponseStatus_InvalidArguments, fmt.Errorf("either address or name must be set")
 	}
 
-	return nil
+	return types.ResponseStatus_Success, nil
 }

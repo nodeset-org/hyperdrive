@@ -7,21 +7,17 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/nodeset-org/eth-utils/eth"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/gas"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 )
 
 // Handle a transaction, either printing its details, signing it, or submitting it and waiting for it to be included
-func HandleTx(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.TransactionInfo, confirmMessage string, identifier string, submissionMessage string) error {
-	// Make sure the TX was successful
-	/*if txInfo.SimulationResult.SimulationError != "" {
-		return fmt.Errorf("simulating %s failed: %s", identifier, txInfo.SimulationResult.SimulationError)
-	}*/
-
+func HandleTx(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.TransactionInfo, confirmMessage string, identifier string, submissionMessage string) (bool, error) {
 	// Print the TX data if requested
 	if c.Bool(utils.PrintTxDataFlag.Name) {
 		fmt.Printf("TX Data for %s:\n", identifier)
@@ -30,13 +26,23 @@ func HandleTx(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.Transacti
 		fmt.Printf("\tValue:    %s\n", txInfo.Value.String())
 		fmt.Printf("\tEst. Gas: %d\n", txInfo.SimulationResult.EstimatedGasLimit)
 		fmt.Printf("\tSafe Gas: %d\n", txInfo.SimulationResult.SafeGasLimit)
-		return nil
+
+		// Warn if the TX failed simulation
+		if txInfo.SimulationResult.SimulationError != "" {
+			fmt.Printf("%sWARNING: '%s' failed simulation: %s\nThis transaction will likely revert if you submit it.%s\n", terminal.ColorYellow, identifier, txInfo.SimulationResult.SimulationError, terminal.ColorReset)
+		}
+		return false, nil
+	}
+
+	// Make sure the TX was successful
+	if txInfo.SimulationResult.SimulationError != "" {
+		return false, fmt.Errorf("simulating %s failed: %s", identifier, txInfo.SimulationResult.SimulationError)
 	}
 
 	// Assign max fees
 	maxFee, maxPrioFee, err := gas.GetMaxFees(c, hd, txInfo.SimulationResult)
 	if err != nil {
-		return fmt.Errorf("error getting fee information: %w", err)
+		return false, fmt.Errorf("error getting fee information: %w", err)
 	}
 
 	// Check the nonce flag
@@ -49,53 +55,47 @@ func HandleTx(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.Transacti
 	submission, _ := eth.CreateTxSubmissionFromInfo(txInfo, nil)
 
 	// Sign only (no submission) if requested
-	if c.Bool(utils.SignTxOnlyFlag) {
+	if c.Bool(utils.SignTxOnlyFlag.Name) {
 		response, err := hd.Api.Tx.SignTx(submission, nonce, maxFee, maxPrioFee)
 		if err != nil {
-			return fmt.Errorf("error signing transaction: %w", err)
+			return false, fmt.Errorf("error signing transaction: %w", err)
 		}
 		fmt.Printf("Signed transaction (%s):\n", identifier)
 		fmt.Println(response.Data.SignedTx)
 		fmt.Println()
 		updateCustomNonce(hd)
-		return nil
+		return false, nil
 	}
 
 	// Confirm submission
 	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm(confirmMessage)) {
 		fmt.Println("Cancelled.")
-		return nil
+		return false, nil
 	}
 
 	// Submit it
 	fmt.Println(submissionMessage)
 	response, err := hd.Api.Tx.SubmitTx(submission, nonce, maxFee, maxPrioFee)
 	if err != nil {
-		return fmt.Errorf("error submitting transaction: %w", err)
+		return false, fmt.Errorf("error submitting transaction: %w", err)
 	}
 
 	// Wait for it
 	utils.PrintTransactionHash(hd, response.Data.TxHash)
 	if _, err = hd.Api.Tx.WaitForTransaction(response.Data.TxHash); err != nil {
-		return fmt.Errorf("error waiting for transaction: %w", err)
+		return false, fmt.Errorf("error waiting for transaction: %w", err)
 	}
 
 	updateCustomNonce(hd)
-	return nil
+	return true, nil
 }
 
 // Handle a batch of transactions, either printing their details, signing them, or submitting them and waiting for them to be included
-func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.TransactionInfo, confirmMessage string, identifierFunc func(int) string, submissionMessage string) error {
-	// Make sure the TXs were successful
-	for i, txInfo := range txInfos {
-		if txInfo.SimulationResult.SimulationError != "" {
-			return fmt.Errorf("simulating %s failed: %s", identifierFunc(i), txInfo.SimulationResult.SimulationError)
-		}
-	}
-
+func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.TransactionInfo, confirmMessage string, identifierFunc func(int) string, submissionMessage string) (bool, error) {
 	// Print the TX data if requested
 	if c.Bool(utils.PrintTxDataFlag.Name) {
 		for i, info := range txInfos {
+			id := identifierFunc(i)
 			fmt.Printf("Data for TX %d (%s):\n", i, identifierFunc(i))
 			fmt.Printf("\tTo:       %s\n", info.To.Hex())
 			fmt.Printf("\tData:     %s\n", hexutil.Encode(info.Data))
@@ -103,8 +103,21 @@ func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.T
 			fmt.Printf("\tEst. Gas: %d\n", info.SimulationResult.EstimatedGasLimit)
 			fmt.Printf("\tSafe Gas: %d\n", info.SimulationResult.SafeGasLimit)
 			fmt.Println()
+
+			// Warn if the TX failed simulation
+			if info.SimulationResult.SimulationError != "" {
+				fmt.Printf("%sWARNING: '%s' failed simulation: %s\nThis transaction will likely revert if you submit it.%s\n", terminal.ColorYellow, id, info.SimulationResult.SimulationError, terminal.ColorReset)
+				fmt.Println()
+			}
 		}
-		return nil
+		return false, nil
+	}
+
+	// Make sure the TXs were successful
+	for i, txInfo := range txInfos {
+		if txInfo.SimulationResult.SimulationError != "" {
+			return false, fmt.Errorf("simulating %s failed: %s", identifierFunc(i), txInfo.SimulationResult.SimulationError)
+		}
 	}
 
 	// Assign max fees
@@ -115,7 +128,7 @@ func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.T
 	}
 	maxFee, maxPrioFee, err := gas.GetMaxFees(c, hd, simResult)
 	if err != nil {
-		return fmt.Errorf("error getting fee information: %w", err)
+		return false, fmt.Errorf("error getting fee information: %w", err)
 	}
 
 	// Check the nonce flag
@@ -132,10 +145,10 @@ func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.T
 	}
 
 	// Sign only (no submission) if requested
-	if c.Bool(utils.SignTxOnlyFlag) {
+	if c.Bool(utils.SignTxOnlyFlag.Name) {
 		response, err := hd.Api.Tx.SignTxBatch(submissions, nonce, maxFee, maxPrioFee)
 		if err != nil {
-			return fmt.Errorf("error signing transactions: %w", err)
+			return false, fmt.Errorf("error signing transactions: %w", err)
 		}
 
 		for i, tx := range response.Data.SignedTxs {
@@ -143,25 +156,25 @@ func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.T
 			fmt.Println(tx)
 			fmt.Println()
 		}
-		return nil
+		return false, nil
 	}
 
 	// Confirm submission
 	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm(confirmMessage)) {
 		fmt.Println("Cancelled.")
-		return nil
+		return false, nil
 	}
 
 	// Submit them
 	fmt.Println(submissionMessage)
 	response, err := hd.Api.Tx.SubmitTxBatch(submissions, nonce, maxFee, maxPrioFee)
 	if err != nil {
-		return fmt.Errorf("error submitting transactions: %w", err)
+		return false, fmt.Errorf("error submitting transactions: %w", err)
 	}
 
 	// Wait for them
 	utils.PrintTransactionBatchHashes(hd, response.Data.TxHashes)
-	return waitForTransactions(hd, response.Data.TxHashes, identifierFunc)
+	return true, waitForTransactions(hd, response.Data.TxHashes, identifierFunc)
 }
 
 // Wait for a batch of transactions to get included in blocks

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 func createFinishedStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
