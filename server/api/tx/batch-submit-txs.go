@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"errors"
 	"fmt"
 	"math/big"
 	_ "time/tzdata"
@@ -67,9 +66,8 @@ func (c *txBatchSubmitTxsContext) PrepareData(data *api.BatchTxData, opts *bind.
 	ctx := c.handler.ctx
 	nodeAddress, _ := sp.GetWallet().GetAddress()
 
-	err := errors.Join(
-		sp.RequireWalletReady(),
-	)
+	// Requirements
+	err := sp.RequireWalletReady()
 	if err != nil {
 		return types.ResponseStatus_WalletNotReady, err
 	}

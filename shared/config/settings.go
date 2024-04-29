@@ -22,7 +22,7 @@ const (
 	VcStartScript string = "start-vc.sh"
 
 	// HTTP
-	ClientTimeout time.Duration = 8 * time.Second
+	ClientTimeout time.Duration = 1 * time.Minute
 
 	// Volumes
 	ExecutionClientDataVolume string = "ecdata"

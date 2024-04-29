@@ -2,7 +2,6 @@ package tx
 
 import (
 	"encoding/hex"
-	"errors"
 	"fmt"
 	_ "time/tzdata"
 
@@ -61,9 +60,8 @@ func (c *txSignTxContext) PrepareData(data *api.TxSignTxData, opts *bind.Transac
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 
-	err := errors.Join(
-		sp.RequireWalletReady(),
-	)
+	// Requirements
+	err := sp.RequireWalletReady()
 	if err != nil {
 		return types.ResponseStatus_WalletNotReady, err
 	}

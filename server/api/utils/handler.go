@@ -23,7 +23,6 @@ func NewUtilsHandler(logger *log.Logger, ctx context.Context, serviceProvider *c
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{
-		&utilsBalanceContextFactory{h},
 		&utilsResolveEnsContextFactory{h},
 	}
 	return h

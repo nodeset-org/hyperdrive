@@ -11,8 +11,9 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/api/types"
-	"github.com/rocket-pool/node-manager-core/node/wallet"
+	nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
 	"github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
 const (
@@ -81,7 +82,7 @@ func (c *walletSearchAndRecoverContext) PrepareData(data *api.WalletSearchAndRec
 	for i := uint(0); i < findIterations; i++ {
 		for j := 0; j < len(paths); j++ {
 			derivationPath := paths[j]
-			recoveredWallet, err := wallet.TestRecovery(derivationPath, i, c.mnemonic, rs.ChainID)
+			recoveredWallet, err := nodewallet.TestRecovery(derivationPath, i, c.mnemonic, rs.ChainID)
 			if err != nil {
 				return types.ResponseStatus_Error, fmt.Errorf("error recovering wallet with path [%s], index [%d]: %w", derivationPath, i, err)
 			}

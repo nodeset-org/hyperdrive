@@ -10,7 +10,6 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/api/types"
-	nodewallet "github.com/rocket-pool/node-manager-core/node/wallet"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/rocket-pool/node-manager-core/wallet"
 )
@@ -70,7 +69,7 @@ func (c *walletRecoverContext) PrepareData(data *api.WalletRecoverData, opts *bi
 	}
 
 	// Parse the derivation path
-	path, err := nodewallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
+	path, err := wallet.GetDerivationPath(wallet.DerivationPath(c.derivationPath))
 	if err != nil {
 		return types.ResponseStatus_InvalidArguments, err
 	}

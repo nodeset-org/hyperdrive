@@ -36,8 +36,7 @@ func (f *serviceRotateLogsContextFactory) RegisterRoute(router *mux.Router) {
 // ===============
 
 type serviceRotateLogsContext struct {
-	handler   *ServiceHandler
-	container string
+	handler *ServiceHandler
 }
 
 func (c *serviceRotateLogsContext) PrepareData(data *types.SuccessData, opts *bind.TransactOpts) (types.ResponseStatus, error) {

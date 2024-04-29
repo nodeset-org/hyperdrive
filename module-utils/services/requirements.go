@@ -11,6 +11,7 @@ import (
 	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/node/services"
+	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
 const (
@@ -34,12 +35,15 @@ var (
 	beaconClientSyncLock sync.Mutex
 )
 
-func (sp *ServiceProvider) RequireNodeAddress() error {
-	return fmt.Errorf("NYI")
+func (sp *ServiceProvider) RequireNodeAddress(status wallet.WalletStatus) error {
+	if !status.Address.HasAddress {
+		return errors.New("The node currently does not have an address set. Please run 'hyperdrive wallet init' and try again.")
+	}
+	return nil
 }
 
-func (sp *ServiceProvider) RequireWalletReady() error {
-	return fmt.Errorf("NYI")
+func (sp *ServiceProvider) RequireWalletReady(status wallet.WalletStatus) error {
+	return CheckIfWalletReady(status)
 }
 
 func (sp *ServiceProvider) RequireEthClientSynced(ctx context.Context) error {

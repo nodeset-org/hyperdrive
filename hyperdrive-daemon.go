@@ -79,7 +79,7 @@ func main() {
 
 		// Create the data dir
 		dataDir := sp.GetConfig().UserDataPath.Value
-		err = os.MkdirAll(dataDir, 0700)
+		err = os.MkdirAll(dataDir, 0755)
 		if err != nil {
 			return fmt.Errorf("error creating user data directory [%s]: %w", dataDir, err)
 		}
@@ -96,8 +96,6 @@ func main() {
 		if err != nil {
 			return fmt.Errorf("error starting task loop: %w", err)
 		}
-
-		// TODO: Metrics manager
 
 		// Handle process closures
 		termListener := make(chan os.Signal, 1)

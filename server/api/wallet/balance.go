@@ -47,7 +47,11 @@ func (c *walletBalanceContext) PrepareData(data *api.WalletBalanceData, opts *bi
 	nodeAddress, _ := w.GetAddress()
 
 	// Requirements
-	err := sp.RequireEthClientSynced(ctx)
+	err := sp.RequireNodeAddress()
+	if err != nil {
+		return types.ResponseStatus_AddressNotPresent, err
+	}
+	err = sp.RequireEthClientSynced(ctx)
 	if err != nil {
 		return types.ResponseStatus_ClientsNotSynced, err
 	}

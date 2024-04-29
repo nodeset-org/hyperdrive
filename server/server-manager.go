@@ -25,8 +25,8 @@ type ServerManager struct {
 	// The server for the CLI to interact with
 	cliServer *server.ApiServer
 
-	// The server for the Stakewise module
-	stakewiseServer *server.ApiServer
+	// The server for the modules
+	serverModules map[string]*server.ApiServer
 
 	// The daemon's main closing waitgroup
 	stopWg *sync.WaitGroup
@@ -35,7 +35,8 @@ type ServerManager struct {
 // Creates a new server manager
 func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.WaitGroup, moduleNames []string) (*ServerManager, error) {
 	mgr := &ServerManager{
-		stopWg: stopWg,
+		stopWg:        stopWg,
+		serverModules: map[string]*server.ApiServer{},
 	}
 
 	// Get the owner of the config file
@@ -70,8 +71,8 @@ func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.W
 		if err != nil {
 			return nil, fmt.Errorf("error starting server for module [%s]: %w", module, err)
 		}
-		mgr.stakewiseServer = server
-		fmt.Printf("Daemon started on %s\n", moduleSocketPath)
+		mgr.serverModules[module] = server
+		fmt.Printf("Daemon for module [%s] started on %s\n", module, moduleSocketPath)
 	}
 
 	return mgr, nil
@@ -85,10 +86,10 @@ func (m *ServerManager) Stop() {
 		m.stopWg.Done()
 	}
 
-	if m.stakewiseServer != nil {
-		err := m.stakewiseServer.Stop()
+	for moduleName, server := range m.serverModules {
+		err := server.Stop()
 		if err != nil {
-			fmt.Printf("WARNING: Stakewise server didn't shutdown cleanly: %s\n", err.Error())
+			fmt.Printf("WARNING: Module [%s] server didn't shutdown cleanly: %s\n", moduleName, err.Error())
 			m.stopWg.Done()
 		}
 	}

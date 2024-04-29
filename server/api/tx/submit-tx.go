@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"errors"
 	"fmt"
 	_ "time/tzdata"
 
@@ -60,9 +59,8 @@ func (c *txSubmitTxContext) PrepareData(data *api.TxData, opts *bind.TransactOpt
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 
-	err := errors.Join(
-		sp.RequireWalletReady(),
-	)
+	// Requirements
+	err := sp.RequireWalletReady()
 	if err != nil {
 		return types.ResponseStatus_WalletNotReady, err
 	}
