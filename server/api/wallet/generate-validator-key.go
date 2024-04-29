@@ -50,6 +50,12 @@ func (c *walletGenerateValidatorKeyContext) PrepareData(data *api.WalletGenerate
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 
+	// Requirements
+	err := sp.RequireWalletReady()
+	if err != nil {
+		return types.ResponseStatus_WalletNotReady, err
+	}
+
 	key, err := w.GenerateValidatorKey(c.path)
 	if err != nil {
 		return types.ResponseStatus_Error, fmt.Errorf("error generating validator key: %w", err)

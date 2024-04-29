@@ -51,9 +51,8 @@ func (c *walletSignMessageContext) PrepareData(data *api.WalletSignMessageData, 
 	sp := c.handler.serviceProvider
 	w := sp.GetWallet()
 
-	err := errors.Join(
-		sp.RequireWalletReady(),
-	)
+	// Requirements
+	err := sp.RequireWalletReady()
 	if err != nil {
 		return types.ResponseStatus_WalletNotReady, err
 	}

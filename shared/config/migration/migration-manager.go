@@ -47,7 +47,6 @@ func UpdateConfig(serializedConfig map[string]any) error {
 	}
 
 	return nil
-
 }
 
 // Get the Hyperdrive version that the given config was built with

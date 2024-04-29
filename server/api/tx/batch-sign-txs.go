@@ -2,7 +2,6 @@ package tx
 
 import (
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"math/big"
 	_ "time/tzdata"
@@ -68,9 +67,8 @@ func (c *txBatchSignTxsContext) PrepareData(data *api.TxBatchSignTxData, opts *b
 	ctx := c.handler.ctx
 	nodeAddress, _ := sp.GetWallet().GetAddress()
 
-	err := errors.Join(
-		sp.RequireWalletReady(),
-	)
+	// Requirements
+	err := sp.RequireWalletReady()
 	if err != nil {
 		return types.ResponseStatus_WalletNotReady, err
 	}
@@ -103,7 +101,7 @@ func (c *txBatchSignTxsContext) PrepareData(data *api.TxBatchSignTxData, opts *b
 			return types.ResponseStatus_Error, fmt.Errorf("error marshalling transaction: %w", err)
 		}
 		encodedString := hex.EncodeToString(bytes)
-		signedTxs = append(signedTxs, encodedString)
+		signedTxs[i] = encodedString
 
 		// Update the nonce to the next one
 		currentNonce.Add(currentNonce, common.Big1)

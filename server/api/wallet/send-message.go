@@ -52,9 +52,8 @@ func (c *walletSendMessageContext) PrepareData(data *types.TxInfoData, opts *bin
 	sp := c.handler.serviceProvider
 	txMgr := sp.GetTransactionManager()
 
-	err := errors.Join(
-		sp.RequireWalletReady(),
-	)
+	// Requirements
+	err := sp.RequireWalletReady()
 	if err != nil {
 		return types.ResponseStatus_WalletNotReady, err
 	}

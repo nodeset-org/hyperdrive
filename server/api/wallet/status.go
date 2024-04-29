@@ -47,7 +47,6 @@ func (c *walletStatusContext) PrepareData(data *api.WalletStatusData, opts *bind
 	if err != nil {
 		return types.ResponseStatus_Error, err
 	}
-
 	data.WalletStatus = status
 	return types.ResponseStatus_Success, nil
 }
