@@ -81,7 +81,7 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 	// Verify the node has enough ETH to use this max fee
 	maxFee := eth.GweiToWei(maxFeeGwei)
 	ethRequired := big.NewInt(0).Mul(maxFee, big.NewInt(int64(simResult.SafeGasLimit)))
-	response, err := hd.Api.Utils.Balance()
+	response, err := hd.Api.Wallet.Balance()
 	if err != nil {
 		fmt.Printf("%sWARNING: couldn't check the ETH balance of the node (%s)\nPlease ensure your node wallet has enough ETH to pay for this transaction.%s\n\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
 	} else if response.Data.Balance.Cmp(ethRequired) < 0 {

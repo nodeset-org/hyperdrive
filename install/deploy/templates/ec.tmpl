@@ -45,7 +45,7 @@ services:
       - HD_NETHERMIND_FULL_PRUNE_MEMORY_BUDGET={{.Hyperdrive.LocalExecutionClient.Nethermind.FullPruneMemoryBudget}}
       - HD_NETHERMIND_FULL_PRUNING_THRESHOLD_MB={{.Hyperdrive.LocalExecutionClient.Nethermind.FullPruningThresholdMb}}
       {{- else if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "geth"}}
-      - HD_GETH_ENABLE_PBSS={{.Hyperdrive.LocalExecutionClient.Geth.EnablePbss}}
+      - HD_GETH_EVM_TIMEOUT={{.Hyperdrive.LocalExecutionClient.Geth.EvmTimeout}}
       {{- end}}
     entrypoint: sh
     command: "/usr/share/hyperdrive/scripts/{{.Hyperdrive.GetEcStartScript}}"

@@ -273,6 +273,7 @@ if [ "$CLIENT" = "teku" ]; then
         --log-destination=CONSOLE \
         --ee-jwt-secret-file=/secrets/jwtsecret \
         --beacon-liveness-tracking-enabled \
+        --validators-graffiti-client-append-format=DISABLED \
         $BN_ADDITIONAL_FLAGS"
 
     if [ "$TEKU_ARCHIVE_MODE" = "true" ]; then
