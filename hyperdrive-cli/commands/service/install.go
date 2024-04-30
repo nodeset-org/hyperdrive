@@ -99,6 +99,6 @@ func printPatchNotes() {
 	fmt.Printf("%s=== Hyperdrive v%s ===%s\n\n", terminal.ColorGreen, shared.HyperdriveVersion, terminal.ColorReset)
 	fmt.Printf("Changes you should be aware of before starting:\n\n")
 
-	fmt.Printf("%s=== Alpha! ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("So it begins.")
+	fmt.Printf("%s=== Stakewise Module ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("Stakewise functions now initialize the Stakewise wallet if it's missing instead of erroring out.")
 }
