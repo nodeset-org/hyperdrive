@@ -10,7 +10,6 @@ import (
 
 	"github.com/alessio/shellescape"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
-	"github.com/rocket-pool/node-manager-core/api/types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -104,34 +103,4 @@ func SaveConfig(cfg *GlobalConfig, directory string, filename string) error {
 	}
 
 	return nil
-}
-
-// Get the external IP address. Try finding an IPv4 address first to:
-// * Improve peer discovery and node performance
-// * Avoid unnecessary container restarts caused by switching between IPv4 and IPv6
-// func getExternalIP() (net.IP, error) {
-// 	// Try IPv4 first
-// 	ip4Consensus := externalip.DefaultConsensus(nil, nil)
-// 	ip4Consensus.UseIPProtocol(4)
-// 	if ip, err := ip4Consensus.ExternalIP(); err == nil {
-// 		return ip, nil
-// 	}
-
-// 	// Try IPv6 as fallback
-// 	ip6Consensus := externalip.DefaultConsensus(nil, nil)
-// 	ip6Consensus.UseIPProtocol(6)
-// 	return ip6Consensus.ExternalIP()
-// }
-
-// Parse and augment the status of a client into a human-readable format
-func getClientStatusString(clientStatus types.ClientStatus) string {
-	if clientStatus.IsSynced {
-		return "synced and ready"
-	}
-
-	if clientStatus.IsWorking {
-		return fmt.Sprintf("syncing (%.2f%%)", SyncRatioToPercent(clientStatus.SyncProgress))
-	}
-
-	return fmt.Sprintf("unavailable (%s)", clientStatus.Error)
 }

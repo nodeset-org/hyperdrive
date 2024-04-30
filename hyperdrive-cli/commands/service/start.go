@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -38,8 +39,12 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	if isUpdate && !ignoreConfigSuggestion {
 		if c.Bool(cliutils.YesFlag.Name) || cliutils.Confirm("Hyperdrive upgrade detected - starting will overwrite certain settings with the latest defaults (such as container versions).\nYou may want to run `hyperdrive service config` first to see what's changed.\n\nWould you like to continue starting the service?") {
 			cfg.UpdateDefaults()
-			hd.SaveConfig(cfg)
-			fmt.Printf("%sUpdated settings successfully.%s\n", terminal.ColorGreen, terminal.ColorReset)
+			err := hd.SaveConfig(cfg)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%sError saving settings: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+			} else {
+				fmt.Printf("%sUpdated settings successfully.%s\n", terminal.ColorGreen, terminal.ColorReset)
+			}
 		} else {
 			fmt.Println("Cancelled.")
 			return nil

@@ -187,7 +187,8 @@ func handleEtherchainGasPrices(gasSuggestion gas.EtherchainGasFeeSuggestion, sim
 
 		desiredPriceFloat, err := strconv.ParseFloat(desiredPrice, 64)
 		if err != nil {
-			fmt.Println("Not a valid gas price (%s), try again.", err.Error())
+			fmt.Printf("Not a valid gas price (%s), try again.", err.Error())
+			fmt.Println()
 			continue
 		}
 		if desiredPriceFloat <= 0 {
@@ -263,7 +264,8 @@ func handleEtherscanGasPrices(gasSuggestion gas.EtherscanGasFeeSuggestion, simRe
 
 		desiredPriceFloat, err := strconv.ParseFloat(desiredPrice, 64)
 		if err != nil {
-			fmt.Println("Not a valid gas price (%s), try again.", err.Error())
+			fmt.Printf("Not a valid gas price (%s), try again.", err.Error())
+			fmt.Println()
 			continue
 		}
 		if desiredPriceFloat <= 0 {

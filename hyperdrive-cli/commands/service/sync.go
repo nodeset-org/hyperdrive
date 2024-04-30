@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	"time"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
@@ -19,11 +18,6 @@ func SyncRatioToPercent(in float64) float64 {
 	return math.Min(99.99, in*100)
 	// TODO: INCORPORATE THIS
 }
-
-// Settings
-const (
-	ethClientRecentBlockThreshold time.Duration = 5 * time.Minute
-)
 
 func printClientStatus(status *types.ClientStatus, name string) {
 

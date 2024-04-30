@@ -2,12 +2,10 @@ package service
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,6 +23,8 @@ var (
 )
 
 // Creates CLI argument flags from the parameters of the configuration struct
+// TODO: HEADLESS MODE
+/*
 func createFlagsFromConfigParams(sectionName string, params []config.IParameter, configFlags []cli.Flag, network config.Network) []cli.Flag {
 	for _, param := range params {
 		common := param.GetCommon()
@@ -55,6 +55,7 @@ func createFlagsFromConfigParams(sectionName string, params []config.IParameter,
 
 	return configFlags
 }
+*/
 
 // Register commands
 func RegisterCommands(app *cli.App, name string, aliases []string) {
