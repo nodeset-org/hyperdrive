@@ -14,7 +14,7 @@ services:
 {{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .Stakewise.GetModuleName)}}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - {{.Hyperdrive.HyperdriveUserDirectory}}:{{.Hyperdrive.HyperdriveUserDirectory}}
+      - {{.Hyperdrive.GetUserDirectory}}:{{.Hyperdrive.GetUserDirectory}}
       - {{$module_dir}}:{{$module_dir}}
     command:
       - "--module-dir"

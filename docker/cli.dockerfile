@@ -2,7 +2,7 @@
 FROM golang:1.21-bookworm AS builder
 COPY . /hyperdrive
 ENV CGO_ENABLED=0
-WORKDIR /hyperdrive/src/hyperdrive-cli
+WORKDIR /hyperdrive/hyperdrive-cli
 
 # Build x64 version
 RUN GOOS=linux GOARCH=amd64 go build -o /build/hyperdrive-cli-linux-amd64

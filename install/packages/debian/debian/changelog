@@ -1,12 +1,7 @@
-hyperdrive (0.4.0) UNRELEASED; urgency=medium
+hyperdrive (0.4.2~b1) unstable; urgency=medium
 
-  * Migrated to the node-manager-core
+  * Initial Debian package release
+  * Stakewise functions now initialize the Stakewise wallet if it's missing instead of erroring out
 
  -- NodeSet LLC <info@nodeset.io>  Fri, 22 Mar 2024 02:00:21 +0000
 
-hyperdrive (0.3.0) unstable; urgency=medium
-
-  * Testing release with package manager support.
-  * PLACEHOLDER
-
- -- NodeSet LLC <info@nodeset.io>  Fri, 22 Mar 2024 01:59:11 +0000

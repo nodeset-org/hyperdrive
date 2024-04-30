@@ -1,0 +1,124 @@
+package config
+
+import (
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/rivo/tview"
+	"github.com/rocket-pool/node-manager-core/config"
+)
+
+// The page wrapper for the metrics config
+type MetricsConfigPage struct {
+	home                       *settingsHome
+	page                       *page
+	layout                     *standardLayout
+	masterConfig               *client.GlobalConfig
+	enableMetricsBox           *parameterizedFormItem
+	ecMetricsPortBox           *parameterizedFormItem
+	bnMetricsPortBox           *parameterizedFormItem
+	daemonMetricsPortBox       *parameterizedFormItem
+	exporterMetricsPortBox     *parameterizedFormItem
+	grafanaItems               []*parameterizedFormItem
+	prometheusItems            []*parameterizedFormItem
+	exporterItems              []*parameterizedFormItem
+	enableBitflyNodeMetricsBox *parameterizedFormItem
+	bitflyNodeMetricsItems     []*parameterizedFormItem
+}
+
+// Creates a new page for the metrics / stats settings
+func NewMetricsConfigPage(home *settingsHome) *MetricsConfigPage {
+	configPage := &MetricsConfigPage{
+		home:         home,
+		masterConfig: home.md.Config,
+	}
+	configPage.createContent()
+
+	configPage.page = newPage(
+		home.homePage,
+		"settings-metrics",
+		"Monitoring / Metrics",
+		"Select this to configure the monitoring and statistics gathering parts of Hyperdrive, such as Grafana and Prometheus.",
+		configPage.layout.grid,
+	)
+
+	return configPage
+}
+
+// Get the underlying page
+func (configPage *MetricsConfigPage) getPage() *page {
+	return configPage.page
+}
+
+// Creates the content for the monitoring / stats settings page
+func (configPage *MetricsConfigPage) createContent() {
+	// Create the layout
+	configPage.layout = newStandardLayout()
+	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Monitoring / Metrics Settings")
+	configPage.layout.setupEscapeReturnHomeHandler(configPage.home.md, configPage.home.homePage)
+
+	// Set up the form items
+	configPage.enableMetricsBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics)
+	configPage.ecMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Hyperdrive.Metrics.EcMetricsPort)
+	configPage.bnMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Hyperdrive.Metrics.BnMetricsPort)
+	configPage.daemonMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Hyperdrive.Metrics.DaemonMetricsPort)
+	configPage.exporterMetricsPortBox = createParameterizedUint16Field(&configPage.masterConfig.Hyperdrive.Metrics.ExporterMetricsPort)
+	configPage.grafanaItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.Metrics.Grafana.GetParameters(), configPage.layout.descriptionBox)
+	configPage.prometheusItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.Metrics.Prometheus.GetParameters(), configPage.layout.descriptionBox)
+	configPage.exporterItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.Metrics.Exporter.GetParameters(), configPage.layout.descriptionBox)
+	configPage.enableBitflyNodeMetricsBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics)
+	configPage.bitflyNodeMetricsItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.Metrics.BitflyNodeMetrics.GetParameters(), configPage.layout.descriptionBox)
+
+	// Map the parameters to the form items in the layout
+	configPage.layout.mapParameterizedFormItems(configPage.enableMetricsBox, configPage.ecMetricsPortBox, configPage.bnMetricsPortBox, configPage.daemonMetricsPortBox, configPage.exporterMetricsPortBox)
+	configPage.layout.mapParameterizedFormItems(configPage.grafanaItems...)
+	configPage.layout.mapParameterizedFormItems(configPage.prometheusItems...)
+	configPage.layout.mapParameterizedFormItems(configPage.exporterItems...)
+	configPage.layout.mapParameterizedFormItems(configPage.enableBitflyNodeMetricsBox)
+	configPage.layout.mapParameterizedFormItems(configPage.bitflyNodeMetricsItems...)
+
+	// Set up the setting callbacks
+	configPage.enableMetricsBox.item.(*tview.Checkbox).SetChangedFunc(func(checked bool) {
+		if configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics.Value == checked {
+			return
+		}
+		configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics.Value = checked
+		configPage.handleLayoutChanged()
+	})
+	configPage.enableBitflyNodeMetricsBox.item.(*tview.Checkbox).SetChangedFunc(func(checked bool) {
+		if configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value == checked {
+			return
+		}
+		configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value = checked
+		configPage.handleLayoutChanged()
+	})
+
+	// Do the initial draw
+	configPage.handleLayoutChanged()
+}
+
+// Handle all of the form changes when the Enable Metrics box has changed
+func (configPage *MetricsConfigPage) handleLayoutChanged() {
+	configPage.layout.form.Clear(true)
+	configPage.layout.form.AddFormItem(configPage.enableMetricsBox.item)
+
+	if configPage.masterConfig.Hyperdrive.Metrics.EnableMetrics.Value {
+		if configPage.masterConfig.Hyperdrive.IsLocalMode() {
+			configPage.layout.addFormItems([]*parameterizedFormItem{configPage.ecMetricsPortBox, configPage.bnMetricsPortBox})
+		}
+		configPage.layout.addFormItems([]*parameterizedFormItem{configPage.daemonMetricsPortBox, configPage.exporterMetricsPortBox})
+		configPage.layout.addFormItems(configPage.grafanaItems)
+		configPage.layout.addFormItems(configPage.prometheusItems)
+		configPage.layout.addFormItems(configPage.exporterItems)
+	}
+
+	if configPage.masterConfig.Hyperdrive.IsLocalMode() {
+		switch configPage.masterConfig.Hyperdrive.LocalBeaconClient.BeaconNode.Value {
+		case config.BeaconNode_Teku, config.BeaconNode_Lighthouse, config.BeaconNode_Lodestar:
+			configPage.layout.form.AddFormItem(configPage.enableBitflyNodeMetricsBox.item)
+			if configPage.masterConfig.Hyperdrive.Metrics.EnableBitflyNodeMetrics.Value {
+				configPage.layout.addFormItems(configPage.bitflyNodeMetricsItems)
+			}
+		}
+	}
+
+	configPage.layout.refresh()
+}

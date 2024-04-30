@@ -27,10 +27,6 @@ go.work
 *.swp
 
 # Binaries
-src/hyperdrive-cli/hyperdrive-cli
-src/hyperdrive-daemon/hyperdrive-daemon
-src/modules/stakewise/stakewise
-src/modules/stakewise/stakewise-daemon/stakewise-daemon
 hyperdrive-cli/hyperdrive-cli
 hyperdrive-daemon/hyperdrive-daemon
 
@@ -38,6 +34,7 @@ hyperdrive-daemon/hyperdrive-daemon
 build/
 *.build
 *.dsc
+*.dch
 *.tar.gz
 *debhelper*
 install/packages/debian/hyperdrive

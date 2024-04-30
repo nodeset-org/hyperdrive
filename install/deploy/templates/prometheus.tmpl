@@ -18,8 +18,8 @@ services:
       {{- end}}
     ports: [{{.Hyperdrive.GetPrometheusOpenPorts}}]
     volumes:
-      - "{{.Hyperdrive.HyperdriveUserDirectory}}/prometheus.yml:/etc/prometheus/prometheus.yml"
-      - "{{.Hyperdrive.HyperdriveUserDirectory}}/extra-scrape-jobs:/extra-scrape-jobs"
+      - "{{.Hyperdrive.GetUserDirectory}}/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "{{.Hyperdrive.GetUserDirectory}}/extra-scrape-jobs:/extra-scrape-jobs"
       - "prometheus-data:/prometheus"
     networks:
       - net
