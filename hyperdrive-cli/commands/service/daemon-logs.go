@@ -46,9 +46,9 @@ func daemonLogs(c *cli.Context, serviceNames ...string) error {
 	for _, service := range serviceNames {
 		switch service {
 		// Vanilla
-		case "api":
+		case "api", "a":
 			logPaths = append(logPaths, cfg.Hyperdrive.GetApiLogFilePath())
-		case "tasks":
+		case "tasks", "t":
 			logPaths = append(logPaths, cfg.Hyperdrive.GetTasksLogFilePath())
 
 		// Modules

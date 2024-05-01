@@ -8,11 +8,10 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/ethereum/go-ethereum v1.14.0
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/nodeset-org/hyperdrive-daemon v0.4.2-dev.0.20240429205402-54c7fd4f2c3b
-	github.com/nodeset-org/hyperdrive-stakewise v0.1.0-dev.0.20240429205512-dc9d56689da9
+	github.com/nodeset-org/hyperdrive-daemon v0.4.2-dev.0.20240501154944-195be498d365
+	github.com/nodeset-org/hyperdrive-stakewise v0.1.0-dev.0.20240501200235-ff6f8380e738
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/node-manager-core v0.3.0
-	github.com/shirou/gopsutil/v3 v3.24.2
 	golang.org/x/sync v0.7.0
 	golang.org/x/term v0.19.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -66,7 +65,6 @@ require (
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/prysmaticlabs/go-bitfield v0.0.0-20210809151128-385d8c5e3fb7 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rocket-pool/batch-query v1.0.0 // indirect
