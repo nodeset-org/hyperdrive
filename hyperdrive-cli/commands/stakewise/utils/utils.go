@@ -49,7 +49,7 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 	}
 
 	data = response.Data
-	fmt.Printf("Server returned: %s\n", string(data.ServerResponse))
+	sw.Logger.Debug("Server response", "data", data.ServerResponse)
 	fmt.Println()
 	fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, len(data.UnregisteredPubkeys), terminal.ColorReset)
 	for _, key := range data.UnregisteredPubkeys {
