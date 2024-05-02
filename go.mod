@@ -6,7 +6,7 @@ toolchain go1.21.1
 
 require (
 	github.com/alessio/shellescape v1.4.2
-	github.com/docker/docker v26.0.0+incompatible
+	github.com/docker/docker v26.1.0+incompatible
 	github.com/ethereum/go-ethereum v1.14.0
 	github.com/fatih/color v1.16.0
 	github.com/goccy/go-json v0.10.2

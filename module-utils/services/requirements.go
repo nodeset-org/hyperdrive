@@ -11,6 +11,7 @@ import (
 	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/node/services"
+	"github.com/rocket-pool/node-manager-core/utils"
 	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
@@ -28,6 +29,7 @@ const (
 	ethClientStatusRefreshInterval time.Duration = 60 * time.Second
 	ethClientSyncPollInterval      time.Duration = 5 * time.Second
 	beaconClientSyncPollInterval   time.Duration = 5 * time.Second
+	walletReadyCheckInterval       time.Duration = 15 * time.Second
 )
 
 var (
@@ -78,6 +80,33 @@ func (sp *ServiceProvider) WaitEthClientSynced(ctx context.Context, verbose bool
 func (sp *ServiceProvider) WaitBeaconClientSynced(ctx context.Context, verbose bool) error {
 	_, err := sp.waitBeaconClientSynced(ctx, verbose, 0)
 	return err
+}
+
+// Wait for the Hyperdrive wallet to be ready
+func (sp *ServiceProvider) WaitForWallet(ctx context.Context) error {
+	// Get the logger
+	logger, exists := log.FromContext(ctx)
+	if !exists {
+		panic("context didn't have a logger!")
+	}
+
+	for {
+		hdWalletStatus, err := sp.GetHyperdriveClient().Wallet.Status()
+		if err != nil {
+			return fmt.Errorf("error getting Hyperdrive wallet status: %w", err)
+		}
+
+		if CheckIfWalletReady(hdWalletStatus.Data.WalletStatus) == nil {
+			return nil
+		}
+
+		logger.Info("Hyperdrive wallet not ready yet",
+			slog.Duration("retry", walletReadyCheckInterval),
+		)
+		if utils.SleepWithCancel(ctx, walletReadyCheckInterval) {
+			return nil
+		}
+	}
 }
 
 // Check if the primary and fallback Execution clients are synced
