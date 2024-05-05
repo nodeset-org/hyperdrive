@@ -53,7 +53,6 @@ fi
 
 # Geth startup
 if [ "$CLIENT" = "geth" ]; then
-
     # Performance tuning for ARM systems
     UNAME_VAL=$(uname -m)
     if [ "$UNAME_VAL" = "arm64" ] || [ "$UNAME_VAL" = "aarch64" ]; then
@@ -104,6 +103,10 @@ if [ "$CLIENT" = "geth" ]; then
             CMD="$CMD --rpc.evmtimeout ${HD_GETH_EVM_TIMEOUT}s"
         fi
 
+        if [ "$HD_GETH_ARCHIVE_MODE" = "true" ]; then
+            CMD="$CMD --syncmode=full --gcmode=archive"
+        fi
+
         if [ "$ENABLE_METRICS" = "true" ]; then
             CMD="$CMD --metrics --metrics.addr 0.0.0.0 --metrics.port $EC_METRICS_PORT"
         fi
@@ -115,13 +118,11 @@ if [ "$CLIENT" = "geth" ]; then
         exec ${CMD} --http.vhosts '*'
 
     fi
-
 fi
 
 
 # Nethermind startup
 if [ "$CLIENT" = "nethermind" ]; then
-
     # Performance tuning for ARM systems
     UNAME_VAL=$(uname -m)
     if [ "$UNAME_VAL" = "arm64" ] || [ "$UNAME_VAL" = "aarch64" ]; then
@@ -212,13 +213,11 @@ if [ "$CLIENT" = "nethermind" ]; then
     fi
 
     exec ${CMD}
-
 fi
 
 
 # Besu startup
 if [ "$CLIENT" = "besu" ]; then
-
     # Performance tuning for ARM systems
     UNAME_VAL=$(uname -m)
     if [ "$UNAME_VAL" = "arm64" ] || [ "$UNAME_VAL" = "aarch64" ]; then
@@ -324,5 +323,4 @@ if [ "$CLIENT" = "reth" ]; then
     fi
 
     exec ${CMD}
-
 fi
