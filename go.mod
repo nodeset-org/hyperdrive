@@ -11,7 +11,7 @@ require (
 	github.com/nodeset-org/hyperdrive-daemon v0.4.2-dev.0.20240501154944-195be498d365
 	github.com/nodeset-org/hyperdrive-stakewise v0.1.1
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.3.0
+	github.com/rocket-pool/node-manager-core v0.3.1-0.20240505144232-5b9a3ae77d47
 	golang.org/x/sync v0.7.0
 	golang.org/x/term v0.19.0
 	gopkg.in/yaml.v2 v2.4.0

@@ -18,9 +18,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Usage:   "Clone the node wallet file into a wallet that the Stakewise operator service can use.",
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := utils.ValidateArgCount(c, 0); err != nil {
-						return err
-					}
+					utils.ValidateArgCount(c, 0)
 
 					// Run
 					return initialize(c)
@@ -36,9 +34,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
-					if err := utils.ValidateArgCount(c, 0); err != nil {
-						return err
-					}
+					utils.ValidateArgCount(c, 0)
 
 					// Run
 					return generateKeys(c)

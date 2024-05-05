@@ -8,6 +8,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/rocket-pool/node-manager-core/beacon"
+	nutils "github.com/rocket-pool/node-manager-core/cli/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -50,7 +51,7 @@ func exit(c *cli.Context) error {
 	}
 
 	// Get selected validators
-	options := make([]utils.SelectionOption[beacon.ValidatorPubkey], len(activeValidators))
+	options := make([]nutils.SelectionOption[beacon.ValidatorPubkey], len(activeValidators))
 	for i, pubkey := range activeValidators {
 		option := &options[i]
 		option.Element = &activeValidators[i]

@@ -127,7 +127,8 @@ func main() {
 	// Run application
 	fmt.Println()
 	if err := app.Run(os.Args); err != nil {
-		fmt.Println(err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
 	}
 	fmt.Println()
 }
