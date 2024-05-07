@@ -15,10 +15,10 @@ func printUploadError(err error) {
 }
 
 // Upload deposit data to the server
-func UploadDepositData(sw *client.StakewiseClient, forceUpload bool) (bool, error) {
+func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 	// Initial attempt to upload all deposit data
 	fmt.Println("Uploading deposit data to the NodeSet server...")
-	response, err := sw.Api.Nodeset.UploadDepositData(forceUpload)
+	response, err := sw.Api.Nodeset.UploadDepositData()
 	if err != nil {
 		printUploadError(err)
 		return false, nil

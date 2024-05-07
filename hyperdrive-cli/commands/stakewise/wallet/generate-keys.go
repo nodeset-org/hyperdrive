@@ -23,11 +23,6 @@ var (
 		Name:  "no-restart",
 		Usage: fmt.Sprintf("Don't automatically restart the Stakewise Operator or Validator Client containers after generating keys. %sOnly use this if you know what you're doing and can restart them manually.%s", terminal.ColorRed, terminal.ColorReset),
 	}
-	forceUploadFlag *cli.BoolFlag = &cli.BoolFlag{
-		Name:    "force-upload",
-		Aliases: []string{"f"},
-		Usage:   "Force the upload of the deposit data to the server",
-	}
 )
 
 func generateKeys(c *cli.Context) error {
@@ -119,7 +114,7 @@ func generateKeys(c *cli.Context) error {
 	fmt.Println()
 
 	// Upload to the server
-	newKeysUploaded, err := swcmdutils.UploadDepositData(sw, c.Bool(forceUploadFlag.Name))
+	newKeysUploaded, err := swcmdutils.UploadDepositData(sw)
 	if err != nil {
 		return err
 	}

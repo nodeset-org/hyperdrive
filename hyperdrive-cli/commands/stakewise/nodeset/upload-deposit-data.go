@@ -6,11 +6,11 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func uploadDepositData(c *cli.Context, forceUploadFlag bool) error {
+func uploadDepositData(c *cli.Context) error {
 	// Get the client
 	sw := client.NewStakewiseClientFromCtx(c)
 
 	// Upload to the server
-	_, err := swcmdutils.UploadDepositData(sw, forceUploadFlag)
+	_, err := swcmdutils.UploadDepositData(sw)
 	return err
 }
