@@ -24,8 +24,9 @@ var (
 		Usage: fmt.Sprintf("Don't automatically restart the Stakewise Operator or Validator Client containers after generating keys. %sOnly use this if you know what you're doing and can restart them manually.%s", terminal.ColorRed, terminal.ColorReset),
 	}
 	forceUploadFlag *cli.BoolFlag = &cli.BoolFlag{
-		Name:  "force-upload",
-		Usage: "Force the upload of the deposit data to the server",
+		Name:    "force-upload",
+		Aliases: []string{"f"},
+		Usage:   "Force the upload of the deposit data to the server",
 	}
 )
 
