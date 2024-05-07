@@ -4,9 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/rocket-pool/node-manager-core/eth"
 )
 
 func printUploadError(err error) {
@@ -17,9 +15,10 @@ func printUploadError(err error) {
 }
 
 // Upload deposit data to the server
-func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
+func UploadDepositData(sw *client.StakewiseClient, forceUpload bool) (bool, error) {
+	// Initial attempt to upload all deposit data
 	fmt.Println("Uploading deposit data to the NodeSet server...")
-	response, err := sw.Api.Nodeset.UploadDepositData(false)
+	response, err := sw.Api.Nodeset.UploadDepositData(forceUpload)
 	if err != nil {
 		printUploadError(err)
 		return false, nil
@@ -32,20 +31,7 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 		return false, nil
 	}
 	if !data.SufficientBalance {
-		// Prompt the user to upload anyway
-		fmt.Printf("You're attempting to upload %d keys, but you only have %.6f ETH in your account. We recommend you have at least %.6f ETH.", newKeyCount, eth.WeiToEth(data.Balance), eth.WeiToEth(data.RequiredBalance))
-		fmt.Println()
-		if !utils.Confirm("Do you want to upload these keys anyway? You may not be able to register them if your wallet doesn't have sufficient ETH in it!") {
-			fmt.Println("Cancelled.")
-			return false, nil
-		}
-
-		fmt.Println("Uploading deposit data to the NodeSet server...")
-		response, err = sw.Api.Nodeset.UploadDepositData(true)
-		if err != nil {
-			printUploadError(err)
-			return false, nil
-		}
+		fmt.Println("Not all keys were uploaded due to insufficient balance.")
 	}
 
 	data = response.Data

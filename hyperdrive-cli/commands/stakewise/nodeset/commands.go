@@ -21,7 +21,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 					utils.ValidateArgCount(c, 0)
 
 					// Run
-					return uploadDepositData(c)
+					return uploadDepositData(c, false)
 				},
 			},
 		},

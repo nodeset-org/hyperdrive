@@ -31,6 +31,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Flags: []cli.Flag{
 					generateKeysCountFlag,
 					generateKeysNoRestartFlag,
+					forceUploadFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
