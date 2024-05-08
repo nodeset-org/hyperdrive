@@ -40,12 +40,14 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 	data = response.Data
 	sw.Logger.Debug("Server response", "data", data.ServerResponse)
 	fmt.Println()
-	fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, len(data.UnregisteredPubkeys), terminal.ColorReset)
-	for _, key := range data.UnregisteredPubkeys {
-		fmt.Println(key.HexWithPrefix())
+	if data.SufficientBalance {
+		fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, len(data.UnregisteredPubkeys), terminal.ColorReset)
+		for _, key := range data.UnregisteredPubkeys {
+			fmt.Println(key.HexWithPrefix())
+		}
+		fmt.Println()
+		fmt.Printf("Total keys registered: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
 	}
-	fmt.Println()
 
-	fmt.Printf("Total keys registered: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
 	return true, nil
 }
