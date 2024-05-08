@@ -34,7 +34,7 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 
 	if !data.SufficientBalance {
 		fmt.Println("Not all keys were uploaded due to insufficient balance.")
-		fmt.Println("Uploaded %n out of %n keys.", newKeyCount, data.TotalCount)
+		fmt.Printf("Uploaded %d out of %d keys.", newKeyCount, data.TotalCount)
 	}
 
 	data = response.Data
