@@ -26,10 +26,12 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 
 	data := response.Data
 	newKeyCount := len(data.UnregisteredPubkeys)
-	if newKeyCount == 0 {
+
+	if newKeyCount == 0 && data.SufficientBalance {
 		fmt.Println("All of your validator keys were already registered.")
 		return false, nil
 	}
+
 	if !data.SufficientBalance {
 		fmt.Println("Not all keys were uploaded due to insufficient balance.")
 		fmt.Println("Uploaded %n out of %n keys.", newKeyCount, data.TotalCount)
