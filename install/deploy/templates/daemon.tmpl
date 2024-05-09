@@ -36,4 +36,4 @@ services:
 networks:
   hyperdrive-net:
     name: {{.Hyperdrive.DockerNetwork}}
-    external: true
+    external: {{.Hyperdrive.DockerNetworkIsExternal}}
