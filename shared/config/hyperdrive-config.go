@@ -28,13 +28,15 @@ const (
 // The master configuration struct
 type HyperdriveConfig struct {
 	// General settings
-	Network            config.Parameter[config.Network]
-	ClientMode         config.Parameter[config.ClientMode]
-	ProjectName        config.Parameter[string]
-	UserDataPath       config.Parameter[string]
-	AutoTxMaxFee       config.Parameter[float64]
-	MaxPriorityFee     config.Parameter[float64]
-	AutoTxGasThreshold config.Parameter[float64]
+	Network                 config.Parameter[config.Network]
+	ClientMode              config.Parameter[config.ClientMode]
+	ProjectName             config.Parameter[string]
+	UserDataPath            config.Parameter[string]
+	AutoTxMaxFee            config.Parameter[float64]
+	MaxPriorityFee          config.Parameter[float64]
+	AutoTxGasThreshold      config.Parameter[float64]
+	DockerNetwork           config.Parameter[string]
+	DockerNetworkIsExternal config.Parameter[bool]
 
 	// Logging
 	Logging *config.LoggerConfig
@@ -210,6 +212,32 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				config.Network_All: filepath.Join(hdDir, "data"),
 			},
 		},
+		DockerNetwork: config.Parameter[string]{
+			ParameterCommon: &config.ParameterCommon{
+				ID:                 ids.DockerNetworkID,
+				Name:               "Docker Network",
+				Description:        "Allows the user to provide the docker network as given by `docker network ls`, If using external clients on a the same machine as a rocket pool node set the docker network to rocketpool_net, then the client hosts can be set to http://rocketpool_eth1 and http://rocketpool_eth2",
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient, config.ContainerID_ExecutionClient},
+				CanBeBlank:         true,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[config.Network]string{
+				config.Network_All: "hyperdrive_net",
+			},
+		},
+		DockerNetworkIsExternal: config.Parameter[bool]{
+			ParameterCommon: &config.ParameterCommon{
+				ID:                 ids.DockerNetworkID,
+				Name:               "Docker Network Is External",
+				Description:        "set to true if using a Docker Network rocketpool_net",
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient, config.ContainerID_ExecutionClient},
+				CanBeBlank:         true,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[config.Network]bool{
+				config.Network_All: false,
+			},
+		},
 	}
 
 	// Create the subconfigs
@@ -243,6 +271,8 @@ func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 		&cfg.MaxPriorityFee,
 		&cfg.AutoTxGasThreshold,
 		&cfg.UserDataPath,
+		&cfg.DockerNetwork,
+		&cfg.DockerNetworkIsExternal,
 	}
 }
 
