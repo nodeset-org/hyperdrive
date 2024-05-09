@@ -31,6 +31,7 @@ type HyperdriveConfig struct {
 	Network            config.Parameter[config.Network]
 	ClientMode         config.Parameter[config.ClientMode]
 	ProjectName        config.Parameter[string]
+	ApiPort            config.Parameter[uint16]
 	UserDataPath       config.Parameter[string]
 	AutoTxMaxFee       config.Parameter[float64]
 	MaxPriorityFee     config.Parameter[float64]
@@ -109,6 +110,20 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 			},
 			Default: map[config.Network]string{
 				config.Network_All: "hyperdrive",
+			},
+		},
+
+		ApiPort: config.Parameter[uint16]{
+			ParameterCommon: &config.ParameterCommon{
+				ID:                 ids.ApiPortID,
+				Name:               "Daemon API Port",
+				Description:        "The port that Hyperdrive's API server should run on. Note this is bound to the local machine only; it cannot be accessed by other machines.",
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[config.Network]uint16{
+				config.Network_All: DefaultApiPort,
 			},
 		},
 

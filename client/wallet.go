@@ -12,10 +12,10 @@ import (
 )
 
 type WalletRequester struct {
-	context *client.RequesterContext
+	context client.IRequesterContext
 }
 
-func NewWalletRequester(context *client.RequesterContext) *WalletRequester {
+func NewWalletRequester(context client.IRequesterContext) *WalletRequester {
 	return &WalletRequester{
 		context: context,
 	}
@@ -27,7 +27,7 @@ func (r *WalletRequester) GetName() string {
 func (r *WalletRequester) GetRoute() string {
 	return "wallet"
 }
-func (r *WalletRequester) GetContext() *client.RequesterContext {
+func (r *WalletRequester) GetContext() client.IRequesterContext {
 	return r.context
 }
 

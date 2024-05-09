@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.3.1-0.20240505144232-5b9a3ae77d47
+	github.com/rocket-pool/node-manager-core v0.3.1-0.20240507185958-ac96f93a88ec
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/wealdtech/go-ens/v3 v3.6.0
 	gopkg.in/yaml.v3 v3.0.1

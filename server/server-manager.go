@@ -2,9 +2,7 @@ package server
 
 import (
 	"fmt"
-	"path/filepath"
 	"sync"
-	"syscall"
 
 	"github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/server/api/service"
@@ -15,100 +13,53 @@ import (
 	"github.com/rocket-pool/node-manager-core/api/server"
 )
 
-const (
-	cliOrigin string = "cli"
-	webOrigin string = "net"
-)
-
-// ServerManager manages all of the daemon sockets and servers run by the main Hyperdrive daemon
+// ServerManager manages the API server run by the daemon
 type ServerManager struct {
-	// The server for the CLI to interact with
-	cliServer *server.ApiServer
-
-	// The server for the modules
-	serverModules map[string]*server.ApiServer
-
-	// The daemon's main closing waitgroup
-	stopWg *sync.WaitGroup
+	// The server for clients to interact with
+	apiServer *server.NetworkSocketApiServer
 }
 
 // Creates a new server manager
-func NewServerManager(sp *common.ServiceProvider, cfgPath string, stopWg *sync.WaitGroup, moduleNames []string) (*ServerManager, error) {
+func NewServerManager(sp *common.ServiceProvider, ip string, port uint16, stopWg *sync.WaitGroup) (*ServerManager, error) {
+	// Start the API server
+	apiServer, err := createServer(sp, ip, port)
+	if err != nil {
+		return nil, fmt.Errorf("error creating API server: %w", err)
+	}
+	err = apiServer.Start(stopWg)
+	if err != nil {
+		return nil, fmt.Errorf("error starting API server: %w", err)
+	}
+	fmt.Printf("API server started on %s:%d\n", ip, port)
+
+	// Create the manager
 	mgr := &ServerManager{
-		stopWg:        stopWg,
-		serverModules: map[string]*server.ApiServer{},
+		apiServer: apiServer,
 	}
-
-	// Get the owner of the config file
-	var cfgFileStat syscall.Stat_t
-	err := syscall.Stat(cfgPath, &cfgFileStat)
-	if err != nil {
-		return nil, fmt.Errorf("error getting config file [%s] info: %w", cfgPath, err)
-	}
-
-	// Start the CLI server
-	cliSocketPath := filepath.Join(sp.GetUserDir(), config.HyperdriveCliSocketFilename)
-	cliServer, err := createServer(cliOrigin, sp, cliSocketPath)
-	if err != nil {
-		return nil, fmt.Errorf("error creating CLI server: %w", err)
-	}
-	err = cliServer.Start(stopWg, cfgFileStat.Uid, cfgFileStat.Gid)
-	if err != nil {
-		return nil, fmt.Errorf("error starting CLI server: %w", err)
-	}
-	mgr.cliServer = cliServer
-	fmt.Printf("CLI daemon started on %s\n", cliSocketPath)
-
-	// Handle each module server
-	for _, module := range moduleNames {
-		modulesDir := filepath.Join(sp.GetConfig().UserDataPath.Value, config.ModulesName)
-		moduleSocketPath := filepath.Join(modulesDir, module, config.HyperdriveCliSocketFilename)
-		server, err := createServer(module, sp, moduleSocketPath)
-		if err != nil {
-			return nil, fmt.Errorf("error creating server for module [%s]: %w", module, err)
-		}
-		err = server.Start(stopWg, cfgFileStat.Uid, cfgFileStat.Gid)
-		if err != nil {
-			return nil, fmt.Errorf("error starting server for module [%s]: %w", module, err)
-		}
-		mgr.serverModules[module] = server
-		fmt.Printf("Daemon for module [%s] started on %s\n", module, moduleSocketPath)
-	}
-
 	return mgr, nil
 }
 
 // Stops and shuts down the servers
 func (m *ServerManager) Stop() {
-	err := m.cliServer.Stop()
+	err := m.apiServer.Stop()
 	if err != nil {
-		fmt.Printf("WARNING: CLI server didn't shutdown cleanly: %s\n", err.Error())
-		m.stopWg.Done()
-	}
-
-	for moduleName, server := range m.serverModules {
-		err := server.Stop()
-		if err != nil {
-			fmt.Printf("WARNING: Module [%s] server didn't shutdown cleanly: %s\n", moduleName, err.Error())
-			m.stopWg.Done()
-		}
+		fmt.Printf("WARNING: API server didn't shutdown cleanly: %s\n", err.Error())
 	}
 }
 
 // Creates a new Hyperdrive API server
-func createServer(origin string, sp *common.ServiceProvider, socketPath string) (*server.ApiServer, error) {
+func createServer(sp *common.ServiceProvider, ip string, port uint16) (*server.NetworkSocketApiServer, error) {
 	apiLogger := sp.GetApiLogger()
-	subLogger := apiLogger.CreateSubLogger(origin)
-	ctx := subLogger.CreateContextWithLogger(sp.GetBaseContext())
+	ctx := apiLogger.CreateContextWithLogger(sp.GetBaseContext())
 
 	handlers := []server.IHandler{
-		service.NewServiceHandler(subLogger, ctx, sp),
-		tx.NewTxHandler(subLogger, ctx, sp),
-		utils.NewUtilsHandler(subLogger, ctx, sp),
-		wallet.NewWalletHandler(subLogger, ctx, sp),
+		service.NewServiceHandler(apiLogger, ctx, sp),
+		tx.NewTxHandler(apiLogger, ctx, sp),
+		utils.NewUtilsHandler(apiLogger, ctx, sp),
+		wallet.NewWalletHandler(apiLogger, ctx, sp),
 	}
 
-	server, err := server.NewApiServer(subLogger.Logger, socketPath, handlers, config.HyperdriveDaemonRoute, config.HyperdriveApiVersion)
+	server, err := server.NewNetworkSocketApiServer(apiLogger.Logger, ip, port, handlers, config.HyperdriveDaemonRoute, config.HyperdriveApiVersion)
 	if err != nil {
 		return nil, err
 	}
