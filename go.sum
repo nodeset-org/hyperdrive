@@ -255,6 +255,8 @@ github.com/nodeset-org/hyperdrive-stakewise v0.1.2-0.20240508150909-dc1c02650f21
 github.com/nodeset-org/hyperdrive-stakewise v0.1.2-0.20240508150909-dc1c02650f21/go.mod h1:62C2GEZrdeafXsOYLmx8syCQ3UKLg6go8N4pXl3E+hk=
 github.com/nodeset-org/hyperdrive-stakewise v0.1.2-0.20240508232629-5c274180b8af h1:6eCTKKvjtckOSRe+Vcq+ZDfWE6+UHk78JVhu+Q/O2yk=
 github.com/nodeset-org/hyperdrive-stakewise v0.1.2-0.20240508232629-5c274180b8af/go.mod h1:62C2GEZrdeafXsOYLmx8syCQ3UKLg6go8N4pXl3E+hk=
+github.com/nodeset-org/hyperdrive-stakewise v0.1.2-0.20240508235223-ced1a7ed0d5c h1:V6Uvzs10bxhIgrR+tERMKdDptoqLQEJV24o58IouWts=
+github.com/nodeset-org/hyperdrive-stakewise v0.1.2-0.20240508235223-ced1a7ed0d5c/go.mod h1:62C2GEZrdeafXsOYLmx8syCQ3UKLg6go8N4pXl3E+hk=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
