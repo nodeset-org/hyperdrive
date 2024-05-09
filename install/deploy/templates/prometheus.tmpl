@@ -22,7 +22,7 @@ services:
       - "{{.Hyperdrive.GetUserDirectory}}/extra-scrape-jobs:/extra-scrape-jobs"
       - "prometheus-data:/prometheus"
     networks:
-      - net
+      - hyperdrive-net
       - monitor-net
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -37,6 +37,5 @@ networks:
         - subnet: 172.23.0.0/16
           ip_range: 172.23.5.0/24
           gateway: 172.23.5.254
-  net:
 volumes:
   prometheus-data:

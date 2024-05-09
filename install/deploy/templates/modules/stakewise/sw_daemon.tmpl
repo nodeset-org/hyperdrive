@@ -20,7 +20,7 @@ services:
       - "--module-dir"
       - "{{$module_dir}}"
     networks:
-      - hyperdrive-network
+      - hyperdrive-net
     cap_drop:
       - all
     cap_add:
@@ -28,7 +28,3 @@ services:
       - chown
     security_opt:
       - no-new-privileges
-networks:
-  hyperdrive-network:
-    name: {{.Hyperdrive.DockerNetwork}}
-    external: true
