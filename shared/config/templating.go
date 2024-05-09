@@ -135,14 +135,6 @@ func (cfg *HyperdriveConfig) AutoTxGasThresholdInt() uint64 {
 	return uint64(cfg.AutoTxGasThreshold.Value)
 }
 
-// ==============
-// === Daemon ===
-// ==============
-
-func (cfg *HyperdriveConfig) GetDaemonContainerTag() string {
-	return hyperdriveTag
-}
-
 // ========================
 // === Execution Client ===
 // ========================

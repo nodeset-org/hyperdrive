@@ -13,6 +13,7 @@ const (
 	AutoTxMaxFeeID       string = "autoTxMaxFee"
 	MaxPriorityFeeID     string = "maxPriorityFee"
 	AutoTxGasThresholdID string = "autoTxGasThreshold"
+	ContainerTagID       string = "containerTag"
 
 	// Subconfig IDs
 	LoggingID           string = "logging"
