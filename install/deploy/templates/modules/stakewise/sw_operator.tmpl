@@ -33,7 +33,7 @@ services:
       - "--metrics-host=0.0.0.0"
       - "--max-fee-per-gas-gwei={{.Hyperdrive.AutoTxGasThresholdInt}}"
     networks:
-      - net
+      - hyperdrive-network
     cap_drop:
       - all
     cap_add:
@@ -41,4 +41,6 @@ services:
     security_opt:
       - no-new-privileges
 networks:
-  net:
+  hyperdrive-network:
+    name: {{.Hyperdrive.DockerNetwork}}
+    external: true

@@ -19,7 +19,7 @@ services:
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - /var/lib/hyperdrive/data/{{.Hyperdrive.ProjectName}}:/secrets
     networks:
-      - net
+      - hyperdrive-network
     environment:
       - NETWORK={{.Hyperdrive.Network}}
       - CLIENT={{.Hyperdrive.LocalExecutionClient.ExecutionClient}}
@@ -56,6 +56,8 @@ services:
     security_opt:
       - no-new-privileges
 networks:
-  net:
+  hyperdrive-network:
+    name: {{.Hyperdrive.DockerNetwork}}
+    external: true
 volumes:
   {{.Hyperdrive.ExecutionClientDataVolume}}:

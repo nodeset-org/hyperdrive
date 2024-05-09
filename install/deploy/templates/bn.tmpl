@@ -27,7 +27,7 @@ services:
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - /var/lib/hyperdrive/data/{{.Hyperdrive.ProjectName}}:/secrets:ro
     networks:
-      - net
+      - hyperdrive-network
     environment:
       - NETWORK={{.Hyperdrive.Network}}
       - CLIENT={{.Hyperdrive.LocalBeaconClient.BeaconNode}}
@@ -67,6 +67,8 @@ services:
     security_opt:
       - no-new-privileges
 networks:
-  net:
+  hyperdrive-network:
+    name: {{.Hyperdrive.DockerNetwork}}
+    external: true
 volumes:
   {{.Hyperdrive.BeaconNodeDataVolume}}:

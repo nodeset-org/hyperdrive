@@ -17,7 +17,7 @@ services:
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - {{$module_dir}}/{{.ValidatorsDirectory}}:/{{.ValidatorsDirectory}}
     networks:
-      - net
+      - hyperdrive-network
     environment:
       - NETWORK={{.Hyperdrive.Network}}
       - CLIENT={{.Hyperdrive.GetSelectedBeaconNode}}
@@ -44,4 +44,6 @@ services:
     security_opt:
       - no-new-privileges
 networks:
-  net:
+  hyperdrive-network:
+    name: {{.Hyperdrive.DockerNetwork}}
+    external: true
