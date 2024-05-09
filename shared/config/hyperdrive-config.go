@@ -36,7 +36,7 @@ type HyperdriveConfig struct {
 	MaxPriorityFee          config.Parameter[float64]
 	AutoTxGasThreshold      config.Parameter[float64]
 	DockerNetwork           config.Parameter[string]
-	DockerNetworkIsExternal config.Parameter[bool]
+	DockerNetworkIsExternal config.Parameter[string]
 
 	// Logging
 	Logging *config.LoggerConfig
@@ -225,17 +225,17 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				config.Network_All: "hyperdrive_net",
 			},
 		},
-		DockerNetworkIsExternal: config.Parameter[bool]{
+		DockerNetworkIsExternal: config.Parameter[string]{
 			ParameterCommon: &config.ParameterCommon{
-				ID:                 ids.DockerNetworkID,
+				ID:                 ids.DockerNetworkIsExternalID,
 				Name:               "Docker Network Is External",
 				Description:        "set to true if using a Docker Network rocketpool_net",
 				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient, config.ContainerID_ExecutionClient},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
-			Default: map[config.Network]bool{
-				config.Network_All: false,
+			Default: map[config.Network]string{
+				config.Network_All: "false",
 			},
 		},
 	}
