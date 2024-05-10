@@ -204,7 +204,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				ID:                 ids.UserDataPathID,
 				Name:               "User Data Path",
 				Description:        "The absolute path of your personal `data` folder that contains secrets such as your node wallet's encrypted file, the password for your node wallet, and all of the validator keys for any Hyperdrive modules.",
-				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient, config.ContainerID_ExecutionClient, config.ContainerID_BeaconNode},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
@@ -216,9 +216,9 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 			ParameterCommon: &config.ParameterCommon{
 				ID:                 ids.DockerNetworkID,
 				Name:               "Docker Network",
-				Description:        "Allows the user to provide the docker network as given by `docker network ls`, If using external clients on a the same machine as a rocket pool node set the docker network to rocketpool_net, then the client hosts can be set to http://rocketpool_eth1 and http://rocketpool_eth2",
-				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient, config.ContainerID_ExecutionClient},
-				CanBeBlank:         true,
+				Description:        "Provide the name of the docker network as given by `docker network ls`. This is useful for connecting to the ec and bc clients provided by the rocketpool stack on the same machine. Use `rocketpool_net`, ec http url: http://rocketpool_eth1:8545 and bc http url: http://rocketpool_eth2:5052. For this setup the Docker Network Is External=true",
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient, config.ContainerID_ExecutionClient, config.ContainerID_BeaconNode},
+				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
 			Default: map[config.Network]string{
@@ -229,9 +229,9 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 			ParameterCommon: &config.ParameterCommon{
 				ID:                 ids.DockerNetworkIsExternalID,
 				Name:               "Docker Network Is External",
-				Description:        "set to true if using a Docker Network rocketpool_net",
+				Description:        "set to true if using `rocketpool_net` or another existing docker network",
 				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient, config.ContainerID_ExecutionClient},
-				CanBeBlank:         true,
+				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
 			Default: map[config.Network]string{
