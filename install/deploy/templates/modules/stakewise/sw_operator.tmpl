@@ -33,12 +33,10 @@ services:
       - "--metrics-host=0.0.0.0"
       - "--max-fee-per-gas-gwei={{.Hyperdrive.AutoTxGasThresholdInt}}"
     networks:
-      - net
+      - hyperdrive-net
     cap_drop:
       - all
     cap_add:
       - dac_override
     security_opt:
       - no-new-privileges
-networks:
-  net:

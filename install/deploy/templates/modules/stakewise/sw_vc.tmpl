@@ -17,7 +17,7 @@ services:
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - {{$module_dir}}/{{.ValidatorsDirectory}}:/{{.ValidatorsDirectory}}
     networks:
-      - net
+      - hyperdrive-net
     environment:
       - NETWORK={{.Hyperdrive.Network}}
       - CLIENT={{.Hyperdrive.GetSelectedBeaconNode}}
@@ -43,5 +43,3 @@ services:
       - dac_override
     security_opt:
       - no-new-privileges
-networks:
-  net:

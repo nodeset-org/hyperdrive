@@ -19,8 +19,6 @@ services:
       - "{{.Hyperdrive.GetUserDirectory}}/grafana-prometheus-datasource.yml:/etc/grafana/provisioning/datasources/prometheus.yml"
       - "grafana-storage:/var/lib/grafana"
     networks:
-      - net
-networks:
-  net:
+      - hyperdrive-net
 volumes:
   grafana-storage:
