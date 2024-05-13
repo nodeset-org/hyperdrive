@@ -58,20 +58,29 @@ func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType 
 
 		// Check the method
 		if r.Method != http.MethodGet {
-			server.HandleInvalidMethod(logger, w)
+			err := server.HandleInvalidMethod(logger, w)
+			if err != nil {
+				logger.Error("Error handling response", log.Err(err))
+			}
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(args)
 		if err != nil {
-			server.HandleInputError(logger, w, err)
+			err = server.HandleInputError(logger, w, err)
+			if err != nil {
+				logger.Error("Error handling response", log.Err(err))
+			}
 			return
 		}
 
 		// Run the context's processing routine
 		status, response, err := runQuerylessRoute[DataType](context, serviceProvider)
-		server.HandleResponse(logger, w, status, response, err)
+		err = server.HandleResponse(logger, w, status, response, err)
+		if err != nil {
+			logger.Error("Error handling response", log.Err(err))
+		}
 	})
 }
 
@@ -90,14 +99,20 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 
 		// Check the method
 		if r.Method != http.MethodPost {
-			server.HandleInvalidMethod(logger, w)
+			err := server.HandleInvalidMethod(logger, w)
+			if err != nil {
+				logger.Error("Error handling response", log.Err(err))
+			}
 			return
 		}
 
 		// Read the body
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
-			server.HandleInputError(logger, w, fmt.Errorf("error reading request body: %w", err))
+			err = server.HandleInputError(logger, w, fmt.Errorf("error reading request body: %w", err))
+			if err != nil {
+				logger.Error("Error handling response", log.Err(err))
+			}
 			return
 		}
 		logger.Debug("Body", slog.String(log.BodyKey, string(bodyBytes)))
@@ -106,20 +121,29 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 		var body BodyType
 		err = json.Unmarshal(bodyBytes, &body)
 		if err != nil {
-			server.HandleInputError(logger, w, fmt.Errorf("error deserializing request body: %w", err))
+			err = server.HandleInputError(logger, w, fmt.Errorf("error deserializing request body: %w", err))
+			if err != nil {
+				logger.Error("Error handling response", log.Err(err))
+			}
 			return
 		}
 
 		// Create the handler and deal with any input validation errors
 		context, err := factory.Create(body)
 		if err != nil {
-			server.HandleInputError(logger, w, err)
+			err = server.HandleInputError(logger, w, err)
+			if err != nil {
+				logger.Error("Error handling response", log.Err(err))
+			}
 			return
 		}
 
 		// Run the context's processing routine
 		status, response, err := runQuerylessRoute[DataType](context, serviceProvider)
-		server.HandleResponse(logger, w, status, response, err)
+		err = server.HandleResponse(logger, w, status, response, err)
+		if err != nil {
+			logger.Error("Error handling response", log.Err(err))
+		}
 	})
 }
 
