@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"sync"
 	"time"
 
 	"github.com/rocket-pool/node-manager-core/eth"
@@ -23,18 +22,10 @@ const (
 	PrimaryErrorKey         string = "primaryError"
 	FallbackErrorKey        string = "fallbackError"
 
-	EthClientSyncTimeout    int64 = 8 // 8 seconds
-	BeaconClientSyncTimeout int64 = 8 // 8 seconds
-
 	ethClientStatusRefreshInterval time.Duration = 60 * time.Second
 	ethClientSyncPollInterval      time.Duration = 5 * time.Second
 	beaconClientSyncPollInterval   time.Duration = 5 * time.Second
 	walletReadyCheckInterval       time.Duration = 15 * time.Second
-)
-
-var (
-	ethClientSyncLock    sync.Mutex
-	beaconClientSyncLock sync.Mutex
 )
 
 // ====================
@@ -76,36 +67,36 @@ func (sp *ServiceProvider) RequireWalletReady() error {
 }
 
 func (sp *ServiceProvider) RequireEthClientSynced(ctx context.Context) error {
-	ethClientSynced, err := sp.waitEthClientSynced(ctx, false, EthClientSyncTimeout)
+	synced, _, err := sp.checkExecutionClientStatus(ctx)
 	if err != nil {
 		return err
 	}
-	if !ethClientSynced {
-		return errors.New("The Execution client is currently syncing. Please try again later.")
+	if synced {
+		return nil
 	}
-	return nil
+	return errors.New("The Execution client is currently syncing. Please try again later.")
 }
 
 func (sp *ServiceProvider) RequireBeaconClientSynced(ctx context.Context) error {
-	beaconClientSynced, err := sp.waitBeaconClientSynced(ctx, false, BeaconClientSyncTimeout)
+	synced, err := sp.checkBeaconClientStatus(ctx)
 	if err != nil {
 		return err
 	}
-	if !beaconClientSynced {
-		return errors.New("The Beacon client is currently syncing. Please try again later.")
+	if synced {
+		return nil
 	}
-	return nil
+	return errors.New("The Beacon client is currently syncing. Please try again later.")
 }
 
 // Wait for the Executon client to sync; timeout of 0 indicates no timeout
 func (sp *ServiceProvider) WaitEthClientSynced(ctx context.Context, verbose bool) error {
-	_, err := sp.waitEthClientSynced(ctx, verbose, 0)
+	_, err := sp.waitEthClientSynced(ctx, verbose)
 	return err
 }
 
 // Wait for the Beacon client to sync; timeout of 0 indicates no timeout
 func (sp *ServiceProvider) WaitBeaconClientSynced(ctx context.Context, verbose bool) error {
-	_, err := sp.waitBeaconClientSynced(ctx, verbose, 0)
+	_, err := sp.waitBeaconClientSynced(ctx, verbose)
 	return err
 }
 
@@ -231,11 +222,7 @@ func (sp *ServiceProvider) checkBeaconClientStatus(ctx context.Context) (bool, e
 }
 
 // Wait for the primary or fallback Execution client to be synced
-func (sp *ServiceProvider) waitEthClientSynced(ctx context.Context, verbose bool, timeout int64) (bool, error) {
-	// Prevent multiple waiting goroutines from requesting sync progress
-	ethClientSyncLock.Lock()
-	defer ethClientSyncLock.Unlock()
-
+func (sp *ServiceProvider) waitEthClientSynced(ctx context.Context, verbose bool) (bool, error) {
 	synced, clientToCheck, err := sp.checkExecutionClientStatus(ctx)
 	if err != nil {
 		return false, err
@@ -258,11 +245,6 @@ func (sp *ServiceProvider) waitEthClientSynced(ctx context.Context, verbose bool
 
 	// Wait for sync
 	for {
-		// Check timeout
-		if (timeout > 0) && (time.Since(startTime).Seconds() > float64(timeout)) {
-			return false, nil
-		}
-
 		// Check if the EC status needs to be refreshed
 		if time.Since(ecRefreshTime) > ethClientStatusRefreshInterval {
 			logger.Info("Refreshing primary / fallback execution client status...")
@@ -313,11 +295,7 @@ func (sp *ServiceProvider) waitEthClientSynced(ctx context.Context, verbose bool
 }
 
 // Wait for the primary or fallback Beacon client to be synced
-func (sp *ServiceProvider) waitBeaconClientSynced(ctx context.Context, verbose bool, timeout int64) (bool, error) {
-	// Prevent multiple waiting goroutines from requesting sync progress
-	beaconClientSyncLock.Lock()
-	defer beaconClientSyncLock.Unlock()
-
+func (sp *ServiceProvider) waitBeaconClientSynced(ctx context.Context, verbose bool) (bool, error) {
 	synced, err := sp.checkBeaconClientStatus(ctx)
 	if err != nil {
 		return false, err
@@ -340,11 +318,6 @@ func (sp *ServiceProvider) waitBeaconClientSynced(ctx context.Context, verbose b
 
 	// Wait for sync
 	for {
-		// Check timeout
-		if (timeout > 0) && (time.Since(startTime).Seconds() > float64(timeout)) {
-			return false, nil
-		}
-
 		// Check if the BC status needs to be refreshed
 		if time.Since(bcRefreshTime) > ethClientStatusRefreshInterval {
 			logger.Info("Refreshing primary / fallback Beacon Node status...")

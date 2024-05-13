@@ -31,10 +31,14 @@ type HyperdriveConfig struct {
 	Network            config.Parameter[config.Network]
 	ClientMode         config.Parameter[config.ClientMode]
 	ProjectName        config.Parameter[string]
+	ApiPort            config.Parameter[uint16]
 	UserDataPath       config.Parameter[string]
 	AutoTxMaxFee       config.Parameter[float64]
 	MaxPriorityFee     config.Parameter[float64]
 	AutoTxGasThreshold config.Parameter[float64]
+
+	// The Docker Hub tag for the daemon container
+	ContainerTag config.Parameter[string]
 
 	// Logging
 	Logging *config.LoggerConfig
@@ -109,6 +113,20 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 			},
 			Default: map[config.Network]string{
 				config.Network_All: "hyperdrive",
+			},
+		},
+
+		ApiPort: config.Parameter[uint16]{
+			ParameterCommon: &config.ParameterCommon{
+				ID:                 ids.ApiPortID,
+				Name:               "Daemon API Port",
+				Description:        "The port that Hyperdrive's API server should run on. Note this is bound to the local machine only; it cannot be accessed by other machines.",
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[config.Network]uint16{
+				config.Network_All: DefaultApiPort,
 			},
 		},
 
@@ -210,6 +228,20 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				config.Network_All: filepath.Join(hdDir, "data"),
 			},
 		},
+
+		ContainerTag: config.Parameter[string]{
+			ParameterCommon: &config.ParameterCommon{
+				ID:                 ids.ContainerTagID,
+				Name:               "Daemon Container Tag",
+				Description:        "The tag name of the Hyperdrive Daemon image to use.",
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: true,
+			},
+			Default: map[config.Network]string{
+				config.Network_All: hyperdriveTag,
+			},
+		},
 	}
 
 	// Create the subconfigs
@@ -237,12 +269,14 @@ func (cfg *HyperdriveConfig) GetTitle() string {
 func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 	return []config.IParameter{
 		&cfg.ProjectName,
+		&cfg.ApiPort,
 		&cfg.Network,
 		&cfg.ClientMode,
 		&cfg.AutoTxMaxFee,
 		&cfg.MaxPriorityFee,
 		&cfg.AutoTxGasThreshold,
 		&cfg.UserDataPath,
+		&cfg.ContainerTag,
 	}
 }
 

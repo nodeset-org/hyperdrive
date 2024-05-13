@@ -5,6 +5,7 @@ const (
 	RootConfigID         string = "hyperdrive"
 	VersionID            string = "version"
 	UserDirID            string = "hdUserDir"
+	ApiPortID            string = "apiPort"
 	NetworkID            string = "network"
 	ClientModeID         string = "clientMode"
 	UserDataPathID       string = "hdUserDataDir"
@@ -12,6 +13,7 @@ const (
 	AutoTxMaxFeeID       string = "autoTxMaxFee"
 	MaxPriorityFeeID     string = "maxPriorityFee"
 	AutoTxGasThresholdID string = "autoTxGasThreshold"
+	ContainerTagID       string = "containerTag"
 
 	// Subconfig IDs
 	LoggingID           string = "logging"
