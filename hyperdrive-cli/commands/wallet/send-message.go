@@ -13,7 +13,10 @@ import (
 
 func sendMessage(c *cli.Context, toAddressOrEns string, message []byte) error {
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Get the address
 	var toAddress common.Address

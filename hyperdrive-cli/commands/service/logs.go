@@ -23,7 +23,10 @@ func serviceLogs(c *cli.Context, aliasedNames ...string) error {
 	}
 
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Print service logs
 	return hd.PrintServiceLogs(getComposeFiles(c), c.String("tail"), serviceNames...)

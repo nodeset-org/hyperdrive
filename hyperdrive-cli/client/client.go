@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 	"log/slog"
-	"path/filepath"
+	"net/http/httptrace"
 
 	docker "github.com/docker/docker/client"
 	"github.com/fatih/color"
@@ -44,37 +44,86 @@ type StakewiseClient struct {
 	Logger  *slog.Logger
 }
 
-// Create new Hyperdrive client from CLI context without checking for sync status
-// Only use this function from commands that may work if the Daemon service doesn't exist
-// Most users should call NewHyperdriveClientFromCtx(c).WithStatus() or NewHyperdriveClientFromCtx(c).WithReady()
-func NewHyperdriveClientFromCtx(c *cli.Context) *HyperdriveClient {
+// Create new Hyperdrive client from CLI context
+func NewHyperdriveClientFromCtx(c *cli.Context) (*HyperdriveClient, error) {
 	hdCtx := context.GetHyperdriveContext(c)
-	socketPath := filepath.Join(hdCtx.ConfigPath, config.HyperdriveCliSocketFilename)
+	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, config.HyperdriveDaemonRoute))
+
+	// Create the tracer if required
+	var tracer *httptrace.ClientTrace
+	if hdCtx.HttpTraceFile != nil {
+		var err error
+		tracer, err = createTracer(hdCtx.HttpTraceFile, logger)
+		if err != nil {
+			logger.Error("Error creating HTTP trace", log.Err(err))
+		}
+	}
 
 	// Make the client
-	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, config.HyperdriveDaemonRoute))
-	client := &HyperdriveClient{
-		Api:     client.NewApiClient(config.HyperdriveApiClientRoute, socketPath, logger),
+	hdClient := &HyperdriveClient{
 		Context: hdCtx,
 		Logger:  logger,
 	}
-	return client
+
+	// Get the API URL
+	url := hdCtx.ApiUrl
+	if url == nil {
+		// Load the config to get the API port
+		cfg, _, err := hdClient.LoadConfig()
+		if err != nil {
+			return nil, fmt.Errorf("error loading config: %w", err)
+		}
+
+		url, err = url.Parse(fmt.Sprintf("http://localhost:%d/%s", cfg.Hyperdrive.ApiPort.Value, config.HyperdriveApiClientRoute))
+		if err != nil {
+			return nil, fmt.Errorf("error parsing Hyperdrive API URL: %w", err)
+		}
+	}
+	hdClient.Api = client.NewApiClient(url, logger, tracer)
+	return hdClient, nil
 }
 
-// Create new Stakewise client from CLI context without checking for sync status
+// Create new Stakewise client from CLI context
 // Only use this function from commands that may work if the Daemon service doesn't exist
-func NewStakewiseClientFromCtx(c *cli.Context) *StakewiseClient {
+func NewStakewiseClientFromCtx(c *cli.Context, hdClient *HyperdriveClient) (*StakewiseClient, error) {
 	hdCtx := context.GetHyperdriveContext(c)
-	socketPath := filepath.Join(hdCtx.ConfigPath, swconfig.CliSocketFilename)
+	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, swconfig.ModuleName))
+
+	// Create the tracer if required
+	var tracer *httptrace.ClientTrace
+	if hdCtx.HttpTraceFile != nil {
+		var err error
+		tracer, err = createTracer(hdCtx.HttpTraceFile, logger)
+		if err != nil {
+			logger.Error("Error creating HTTP trace", log.Err(err))
+		}
+	}
 
 	// Make the client
-	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, swconfig.ModuleName))
-	client := &StakewiseClient{
-		Api:     swclient.NewApiClient(swconfig.ApiClientRoute, socketPath, logger),
+	swClient := &StakewiseClient{
 		Context: hdCtx,
 		Logger:  logger,
 	}
-	return client
+
+	// Get the API URL
+	url := hdCtx.ApiUrl
+	if url == nil {
+		var err error
+		url, err = url.Parse(fmt.Sprintf("http://localhost:%d/%s", hdClient.cfg.Stakewise.ApiPort.Value, swconfig.ApiClientRoute))
+		if err != nil {
+			return nil, fmt.Errorf("error parsing StakeWise API URL: %w", err)
+		}
+	} else {
+		host := fmt.Sprintf("%s://%s:%d/%s", url.Scheme, url.Hostname(), hdClient.cfg.Stakewise.ApiPort.Value, swconfig.ApiClientRoute)
+		var err error
+		url, err = url.Parse(host)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing StakeWise API URL: %w", err)
+		}
+	}
+
+	swClient.Api = swclient.NewApiClient(url, logger, tracer)
+	return swClient, nil
 }
 
 // Get the Docker client

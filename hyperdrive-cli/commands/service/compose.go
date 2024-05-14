@@ -8,7 +8,10 @@ import (
 // View the Hyperdrive service compose config
 func serviceCompose(c *cli.Context) error {
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Print service compose config
 	return hd.PrintServiceCompose(getComposeFiles(c))

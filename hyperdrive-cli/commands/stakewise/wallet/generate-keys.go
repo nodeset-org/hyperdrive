@@ -26,8 +26,15 @@ var (
 )
 
 func generateKeys(c *cli.Context) error {
-	hd := client.NewHyperdriveClientFromCtx(c)
-	sw := client.NewStakewiseClientFromCtx(c)
+	// Get the client
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
+	sw, err := client.NewStakewiseClientFromCtx(c, hd)
+	if err != nil {
+		return err
+	}
 	noRestart := c.Bool(generateKeysNoRestartFlag.Name)
 
 	// Make sure there's a wallet loaded

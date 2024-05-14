@@ -32,7 +32,14 @@ var (
 
 func exit(c *cli.Context) error {
 	// Get the client
-	sw := client.NewStakewiseClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
+	sw, err := client.NewStakewiseClientFromCtx(c, hd)
+	if err != nil {
+		return err
+	}
 
 	// Get all active validators
 	activeValidatorResponse, err := sw.Api.Status.GetValidatorStatuses()

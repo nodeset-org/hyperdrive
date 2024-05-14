@@ -10,7 +10,16 @@ import (
 )
 
 func getNodeStatus(c *cli.Context) error {
-	sw := client.NewStakewiseClientFromCtx(c)
+	// Get the client
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
+	sw, err := client.NewStakewiseClientFromCtx(c, hd)
+	if err != nil {
+		return err
+	}
+
 	response, err := sw.Api.Status.GetValidatorStatuses()
 	if err != nil {
 		fmt.Printf("error fetching validator statuses: %v\n", err)
