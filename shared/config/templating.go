@@ -49,6 +49,11 @@ func (c *HyperdriveConfig) BeaconNodeDataVolume() string {
 // === General ===
 // ===============
 
+// Container tag for the daemon
+func (cfg *HyperdriveConfig) GetDaemonContainerTag() string {
+	return cfg.ContainerTag.Value
+}
+
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) IsLocalMode() bool {
 	return cfg.ClientMode.Value == config.ClientMode_Local
