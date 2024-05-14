@@ -5,6 +5,9 @@ import (
 )
 
 const (
+	// Background for non-interactive elements
+	NonInteractiveBackgroundColor tcell.Color = tcell.ColorBlack
+
 	// Background for all UI elements
 	BackgroundColor tcell.Color = tcell.ColorDarkSlateGray
 
