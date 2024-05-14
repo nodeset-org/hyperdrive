@@ -325,6 +325,7 @@ if [ "$CLIENT" = "reth" ]; then
 
     if [ ! -z "$EC_MAX_PEERS" ]; then
         CMD="$CMD --max-outbound-peers $EC_MAX_PEERS --max-inbound-peers $EC_MAX_PEERS"
+    fi
 
     exec ${CMD}
 
