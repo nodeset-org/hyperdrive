@@ -20,7 +20,10 @@ import (
 // Start the Hyperdrive service
 func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Update the Prometheus template with the assigned ports
 	cfg, isNew, err := hd.LoadConfig()
@@ -140,7 +143,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 
 	// Handle errors
 	if status == nil {
-		fmt.Println("Hyperdrive couldn't check your node wallet status yet. Check on it again later with `hyperdrive wallet status`. If you haven't madea wallet yet, you can do so now with `hyperdrive wallet init`.")
+		fmt.Println("Hyperdrive couldn't check your node wallet status yet. Check on it again later with `hyperdrive wallet status`. If you haven't made a wallet yet, you can do so now with `hyperdrive wallet init`.")
 		return nil
 	}
 

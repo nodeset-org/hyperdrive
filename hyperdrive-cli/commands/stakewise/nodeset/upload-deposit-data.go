@@ -8,9 +8,16 @@ import (
 
 func uploadDepositData(c *cli.Context) error {
 	// Get the client
-	sw := client.NewStakewiseClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
+	sw, err := client.NewStakewiseClientFromCtx(c, hd)
+	if err != nil {
+		return err
+	}
 
 	// Upload to the server
-	_, err := swcmdutils.UploadDepositData(sw)
+	_, err = swcmdutils.UploadDepositData(sw)
 	return err
 }

@@ -10,8 +10,14 @@ import (
 
 func initialize(c *cli.Context) error {
 	// Get client
-	hd := client.NewHyperdriveClientFromCtx(c)
-	sw := client.NewStakewiseClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
+	sw, err := client.NewStakewiseClientFromCtx(c, hd)
+	if err != nil {
+		return err
+	}
 
 	// Make sure there's a wallet loaded
 	response, err := hd.Api.Wallet.Status()

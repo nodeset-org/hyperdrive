@@ -21,7 +21,11 @@ var (
 func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	if hd == nil {
 		// Get Hyperdrive client
-		hd = client.NewHyperdriveClientFromCtx(c)
+		var err error
+		hd, err = client.NewHyperdriveClientFromCtx(c)
+		if err != nil {
+			return err
+		}
 
 		// Get & check wallet status
 		statusResponse, err := hd.Api.Wallet.Status()
@@ -116,7 +120,10 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	if cfg.Stakewise.Enabled.Value {
 		fmt.Println()
 		fmt.Println("You have the Stakewise module enabled. Initializing it with your new wallet...")
-		sw := client.NewStakewiseClientFromCtx(c)
+		sw, err := client.NewStakewiseClientFromCtx(c, hd)
+		if err != nil {
+			return err
+		}
 		_, err = sw.Api.Wallet.Initialize()
 		if err != nil {
 			return fmt.Errorf("error initializing Stakewise wallet: %w", err)

@@ -13,7 +13,10 @@ import (
 // Destroy and resync the Beacon Node from scratch
 func resyncBeaconNode(c *cli.Context) error {
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Get the merged config
 	cfg, isNew, err := hd.LoadConfig()

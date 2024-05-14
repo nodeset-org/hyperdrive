@@ -51,10 +51,13 @@ func installService(c *cli.Context) error {
 	}
 
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Install service
-	err := hd.InstallService(
+	err = hd.InstallService(
 		c.Bool(installVersionFlag.Name),
 		c.Bool(installNoDepsFlag.Name),
 		c.String(installVersionFlag.Name),

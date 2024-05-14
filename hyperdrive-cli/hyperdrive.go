@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"math/big"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
 	swcmd "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
@@ -18,7 +20,8 @@ import (
 )
 
 const (
-	defaultConfigFolder string = ".hyperdrive"
+	defaultConfigFolder string      = ".hyperdrive"
+	traceMode           os.FileMode = 0644
 )
 
 // Flags
@@ -59,6 +62,16 @@ var (
 		Aliases: []string{"s"},
 		Usage:   "Some commands may print sensitive information to your terminal. Use this flag when nobody can see your screen to allow sensitive data to be printed without prompting",
 	}
+	apiAddressFlag *cli.StringFlag = &cli.StringFlag{
+		Name:    "api-address",
+		Aliases: []string{"a"},
+		Usage:   "The address of the Hyperdrive API server to connect to. If left blank it will default to 'localhost' at the port specified in the service configuration.",
+	}
+	httpTracePathFlag *cli.StringFlag = &cli.StringFlag{
+		Name:    "http-trace-path",
+		Aliases: []string{"htp"},
+		Usage:   "The path to save HTTP trace logs to. Leave blank to disable HTTP tracing",
+	}
 )
 
 // Run
@@ -91,12 +104,14 @@ func main() {
 	app.Flags = []cli.Flag{
 		allowRootFlag,
 		configPathFlag,
+		apiAddressFlag,
 		maxFeeFlag,
 		maxPriorityFeeFlag,
 		nonceFlag,
 		utils.PrintTxDataFlag,
 		utils.SignTxOnlyFlag,
 		debugFlag,
+		httpTracePathFlag,
 		secureSessionFlag,
 	}
 
@@ -108,6 +123,7 @@ func main() {
 	swcmd.RegisterCommands(app, "stakewise", []string{"sw"})
 	wallet.RegisterCommands(app, "wallet", []string{"w"})
 
+	var hdCtx *context.HyperdriveContext
 	app.Before = func(c *cli.Context) error {
 		// Check user ID
 		if os.Getuid() == 0 && !c.Bool(allowRootFlag.Name) {
@@ -116,7 +132,8 @@ func main() {
 			os.Exit(1)
 		}
 
-		err := validateFlags(c)
+		var err error
+		hdCtx, err = validateFlags(c)
 		if err != nil {
 			fmt.Fprint(os.Stderr, err.Error())
 			os.Exit(1)
@@ -125,6 +142,9 @@ func main() {
 	}
 
 	// Run application
+	if hdCtx != nil && hdCtx.HttpTraceFile != nil {
+		defer hdCtx.HttpTraceFile.Close()
+	}
 	fmt.Println()
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
@@ -148,7 +168,7 @@ func setDefaultPaths() {
 }
 
 // Validate the global flags
-func validateFlags(c *cli.Context) error {
+func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
 	hdCtx := &context.HyperdriveContext{
 		MaxFee:         c.Float64(maxFeeFlag.Name),
 		MaxPriorityFee: c.Float64(maxPriorityFeeFlag.Name),
@@ -167,11 +187,30 @@ func validateFlags(c *cli.Context) error {
 	configPath := c.String(configPathFlag.Name)
 	path, err := homedir.Expand(strings.TrimSpace(configPath))
 	if err != nil {
-		return fmt.Errorf("error expanding config path [%s]: %w", configPath, err)
+		return nil, fmt.Errorf("error expanding config path [%s]: %w", configPath, err)
 	}
 	hdCtx.ConfigPath = path
 
+	// Get the API URL
+	address := c.String(apiAddressFlag.Name)
+	if address != "" {
+		baseUrl, err := url.Parse(address)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing API address [%s]: %w", hdCtx.ApiUrl, err)
+		}
+		hdCtx.ApiUrl = baseUrl.JoinPath(config.HyperdriveApiClientRoute)
+	}
+
+	// Get the HTTP trace flag
+	httpTracePath := c.String(httpTracePathFlag.Name)
+	if httpTracePath != "" {
+		hdCtx.HttpTraceFile, err = os.OpenFile(httpTracePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, traceMode)
+		if err != nil {
+			return nil, fmt.Errorf("error opening HTTP trace file [%s]: %w", httpTracePath, err)
+		}
+	}
+
 	// TODO: more here
 	context.SetHyperdriveContext(c, hdCtx)
-	return nil
+	return hdCtx, nil
 }
