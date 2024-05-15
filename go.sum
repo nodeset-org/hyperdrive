@@ -249,6 +249,8 @@ github.com/nodeset-org/hyperdrive-daemon v0.4.2-dev.0.20240515161352-9f17d9f9bfa
 github.com/nodeset-org/hyperdrive-daemon v0.4.2-dev.0.20240515161352-9f17d9f9bfa5/go.mod h1:cPMY0KDqaoJXN2dUkC1ChhfjsguHDPLYcSbBskIPb/s=
 github.com/nodeset-org/hyperdrive-stakewise v0.1.2-dev.0.20240514211420-2780f5d13e3c h1:x5LnUnOumc4srFCKOOjx4RIsSTaBH+7NyJKIK2GmlxA=
 github.com/nodeset-org/hyperdrive-stakewise v0.1.2-dev.0.20240514211420-2780f5d13e3c/go.mod h1:3DwJs5hWtsCtIpErQOEKHrBScvuMs/jd5fkVCz1ecYU=
+github.com/nodeset-org/hyperdrive-stakewise v0.1.2-dev.0.20240515161453-1cba1d9034d7 h1:ElgK7VdC+y9LRrBs/mr5ufjT9srxmnGmEU5Q+ASU6e4=
+github.com/nodeset-org/hyperdrive-stakewise v0.1.2-dev.0.20240515161453-1cba1d9034d7/go.mod h1:luPR6e7I1YZ3KYfd2fV8QMNYgvnOnxz8tmWhFbRZ7tY=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
