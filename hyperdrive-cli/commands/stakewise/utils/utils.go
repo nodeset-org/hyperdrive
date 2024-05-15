@@ -25,31 +25,27 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 	}
 
 	data := response.Data
-	newKeyCount := len(data.UnregisteredPubkeys)
-
-	if newKeyCount == 0 && data.SufficientBalance {
-		fmt.Println("All of your validator keys were already registered.")
-		return false, nil
-	}
-
-	if !data.SufficientBalance {
-		fmt.Println("Not all keys were uploaded due to insufficient balance.")
-		fmt.Printf("Uploaded %d out of %d keys:\n", newKeyCount, data.TotalCount)
-		for _, key := range data.UnregisteredPubkeys {
-			fmt.Println(key.HexWithPrefix())
-		}
-	}
-
-	data = response.Data
 	sw.Logger.Debug("Server response", "data", data.ServerResponse)
 	fmt.Println()
+	newKeyCount := len(data.UnregisteredPubkeys)
+
 	if data.SufficientBalance {
+		if newKeyCount == 0 {
+			fmt.Println("All of your validator keys were already registered.")
+			return false, nil
+		}
 		fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, len(data.UnregisteredPubkeys), terminal.ColorReset)
 		for _, key := range data.UnregisteredPubkeys {
 			fmt.Println(key.HexWithPrefix())
 		}
 		fmt.Println()
 		fmt.Printf("Total keys registered: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
+	} else {
+		fmt.Println("Not all keys were uploaded due to insufficient balance.")
+		fmt.Printf("Uploaded %d out of %d keys:\n", newKeyCount, data.TotalCount)
+		for _, key := range data.UnregisteredPubkeys {
+			fmt.Println(key.HexWithPrefix())
+		}
 	}
 
 	return true, nil
