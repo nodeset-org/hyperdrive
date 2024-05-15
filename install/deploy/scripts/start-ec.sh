@@ -322,5 +322,13 @@ if [ "$CLIENT" = "reth" ]; then
         CMD="$CMD --port $EC_P2P_PORT"
     fi
 
+    if [ ! -z "$RETH_INBOUND_MAX_PEERS" ]; then
+        CMD="$CMD --max-inbound-peers $RETH_INBOUND_MAX_PEERS"
+    fi
+
+    if [ ! -z "$RETH_OUTBOUND_MAX_PEERS" ]; then
+        CMD="$CMD --max-outbound-peers $RETH_OUTBOUND_MAX_PEERS"
+    fi
+
     exec ${CMD}
 fi
