@@ -222,7 +222,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				ID:                 ids.UserDataPathID,
 				Name:               "User Data Path",
 				Description:        "The absolute path of your personal `data` folder that contains secrets such as your node wallet's encrypted file, the password for your node wallet, and all of the validator keys for any Hyperdrive modules.",
-				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient, config.ContainerID_ExecutionClient, config.ContainerID_BeaconNode},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
