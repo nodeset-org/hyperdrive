@@ -24,6 +24,9 @@ services:
     networks:
       - net
       - monitor-net
+      {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+      - {{$network}}
+      {{- end}}
     extra_hosts:
       - "host.docker.internal:host-gateway"
 networks:
@@ -38,5 +41,9 @@ networks:
           ip_range: 172.23.5.0/24
           gateway: 172.23.5.254
   net:
+  {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+  {{$network}}:
+    external: true
+  {{- end}}
 volumes:
   prometheus-data:

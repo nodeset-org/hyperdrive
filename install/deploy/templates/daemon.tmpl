@@ -26,6 +26,9 @@ services:
       {{- end}}
     networks:
       - net
+      {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+      - {{$network}}
+      {{- end}}
     cap_drop:
       - all
     cap_add:
@@ -35,3 +38,7 @@ services:
       - no-new-privileges
 networks:
   net:
+  {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+  {{$network}}:
+    external: true
+  {{- end}}

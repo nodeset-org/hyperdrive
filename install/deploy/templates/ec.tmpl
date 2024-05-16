@@ -20,6 +20,9 @@ services:
       - /var/lib/hyperdrive/data/{{.Hyperdrive.ProjectName}}:/secrets
     networks:
       - net
+      {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+      - {{$network}}
+      {{- end}}
     environment:
       - NETWORK={{.Hyperdrive.Network}}
       - CLIENT={{.Hyperdrive.LocalExecutionClient.ExecutionClient}}
@@ -57,5 +60,9 @@ services:
       - no-new-privileges
 networks:
   net:
+  {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+  {{$network}}:
+    external: true
+  {{- end}}
 volumes:
   {{.Hyperdrive.ExecutionClientDataVolume}}:
