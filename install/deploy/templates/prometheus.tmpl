@@ -23,9 +23,16 @@ services:
       - "prometheus-data:/prometheus"
     networks:
       - net
+      {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+      - {{$network}}
+      {{- end}}
     extra_hosts:
       - "host.docker.internal:host-gateway"
 networks:
   net:
+  {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+  {{$network}}:
+    external: true
+  {{- end}}
 volumes:
   prometheus-data:

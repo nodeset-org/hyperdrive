@@ -20,7 +20,14 @@ services:
       - "grafana-storage:/var/lib/grafana"
     networks:
       - net
+      {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+      - {{$network}}
+      {{- end}}
 networks:
   net:
+  {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+  {{$network}}:
+    external: true
+  {{- end}}
 volumes:
   grafana-storage:

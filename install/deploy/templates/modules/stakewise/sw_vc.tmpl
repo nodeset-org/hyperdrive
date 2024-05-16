@@ -18,6 +18,9 @@ services:
       - {{$module_dir}}/{{.ValidatorsDirectory}}:/{{.ValidatorsDirectory}}
     networks:
       - net
+      {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+      - {{$network}}
+      {{- end}}
     environment:
       - NETWORK={{.Hyperdrive.Network}}
       - CLIENT={{.Hyperdrive.GetSelectedBeaconNode}}
@@ -45,3 +48,7 @@ services:
       - no-new-privileges
 networks:
   net:
+  {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
+  {{$network}}:
+    external: true
+  {{- end}}
