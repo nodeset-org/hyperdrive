@@ -31,7 +31,7 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 
 	if data.SufficientBalance {
 		if newKeyCount == 0 {
-			fmt.Println("All of your validator keys were already registered.")
+			fmt.Println("All of your validator keys are registered.")
 			return false, nil
 		}
 		fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, newKeyCount, terminal.ColorReset)
