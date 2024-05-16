@@ -28,16 +28,15 @@ const (
 // The master configuration struct
 type HyperdriveConfig struct {
 	// General settings
-	Network                 config.Parameter[config.Network]
-	ClientMode              config.Parameter[config.ClientMode]
-	ProjectName             config.Parameter[string]
-	ApiPort                 config.Parameter[uint16]
-	UserDataPath            config.Parameter[string]
-	AutoTxMaxFee            config.Parameter[float64]
-	MaxPriorityFee          config.Parameter[float64]
-	AutoTxGasThreshold      config.Parameter[float64]
-	DockerNetwork           config.Parameter[string]
-	DockerNetworkIsExternal config.Parameter[string]
+	Network                  config.Parameter[config.Network]
+	ClientMode               config.Parameter[config.ClientMode]
+	ProjectName              config.Parameter[string]
+	ApiPort                  config.Parameter[uint16]
+	UserDataPath             config.Parameter[string]
+	AutoTxMaxFee             config.Parameter[float64]
+	MaxPriorityFee           config.Parameter[float64]
+	AutoTxGasThreshold       config.Parameter[float64]
+	AdditionalDockerNetworks config.Parameter[string]
 
 	// The Docker Hub tag for the daemon container
 	ContainerTag config.Parameter[string]
@@ -230,30 +229,18 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 				config.Network_All: filepath.Join(hdDir, "data"),
 			},
 		},
-		DockerNetwork: config.Parameter[string]{
+
+		AdditionalDockerNetworks: config.Parameter[string]{
 			ParameterCommon: &config.ParameterCommon{
-				ID:                 ids.DockerNetworkID,
-				Name:               "Docker Network",
-				Description:        "Provide the name of the docker network as given by `docker network ls`. This is useful for connecting to the ec and bc clients provided by the rocketpool stack on the same machine. Use `rocketpool_net`, ec http url: http://rocketpool_eth1:8545 and bc http url: http://rocketpool_eth2:5052. For this setup the Docker Network Is External=true",
-				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient, config.ContainerID_ExecutionClient, config.ContainerID_BeaconNode},
-				CanBeBlank:         false,
+				ID:                 ids.AdditionalDockerNetworksID,
+				Name:               "Additional Docker Networks",
+				Description:        "List any other externally-managed Docker networks running on this machine that you'd like to give the Hyperdrive services access to here. Use a comma-separated list of network names.\n\nTo get a list of local Docker networks, run `docker network ls`.",
+				AffectsContainers:  []config.ContainerID{config.ContainerID_BeaconNode, config.ContainerID_Daemon, config.ContainerID_ExecutionClient, config.ContainerID_Grafana, config.ContainerID_Prometheus, config.ContainerID_ValidatorClient},
+				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
 			},
 			Default: map[config.Network]string{
-				config.Network_All: "hyperdrive_net",
-			},
-		},
-		DockerNetworkIsExternal: config.Parameter[string]{
-			ParameterCommon: &config.ParameterCommon{
-				ID:                 ids.DockerNetworkIsExternalID,
-				Name:               "Docker Network Is External",
-				Description:        "set to true if using `rocketpool_net` or another existing docker network",
-				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ValidatorClient, config.ContainerID_ExecutionClient},
-				CanBeBlank:         false,
-				OverwriteOnUpgrade: false,
-			},
-			Default: map[config.Network]string{
-				config.Network_All: "false",
+				config.Network_All: "",
 			},
 		},
 
@@ -304,8 +291,7 @@ func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 		&cfg.MaxPriorityFee,
 		&cfg.AutoTxGasThreshold,
 		&cfg.UserDataPath,
-		&cfg.DockerNetwork,
-		&cfg.DockerNetworkIsExternal,
+		&cfg.AdditionalDockerNetworks,
 		&cfg.ContainerTag,
 	}
 }

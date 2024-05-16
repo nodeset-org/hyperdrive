@@ -2,20 +2,19 @@ package ids
 
 const (
 	// Hyperdrive parameter IDs
-	RootConfigID              string = "hyperdrive"
-	VersionID                 string = "version"
-	UserDirID                 string = "hdUserDir"
-	ApiPortID                 string = "apiPort"
-	NetworkID                 string = "network"
-	ClientModeID              string = "clientMode"
-	UserDataPathID            string = "hdUserDataDir"
-	ProjectNameID             string = "projectName"
-	AutoTxMaxFeeID            string = "autoTxMaxFee"
-	MaxPriorityFeeID          string = "maxPriorityFee"
-	AutoTxGasThresholdID      string = "autoTxGasThreshold"
-	ContainerTagID            string = "containerTag"
-	DockerNetworkID           string = "dockerNetwork"
-	DockerNetworkIsExternalID string = "dockerNetworkIsExternal"
+	RootConfigID               string = "hyperdrive"
+	VersionID                  string = "version"
+	UserDirID                  string = "hdUserDir"
+	ApiPortID                  string = "apiPort"
+	NetworkID                  string = "network"
+	ClientModeID               string = "clientMode"
+	UserDataPathID             string = "hdUserDataDir"
+	ProjectNameID              string = "projectName"
+	AutoTxMaxFeeID             string = "autoTxMaxFee"
+	MaxPriorityFeeID           string = "maxPriorityFee"
+	AutoTxGasThresholdID       string = "autoTxGasThreshold"
+	AdditionalDockerNetworksID string = "additionalDockerNetworks"
+	ContainerTagID             string = "containerTag"
 
 	// Subconfig IDs
 	LoggingID           string = "logging"

@@ -135,6 +135,10 @@ func (cfg *HyperdriveConfig) AutoTxGasThresholdInt() uint64 {
 	return uint64(cfg.AutoTxGasThreshold.Value)
 }
 
+func (cfg *HyperdriveConfig) GetAdditionalDockerNetworks() []string {
+	return strings.Split(cfg.AdditionalDockerNetworks.Value, ",")
+}
+
 // ========================
 // === Execution Client ===
 // ========================
