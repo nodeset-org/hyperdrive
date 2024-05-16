@@ -34,7 +34,7 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 			fmt.Println("All of your validator keys were already registered.")
 			return false, nil
 		}
-		fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, len(data.UnregisteredPubkeys), terminal.ColorReset)
+		fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, newKeyCount, terminal.ColorReset)
 		for _, key := range data.UnregisteredPubkeys {
 			fmt.Println(key.HexWithPrefix())
 		}
@@ -42,7 +42,11 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 		fmt.Printf("Total keys registered: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
 	} else {
 		fmt.Println("Not all keys were uploaded due to insufficient balance.")
-		fmt.Printf("Uploaded %d out of %d keys:\n", newKeyCount, data.TotalCount)
+		fmt.Printf("ETH required per key: %s%f%s\n", terminal.ColorGreen, data.EthPerKey, terminal.ColorReset)
+		fmt.Printf("Current Balance: %s%s%s\n", terminal.ColorGreen, data.Balance, terminal.ColorReset)
+		fmt.Printf("ETH required for remaining keys: %s%f%s\n", terminal.ColorGreen, data.RemainingEthRequired, terminal.ColorReset)
+
+		fmt.Printf("\nUploaded %d out of %d keys:\n", newKeyCount, data.TotalCount)
 		for _, key := range data.UnregisteredPubkeys {
 			fmt.Println(key.HexWithPrefix())
 		}
