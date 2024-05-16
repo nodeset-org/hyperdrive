@@ -43,7 +43,7 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 	} else {
 		fmt.Println("Not all keys were uploaded due to insufficient balance.")
 		fmt.Printf("ETH required per key: %s%f%s\n", terminal.ColorGreen, data.EthPerKey, terminal.ColorReset)
-		fmt.Printf("Current Balance: %s%s%s\n", terminal.ColorGreen, data.Balance, terminal.ColorReset)
+		fmt.Printf("Current Balance: %s%f%s\n", terminal.ColorGreen, data.Balance, terminal.ColorReset)
 		fmt.Printf("ETH required for remaining keys: %s%f%s\n", terminal.ColorGreen, data.RemainingEthRequired, terminal.ColorReset)
 
 		fmt.Printf("\nUploaded %d out of %d keys:\n", newKeyCount, data.TotalCount)

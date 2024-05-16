@@ -9,7 +9,7 @@ require (
 	github.com/ethereum/go-ethereum v1.14.0
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/nodeset-org/hyperdrive-daemon v0.4.2-dev.0.20240515161352-9f17d9f9bfa5
-	github.com/nodeset-org/hyperdrive-stakewise v0.1.2-dev.0.20240516155930-e0930d2a8dd1
+	github.com/nodeset-org/hyperdrive-stakewise v0.1.2-dev.0.20240516220521-bcbda440b697
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/node-manager-core v0.3.1-0.20240515153751-dd88806cef89
 	golang.org/x/sync v0.7.0
@@ -91,4 +91,38 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
+)
+
+require (
+	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/btcsuite/btcd v0.24.0 // indirect
+	github.com/btcsuite/btcd/btcutil v1.1.5 // indirect
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/ferranbt/fastssz v0.1.3 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1 // indirect
+	github.com/herumi/bls-eth-go-binary v1.33.0 // indirect
+	github.com/minio/highwayhash v1.0.2 // indirect
+	github.com/minio/sha256-simd v1.0.1 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/prometheus/client_golang v1.19.0 // indirect
+	github.com/prometheus/client_model v0.6.0 // indirect
+	github.com/prometheus/common v0.51.1 // indirect
+	github.com/prometheus/procfs v0.13.0 // indirect
+	github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44 // indirect
+	github.com/prysmaticlabs/gohashtree v0.0.4-beta // indirect
+	github.com/prysmaticlabs/prysm/v5 v5.0.3 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
+	github.com/thomaso-mirodin/intmath v0.0.0-20160323211736-5dc6d854e46e // indirect
+	github.com/wealdtech/go-bytesutil v1.2.1 // indirect
+	github.com/wealdtech/go-eth2-types/v2 v2.8.2 // indirect
+	github.com/wealdtech/go-eth2-util v1.8.2 // indirect
+	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.4.1 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240325203815-454cdb8f5daa // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240325203815-454cdb8f5daa // indirect
+	google.golang.org/grpc v1.62.1 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 )
