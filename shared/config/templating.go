@@ -141,7 +141,20 @@ func (cfg *HyperdriveConfig) AutoTxGasThresholdInt() uint64 {
 }
 
 func (cfg *HyperdriveConfig) GetAdditionalDockerNetworks() []string {
-	return strings.Split(cfg.AdditionalDockerNetworks.Value, ",")
+	if len(cfg.AdditionalDockerNetworks.Value) == 0 {
+		return []string{}
+	}
+
+	// Trim each element in case the user added spaces
+	networks := []string{}
+	elements := strings.Split(cfg.AdditionalDockerNetworks.Value, ",")
+	for _, element := range elements {
+		trimmed := strings.TrimSpace(element)
+		if len(trimmed) > 0 {
+			networks = append(networks, trimmed)
+		}
+	}
+	return networks
 }
 
 // ========================
