@@ -33,15 +33,14 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 	if data.SufficientBalance {
 		if newKeyCount == 0 {
 			fmt.Printf("All of your validator keys are already registered (%s%d%s in total).\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
-			fmt.Printf("%s%d%s are pending activation.", terminal.ColorGreen, data.PendingCount, terminal.ColorReset)
-			fmt.Printf("%s%d%s have been activated already.", terminal.ColorGreen, data.ActiveCount, terminal.ColorReset)
+			fmt.Printf("%s%d%s are pending activation.\n", terminal.ColorGreen, data.PendingCount, terminal.ColorReset)
+			fmt.Printf("%s%d%s have been activated already.\n", terminal.ColorGreen, data.ActiveCount, terminal.ColorReset)
 			return false, nil
 		}
 		fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, newKeyCount, terminal.ColorReset)
 		for _, key := range data.NewPubkeys {
 			fmt.Println(key.HexWithPrefix())
 		}
-		data.PendingCount += uint64(newKeyCount)
 	} else {
 		fmt.Println("Not all keys were uploaded due to insufficient balance.")
 		fmt.Printf("Current wallet balance: %s%f%s\n", terminal.ColorGreen, data.Balance, terminal.ColorReset)
@@ -58,6 +57,7 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 			}
 		}
 	}
+	data.PendingCount += uint64(newKeyCount)
 	fmt.Println()
 	fmt.Printf("Total keys: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
 	fmt.Printf("%s%d%s are registered and pending activation.\n", terminal.ColorGreen, data.PendingCount, terminal.ColorReset)

@@ -1,10 +1,24 @@
-hyperdrive (0.4.2~b2) UNRELEASED; urgency=medium
+hyperdrive (0.4.2~b2) unstable; urgency=medium
 
+  * Updated Besu, Geth, and Lodestar.
+  * Geth: added a setting to toggle archive mode support.
+  * Reth: replaced the max peers setting with separate settings for max inbound and max outbound peers.
+  * Reth: `jwtsecret` generation now works properly if you create a new node and select Reth as your first Execution Client.
+  * Moved the API from Unix sockets to network sockets.
+  * Added an `Additional Docker Networks` setting. Use this to give Hyperdrive's containers access to other Docker networks running on your machine, so it can use services running in those networks.
+  * Fixed a bug that caused the API and tasks loop to hang if your clients weren't synced yet.
+  * Commands that require synced clients now also verify that the clients are on the expected network (e.g., they will error out if you're attempting to use Mainnet clients when Hyperdrive is set to Holesky).
+  * Removed the deprecated `monitor-net` from Prometheus, so metrics will now work properly if the Rocket Pool Smart Node is installed on the same machine as Hyperdrive.
+  * New command: `wallet send` lets you send ETH or arbitrary tokens (by address) to other wallets.
+  * New flag: `--http-trace-path` lets you enable extra debug info for HTTP requests, printing it to the CLI's debug log if `--debug` is set and saving it to the provided file.
+  * New flag: `--api-address` lets you specify the endpoint for the Hyperdrive server to connect to. Useful if you want to connect to a different machine. Defaults to the local daemon running on your node.
   * Multiselect commands (such as `minipool distribute`) now support ranges as well as comma-separated options - e.g., things like `1-3,4,5,6-10` will now work.
-  * `wallet export` now prints the wallet key as a hex string.
-  * Added the archive mode setting for Geth.
+  * Running a command with an unexpected number of arguments now properly prints the command's help text.
+  * `wallet export` now prints the wallet's private key as a hex string properly.
+  * Fixed the background color in the `hyperdrive service config` TUI not displaying properly in empty cells.
+  * StakeWise: Uploading deposit data for generated keys will now be blocked if your node wallet doesn't have enough ETH in it to pay for the gas cost of the deposit transactions (0.01 ETH per key).
 
- -- NodeSet LLC <info@nodeset.io>  Sun, 05 May 2024 20:01:10 +0000
+ -- NodeSet LLC <info@nodeset.io>  Fri, 17 May 2024 19:01:10 +0000
 
 hyperdrive (0.4.2~b1) unstable; urgency=medium
 
