@@ -4,9 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
-	"github.com/rocket-pool/node-manager-core/eth"
 )
 
 func printUploadError(err error) {
@@ -18,45 +16,41 @@ func printUploadError(err error) {
 
 // Upload deposit data to the server
 func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
+	// Initial attempt to upload all deposit data
 	fmt.Println("Uploading deposit data to the NodeSet server...")
-	response, err := sw.Api.Nodeset.UploadDepositData(false)
+	response, err := sw.Api.Nodeset.UploadDepositData()
 	if err != nil {
 		printUploadError(err)
 		return false, nil
 	}
 
 	data := response.Data
-	newKeyCount := len(data.UnregisteredPubkeys)
-	if newKeyCount == 0 {
-		fmt.Println("All of your validator keys were already registered.")
-		return false, nil
-	}
-	if !data.SufficientBalance {
-		// Prompt the user to upload anyway
-		fmt.Printf("You're attempting to upload %d keys, but you only have %.6f ETH in your account. We recommend you have at least %.6f ETH.", newKeyCount, eth.WeiToEth(data.Balance), eth.WeiToEth(data.RequiredBalance))
-		fmt.Println()
-		if !utils.Confirm("Do you want to upload these keys anyway? You may not be able to register them if your wallet doesn't have sufficient ETH in it!") {
-			fmt.Println("Cancelled.")
-			return false, nil
-		}
-
-		fmt.Println("Uploading deposit data to the NodeSet server...")
-		response, err = sw.Api.Nodeset.UploadDepositData(true)
-		if err != nil {
-			printUploadError(err)
-			return false, nil
-		}
-	}
-
-	data = response.Data
 	sw.Logger.Debug("Server response", "data", data.ServerResponse)
 	fmt.Println()
-	fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, len(data.UnregisteredPubkeys), terminal.ColorReset)
-	for _, key := range data.UnregisteredPubkeys {
-		fmt.Println(key.HexWithPrefix())
-	}
-	fmt.Println()
+	newKeyCount := len(data.UnregisteredPubkeys)
 
-	fmt.Printf("Total keys registered: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
+	if data.SufficientBalance {
+		if newKeyCount == 0 {
+			fmt.Println("All of your validator keys are registered.")
+			return false, nil
+		}
+		fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, newKeyCount, terminal.ColorReset)
+		for _, key := range data.UnregisteredPubkeys {
+			fmt.Println(key.HexWithPrefix())
+		}
+		fmt.Println()
+		fmt.Printf("Total keys registered: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
+	} else {
+		fmt.Println("Not all keys were uploaded due to insufficient balance.")
+		fmt.Printf("ETH required per key: %s%f%s\n", terminal.ColorGreen, data.EthPerKey, terminal.ColorReset)
+		fmt.Printf("Current Balance: %s%f%s\n", terminal.ColorGreen, data.Balance, terminal.ColorReset)
+		fmt.Printf("Additional ETH required for remaining keys: %s%f%s\n", terminal.ColorGreen, data.RemainingEthRequired, terminal.ColorReset)
+
+		fmt.Printf("\nUploaded %d out of %d keys:\n", newKeyCount, data.TotalCount)
+		for _, key := range data.UnregisteredPubkeys {
+			fmt.Println(key.HexWithPrefix())
+		}
+	}
+
 	return true, nil
 }
