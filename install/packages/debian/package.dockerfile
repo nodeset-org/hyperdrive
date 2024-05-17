@@ -6,7 +6,8 @@ ARG BUILDPLATFORM
 COPY . /hyperdrive/debian
 WORKDIR /hyperdrive/debian
 
-RUN mv /hyperdrive/debian/install/packages/debian/debian /hyperdrive/debian/debian && \
+RUN rm -rf /hyperdrive/debian/build && \
+    mv /hyperdrive/debian/install/packages/debian/debian /hyperdrive/debian/debian && \
     mv /hyperdrive/debian/install/deploy /hyperdrive/debian/deploy
 
 # Build the native arch package and source package

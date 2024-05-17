@@ -11,7 +11,10 @@ import (
 
 func setPassword(c *cli.Context) error {
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Get & check wallet status
 	statusResponse, err := hd.Api.Wallet.Status()

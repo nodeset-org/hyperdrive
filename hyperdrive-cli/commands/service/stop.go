@@ -11,7 +11,10 @@ import (
 // Pause the Hyperdrive service
 func stopService(c *cli.Context) error {
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Prompt for confirmation
 	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Are you sure you want to pause the Hyperdrive service?")) {

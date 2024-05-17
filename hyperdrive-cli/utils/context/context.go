@@ -2,6 +2,8 @@ package context
 
 import (
 	"math/big"
+	"net/url"
+	"os"
 
 	"github.com/urfave/cli/v2"
 )
@@ -29,6 +31,12 @@ type HyperdriveContext struct {
 
 	// True if this is a secure session
 	SecureSession bool
+
+	// The address and URL of the API server
+	ApiUrl *url.URL
+
+	// The HTTP trace file if tracing is enabled
+	HttpTraceFile *os.File
 }
 
 // Add the Hyperdrive context into a CLI context

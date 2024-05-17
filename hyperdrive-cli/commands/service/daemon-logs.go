@@ -20,7 +20,10 @@ func daemonLogs(c *cli.Context, serviceNames ...string) error {
 	}
 
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 	cfg, _, err := hd.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("error loading Hyperdrive configuration: %w", err)

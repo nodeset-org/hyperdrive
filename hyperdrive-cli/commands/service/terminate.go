@@ -18,7 +18,10 @@ func terminateService(c *cli.Context) error {
 	}
 
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Stop service
 	return hd.TerminateService(getComposeFiles(c), hd.Context.ConfigPath)

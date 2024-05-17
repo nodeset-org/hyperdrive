@@ -53,7 +53,6 @@ fi
 
 # Geth startup
 if [ "$CLIENT" = "geth" ]; then
-
     # Performance tuning for ARM systems
     UNAME_VAL=$(uname -m)
     if [ "$UNAME_VAL" = "arm64" ] || [ "$UNAME_VAL" = "aarch64" ]; then
@@ -104,6 +103,10 @@ if [ "$CLIENT" = "geth" ]; then
             CMD="$CMD --rpc.evmtimeout ${HD_GETH_EVM_TIMEOUT}s"
         fi
 
+        if [ "$HD_GETH_ARCHIVE_MODE" = "true" ]; then
+            CMD="$CMD --syncmode=full --gcmode=archive"
+        fi
+
         if [ "$ENABLE_METRICS" = "true" ]; then
             CMD="$CMD --metrics --metrics.addr 0.0.0.0 --metrics.port $EC_METRICS_PORT"
         fi
@@ -115,13 +118,11 @@ if [ "$CLIENT" = "geth" ]; then
         exec ${CMD} --http.vhosts '*'
 
     fi
-
 fi
 
 
 # Nethermind startup
 if [ "$CLIENT" = "nethermind" ]; then
-
     # Performance tuning for ARM systems
     UNAME_VAL=$(uname -m)
     if [ "$UNAME_VAL" = "arm64" ] || [ "$UNAME_VAL" = "aarch64" ]; then
@@ -212,13 +213,11 @@ if [ "$CLIENT" = "nethermind" ]; then
     fi
 
     exec ${CMD}
-
 fi
 
 
 # Besu startup
 if [ "$CLIENT" = "besu" ]; then
-
     # Performance tuning for ARM systems
     UNAME_VAL=$(uname -m)
     if [ "$UNAME_VAL" = "arm64" ] || [ "$UNAME_VAL" = "aarch64" ]; then
@@ -295,7 +294,7 @@ if [ "$CLIENT" = "reth" ]; then
 
     # Create the JWT secret
     if [ ! -f "/secrets/jwtsecret" ]; then
-        openssl rand -hex 32 | tr -d "\n" > /secrets/jwtsecret
+        echo -n "$(head -c 32 /dev/urandom | od -A n -t x1 | tr -d '[:space:]')" > /secrets/jwtsecret
     fi
 
     CMD="$PERF_PREFIX /usr/local/bin/reth node $RETH_NETWORK \
@@ -323,10 +322,13 @@ if [ "$CLIENT" = "reth" ]; then
         CMD="$CMD --port $EC_P2P_PORT"
     fi
 
-    if [ ! -z "$EC_MAX_PEERS" ]; then
-        CMD="$CMD --max-outbound-peers $EC_MAX_PEERS --max-inbound-peers $EC_MAX_PEERS"
+    if [ ! -z "$RETH_INBOUND_MAX_PEERS" ]; then
+        CMD="$CMD --max-inbound-peers $RETH_INBOUND_MAX_PEERS"
+    fi
+
+    if [ ! -z "$RETH_OUTBOUND_MAX_PEERS" ]; then
+        CMD="$CMD --max-outbound-peers $RETH_OUTBOUND_MAX_PEERS"
     fi
 
     exec ${CMD}
-
 fi

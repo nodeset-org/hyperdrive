@@ -6,12 +6,16 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	nutils "github.com/rocket-pool/node-manager-core/utils"
 	"github.com/urfave/cli/v2"
 )
 
 func exportWallet(c *cli.Context) error {
 	// Get Hyperdrive client
-	hd := client.NewHyperdriveClientFromCtx(c)
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Get & check wallet status
 	status, err := hd.Api.Wallet.Status()
@@ -47,7 +51,7 @@ func exportWallet(c *cli.Context) error {
 	// Print wallet & return
 	fmt.Println("Node account private key:")
 	fmt.Println("")
-	fmt.Println(export.Data.AccountPrivateKey)
+	fmt.Println(nutils.EncodeHexWithPrefix(export.Data.AccountPrivateKey))
 	fmt.Println("")
 	fmt.Println("Wallet password:")
 	fmt.Println("")

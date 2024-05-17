@@ -10,6 +10,8 @@ services:
     image: {{.Hyperdrive.GetDaemonContainerTag}}
     container_name: {{.Hyperdrive.ProjectName}}_{{.Hyperdrive.DaemonContainerName}}
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:{{.Hyperdrive.ApiPort}}:{{.Hyperdrive.ApiPort}}/tcp" # Restricted to localhost outside of Docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - {{.Hyperdrive.GetUserDirectory}}:{{.Hyperdrive.GetUserDirectory}}
@@ -20,10 +22,10 @@ services:
     command:
       - --user-dir
       - "{{.Hyperdrive.GetUserDirectory}}"
-      {{- range $module := .GetEnabledModuleConfigNames}}
-      - -m
-      - "{{$module}}"
-      {{- end}}
+      - --ip
+      - "0.0.0.0" # Open to all Docker traffic
+      - --port
+      - "{{.Hyperdrive.ApiPort}}"
     networks:
       - net
       {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}

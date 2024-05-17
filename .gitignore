@@ -11,6 +11,9 @@
 # Test binary, built with `go test -c`
 *.test
 
+# VS Code
+.vscode/
+
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
@@ -42,3 +45,4 @@ install/packages/debian/debian/hyperdrive*
 install/packages/debian/_build/
 bin
 pkg
+.vscode/

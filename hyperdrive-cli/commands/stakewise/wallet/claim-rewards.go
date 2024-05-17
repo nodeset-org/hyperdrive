@@ -12,14 +12,21 @@ import (
 )
 
 func claimRewards(c *cli.Context) error {
-	hd := client.NewHyperdriveClientFromCtx(c)
-	sw := client.NewStakewiseClientFromCtx(c)
-	resp, err := sw.Api.Wallet.ClaimRewards()
+	// Get the client
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
+	sw, err := client.NewStakewiseClientFromCtx(c, hd)
 	if err != nil {
 		return err
 	}
 
 	// Get the list of rewards available
+	resp, err := sw.Api.Wallet.ClaimRewards()
+	if err != nil {
+		return err
+	}
 	fmt.Println("Your withdrawable rewards:")
 	fmt.Printf("%.4f %s (%s)\n", eth.WeiToEth(resp.Data.WithdrawableToken), resp.Data.TokenSymbol, resp.Data.TokenName)
 	fmt.Printf("%.4f ETH\n", eth.WeiToEth(resp.Data.WithdrawableEth))
