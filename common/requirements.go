@@ -131,7 +131,7 @@ func (sp *ServiceProvider) WaitForWallet(ctx context.Context) error {
 func (sp *ServiceProvider) checkExecutionClientStatus(ctx context.Context) (bool, eth.IExecutionClient, error) {
 	// Check the EC status
 	ecMgr := sp.GetEthClient()
-	mgrStatus := ecMgr.CheckStatus(ctx)
+	mgrStatus := ecMgr.CheckStatus(ctx, true) // Always check the chain ID for now
 	if ecMgr.IsPrimaryReady() {
 		return true, nil, nil
 	}
@@ -178,7 +178,7 @@ func (sp *ServiceProvider) checkExecutionClientStatus(ctx context.Context) (bool
 func (sp *ServiceProvider) checkBeaconClientStatus(ctx context.Context) (bool, error) {
 	// Check the BC status
 	bcMgr := sp.GetBeaconClient()
-	mgrStatus := bcMgr.CheckStatus(ctx)
+	mgrStatus := bcMgr.CheckStatus(ctx, true) // Always check the chain ID for now
 	if bcMgr.IsPrimaryReady() {
 		return true, nil
 	}

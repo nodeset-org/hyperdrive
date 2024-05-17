@@ -20,7 +20,7 @@ type ServiceProvider struct {
 	userDir string
 }
 
-// Creates a new ServiceProvider instance
+// Creates a new ServiceProvider instance by loading the Hyperdrive config in the provided directory
 func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 	// Config
 	cfgPath := filepath.Join(userDir, hdconfig.ConfigFilename)
@@ -32,6 +32,11 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 		return nil, fmt.Errorf("hyperdrive config settings file [%s] not found", cfgPath)
 	}
 
+	return NewServiceProviderFromConfig(userDir, cfg)
+}
+
+// Creates a new ServiceProvider instance from a Hyperdrive config; the config will not be laoded from the provided directory
+func NewServiceProviderFromConfig(userDir string, cfg *hdconfig.HyperdriveConfig) (*ServiceProvider, error) {
 	// Core provider
 	sp, err := services.NewServiceProvider(cfg, hdconfig.ClientTimeout)
 	if err != nil {
