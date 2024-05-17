@@ -27,30 +27,41 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 	data := response.Data
 	sw.Logger.Debug("Server response", "data", data.ServerResponse)
 	fmt.Println()
-	newKeyCount := len(data.UnregisteredPubkeys)
+	newKeyCount := len(data.NewPubkeys)
+	remainingKeyCount := len(data.RemainingPubkeys)
 
 	if data.SufficientBalance {
 		if newKeyCount == 0 {
-			fmt.Println("All of your validator keys are registered.")
+			fmt.Printf("All of your validator keys are already registered (%s%d%s in total).\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
+			fmt.Printf("%s%d%s are pending activation.", terminal.ColorGreen, data.PendingCount, terminal.ColorReset)
+			fmt.Printf("%s%d%s have been activated already.", terminal.ColorGreen, data.ActiveCount, terminal.ColorReset)
 			return false, nil
 		}
 		fmt.Printf("Registered %s%d%s new validator keys:\n", terminal.ColorGreen, newKeyCount, terminal.ColorReset)
-		for _, key := range data.UnregisteredPubkeys {
+		for _, key := range data.NewPubkeys {
 			fmt.Println(key.HexWithPrefix())
 		}
-		fmt.Println()
-		fmt.Printf("Total keys registered: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
+		data.PendingCount += uint64(newKeyCount)
 	} else {
 		fmt.Println("Not all keys were uploaded due to insufficient balance.")
-		fmt.Printf("ETH required per key: %s%f%s\n", terminal.ColorGreen, data.EthPerKey, terminal.ColorReset)
-		fmt.Printf("Current Balance: %s%f%s\n", terminal.ColorGreen, data.Balance, terminal.ColorReset)
-		fmt.Printf("Additional ETH required for remaining keys: %s%f%s\n", terminal.ColorGreen, data.RemainingEthRequired, terminal.ColorReset)
+		fmt.Printf("Current wallet balance: %s%f%s\n", terminal.ColorGreen, data.Balance, terminal.ColorReset)
+		fmt.Printf("Remaining unregistered keys: %s%d%s\n", terminal.ColorGreen, remainingKeyCount, terminal.ColorReset)
+		fmt.Printf("You need %s%f%s more ETH to register your remaining keys.\n", terminal.ColorGreen, data.RemainingEthRequired, terminal.ColorReset)
 
-		fmt.Printf("\nUploaded %d out of %d keys:\n", newKeyCount, data.TotalCount)
-		for _, key := range data.UnregisteredPubkeys {
-			fmt.Println(key.HexWithPrefix())
+		totalUnregisteredKeyCount := len(data.NewPubkeys) + len(data.RemainingPubkeys)
+		if newKeyCount == 0 {
+			fmt.Printf("\nUploaded 0 out of %d new keys.\n", totalUnregisteredKeyCount)
+		} else {
+			fmt.Printf("\nUploaded %d out of %d new keys:\n", newKeyCount, totalUnregisteredKeyCount)
+			for _, key := range data.NewPubkeys {
+				fmt.Println(key.HexWithPrefix())
+			}
 		}
 	}
+	fmt.Println()
+	fmt.Printf("Total keys: %s%d%s\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
+	fmt.Printf("%s%d%s are registered and pending activation.\n", terminal.ColorGreen, data.PendingCount, terminal.ColorReset)
+	fmt.Printf("%s%d%s are registered and have been activated already.\n", terminal.ColorGreen, data.ActiveCount, terminal.ColorReset)
 
 	return true, nil
 }

@@ -30,6 +30,31 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			},
 
 			{
+				Name:      "send",
+				Aliases:   []string{"n"},
+				Usage:     "Send ETH or tokens from the node account to an address. ENS names supported. <token> can be 'eth' or the address of an arbitrary token you want to send (including the 0x prefix).",
+				ArgsUsage: "amount token to",
+				Flags: []cli.Flag{
+					utils.YesFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 3)
+					amount, err := input.ValidatePositiveEthAmount("send amount", c.Args().Get(0))
+					if err != nil {
+						return err
+					}
+					token, err := utils.ValidateTokenType("token type", c.Args().Get(1))
+					if err != nil {
+						return err
+					}
+
+					// Run
+					return nodeSend(c, amount, token, c.Args().Get(2))
+				},
+			},
+
+			{
 				Name:    "init",
 				Aliases: []string{"i"},
 				Usage:   "Initialize the node wallet",
