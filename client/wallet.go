@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/hex"
 	"fmt"
+	"math/big"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -183,4 +184,14 @@ func (r *WalletRequester) SignTx(message []byte) (*types.ApiResponse[api.WalletS
 		"tx": hex.EncodeToString(message),
 	}
 	return client.SendGetRequest[api.WalletSignTxData](r, "sign-tx", "SignTx", args)
+}
+
+// Send tokens from the wallet to an address
+func (r *WalletRequester) Send(amount *big.Int, token string, recipient common.Address) (*types.ApiResponse[api.WalletSendData], error) {
+	args := map[string]string{
+		"amount":    amount.String(),
+		"token":     token,
+		"recipient": recipient.Hex(),
+	}
+	return client.SendGetRequest[api.WalletSendData](r, "send", "Send", args)
 }

@@ -33,6 +33,7 @@ func NewWalletHandler(logger *log.Logger, ctx context.Context, serviceProvider *
 		&walletRecoverContextFactory{h},
 		&walletRestoreAddressContextFactory{h},
 		&walletSearchAndRecoverContextFactory{h},
+		&walletSendContextFactory{h},
 		&walletSendMessageContextFactory{h},
 		&walletSetEnsNameContextFactory{h},
 		&walletSetPasswordContextFactory{h},

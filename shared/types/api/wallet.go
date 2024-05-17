@@ -72,3 +72,12 @@ type WalletExportEthKeyData struct {
 type WalletGenerateValidatorKeyData struct {
 	PrivateKey []byte `json:"privateKey"`
 }
+
+type WalletSendData struct {
+	Balance             *big.Int             `json:"balance"`
+	TokenName           string               `json:"name"`
+	TokenSymbol         string               `json:"symbol"`
+	CanSend             bool                 `json:"canSend"`
+	InsufficientBalance bool                 `json:"insufficientBalance"`
+	TxInfo              *eth.TransactionInfo `json:"txInfo"`
+}
