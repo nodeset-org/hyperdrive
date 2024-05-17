@@ -45,3 +45,4 @@ install/packages/debian/debian/hyperdrive*
 install/packages/debian/_build/
 bin
 pkg
+.vscode/
