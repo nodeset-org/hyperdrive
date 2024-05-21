@@ -1,4 +1,12 @@
+hyperdrive (0.5.0) UNRELEASED; urgency=medium
+
+  * Constellation module
+
+ -- NodeSet LLC <info@nodeset.io>  Thu, 18 Apr 2024 17:06:33 +0000
+
 hyperdrive (0.4.2~b2) unstable; urgency=medium
+
+hyperdrive (0.4.1) unstable; urgency=medium
 
   * Updated Besu, Geth, and Lodestar.
   * Geth: added a setting to toggle archive mode support.
@@ -25,5 +33,5 @@ hyperdrive (0.4.2~b1) unstable; urgency=medium
   * Initial Debian package release
   * Stakewise functions now initialize the Stakewise wallet if it's missing instead of erroring out
 
- -- NodeSet LLC <info@nodeset.io>  Fri, 22 Mar 2024 02:00:21 +0000
+ -- NodeSet LLC <info@nodeset.io>  Thu, 18 Apr 2024 17:06:14 +0000
 

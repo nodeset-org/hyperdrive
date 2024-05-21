@@ -4,6 +4,8 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 	// Create the labels
 	stakewiseCfg := wiz.md.Config.Stakewise
 	stakewiseLabel := stakewiseCfg.GetTitle()
+	constellationCfg := wiz.md.Config.Constellation
+	constellationLabel := constellationCfg.GetTitle()
 
 	helperText := "Select the NodeSet modules you would like to enable below."
 
@@ -14,12 +16,16 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 			switch label {
 			case stakewiseLabel:
 				box.SetChecked(wiz.md.Config.Stakewise.Enabled.Value)
+			case constellationLabel:
+				box.SetChecked(wiz.md.Config.Constellation.Enabled.Value)
 			}
 		}
 	}
 
 	done := func(choices map[string]bool) {
 		stakewiseCfg.Enabled.Value = choices[stakewiseLabel]
+		constellationCfg.Enabled.Value = choices[constellationLabel]
+
 		wiz.metricsModal.show()
 	}
 
@@ -34,9 +40,9 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 		helperText,
 		90,
 		"Modules",
-		[]string{stakewiseLabel},
-		[]string{stakewiseCfg.Enabled.Description},
-		[]bool{stakewiseCfg.Enabled.Value},
+		[]string{stakewiseLabel, constellationLabel},
+		[]string{stakewiseCfg.Enabled.Description, constellationCfg.Enabled.Description},
+		[]bool{stakewiseCfg.Enabled.Value, constellationCfg.Enabled.Value},
 		show,
 		done,
 		back,

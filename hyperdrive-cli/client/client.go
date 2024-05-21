@@ -5,6 +5,9 @@ import (
 	"log/slog"
 	"net/http/httptrace"
 
+	csclient "github.com/nodeset-org/hyperdrive-constellation/client"
+	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
+
 	docker "github.com/docker/docker/client"
 	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive-daemon/client"
@@ -40,6 +43,12 @@ type HyperdriveClient struct {
 // Stakewise client
 type StakewiseClient struct {
 	Api     *swclient.ApiClient
+	Context *context.HyperdriveContext
+	Logger  *slog.Logger
+}
+
+type ConstellationClient struct {
+	Api     *csclient.ApiClient
 	Context *context.HyperdriveContext
 	Logger  *slog.Logger
 }
@@ -124,6 +133,47 @@ func NewStakewiseClientFromCtx(c *cli.Context, hdClient *HyperdriveClient) (*Sta
 
 	swClient.Api = swclient.NewApiClient(url, logger, tracer)
 	return swClient, nil
+}
+
+// Create new Constellation client from CLI context without checking for sync status
+// Only use this function from commands that may work if the Daemon service doesn't exist
+func NewConstellationClientFromCtx(c *cli.Context, hdClient *HyperdriveClient) (*ConstellationClient, error) {
+	hdCtx := context.GetHyperdriveContext(c)
+	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, csconfig.ModuleName))
+
+	// Create the tracer if required
+	var tracer *httptrace.ClientTrace
+	if hdCtx.HttpTraceFile != nil {
+		var err error
+		tracer, err = createTracer(hdCtx.HttpTraceFile, logger)
+		if err != nil {
+			logger.Error("Error creating HTTP trace", log.Err(err))
+		}
+	}
+
+	csClient := &ConstellationClient{
+		Context: hdCtx,
+		Logger:  logger,
+	}
+	// Get the API URL
+	url := hdCtx.ApiUrl
+	if url == nil {
+		var err error
+		url, err = url.Parse(fmt.Sprintf("http://localhost:%d/%s", hdClient.cfg.Stakewise.ApiPort.Value, swconfig.ApiClientRoute))
+		if err != nil {
+			return nil, fmt.Errorf("error parsing StakeWise API URL: %w", err)
+		}
+	} else {
+		host := fmt.Sprintf("%s://%s:%d/%s", url.Scheme, url.Hostname(), hdClient.cfg.Stakewise.ApiPort.Value, swconfig.ApiClientRoute)
+		var err error
+		url, err = url.Parse(host)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing StakeWise API URL: %w", err)
+		}
+	}
+
+	csClient.Api = csclient.NewApiClient(url, logger, tracer)
+	return csClient, nil
 }
 
 // Get the Docker client
