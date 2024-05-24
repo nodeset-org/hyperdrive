@@ -10,8 +10,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/nodeset-org/hyperdrive-daemon/client"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/rocket-pool/node-manager-core/beacon"
+	bclient "github.com/rocket-pool/node-manager-core/beacon/client"
 	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/rocket-pool/node-manager-core/log"
@@ -45,27 +48,49 @@ type ServiceProvider struct {
 
 // Creates a new ServiceProvider instance
 func NewServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, clientTimeout time.Duration) (*ServiceProvider, error) {
-	// Add the API client route if missing
-	hyperdriveUrl.Path = strings.TrimSuffix(hyperdriveUrl.Path, "/")
-	if hyperdriveUrl.Path == "" {
-		hyperdriveUrl.Path = fmt.Sprintf("%s/%s", hyperdriveUrl.Path, hdconfig.HyperdriveApiClientRoute)
-	}
-
-	// Create a client for the Hyperdrive daemon
-	defaultLogger := slog.Default()
-	hdClient := client.NewApiClient(hyperdriveUrl, defaultLogger, nil)
-
-	// Get the Hyperdrive config
-	hdCfg := hdconfig.NewHyperdriveConfig("")
-	cfgResponse, err := hdClient.Service.GetConfig()
+	hdCfg, hdClient, err := getHdConfig(hyperdriveUrl)
 	if err != nil {
-		return nil, fmt.Errorf("error getting config from Hyperdrive server: %w", err)
-	}
-	err = hdCfg.Deserialize(cfgResponse.Data.Config)
-	if err != nil {
-		return nil, fmt.Errorf("error deserializing Hyperdrive config: %w", err)
+		return nil, fmt.Errorf("error getting Hyperdrive config: %w", err)
 	}
 
+	// EC Manager
+	var fallbackEc *ethclient.Client
+	primaryEcUrl, fallbackEcUrl := hdCfg.GetExecutionClientUrls()
+	primaryEc, err := ethclient.Dial(primaryEcUrl)
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to primary EC at [%s]: %w", primaryEcUrl, err)
+	}
+	if fallbackEcUrl != "" {
+		// Get the fallback EC url, if applicable
+		fallbackEc, err = ethclient.Dial(fallbackEcUrl)
+		if err != nil {
+			return nil, fmt.Errorf("error connecting to fallback EC at [%s]: %w", fallbackEcUrl, err)
+		}
+	}
+
+	// Beacon manager
+	primaryBnUrl, fallbackBnUrl := hdCfg.GetBeaconNodeUrls()
+	primaryBc := bclient.NewStandardHttpClient(primaryBnUrl, clientTimeout)
+	var fallbackBc *bclient.StandardHttpClient
+	if fallbackBnUrl != "" {
+		fallbackBc = bclient.NewStandardHttpClient(fallbackBnUrl, clientTimeout)
+	}
+
+	return NewServiceProviderFromArtifacts(hdClient, hdCfg, moduleDir, moduleName, clientLogName, factory, primaryEc, fallbackEc, primaryBc, fallbackBc, clientTimeout)
+}
+
+// Creates a new ServiceProvider instance, using the given clients instead of creating ones based on the config parameters
+func NewServiceProviderFromClients[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, primaryEc eth.IExecutionClient, fallbackEc eth.IExecutionClient, primaryBn beacon.IBeaconClient, fallbackBn beacon.IBeaconClient, clientTimeout time.Duration) (*ServiceProvider, error) {
+	hdCfg, hdClient, err := getHdConfig(hyperdriveUrl)
+	if err != nil {
+		return nil, fmt.Errorf("error getting Hyperdrive config: %w", err)
+	}
+
+	return NewServiceProviderFromArtifacts(hdClient, hdCfg, moduleDir, moduleName, clientLogName, factory, primaryEc, fallbackEc, primaryBn, fallbackBn, clientTimeout)
+}
+
+// Creates a new ServiceProvider instance, using the given artifacts instead of creating ones based on the config parameters
+func NewServiceProviderFromArtifacts[ConfigType hdconfig.IModuleConfig](hdClient *client.ApiClient, hdCfg *hdconfig.HyperdriveConfig, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, primaryEc eth.IExecutionClient, fallbackEc eth.IExecutionClient, primaryBn beacon.IBeaconClient, fallbackBn beacon.IBeaconClient, clientTimeout time.Duration) (*ServiceProvider, error) {
 	// Set up the client logger
 	logPath := hdCfg.GetModuleLogFilePath(moduleName, clientLogName)
 	clientLogger, err := log.NewLogger(logPath, hdCfg.GetLoggerOptions())
@@ -110,15 +135,13 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.UR
 	signer := NewModuleSigner(hdClient)
 
 	// EC Manager
-	primaryEcUrl, fallbackEcUrl := hdCfg.GetExecutionClientUrls()
-	ecManager, err := services.NewExecutionClientManager(primaryEcUrl, fallbackEcUrl, resources.ChainID, clientTimeout)
+	ecManager, err := services.NewExecutionClientManager(primaryEc, fallbackEc, resources.ChainID, clientTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("error creating executon client manager: %w", err)
 	}
 
 	// Beacon manager
-	primaryBnUrl, fallbackBnUrl := hdCfg.GetBeaconNodeUrls()
-	bcManager, err := services.NewBeaconClientManager(primaryBnUrl, fallbackBnUrl, resources.ChainID, clientTimeout)
+	bcManager, err := services.NewBeaconClientManager(primaryBn, fallbackBn, resources.ChainID, clientTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("error creating Beacon client manager: %w", err)
 	}
@@ -130,7 +153,7 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.UR
 	}
 
 	// Query Manager - set the default concurrent run limit to half the CPUs so the EC doesn't get overwhelmed
-	concurrentCallLimit := runtime.NumCPU()
+	concurrentCallLimit := runtime.NumCPU() / 2
 	if concurrentCallLimit < 1 {
 		concurrentCallLimit = 1
 	}
@@ -239,4 +262,33 @@ func (p *ServiceProvider) GetBaseContext() context.Context {
 
 func (p *ServiceProvider) CancelContextOnShutdown() {
 	p.cancel()
+}
+
+// ==========================
+// === Internal Functions ===
+// ==========================
+
+func getHdConfig(hyperdriveUrl *url.URL) (*hdconfig.HyperdriveConfig, *client.ApiClient, error) {
+	// Add the API client route if missing
+	hyperdriveUrl.Path = strings.TrimSuffix(hyperdriveUrl.Path, "/")
+	if hyperdriveUrl.Path == "" {
+		hyperdriveUrl.Path = fmt.Sprintf("%s/%s", hyperdriveUrl.Path, hdconfig.HyperdriveApiClientRoute)
+	}
+
+	// Create a client for the Hyperdrive daemon
+	defaultLogger := slog.Default()
+	hdClient := client.NewApiClient(hyperdriveUrl, defaultLogger, nil)
+
+	// Get the Hyperdrive config
+	hdCfg := hdconfig.NewHyperdriveConfig("")
+	cfgResponse, err := hdClient.Service.GetConfig()
+	if err != nil {
+		return nil, nil, fmt.Errorf("error getting config from Hyperdrive server: %w", err)
+	}
+	err = hdCfg.Deserialize(cfgResponse.Data.Config)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error deserializing Hyperdrive config: %w", err)
+	}
+
+	return hdCfg, hdClient, nil
 }

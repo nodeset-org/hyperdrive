@@ -7,13 +7,13 @@ toolchain go1.21.1
 require (
 	github.com/alessio/shellescape v1.4.2
 	github.com/docker/docker v26.1.0+incompatible
-	github.com/ethereum/go-ethereum v1.14.0
+	github.com/ethereum/go-ethereum v1.14.3
 	github.com/fatih/color v1.16.0
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.3.1
+	github.com/rocket-pool/node-manager-core v0.3.1-0.20240524015353-c3f79505f02b
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/wealdtech/go-ens/v3 v3.6.0
 	gopkg.in/yaml.v3 v3.0.1
