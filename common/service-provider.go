@@ -5,7 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/docker/docker/client"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/node/services"
 )
 
@@ -32,11 +34,11 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 		return nil, fmt.Errorf("hyperdrive config settings file [%s] not found", cfgPath)
 	}
 
-	return NewServiceProviderFromConfig(userDir, cfg)
+	return NewServiceProviderFromConfig(cfg)
 }
 
-// Creates a new ServiceProvider instance from a Hyperdrive config; the config will not be laoded from the provided directory
-func NewServiceProviderFromConfig(userDir string, cfg *hdconfig.HyperdriveConfig) (*ServiceProvider, error) {
+// Creates a new ServiceProvider instance directly from a Hyperdrive config instead of loading it from the filesystem
+func NewServiceProviderFromConfig(cfg *hdconfig.HyperdriveConfig) (*ServiceProvider, error) {
 	// Core provider
 	sp, err := services.NewServiceProvider(cfg, hdconfig.ClientTimeout)
 	if err != nil {
@@ -46,7 +48,24 @@ func NewServiceProviderFromConfig(userDir string, cfg *hdconfig.HyperdriveConfig
 	// Create the provider
 	provider := &ServiceProvider{
 		ServiceProvider: sp,
-		userDir:         userDir,
+		userDir:         cfg.GetUserDirectory(),
+		cfg:             cfg,
+	}
+	return provider, nil
+}
+
+// Creates a new ServiceProvider instance from custom services and artifacts
+func NewServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resources *config.NetworkResources, ecManager *services.ExecutionClientManager, bnManager *services.BeaconClientManager, docker client.APIClient) (*ServiceProvider, error) {
+	// Core provider
+	sp, err := services.NewServiceProviderWithCustomServices(cfg, resources, ecManager, bnManager, docker)
+	if err != nil {
+		return nil, fmt.Errorf("error creating core service provider: %w", err)
+	}
+
+	// Create the provider
+	provider := &ServiceProvider{
+		ServiceProvider: sp,
+		userDir:         cfg.GetUserDirectory(),
 		cfg:             cfg,
 	}
 	return provider, nil
