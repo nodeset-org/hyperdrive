@@ -25,18 +25,20 @@ var (
 
 // Initialize a common server used by all tests
 func TestMain(m *testing.M) {
-	mgr := tests.NewTestManager()
 	wg = &sync.WaitGroup{}
-	logger = mgr.Logger
+	var err error
+	testMgr, err = tests.NewTestManager()
+	if err != nil {
+		fail("error creating test manager: %v", err)
+	}
+	logger = testMgr.Logger
 
 	// Create the server
-	var err error
 	ip := "localhost"
-	serverMgr, err = server.NewServerManager(mgr.ServiceProvider, ip, 0, wg)
+	serverMgr, err = server.NewServerManager(testMgr.ServiceProvider, ip, 0, wg)
 	if err != nil {
 		fail("error creating server: %v", err)
 	}
-	logger.Info("Created server")
 
 	// Create the client
 	urlString := fmt.Sprintf("http://%s:%d/%s", ip, serverMgr.GetPort(), config.HyperdriveApiClientRoute)

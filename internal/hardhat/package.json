@@ -1,0 +1,7 @@
+{
+  "name": "hyperdrive-daemon",
+  "dependencies": {
+    "@nomicfoundation/edr": "^0.3.8",
+    "hardhat": "^2.22.4"
+  }
+}
