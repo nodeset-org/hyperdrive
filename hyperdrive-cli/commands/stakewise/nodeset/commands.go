@@ -25,6 +25,19 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 					return uploadDepositData(c)
 				},
 			},
+			{
+				Name:    "blah",
+				Aliases: []string{"b"},
+				Flags:   []cli.Flag{},
+				Usage:   "Testing endpoint for new features",
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run
+					return blah(c)
+				},
+			},
 		},
 	})
 }
