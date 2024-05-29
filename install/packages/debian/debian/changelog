@@ -1,3 +1,9 @@
+hyperdrive (0.4.3) UNRELEASED; urgency=medium
+
+  * New Nodeset API 
+
+ -- NodeSet LLC <info@nodeset.io>  Wed, 29 May 2024 14:35:44 +0000
+
 hyperdrive (0.4.2~b2) unstable; urgency=medium
 
   * Updated Besu, Geth, and Lodestar.
@@ -18,7 +24,7 @@ hyperdrive (0.4.2~b2) unstable; urgency=medium
   * Fixed the background color in the `hyperdrive service config` TUI not displaying properly in empty cells.
   * StakeWise: Uploading deposit data for generated keys will now be blocked if your node wallet doesn't have enough ETH in it to pay for the gas cost of the deposit transactions (0.01 ETH per key).
 
- -- NodeSet LLC <info@nodeset.io>  Fri, 17 May 2024 19:01:10 +0000
+ -- NodeSet LLC <info@nodeset.io>  Wed, 29 May 2024 14:35:08 +0000
 
 hyperdrive (0.4.2~b1) unstable; urgency=medium
 
