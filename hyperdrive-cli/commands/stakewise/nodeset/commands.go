@@ -26,16 +26,22 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				},
 			},
 			{
-				Name:    "blah",
-				Aliases: []string{"b"},
-				Flags:   []cli.Flag{},
-				Usage:   "Testing endpoint for new features",
+				Name:    "register-node",
+				Aliases: []string{"r"},
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "email",
+						Aliases: []string{"e"},
+						Usage:   "Email address to register with NodeSet.",
+					},
+				},
+				Usage: "Register node with Nodeset",
 				Action: func(c *cli.Context) error {
 					// Validate args
 					utils.ValidateArgCount(c, 0)
 
 					// Run
-					return blah(c)
+					return registerNode(c)
 				},
 			},
 		},
