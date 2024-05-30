@@ -58,6 +58,9 @@ type HyperdriveConfig struct {
 	// Metrics
 	Metrics *config.MetricsConfig
 
+	// MEV-Boost
+	MevBoost *MevBoostConfig
+
 	// Modules
 	Modules map[string]any
 
@@ -267,6 +270,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg.ExternalBeaconClient = config.NewExternalBeaconConfig()
 	cfg.Fallback = config.NewFallbackConfig()
 	cfg.Metrics = NewMetricsConfig()
+	cfg.MevBoost = NewMevBoostConfig(cfg)
 
 	// Apply the default values for mainnet
 	cfg.Network.Value = config.Network_Mainnet
@@ -306,6 +310,7 @@ func (cfg *HyperdriveConfig) GetSubconfigs() map[string]config.IConfigSection {
 		ids.LocalBeaconID:       cfg.LocalBeaconClient,
 		ids.ExternalBeaconID:    cfg.ExternalBeaconClient,
 		ids.MetricsID:           cfg.Metrics,
+		ids.MevBoostID:          cfg.MevBoost,
 	}
 }
 

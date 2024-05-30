@@ -16,9 +16,10 @@ const (
 	UserPasswordFilename   string = "password"
 
 	// Scripts
-	EcStartScript string = "start-ec.sh"
-	BnStartScript string = "start-bn.sh"
-	VcStartScript string = "start-vc.sh"
+	EcStartScript       string = "start-ec.sh"
+	BnStartScript       string = "start-bn.sh"
+	VcStartScript       string = "start-vc.sh"
+	MevBoostStartScript string = "start-mev-boost.sh"
 
 	// HTTP
 	ClientTimeout time.Duration = 1 * time.Minute
