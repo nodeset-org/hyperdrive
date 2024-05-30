@@ -25,8 +25,7 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 	}
 
 	data := response.Data
-	sw.Logger.Debug("Server response", "data", data.ServerResponse)
-	fmt.Println()
+
 	newKeyCount := len(data.NewPubkeys)
 	remainingKeyCount := len(data.RemainingPubkeys)
 
