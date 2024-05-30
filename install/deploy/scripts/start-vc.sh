@@ -57,12 +57,7 @@ if [ "$CLIENT" = "lighthouse" ]; then
         CMD="$CMD --monitoring-endpoint $BITFLY_NODE_METRICS_ENDPOINT?apikey=$BITFLY_NODE_METRICS_SECRET&machine=$BITFLY_NODE_METRICS_MACHINE_NAME"
     fi
 
-    if [ "$ADDON_GWW_ENABLED" = "true" ]; then
-        echo "default: $GRAFFITI" > $GWW_GRAFFITI_FILE # Default graffiti value for Lighthouse
-        exec ${CMD} --graffiti-file $GWW_GRAFFITI_FILE
-    else
-        exec ${CMD} --graffiti "$GRAFFITI"
-    fi
+    exec ${CMD} --graffiti "$GRAFFITI"
 
 fi
 
@@ -187,12 +182,7 @@ if [ "$CLIENT" = "prysm" ]; then
         CMD="$CMD --disable-account-metrics"
     fi
 
-    if [ "$ADDON_GWW_ENABLED" = "true" ]; then
-        echo "ordered:\n  - $GRAFFITI" > $GWW_GRAFFITI_FILE # Default graffiti value for Prysm
-        exec ${CMD} --graffiti-file=$GWW_GRAFFITI_FILE
-    else
-        exec ${CMD} --graffiti "$GRAFFITI"
-    fi
+    exec ${CMD} --graffiti "$GRAFFITI"
 
 fi
 
@@ -239,12 +229,7 @@ if [ "$CLIENT" = "teku" ]; then
         CMD="$CMD --metrics-publish-endpoint=$BITFLY_NODE_METRICS_ENDPOINT?apikey=$BITFLY_NODE_METRICS_SECRET&machine=$BITFLY_NODE_METRICS_MACHINE_NAME"
     fi
 
-    if [ "$ADDON_GWW_ENABLED" = "true" ]; then
-        echo "$GRAFFITI" > $GWW_GRAFFITI_FILE # Default graffiti value for Teku
-        exec ${CMD} --validators-graffiti-file=$GWW_GRAFFITI_FILE
-    else
-        exec ${CMD} --validators-graffiti="$GRAFFITI"
-    fi
+    exec ${CMD} --validators-graffiti="$GRAFFITI"
 
 fi
 

@@ -8,6 +8,12 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 	helperText := "Select the NodeSet modules you would like to enable below."
 
 	show := func(modal *checkBoxModalLayout) {
+		modal.generateCheckboxes(
+			[]string{stakewiseLabel},
+			[]string{stakewiseCfg.Enabled.Description},
+			[]bool{stakewiseCfg.Enabled.Value},
+		)
+
 		wiz.md.setPage(modal.page)
 		modal.focus()
 		for label, box := range modal.checkboxes {
@@ -34,9 +40,6 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 		helperText,
 		90,
 		"Modules",
-		[]string{stakewiseLabel},
-		[]string{stakewiseCfg.Enabled.Description},
-		[]bool{stakewiseCfg.Enabled.Value},
 		show,
 		done,
 		back,

@@ -118,23 +118,53 @@ func (c *GlobalConfig) Validate() []string {
 	}
 	*/
 
+	// Ensure there's a MEV-boost URL
+	if c.Hyperdrive.MevBoost.Enable.Value {
+		switch c.Hyperdrive.MevBoost.Mode.Value {
+		case config.ClientMode_Local:
+			// In local MEV-boost mode, the user has to have at least one relay
+			relays := c.Hyperdrive.MevBoost.GetEnabledMevRelays()
+			if len(relays) == 0 {
+				errors = append(errors, "You have MEV-boost enabled in local mode but don't have any profiles or relays enabled. Please select at least one profile or relay to use MEV-boost.")
+			}
+		case config.ClientMode_External:
+			// In external MEV-boost mode, the user has to have an external URL if they're running Docker mode
+			if c.Hyperdrive.IsLocalMode() && c.Hyperdrive.MevBoost.ExternalUrl.Value == "" {
+				errors = append(errors, "You have MEV-boost enabled in external mode but don't have a URL set. Please enter the external MEV-boost server URL to use it.")
+			}
+		default:
+			errors = append(errors, "You do not have a MEV-Boost mode configured. You must either select a mode in the `hyperdrive service config` UI, or disable MEV-Boost.")
+		}
+	}
+
 	// Ensure the selected port numbers are unique. Keeps track of all the errors
 	portMap := make(map[uint16]bool)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.ApiPort, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Stakewise.ApiPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.HttpPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.P2pPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.HttpPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.WebsocketPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.EnginePort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.P2pPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.EcMetricsPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.BnMetricsPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.Prometheus.Port, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.ExporterMetricsPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.Grafana.Port, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.DaemonMetricsPort, errors)
-	_, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.Lighthouse.P2pQuicPort, errors)
+	if c.Hyperdrive.ClientMode.Value == config.ClientMode_Local {
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.HttpPort, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.WebsocketPort, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.EnginePort, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.P2pPort, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.HttpPort, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.P2pPort, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.Lighthouse.P2pQuicPort, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.Prysm.RpcPort, errors)
+	}
+	if c.Hyperdrive.Metrics.EnableMetrics.Value {
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.EcMetricsPort, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.BnMetricsPort, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.Prometheus.Port, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.ExporterMetricsPort, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.Grafana.Port, errors)
+		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.DaemonMetricsPort, errors)
+		if c.Stakewise.Enabled.Value {
+			portMap, errors = addAndCheckForDuplicate(portMap, c.Stakewise.VcCommon.MetricsPort, errors)
+		}
+	}
+	if c.Hyperdrive.MevBoost.Enable.Value && c.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
+		_, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.MevBoost.Port, errors)
+	}
 
 	return errors
 }

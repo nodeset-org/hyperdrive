@@ -114,10 +114,22 @@ func serviceVersion(c *cli.Context) error {
 		return fmt.Errorf("unknown client mode [%v]", clientMode)
 	}
 
+	var mevBoostString string
+	if cfg.Hyperdrive.MevBoost.Enable.Value {
+		if cfg.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
+			mevBoostString = fmt.Sprintf("Enabled (Local Mode)\n\tImage: %s", cfg.Hyperdrive.MevBoost.ContainerTag.Value)
+		} else {
+			mevBoostString = "Enabled (External Mode)"
+		}
+	} else {
+		mevBoostString = "Disabled"
+	}
+
 	// Print version info
 	fmt.Printf("Hyperdrive client version: %s\n", c.App.Version)
 	fmt.Printf("Hyperdrive daemon version: %s\n", serviceVersion)
 	fmt.Printf("Selected Execution Client: %s\n", executionClientString)
 	fmt.Printf("Selected Beacon Node: %s\n", beaconNodeString)
+	fmt.Printf("MEV-Boost client: %s\n", mevBoostString)
 	return nil
 }
