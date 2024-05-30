@@ -96,11 +96,7 @@ func NewTestManager() (*TestManager, error) {
 	}
 
 	// Create the Execution client manager
-	ecManager, err := services.NewExecutionClientManager(primaryEc, nil, uint(chainID.Uint64()), clientTimeout)
-	if err != nil {
-		cleanup(testingConfigDir)
-		return nil, fmt.Errorf("error creating execution client manager: %v", err)
-	}
+	ecManager := services.NewExecutionClientManager(primaryEc, uint(chainID.Uint64()), clientTimeout)
 
 	// Create the Beacon config based on the Hardhat values
 	beaconCfg := db.NewDefaultConfig()
@@ -111,11 +107,7 @@ func NewTestManager() (*TestManager, error) {
 	// Make the Beacon client manager
 	beaconMockManager := manager.NewBeaconMockManager(logger, beaconCfg)
 	primaryBn := client.NewStandardClient(beaconMockManager)
-	bnManager, err := services.NewBeaconClientManager(primaryBn, nil, uint(beaconCfg.ChainID), clientTimeout)
-	if err != nil {
-		cleanup(testingConfigDir)
-		return nil, fmt.Errorf("error creating beacon client manager: %v", err)
-	}
+	bnManager := services.NewBeaconClientManager(primaryBn, uint(beaconCfg.ChainID), clientTimeout)
 
 	// Make a Docker client mock
 	docker := docker.NewDockerClientMock()

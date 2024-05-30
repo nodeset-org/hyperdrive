@@ -13,7 +13,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/nodeset-org/hyperdrive-daemon/client"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
-	"github.com/rocket-pool/node-manager-core/beacon"
 	bclient "github.com/rocket-pool/node-manager-core/beacon/client"
 	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/eth"
@@ -53,8 +52,11 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.UR
 		return nil, fmt.Errorf("error getting Hyperdrive config: %w", err)
 	}
 
+	// Resources
+	resources := hdCfg.GetNetworkResources()
+
 	// EC Manager
-	var fallbackEc *ethclient.Client
+	var ecManager *services.ExecutionClientManager
 	primaryEcUrl, fallbackEcUrl := hdCfg.GetExecutionClientUrls()
 	primaryEc, err := ethclient.Dial(primaryEcUrl)
 	if err != nil {
@@ -62,35 +64,41 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.UR
 	}
 	if fallbackEcUrl != "" {
 		// Get the fallback EC url, if applicable
-		fallbackEc, err = ethclient.Dial(fallbackEcUrl)
+		fallbackEc, err := ethclient.Dial(fallbackEcUrl)
 		if err != nil {
 			return nil, fmt.Errorf("error connecting to fallback EC at [%s]: %w", fallbackEcUrl, err)
 		}
+		ecManager = services.NewExecutionClientManagerWithFallback(primaryEc, fallbackEc, resources.ChainID, clientTimeout)
+	} else {
+		ecManager = services.NewExecutionClientManager(primaryEc, resources.ChainID, clientTimeout)
 	}
 
 	// Beacon manager
+	var bcManager *services.BeaconClientManager
 	primaryBnUrl, fallbackBnUrl := hdCfg.GetBeaconNodeUrls()
 	primaryBc := bclient.NewStandardHttpClient(primaryBnUrl, clientTimeout)
-	var fallbackBc *bclient.StandardHttpClient
 	if fallbackBnUrl != "" {
-		fallbackBc = bclient.NewStandardHttpClient(fallbackBnUrl, clientTimeout)
+		fallbackBc := bclient.NewStandardHttpClient(fallbackBnUrl, clientTimeout)
+		bcManager = services.NewBeaconClientManagerWithFallback(primaryBc, fallbackBc, resources.ChainID, clientTimeout)
+	} else {
+		bcManager = services.NewBeaconClientManager(primaryBc, resources.ChainID, clientTimeout)
 	}
 
-	return NewServiceProviderFromArtifacts(hdClient, hdCfg, moduleDir, moduleName, clientLogName, factory, primaryEc, fallbackEc, primaryBc, fallbackBc, clientTimeout)
+	return NewServiceProviderFromArtifacts(hdClient, hdCfg, moduleDir, moduleName, clientLogName, factory, ecManager, bcManager)
 }
 
 // Creates a new ServiceProvider instance, using the given clients instead of creating ones based on the config parameters
-func NewServiceProviderFromClients[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, primaryEc eth.IExecutionClient, fallbackEc eth.IExecutionClient, primaryBn beacon.IBeaconClient, fallbackBn beacon.IBeaconClient, clientTimeout time.Duration) (*ServiceProvider, error) {
+func NewServiceProviderFromClients[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, ecManager *services.ExecutionClientManager, bcManager *services.BeaconClientManager) (*ServiceProvider, error) {
 	hdCfg, hdClient, err := getHdConfig(hyperdriveUrl)
 	if err != nil {
 		return nil, fmt.Errorf("error getting Hyperdrive config: %w", err)
 	}
 
-	return NewServiceProviderFromArtifacts(hdClient, hdCfg, moduleDir, moduleName, clientLogName, factory, primaryEc, fallbackEc, primaryBn, fallbackBn, clientTimeout)
+	return NewServiceProviderFromArtifacts(hdClient, hdCfg, moduleDir, moduleName, clientLogName, factory, ecManager, bcManager)
 }
 
 // Creates a new ServiceProvider instance, using the given artifacts instead of creating ones based on the config parameters
-func NewServiceProviderFromArtifacts[ConfigType hdconfig.IModuleConfig](hdClient *client.ApiClient, hdCfg *hdconfig.HyperdriveConfig, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, primaryEc eth.IExecutionClient, fallbackEc eth.IExecutionClient, primaryBn beacon.IBeaconClient, fallbackBn beacon.IBeaconClient, clientTimeout time.Duration) (*ServiceProvider, error) {
+func NewServiceProviderFromArtifacts[ConfigType hdconfig.IModuleConfig](hdClient *client.ApiClient, hdCfg *hdconfig.HyperdriveConfig, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, ecManager *services.ExecutionClientManager, bcManager *services.BeaconClientManager) (*ServiceProvider, error) {
 	// Set up the client logger
 	logPath := hdCfg.GetModuleLogFilePath(moduleName, clientLogName)
 	clientLogger, err := log.NewLogger(logPath, hdCfg.GetLoggerOptions())
@@ -133,18 +141,6 @@ func NewServiceProviderFromArtifacts[ConfigType hdconfig.IModuleConfig](hdClient
 
 	// Signer
 	signer := NewModuleSigner(hdClient)
-
-	// EC Manager
-	ecManager, err := services.NewExecutionClientManager(primaryEc, fallbackEc, resources.ChainID, clientTimeout)
-	if err != nil {
-		return nil, fmt.Errorf("error creating executon client manager: %w", err)
-	}
-
-	// Beacon manager
-	bcManager, err := services.NewBeaconClientManager(primaryBn, fallbackBn, resources.ChainID, clientTimeout)
-	if err != nil {
-		return nil, fmt.Errorf("error creating Beacon client manager: %w", err)
-	}
 
 	// TX Manager
 	txMgr, err := eth.NewTransactionManager(ecManager, eth.DefaultSafeGasBuffer, eth.DefaultSafeGasMultiplier)

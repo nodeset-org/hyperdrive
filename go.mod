@@ -14,7 +14,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0
 	github.com/nodeset-org/beacon-mock v0.0.0-20240528173426-a4f457d8876c
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.3.1-0.20240524213017-8790894a2d31
+	github.com/rocket-pool/node-manager-core v0.3.1-0.20240529192147-051429eb6636
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/wealdtech/go-ens/v3 v3.6.0
