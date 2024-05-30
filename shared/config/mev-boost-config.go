@@ -113,7 +113,7 @@ func NewMevBoostConfig(parent *HyperdriveConfig) *MevBoostConfig {
 				Description:        "Enable MEV-Boost, which connects your validators to one or more relays of your choice. The relays act as intermediaries between you and professional block builders that find and extract MEV opportunities. The builders will give you a healthy tip in return, which tends to be worth more than blocks you built on your own.",
 				AffectsContainers:  []config.ContainerID{config.ContainerID_BeaconNode, config.ContainerID_MevBoost},
 				CanBeBlank:         false,
-				OverwriteOnUpgrade: true,
+				OverwriteOnUpgrade: false,
 			},
 			Default: map[config.Network]bool{
 				config.Network_All: true,
