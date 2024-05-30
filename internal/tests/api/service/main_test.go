@@ -51,10 +51,8 @@ func TestMain(m *testing.M) {
 	// Run tests
 	code := m.Run()
 
-	// Revert to the baseline after testing is done
+	// Clean up and exit
 	cleanup()
-
-	// Done
 	os.Exit(code)
 }
 
@@ -69,9 +67,11 @@ func cleanup() {
 		serverMgr.Stop()
 		wg.Wait()
 		logger.Info("Stopped server")
+		serverMgr = nil
 	}
 	if testMgr != nil {
 		testMgr.Cleanup()
 		logger.Info("Cleaned up test manager")
+		testMgr = nil
 	}
 }

@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -63,15 +64,9 @@ func NewTestManager() (*TestManager, error) {
 	}
 	logger.Info("Created temp config dir", "dir", testingConfigDir)
 
-	// Create the default Beacon config
-	beaconCfg := db.NewDefaultConfig()
-
 	// Make a new Hyperdrive config
 	cfg := config.NewHyperdriveConfig(testingConfigDir)
 	cfg.Network.Value = config.Network_LocalTest
-
-	// Make test resources
-	resources := GetTestResources(beaconCfg)
 
 	// Make the RPC client for the Hardhat instance (used for admin functions)
 	hardhatRpcClient, err := rpc.Dial(hardhatUrl)
@@ -80,18 +75,38 @@ func NewTestManager() (*TestManager, error) {
 		return nil, fmt.Errorf("error creating RPC client binding: %w", err)
 	}
 
-	// Make the Execution client manager
+	// Create a Hardhat client
 	clientTimeout := time.Duration(10) * time.Second
 	primaryEc, err := ethclient.Dial(hardhatUrl)
 	if err != nil {
 		cleanup(testingConfigDir)
 		return nil, fmt.Errorf("error creating primary eth client with URL [%s]: %v", hardhatUrl, err)
 	}
-	ecManager, err := services.NewExecutionClientManager(primaryEc, nil, uint(beaconCfg.ChainID), clientTimeout)
+
+	// Get the latest block and chain ID from Hardhat
+	latestBlockHeader, err := primaryEc.HeaderByNumber(context.Background(), nil)
+	if err != nil {
+		cleanup(testingConfigDir)
+		return nil, fmt.Errorf("error getting latest EL block: %v", err)
+	}
+	chainID, err := primaryEc.ChainID(context.Background())
+	if err != nil {
+		cleanup(testingConfigDir)
+		return nil, fmt.Errorf("error getting chain ID: %v", err)
+	}
+
+	// Create the Execution client manager
+	ecManager, err := services.NewExecutionClientManager(primaryEc, nil, uint(chainID.Uint64()), clientTimeout)
 	if err != nil {
 		cleanup(testingConfigDir)
 		return nil, fmt.Errorf("error creating execution client manager: %v", err)
 	}
+
+	// Create the Beacon config based on the Hardhat values
+	beaconCfg := db.NewDefaultConfig()
+	beaconCfg.FirstExecutionBlockIndex = latestBlockHeader.Number.Uint64()
+	beaconCfg.ChainID = chainID.Uint64()
+	beaconCfg.GenesisTime = time.Unix(int64(latestBlockHeader.Time), 0)
 
 	// Make the Beacon client manager
 	beaconMockManager := manager.NewBeaconMockManager(logger, beaconCfg)
@@ -104,6 +119,9 @@ func NewTestManager() (*TestManager, error) {
 
 	// Make a Docker client mock
 	docker := docker.NewDockerClientMock()
+
+	// Make test resources
+	resources := GetTestResources(beaconCfg)
 
 	// Make a new service provider
 	serviceProvider, err := common.NewServiceProviderFromCustomServices(
@@ -146,9 +164,9 @@ func (m *TestManager) Fail(format string, args ...any) {
 
 // Cleans up the test environment, including the temporary folder to house any generated files
 func (m *TestManager) Cleanup() {
-	err := m.RevertToBaseline()
+	err := m.revertToSnapshot(m.baselineSnapshotID)
 	if err != nil {
-		m.Logger.Error(err.Error())
+		m.Logger.Error("error reverting to baseline snapshot", "err", err)
 	}
 	if m.testingConfigDir == "" {
 		return
@@ -183,6 +201,54 @@ func (m *TestManager) RevertToCustomSnapshot(snapshotID string) error {
 	return m.revertToSnapshot(snapshotID)
 }
 
+// Commits a new block in the EC and BN, advancing the chain
+func (m *TestManager) CommitBlock() error {
+	// Mine the next block in Hardhat
+	err := m.hardhat_mineBlock()
+	if err != nil {
+		return err
+	}
+
+	// Increase time by the slot duration to prep for the next slot
+	secondsPerSlot := uint(m.beaconMockManager.GetConfig().SecondsPerSlot)
+	err = m.hardhat_increaseTime(secondsPerSlot)
+	if err != nil {
+		return err
+	}
+
+	// Commit the block in the BN
+	m.beaconMockManager.CommitBlock(true)
+	return nil
+}
+
+// Advances the chain by a number of slots.
+// If includeBlocks is true, an EL block will be mined for each slot and the slot will reference that block.
+// If includeBlocks is false, each slot (until the last one) will be "missed", so no EL block will be mined for it.
+func (m *TestManager) AdvanceSlots(slots uint, includeBlocks bool) error {
+	if includeBlocks {
+		for i := uint(0); i < slots; i++ {
+			err := m.CommitBlock()
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	// Commit slots without blocks
+	for i := uint(0); i < slots; i++ {
+		m.beaconMockManager.CommitBlock(false)
+	}
+
+	// Advance the time in Hardhat
+	secondsPerSlot := uint(m.beaconMockManager.GetConfig().SecondsPerSlot)
+	err := m.hardhatRpcClient.Call(nil, "evm_increaseTime", secondsPerSlot*slots)
+	if err != nil {
+		return fmt.Errorf("error advancing time on EL: %w", err)
+	}
+	return nil
+}
+
 // Takes a snapshot of the EC and BN states
 func (m *TestManager) takeSnapshot() (string, error) {
 	// Snapshot the EC
@@ -209,6 +275,24 @@ func (m *TestManager) revertToSnapshot(snapshotID string) error {
 	err = m.beaconMockManager.RevertToSnapshot(snapshotID)
 	if err != nil {
 		return fmt.Errorf("error reverting the BN to snapshot %s: %w", snapshotID, err)
+	}
+	return nil
+}
+
+// Tell Hardhat to mine a block
+func (m *TestManager) hardhat_mineBlock() error {
+	err := m.hardhatRpcClient.Call(nil, "evm_mine")
+	if err != nil {
+		return fmt.Errorf("error mining EL block: %w", err)
+	}
+	return nil
+}
+
+// Tell Hardhat to mine a block
+func (m *TestManager) hardhat_increaseTime(seconds uint) error {
+	err := m.hardhatRpcClient.Call(nil, "evm_increaseTime", seconds)
+	if err != nil {
+		return fmt.Errorf("error increasing EL time: %w", err)
 	}
 	return nil
 }

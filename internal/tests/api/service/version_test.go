@@ -1,6 +1,7 @@
 package service
 
 import (
+	"runtime/debug"
 	"testing"
 
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
@@ -9,6 +10,17 @@ import (
 
 // Test getting the server version
 func TestServerVersion(t *testing.T) {
+	// Set up panic handling and cleanup
+	defer func() {
+		r := recover()
+		if r != nil {
+			debug.PrintStack()
+			fail("Recovered from panic: %v", r)
+		} else {
+			testMgr.RevertToBaseline()
+		}
+	}()
+
 	version := shared.HyperdriveVersion
 
 	// Run the round-trip test

@@ -251,8 +251,8 @@ github.com/multiformats/go-multihash v0.2.3 h1:7Lyc8XfX/IY2jWb/gI7JP+o7JEq9hOa7B
 github.com/multiformats/go-multihash v0.2.3/go.mod h1:dXgKXCXjBzdscBLk9JkjINiEsCKRVch90MdaGiKsvSM=
 github.com/multiformats/go-varint v0.0.7 h1:sWSGR+f/eu5ABZA2ZpYKBILXTTs9JWpdEM/nEGOHFS8=
 github.com/multiformats/go-varint v0.0.7/go.mod h1:r8PUYw/fD/SjBCiKOoDlGF6QawOELpZAu9eioSos/OU=
-github.com/nodeset-org/beacon-mock v0.1.0 h1:13TuGJBXVKkbwrFA+mfo7NWMi3qiM8lBMqFj6MKzh04=
-github.com/nodeset-org/beacon-mock v0.1.0/go.mod h1:4nBbx/ncKnru92s/vGLLChudqyMfHYZVsXb+hcp/A7o=
+github.com/nodeset-org/beacon-mock v0.0.0-20240528173426-a4f457d8876c h1:4LFk2kngN3icA0p8aYnHObJmDTEgP6BfDYVZr0yRqZc=
+github.com/nodeset-org/beacon-mock v0.0.0-20240528173426-a4f457d8876c/go.mod h1:4nBbx/ncKnru92s/vGLLChudqyMfHYZVsXb+hcp/A7o=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
