@@ -21,6 +21,17 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 		Usage:   "Manage your account with the Stakewise vault in NodeSet.",
 		Subcommands: []*cli.Command{
 			{
+				Name:    "registration-status",
+				Aliases: []string{"s"},
+				Flags: []cli.Flag{
+					RegisterEmailFlag,
+				},
+				Usage: "Check the registration status of your validator with NodeSet.",
+				Action: func(c *cli.Context) error {
+					return registrationStatus(c)
+				},
+			},
+			{
 				Name:    "upload-deposit-data",
 				Aliases: []string{"u"},
 				Flags:   []cli.Flag{},
