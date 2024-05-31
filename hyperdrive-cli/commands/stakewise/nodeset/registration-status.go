@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,6 +27,17 @@ func registrationStatus(c *cli.Context) error {
 		fmt.Println("Your node is registered.")
 	} else {
 		fmt.Println("Your node is not registered.")
+		if cliutils.Confirm("Would you like to upload your validator keys to NodeSet?") {
+			if c.String(RegisterEmailFlag.Name) == "" {
+				fmt.Printf("Please provide an email address with the %s flag.\n", RegisterEmailFlag.Name)
+				return nil
+			}
+			_, err := sw.Api.Nodeset.RegisterNode(c.String(RegisterEmailFlag.Name))
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

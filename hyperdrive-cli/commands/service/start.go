@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	swtypes "github.com/nodeset-org/hyperdrive-stakewise/shared/types"
-
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
@@ -157,23 +155,18 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		if err != nil {
 			return err
 		}
-		statusResponse, err := sw.Api.Status.GetValidatorStatuses()
+		registrationStatusResp, err := sw.Api.Nodeset.RegistrationStatus()
 		if err != nil {
 			return err
 		}
-		if len(statusResponse.Data.States) != 0 {
-			for _, state := range statusResponse.Data.States {
-				if state.NodesetStatus != swtypes.NodesetStatus_UploadedToNodeset {
-					// TODO: Prompt user to upload
-					fmt.Println("Your validator keys have not been uploaded to NodeSet yet.")
-					if cliutils.Confirm("Would you like to upload your validator keys to NodeSet?") {
-						// Upload keys
-						_, err := sw.Api.Nodeset.RegisterNode(c.String(nodeset.RegisterEmailFlag.Name))
-						if err != nil {
-							return err
-						}
-					}
-				}
+		if !registrationStatusResp.Data.Registered && cliutils.Confirm("Would you like to upload your validator keys to NodeSet?") {
+			if c.String(nodeset.RegisterEmailFlag.Name) == "" {
+				fmt.Printf("Please provide an email address with the %s flag.\n", nodeset.RegisterEmailFlag.Name)
+				return nil
+			}
+			_, err := sw.Api.Nodeset.RegisterNode(c.String(nodeset.RegisterEmailFlag.Name))
+			if err != nil {
+				return err
 			}
 		}
 		return nil
