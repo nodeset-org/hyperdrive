@@ -7,8 +7,11 @@ import (
 	"strings"
 	"time"
 
+	swtypes "github.com/nodeset-org/hyperdrive-stakewise/shared/types"
+
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
 	cliwallet "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
@@ -150,6 +153,29 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	// All set
 	if status.Wallet.IsLoaded {
 		fmt.Printf("Your node wallet with address %s%s%s is loaded and ready to use.\n", terminal.ColorBlue, status.Wallet.WalletAddress.Hex(), terminal.ColorReset)
+		sw, err := client.NewStakewiseClientFromCtx(c, hd)
+		if err != nil {
+			return err
+		}
+		statusResponse, err := sw.Api.Status.GetValidatorStatuses()
+		if err != nil {
+			return err
+		}
+		if len(statusResponse.Data.States) != 0 {
+			for _, state := range statusResponse.Data.States {
+				if state.NodesetStatus != swtypes.NodesetStatus_UploadedToNodeset {
+					// TODO: Prompt user to upload
+					fmt.Println("Your validator keys have not been uploaded to NodeSet yet.")
+					if cliutils.Confirm("Would you like to upload your validator keys to NodeSet?") {
+						// Upload keys
+						_, err := sw.Api.Nodeset.RegisterNode(c.String(nodeset.RegisterEmailFlag.Name))
+						if err != nil {
+							return err
+						}
+					}
+				}
+			}
+		}
 		return nil
 	}
 

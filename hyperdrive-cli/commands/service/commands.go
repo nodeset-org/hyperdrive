@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
+
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
@@ -151,6 +153,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				Usage:   "Start the Hyperdrive service",
 				Flags: []cli.Flag{
 					ignoreSlashTimerFlag,
+					nodeset.RegisterEmailFlag,
 					wallet.PasswordFlag,
 					wallet.SavePasswordFlag,
 					utils.YesFlag,
