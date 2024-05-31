@@ -130,17 +130,25 @@ func configureService(c *cli.Context) error {
 				return nil
 			}
 
-			fmt.Println()
+			runningContainers, err := hd.GetRunningContainers(prefix)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: couldn't check running containers: %s\n", err.Error())
+				runningContainers = map[string]bool{}
+			}
 			for _, container := range md.ContainersToRestart {
 				fullName := fmt.Sprintf("%s_%s", prefix, container)
-				fmt.Printf("Stopping %s... ", fullName)
-				err := hd.StopContainer(fullName)
-				if err != nil {
-					fmt.Println("error!")
-					fmt.Fprintf(os.Stderr, "Error stopping container %s: %s\n", fullName, err.Error())
-					continue
+				if !runningContainers[fullName] {
+					fmt.Printf("%s is not currently running.", fullName)
+				} else {
+					fmt.Printf("Stopping %s... ", fullName)
+					err := hd.StopContainer(fullName)
+					if err != nil {
+						fmt.Println("error!")
+						fmt.Fprintf(os.Stderr, "Error stopping container %s: %s\n", fullName, err.Error())
+						continue
+					}
+					fmt.Println("done!")
 				}
-				fmt.Println("done!")
 			}
 
 			fmt.Println()
