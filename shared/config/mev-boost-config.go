@@ -548,6 +548,20 @@ func generateProfileParameter(id string, relays []MevRelay, regulated bool) conf
 	}
 	mainnetDescription += strings.Join(mainnetRelays, ", ")
 
+	// Generate the Holesky description
+	holeskyRelays := []string{}
+	holeskyDescription := description + "\n\nRelays: "
+	for _, relay := range relays {
+		_, exists := relay.Urls[config.Network_Holesky]
+		if !exists {
+			continue
+		}
+		if relay.Regulated == regulated {
+			holeskyRelays = append(holeskyRelays, relay.Name)
+		}
+	}
+	holeskyDescription += strings.Join(holeskyRelays, ", ")
+
 	return config.Parameter[bool]{
 		ParameterCommon: &config.ParameterCommon{
 			ID:                 id,
@@ -558,6 +572,8 @@ func generateProfileParameter(id string, relays []MevRelay, regulated bool) conf
 			OverwriteOnUpgrade: false,
 			DescriptionsByNetwork: map[config.Network]string{
 				config.Network_Mainnet: mainnetDescription,
+				config.Network_Holesky: holeskyDescription,
+				Network_HoleskyDev:     holeskyDescription,
 			},
 		},
 		Default: map[config.Network]bool{
