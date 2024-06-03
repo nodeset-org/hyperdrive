@@ -8,7 +8,7 @@ type checkBoxWizardStep struct {
 	showImpl func(*checkBoxModalLayout)
 }
 
-func newCheckBoxStep(wiz *wizard, currentStep int, totalSteps int, helperText string, width int, title string, labels []string, descriptions []string, settings []bool, showImpl func(*checkBoxModalLayout), done func(map[string]bool), back func(), pageID string) *checkBoxWizardStep {
+func newCheckBoxStep(wiz *wizard, currentStep int, totalSteps int, helperText string, width int, title string, showImpl func(*checkBoxModalLayout), done func(map[string]bool), back func(), pageID string) *checkBoxWizardStep {
 
 	step := &checkBoxWizardStep{
 		wiz:      wiz,
@@ -23,9 +23,6 @@ func newCheckBoxStep(wiz *wizard, currentStep int, totalSteps int, helperText st
 		title,
 		width,
 		helperText,
-		labels,
-		descriptions,
-		settings,
 	)
 
 	modal.done = done

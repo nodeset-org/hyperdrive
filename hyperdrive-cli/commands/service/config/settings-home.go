@@ -19,6 +19,7 @@ type settingsHome struct {
 	ecPage           *ExecutionConfigPage
 	fallbackPage     *FallbackConfigPage
 	bnPage           *BeaconConfigPage
+	mevBoostPage     *MevBoostConfigPage
 	metricsPage      *MetricsConfigPage
 	modulesPage      *ModulesPage
 	categoryList     *tview.List
@@ -43,6 +44,7 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 	home.ecPage = NewExecutionConfigPage(home)
 	home.bnPage = NewBeaconConfigPage(home)
 	home.fallbackPage = NewFallbackConfigPage(home)
+	home.mevBoostPage = NewMevBoostConfigPage(home)
 	home.metricsPage = NewMetricsConfigPage(home)
 	home.modulesPage = NewModulesPage(home)
 	settingsSubpages := []settingsPage{
@@ -51,6 +53,7 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 		home.ecPage,
 		home.bnPage,
 		home.fallbackPage,
+		home.mevBoostPage,
 		home.metricsPage,
 		home.modulesPage,
 	}
@@ -78,7 +81,6 @@ func (home *settingsHome) createContent() {
 		})
 	categoryList.SetBackgroundColor(BackgroundColor)
 	categoryList.SetBorderPadding(0, 0, 1, 1)
-	//categoryList.SetSelectedBackgroundColor(ButtonFocusedBackgroundColor)
 
 	home.categoryList = categoryList
 
@@ -231,6 +233,10 @@ func (home *settingsHome) refresh() {
 
 	if home.fallbackPage != nil {
 		home.fallbackPage.layout.refresh()
+	}
+
+	if home.mevBoostPage != nil {
+		home.mevBoostPage.layout.refresh()
 	}
 
 	if home.metricsPage != nil {

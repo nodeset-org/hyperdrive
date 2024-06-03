@@ -1,3 +1,12 @@
+hyperdrive (0.5.0~b1) UNRELEASED; urgency=medium
+
+  * Updated Besu, Nimbus, Grafana, Prometheus, and Node Exporter.
+  * Updated the StakeWise Operator service.
+  * Added MEV-Boost support with several built-in relays
+  * New command: `stakewise nodeset register-node` will register your node with your NodeSet user account if it's not already registered.
+
+ -- NodeSet LLC <info@nodeset.io>  Wed, 29 May 2024 15:41:30 +0000
+
 hyperdrive (0.4.2~b2) unstable; urgency=medium
 
   * Updated Besu, Geth, and Lodestar.

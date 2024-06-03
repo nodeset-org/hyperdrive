@@ -85,7 +85,12 @@ func (layout *standardLayout) createForm(networkParam *config.Parameter[config.N
 			formItem := form.GetFormItem(index)
 			param := layout.parameters[formItem].parameter
 			defaultValue := param.GetDefaultAsAny(networkParam.Value)
-			descriptionText := fmt.Sprintf("Default: %v\n\n%s", defaultValue, param.GetCommon().Description)
+			networkDescription, exists := param.GetCommon().DescriptionsByNetwork[networkParam.Value]
+			if !exists {
+				// Use the default description if there isn't a specific one for the network
+				networkDescription = param.GetCommon().Description
+			}
+			descriptionText := fmt.Sprintf("Default: %v\n\n%s", defaultValue, networkDescription)
 			layout.descriptionBox.SetText(descriptionText)
 			layout.descriptionBox.ScrollToBeginning()
 		}

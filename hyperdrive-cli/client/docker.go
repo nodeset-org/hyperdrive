@@ -20,6 +20,31 @@ func (c *HyperdriveClient) GetDockerImage(containerName string) (string, error) 
 	return ci.Config.Image, nil
 }
 
+// Get a list of running project containers (values are always true, the map is just for quick name lookup)
+func (c *HyperdriveClient) GetRunningContainers(projectName string) (map[string]bool, error) {
+	d, err := c.GetDocker()
+	if err != nil {
+		return nil, err
+	}
+	cl, err := d.ContainerList(context.Background(), dtc.ListOptions{All: true})
+	if err != nil {
+		return nil, fmt.Errorf("error getting container list: %w", err)
+	}
+
+	// Find all of them that belong to the project
+	containers := map[string]bool{}
+	for _, container := range cl {
+		for _, name := range container.Names {
+			name = strings.TrimPrefix(name, "/") // Docker throws a leading / on names
+			if strings.HasPrefix(name, projectName) && container.State == "running" {
+				containers[name] = true
+				break
+			}
+		}
+	}
+	return containers, nil
+}
+
 // Get the Docker images with the project ID as a prefix that run the VC start script in their command line arguments
 func (c *HyperdriveClient) GetValidatorContainers(projectName string) ([]string, error) {
 	d, err := c.GetDocker()
