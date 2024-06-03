@@ -5,14 +5,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var (
-	registerEmailFlag *cli.StringFlag = &cli.StringFlag{
-		Name:    "email",
-		Aliases: []string{"e"},
-		Usage:   "Email address to register with NodeSet.",
-	}
-)
-
 func registerNode(c *cli.Context) error {
 	// Get the client
 	hd, err := client.NewHyperdriveClientFromCtx(c)
@@ -24,7 +16,7 @@ func registerNode(c *cli.Context) error {
 		return err
 	}
 
-	_, err = sw.Api.Nodeset.RegisterNode(registerEmailFlag.Name)
+	_, err = sw.Api.Nodeset.RegisterNode(RegisterEmailFlag.Name)
 
 	return err
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
 	cliwallet "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
@@ -150,6 +151,24 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	// All set
 	if status.Wallet.IsLoaded {
 		fmt.Printf("Your node wallet with address %s%s%s is loaded and ready to use.\n", terminal.ColorBlue, status.Wallet.WalletAddress.Hex(), terminal.ColorReset)
+		sw, err := client.NewStakewiseClientFromCtx(c, hd)
+		if err != nil {
+			return err
+		}
+		registrationStatusResp, err := sw.Api.Nodeset.RegistrationStatus()
+		if err != nil {
+			return err
+		}
+		if !registrationStatusResp.Data.Registered && cliutils.Confirm("Would you like to upload your validator keys to NodeSet?") {
+			if c.String(nodeset.RegisterEmailFlag.Name) == "" {
+				fmt.Printf("Please provide an email address with the %s flag.\n", nodeset.RegisterEmailFlag.Name)
+				return nil
+			}
+			_, err := sw.Api.Nodeset.RegisterNode(c.String(nodeset.RegisterEmailFlag.Name))
+			if err != nil {
+				return err
+			}
+		}
 		return nil
 	}
 
