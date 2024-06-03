@@ -21,6 +21,9 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				},
 				Usage: "Check the registration status of your validator with NodeSet.",
 				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
 					return registrationStatus(c)
 				},
 			},

@@ -172,7 +172,10 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		}
 	}
 
-	// Handle NodeSet registration
+	// Handle NodeSet registration if StakeWise is enabled
+	if !cfg.Stakewise.Enabled.Value {
+		return nil
+	}
 	sw, err := client.NewStakewiseClientFromCtx(c, hd)
 	if err != nil {
 		return err
