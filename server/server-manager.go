@@ -30,6 +30,7 @@ func NewServerManager(sp *common.ServiceProvider, ip string, port uint16, stopWg
 	if err != nil {
 		return nil, fmt.Errorf("error starting API server: %w", err)
 	}
+	port = apiServer.GetPort()
 	fmt.Printf("API server started on %s:%d\n", ip, port)
 
 	// Create the manager
@@ -37,6 +38,11 @@ func NewServerManager(sp *common.ServiceProvider, ip string, port uint16, stopWg
 		apiServer: apiServer,
 	}
 	return mgr, nil
+}
+
+// Returns the port the server is running on
+func (m *ServerManager) GetPort() uint16 {
+	return m.apiServer.GetPort()
 }
 
 // Stops and shuts down the servers

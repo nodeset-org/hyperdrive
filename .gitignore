@@ -23,6 +23,9 @@
 # Go workspace file
 go.work
 
+# NPM artifacts
+internal/hardhat/node_modules/
+
 # Build artifacts
 build/
 

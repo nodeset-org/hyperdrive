@@ -37,6 +37,10 @@ func (c *HyperdriveConfig) PrometheusContainerName() string {
 	return string(config.ContainerID_Prometheus)
 }
 
+func (c *HyperdriveConfig) MevBoostContainerName() string {
+	return string(config.ContainerID_MevBoost)
+}
+
 func (c *HyperdriveConfig) ExecutionClientDataVolume() string {
 	return ExecutionClientDataVolume
 }
@@ -394,4 +398,36 @@ func (cfg *HyperdriveConfig) GraffitiPrefix() string {
 	}
 
 	return fmt.Sprintf("HD%s %s", identifier, versionString)
+}
+
+// Used by text/template to format validator.yml
+func (cfg *HyperdriveConfig) MevBoostUrl() string {
+	if !cfg.MevBoost.Enable.Value {
+		return ""
+	}
+
+	if cfg.MevBoost.Mode.Value == config.ClientMode_Local {
+		return fmt.Sprintf("http://%s:%d", config.ContainerID_MevBoost, cfg.MevBoost.Port.Value)
+	}
+
+	return cfg.MevBoost.ExternalUrl.Value
+}
+
+// =================
+// === MEV-Boost ===
+// =================
+
+// Gets the name of the MEV-Boost start script
+func (cfg *HyperdriveConfig) GetMevBoostStartScript() string {
+	return MevBoostStartScript
+}
+
+// Used by text/template to format mev-boost.yml
+func (cfg *HyperdriveConfig) GetMevBoostOpenPorts() string {
+	portMode := cfg.MevBoost.OpenRpcPort.Value
+	if !portMode.IsOpen() {
+		return ""
+	}
+	port := cfg.MevBoost.Port.Value
+	return fmt.Sprintf("\"%s\"", portMode.DockerPortMapping(port))
 }
