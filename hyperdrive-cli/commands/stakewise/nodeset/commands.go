@@ -16,6 +16,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Name:    "registration-status",
 				Aliases: []string{"s"},
 				Flags: []cli.Flag{
+					utils.YesFlag,
 					RegisterEmailFlag,
 				},
 				Usage: "Check the registration status of your validator with NodeSet.",
