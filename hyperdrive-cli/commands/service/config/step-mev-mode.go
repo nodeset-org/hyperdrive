@@ -16,7 +16,7 @@ func createMevModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 		modeDescriptions = append(modeDescriptions, mode.Description)
 	}
 
-	helperText := "By default, your Smart Node has MEV-Boost enabled. This allows you to capture extra profits from block proposals. Would you like Rocket Pool to manage MEV-Boost for you, or would you like to manage it yourself?\n\n[lime]Please read our guide to learn more about MEV:\nhttps://docs.rocketpool.net/guides/node/mev.html\n"
+	helperText := "By default, Hyperdrive has MEV-Boost enabled. This allows you to capture extra profits from block proposals. Would you like Hyperdrive to manage MEV-Boost for you, or would you like to manage it yourself?\n\n[lime]To learn more about MEV, please visit:\nhttps://docs.flashbots.net/new-to-mev\n"
 
 	show := func(modal *choiceModalLayout) {
 		wiz.md.setPage(modal.page)

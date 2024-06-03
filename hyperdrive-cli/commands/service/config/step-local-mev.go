@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	nconfig "github.com/rocket-pool/node-manager-core/config"
 )
 
 func createLocalMevStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWizardStep {
@@ -11,10 +12,10 @@ func createLocalMevStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxW
 	regulatedAllLabel := strings.TrimPrefix(wiz.md.Config.Hyperdrive.MevBoost.EnableRegulatedAllMev.Name, "Enable ")
 	unregulatedAllLabel := strings.TrimPrefix(wiz.md.Config.Hyperdrive.MevBoost.EnableUnregulatedAllMev.Name, "Enable ")
 
-	helperText := "Select the profiles you would like to enable below. Read the descriptions carefully! Leave all options unchecked if you wish to opt out of MEV-Boost for now, [orange]but it will be required in the future.[white]\n\n[lime]Please read our guide to learn more about MEV:\nhttps://docs.rocketpool.net/guides/node/mev.html\n"
+	helperText := "Select the profiles you would like to enable below. Read the descriptions carefully! Leave all options unchecked if you wish to disable MEV-Boost.\n\n[lime]To learn more about MEV, please visit:\nhttps://docs.flashbots.net/new-to-mev\n"
 
 	show := func(modal *checkBoxModalLayout) {
-		labels, descriptions, selections := getMevChoices(wiz.md.Config.Hyperdrive.MevBoost)
+		labels, descriptions, selections := getMevChoices(wiz.md.Config.Hyperdrive.MevBoost, wiz.md.Config.Hyperdrive.Network.Value)
 		modal.generateCheckboxes(labels, descriptions, selections)
 
 		wiz.md.setPage(modal.page)
@@ -59,7 +60,7 @@ func createLocalMevStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxW
 	)
 }
 
-func getMevChoices(config *config.MevBoostConfig) ([]string, []string, []bool) {
+func getMevChoices(config *config.MevBoostConfig, network nconfig.Network) ([]string, []string, []bool) {
 	labels := []string{}
 	descriptions := []string{}
 	settings := []bool{}
@@ -69,13 +70,15 @@ func getMevChoices(config *config.MevBoostConfig) ([]string, []string, []bool) {
 	if unregulatedAllMev {
 		label := strings.TrimPrefix(config.EnableUnregulatedAllMev.Name, "Enable ")
 		labels = append(labels, label)
-		descriptions = append(descriptions, getDescriptionBody(config.EnableUnregulatedAllMev.Description))
+		description := config.EnableUnregulatedAllMev.DescriptionsByNetwork[network]
+		descriptions = append(descriptions, getDescriptionBody(description))
 		settings = append(settings, config.EnableUnregulatedAllMev.Value)
 	}
 	if regulatedAllMev {
 		label := strings.TrimPrefix(config.EnableRegulatedAllMev.Name, "Enable ")
 		labels = append(labels, label)
-		descriptions = append(descriptions, getDescriptionBody(config.EnableRegulatedAllMev.Description))
+		description := config.EnableRegulatedAllMev.DescriptionsByNetwork[network]
+		descriptions = append(descriptions, getDescriptionBody(description))
 		settings = append(settings, config.EnableRegulatedAllMev.Value)
 	}
 
