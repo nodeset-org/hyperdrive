@@ -148,47 +148,40 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		return nil
 	}
 
-	// All set
+	// Handle wallet status
 	if status.Wallet.IsLoaded {
 		fmt.Printf("Your node wallet with address %s%s%s is loaded and ready to use.\n", terminal.ColorBlue, status.Wallet.WalletAddress.Hex(), terminal.ColorReset)
-		sw, err := client.NewStakewiseClientFromCtx(c, hd)
-		if err != nil {
-			return err
-		}
-		registrationStatusResp, err := sw.Api.Nodeset.RegistrationStatus()
-		if err != nil {
-			return err
-		}
-		if !registrationStatusResp.Data.Registered && cliutils.Confirm("Would you like to upload your validator keys to NodeSet?") {
-			if c.String(nodeset.RegisterEmailFlag.Name) == "" {
-				fmt.Printf("Please provide an email address with the %s flag.\n", nodeset.RegisterEmailFlag.Name)
-				return nil
-			}
-			_, err := sw.Api.Nodeset.RegisterNode(c.String(nodeset.RegisterEmailFlag.Name))
+	} else {
+		// Prompt for password
+		if status.Wallet.IsOnDisk {
+			err := promptForPassword(c, hd)
 			if err != nil {
 				return err
 			}
+		} else {
+			// Init
+			fmt.Println("You don't have a node wallet yet.")
+			if c.Bool(cliutils.YesFlag.Name) || !cliutils.Confirm("Would you like to create one now?") {
+				fmt.Println("Please create one using `hyperdrive wallet init` when you're ready.")
+				return nil
+			}
+			err = cliwallet.InitWallet(c, hd)
+			if err != nil {
+				return fmt.Errorf("error initializing node wallet: %w", err)
+			}
 		}
-		return nil
 	}
 
-	// Prompt for password
-	if status.Wallet.IsOnDisk {
-		return promptForPassword(c, hd)
-	}
-
-	// Init
-	fmt.Println("You don't have a node wallet yet.")
-	if c.Bool(cliutils.YesFlag.Name) || !cliutils.Confirm("Would you like to create one now?") {
-		fmt.Println("Please create one using `hyperdrive wallet init` when you're ready.")
-		return nil
-	}
-	err = cliwallet.InitWallet(c, hd)
+	// Handle NodeSet registration
+	sw, err := client.NewStakewiseClientFromCtx(c, hd)
 	if err != nil {
-		return fmt.Errorf("error initializing node wallet: %w", err)
+		return err
+	}
+	err = nodeset.CheckRegistrationStatus(c, hd, sw)
+	if err != nil {
+		return fmt.Errorf("error checking NodeSet registration status: %w", err)
 	}
 
-	// Get the wallet status
 	return nil
 }
 

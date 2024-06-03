@@ -19,25 +19,35 @@ func registrationStatus(c *cli.Context) error {
 		return err
 	}
 
+	return CheckRegistrationStatus(c, hd, sw)
+}
+
+func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient, sw *client.StakewiseClient) error {
+	// Get wallet response
+	response, err := hd.Api.Wallet.Status()
+	if err != nil {
+		return err
+	}
+
+	// Make sure we have a wallet loaded
+	if !response.Data.WalletStatus.Wallet.IsLoaded {
+		fmt.Println("The node wallet has not been initialized yet. Please run `hyperdrive wallet status` to learn more.")
+		return nil
+	}
+
+	// Get the registration status
 	resp, err := sw.Api.Nodeset.RegistrationStatus()
 	if err != nil {
 		return err
 	}
 	if resp.Data.Registered {
 		fmt.Println("Your node is registered.")
-	} else {
-		fmt.Println("Your node is not registered.")
-		if cliutils.Confirm("Would you like to upload your validator keys to NodeSet?") {
-			if c.String(RegisterEmailFlag.Name) == "" {
-				fmt.Printf("Please provide an email address with the %s flag.\n", RegisterEmailFlag.Name)
-				return nil
-			}
-			_, err := sw.Api.Nodeset.RegisterNode(c.String(RegisterEmailFlag.Name))
-			if err != nil {
-				return err
-			}
-		}
+		return nil
+	}
 
+	fmt.Println("Your node is not currently registered.")
+	if cliutils.Confirm("Would you like to register now so you can upload your validator keys to NodeSet?") {
+		return registerNode(c)
 	}
 
 	return nil

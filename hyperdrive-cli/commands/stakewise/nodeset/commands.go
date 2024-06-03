@@ -5,14 +5,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var (
-	RegisterEmailFlag *cli.StringFlag = &cli.StringFlag{
-		Name:    "email",
-		Aliases: []string{"e"},
-		Usage:   "Email address to register with NodeSet.",
-	}
-)
-
 // Register commands
 func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 	cmd.Subcommands = append(cmd.Subcommands, &cli.Command{
