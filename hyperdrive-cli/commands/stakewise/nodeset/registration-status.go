@@ -41,12 +41,12 @@ func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient, sw *cl
 		return err
 	}
 	if resp.Data.Registered {
-		fmt.Println("Your node is registered.")
+		fmt.Println("Your node is registered with NodeSet.")
 		return nil
 	}
 
-	fmt.Println("Your node is not currently registered.")
-	if !cliutils.Confirm("Would you like to register now so you can upload your validator keys to NodeSet?") {
+	fmt.Println("Your node is not currently registered with NodeSet.")
+	if !cliutils.Confirm("Would you like to register your node now?") {
 		fmt.Println("Cancelled.")
 		return nil
 	}
