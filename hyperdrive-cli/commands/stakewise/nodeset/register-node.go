@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	registerEmailFlag *cli.StringFlag = &cli.StringFlag{
+	RegisterEmailFlag *cli.StringFlag = &cli.StringFlag{
 		Name:    "email",
 		Aliases: []string{"e"},
 		Usage:   "Email address to register with NodeSet.",
@@ -24,7 +24,14 @@ func registerNode(c *cli.Context) error {
 		return err
 	}
 
-	_, err = sw.Api.Nodeset.RegisterNode(registerEmailFlag.Name)
+	// Check if it's already registered
+	shouldRegister, err := checkRegistrationStatusImpl(hd, sw)
+	if err != nil {
+		return err
+	}
+	if !shouldRegister {
+		return nil
+	}
 
-	return err
+	return registerNodeImpl(c, sw)
 }

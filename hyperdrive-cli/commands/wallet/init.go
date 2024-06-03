@@ -15,6 +15,11 @@ var (
 		Aliases: []string{"c"},
 		Usage:   "Automatically confirm the mnemonic phrase",
 	}
+	RegisterEmailFlag *cli.StringFlag = &cli.StringFlag{
+		Name:    "email",
+		Aliases: []string{"e"},
+		Usage:   "Email address to register with NodeSet.",
+	}
 )
 
 // If hd is provided, this is assumed to be called from another function so the wallet check will be skipped.
@@ -129,6 +134,22 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 			return fmt.Errorf("error initializing Stakewise wallet: %w", err)
 		}
 		fmt.Println("Stakewise wallet initialized.")
+
+		registrationStatusResp, err := sw.Api.Nodeset.RegistrationStatus()
+		if err != nil {
+			return err
+		}
+		if !registrationStatusResp.Data.Registered && utils.Confirm("Would you like to upload your validator keys to NodeSet?") {
+			if c.String(RegisterEmailFlag.Name) == "" {
+				fmt.Printf("Please provide an email address with the %s flag.\n", RegisterEmailFlag.Name)
+				fmt.Printf("You can register your validator with `hyperdrive stakewise nodeset register-node`.\n")
+				return nil
+			}
+			_, err := sw.Api.Nodeset.RegisterNode(c.String(RegisterEmailFlag.Name))
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
