@@ -46,9 +46,17 @@ func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient, sw *cl
 	}
 
 	fmt.Println("Your node is not currently registered.")
-	if cliutils.Confirm("Would you like to register now so you can upload your validator keys to NodeSet?") {
-		return registerNode(c)
+	if !cliutils.Confirm("Would you like to register now so you can upload your validator keys to NodeSet?") {
+		fmt.Println("Cancelled.")
+		return nil
 	}
 
+	// Register the node
+	err = registerNode(c)
+	if err != nil {
+		return fmt.Errorf("error registering node: %w", err)
+	}
+
+	fmt.Println("Node successfully registered.")
 	return nil
 }
