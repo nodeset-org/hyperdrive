@@ -40,6 +40,11 @@ type wizard struct {
 	// Step 8 - Metrics
 	metricsModal *choiceWizardStep
 
+	// Step 9 - MEV Boost
+	mevModeModal     *choiceWizardStep
+	localMevModal    *checkBoxWizardStep
+	externalMevModal *textBoxWizardStep
+
 	// Done
 	finishedModal *choiceWizardStep
 }
@@ -50,44 +55,59 @@ func newWizard(md *mainDisplay) *wizard {
 		md: md,
 	}
 
-	totalSteps := 9
+	totalSteps := 10
+	stepCount := 1
 
 	// Step 1 - Welcome
-	wiz.welcomeModal = createWelcomeStep(wiz, 1, totalSteps)
+	wiz.welcomeModal = createWelcomeStep(wiz, stepCount, totalSteps)
+	stepCount++
 
 	// Step 2 - Network
-	wiz.networkModal = createNetworkStep(wiz, 2, totalSteps)
+	wiz.networkModal = createNetworkStep(wiz, stepCount, totalSteps)
+	stepCount++
 
 	// Step 3 - Client mode
-	wiz.modeModal = createModeStep(wiz, 3, totalSteps)
+	wiz.modeModal = createModeStep(wiz, stepCount, totalSteps)
+	stepCount++
 
 	// Step 4 - EC settings
-	wiz.localEcModal = createLocalEcStep(wiz, 4, totalSteps)
-	wiz.externalEcSelectModal = createExternalEcSelectStep(wiz, 4, totalSteps)
-	wiz.externalEcSettingsModal = createExternalEcSettingsStep(wiz, 4, totalSteps)
+	wiz.localEcModal = createLocalEcStep(wiz, stepCount, totalSteps)
+	wiz.externalEcSelectModal = createExternalEcSelectStep(wiz, stepCount, totalSteps)
+	wiz.externalEcSettingsModal = createExternalEcSettingsStep(wiz, stepCount, totalSteps)
+	stepCount++
 
 	// Step 5 - BN settings
-	wiz.localBnModal = createLocalBnStep(wiz, 5, totalSteps)
-	wiz.localBnPrysmWarning = createPrysmWarningStep(wiz, 5, totalSteps)
-	wiz.localBnTekuWarning = createTekuWarningStep(wiz, 5, totalSteps)
-	wiz.checkpointSyncProviderModal = createCheckpointSyncStep(wiz, 5, totalSteps)
-	wiz.externalBnSelectModal = createExternalBnSelectStep(wiz, 5, totalSteps)
-	wiz.externalBnSettingsModal = createExternalBnSettingsStep(wiz, 5, totalSteps)
-	wiz.externalPrysmSettingsModal = createExternalPrysmSettingsStep(wiz, 5, totalSteps)
+	wiz.localBnModal = createLocalBnStep(wiz, stepCount, totalSteps)
+	wiz.localBnPrysmWarning = createPrysmWarningStep(wiz, stepCount, totalSteps)
+	wiz.localBnTekuWarning = createTekuWarningStep(wiz, stepCount, totalSteps)
+	wiz.checkpointSyncProviderModal = createCheckpointSyncStep(wiz, stepCount, totalSteps)
+	wiz.externalBnSelectModal = createExternalBnSelectStep(wiz, stepCount, totalSteps)
+	wiz.externalBnSettingsModal = createExternalBnSettingsStep(wiz, stepCount, totalSteps)
+	wiz.externalPrysmSettingsModal = createExternalPrysmSettingsStep(wiz, stepCount, totalSteps)
+	stepCount++
 
 	// Step 6 - Fallback clients
-	wiz.useFallbackModal = createUseFallbackStep(wiz, 6, totalSteps)
-	wiz.fallbackNormalModal = createFallbackNormalStep(wiz, 6, totalSteps)
-	wiz.fallbackPrysmModal = createFallbackPrysmStep(wiz, 6, totalSteps)
+	wiz.useFallbackModal = createUseFallbackStep(wiz, stepCount, totalSteps)
+	wiz.fallbackNormalModal = createFallbackNormalStep(wiz, stepCount, totalSteps)
+	wiz.fallbackPrysmModal = createFallbackPrysmStep(wiz, stepCount, totalSteps)
+	stepCount++
 
 	// Step 7 - Modules
-	wiz.modulesModal = createModulesStep(wiz, 7, totalSteps)
+	wiz.modulesModal = createModulesStep(wiz, stepCount, totalSteps)
+	stepCount++
 
 	// Step 8 - Metrics
-	wiz.metricsModal = createMetricsStep(wiz, 8, totalSteps)
+	wiz.metricsModal = createMetricsStep(wiz, stepCount, totalSteps)
+	stepCount++
+
+	// Step 9 - MEV Boost
+	wiz.mevModeModal = createMevModeStep(wiz, stepCount, totalSteps)
+	wiz.localMevModal = createLocalMevStep(wiz, stepCount, totalSteps)
+	wiz.externalMevModal = createExternalMevStep(wiz, stepCount, totalSteps)
+	stepCount++
 
 	// Done
-	wiz.finishedModal = createFinishedStep(wiz, 9, totalSteps)
+	wiz.finishedModal = createFinishedStep(wiz, stepCount, totalSteps)
 
 	return wiz
 }

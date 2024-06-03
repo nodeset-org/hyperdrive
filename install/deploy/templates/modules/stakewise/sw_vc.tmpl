@@ -37,6 +37,7 @@ services:
       - BITFLY_NODE_METRICS_SECRET={{.Hyperdrive.Metrics.BitflyNodeMetrics.Secret}}
       - BITFLY_NODE_METRICS_ENDPOINT={{.Hyperdrive.Metrics.BitflyNodeMetrics.Endpoint}}
       - BITFLY_NODE_METRICS_MACHINE_NAME={{.Hyperdrive.Metrics.BitflyNodeMetrics.MachineName}}
+      - ENABLE_MEV_BOOST={{.Hyperdrive.MevBoost.Enable}}
       - GRAFFITI={{.Stakewise.Graffiti}}
     entrypoint: sh
     command: "/usr/share/hyperdrive/scripts/{{.Hyperdrive.GetVcStartScript}}"

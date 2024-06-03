@@ -50,6 +50,7 @@ services:
       - BITFLY_NODE_METRICS_SECRET={{.Hyperdrive.Metrics.BitflyNodeMetrics.Secret}}
       - BITFLY_NODE_METRICS_ENDPOINT={{.Hyperdrive.Metrics.BitflyNodeMetrics.Endpoint}}
       - BITFLY_NODE_METRICS_MACHINE_NAME={{.Hyperdrive.Metrics.BitflyNodeMetrics.MachineName}}
+      - MEV_BOOST_URL={{.Hyperdrive.MevBoostUrl}}
       {{- /* Client-specific values */}}
       {{- if eq .Hyperdrive.LocalBeaconClient.BeaconNode.String "teku"}}
       - TEKU_JVM_HEAP_SIZE={{.Hyperdrive.LocalBeaconClient.Teku.JvmHeapSize}}

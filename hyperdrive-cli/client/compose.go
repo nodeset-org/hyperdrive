@@ -124,6 +124,11 @@ func (c *HyperdriveClient) deployTemplates(cfg *GlobalConfig, hyperdriveDir stri
 		)
 	}
 
+	// Check if we are running the MEV-Boost container locally
+	if cfg.Hyperdrive.MevBoost.Enable.Value && cfg.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
+		toDeploy = append(toDeploy, config.ContainerID_MevBoost)
+	}
+
 	// Deploy main containers
 	for _, containerName := range toDeploy {
 		containers, err := composePaths.File(string(containerName)).Write(cfg)
