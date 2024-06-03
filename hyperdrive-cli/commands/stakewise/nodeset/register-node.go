@@ -1,11 +1,7 @@
 package nodeset
 
 import (
-	"fmt"
-	"net/mail"
-
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -28,20 +24,14 @@ func registerNode(c *cli.Context) error {
 		return err
 	}
 
-	// Get the email
-	email := RegisterEmailFlag.Name
-	if email == "" {
-		for {
-			email = cliutils.Prompt("Enter the email address you'd like to register with NodeSet:", "^.*$", "Invalid email address, try again")
-			_, err := mail.ParseAddress(email)
-			if err == nil {
-				break
-			}
-			fmt.Println("Invalid email address, try again")
-		}
+	// Check if it's already registered
+	shouldRegister, err := checkRegistrationStatusImpl(hd, sw)
+	if err != nil {
+		return err
+	}
+	if !shouldRegister {
+		return nil
 	}
 
-	_, err = sw.Api.Nodeset.RegisterNode(email)
-
-	return err
+	return registerNodeImpl(c, sw)
 }
