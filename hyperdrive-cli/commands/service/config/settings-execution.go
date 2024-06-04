@@ -54,6 +54,14 @@ func (configPage *ExecutionConfigPage) createContent() {
 	configPage.layout.createForm(&configPage.masterConfig.Hyperdrive.Network, "Execution Client Settings")
 	configPage.layout.setupEscapeReturnHomeHandler(configPage.home.md, configPage.home.homePage)
 
+	// Update the Reth descriptions
+	for _, option := range configPage.masterConfig.Hyperdrive.LocalExecutionClient.ExecutionClient.Options {
+		option.Description = getAugmentedLocalEcDescription(option.Value, option.Description)
+	}
+	for _, option := range configPage.masterConfig.Hyperdrive.ExternalExecutionClient.ExecutionClient.Options {
+		option.Description = getAugmentedExternalEcDescription(option.Value, option.Description)
+	}
+
 	// Set up the form items
 	configPage.clientModeDropdown = createParameterizedDropDown(&configPage.masterConfig.Hyperdrive.ClientMode, configPage.layout.descriptionBox)
 	configPage.localEcDropdown = createParameterizedDropDown(&configPage.masterConfig.Hyperdrive.LocalExecutionClient.ExecutionClient, configPage.layout.descriptionBox)

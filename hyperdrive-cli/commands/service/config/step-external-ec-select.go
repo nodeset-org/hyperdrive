@@ -1,5 +1,7 @@
 package config
 
+import "github.com/rocket-pool/node-manager-core/config"
+
 func createExternalEcSelectStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
 	// Create the button names and descriptions from the config
 	clients := wiz.md.Config.Hyperdrive.ExternalExecutionClient.ExecutionClient.Options
@@ -25,7 +27,13 @@ func createExternalEcSelectStep(wiz *wizard, currentStep int, totalSteps int) *c
 	done := func(buttonIndex int, buttonLabel string) {
 		selectedClient := clients[buttonIndex].Value
 		wiz.md.Config.Hyperdrive.ExternalExecutionClient.ExecutionClient.Value = selectedClient
-		wiz.externalEcSettingsModal.show()
+
+		if selectedClient == config.ExecutionClient_Reth {
+			// Show the Reth warning
+			wiz.externalRethWarning.show()
+		} else {
+			wiz.externalEcSettingsModal.show()
+		}
 	}
 
 	back := func() {
