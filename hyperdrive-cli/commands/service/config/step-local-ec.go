@@ -14,7 +14,10 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 	badClients := []*config.ParameterOption[config.ExecutionClient]{}
 	for _, client := range wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Options {
 		if !strings.HasPrefix(client.Name, "*") {
-			goodClients = append(goodClients, client)
+			if client.Value != config.ExecutionClient_Reth {
+				// Remove Reth from the list of random options for now
+				goodClients = append(goodClients, client)
+			}
 		} else {
 			badClients = append(badClients, client)
 		}
@@ -38,7 +41,7 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 	clientDescriptions := []string{randomDesc.String()}
 	for _, client := range clients {
 		clientNames = append(clientNames, client.Name)
-		clientDescriptions = append(clientDescriptions, client.Description)
+		clientDescriptions = append(clientDescriptions, getAugmentedLocalEcDescription(client.Value, client.Description))
 	}
 
 	helperText := "Please select the Execution Client you would like to use.\n\nHighlight each one to see a brief description of it, or go to https://clientdiversity.org/ to learn more about them."
@@ -81,8 +84,14 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 			if selectedClient == config.ExecutionClient_Unknown {
 				panic(fmt.Sprintf("Local EC selection buttons didn't match any known clients, buttonLabel = %s\n", buttonLabel))
 			}
+
 			wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Value = selectedClient
-			wiz.localBnModal.show()
+			if selectedClient == config.ExecutionClient_Reth {
+				// Show the Reth warning
+				wiz.localRethWarning.show()
+			} else {
+				wiz.localBnModal.show()
+			}
 		}
 	}
 
