@@ -138,7 +138,7 @@ func configureService(c *cli.Context) error {
 			for _, container := range md.ContainersToRestart {
 				fullName := fmt.Sprintf("%s_%s", prefix, container)
 				if !runningContainers[fullName] {
-					fmt.Printf("%s is not currently running.", fullName)
+					fmt.Printf("%s is not currently running.\n", fullName)
 				} else {
 					fmt.Printf("Stopping %s... ", fullName)
 					err := hd.StopContainer(fullName)

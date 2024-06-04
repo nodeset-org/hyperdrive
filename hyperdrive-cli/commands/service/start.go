@@ -70,7 +70,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	// Validate the config
 	errors := cfg.Validate()
 	if len(errors) > 0 {
-		fmt.Printf("%sYour configuration encountered errors. You must correct the following in order to start Hyperdrive:\n\n", terminal.ColorRed)
+		fmt.Printf("%sYour configuration encountered errors. You must correct the following by changing the settings with `hyperdrive service config` in order to start Hyperdrive:\n\n", terminal.ColorRed)
 		for _, err := range errors {
 			fmt.Printf("%s\n\n", err)
 		}
