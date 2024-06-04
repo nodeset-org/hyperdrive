@@ -1,11 +1,13 @@
-hyperdrive (0.5.0~b1) UNRELEASED; urgency=medium
+hyperdrive (0.5.0~b1) unstable; urgency=medium
 
   * Updated Besu, Nimbus, Grafana, Prometheus, and Node Exporter.
   * Updated the StakeWise Operator service.
-  * Added MEV-Boost support with several built-in relays
+  * Added MEV-Boost support for Mainnet and Holesky.
+  * Migrated to the new NodeSet service's new authentication / registration system. Users with the StakeWise module enabled must first whitelist the node address via the nodeset.io portal for their user account, then confirm ownership of the node via Hyperdrive.
+  * New command: `stakewise nodeset registration-status` gets the node's registration status with the NodeSet service.
   * New command: `stakewise nodeset register-node` will register your node with your NodeSet user account if it's not already registered.
 
- -- NodeSet LLC <info@nodeset.io>  Wed, 29 May 2024 15:41:30 +0000
+ -- NodeSet LLC <info@nodeset.io>  Tue, 04 Jun 2024 17:56:00 +0000
 
 hyperdrive (0.4.2~b2) unstable; urgency=medium
 
