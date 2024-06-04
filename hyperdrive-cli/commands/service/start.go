@@ -172,7 +172,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		}
 	}
 
-	// Handle NodeSet registration if StakeWise is enabled
+	// Check if StakeWise is enabled
 	if !cfg.Stakewise.Enabled.Value {
 		return nil
 	}
@@ -180,7 +180,19 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	if err != nil {
 		return err
 	}
-	err = nodeset.CheckRegistrationStatus(c, hd, sw)
+
+	// Get NodeSet registration status
+	fmt.Println()
+	fmt.Println("Checking node registration status...")
+	retries = 5
+	for i := 0; i < retries; i++ {
+		err = nodeset.CheckRegistrationStatus(c, hd, sw)
+		if err != nil {
+			time.Sleep(time.Second)
+			continue
+		}
+		break
+	}
 	if err != nil {
 		return fmt.Errorf("error checking NodeSet registration status: %w", err)
 	}

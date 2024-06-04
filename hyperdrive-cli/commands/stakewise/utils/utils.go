@@ -23,6 +23,10 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 		printUploadError(err)
 		return false, nil
 	}
+	if response.Data.UnregisteredNode {
+		fmt.Println("Your node is not registered with NodeSet yet. Please register your node first.")
+		return false, nil
+	}
 
 	data := response.Data
 
