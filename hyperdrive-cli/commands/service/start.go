@@ -181,7 +181,11 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		return err
 	}
 
-	// Get NodeSet registration status
+	// Get NodeSet registration status if this isn't a new wallet
+	isExistingWallet := status.Wallet.IsLoaded || status.Wallet.IsOnDisk
+	if !isExistingWallet {
+		return nil
+	}
 	fmt.Println()
 	fmt.Println("Checking node registration status...")
 	retries = 5

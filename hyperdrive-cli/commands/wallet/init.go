@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/urfave/cli/v2"
@@ -135,13 +134,8 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 			return fmt.Errorf("error initializing Stakewise wallet: %w", err)
 		}
 		fmt.Println("Stakewise wallet initialized.")
-
-		// Register the node with NodeSet
-		if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to register your new node with your NodeSet account?")) {
-			fmt.Println("You can register your node later with `hyperdrive stakewise nodeset register-node`.")
-			return nil
-		}
-		return nodeset.RegisterNodeImpl(c, sw)
+		fmt.Println()
+		fmt.Println("Please whitelist your node on your `nodeset.io` dashboard, then register it with `hyperdrive sw ns register`.")
 	}
 	return nil
 }

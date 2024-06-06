@@ -7,7 +7,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	swapi "github.com/nodeset-org/hyperdrive-stakewise/shared/api"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/urfave/cli/v2"
@@ -138,13 +137,7 @@ func recoverWallet(c *cli.Context) error {
 			fmt.Println("Your node is already registered with NodeSet.")
 
 		case swapi.NodesetRegistrationStatus_Unregistered:
-			// Register the node with NodeSet
-			fmt.Println("Your node is not registered with NodeSet yet.")
-			if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to register it with your NodeSet account now?")) {
-				fmt.Println("You can register your node later with `hyperdrive stakewise nodeset register-node`.")
-				return nil
-			}
-			return nodeset.RegisterNodeImpl(c, sw)
+			fmt.Println("Please whitelist your node on your `nodeset.io` dashboard, then register it with `hyperdrive sw ns register`.")
 
 		case swapi.NodesetRegistrationStatus_Unknown:
 			fmt.Println("Hyperdrive couldn't check your node's registration status:")

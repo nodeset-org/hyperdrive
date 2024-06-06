@@ -45,7 +45,7 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 			fmt.Println(key.HexWithPrefix())
 		}
 	} else {
-		fmt.Println("Not all keys were uploaded due to insufficient balance.")
+		fmt.Printf("%sWarning: not all keys were uploaded due to insufficient balance.%s\n", terminal.ColorYellow, terminal.ColorReset)
 		fmt.Printf("Current wallet balance: %s%f%s\n", terminal.ColorGreen, data.Balance, terminal.ColorReset)
 		fmt.Printf("Remaining unregistered keys: %s%d%s\n", terminal.ColorGreen, remainingKeyCount, terminal.ColorReset)
 		fmt.Printf("You need %s%f%s more ETH to register your remaining keys.\n", terminal.ColorGreen, data.RemainingEthRequired, terminal.ColorReset)
@@ -66,5 +66,5 @@ func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
 	fmt.Printf("%s%d%s are registered and pending activation.\n", terminal.ColorGreen, data.PendingCount, terminal.ColorReset)
 	fmt.Printf("%s%d%s are registered and have been activated already.\n", terminal.ColorGreen, data.ActiveCount, terminal.ColorReset)
 
-	return true, nil
+	return newKeyCount != 0, nil
 }

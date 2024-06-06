@@ -27,7 +27,7 @@ func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient, sw *cl
 		return nil
 	}
 
-	return RegisterNodeImpl(c, sw)
+	return registerNodeImpl(c, sw)
 }
 
 // Returns true if the node should register because it hasn't yet and is able to
@@ -66,7 +66,7 @@ func checkRegistrationStatusImpl(hd *client.HyperdriveClient, sw *client.Stakewi
 }
 
 // Registers the node with NodeSet
-func RegisterNodeImpl(c *cli.Context, sw *client.StakewiseClient) error {
+func registerNodeImpl(c *cli.Context, sw *client.StakewiseClient) error {
 	// Get the email
 	email := c.String(RegisterEmailFlag.Name)
 	if email == "" {
