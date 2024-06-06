@@ -33,5 +33,5 @@ func registerNode(c *cli.Context) error {
 		return nil
 	}
 
-	return registerNodeImpl(c, sw)
+	return RegisterNodeImpl(c, sw)
 }

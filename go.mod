@@ -9,7 +9,7 @@ require (
 	github.com/ethereum/go-ethereum v1.14.3
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/nodeset-org/hyperdrive-daemon v0.5.0-b1
-	github.com/nodeset-org/hyperdrive-stakewise v0.2.0
+	github.com/nodeset-org/hyperdrive-stakewise v0.1.2-dev.0.20240606025827-789eb0b4494c
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/node-manager-core v0.4.0
 	golang.org/x/sync v0.7.0

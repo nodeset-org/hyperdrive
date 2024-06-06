@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/mail"
 
+	swapi "github.com/nodeset-org/hyperdrive-stakewise/shared/api"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/urfave/cli/v2"
@@ -26,7 +27,7 @@ func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient, sw *cl
 		return nil
 	}
 
-	return registerNodeImpl(c, sw)
+	return RegisterNodeImpl(c, sw)
 }
 
 // Returns true if the node should register because it hasn't yet and is able to
@@ -48,16 +49,24 @@ func checkRegistrationStatusImpl(hd *client.HyperdriveClient, sw *client.Stakewi
 	if err != nil {
 		return false, err
 	}
-	if resp.Data.Registered {
-		fmt.Println("Your node is registered with NodeSet.")
-	} else {
+	switch resp.Data.Status {
+	case swapi.NodesetRegistrationStatus_Unknown:
+		fmt.Println("Hyperdrive couldn't check your node's registration status:")
+		fmt.Println(resp.Data.ErrorMessage)
+		fmt.Println("Please try again later.")
+	case swapi.NodesetRegistrationStatus_NoWallet:
+		fmt.Println("Your node can't be registered until you have a node wallet initialized. Please run `hyperdrive wallet init` or `hyperdrive wallet recover` first.")
+	case swapi.NodesetRegistrationStatus_Unregistered:
 		fmt.Println("Your node is not currently registered with NodeSet.")
+		return true, nil
+	case swapi.NodesetRegistrationStatus_Registered:
+		fmt.Println("Your node is registered with NodeSet.")
 	}
-	return !resp.Data.Registered, nil
+	return false, nil
 }
 
 // Registers the node with NodeSet
-func registerNodeImpl(c *cli.Context, sw *client.StakewiseClient) error {
+func RegisterNodeImpl(c *cli.Context, sw *client.StakewiseClient) error {
 	// Get the email
 	email := c.String(RegisterEmailFlag.Name)
 	if email == "" {

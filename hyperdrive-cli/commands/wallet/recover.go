@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
+	swapi "github.com/nodeset-org/hyperdrive-stakewise/shared/api"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/urfave/cli/v2"
@@ -16,6 +18,12 @@ func recoverWallet(c *cli.Context) error {
 	hd, err := client.NewHyperdriveClientFromCtx(c)
 	if err != nil {
 		return err
+	}
+
+	// Get the config
+	cfg, _, err := hd.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("error getting Hyperdrive configuration: %w", err)
 	}
 
 	// Get & check wallet status
@@ -102,5 +110,48 @@ func recoverWallet(c *cli.Context) error {
 		fmt.Printf("Node account: %s\n", response.Data.AccountAddress.Hex())
 	}
 
+	// Initialize the StakeWise wallet if it's enabled
+	if cfg.Stakewise.Enabled.Value {
+		fmt.Println()
+		fmt.Println("You have the Stakewise module enabled. Initializing it with your new wallet...")
+		sw, err := client.NewStakewiseClientFromCtx(c, hd)
+		if err != nil {
+			return err
+		}
+		_, err = sw.Api.Wallet.Initialize()
+		if err != nil {
+			return fmt.Errorf("error initializing Stakewise wallet: %w", err)
+		}
+		fmt.Println("Stakewise wallet initialized.")
+		fmt.Println()
+
+		// Check if the wallet is registered with NodeSet
+		regResponse, err := sw.Api.Nodeset.RegistrationStatus()
+		if err != nil {
+			fmt.Println("Hyperdrive couldn't check your node's registration status:")
+			fmt.Println(err.Error())
+			fmt.Println("If your node isn't registered yet, you'll have to register it later.")
+			return nil
+		}
+		switch regResponse.Data.Status {
+		case swapi.NodesetRegistrationStatus_Registered:
+			fmt.Println("Your node is already registered with NodeSet.")
+
+		case swapi.NodesetRegistrationStatus_Unregistered:
+			// Register the node with NodeSet
+			fmt.Println("Your node is not registered with NodeSet yet.")
+			if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to register it with your NodeSet account now?")) {
+				fmt.Println("You can register your node later with `hyperdrive stakewise nodeset register-node`.")
+				return nil
+			}
+			return nodeset.RegisterNodeImpl(c, sw)
+
+		case swapi.NodesetRegistrationStatus_Unknown:
+			fmt.Println("Hyperdrive couldn't check your node's registration status:")
+			fmt.Println(regResponse.Data.ErrorMessage)
+			fmt.Println("If your node isn't registered yet, you'll have to register it later.")
+		}
+
+	}
 	return nil
 }

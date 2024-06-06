@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/urfave/cli/v2"
@@ -121,7 +122,7 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	fmt.Println("The node wallet was successfully initialized.")
 	fmt.Printf("Node account: %s%s%s\n", terminal.ColorBlue, response.Data.AccountAddress.Hex(), terminal.ColorReset)
 
-	// Initialize the Stakewise wallet if it's enabled
+	// Initialize the StakeWise wallet if it's enabled
 	if cfg.Stakewise.Enabled.Value {
 		fmt.Println()
 		fmt.Println("You have the Stakewise module enabled. Initializing it with your new wallet...")
@@ -135,21 +136,12 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 		}
 		fmt.Println("Stakewise wallet initialized.")
 
-		registrationStatusResp, err := sw.Api.Nodeset.RegistrationStatus()
-		if err != nil {
-			return err
+		// Register the node with NodeSet
+		if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to register your new node with your NodeSet account?")) {
+			fmt.Println("You can register your node later with `hyperdrive stakewise nodeset register-node`.")
+			return nil
 		}
-		if !registrationStatusResp.Data.Registered && utils.Confirm("Would you like to upload your validator keys to NodeSet?") {
-			if c.String(RegisterEmailFlag.Name) == "" {
-				fmt.Printf("Please provide an email address with the %s flag.\n", RegisterEmailFlag.Name)
-				fmt.Printf("You can register your validator with `hyperdrive stakewise nodeset register-node`.\n")
-				return nil
-			}
-			_, err := sw.Api.Nodeset.RegisterNode(c.String(RegisterEmailFlag.Name))
-			if err != nil {
-				return err
-			}
-		}
+		return nodeset.RegisterNodeImpl(c, sw)
 	}
 	return nil
 }
