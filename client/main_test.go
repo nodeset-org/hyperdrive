@@ -1,4 +1,4 @@
-package service
+package client
 
 import (
 	"fmt"
@@ -8,7 +8,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/nodeset-org/hyperdrive-daemon/client"
 	"github.com/nodeset-org/hyperdrive-daemon/internal/tests"
 	"github.com/nodeset-org/hyperdrive-daemon/server"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
@@ -20,7 +19,7 @@ var (
 	wg        *sync.WaitGroup       = nil
 	serverMgr *server.ServerManager = nil
 	logger    *slog.Logger          = nil
-	apiClient *client.ApiClient     = nil
+	apiClient *ApiClient            = nil
 )
 
 // Initialize a common server used by all tests
@@ -31,7 +30,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		fail("error creating test manager: %v", err)
 	}
-	logger = testMgr.Logger
+	logger = testMgr.GetLogger()
 
 	// Create the server
 	ip := "localhost"
@@ -46,7 +45,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		fail("error parsing client URL [%s]: %v", urlString, err)
 	}
-	apiClient = client.NewApiClient(url, logger, nil)
+	apiClient = NewApiClient(url, logger, nil)
 
 	// Run tests
 	code := m.Run()

@@ -1,9 +1,12 @@
-package service
+package client
 
 import (
 	"runtime/debug"
 	"testing"
+	"time"
 
+	dtypes "github.com/docker/docker/api/types"
+	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/stretchr/testify/require"
 )
 
@@ -56,4 +59,81 @@ func TestClientStatus_Synced(t *testing.T) {
 
 	require.Equal(t, response.Data.EcManagerStatus.PrimaryClientStatus.ChainId, response.Data.BcManagerStatus.PrimaryClientStatus.ChainId)
 	t.Logf("Received correct client status - both clients synced on chain %d", response.Data.EcManagerStatus.PrimaryClientStatus.ChainId)
+}
+
+// Test getting the server version
+func TestServerVersion(t *testing.T) {
+	// Set up panic handling and cleanup
+	defer func() {
+		r := recover()
+		if r != nil {
+			debug.PrintStack()
+			fail("Recovered from panic: %v", r)
+		} else {
+			testMgr.RevertToBaseline()
+		}
+	}()
+
+	version := shared.HyperdriveVersion
+
+	// Run the round-trip test
+	response, err := apiClient.Service.Version()
+	require.NoError(t, err)
+	require.Equal(t, version, response.Data.Version)
+	t.Logf("Received correct version: %s", version)
+}
+
+func TestRestartContainer(t *testing.T) {
+	// Set up panic handling and cleanup
+	defer func() {
+		r := recover()
+		if r != nil {
+			debug.PrintStack()
+			fail("Recovered from panic: %v", r)
+		} else {
+			testMgr.RevertToBaseline()
+		}
+	}()
+
+	// Get some services
+	sp := testMgr.ServiceProvider
+	cfg := sp.GetConfig()
+	ctx := sp.GetBaseContext()
+
+	// Create a fake VC directly
+	containerName := "mock_vc"
+	fullName := cfg.GetDockerArtifactName(containerName)
+	oneMinuteAgo := time.Now().Add(-1 * time.Minute)
+	oneMinuteAgoStr := oneMinuteAgo.Format(time.RFC3339Nano)
+	vc := dtypes.ContainerJSON{
+		ContainerJSONBase: &dtypes.ContainerJSONBase{
+			Name:    fullName,
+			Created: oneMinuteAgoStr,
+			State: &dtypes.ContainerState{
+				Running:    false,
+				StartedAt:  oneMinuteAgoStr,
+				FinishedAt: oneMinuteAgoStr,
+			},
+		},
+	}
+	docker := testMgr.GetDockerClient()
+	err := docker.Mock_AddContainer(vc)
+	if err != nil {
+		t.Fatalf("Error creating mock VC: %v", err)
+	}
+	t.Log("Created mock VC")
+
+	// Run the client call
+	_, err = apiClient.Service.RestartContainer(containerName)
+	require.NoError(t, err)
+	t.Log("Restart called")
+
+	// Make sure the restart actually worked
+	vc, err = docker.ContainerInspect(ctx, fullName)
+	if err != nil {
+		t.Fatalf("Error inspecting mock VC: %v", err)
+	}
+	require.True(t, vc.State.Running)
+	require.Greater(t, vc.State.StartedAt, oneMinuteAgoStr)
+	t.Logf("VC restart was successful - original start = %s, new start = %s", oneMinuteAgoStr, vc.State.StartedAt)
 }

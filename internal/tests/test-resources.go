@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"github.com/nodeset-org/beacon-mock/db"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/nodeset-org/osha/beacon/db"
 	"github.com/rocket-pool/node-manager-core/config"
 )
 
