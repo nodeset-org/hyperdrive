@@ -12,9 +12,9 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
-	github.com/nodeset-org/osha v0.1.0
+	github.com/nodeset-org/osha v0.1.1-0.20240610024446-fee1ac603da7
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.4.0
+	github.com/rocket-pool/node-manager-core v0.3.1-0.20240606201146-02cb18d7d44a
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/wealdtech/go-ens/v3 v3.6.0
