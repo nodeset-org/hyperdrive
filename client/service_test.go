@@ -19,7 +19,10 @@ func TestClientStatus_Synced(t *testing.T) {
 			debug.PrintStack()
 			fail("Recovered from panic: %v", r)
 		} else {
-			testMgr.RevertToBaseline()
+			err := testMgr.RevertToBaseline()
+			if err != nil {
+				t.Fatalf("Error reverting to baseline: %v", err)
+			}
 		}
 	}()
 
@@ -70,7 +73,10 @@ func TestServerVersion(t *testing.T) {
 			debug.PrintStack()
 			fail("Recovered from panic: %v", r)
 		} else {
-			testMgr.RevertToBaseline()
+			err := testMgr.RevertToBaseline()
+			if err != nil {
+				t.Fatalf("Error reverting to baseline: %v", err)
+			}
 		}
 	}()
 
@@ -91,7 +97,10 @@ func TestRestartContainer(t *testing.T) {
 			debug.PrintStack()
 			fail("Recovered from panic: %v", r)
 		} else {
-			testMgr.RevertToBaseline()
+			err := testMgr.RevertToBaseline()
+			if err != nil {
+				t.Fatalf("Error reverting to baseline: %v", err)
+			}
 		}
 	}()
 

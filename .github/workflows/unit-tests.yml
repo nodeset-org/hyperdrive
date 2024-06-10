@@ -12,8 +12,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout OSHA
+        uses: actions/checkout@v4
+        with:
+          repository: nodeset-org/osha
+          path: ./osha
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: ./osha/hardhat
+        run: npm ci
+      
+      - name: Run Hardhat  
+        working-directory: ./osha/hardhat
+        run: npx hardhat node --port 8545 &
+
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: 1.21.10
-      - run: go test ./...
+
+      - name: Run tests
+        env: 
+           HARDHAT_URL: "http://localhost:8545"
+        run: go test -v ./...
