@@ -49,10 +49,13 @@ func NewTestManager() (*TestManager, error) {
 		resources,
 		ecManager,
 		bnManager,
-		tm.GetDockerClient(),
+		tm.GetDockerMockManager(),
 	)
 	if err != nil {
-		tm.Cleanup()
+		err2 := tm.Close()
+		if err2 != nil {
+			tm.GetLogger().Error("Error closing test manager: %v", err2)
+		}
 		return nil, fmt.Errorf("error creating service provider: %v", err)
 	}
 

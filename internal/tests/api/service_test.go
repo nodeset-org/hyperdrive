@@ -7,34 +7,26 @@ import (
 
 	dtypes "github.com/docker/docker/api/types"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
+	"github.com/nodeset-org/osha"
 	"github.com/stretchr/testify/require"
 )
 
 // Test getting the client status of synced clients
 func TestClientStatus_Synced(t *testing.T) {
-	// Set up panic handling and cleanup
+	// Take a snapshot, revert at the end
+	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients)
+	if err != nil {
+		fail("Error creating custom snapshot: %v", err)
+	}
 	defer func() {
 		r := recover()
 		if r != nil {
 			debug.PrintStack()
 			fail("Recovered from panic: %v", r)
-		} else {
-			err := testMgr.RevertToBaseline()
-			if err != nil {
-				t.Fatalf("Error reverting to baseline: %v", err)
-			}
 		}
-	}()
-
-	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot()
-	if err != nil {
-		t.Fatalf("Error creating custom snapshot: %v", err)
-	}
-	defer func() {
 		err := testMgr.RevertToCustomSnapshot(snapshotName)
 		if err != nil {
-			t.Fatalf("Error reverting to custom snapshot: %v", err)
+			fail("Error reverting to custom snapshot: %v", err)
 		}
 	}()
 
@@ -72,11 +64,6 @@ func TestServerVersion(t *testing.T) {
 		if r != nil {
 			debug.PrintStack()
 			fail("Recovered from panic: %v", r)
-		} else {
-			err := testMgr.RevertToBaseline()
-			if err != nil {
-				t.Fatalf("Error reverting to baseline: %v", err)
-			}
 		}
 	}()
 
@@ -90,17 +77,20 @@ func TestServerVersion(t *testing.T) {
 }
 
 func TestRestartContainer(t *testing.T) {
-	// Set up panic handling and cleanup
+	// Take a snapshot, revert at the end
+	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_Docker)
+	if err != nil {
+		fail("Error creating custom snapshot: %v", err)
+	}
 	defer func() {
 		r := recover()
 		if r != nil {
 			debug.PrintStack()
 			fail("Recovered from panic: %v", r)
-		} else {
-			err := testMgr.RevertToBaseline()
-			if err != nil {
-				t.Fatalf("Error reverting to baseline: %v", err)
-			}
+		}
+		err := testMgr.RevertToCustomSnapshot(snapshotName)
+		if err != nil {
+			fail("Error reverting to custom snapshot: %v", err)
 		}
 	}()
 
@@ -125,8 +115,8 @@ func TestRestartContainer(t *testing.T) {
 			},
 		},
 	}
-	docker := testMgr.GetDockerClient()
-	err := docker.Mock_AddContainer(vc)
+	docker := testMgr.GetDockerMockManager()
+	err = docker.Mock_AddContainer(vc)
 	if err != nil {
 		t.Fatalf("Error creating mock VC: %v", err)
 	}

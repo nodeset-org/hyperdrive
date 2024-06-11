@@ -8,6 +8,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/nodeset-org/hyperdrive-daemon/client"
 	"github.com/nodeset-org/hyperdrive-daemon/internal/tests"
 	"github.com/nodeset-org/hyperdrive-daemon/server"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
@@ -19,7 +20,7 @@ var (
 	wg        *sync.WaitGroup       = nil
 	serverMgr *server.ServerManager = nil
 	logger    *slog.Logger          = nil
-	apiClient *ApiClient            = nil
+	apiClient *client.ApiClient     = nil
 )
 
 // Initialize a common server used by all tests
@@ -45,7 +46,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		fail("error parsing client URL [%s]: %v", urlString, err)
 	}
-	apiClient = NewApiClient(url, logger, nil)
+	apiClient = client.NewApiClient(url, logger, nil)
 
 	// Run tests
 	code := m.Run()
@@ -69,8 +70,12 @@ func cleanup() {
 		serverMgr = nil
 	}
 	if testMgr != nil {
-		testMgr.Cleanup()
-		logger.Info("Cleaned up test manager")
+		err := testMgr.Close()
+		if err != nil {
+			logger.Error("Error closing test manager: %v", err)
+		} else {
+			logger.Info("Cleaned up test manager")
+		}
 		testMgr = nil
 	}
 }

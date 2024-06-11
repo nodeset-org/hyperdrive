@@ -1,0 +1,9 @@
+{
+    "go.testEnvVars": {
+        "HARDHAT_URL": "http://localhost:8545"
+    },
+    "go.testFlags": [
+        "-p",
+        "1"
+    ]
+}
