@@ -63,7 +63,6 @@ if [ "$CLIENT" = "lighthouse" ]; then
         --eth1-blocks-per-log-query 150 \
         --disable-upnp \
         --staking \
-        --http-allow-sync-stalled \
         --execution-jwt=/secrets/jwtsecret \
         --quic-port ${BN_P2P_QUIC_PORT:-8001} \
         --historic-state-cache-size 2 \
