@@ -14,7 +14,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0
 	github.com/nodeset-org/osha v0.1.1-0.20240611012939-11008f02cb0a
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.4.1-0.20240611012817-2ab8ae0e338b
+	github.com/rocket-pool/node-manager-core v0.4.1-0.20240611150849-d8ec56d52712
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/wealdtech/go-ens/v3 v3.6.0
