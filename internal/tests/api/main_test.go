@@ -12,6 +12,7 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/internal/tests"
 	"github.com/nodeset-org/hyperdrive-daemon/server"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/rocket-pool/node-manager-core/log"
 )
 
 // Various singleton variables used for testing
@@ -72,7 +73,7 @@ func cleanup() {
 	if testMgr != nil {
 		err := testMgr.Close()
 		if err != nil {
-			logger.Error("Error closing test manager: %v", err)
+			logger.Error("Error closing test manager", log.Err(err))
 		} else {
 			logger.Info("Cleaned up test manager")
 		}

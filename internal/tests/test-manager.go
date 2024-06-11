@@ -7,6 +7,7 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/osha"
+	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/node/services"
 )
 
@@ -54,7 +55,7 @@ func NewTestManager() (*TestManager, error) {
 	if err != nil {
 		err2 := tm.Close()
 		if err2 != nil {
-			tm.GetLogger().Error("Error closing test manager: %v", err2)
+			tm.GetLogger().Error("Error closing test manager", log.Err(err2))
 		}
 		return nil, fmt.Errorf("error creating service provider: %v", err)
 	}
