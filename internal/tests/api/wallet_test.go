@@ -114,13 +114,13 @@ func TestWalletStatus_NotLoaded(t *testing.T) {
 	t.Log("Status called")
 
 	require.NoError(t, err)
-	require.Equal(t, response.Data.WalletStatus.Address.NodeAddress, emptyWalletAddress)
+	require.Equal(t, emptyWalletAddress, response.Data.WalletStatus.Address.NodeAddress)
 	require.False(t, response.Data.WalletStatus.Address.HasAddress)
 
-	require.Equal(t, response.Data.WalletStatus.Wallet.Type, wallet.WalletType(""))
+	require.Equal(t, wallet.WalletType(""), response.Data.WalletStatus.Wallet.Type)
 	require.False(t, response.Data.WalletStatus.Wallet.IsLoaded)
 	require.False(t, response.Data.WalletStatus.Wallet.IsOnDisk)
-	require.Equal(t, response.Data.WalletStatus.Wallet.WalletAddress, emptyWalletAddress)
+	require.Equal(t, emptyWalletAddress, response.Data.WalletStatus.Wallet.WalletAddress)
 
 	t.Log("Received correct wallet status")
 }
@@ -158,13 +158,13 @@ func TestWalletStatus_Loaded(t *testing.T) {
 	t.Log("Status called")
 
 	require.NoError(t, err)
-	require.Equal(t, response.Data.WalletStatus.Address.NodeAddress, expectedWalletAddress)
+	require.Equal(t, expectedWalletAddress, response.Data.WalletStatus.Address.NodeAddress)
 	require.True(t, response.Data.WalletStatus.Address.HasAddress)
 
-	require.Equal(t, response.Data.WalletStatus.Wallet.Type, wallet.WalletType("local"))
+	require.Equal(t, wallet.WalletType("local"), response.Data.WalletStatus.Wallet.Type)
 	require.True(t, response.Data.WalletStatus.Wallet.IsLoaded)
 	require.True(t, response.Data.WalletStatus.Wallet.IsOnDisk)
-	require.Equal(t, response.Data.WalletStatus.Wallet.WalletAddress, expectedWalletAddress)
+	require.Equal(t, expectedWalletAddress, response.Data.WalletStatus.Wallet.WalletAddress)
 
 	t.Log("Received correct wallet status")
 }
