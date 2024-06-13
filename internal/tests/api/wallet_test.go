@@ -1,12 +1,14 @@
 package client
 
 import (
+	"fmt"
 	"math/big"
 	"os"
 	"runtime/debug"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nodeset-org/osha"
 	"github.com/nodeset-org/osha/keys"
 	"github.com/rocket-pool/node-manager-core/eth"
@@ -206,6 +208,55 @@ func TestWalletBalance(t *testing.T) {
 	// Check the response
 	require.Equal(t, 0, response.Data.Balance.Cmp(expectedBalance))
 	t.Logf("Received correct balance (%s)", response.Data.Balance.String())
+}
+
+func TestWalletSignMessage(t *testing.T) {
+	// Take a snapshot, revert at the end
+	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients | osha.Service_Filesystem)
+	if err != nil {
+		fail("Error creating custom snapshot: %v", err)
+	}
+	defer wallet_cleanup(snapshotName)
+
+	// Commit a block just so the latest block is fresh - otherwise the sync progress check will
+	// error out because the block is too old and it thinks the client just can't find any peers
+	err = testMgr.CommitBlock()
+	if err != nil {
+		t.Fatalf("Error committing block: %v", err)
+	}
+
+	// Make sure the data directory exists
+	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
+	err = os.MkdirAll(dataDir, 0755)
+	if err != nil {
+		t.Fatalf("Error creating data directory: %v", err)
+	}
+
+	// Regen the wallet
+	derivationPath := string(wallet.DerivationPath_Default)
+	index := uint64(0)
+	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	require.NoError(t, err)
+	t.Log("Recover called")
+
+	message := []byte("hello world")
+	response, err := apiClient.Wallet.SignMessage(message)
+	require.NoError(t, err)
+	t.Log("SignMessage called")
+
+	require.NotEmpty(t, response.Data.SignedMessage)
+	prefix := fmt.Sprintf("\x19Ethereum Signed Message:\n%d", len(message))
+	msgHash := crypto.Keccak256Hash([]byte(prefix + string(message)))
+	sig := response.Data.SignedMessage
+
+	// Recover the public key from the signature
+	r, s, v := sig[:32], sig[32:64], sig[64]
+	pubKey, err := crypto.SigToPub(msgHash.Bytes(), append(r, append(s, v-27)...))
+	require.NoError(t, err)
+
+	// Make sure that the recovered address is the signer address
+	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
+	require.Equal(t, expectedWalletAddress, recoveredAddr)
 }
 
 // Clean up after each test
