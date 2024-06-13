@@ -21,6 +21,7 @@ const (
 )
 
 var (
+	emptyWalletAddress    common.Address = common.HexToAddress("0x0000000000000000000000000000000000000000")
 	expectedWalletAddress common.Address = common.HexToAddress(expectedWalletAddressString)
 	expectedBalance       *big.Int       = eth.EthToWei(expectedBalanceFloat)
 )
@@ -106,6 +107,66 @@ func TestWalletRecover_WrongDerivationPath(t *testing.T) {
 	// Check the response
 	require.NotEqual(t, expectedWalletAddress, response.Data.AccountAddress)
 	t.Logf("Wallet address doesn't match as expected (expected %s, got %s)", expectedWalletAddress.Hex(), response.Data.AccountAddress.Hex())
+}
+
+func TestWalletStatus_NotLoaded(t *testing.T) {
+	response, err := apiClient.Wallet.Status()
+	t.Log("Status called")
+
+	require.NoError(t, err)
+	require.Equal(t, response.Data.WalletStatus.Address.NodeAddress, emptyWalletAddress)
+	require.False(t, response.Data.WalletStatus.Address.HasAddress)
+
+	require.Equal(t, response.Data.WalletStatus.Wallet.Type, wallet.WalletType(""))
+	require.False(t, response.Data.WalletStatus.Wallet.IsLoaded)
+	require.False(t, response.Data.WalletStatus.Wallet.IsOnDisk)
+	require.Equal(t, response.Data.WalletStatus.Wallet.WalletAddress, emptyWalletAddress)
+
+	t.Log("Received correct wallet status")
+}
+
+func TestWalletStatus_Loaded(t *testing.T) {
+	// Take a snapshot, revert at the end
+	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients | osha.Service_Filesystem)
+	if err != nil {
+		fail("Error creating custom snapshot: %v", err)
+	}
+	defer wallet_cleanup(snapshotName)
+
+	// Commit a block just so the latest block is fresh - otherwise the sync progress check will
+	// error out because the block is too old and it thinks the client just can't find any peers
+	err = testMgr.CommitBlock()
+	if err != nil {
+		t.Fatalf("Error committing block: %v", err)
+	}
+
+	// Make sure the data directory exists
+	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
+	err = os.MkdirAll(dataDir, 0755)
+	if err != nil {
+		t.Fatalf("Error creating data directory: %v", err)
+	}
+
+	// Regen the wallet
+	derivationPath := string(wallet.DerivationPath_Default)
+	index := uint64(0)
+	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	require.NoError(t, err)
+	t.Log("Recover called")
+
+	response, err := apiClient.Wallet.Status()
+	t.Log("Status called")
+
+	require.NoError(t, err)
+	require.Equal(t, response.Data.WalletStatus.Address.NodeAddress, expectedWalletAddress)
+	require.True(t, response.Data.WalletStatus.Address.HasAddress)
+
+	require.Equal(t, response.Data.WalletStatus.Wallet.Type, wallet.WalletType("local"))
+	require.True(t, response.Data.WalletStatus.Wallet.IsLoaded)
+	require.True(t, response.Data.WalletStatus.Wallet.IsOnDisk)
+	require.Equal(t, response.Data.WalletStatus.Wallet.WalletAddress, expectedWalletAddress)
+
+	t.Log("Received correct wallet status")
 }
 
 func TestWalletBalance(t *testing.T) {
