@@ -116,7 +116,7 @@ func (c *walletSendContext) PrepareData(data *api.WalletSendData, opts *bind.Tra
 	}
 
 	// Check the balance
-	data.InsufficientBalance = (data.Balance.Cmp(common.Big0) == 0)
+	data.InsufficientBalance = (data.Balance.Cmp(c.amount) == -1)
 	data.CanSend = !(data.InsufficientBalance)
 
 	// Get the TX Info

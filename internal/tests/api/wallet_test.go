@@ -257,6 +257,95 @@ func TestWalletSignMessage(t *testing.T) {
 	// Make sure that the recovered address is the signer address
 	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
 	require.Equal(t, expectedWalletAddress, recoveredAddr)
+	t.Logf("Successfully signed message")
+
+}
+
+func TestWalletSend_EthSuccess(t *testing.T) {
+	// Take a snapshot, revert at the end
+	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients | osha.Service_Filesystem)
+	if err != nil {
+		fail("Error creating custom snapshot: %v", err)
+	}
+	defer wallet_cleanup(snapshotName)
+
+	// Commit a block just so the latest block is fresh - otherwise the sync progress check will
+	// error out because the block is too old and it thinks the client just can't find any peers
+	err = testMgr.CommitBlock()
+	if err != nil {
+		t.Fatalf("Error committing block: %v", err)
+	}
+
+	// Make sure the data directory exists
+	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
+	err = os.MkdirAll(dataDir, 0755)
+	if err != nil {
+		t.Fatalf("Error creating data directory: %v", err)
+	}
+
+	// Regen the wallet
+	derivationPath := string(wallet.DerivationPath_Default)
+	index := uint64(0)
+	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	require.NoError(t, err)
+	t.Log("Recover called")
+
+	targetAddress := common.HexToAddress("0x95222290dd7278aa3ddd389cc1e1d165cc4bafe5")
+	response, err := apiClient.Wallet.Send(eth.EthToWei(1), "eth", targetAddress)
+	require.NoError(t, err)
+	t.Log("Send called")
+
+	require.Equal(t, targetAddress, response.Data.TxInfo.To)
+	require.Equal(t, eth.EthToWei(1), response.Data.TxInfo.Value)
+	require.NotEmpty(t, response.Data.TxInfo.SimulationResult)
+
+	require.True(t, response.Data.CanSend)
+	require.False(t, response.Data.InsufficientBalance)
+	t.Logf("Successfully sent ETH")
+
+}
+
+func TestWalletSend_EthFailure(t *testing.T) {
+	// Take a snapshot, revert at the end
+	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients | osha.Service_Filesystem)
+	if err != nil {
+		fail("Error creating custom snapshot: %v", err)
+	}
+	defer wallet_cleanup(snapshotName)
+
+	// Commit a block just so the latest block is fresh - otherwise the sync progress check will
+	// error out because the block is too old and it thinks the client just can't find any peers
+	err = testMgr.CommitBlock()
+	if err != nil {
+		t.Fatalf("Error committing block: %v", err)
+	}
+
+	// Make sure the data directory exists
+	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
+	err = os.MkdirAll(dataDir, 0755)
+	if err != nil {
+		t.Fatalf("Error creating data directory: %v", err)
+	}
+
+	// Regen the wallet
+	derivationPath := string(wallet.DerivationPath_Default)
+	index := uint64(0)
+	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	require.NoError(t, err)
+	t.Log("Recover called")
+
+	// Attempt to send too much ETH
+	targetAddress := common.HexToAddress("0x95222290dd7278aa3ddd389cc1e1d165cc4bafe5")
+	response, err := apiClient.Wallet.Send(eth.EthToWei(99999), "eth", targetAddress)
+	require.NoError(t, err)
+	t.Log("Send called")
+
+	require.Empty(t, response.Data.TxInfo)
+
+	require.False(t, response.Data.CanSend)
+	require.True(t, response.Data.InsufficientBalance)
+	t.Logf("Failed to send ETH")
+
 }
 
 // Clean up after each test
