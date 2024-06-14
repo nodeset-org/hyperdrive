@@ -1,4 +1,4 @@
-package client
+package api_test
 
 import (
 	"runtime/debug"
@@ -18,17 +18,7 @@ func TestClientStatus_Synced(t *testing.T) {
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
-	defer func() {
-		r := recover()
-		if r != nil {
-			debug.PrintStack()
-			fail("Recovered from panic: %v", r)
-		}
-		err := testMgr.RevertToCustomSnapshot(snapshotName)
-		if err != nil {
-			fail("Error reverting to custom snapshot: %v", err)
-		}
-	}()
+	defer service_cleanup(snapshotName)
 
 	// Commit a block just so the latest block is fresh - otherwise the sync progress check will
 	// error out because the block is too old and it thinks the client just can't find any peers
@@ -38,7 +28,7 @@ func TestClientStatus_Synced(t *testing.T) {
 	}
 
 	// Run the round-trip test
-	response, err := apiClient.Service.ClientStatus()
+	response, err := testMgr.GetApiClient().Service.ClientStatus()
 	require.NoError(t, err)
 	require.True(t, response.Data.EcManagerStatus.PrimaryClientStatus.IsSynced)
 	require.True(t, response.Data.EcManagerStatus.PrimaryClientStatus.IsWorking)
@@ -58,19 +48,12 @@ func TestClientStatus_Synced(t *testing.T) {
 
 // Test getting the server version
 func TestServerVersion(t *testing.T) {
-	// Set up panic handling and cleanup
-	defer func() {
-		r := recover()
-		if r != nil {
-			debug.PrintStack()
-			fail("Recovered from panic: %v", r)
-		}
-	}()
+	defer service_cleanup("")
 
 	version := shared.HyperdriveVersion
 
 	// Run the round-trip test
-	response, err := apiClient.Service.Version()
+	response, err := testMgr.GetApiClient().Service.Version()
 	require.NoError(t, err)
 	require.Equal(t, version, response.Data.Version)
 	t.Logf("Received correct version: %s", version)
@@ -82,20 +65,10 @@ func TestRestartContainer(t *testing.T) {
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
-	defer func() {
-		r := recover()
-		if r != nil {
-			debug.PrintStack()
-			fail("Recovered from panic: %v", r)
-		}
-		err := testMgr.RevertToCustomSnapshot(snapshotName)
-		if err != nil {
-			fail("Error reverting to custom snapshot: %v", err)
-		}
-	}()
+	defer service_cleanup(snapshotName)
 
 	// Get some services
-	sp := testMgr.ServiceProvider
+	sp := testMgr.GetServiceProvider()
 	cfg := sp.GetConfig()
 	ctx := sp.GetBaseContext()
 
@@ -123,7 +96,7 @@ func TestRestartContainer(t *testing.T) {
 	t.Log("Created mock VC")
 
 	// Run the client call
-	_, err = apiClient.Service.RestartContainer(containerName)
+	_, err = testMgr.GetApiClient().Service.RestartContainer(containerName)
 	require.NoError(t, err)
 	t.Log("Restart called")
 
@@ -135,4 +108,21 @@ func TestRestartContainer(t *testing.T) {
 	require.True(t, vc.State.Running)
 	require.Greater(t, vc.State.StartedAt, oneMinuteAgoStr)
 	t.Logf("VC restart was successful - original start = %s, new start = %s", oneMinuteAgoStr, vc.State.StartedAt)
+}
+
+func service_cleanup(snapshotName string) {
+	// Handle panics
+	r := recover()
+	if r != nil {
+		debug.PrintStack()
+		fail("Recovered from panic: %v", r)
+	}
+
+	// Revert to the snapshot taken at the start of the test
+	if snapshotName != "" {
+		err := testMgr.RevertToCustomSnapshot(snapshotName)
+		if err != nil {
+			fail("Error reverting to custom snapshot: %v", err)
+		}
+	}
 }
