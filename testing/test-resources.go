@@ -1,4 +1,4 @@
-package tests
+package testing
 
 import (
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
@@ -6,10 +6,11 @@ import (
 	"github.com/rocket-pool/node-manager-core/config"
 )
 
+// Returns a network resources instance with local testing network values
 func GetTestResources(beaconConfig *db.Config) *config.NetworkResources {
 	return &config.NetworkResources{
 		Network:            hdconfig.Network_LocalTest,
-		EthNetworkName:     "local",
+		EthNetworkName:     "localtest",
 		ChainID:            uint(beaconConfig.ChainID),
 		GenesisForkVersion: beaconConfig.GenesisForkVersion,
 	}
