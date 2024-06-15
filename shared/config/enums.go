@@ -18,13 +18,8 @@ type MevRelayID string
 const (
 	MevRelayID_Unknown            MevRelayID = ""
 	MevRelayID_Flashbots          MevRelayID = "flashbots"
-	MevRelayID_BloxrouteEthical   MevRelayID = "bloxrouteEthical"
-	MevRelayID_BloxrouteMaxProfit MevRelayID = "bloxrouteMaxProfit"
 	MevRelayID_BloxrouteRegulated MevRelayID = "bloxrouteRegulated"
 	MevRelayID_Eden               MevRelayID = "eden"
-	MevRelayID_Ultrasound         MevRelayID = "ultrasound"
-	MevRelayID_Aestus             MevRelayID = "aestus"
-	MevRelayID_TitanGlobal        MevRelayID = "titanGlobal"
 	MevRelayID_TitanRegional      MevRelayID = "titanRegional"
 )
 
@@ -32,6 +27,6 @@ type MevSelectionMode string
 
 // Enum to describe MEV-Boost relay selection mode
 const (
-	MevSelectionMode_Profile MevSelectionMode = "profile"
-	MevSelectionMode_Relay   MevSelectionMode = "relay"
+	MevSelectionMode_All    MevSelectionMode = "all"
+	MevSelectionMode_Manual MevSelectionMode = "manual"
 )
