@@ -1,21 +1,14 @@
 package config
 
 import (
-	"strings"
-
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
-	nconfig "github.com/rocket-pool/node-manager-core/config"
 )
 
 func createLocalMevStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWizardStep {
-	// Create the labels
-	regulatedAllLabel := strings.TrimPrefix(wiz.md.Config.Hyperdrive.MevBoost.EnableRegulatedAllMev.Name, "Enable ")
-	unregulatedAllLabel := strings.TrimPrefix(wiz.md.Config.Hyperdrive.MevBoost.EnableUnregulatedAllMev.Name, "Enable ")
-
-	helperText := "Select the profiles you would like to enable below. Read the descriptions carefully! Leave all options unchecked if you wish to disable MEV-Boost.\n\n[lime]To learn more about MEV, please visit:\nhttps://docs.flashbots.net/new-to-mev\n"
+	helperText := "Select the relays you would like to enable below. Note that all of Hyperdrive's built-in relays support regional sanction lists (such as the US OFAC list) and are compliant with regulations. If you'd like to add your own custom relays, choose \"Review All Settings\" at the end of the wizard and go to the MEV-Boost section.\n\n[lime]To learn more about MEV, please visit:\nhttps://docs.flashbots.net/new-to-mev\n"
 
 	show := func(modal *checkBoxModalLayout) {
-		labels, descriptions, selections := getMevChoices(wiz.md.Config.Hyperdrive.MevBoost, wiz.md.Config.Hyperdrive.Network.Value)
+		labels, descriptions, selections := getMevChoices(wiz.md.Config.Hyperdrive.MevBoost)
 		modal.generateCheckboxes(labels, descriptions, selections)
 
 		wiz.md.setPage(modal.page)
@@ -23,19 +16,15 @@ func createLocalMevStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxW
 	}
 
 	done := func(choices map[string]bool) {
-		wiz.md.Config.Hyperdrive.MevBoost.SelectionMode.Value = config.MevSelectionMode_Profile
-		wiz.md.Config.Hyperdrive.MevBoost.Enable.Value = false
-
 		atLeastOneEnabled := false
-		enabled, exists := choices[regulatedAllLabel]
-		if exists {
-			wiz.md.Config.Hyperdrive.MevBoost.EnableRegulatedAllMev.Value = enabled
-			atLeastOneEnabled = atLeastOneEnabled || enabled
-		}
-		enabled, exists = choices[unregulatedAllLabel]
-		if exists {
-			wiz.md.Config.Hyperdrive.MevBoost.EnableUnregulatedAllMev.Value = enabled
-			atLeastOneEnabled = atLeastOneEnabled || enabled
+		for label, enabled := range choices {
+			for _, param := range wiz.md.Config.Hyperdrive.MevBoost.GetParameters() {
+				if param.GetCommon().Name == "Enable "+label {
+					param.SetValue(enabled)
+					atLeastOneEnabled = atLeastOneEnabled || enabled
+					break
+				}
+			}
 		}
 
 		wiz.md.Config.Hyperdrive.MevBoost.Enable.Value = atLeastOneEnabled
@@ -51,7 +40,7 @@ func createLocalMevStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxW
 		currentStep,
 		totalSteps,
 		helperText,
-		90,
+		80,
 		"MEV-Boost",
 		show,
 		done,
@@ -60,32 +49,24 @@ func createLocalMevStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxW
 	)
 }
 
-func getMevChoices(config *config.MevBoostConfig, network nconfig.Network) ([]string, []string, []bool) {
+func getMevChoices(config *config.MevBoostConfig) ([]string, []string, []bool) {
 	labels := []string{}
 	descriptions := []string{}
 	settings := []bool{}
 
-	regulatedAllMev, unregulatedAllMev := config.GetAvailableProfiles()
-
-	if unregulatedAllMev {
-		label := strings.TrimPrefix(config.EnableUnregulatedAllMev.Name, "Enable ")
+	relays := config.GetAvailableRelays()
+	for _, relay := range relays {
+		label := relay.Name
 		labels = append(labels, label)
-		description := config.EnableUnregulatedAllMev.DescriptionsByNetwork[network]
-		descriptions = append(descriptions, getDescriptionBody(description))
-		settings = append(settings, config.EnableUnregulatedAllMev.Value)
-	}
-	if regulatedAllMev {
-		label := strings.TrimPrefix(config.EnableRegulatedAllMev.Name, "Enable ")
-		labels = append(labels, label)
-		description := config.EnableRegulatedAllMev.DescriptionsByNetwork[network]
-		descriptions = append(descriptions, getDescriptionBody(description))
-		settings = append(settings, config.EnableRegulatedAllMev.Value)
+		description := relay.Description
+		descriptions = append(descriptions, description)
+		for _, parameter := range config.GetParameters() {
+			if parameter.GetCommon().Name == "Enable "+relay.Name {
+				settings = append(settings, parameter.GetValueAsAny().(bool))
+				break
+			}
+		}
 	}
 
 	return labels, descriptions, settings
-}
-
-func getDescriptionBody(description string) string {
-	index := strings.Index(description, "Select this")
-	return description[index:]
 }
