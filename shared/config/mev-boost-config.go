@@ -36,6 +36,9 @@ type MevBoostConfig struct {
 	// Flashbots relay
 	FlashbotsRelay config.Parameter[bool]
 
+	// bloXroute max profit relay
+	BloxRouteMaxProfitRelay config.Parameter[bool]
+
 	// bloXroute regulated relay
 	BloxRouteRegulatedRelay config.Parameter[bool]
 
@@ -156,6 +159,7 @@ func NewMevBoostConfig(parent *HyperdriveConfig) *MevBoostConfig {
 
 		// Explicit relay params
 		FlashbotsRelay:          generateRelayParameter(ids.MevBoostFlashbotsID, relayMap[MevRelayID_Flashbots]),
+		BloxRouteMaxProfitRelay: generateRelayParameter(ids.MevBoostBloxRouteMaxProfitID, relayMap[MevRelayID_BloxrouteMaxProfit]),
 		BloxRouteRegulatedRelay: generateRelayParameter(ids.MevBoostBloxRouteRegulatedID, relayMap[MevRelayID_BloxrouteRegulated]),
 		EdenRelay:               generateRelayParameter(ids.MevBoostEdenID, relayMap[MevRelayID_Eden]),
 		TitanRegionalRelay:      generateRelayParameter(ids.MevBoostTitanRegionalID, relayMap[MevRelayID_TitanRegional]),
@@ -259,6 +263,7 @@ func (cfg *MevBoostConfig) GetParameters() []config.IParameter {
 		&cfg.Mode,
 		&cfg.SelectionMode,
 		&cfg.FlashbotsRelay,
+		&cfg.BloxRouteMaxProfitRelay,
 		&cfg.BloxRouteRegulatedRelay,
 		&cfg.EdenRelay,
 		&cfg.TitanRegionalRelay,
@@ -328,6 +333,12 @@ func (cfg *MevBoostConfig) GetEnabledMevRelays() []MevRelay {
 				relays = append(relays, cfg.relayMap[MevRelayID_Flashbots])
 			}
 		}
+		if cfg.BloxRouteMaxProfitRelay.Value {
+			_, exists := cfg.relayMap[MevRelayID_BloxrouteMaxProfit].Urls[currentNetwork]
+			if exists {
+				relays = append(relays, cfg.relayMap[MevRelayID_BloxrouteMaxProfit])
+			}
+		}
 		if cfg.BloxRouteRegulatedRelay.Value {
 			_, exists := cfg.relayMap[MevRelayID_BloxrouteRegulated].Urls[currentNetwork]
 			if exists {
@@ -381,6 +392,17 @@ func createDefaultRelays() []MevRelay {
 			},
 		},
 
+		// bloXroute Max Profit
+		{
+			ID:          MevRelayID_BloxrouteMaxProfit,
+			Name:        "bloXroute Max Profit",
+			Description: "Select this to enable the \"max profit\" relay from bloXroute.",
+			Urls: map[config.Network]string{
+				config.Network_Mainnet: "https://0x8b5d2e73e2a3a55c6c87b8b6eb92e0149a125c852751db1422fa951e42a09b82c142c3ea98d0d9930b056a3bc9896b8f@bloxroute.max-profit.blxrbdn.com?id=hyperdrive",
+				config.Network_Holesky: "https://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@bloxroute.holesky.blxrbdn.com",
+			},
+		},
+
 		// bloXroute Regulated
 		{
 			ID:          MevRelayID_BloxrouteRegulated,
@@ -419,8 +441,6 @@ func createDefaultRelays() []MevRelay {
 // Generate one of the relay parameters
 func generateRelayParameter(id string, relay MevRelay) config.Parameter[bool] {
 	description := fmt.Sprintf("[lime]NOTE: You can enable multiple options.\n\n[white]%s\n\n", relay.Description)
-
-	description += "Complies with Regulations: YES\n"
 
 	return config.Parameter[bool]{
 		ParameterCommon: &config.ParameterCommon{

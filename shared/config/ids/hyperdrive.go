@@ -33,6 +33,7 @@ const (
 	MevBoostOpenRpcPortID        string = "openRpcPort"
 	MevBoostExternalUrlID        string = "externalUrl"
 	MevBoostFlashbotsID          string = "flashbotsEnabled"
+	MevBoostBloxRouteMaxProfitID string = "bloxRouteMaxProfitEnabled"
 	MevBoostBloxRouteRegulatedID string = "bloxRouteRegulatedEnabled"
 	MevBoostEdenID               string = "edenEnabled"
 	MevBoostTitanRegionalID      string = "titanRegionaEnabled"
