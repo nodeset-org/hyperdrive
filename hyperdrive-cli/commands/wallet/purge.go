@@ -23,7 +23,7 @@ func purge(c *cli.Context) error {
 
 	// Purge
 	composeFiles := c.StringSlice(utils.ComposeFileFlag.Name)
-	err = hd.PurgeData(composeFiles)
+	err = hd.PurgeData(composeFiles, true)
 	if err != nil {
 		return fmt.Errorf("%w\n%sTHERE WAS AN ERROR DELETING YOUR KEYS. They most likely have not been deleted. Proceed with caution.%s", err, terminal.ColorRed, terminal.ColorReset)
 	}

@@ -18,6 +18,6 @@ func uploadDepositData(c *cli.Context) error {
 	}
 
 	// Upload to the server
-	_, err = swcmdutils.UploadDepositData(sw)
+	_, err = swcmdutils.UploadDepositData(c, sw)
 	return err
 }

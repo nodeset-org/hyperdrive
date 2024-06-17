@@ -23,43 +23,31 @@ func getComposeFiles(c *cli.Context) []string {
 }
 
 // Handle a network change by terminating the service, deleting everything, and starting over
-// TODO
 func changeNetworks(c *cli.Context, hd *client.HyperdriveClient) error {
-	return fmt.Errorf("NYI")
+	composeFiles := getComposeFiles(c)
 
-	/*
-		// Stop all of the containers
-		fmt.Print("Stopping containers... ")
-		err := hd.PauseService(getComposeFiles(c))
-		if err != nil {
-			return fmt.Errorf("error stopping service: %w", err)
-		}
-		fmt.Println("done")
+	// Purge the data folder
+	fmt.Print("Purging data folder... ")
+	err := hd.PurgeData(composeFiles, false)
+	if err != nil {
+		return fmt.Errorf("error purging data folder: %w", err)
+	}
 
-		// Delete the data folder
-		fmt.Print("Removing data folder... ")
-		_, err = hd.Api.Service.TerminateDataFolder()
-		if err != nil {
-			return err
-		}
-		fmt.Println("done")
+	// Terminate the current setup
+	fmt.Print("Removing old installation... ")
+	err = hd.StopService(composeFiles)
+	if err != nil {
+		return fmt.Errorf("error terminating old installation: %w", err)
+	}
+	fmt.Println("done")
 
-		// Terminate the current setup
-		fmt.Print("Removing old installation... ")
-		err = hd.StopService(getComposeFiles(c))
-		if err != nil {
-			return fmt.Errorf("error terminating old installation: %w", err)
-		}
-		fmt.Println("done")
+	// Start the service
+	fmt.Print("Starting Hyperdrive... ")
+	err = hd.StartService(getComposeFiles(c))
+	if err != nil {
+		return fmt.Errorf("error starting service: %w", err)
+	}
+	fmt.Println("done")
 
-		// Start the service
-		fmt.Print("Starting Hyperdrive... ")
-		err = hd.StartService(getComposeFiles(c))
-		if err != nil {
-			return fmt.Errorf("error starting service: %w", err)
-		}
-		fmt.Println("done")
-
-		return nil
-	*/
+	return nil
 }

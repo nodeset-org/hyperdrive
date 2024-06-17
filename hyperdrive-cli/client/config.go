@@ -64,7 +64,15 @@ func (c *HyperdriveClient) SaveConfig(cfg *GlobalConfig) error {
 	if err != nil {
 		return err
 	}
-	return SaveConfig(cfg, settingsFileDirectoryPath, SettingsFile)
+	err = SaveConfig(cfg, settingsFileDirectoryPath, SettingsFile)
+	if err != nil {
+		return fmt.Errorf("error saving config: %w", err)
+	}
+
+	// Update the client's config cache
+	c.cfg = cfg
+	c.isNewCfg = false
+	return nil
 }
 
 // Load the Prometheus config template, do a template variable substitution, and save it
