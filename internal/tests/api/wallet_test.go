@@ -4,7 +4,6 @@ import (
 	"math/big"
 	"runtime/debug"
 	"testing"
-	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
@@ -12,7 +11,6 @@ import (
 	"github.com/nodeset-org/osha"
 	"github.com/nodeset-org/osha/keys"
 	"github.com/rocket-pool/node-manager-core/eth"
-	"github.com/rocket-pool/node-manager-core/node/services"
 	"github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/stretchr/testify/require"
 )
@@ -270,21 +268,19 @@ func TestWalletSend_EthSuccess(t *testing.T) {
 	t.Log("Waiting complete")
 
 	// Check the balance
-	tm, err := osha.NewTestManager()
 	require.NoError(t, err)
-	beaconCfg := tm.GetBeaconMockManager().GetConfig()
 	sp := testMgr.GetServiceProvider()
 	ctx := sp.GetBaseContext()
 
-	ecManager := services.NewExecutionClientManager(tm.GetExecutionClient(), uint(beaconCfg.ChainID), time.Minute)
+	ecManager := sp.GetEthClient()
 	targetAddressBalance, err := ecManager.BalanceAt(ctx, targetAddress, nil)
 	require.NoError(t, err)
 	require.Equal(t, eth.EthToWei(1), targetAddressBalance)
 
-	expectedWalletBalance, err := ecManager.BalanceAt(ctx, expectedWalletAddress, nil)
+	walletBalance, err := ecManager.BalanceAt(ctx, expectedWalletAddress, nil)
 	require.NoError(t, err)
 
-	require.True(t, expectedWalletBalance.Cmp(eth.EthToWei(99999)) < 0)
+	require.True(t, walletBalance.Cmp(eth.EthToWei(99999)) < 0)
 	t.Logf("Successfully sent ETH to target address")
 }
 
