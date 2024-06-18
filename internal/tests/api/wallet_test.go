@@ -1,14 +1,13 @@
 package client
 
 import (
-	"fmt"
 	"math/big"
 	"os"
 	"runtime/debug"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/nodeset-org/nodeset-svc-mock/auth"
 	"github.com/nodeset-org/osha"
 	"github.com/nodeset-org/osha/keys"
 	"github.com/rocket-pool/node-manager-core/eth"
@@ -163,7 +162,7 @@ func TestWalletStatus_Loaded(t *testing.T) {
 	require.Equal(t, expectedWalletAddress, response.Data.WalletStatus.Address.NodeAddress)
 	require.True(t, response.Data.WalletStatus.Address.HasAddress)
 
-	require.Equal(t, wallet.WalletType("local"), response.Data.WalletStatus.Wallet.Type)
+	require.Equal(t, wallet.WalletType_Local, response.Data.WalletStatus.Wallet.Type)
 	require.True(t, response.Data.WalletStatus.Wallet.IsLoaded)
 	require.True(t, response.Data.WalletStatus.Wallet.IsOnDisk)
 	require.Equal(t, expectedWalletAddress, response.Data.WalletStatus.Wallet.WalletAddress)
@@ -245,17 +244,11 @@ func TestWalletSignMessage(t *testing.T) {
 	t.Log("SignMessage called")
 
 	require.NotEmpty(t, response.Data.SignedMessage)
-	prefix := fmt.Sprintf("\x19Ethereum Signed Message:\n%d", len(message))
-	msgHash := crypto.Keccak256Hash([]byte(prefix + string(message)))
-	sig := response.Data.SignedMessage
-
-	// Recover the public key from the signature
-	r, s, v := sig[:32], sig[32:64], sig[64]
-	pubKey, err := crypto.SigToPub(msgHash.Bytes(), append(r, append(s, v-27)...))
-	require.NoError(t, err)
 
 	// Make sure that the recovered address is the signer address
-	recoveredAddr := crypto.PubkeyToAddress(*pubKey)
+	recoveredAddr, err := auth.GetAddressFromSignature(message, response.Data.SignedMessage)
+	require.NoError(t, err)
+
 	require.Equal(t, expectedWalletAddress, recoveredAddr)
 	t.Logf("Successfully signed message")
 

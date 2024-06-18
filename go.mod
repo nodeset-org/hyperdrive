@@ -12,6 +12,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
+	github.com/nodeset-org/nodeset-svc-mock v0.1.1-0.20240618053445-0415b25379d9
 	github.com/nodeset-org/osha v0.1.1-0.20240611012939-11008f02cb0a
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/rocket-pool/node-manager-core v0.4.1-0.20240611150849-d8ec56d52712
@@ -19,6 +20,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/wealdtech/go-ens/v3 v3.6.0
 	gopkg.in/yaml.v3 v3.0.1
+
 )
 
 require (
@@ -125,14 +127,12 @@ require (
 	github.com/prysmaticlabs/go-bitfield v0.0.0-20210809151128-385d8c5e3fb7 // indirect
 	github.com/prysmaticlabs/gohashtree v0.0.4-beta // indirect
 	github.com/prysmaticlabs/prysm/v5 v5.0.3 // indirect
-	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sethvargo/go-password v0.2.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/supranational/blst v0.3.11 // indirect
-	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
 	github.com/thomaso-mirodin/intmath v0.0.0-20160323211736-5dc6d854e46e // indirect
 	github.com/tklauser/go-sysconf v0.3.13 // indirect
 	github.com/tklauser/numcpus v0.7.0 // indirect
