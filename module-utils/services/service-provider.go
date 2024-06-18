@@ -84,29 +84,6 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.UR
 		bcManager = services.NewBeaconClientManager(primaryBc, resources.ChainID, clientTimeout)
 	}
 
-	return NewServiceProviderFromArtifacts(hdClient, hdCfg, moduleDir, moduleName, clientLogName, factory, ecManager, bcManager)
-}
-
-// Creates a new ServiceProvider instance, using the given clients instead of creating ones based on the config parameters
-func NewServiceProviderFromClients[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, ecManager *services.ExecutionClientManager, bcManager *services.BeaconClientManager) (*ServiceProvider, error) {
-	hdCfg, hdClient, err := getHdConfig(hyperdriveUrl)
-	if err != nil {
-		return nil, fmt.Errorf("error getting Hyperdrive config: %w", err)
-	}
-
-	return NewServiceProviderFromArtifacts(hdClient, hdCfg, moduleDir, moduleName, clientLogName, factory, ecManager, bcManager)
-}
-
-// Creates a new ServiceProvider instance, using the given artifacts instead of creating ones based on the config parameters
-func NewServiceProviderFromArtifacts[ConfigType hdconfig.IModuleConfig](hdClient *client.ApiClient, hdCfg *hdconfig.HyperdriveConfig, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, ecManager *services.ExecutionClientManager, bcManager *services.BeaconClientManager) (*ServiceProvider, error) {
-	// Set up the client logger
-	logPath := hdCfg.GetModuleLogFilePath(moduleName, clientLogName)
-	clientLogger, err := log.NewLogger(logPath, hdCfg.GetLoggerOptions())
-	if err != nil {
-		return nil, fmt.Errorf("error creating HD Client logger: %w", err)
-	}
-	hdClient.SetLogger(clientLogger.Logger)
-
 	// Get the module config
 	moduleCfg := factory(hdCfg)
 	modCfgEnrty, exists := hdCfg.Modules[moduleName]
@@ -122,6 +99,19 @@ func NewServiceProviderFromArtifacts[ConfigType hdconfig.IModuleConfig](hdClient
 		return nil, fmt.Errorf("error deserialzing config for module [%s]: %w", moduleName, err)
 	}
 
+	return NewServiceProviderFromArtifacts(hdClient, hdCfg, moduleCfg, resources, moduleDir, moduleName, clientLogName, ecManager, bcManager)
+}
+
+// Creates a new ServiceProvider instance, using the given artifacts instead of creating ones based on the config parameters
+func NewServiceProviderFromArtifacts(hdClient *client.ApiClient, hdCfg *hdconfig.HyperdriveConfig, moduleCfg hdconfig.IModuleConfig, resources *config.NetworkResources, moduleDir string, moduleName string, clientLogName string, ecManager *services.ExecutionClientManager, bcManager *services.BeaconClientManager) (*ServiceProvider, error) {
+	// Set up the client logger
+	logPath := hdCfg.GetModuleLogFilePath(moduleName, clientLogName)
+	clientLogger, err := log.NewLogger(logPath, hdCfg.GetLoggerOptions())
+	if err != nil {
+		return nil, fmt.Errorf("error creating HD Client logger: %w", err)
+	}
+	hdClient.SetLogger(clientLogger.Logger)
+
 	// Make the API logger
 	apiLogPath := hdCfg.GetModuleLogFilePath(moduleName, moduleCfg.GetApiLogFileName())
 	apiLogger, err := log.NewLogger(apiLogPath, hdCfg.GetLoggerOptions())
@@ -135,9 +125,6 @@ func NewServiceProviderFromArtifacts[ConfigType hdconfig.IModuleConfig](hdClient
 	if err != nil {
 		return nil, fmt.Errorf("error creating tasks logger: %w", err)
 	}
-
-	// Resources
-	resources := hdCfg.GetNetworkResources()
 
 	// Signer
 	signer := NewModuleSigner(hdClient)

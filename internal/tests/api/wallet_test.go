@@ -1,8 +1,7 @@
-package client
+package api_test
 
 import (
 	"math/big"
-	"os"
 	"runtime/debug"
 	"testing"
 	"time"
@@ -37,18 +36,10 @@ func TestWalletRecover_Success(t *testing.T) {
 	}
 	defer wallet_cleanup(snapshotName)
 
-	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
-
-	// Make sure the data directory exists
-	err = os.MkdirAll(dataDir, 0755)
-	if err != nil {
-		t.Fatalf("Error creating data directory: %v", err)
-	}
-
 	// Run the round-trip test
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
-	response, err := apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	response, err := testMgr.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
 
@@ -65,18 +56,10 @@ func TestWalletRecover_WrongIndex(t *testing.T) {
 	}
 	defer wallet_cleanup(snapshotName)
 
-	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
-
-	// Make sure the data directory exists
-	err = os.MkdirAll(dataDir, 0755)
-	if err != nil {
-		t.Fatalf("Error creating data directory: %v", err)
-	}
-
 	// Run the round-trip test
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(1)
-	response, err := apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	response, err := testMgr.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
 
@@ -92,18 +75,10 @@ func TestWalletRecover_WrongDerivationPath(t *testing.T) {
 	}
 	defer wallet_cleanup(snapshotName)
 
-	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
-
-	// Make sure the data directory exists
-	err = os.MkdirAll(dataDir, 0755)
-	if err != nil {
-		t.Fatalf("Error creating data directory: %v", err)
-	}
-
 	// Run the round-trip test
 	derivationPath := string(wallet.DerivationPath_LedgerLive)
 	index := uint64(0)
-	response, err := apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	response, err := testMgr.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
 
@@ -113,10 +88,11 @@ func TestWalletRecover_WrongDerivationPath(t *testing.T) {
 }
 
 func TestWalletStatus_NotLoaded(t *testing.T) {
+	apiClient := testMgr.GetApiClient()
 	response, err := apiClient.Wallet.Status()
+	require.NoError(t, err)
 	t.Log("Status called")
 
-	require.NoError(t, err)
 	require.Equal(t, emptyWalletAddress, response.Data.WalletStatus.Address.NodeAddress)
 	require.False(t, response.Data.WalletStatus.Address.HasAddress)
 
@@ -143,24 +119,18 @@ func TestWalletStatus_Loaded(t *testing.T) {
 		t.Fatalf("Error committing block: %v", err)
 	}
 
-	// Make sure the data directory exists
-	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
-	err = os.MkdirAll(dataDir, 0755)
-	if err != nil {
-		t.Fatalf("Error creating data directory: %v", err)
-	}
-
 	// Regen the wallet
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
+	apiClient := testMgr.GetApiClient()
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
 
 	response, err := apiClient.Wallet.Status()
+	require.NoError(t, err)
 	t.Log("Status called")
 
-	require.NoError(t, err)
 	require.Equal(t, expectedWalletAddress, response.Data.WalletStatus.Address.NodeAddress)
 	require.True(t, response.Data.WalletStatus.Address.HasAddress)
 
@@ -187,14 +157,8 @@ func TestWalletBalance(t *testing.T) {
 		t.Fatalf("Error committing block: %v", err)
 	}
 
-	// Make sure the data directory exists
-	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
-	err = os.MkdirAll(dataDir, 0755)
-	if err != nil {
-		t.Fatalf("Error creating data directory: %v", err)
-	}
-
 	// Regen the wallet
+	apiClient := testMgr.GetApiClient()
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
@@ -207,7 +171,7 @@ func TestWalletBalance(t *testing.T) {
 	t.Log("Balance called")
 
 	// Check the response
-	require.Equal(t, 0, response.Data.Balance.Cmp(expectedBalance))
+	require.Equal(t, expectedBalance, response.Data.Balance)
 	t.Logf("Received correct balance (%s)", response.Data.Balance.String())
 }
 
@@ -226,14 +190,8 @@ func TestWalletSignMessage(t *testing.T) {
 		t.Fatalf("Error committing block: %v", err)
 	}
 
-	// Make sure the data directory exists
-	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
-	err = os.MkdirAll(dataDir, 0755)
-	if err != nil {
-		t.Fatalf("Error creating data directory: %v", err)
-	}
-
 	// Regen the wallet
+	apiClient := testMgr.GetApiClient()
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
@@ -271,14 +229,8 @@ func TestWalletSend_EthSuccess(t *testing.T) {
 		t.Fatalf("Error committing block: %v", err)
 	}
 
-	// Make sure the data directory exists
-	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
-	err = os.MkdirAll(dataDir, 0755)
-	if err != nil {
-		t.Fatalf("Error creating data directory: %v", err)
-	}
-
 	// Regen the wallet
+	apiClient := testMgr.GetApiClient()
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
@@ -344,14 +296,8 @@ func TestWalletSend_EthFailure(t *testing.T) {
 		t.Fatalf("Error committing block: %v", err)
 	}
 
-	// Make sure the data directory exists
-	dataDir := testMgr.ServiceProvider.GetConfig().UserDataPath.Value
-	err = os.MkdirAll(dataDir, 0755)
-	if err != nil {
-		t.Fatalf("Error creating data directory: %v", err)
-	}
-
 	// Regen the wallet
+	apiClient := testMgr.GetApiClient()
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
@@ -388,7 +334,7 @@ func wallet_cleanup(snapshotName string) {
 	}
 
 	// Reload the wallet to undo any changes made during the test
-	err = testMgr.ServiceProvider.GetWallet().Reload(testMgr.GetLogger())
+	err = testMgr.GetServiceProvider().GetWallet().Reload(testMgr.GetLogger())
 	if err != nil {
 		fail("Error reloading wallet: %v", err)
 	}
