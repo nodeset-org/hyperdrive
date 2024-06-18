@@ -5,12 +5,14 @@ import (
 	"os"
 	"runtime/debug"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/nodeset-svc-mock/auth"
 	"github.com/nodeset-org/osha"
 	"github.com/nodeset-org/osha/keys"
 	"github.com/rocket-pool/node-manager-core/eth"
+	"github.com/rocket-pool/node-manager-core/node/services"
 	"github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/stretchr/testify/require"
 )
@@ -294,8 +296,37 @@ func TestWalletSend_EthSuccess(t *testing.T) {
 
 	require.True(t, response.Data.CanSend)
 	require.False(t, response.Data.InsufficientBalance)
-	t.Logf("Successfully sent ETH")
+	t.Logf("Successfully generated transaction info for sending ETH")
 
+	sub, _ := eth.CreateTxSubmissionFromInfo(response.Data.TxInfo, nil)
+	submitResponse, err := apiClient.Tx.SubmitTx(sub, nil, eth.GweiToWei(10), eth.GweiToWei(1))
+	require.NoError(t, err)
+	t.Log("SubmitTx called")
+
+	err = testMgr.CommitBlock()
+	require.NoError(t, err)
+
+	_, err = apiClient.Tx.WaitForTransaction(submitResponse.Data.TxHash)
+	require.NoError(t, err)
+	t.Log("Waiting complete")
+
+	// Check the balance
+	tm, err := osha.NewTestManager()
+	require.NoError(t, err)
+	beaconCfg := tm.GetBeaconMockManager().GetConfig()
+	sp := testMgr.ServiceProvider
+	ctx := sp.GetBaseContext()
+
+	ecManager := services.NewExecutionClientManager(tm.GetExecutionClient(), uint(beaconCfg.ChainID), time.Minute)
+	targetAddressBalance, err := ecManager.BalanceAt(ctx, targetAddress, nil)
+	require.NoError(t, err)
+	require.Equal(t, eth.EthToWei(1), targetAddressBalance)
+
+	expectedWalletBalance, err := ecManager.BalanceAt(ctx, expectedWalletAddress, nil)
+	require.NoError(t, err)
+
+	require.True(t, expectedWalletBalance.Cmp(eth.EthToWei(99999)) < 0)
+	t.Logf("Successfully sent ETH to target address")
 }
 
 func TestWalletSend_EthFailure(t *testing.T) {
@@ -337,7 +368,7 @@ func TestWalletSend_EthFailure(t *testing.T) {
 
 	require.False(t, response.Data.CanSend)
 	require.True(t, response.Data.InsufficientBalance)
-	t.Logf("Failed to send ETH")
+	t.Logf("Response correctly indicates insufficient balance")
 
 }
 
