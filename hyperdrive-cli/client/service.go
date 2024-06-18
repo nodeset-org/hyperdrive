@@ -26,7 +26,9 @@ const (
 	overrideSourceDir  string = "/usr/share/hyperdrive/override"
 	overrideDir        string = "override"
 	runtimeDir         string = "runtime"
+	metricsDir         string = "metrics"
 	extraScrapeJobsDir string = "extra-scrape-jobs"
+	modulePrometheusSd string = "prometheus_sd"
 )
 
 // Install Hyperdrive

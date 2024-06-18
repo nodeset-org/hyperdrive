@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	templateSuffix    string = ".tmpl"
-	composeFileSuffix string = ".yml"
+	TemplateSuffix    string = ".tmpl"
+	ComposeFileSuffix string = ".yml"
 )
 
 type ComposePaths struct {
@@ -32,18 +32,18 @@ func (c *ComposePaths) File(name string) *ComposeFile {
 // from the TemplatePath, populate and save to the RuntimePath, and return a
 // slice of compose definitions pertaining to the container (including the override).
 func (c *ComposeFile) Write(data interface{}) ([]string, error) {
-	composePath := filepath.Join(c.paths.RuntimePath, c.name+composeFileSuffix)
+	composePath := filepath.Join(c.paths.RuntimePath, c.name+ComposeFileSuffix)
 	tmpl := Template{
-		Src: filepath.Join(c.paths.TemplatePath, c.name+templateSuffix),
+		Src: filepath.Join(c.paths.TemplatePath, c.name+TemplateSuffix),
 		Dst: composePath,
 	}
 	err := tmpl.Write(data)
 	if err != nil {
-		return nil, fmt.Errorf("Error writing %s compose definition: %w", c.name, err)
+		return nil, fmt.Errorf("error writing %s compose definition: %w", c.name, err)
 	}
 
 	return []string{
 		composePath,
-		filepath.Join(c.paths.OverridePath, c.name+composeFileSuffix),
+		filepath.Join(c.paths.OverridePath, c.name+ComposeFileSuffix),
 	}, nil
 }

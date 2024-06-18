@@ -261,12 +261,28 @@ func (c *HyperdriveClient) composeModule(global *GlobalConfig, module hdconfig.I
 		return []string{}, fmt.Errorf("error creating modules runtime folder (%s): %w", composePaths.RuntimePath, err)
 	}
 
+	// Deploy the container templates
 	for _, containerName := range toDeploy {
 		containers, err := composePaths.File(string(containerName)).Write(global)
 		if err != nil {
 			return []string{}, fmt.Errorf("could not create %s container definition: %w", containerName, err)
 		}
 		deployedContainers = append(deployedContainers, containers...)
+	}
+
+	// Deploy the Prometheus config if it exists
+	prometheusConfigFilename := modulePrometheusSd + template.TemplateSuffix
+	_, err = os.Stat(filepath.Join(composePaths.TemplatePath, prometheusConfigFilename))
+	if os.IsNotExist(err) {
+		return deployedContainers, nil
+	}
+	t := template.Template{
+		Src: filepath.Join(composePaths.TemplatePath, prometheusConfigFilename),
+		Dst: filepath.Join(hyperdriveDir, metricsDir, hdconfig.ModulesName, moduleName+template.ComposeFileSuffix),
+	}
+	err = t.Write(global)
+	if err != nil {
+		return []string{}, fmt.Errorf("could not write module [%s] Prometheus config: %w", moduleName, err)
 	}
 
 	return deployedContainers, nil
