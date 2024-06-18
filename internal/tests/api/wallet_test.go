@@ -266,7 +266,7 @@ func TestWalletSend_EthSuccess(t *testing.T) {
 	tm, err := osha.NewTestManager()
 	require.NoError(t, err)
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
-	sp := testMgr.ServiceProvider
+	sp := testMgr.GetServiceProvider()
 	ctx := sp.GetBaseContext()
 
 	ecManager := services.NewExecutionClientManager(tm.GetExecutionClient(), uint(beaconCfg.ChainID), time.Minute)
