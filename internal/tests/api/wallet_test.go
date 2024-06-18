@@ -205,12 +205,14 @@ func TestWalletSignMessage(t *testing.T) {
 	t.Log("SignMessage called")
 
 	require.NotEmpty(t, response.Data.SignedMessage)
+	signature := response.Data.SignedMessage
+	if signature[crypto.RecoveryIDOffset] >= 4 {
+		signature[crypto.RecoveryIDOffset] -= 27
+	}
 
 	// Make sure that the recovered address is the signer address
-	// recoveredAddr, err := auth.GetAddressFromSignature(message, response.Data.SignedMessage)
-	// Get the address
 	messageHash := accounts.TextHash(message)
-	pubkeyBytes, err := crypto.SigToPub(messageHash, response.Data.SignedMessage)
+	pubkeyBytes, err := crypto.SigToPub(messageHash, signature)
 	require.NoError(t, err)
 	recoveredAddr := crypto.PubkeyToAddress(*pubkeyBytes)
 
