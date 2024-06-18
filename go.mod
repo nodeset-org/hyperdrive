@@ -12,7 +12,6 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
-	github.com/nodeset-org/nodeset-svc-mock v0.1.1-0.20240618053445-0415b25379d9
 	github.com/nodeset-org/osha v0.1.1-0.20240614183409-91272019f954
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/rocket-pool/node-manager-core v0.4.1-0.20240614183125-1546057bc5ef

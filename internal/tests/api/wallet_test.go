@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/nodeset-org/nodeset-svc-mock/auth"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/nodeset-org/osha"
 	"github.com/nodeset-org/osha/keys"
 	"github.com/rocket-pool/node-manager-core/eth"
@@ -206,8 +207,12 @@ func TestWalletSignMessage(t *testing.T) {
 	require.NotEmpty(t, response.Data.SignedMessage)
 
 	// Make sure that the recovered address is the signer address
-	recoveredAddr, err := auth.GetAddressFromSignature(message, response.Data.SignedMessage)
+	// recoveredAddr, err := auth.GetAddressFromSignature(message, response.Data.SignedMessage)
+	// Get the address
+	messageHash := accounts.TextHash(message)
+	pubkeyBytes, err := crypto.SigToPub(messageHash, response.Data.SignedMessage)
 	require.NoError(t, err)
+	recoveredAddr := crypto.PubkeyToAddress(*pubkeyBytes)
 
 	require.Equal(t, expectedWalletAddress, recoveredAddr)
 	t.Logf("Successfully signed message")
