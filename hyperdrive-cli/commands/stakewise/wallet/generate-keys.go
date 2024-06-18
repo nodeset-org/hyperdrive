@@ -121,7 +121,7 @@ func generateKeys(c *cli.Context) error {
 	fmt.Println()
 
 	// Upload to the server
-	newKeysUploaded, err := swcmdutils.UploadDepositData(sw)
+	newKeysUploaded, err := swcmdutils.UploadDepositData(c, sw)
 	if err != nil {
 		return err
 	}

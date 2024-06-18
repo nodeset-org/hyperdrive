@@ -12,14 +12,14 @@ import (
 // Wrapper for global configuration
 type GlobalConfig struct {
 	Hyperdrive *hdconfig.HyperdriveConfig
-	Stakewise  *swconfig.StakewiseConfig
+	Stakewise  *swconfig.StakeWiseConfig
 }
 
 // Make a new global config
 func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig) *GlobalConfig {
 	cfg := &GlobalConfig{
 		Hyperdrive: hdCfg,
-		Stakewise:  swconfig.NewStakewiseConfig(hdCfg),
+		Stakewise:  swconfig.NewStakeWiseConfig(hdCfg),
 	}
 
 	for _, module := range cfg.GetAllModuleConfigs() {
@@ -64,7 +64,7 @@ func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 	hdCopy := c.Hyperdrive.Clone()
 
 	// Stakewise
-	swCopy := c.Stakewise.Clone().(*swconfig.StakewiseConfig)
+	swCopy := c.Stakewise.Clone().(*swconfig.StakeWiseConfig)
 
 	return &GlobalConfig{
 		Hyperdrive: hdCopy,

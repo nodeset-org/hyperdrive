@@ -24,12 +24,12 @@ func registerNode(c *cli.Context) error {
 		return err
 	}
 
-	// Check if it's already registered
-	shouldRegister, err := checkRegistrationStatusImpl(hd, sw)
+	// Check if doesn't have a wallet it's already registered
+	hasWallet, shouldRegister, err := checkRegistrationStatusImpl(hd, sw)
 	if err != nil {
 		return err
 	}
-	if !shouldRegister {
+	if !hasWallet || !shouldRegister {
 		return nil
 	}
 

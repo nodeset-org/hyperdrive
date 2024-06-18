@@ -29,6 +29,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Aliases: []string{"g"},
 				Usage:   "Generate new validator keys derived from your node wallet.",
 				Flags: []cli.Flag{
+					utils.YesFlag,
 					generateKeysCountFlag,
 					generateKeysNoRestartFlag,
 				},

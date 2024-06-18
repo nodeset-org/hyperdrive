@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
@@ -10,10 +11,11 @@ import (
 )
 
 const (
-	prometheusConfigTemplate string = "prometheus-cfg.tmpl"
-	prometheusConfigTarget   string = "prometheus.yml"
-	grafanaConfigTemplate    string = "grafana-prometheus-datasource.tmpl"
-	grafanaConfigTarget      string = "grafana-prometheus-datasource.yml"
+	metricsDirMode           os.FileMode = 0755
+	prometheusConfigTemplate string      = "prometheus-cfg.tmpl"
+	prometheusConfigTarget   string      = "prometheus.yml"
+	grafanaConfigTemplate    string      = "grafana-prometheus-datasource.tmpl"
+	grafanaConfigTarget      string      = "grafana-prometheus-datasource.yml"
 )
 
 // Load the config
@@ -64,17 +66,31 @@ func (c *HyperdriveClient) SaveConfig(cfg *GlobalConfig) error {
 	if err != nil {
 		return err
 	}
-	return SaveConfig(cfg, settingsFileDirectoryPath, SettingsFile)
+	err = SaveConfig(cfg, settingsFileDirectoryPath, SettingsFile)
+	if err != nil {
+		return fmt.Errorf("error saving config: %w", err)
+	}
+
+	// Update the client's config cache
+	c.cfg = cfg
+	c.isNewCfg = false
+	return nil
 }
 
 // Load the Prometheus config template, do a template variable substitution, and save it
 func (c *HyperdriveClient) UpdatePrometheusConfiguration(config *GlobalConfig) error {
+	// Make sure the metrics path exists
+	metricsDirPath, err := createMetricsDir(c.Context.ConfigPath)
+	if err != nil {
+		return err
+	}
+
 	prometheusConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, prometheusConfigTemplate))
 	if err != nil {
 		return fmt.Errorf("error expanding Prometheus config template path: %w", err)
 	}
 
-	prometheusConfigTargetPath, err := homedir.Expand(filepath.Join(c.Context.ConfigPath, prometheusConfigTarget))
+	prometheusConfigTargetPath, err := homedir.Expand(filepath.Join(metricsDirPath, prometheusConfigTarget))
 	if err != nil {
 		return fmt.Errorf("error expanding Prometheus config target path: %w", err)
 	}
@@ -89,12 +105,18 @@ func (c *HyperdriveClient) UpdatePrometheusConfiguration(config *GlobalConfig) e
 
 // Load the Grafana config template, do a template variable substitution, and save it
 func (c *HyperdriveClient) UpdateGrafanaDatabaseConfiguration(config *GlobalConfig) error {
+	// Make sure the metrics path exists
+	metricsDirPath, err := createMetricsDir(c.Context.ConfigPath)
+	if err != nil {
+		return err
+	}
+
 	grafanaConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, grafanaConfigTemplate))
 	if err != nil {
 		return fmt.Errorf("error expanding Grafana config template path: %w", err)
 	}
 
-	grafanaConfigTargetPath, err := homedir.Expand(filepath.Join(c.Context.ConfigPath, grafanaConfigTarget))
+	grafanaConfigTargetPath, err := homedir.Expand(filepath.Join(metricsDirPath, grafanaConfigTarget))
 	if err != nil {
 		return fmt.Errorf("error expanding Grafana config target path: %w", err)
 	}
@@ -105,4 +127,14 @@ func (c *HyperdriveClient) UpdateGrafanaDatabaseConfiguration(config *GlobalConf
 	}
 
 	return t.Write(config)
+}
+
+// Create the metrics directory
+func createMetricsDir(cfgPath string) (string, error) {
+	metricsDirPath := filepath.Join(cfgPath, metricsDir)
+	err := os.MkdirAll(metricsDirPath, metricsDirMode)
+	if err != nil {
+		return "", fmt.Errorf("error creating metrics directory [%s]: %w", metricsDirPath, err)
+	}
+	return metricsDirPath, nil
 }

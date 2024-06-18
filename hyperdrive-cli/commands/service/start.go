@@ -190,7 +190,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	fmt.Println("Checking node registration status...")
 	retries = 5
 	for i := 0; i < retries; i++ {
-		err = nodeset.CheckRegistrationStatus(c, hd, sw)
+		_, err = nodeset.CheckRegistrationStatus(c, hd, sw)
 		if err != nil {
 			time.Sleep(time.Second)
 			continue

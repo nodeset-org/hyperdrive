@@ -11,43 +11,43 @@ import (
 )
 
 // CheckRegistrationStatus checks the registration status of the node with NodeSet and prompts the user to register if not already done
-func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient, sw *client.StakewiseClient) error {
+func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient, sw *client.StakewiseClient) (bool, error) {
 	// Check if the node is already registered
-	shouldRegister, err := checkRegistrationStatusImpl(hd, sw)
+	hasWallet, shouldRegister, err := checkRegistrationStatusImpl(hd, sw)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if !shouldRegister {
-		return nil
+		return hasWallet, nil
 	}
 
 	// Prompt for registration
 	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to register your node now?")) {
 		fmt.Println("Cancelled.")
-		return nil
+		return hasWallet, nil
 	}
 
-	return registerNodeImpl(c, sw)
+	return hasWallet, registerNodeImpl(c, sw)
 }
 
 // Returns true if the node should register because it hasn't yet and is able to
-func checkRegistrationStatusImpl(hd *client.HyperdriveClient, sw *client.StakewiseClient) (bool, error) {
+func checkRegistrationStatusImpl(hd *client.HyperdriveClient, sw *client.StakewiseClient) (bool, bool, error) {
 	// Get wallet response
 	response, err := hd.Api.Wallet.Status()
 	if err != nil {
-		return false, err
+		return false, false, err
 	}
 
 	// Make sure we have a wallet loaded
 	if !response.Data.WalletStatus.Wallet.IsLoaded {
 		fmt.Println("The node wallet has not been initialized yet. Please run `hyperdrive wallet status` to learn more.")
-		return false, nil
+		return false, false, nil
 	}
 
 	// Get the registration status
 	resp, err := sw.Api.Nodeset.RegistrationStatus()
 	if err != nil {
-		return false, err
+		return false, false, err
 	}
 	switch resp.Data.Status {
 	case swapi.NodesetRegistrationStatus_Unknown:
@@ -58,11 +58,11 @@ func checkRegistrationStatusImpl(hd *client.HyperdriveClient, sw *client.Stakewi
 		fmt.Println("Your node can't be registered until you have a node wallet initialized. Please run `hyperdrive wallet init` or `hyperdrive wallet recover` first.")
 	case swapi.NodesetRegistrationStatus_Unregistered:
 		fmt.Println("Your node is not currently registered with NodeSet.")
-		return true, nil
+		return true, true, nil
 	case swapi.NodesetRegistrationStatus_Registered:
 		fmt.Println("Your node is registered with NodeSet.")
 	}
-	return false, nil
+	return true, false, nil
 }
 
 // Registers the node with NodeSet

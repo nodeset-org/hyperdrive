@@ -8,10 +8,10 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/ethereum/go-ethereum v1.14.3
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/nodeset-org/hyperdrive-daemon v0.5.0-b1.0.20240611152842-0bf804dff3e8
-	github.com/nodeset-org/hyperdrive-stakewise v0.2.1-0.20240611153126-c12438a74a75
+	github.com/nodeset-org/hyperdrive-daemon v0.5.0-b1.0.20240618204202-7f072201f2a6
+	github.com/nodeset-org/hyperdrive-stakewise v0.2.1-0.20240618204707-71e76319cced
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.4.1-0.20240611150849-d8ec56d52712
+	github.com/rocket-pool/node-manager-core v0.5.0
 	golang.org/x/sync v0.7.0
 	golang.org/x/term v0.19.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -84,8 +84,16 @@ require (
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
+)
+
+require (
+	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.27.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.27.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
 )

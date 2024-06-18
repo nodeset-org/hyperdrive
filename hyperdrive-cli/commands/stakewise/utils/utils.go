@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	"github.com/urfave/cli/v2"
 )
 
 func printUploadError(err error) {
@@ -15,7 +17,17 @@ func printUploadError(err error) {
 }
 
 // Upload deposit data to the server
-func UploadDepositData(sw *client.StakewiseClient) (bool, error) {
+func UploadDepositData(c *cli.Context, sw *client.StakewiseClient) (bool, error) {
+	// Warn user prior to uploading deposit data
+	fmt.Println("NOTE: There is currently no way to remove a validator's deposit data from the NodeSet service once you've uploaded it. The key will be eligible for activation at any time, so this node must remain online at all times to handle activation and validation duties.")
+	fmt.Printf("%sIf you turn the node off, you may be removed from NodeSet for negligence of duty!%s\n", terminal.ColorYellow, terminal.ColorReset)
+	fmt.Println()
+
+	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Do you want to continue uploading your deposit data?")) {
+		fmt.Println("Cancelled.")
+		return false, nil
+	}
+
 	// Initial attempt to upload all deposit data
 	fmt.Println("Uploading deposit data to the NodeSet server...")
 	response, err := sw.Api.Nodeset.UploadDepositData()

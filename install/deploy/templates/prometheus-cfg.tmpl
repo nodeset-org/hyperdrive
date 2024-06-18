@@ -33,6 +33,11 @@ scrape_configs:
     static_configs:
       - targets: ['{{.Hyperdrive.DaemonContainerName}}:{{or .Hyperdrive.Metrics.DaemonMetricsPort.Value "9102"}}']
 
+  - job_name: 'modules'
+    file_sd_configs:
+      - files:
+        - /modules/*.yml
+
   - job_name: 'custom_jobs' # Mandatory field, but will be ignored.
     file_sd_configs:
       - files:
