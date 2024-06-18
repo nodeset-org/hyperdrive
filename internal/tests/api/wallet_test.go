@@ -268,7 +268,6 @@ func TestWalletSend_EthSuccess(t *testing.T) {
 	t.Log("Waiting complete")
 
 	// Check the balance
-	require.NoError(t, err)
 	sp := testMgr.GetServiceProvider()
 	ctx := sp.GetBaseContext()
 
