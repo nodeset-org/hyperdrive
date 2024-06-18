@@ -451,13 +451,13 @@ func (cfg *HyperdriveConfig) applyAllDefaults() {
 // Get the list of options for networks to run on
 func getNetworkOptions() []*config.ParameterOption[config.Network] {
 	options := []*config.ParameterOption[config.Network]{
-		/*{
+		{
 			ParameterOptionCommon: &config.ParameterOptionCommon{
 				Name:        "Ethereum Mainnet",
 				Description: "This is the real Ethereum main network, using real ETH to make real validators.",
 			},
 			Value: config.Network_Mainnet,
-		},*/
+		},
 		{
 			ParameterOptionCommon: &config.ParameterOptionCommon{
 				Name:        "Holesky Testnet",
