@@ -50,15 +50,14 @@ func (c *walletExportContext) PrepareData(data *api.WalletExportData, opts *bind
 		return types.ResponseStatus_WalletNotReady, err
 	}
 
-	// Get password
+	// Get password - blank if not saved
 	pw, isSet, err := w.GetPassword()
 	if err != nil {
 		return types.ResponseStatus_Error, fmt.Errorf("error getting wallet password: %w", err)
 	}
-	if !isSet {
-		return types.ResponseStatus_WalletNotReady, fmt.Errorf("password has not been set; cannot decrypt wallet keystore without it")
+	if isSet {
+		data.Password = pw
 	}
-	data.Password = pw
 
 	// Serialize wallet
 	walletString, err := w.SerializeData()
