@@ -8,8 +8,8 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/ethereum/go-ethereum v1.14.3
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/nodeset-org/hyperdrive-daemon v0.5.0-b1.0.20240618204202-7f072201f2a6
-	github.com/nodeset-org/hyperdrive-stakewise v0.2.1-0.20240619034220-8a2ba6f83008
+	github.com/nodeset-org/hyperdrive-daemon v0.5.0-b1.0.20240619210724-0605e8ffb53e
+	github.com/nodeset-org/hyperdrive-stakewise v0.2.1-0.20240619213452-816de1b31ae5
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/node-manager-core v0.5.0
 	golang.org/x/sync v0.7.0
