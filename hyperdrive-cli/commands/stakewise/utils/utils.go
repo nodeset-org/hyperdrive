@@ -45,6 +45,15 @@ func UploadDepositData(c *cli.Context, sw *client.StakewiseClient) (bool, error)
 	newKeyCount := len(data.NewPubkeys)
 	remainingKeyCount := len(data.RemainingPubkeys)
 
+	if data.InvalidWithdrawalCredentials {
+		fmt.Printf("%sWARNING: Your deposit data contained withdrawal credentials that do not correspond to a valid StakeWise vault. Please contact the Hyperdrive developers and report this issue.%s\n", terminal.ColorYellow, terminal.ColorReset)
+		return false, nil
+	}
+	if data.NotAuthorizedForMainnet {
+		fmt.Printf("%sWARNING: Your deposit data was rejected because you are not currently authorized to access the Mainnet vault. You will need to run on the Holesky testnet first before being given access to Mainnet.%s\n", terminal.ColorYellow, terminal.ColorReset)
+		return false, nil
+	}
+
 	if data.SufficientBalance {
 		if newKeyCount == 0 {
 			fmt.Printf("All of your validator keys are already registered (%s%d%s in total).\n", terminal.ColorGreen, data.TotalCount, terminal.ColorReset)
