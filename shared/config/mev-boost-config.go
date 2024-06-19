@@ -427,7 +427,7 @@ func createDefaultRelays() []MevRelay {
 		// Titan Regional
 		{
 			ID:          MevRelayID_TitanRegional,
-			Name:        "Titan Regional (Regulated)",
+			Name:        "Titan Regional",
 			Description: "Titan Relay is a neutral, Rust-based MEV-Boost Relay optimized for low latency through put, geographical distribution, and robustness. This is the regulated (censoring) version.",
 			Urls: map[config.Network]string{
 				config.Network_Mainnet: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@regional.titanrelay.xyz",
