@@ -17,7 +17,16 @@ func printUploadError(err error) {
 }
 
 // Upload deposit data to the server
-func UploadDepositData(c *cli.Context, sw *client.StakewiseClient) (bool, error) {
+func UploadDepositData(c *cli.Context, hd *client.HyperdriveClient, sw *client.StakewiseClient) (bool, error) {
+	// Check wallet status
+	_, ready, err := utils.CheckIfWalletReady(hd)
+	if err != nil {
+		return false, err
+	}
+	if !ready {
+		return false, nil
+	}
+
 	// Warn user prior to uploading deposit data
 	fmt.Println("NOTE: There is currently no way to remove a validator's deposit data from the NodeSet service once you've uploaded it. The key will be eligible for activation at any time, so this node must remain online at all times to handle activation and validation duties.")
 	fmt.Printf("%sIf you turn the node off, you may be removed from NodeSet for negligence of duty!%s\n", terminal.ColorYellow, terminal.ColorReset)

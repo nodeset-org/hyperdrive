@@ -7,6 +7,7 @@ import (
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	swcmdutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/utils"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/rocket-pool/node-manager-core/utils/input"
@@ -37,21 +38,12 @@ func generateKeys(c *cli.Context) error {
 	}
 	noRestart := c.Bool(generateKeysNoRestartFlag.Name)
 
-	// Make sure there's a wallet loaded
-	response, err := hd.Api.Wallet.Status()
+	// Check wallet status
+	_, ready, err := utils.CheckIfWalletReady(hd)
 	if err != nil {
-		return fmt.Errorf("error checking wallet status: %w", err)
+		return err
 	}
-	status := response.Data.WalletStatus
-	if !status.Wallet.IsLoaded {
-		if !status.Wallet.IsOnDisk {
-			fmt.Println("Your node wallet has not been initialized yet. Please run `hyperdrive wallet init` first to create it, then run this again.")
-			return nil
-		}
-		if !status.Password.IsPasswordSaved {
-			fmt.Println("Your node wallet has been initialized, but Hyperdrive doesn't have a password loaded for it so it cannot be used. Please run `hyperdrive wallet set-password` to enter it, then run this command again.")
-			return nil
-		}
+	if !ready {
 		return nil
 	}
 
@@ -121,7 +113,7 @@ func generateKeys(c *cli.Context) error {
 	fmt.Println()
 
 	// Upload to the server
-	newKeysUploaded, err := swcmdutils.UploadDepositData(c, sw)
+	newKeysUploaded, err := swcmdutils.UploadDepositData(c, hd, sw)
 	if err != nil {
 		return err
 	}

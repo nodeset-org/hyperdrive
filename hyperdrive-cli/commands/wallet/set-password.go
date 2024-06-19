@@ -31,6 +31,10 @@ func setPassword(c *cli.Context) error {
 		}
 		fmt.Println("The node wallet is loaded, but the password is not saved to disk.")
 	}
+	if !status.Wallet.IsOnDisk {
+		fmt.Println("The node wallet has not been initialized yet. Please run `hyperdrive wallet init` or `hyperdrive wallet recover` first, then run this again.")
+		return nil
+	}
 
 	// Get the password
 	passwordString := c.String(PasswordFlag.Name)

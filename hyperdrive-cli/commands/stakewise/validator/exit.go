@@ -41,6 +41,15 @@ func exit(c *cli.Context) error {
 		return err
 	}
 
+	// Check wallet status
+	_, ready, err := utils.CheckIfWalletReady(hd)
+	if err != nil {
+		return err
+	}
+	if !ready {
+		return nil
+	}
+
 	// Get all active validators
 	activeValidatorResponse, err := sw.Api.Status.GetValidatorStatuses()
 	if err != nil {

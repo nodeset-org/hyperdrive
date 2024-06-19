@@ -11,6 +11,7 @@ import (
 )
 
 // CheckRegistrationStatus checks the registration status of the node with NodeSet and prompts the user to register if not already done
+// Returns whether or not the caller should continue with its operation after this check completes, or if it should exit
 func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient, sw *client.StakewiseClient) (bool, error) {
 	// Check if the node is already registered
 	hasWallet, shouldRegister, err := checkRegistrationStatusImpl(hd, sw)
@@ -24,7 +25,7 @@ func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient, sw *cl
 	// Prompt for registration
 	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to register your node now?")) {
 		fmt.Println("Cancelled.")
-		return hasWallet, nil
+		return false, nil
 	}
 
 	return hasWallet, registerNodeImpl(c, sw)
@@ -32,15 +33,12 @@ func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient, sw *cl
 
 // Returns true if the node should register because it hasn't yet and is able to
 func checkRegistrationStatusImpl(hd *client.HyperdriveClient, sw *client.StakewiseClient) (bool, bool, error) {
-	// Get wallet response
-	response, err := hd.Api.Wallet.Status()
+	// Check wallet status
+	_, ready, err := utils.CheckIfWalletReady(hd)
 	if err != nil {
 		return false, false, err
 	}
-
-	// Make sure we have a wallet loaded
-	if !response.Data.WalletStatus.Wallet.IsLoaded {
-		fmt.Println("The node wallet has not been initialized yet. Please run `hyperdrive wallet status` to learn more.")
+	if !ready {
 		return false, false, nil
 	}
 

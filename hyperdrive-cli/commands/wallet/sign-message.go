@@ -6,9 +6,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
-	"github.com/rocket-pool/node-manager-core/utils"
-	"github.com/rocket-pool/node-manager-core/wallet"
+	nutils "github.com/rocket-pool/node-manager-core/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -38,13 +38,12 @@ func signMessage(c *cli.Context) error {
 		return err
 	}
 
-	// Get & check wallet status
-	status, err := hd.Api.Wallet.Status()
+	// Check wallet status
+	status, ready, err := utils.CheckIfWalletReady(hd)
 	if err != nil {
 		return err
 	}
-	if !wallet.IsWalletReady(status.Data.WalletStatus) {
-		fmt.Println("The node wallet is not loaded or your node is in read-only mode. Please run `hyperdrive wallet status` for more details.")
+	if !ready {
 		return nil
 	}
 
@@ -62,9 +61,9 @@ func signMessage(c *cli.Context) error {
 
 	// Print the signature
 	formattedSignature := PersonalSignature{
-		Address:   status.Data.WalletStatus.Wallet.WalletAddress,
+		Address:   status.Wallet.WalletAddress,
 		Message:   message,
-		Signature: utils.EncodeHexWithPrefix(response.Data.SignedMessage),
+		Signature: nutils.EncodeHexWithPrefix(response.Data.SignedMessage),
 		Version:   fmt.Sprint(signatureVersion),
 	}
 	bytes, err := json.MarshalIndent(formattedSignature, "", "    ")

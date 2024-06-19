@@ -22,11 +22,11 @@ func getNodeStatus(c *cli.Context) error {
 	}
 
 	// Check the registration status first
-	hasWallet, err := nodeset.CheckRegistrationStatus(c, hd, sw)
+	shouldContinue, err := nodeset.CheckRegistrationStatus(c, hd, sw)
 	if err != nil {
 		return fmt.Errorf("error checking registration status: %w", err)
 	}
-	if !hasWallet {
+	if !shouldContinue {
 		return nil
 	}
 

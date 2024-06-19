@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/tx"
 	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/urfave/cli/v2"
@@ -20,6 +21,15 @@ func claimRewards(c *cli.Context) error {
 	sw, err := client.NewStakewiseClientFromCtx(c, hd)
 	if err != nil {
 		return err
+	}
+
+	// Check if there's a node address ready
+	_, ready, err := utils.CheckIfAddressReady(hd)
+	if err != nil {
+		return err
+	}
+	if !ready {
+		return nil
 	}
 
 	// Get the list of rewards available

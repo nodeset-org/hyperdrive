@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/tx"
 	"github.com/urfave/cli/v2"
@@ -14,6 +15,15 @@ func setEnsName(c *cli.Context, name string) error {
 	hd, err := client.NewHyperdriveClientFromCtx(c)
 	if err != nil {
 		return err
+	}
+
+	// Check if there's a node address ready
+	_, ready, err := utils.CheckIfAddressReady(hd)
+	if err != nil {
+		return err
+	}
+	if !ready {
+		return nil
 	}
 
 	fmt.Printf("This will confirm the node's ENS name as '%s'.\n\n%sNOTE: to confirm your name, you must first register it with the ENS application at https://app.ens.domains.\nWe recommend using a hardware wallet as the base domain, and registering your node as a subdomain of it.%s\n\n", name, terminal.ColorYellow, terminal.ColorReset)
