@@ -32,7 +32,7 @@ services:
       - EC_HTTP_PORT={{.Hyperdrive.LocalExecutionClient.HttpPort}}
       - EC_WS_PORT={{.Hyperdrive.LocalExecutionClient.WebsocketPort}}
       - EC_ENGINE_PORT={{.Hyperdrive.LocalExecutionClient.EnginePort}}
-      - EXTERNAL_IP={{.Hyperdrive.GetExternalIP}}
+      - EXTERNAL_IP={{.ExternalIP}}
       - ENABLE_METRICS={{.Hyperdrive.Metrics.EnableMetrics}}
       - EC_METRICS_PORT={{.Hyperdrive.Metrics.EcMetricsPort}}
       {{- /* Client-specific values */}}

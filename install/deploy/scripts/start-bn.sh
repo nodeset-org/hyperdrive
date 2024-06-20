@@ -291,6 +291,10 @@ if [ "$CLIENT" = "teku" ]; then
         CMD="$CMD --metrics-enabled=true --metrics-interface=0.0.0.0 --metrics-port=$BN_METRICS_PORT --metrics-host-allowlist=*"
     fi
 
+    if [ ! -z "$EXTERNAL_IP" ]; then
+        CMD="$CMD --p2p-advertised-ip=$EXTERNAL_IP"
+    fi
+
     if [ ! -z "$CHECKPOINT_SYNC_URL" ]; then
         CMD="$CMD --checkpoint-sync-url=$CHECKPOINT_SYNC_URL"
     fi

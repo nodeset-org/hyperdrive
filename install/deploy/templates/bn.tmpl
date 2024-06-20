@@ -43,7 +43,7 @@ services:
       - BN_MAX_PEERS={{.Hyperdrive.GetBnMaxPeers}}
       - ENABLE_METRICS={{.Hyperdrive.Metrics.EnableMetrics}}
       - BN_METRICS_PORT={{.Hyperdrive.Metrics.BnMetricsPort}}
-      - EXTERNAL_IP={{.Hyperdrive.GetExternalIP}}
+      - EXTERNAL_IP={{.ExternalIP}}
       - CHECKPOINT_SYNC_URL={{.Hyperdrive.LocalBeaconClient.CheckpointSyncProvider}}
       - BN_ADDITIONAL_FLAGS={{.Hyperdrive.GetBnAdditionalFlags}}
       - ENABLE_BITFLY_NODE_METRICS={{.Hyperdrive.Metrics.EnableBitflyNodeMetrics}}

@@ -28,7 +28,6 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 	if err != nil {
 		return "", err
 	}
-
 	if isNew {
 		return "", fmt.Errorf("settings file not found. Please run `hyperdrive service config` to set up Hyperdrive before starting it")
 	}
@@ -42,6 +41,9 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 	if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalBeaconClient.BeaconNode.Value == config.BeaconNode_Unknown {
 		return "", errors.New("no Beacon Node selected. Please run 'hyperdrive service config' before running this command")
 	}
+
+	// Make sure the external IP is loaded
+	cfg.LoadExternalIP()
 
 	// Deploy the templates and run environment variable substitution on them
 	deployedContainers, err := c.deployTemplates(cfg, expandedConfigPath)

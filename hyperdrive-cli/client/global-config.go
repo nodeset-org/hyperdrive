@@ -11,6 +11,7 @@ import (
 
 // Wrapper for global configuration
 type GlobalConfig struct {
+	ExternalIP string
 	Hyperdrive *hdconfig.HyperdriveConfig
 	Stakewise  *swconfig.StakeWiseConfig
 }
@@ -196,6 +197,27 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 	}
 
 	return sectionList, changedContainers, changeNetworks
+}
+
+// Attempts to load the system's external IP address
+func (c *GlobalConfig) LoadExternalIP() {
+	if c.ExternalIP != "" {
+		return
+	}
+
+	// Get the external IP address
+	ip, err := config.GetExternalIP()
+	if err != nil {
+		fmt.Println("Warning: couldn't get external IP address; if you're using Nimbus, Besu, or Teku, it may have trouble finding peers:")
+		fmt.Println(err.Error())
+		return
+	}
+
+	if ip.To4() == nil {
+		fmt.Println("Warning: external IP address is v6; if you're using Nimbus, Besu, or Teku, it may have trouble finding peers.")
+	}
+
+	c.ExternalIP = ip.String()
 }
 
 // Compare two config sections and see what's changed between them, generating a ChangedSection for the results.
