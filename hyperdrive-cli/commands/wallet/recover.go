@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -34,6 +35,16 @@ func recoverWallet(c *cli.Context) error {
 	if status.Wallet.IsOnDisk {
 		fmt.Println("The node wallet is already initialized.")
 		return nil
+	}
+
+	// Print a debug log warning
+	if cfg.Hyperdrive.Logging.Level.Value == slog.LevelDebug {
+		fmt.Printf("%sWARNING: You have debug logging enabled. Your mnemonic and node wallet password will be saved to the log file if you run this command.%s\n\n", terminal.ColorRed, terminal.ColorReset)
+		if !utils.Confirm("Are you sure you want to continue?") {
+			fmt.Println("Cancelled.")
+			return nil
+		}
+		fmt.Println()
 	}
 
 	// Prompt a notice about test recovery

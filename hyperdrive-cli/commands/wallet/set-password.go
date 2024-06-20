@@ -2,9 +2,11 @@ package wallet
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
@@ -14,6 +16,12 @@ func setPassword(c *cli.Context) error {
 	hd, err := client.NewHyperdriveClientFromCtx(c)
 	if err != nil {
 		return err
+	}
+
+	// Get the config
+	cfg, _, err := hd.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("error getting Hyperdrive configuration: %w", err)
 	}
 
 	// Get & check wallet status
@@ -34,6 +42,16 @@ func setPassword(c *cli.Context) error {
 	if !status.Wallet.IsOnDisk {
 		fmt.Println("The node wallet has not been initialized yet. Please run `hyperdrive wallet init` or `hyperdrive wallet recover` first, then run this again.")
 		return nil
+	}
+
+	// Print a debug log warning
+	if cfg.Hyperdrive.Logging.Level.Value == slog.LevelDebug {
+		fmt.Printf("%sWARNING: You have debug logging enabled. Your node's wallet password will be saved to the log file if you run this command.%s\n\n", terminal.ColorRed, terminal.ColorReset)
+		if !utils.Confirm("Are you sure you want to continue?") {
+			fmt.Println("Cancelled.")
+			return nil
+		}
+		fmt.Println()
 	}
 
 	// Get the password
