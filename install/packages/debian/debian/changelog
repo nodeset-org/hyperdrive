@@ -1,6 +1,6 @@
 hyperdrive (1.0.0) UNRELEASED; urgency=medium
 
-  * Updated Besu, Geth, Reth, Lighthouse, and Lodestar.
+  * Updated Besu, Geth, Reth, Lighthouse, Lodestar, and Teku.
   * Added support for Mainnet.
   * Fixed a race condition that caused `service start` to incorrectly state your node wasn't registered with your NodeSet account if the service was stopped before running the command.
   * The MEV-Boost relay selection mode has been adjusted in preparation for Mainnet.
