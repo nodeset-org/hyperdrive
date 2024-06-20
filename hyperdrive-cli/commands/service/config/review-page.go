@@ -6,6 +6,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/rivo/tview"
 	"github.com/rocket-pool/node-manager-core/config"
@@ -68,6 +69,12 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 				containerName := oldConfig.Hyperdrive.GetDockerArtifactName(string(container))
 				builder.WriteString(fmt.Sprintf("\n\t%s", containerName))
 				containersToRestart = append(containersToRestart, container)
+				if container == config.ContainerID_Daemon {
+					// TEMP: Restart all of the module daemons
+					containerName := oldConfig.Hyperdrive.GetDockerArtifactName(string(swconfig.ContainerID_StakewiseDaemon))
+					builder.WriteString(fmt.Sprintf("\n\t%s", containerName))
+					containersToRestart = append(containersToRestart, swconfig.ContainerID_StakewiseDaemon)
+				}
 			}
 		}
 	}
