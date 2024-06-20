@@ -28,7 +28,7 @@ const (
 	runtimeDir         string = "runtime"
 	metricsDir         string = "metrics"
 	extraScrapeJobsDir string = "extra-scrape-jobs"
-	modulePrometheusSd string = "prometheus_sd"
+	modulePrometheusSd string = "prometheus-sd"
 )
 
 // Install Hyperdrive
