@@ -91,12 +91,14 @@ func processConfigAfterQuit(md *mainDisplay) {
 		}
 
 		var containersToRestart []config.ContainerID
+		// TEMP: Restart all of the module daemons if the HD daemon is being restarted
+		for container := range totalAffectedContainers {
+			if container == config.ContainerID_Daemon {
+				totalAffectedContainers[swconfig.ContainerID_StakewiseDaemon] = true
+			}
+		}
 		for container := range totalAffectedContainers {
 			containersToRestart = append(containersToRestart, container)
-			if container == config.ContainerID_Daemon {
-				// TEMP: Restart all of the module daemons
-				containersToRestart = append(containersToRestart, swconfig.ContainerID_StakewiseDaemon)
-			}
 		}
 
 		md.ShouldSave = true

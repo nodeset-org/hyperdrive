@@ -60,6 +60,13 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 			}
 		}
 
+		// TEMP: Restart all of the module daemons if the HD daemon is being restarted
+		for container := range totalAffectedContainers {
+			if container == config.ContainerID_Daemon {
+				totalAffectedContainers[swconfig.ContainerID_StakewiseDaemon] = true
+			}
+		}
+
 		// Print the list of containers to restart
 		if builder.String() == "" {
 			builder.WriteString("<No changes>")
@@ -69,12 +76,6 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 				containerName := oldConfig.Hyperdrive.GetDockerArtifactName(string(container))
 				builder.WriteString(fmt.Sprintf("\n\t%s", containerName))
 				containersToRestart = append(containersToRestart, container)
-				if container == config.ContainerID_Daemon {
-					// TEMP: Restart all of the module daemons
-					containerName := oldConfig.Hyperdrive.GetDockerArtifactName(string(swconfig.ContainerID_StakewiseDaemon))
-					builder.WriteString(fmt.Sprintf("\n\t%s", containerName))
-					containersToRestart = append(containersToRestart, swconfig.ContainerID_StakewiseDaemon)
-				}
 			}
 		}
 	}
