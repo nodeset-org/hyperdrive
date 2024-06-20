@@ -5,6 +5,7 @@ import (
 
 	swtypes "github.com/nodeset-org/hyperdrive-stakewise/shared/types"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
 	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/urfave/cli/v2"
 )
@@ -20,6 +21,16 @@ func getNodeStatus(c *cli.Context) error {
 		return err
 	}
 
+	// Check the registration status first
+	shouldContinue, err := nodeset.CheckRegistrationStatus(c, hd, sw)
+	if err != nil {
+		return fmt.Errorf("error checking registration status: %w", err)
+	}
+	if !shouldContinue {
+		return nil
+	}
+
+	// Get the validator statuses
 	response, err := sw.Api.Status.GetValidatorStatuses()
 	if err != nil {
 		fmt.Printf("error fetching validator statuses: %v\n", err)

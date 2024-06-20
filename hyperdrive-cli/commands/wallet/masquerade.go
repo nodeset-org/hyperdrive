@@ -25,7 +25,7 @@ func masquerade(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Printf("Masquerading allows you to set your node address to any address you want. Your daemon will \"pretend\" to be that node, and all commands will act as though your node wallet is for that address. Since you don't have the private key for that address, you can't submit transactions or sign messages though; your node will be in %sread-only mode%s until you end the masquerade with `hyperdrive wallet restore-address`.\n\n", terminal.ColorYellow, terminal.ColorReset)
+	fmt.Printf("Masquerading allows you to set your node address to any address you want. Your node will \"pretend\" to have that address, and most commands will act as though your node wallet is for that address. Since you don't have the private key for that address, you can't submit transactions or sign messages though; your node will be in %sread-only mode%s until you end the masquerade with `hyperdrive wallet restore-address`.\n\n", terminal.ColorYellow, terminal.ColorReset)
 
 	// Get the address
 	addressString := c.String(masqueradeAddressFlag.Name)

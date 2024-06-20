@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
@@ -48,6 +49,16 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	cfg, _, err := hd.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("error getting Hyperdrive configuration: %w", err)
+	}
+
+	// Print a debug log warning
+	if cfg.Hyperdrive.Logging.Level.Value == slog.LevelDebug {
+		fmt.Printf("%sWARNING: You have debug logging enabled. Your node's wallet password will be saved to the log file if you run this command.%s\n\n", terminal.ColorRed, terminal.ColorReset)
+		if !utils.Confirm("Are you sure you want to continue?") {
+			fmt.Println("Cancelled.")
+			return nil
+		}
+		fmt.Println()
 	}
 
 	// Prompt for user confirmation before printing sensitive information
@@ -121,7 +132,7 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	fmt.Println("The node wallet was successfully initialized.")
 	fmt.Printf("Node account: %s%s%s\n", terminal.ColorBlue, response.Data.AccountAddress.Hex(), terminal.ColorReset)
 
-	// Initialize the Stakewise wallet if it's enabled
+	// Initialize the StakeWise wallet if it's enabled
 	if cfg.Stakewise.Enabled.Value {
 		fmt.Println()
 		fmt.Println("You have the Stakewise module enabled. Initializing it with your new wallet...")
@@ -134,22 +145,8 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 			return fmt.Errorf("error initializing Stakewise wallet: %w", err)
 		}
 		fmt.Println("Stakewise wallet initialized.")
-
-		registrationStatusResp, err := sw.Api.Nodeset.RegistrationStatus()
-		if err != nil {
-			return err
-		}
-		if !registrationStatusResp.Data.Registered && utils.Confirm("Would you like to upload your validator keys to NodeSet?") {
-			if c.String(RegisterEmailFlag.Name) == "" {
-				fmt.Printf("Please provide an email address with the %s flag.\n", RegisterEmailFlag.Name)
-				fmt.Printf("You can register your validator with `hyperdrive stakewise nodeset register-node`.\n")
-				return nil
-			}
-			_, err := sw.Api.Nodeset.RegisterNode(c.String(RegisterEmailFlag.Name))
-			if err != nil {
-				return err
-			}
-		}
+		fmt.Println()
+		fmt.Println("Please whitelist your node on your `nodeset.io` dashboard, then register it with `hyperdrive sw ns register`.")
 	}
 	return nil
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/tx"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
@@ -16,6 +17,15 @@ func sendMessage(c *cli.Context, toAddressOrEns string, message []byte) error {
 	hd, err := client.NewHyperdriveClientFromCtx(c)
 	if err != nil {
 		return err
+	}
+
+	// Check if there's a node address ready
+	_, ready, err := utils.CheckIfAddressReady(hd)
+	if err != nil {
+		return err
+	}
+	if !ready {
+		return nil
 	}
 
 	// Get the address

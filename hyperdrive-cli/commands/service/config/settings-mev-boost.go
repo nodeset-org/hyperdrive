@@ -18,15 +18,10 @@ type MevBoostConfigPage struct {
 	selectionModeBox      *parameterizedFormItem
 	localItems            []*parameterizedFormItem
 	externalItems         []*parameterizedFormItem
-	regulatedAllMevBox    *parameterizedFormItem
-	unregulatedAllMevBox  *parameterizedFormItem
 	flashbotsBox          *parameterizedFormItem
 	bloxrouteMaxProfitBox *parameterizedFormItem
 	bloxrouteRegulatedBox *parameterizedFormItem
 	edenBox               *parameterizedFormItem
-	ultrasoundBox         *parameterizedFormItem
-	aestusBox             *parameterizedFormItem
-	titanGlobalBox        *parameterizedFormItem
 	titanRegionalBox      *parameterizedFormItem
 }
 
@@ -67,6 +62,7 @@ func (configPage *MevBoostConfigPage) createContent() {
 	configPage.selectionModeBox = createParameterizedDropDown(&configPage.masterConfig.Hyperdrive.MevBoost.SelectionMode, configPage.layout.descriptionBox)
 
 	localParams := []config.IParameter{
+		&configPage.masterConfig.Hyperdrive.MevBoost.CustomRelays,
 		&configPage.masterConfig.Hyperdrive.MevBoost.Port,
 		&configPage.masterConfig.Hyperdrive.MevBoost.OpenRpcPort,
 		&configPage.masterConfig.Hyperdrive.MevBoost.ContainerTag,
@@ -81,14 +77,11 @@ func (configPage *MevBoostConfigPage) createContent() {
 	configPage.bloxrouteMaxProfitBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.BloxRouteMaxProfitRelay)
 	configPage.bloxrouteRegulatedBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.BloxRouteRegulatedRelay)
 	configPage.edenBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.EdenRelay)
-	configPage.ultrasoundBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.UltrasoundRelay)
-	configPage.aestusBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.AestusRelay)
-	configPage.titanGlobalBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.TitanGlobalRelay)
 	configPage.titanRegionalBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.TitanRegionalRelay)
 
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.enableBox, configPage.modeBox, configPage.selectionModeBox)
-	configPage.layout.mapParameterizedFormItems(configPage.flashbotsBox, configPage.bloxrouteMaxProfitBox, configPage.bloxrouteRegulatedBox, configPage.edenBox, configPage.ultrasoundBox, configPage.aestusBox, configPage.titanGlobalBox, configPage.titanRegionalBox)
+	configPage.layout.mapParameterizedFormItems(configPage.flashbotsBox, configPage.bloxrouteMaxProfitBox, configPage.bloxrouteRegulatedBox, configPage.edenBox, configPage.titanRegionalBox)
 	configPage.layout.mapParameterizedFormItems(configPage.localItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.externalItems...)
 
@@ -150,16 +143,7 @@ func (configPage *MevBoostConfigPage) handleSelectionModeChanged() {
 	configPage.layout.form.AddFormItem(configPage.selectionModeBox.item)
 	selectedMode := configPage.masterConfig.Hyperdrive.MevBoost.SelectionMode.Value
 	switch selectedMode {
-	case hdconfig.MevSelectionMode_Profile:
-		regulatedAllMev, unregulatedAllMev := configPage.masterConfig.Hyperdrive.MevBoost.GetAvailableProfiles()
-		if unregulatedAllMev {
-			configPage.layout.form.AddFormItem(configPage.unregulatedAllMevBox.item)
-		}
-		if regulatedAllMev {
-			configPage.layout.form.AddFormItem(configPage.regulatedAllMevBox.item)
-		}
-
-	case hdconfig.MevSelectionMode_Relay:
+	case hdconfig.MevSelectionMode_Manual:
 		relays := configPage.masterConfig.Hyperdrive.MevBoost.GetAvailableRelays()
 		for _, relay := range relays {
 			switch relay.ID {
@@ -171,12 +155,6 @@ func (configPage *MevBoostConfigPage) handleSelectionModeChanged() {
 				configPage.layout.form.AddFormItem(configPage.bloxrouteRegulatedBox.item)
 			case hdconfig.MevRelayID_Eden:
 				configPage.layout.form.AddFormItem(configPage.edenBox.item)
-			case hdconfig.MevRelayID_Ultrasound:
-				configPage.layout.form.AddFormItem(configPage.ultrasoundBox.item)
-			case hdconfig.MevRelayID_Aestus:
-				configPage.layout.form.AddFormItem(configPage.aestusBox.item)
-			case hdconfig.MevRelayID_TitanGlobal:
-				configPage.layout.form.AddFormItem(configPage.titanGlobalBox.item)
 			case hdconfig.MevRelayID_TitanRegional:
 				configPage.layout.form.AddFormItem(configPage.titanRegionalBox.item)
 			}
@@ -188,11 +166,6 @@ func (configPage *MevBoostConfigPage) handleSelectionModeChanged() {
 
 // Handle a bulk redraw request
 func (configPage *MevBoostConfigPage) handleLayoutChanged() {
-	// Rebuild the profile boxes with the new descriptions
-	configPage.regulatedAllMevBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.EnableRegulatedAllMev)
-	configPage.unregulatedAllMevBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.EnableUnregulatedAllMev)
-	configPage.layout.mapParameterizedFormItems(configPage.regulatedAllMevBox, configPage.unregulatedAllMevBox)
-
 	// Rebuild the parameter maps based on the selected network
 	configPage.handleModeChanged()
 }

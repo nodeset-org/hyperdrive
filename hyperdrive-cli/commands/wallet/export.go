@@ -17,13 +17,12 @@ func exportWallet(c *cli.Context) error {
 		return err
 	}
 
-	// Get & check wallet status
-	status, err := hd.Api.Wallet.Status()
+	// Check wallet status
+	_, ready, err := utils.CheckIfWalletReady(hd)
 	if err != nil {
 		return err
 	}
-	if !status.Data.WalletStatus.Wallet.IsLoaded {
-		fmt.Println("The node wallet is not loaded and ready for usage. Please run `hyperdrive wallet status` for more details.")
+	if !ready {
 		return nil
 	}
 
@@ -32,7 +31,7 @@ func exportWallet(c *cli.Context) error {
 		stat, err := os.Stdout.Stat()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "An error occured while determining whether or not the output is a tty: %s\n"+
-				"Use \"hyperdrive --secure-session wallet export\" to bypass.\n", err.Error())
+				"Use 'hyperdrive --secure-session wallet export' to bypass.\n", err.Error())
 			os.Exit(1)
 		}
 
@@ -50,18 +49,23 @@ func exportWallet(c *cli.Context) error {
 
 	// Print wallet & return
 	fmt.Println("Node account private key:")
-	fmt.Println("")
+	fmt.Println()
 	fmt.Println(nutils.EncodeHexWithPrefix(export.Data.AccountPrivateKey))
-	fmt.Println("")
-	fmt.Println("Wallet password:")
-	fmt.Println("")
-	fmt.Println(export.Data.Password)
-	fmt.Println("")
+	fmt.Println()
 	fmt.Println("Wallet file:")
 	fmt.Println("============")
-	fmt.Println("")
+	fmt.Println()
 	fmt.Println(export.Data.Wallet)
-	fmt.Println("")
+	fmt.Println()
 	fmt.Println("============")
+	fmt.Println()
+	fmt.Println("Wallet password:")
+	fmt.Println()
+	if export.Data.Password == "" {
+		fmt.Println("<Unknown - password not saved to disk>")
+	} else {
+		fmt.Println(export.Data.Password)
+	}
+	fmt.Println()
 	return nil
 }

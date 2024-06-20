@@ -16,5 +16,6 @@ func registrationStatus(c *cli.Context) error {
 		return err
 	}
 
-	return CheckRegistrationStatus(c, hd, sw)
+	_, err = CheckRegistrationStatus(c, hd, sw)
+	return err
 }

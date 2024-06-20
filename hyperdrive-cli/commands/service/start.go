@@ -70,7 +70,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	// Validate the config
 	errors := cfg.Validate()
 	if len(errors) > 0 {
-		fmt.Printf("%sYour configuration encountered errors. You must correct the following in order to start Hyperdrive:\n\n", terminal.ColorRed)
+		fmt.Printf("%sYour configuration encountered errors. You must correct the following by changing the settings with `hyperdrive service config` in order to start Hyperdrive:\n\n", terminal.ColorRed)
 		for _, err := range errors {
 			fmt.Printf("%s\n\n", err)
 		}
@@ -181,12 +181,16 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		return err
 	}
 
-	// Get NodeSet registration status
+	// Get NodeSet registration status if this isn't a new wallet
+	isExistingWallet := status.Wallet.IsLoaded || status.Wallet.IsOnDisk
+	if !isExistingWallet {
+		return nil
+	}
 	fmt.Println()
 	fmt.Println("Checking node registration status...")
 	retries = 5
 	for i := 0; i < retries; i++ {
-		err = nodeset.CheckRegistrationStatus(c, hd, sw)
+		_, err = nodeset.CheckRegistrationStatus(c, hd, sw)
 		if err != nil {
 			time.Sleep(time.Second)
 			continue

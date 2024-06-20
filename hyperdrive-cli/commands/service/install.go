@@ -102,6 +102,15 @@ func printPatchNotes() {
 	fmt.Printf("%s=== Hyperdrive v%s ===%s\n\n", terminal.ColorGreen, shared.HyperdriveVersion, terminal.ColorReset)
 	fmt.Printf("Changes you should be aware of before starting:\n\n")
 
-	fmt.Printf("%s=== Stakewise Module ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("Stakewise functions now initialize the Stakewise wallet if it's missing instead of erroring out.")
+	fmt.Printf("%s=== Mainnet Support! ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("This version of Hyperdrive supports the Ethereum Mainnet. You can now access the Gravita vault if you're a StakeWise module user and stake ETH on Gravita's behalf.")
+	fmt.Println()
+
+	fmt.Printf("%s=== NodeSet Service ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("Fixed a race condition that caused Hyperdrive to occasionally state your node wasn't registered when it was. The whole registration checking process should be greatly improved now.")
+	fmt.Println()
+
+	fmt.Printf("%s=== MEV-Boost Overhaul ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("The list of MEV-Boost built-in relays has been adjusted and only includes regulated relays due to liability concerns. Hyperdrive now includes a \"Custom Relays\" box that allows you to add your own relay URLs that MEV-Boost will use in addition to any built-in ones that you enable.")
+	fmt.Println()
 }

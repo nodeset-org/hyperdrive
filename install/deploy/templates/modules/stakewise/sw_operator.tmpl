@@ -37,6 +37,8 @@ services:
       {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
       - {{$network}}
       {{- end}}
+    environment:
+      - DISABLE_DEPOSIT_DATA_WARNINGS=true
     cap_drop:
       - all
     cap_add:

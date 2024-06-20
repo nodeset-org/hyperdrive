@@ -15,8 +15,59 @@ import (
 	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/rocket-pool/node-manager-core/utils/input"
+	"github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/urfave/cli/v2"
 )
+
+// Verifies the daemon has a node address ready and loaded (allows for masquerade mode support).
+func CheckIfAddressReady(hd *client.HyperdriveClient) (wallet.WalletStatus, bool, error) {
+	// Get & check wallet status
+	statusResponse, err := hd.Api.Wallet.Status()
+	if err != nil {
+		return wallet.WalletStatus{}, false, err
+	}
+	status := statusResponse.Data.WalletStatus
+
+	// There's an address ready
+	if status.Address.HasAddress {
+		if status.Address.NodeAddress != status.Wallet.WalletAddress {
+			fmt.Printf("%sReminder: You are currently masquerading as %s%s%s.\nYou can create transactions but cannot sign or submit them.%s\n", terminal.ColorGreen, terminal.ColorBlue, status.Address.NodeAddress, terminal.ColorGreen, terminal.ColorReset)
+			fmt.Println()
+		}
+		return status, true, nil
+	}
+
+	// If the address isn't ready, check if the wallet's ready
+	if !status.Wallet.IsLoaded {
+		if !status.Wallet.IsOnDisk {
+			fmt.Println("The node wallet has not been initialized yet. Please run `hyperdrive wallet init` or `hyperdrive wallet recover` first, then run this again.")
+			return status, false, nil
+		}
+		fmt.Println("The daemon requires your node wallet's password to unlock it. Please run `hyperdrive wallet set-password` first, then run this again.")
+		return status, false, nil
+	}
+
+	// The address isn't ready but the wallet is so have the user run restore-address to fix it
+	fmt.Printf("The node wallet is %s%s%s but the node address is not set. Please restore it with `hyperdrive wallet restore-address` or `hyperdrive wallet masquerade` first, then run this again.", terminal.ColorBlue, status.Wallet.WalletAddress, terminal.ColorReset)
+	return status, false, nil
+}
+
+// Verifies the daemon has a node wallet ready and loaded.
+func CheckIfWalletReady(hd *client.HyperdriveClient) (wallet.WalletStatus, bool, error) {
+	// Get & check wallet status
+	statusResponse, err := hd.Api.Wallet.Status()
+	if err != nil {
+		return wallet.WalletStatus{}, false, err
+	}
+	status := statusResponse.Data.WalletStatus
+
+	// Check if it's already set properly and the wallet has been loaded
+	if !wallet.IsWalletReady(status) {
+		fmt.Println("The node wallet is not loaded or your node is in read-only mode. Please run `hyperdrive wallet status` for more details.")
+		return status, false, nil
+	}
+	return status, true, nil
+}
 
 // Print a TX's details to the console.
 func PrintTransactionHash(hd *client.HyperdriveClient, hash common.Hash) {

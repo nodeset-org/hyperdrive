@@ -63,7 +63,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					initConfirmMnemonicFlag,
 					derivationPathFlag,
 					walletIndexFlag,
-					RegisterEmailFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args

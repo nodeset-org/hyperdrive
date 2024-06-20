@@ -1,3 +1,20 @@
+hyperdrive (1.0.0) unstable; urgency=medium
+
+  * Updated Besu, Geth, Reth, Lighthouse, Lodestar, and Teku.
+  * Added support for Mainnet.
+  * Fixed a race condition that caused `service start` to incorrectly state your node wasn't registered with your NodeSet account if the service was stopped before running the command.
+  * The MEV-Boost relay selection mode has been adjusted in preparation for Mainnet.
+  * Added support for Prometheus scrape targets provided by modules. 
+  * Fixed a bug that prevented Lighthouse's VC from working with MEV-Boost enabled.
+  * Improved the node registration check to handle NodeSet service connection failures and race conditions.
+  * New command: `stakewise nodeset generate-deposit-data` can be used to print the deposit data for your validators directly instead of uploading it to the NodeSet servers, just in case you need to access it for any reason.
+  * Updated the StakeWise v3 Operator container. This version no longer spams the logs with warning about empty deposit data or missing validator keys, which were not applicable to NodeSet operators.
+  * Added support for 0xSplits v2.0, which is now used for StakeWise rewards on Holesky and will be used on Mainnet.
+  * The StakeWise daemon's task loop now waits for your node to be registered before trying to perform any actions that require registration.
+  * Uploading deposit data to NodeSet now requires both your Execution Client and Beacon Node to be synced.
+
+ -- NodeSet LLC <info@nodeset.io>  Thu, 20 Jun 2024 19:54:59 +0000
+
 hyperdrive (0.5.0~b1) unstable; urgency=medium
 
   * Updated Besu, Nimbus, Grafana, Prometheus, and Node Exporter.

@@ -63,7 +63,6 @@ if [ "$CLIENT" = "lighthouse" ]; then
         --eth1-blocks-per-log-query 150 \
         --disable-upnp \
         --staking \
-        --http-allow-sync-stalled \
         --execution-jwt=/secrets/jwtsecret \
         --quic-port ${BN_P2P_QUIC_PORT:-8001} \
         --historic-state-cache-size 2 \
@@ -290,6 +289,10 @@ if [ "$CLIENT" = "teku" ]; then
 
     if [ "$ENABLE_METRICS" = "true" ]; then
         CMD="$CMD --metrics-enabled=true --metrics-interface=0.0.0.0 --metrics-port=$BN_METRICS_PORT --metrics-host-allowlist=*"
+    fi
+
+    if [ ! -z "$EXTERNAL_IP" ]; then
+        CMD="$CMD --p2p-advertised-ip=$EXTERNAL_IP"
     fi
 
     if [ ! -z "$CHECKPOINT_SYNC_URL" ]; then

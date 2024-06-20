@@ -30,8 +30,10 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 			{
 				Name:    "upload-deposit-data",
 				Aliases: []string{"u"},
-				Flags:   []cli.Flag{},
-				Usage:   "Uploads the combined deposit data for all of your validator keys to NodeSet's Stakewise vault, so they can be assigned new deposits.",
+				Flags: []cli.Flag{
+					utils.YesFlag,
+				},
+				Usage: "Uploads the combined deposit data for all of your validator keys to NodeSet's Stakewise vault, so they can be assigned new deposits.",
 				Action: func(c *cli.Context) error {
 					// Validate args
 					utils.ValidateArgCount(c, 0)
@@ -53,6 +55,22 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 
 					// Run
 					return registerNode(c)
+				},
+			},
+			{
+				Name:    "generate-deposit-data",
+				Aliases: []string{"g"},
+				Flags: []cli.Flag{
+					generatePubkeyFlag,
+					generateIndentFlag,
+				},
+				Usage: "Generates and prints the deposit data for your validators without uploading it to NodeSet. Useful for debugging.",
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run
+					return generateDepositData(c)
 				},
 			},
 		},

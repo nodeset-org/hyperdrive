@@ -2,8 +2,10 @@ package wallet
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/urfave/cli/v2"
 )
@@ -29,6 +31,21 @@ func exportEthKey(c *cli.Context) error {
 		return nil
 	}
 
+	if !hd.Context.SecureSession {
+		// Check if stdout is interactive
+		stat, err := os.Stdout.Stat()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "An error occured while determining whether or not the output is a tty: %s\n"+
+				"Use 'hyperdrive --secure-session wallet export-eth-key' to bypass.\n", err.Error())
+			os.Exit(1)
+		}
+
+		if (stat.Mode()&os.ModeCharDevice) == os.ModeCharDevice &&
+			!utils.ConfirmSecureSession("Exporting a wallet will print sensitive information to your screen.") {
+			return nil
+		}
+	}
+
 	// Get the wallet in ETH key format
 	ethKey, err := hd.Api.Wallet.ExportEthKey()
 	if err != nil {
@@ -37,6 +54,15 @@ func exportEthKey(c *cli.Context) error {
 
 	// Print wallet & return
 	fmt.Println("Wallet in ETH Key Format:")
+	fmt.Println("============")
+	fmt.Println()
 	fmt.Println(string(ethKey.Data.EthKeyJson))
+	fmt.Println()
+	fmt.Println("============")
+	fmt.Println()
+	fmt.Println("Wallet password:")
+	fmt.Println()
+	fmt.Println(ethKey.Data.Password)
+	fmt.Println()
 	return nil
 }

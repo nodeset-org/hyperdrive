@@ -6,6 +6,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/rivo/tview"
 	"github.com/rocket-pool/node-manager-core/config"
@@ -56,6 +57,13 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 		if len(changedSettings) > 0 {
 			for _, change := range changedSettings {
 				addChangesToDescription(change, "", &builder)
+			}
+		}
+
+		// TEMP: Restart all of the module daemons if the HD daemon is being restarted
+		for container := range totalAffectedContainers {
+			if container == config.ContainerID_Daemon {
+				totalAffectedContainers[swconfig.ContainerID_StakewiseDaemon] = true
 			}
 		}
 

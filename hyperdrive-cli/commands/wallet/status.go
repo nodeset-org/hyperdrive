@@ -20,7 +20,7 @@ func getStatus(c *cli.Context) error {
 	// Get the config
 	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
-		return fmt.Errorf("Error loading configuration: %w", err)
+		return fmt.Errorf("error loading configuration: %w", err)
 	}
 
 	// Print what network we're on
@@ -49,7 +49,7 @@ func getStatus(c *cli.Context) error {
 			return nil
 		}
 		if !status.Password.IsPasswordSaved {
-			fmt.Println("The node wallet has been initialized, but Hyperdrive doesn't have a password loaded for your node wallet so it cannot be used.")
+			fmt.Println("The node wallet has been initialized, but Hyperdrive doesn't have a password loaded for your node wallet so it cannot be used. Please run `hyperdrive wallet set-password` to load it.")
 			fmt.Printf("Your node is currently running as %s%s%s in %s'read-only' mode%s.\n", terminal.ColorBlue, status.Address.NodeAddress.Hex(), terminal.ColorReset, terminal.ColorYellow, terminal.ColorReset)
 			return nil
 		}

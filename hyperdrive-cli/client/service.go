@@ -26,7 +26,9 @@ const (
 	overrideSourceDir  string = "/usr/share/hyperdrive/override"
 	overrideDir        string = "override"
 	runtimeDir         string = "runtime"
+	metricsDir         string = "metrics"
 	extraScrapeJobsDir string = "extra-scrape-jobs"
+	modulePrometheusSd string = "prometheus-sd"
 )
 
 // Install Hyperdrive
@@ -269,8 +271,8 @@ func (c *HyperdriveClient) GetServiceVersion() (string, error) {
 	return version.String(), nil
 }
 
-// Deletes the data directory, including the node wallet and all validator keys, and restarts the Docker containers
-func (c *HyperdriveClient) PurgeData(composeFiles []string) error {
+// Deletes the data directory, including the node wallet and all validator keys, and restarts the Docker containers if requested
+func (c *HyperdriveClient) PurgeData(composeFiles []string, restart bool) error {
 	// Get the command to run with root privileges
 	rootCmd, err := c.getEscalationCommand()
 	if err != nil {
@@ -302,11 +304,13 @@ func (c *HyperdriveClient) PurgeData(composeFiles []string) error {
 		return fmt.Errorf("error deleting data: %w", err)
 	}
 
-	// Start the containers
-	fmt.Println("Starting containers...")
-	err = c.StartService(composeFiles)
-	if err != nil {
-		return fmt.Errorf("error starting Docker containers: %w", err)
+	if restart {
+		// Start the containers
+		fmt.Println("Starting containers...")
+		err = c.StartService(composeFiles)
+		if err != nil {
+			return fmt.Errorf("error starting Docker containers: %w", err)
+		}
 	}
 
 	fmt.Println("Purge complete.")

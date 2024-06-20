@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/rivo/tview"
 	"github.com/rocket-pool/node-manager-core/config"
 )
@@ -90,6 +91,12 @@ func processConfigAfterQuit(md *mainDisplay) {
 		}
 
 		var containersToRestart []config.ContainerID
+		// TEMP: Restart all of the module daemons if the HD daemon is being restarted
+		for container := range totalAffectedContainers {
+			if container == config.ContainerID_Daemon {
+				totalAffectedContainers[swconfig.ContainerID_StakewiseDaemon] = true
+			}
+		}
 		for container := range totalAffectedContainers {
 			containersToRestart = append(containersToRestart, container)
 		}

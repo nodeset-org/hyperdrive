@@ -28,7 +28,6 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 	if err != nil {
 		return "", err
 	}
-
 	if isNew {
 		return "", fmt.Errorf("settings file not found. Please run `hyperdrive service config` to set up Hyperdrive before starting it")
 	}
@@ -42,6 +41,9 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 	if cfg.Hyperdrive.IsLocalMode() && cfg.Hyperdrive.LocalBeaconClient.BeaconNode.Value == config.BeaconNode_Unknown {
 		return "", errors.New("no Beacon Node selected. Please run 'hyperdrive service config' before running this command")
 	}
+
+	// Make sure the external IP is loaded
+	cfg.LoadExternalIP()
 
 	// Deploy the templates and run environment variable substitution on them
 	deployedContainers, err := c.deployTemplates(cfg, expandedConfigPath)
@@ -261,12 +263,37 @@ func (c *HyperdriveClient) composeModule(global *GlobalConfig, module hdconfig.I
 		return []string{}, fmt.Errorf("error creating modules runtime folder (%s): %w", composePaths.RuntimePath, err)
 	}
 
+	// Deploy the container templates
 	for _, containerName := range toDeploy {
 		containers, err := composePaths.File(string(containerName)).Write(global)
 		if err != nil {
 			return []string{}, fmt.Errorf("could not create %s container definition: %w", containerName, err)
 		}
 		deployedContainers = append(deployedContainers, containers...)
+	}
+
+	// Check if the module has a Prometheus config
+	prometheusConfigFilename := modulePrometheusSd + template.TemplateSuffix
+	_, err = os.Stat(filepath.Join(composePaths.TemplatePath, prometheusConfigFilename))
+	if os.IsNotExist(err) {
+		return deployedContainers, nil
+	}
+
+	// Make the modules dir
+	modulesDir := filepath.Join(hyperdriveDir, metricsDir, hdconfig.ModulesName)
+	err = os.MkdirAll(modulesDir, metricsDirMode)
+	if err != nil {
+		return []string{}, fmt.Errorf("error creating metrics module directory [%s]: %w", modulesDir, err)
+	}
+
+	// Deploy the Prometheus config
+	t := template.Template{
+		Src: filepath.Join(composePaths.TemplatePath, prometheusConfigFilename),
+		Dst: filepath.Join(modulesDir, moduleName+template.ComposeFileSuffix),
+	}
+	err = t.Write(global)
+	if err != nil {
+		return []string{}, fmt.Errorf("could not write module [%s] Prometheus config: %w", moduleName, err)
 	}
 
 	return deployedContainers, nil
