@@ -53,7 +53,7 @@ func (c *walletSendMessageContext) PrepareData(data *types.TxInfoData, opts *bin
 	txMgr := sp.GetTransactionManager()
 
 	// Requirements
-	err := sp.RequireWalletReady()
+	err := sp.RequireNodeAddress()
 	if err != nil {
 		return types.ResponseStatus_WalletNotReady, err
 	}

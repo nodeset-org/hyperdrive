@@ -12,7 +12,11 @@
 *.test
 
 # VS Code
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out

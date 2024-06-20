@@ -74,7 +74,7 @@ func (c *walletSendContext) PrepareData(data *api.WalletSendData, opts *bind.Tra
 	}
 	err = sp.RequireEthClientSynced(ctx)
 	if err != nil {
-		return types.ResponseStatus_AddressNotPresent, err
+		return types.ResponseStatus_ClientsNotSynced, err
 	}
 
 	// Get the contract (nil in the case of ETH)
@@ -116,7 +116,7 @@ func (c *walletSendContext) PrepareData(data *api.WalletSendData, opts *bind.Tra
 	}
 
 	// Check the balance
-	data.InsufficientBalance = (data.Balance.Cmp(common.Big0) == 0)
+	data.InsufficientBalance = (data.Balance.Cmp(c.amount) == -1)
 	data.CanSend = !(data.InsufficientBalance)
 
 	// Get the TX Info

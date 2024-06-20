@@ -205,23 +205,6 @@ func (cfg *HyperdriveConfig) GetEcAdditionalFlags() (string, error) {
 	return cfg.LocalExecutionClient.GetAdditionalFlags(), nil
 }
 
-// Used by text/template to format ec.yml
-func (cfg *HyperdriveConfig) GetExternalIP() string {
-	// Get the external IP address
-	ip, err := config.GetExternalIP()
-	if err != nil {
-		fmt.Println("Warning: couldn't get external IP address; if you're using Nimbus or Besu, it may have trouble finding peers:")
-		fmt.Println(err.Error())
-		return ""
-	}
-
-	if ip.To4() == nil {
-		fmt.Println("Warning: external IP address is v6; if you're using Nimbus or Besu, it may have trouble finding peers:")
-	}
-
-	return ip.String()
-}
-
 // Used by text/template to format bn.yml
 func (cfg *HyperdriveConfig) GetEcHttpEndpoint() string {
 	if cfg.ClientMode.Value == config.ClientMode_Local {
@@ -397,7 +380,7 @@ func (cfg *HyperdriveConfig) GraffitiPrefix() string {
 		identifier = fmt.Sprintf("%s%s%s", ecInitial, bnInitial, modeFlag)
 	}
 
-	return fmt.Sprintf("HD%s %s", identifier, versionString)
+	return fmt.Sprintf("NS%s %s", identifier, versionString)
 }
 
 // Used by text/template to format validator.yml

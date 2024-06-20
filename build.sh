@@ -34,6 +34,11 @@ build_daemon() {
     # If uploading, make and push a manifest
     if [ "$UPLOAD" = true ]; then
         docker buildx build --rm --platform=linux/amd64,linux/arm64 --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile --push . || fail "Error building Hyperdrive Docker image."
+    elif [ "$LOCAL_UPLOAD" = true ]; then
+        if [ -z "$LOCAL_DOCKER_REGISTRY" ]; then
+            fail "LOCAL_DOCKER_REGISTRY must be set to upload to a local registry."
+        fi
+        docker buildx build --rm --platform=linux/amd64,linux/arm64 --build-arg BINARIES_PATH=build/$VERSION -t $LOCAL_DOCKER_REGISTRY/nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile --push . || fail "Error building Hyperdrive Docker image."
     else
         docker buildx build --rm --load --build-arg BINARIES_PATH=build/$VERSION -t nodeset/hyperdrive:$VERSION -f docker/daemon.dockerfile . || fail "Error building Hyperdrive Docker image."
     fi
@@ -63,6 +68,7 @@ usage() {
     echo "This script assumes it is in the hyperdrive-daemon repository directory."
     echo "Options:"
     echo $'\t-a\tBuild all of the artifacts'
+    echo $'\t-c\tWhen passed with a build, upload the resulting image tags to a local Docker registry specified in $LOCAL_DOCKER_REGISTRY'
     echo $'\t-d\tBuild the Hyperdrive daemon image and Docker container'
     echo $'\t-l\tTag the given version as "latest" on Docker Hub'
     echo $'\t-u\tWhen passed with a build, upload the resulting image tags to Docker Hub'
@@ -75,9 +81,10 @@ usage() {
 # =================
 
 # Parse arguments
-while getopts "adluv:" FLAG; do
+while getopts "acdluv:" FLAG; do
     case "$FLAG" in
         a) DAEMON=true ;;
+        c) LOCAL_UPLOAD=true ;;
         d) DAEMON=true ;;
         l) LATEST=true ;;
         u) UPLOAD=true ;;
@@ -95,6 +102,8 @@ mkdir -p build/$VERSION
 
 # Make a multiarch builder, ignore if it's already there
 docker buildx create --name multiarch-builder --driver docker-container --use > /dev/null 2>&1
+# NOTE: if using a local repo with a private CA, you will have to follow these steps to add the CA to the builder:
+# https://stackoverflow.com/a/73585243
 
 # Build the artifacts
 if [ "$DAEMON" = true ]; then

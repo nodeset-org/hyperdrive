@@ -102,6 +102,20 @@ func LoadFromFile(path string) (*HyperdriveConfig, error) {
 
 // Creates a new Hyperdrive configuration instance
 func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
+	cfg := newHyperdriveConfigImpl(hdDir, config.Network_Mainnet) // Default to mainnet
+	cfg.updateResources()
+	return cfg
+}
+
+// Creates a new Hyperdrive configuration instance for a custom network
+func NewHyperdriveConfigForNetwork(hdDir string, network config.Network, resources *config.NetworkResources) *HyperdriveConfig {
+	cfg := newHyperdriveConfigImpl(hdDir, network)
+	cfg.resources = resources
+	return cfg
+}
+
+// Implementation of the Hyperdrive config constructor
+func newHyperdriveConfigImpl(hdDir string, network config.Network) *HyperdriveConfig {
 	cfg := &HyperdriveConfig{
 		hyperdriveUserDirectory: hdDir,
 		Modules:                 map[string]any{},
@@ -272,8 +286,8 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 	cfg.Metrics = NewMetricsConfig()
 	cfg.MevBoost = NewMevBoostConfig(cfg)
 
-	// Apply the default values for mainnet
-	cfg.Network.Value = config.Network_Mainnet
+	// Apply the default values for the network
+	cfg.Network.Value = network
 	cfg.applyAllDefaults()
 
 	return cfg
@@ -437,13 +451,13 @@ func (cfg *HyperdriveConfig) applyAllDefaults() {
 // Get the list of options for networks to run on
 func getNetworkOptions() []*config.ParameterOption[config.Network] {
 	options := []*config.ParameterOption[config.Network]{
-		/*{
+		{
 			ParameterOptionCommon: &config.ParameterOptionCommon{
 				Name:        "Ethereum Mainnet",
 				Description: "This is the real Ethereum main network, using real ETH to make real validators.",
 			},
 			Value: config.Network_Mainnet,
-		},*/
+		},
 		{
 			ParameterOptionCommon: &config.ParameterOptionCommon{
 				Name:        "Holesky Testnet",

@@ -11,11 +11,7 @@ import (
 
 // Constants
 const (
-	mevBoostTag                 string = "flashbots/mev-boost:1.7"
-	RegulatedRelayDescription   string = "Select this to enable the relays that comply with government regulations (e.g. OFAC sanctions), "
-	UnregulatedRelayDescription string = "Select this to enable the relays that do not follow any sanctions lists (do not censor transactions), "
-	NoSandwichRelayDescription  string = "and do not allow front-running or sandwich attacks."
-	AllMevRelayDescription      string = "and allow for all types of MEV (including sandwich attacks)."
+	mevBoostTag string = "flashbots/mev-boost:1.7"
 )
 
 // A MEV relay
@@ -24,7 +20,6 @@ type MevRelay struct {
 	Name        string
 	Description string
 	Urls        map[config.Network]string
-	Regulated   bool
 }
 
 // Configuration for MEV-Boost
@@ -38,12 +33,6 @@ type MevBoostConfig struct {
 	// The mode for relay selection
 	SelectionMode config.Parameter[MevSelectionMode]
 
-	// Regulated, all types
-	EnableRegulatedAllMev config.Parameter[bool]
-
-	// Unregulated, all types
-	EnableUnregulatedAllMev config.Parameter[bool]
-
 	// Flashbots relay
 	FlashbotsRelay config.Parameter[bool]
 
@@ -56,17 +45,11 @@ type MevBoostConfig struct {
 	// Eden relay
 	EdenRelay config.Parameter[bool]
 
-	// Ultra sound relay
-	UltrasoundRelay config.Parameter[bool]
-
-	// Aestus relay
-	AestusRelay config.Parameter[bool]
-
-	// Titan global relay
-	TitanGlobalRelay config.Parameter[bool]
-
 	// Titan regional relay
 	TitanRegionalRelay config.Parameter[bool]
+
+	// Custom relays provided by the user
+	CustomRelays config.Parameter[string]
 
 	// The RPC port
 	Port config.Parameter[uint16]
@@ -158,34 +141,39 @@ func NewMevBoostConfig(parent *HyperdriveConfig) *MevBoostConfig {
 			},
 			Options: []*config.ParameterOption[MevSelectionMode]{{
 				ParameterOptionCommon: &config.ParameterOptionCommon{
-					Name:        "Profile Mode",
-					Description: "Relays will be bundled up based on whether or not they're regulated, and whether or not they allow sandwich attacks.\nUse this if you simply want to specify which type of relay you want to use without needing to read about each individual relay.",
+					Name:        "Use All Relays",
+					Description: "Use this if you simply want to enable all of the built-in relays without needing to read about each individual relay. If new relays get added to Hyperdrive, you'll automatically start using those too.\n\nNote that all of Hyperdrive's built-in relays support regional sanction lists (such as the US OFAC list) and are compliant with regulations. To learn more, please visit https://medium.com/coinmonks/understanding-the-impact-of-the-ofac-sanctions-on-block-builders-9c0e02b7e450.",
 				},
-				Value: MevSelectionMode_Profile,
+				Value: MevSelectionMode_All,
 			}, {
 				ParameterOptionCommon: &config.ParameterOptionCommon{
-					Name:        "Relay Mode",
-					Description: "Each relay will be shown, and you can enable each one individually as you see fit.\nUse this if you already know about the relays and want to customize the ones you will use.",
+					Name:        "Manual Mode",
+					Description: "Each relay will be shown, and you can enable each one individually as you see fit.\nUse this if you already know about the relays and want to customize the ones you will use.\n\nNote that all of Hyperdrive's built-in relays support regional sanction lists (such as the US OFAC list) and are compliant with regulations. To learn more, please visit https://medium.com/coinmonks/understanding-the-impact-of-the-ofac-sanctions-on-block-builders-9c0e02b7e450.",
 				},
-				Value: MevSelectionMode_Relay,
+				Value: MevSelectionMode_Manual,
 			}},
 			Default: map[config.Network]MevSelectionMode{
-				config.Network_All: MevSelectionMode_Profile,
+				config.Network_All: MevSelectionMode_All,
 			},
 		},
-
-		EnableRegulatedAllMev:   generateProfileParameter(ids.MevBoostEnableRegulatedAllID, relays, true),
-		EnableUnregulatedAllMev: generateProfileParameter(ids.MevBoostEnableUnregulatedAllID, relays, false),
 
 		// Explicit relay params
 		FlashbotsRelay:          generateRelayParameter(ids.MevBoostFlashbotsID, relayMap[MevRelayID_Flashbots]),
 		BloxRouteMaxProfitRelay: generateRelayParameter(ids.MevBoostBloxRouteMaxProfitID, relayMap[MevRelayID_BloxrouteMaxProfit]),
 		BloxRouteRegulatedRelay: generateRelayParameter(ids.MevBoostBloxRouteRegulatedID, relayMap[MevRelayID_BloxrouteRegulated]),
 		EdenRelay:               generateRelayParameter(ids.MevBoostEdenID, relayMap[MevRelayID_Eden]),
-		UltrasoundRelay:         generateRelayParameter(ids.MevBoostUltrasoundID, relayMap[MevRelayID_Ultrasound]),
-		AestusRelay:             generateRelayParameter(ids.MevBoostAestusID, relayMap[MevRelayID_Aestus]),
-		TitanGlobalRelay:        generateRelayParameter(ids.MevBoostTitanGlobalID, relayMap[MevRelayID_TitanGlobal]),
 		TitanRegionalRelay:      generateRelayParameter(ids.MevBoostTitanRegionalID, relayMap[MevRelayID_TitanRegional]),
+
+		CustomRelays: config.Parameter[string]{
+			ParameterCommon: &config.ParameterCommon{
+				ID:          ids.MevBoostCustomRelaysID,
+				Name:        "Custom Relays",
+				Description: "Add custom relay URLs to MEV-Boost that aren't part of the built-in set. You can add multiple relays by separating each one with a comma. Any relay URLs can be used as long as they match your selected Ethereum network.\n\nFor a comprehensive list of available relays, we recommend the list maintained by ETHStaker:\nhttps://github.com/eth-educators/ethstaker-guides/blob/main/MEV-relay-list.md",
+			},
+			Default: map[config.Network]string{
+				config.Network_All: "",
+			},
+		},
 
 		Port: config.Parameter[uint16]{
 			ParameterCommon: &config.ParameterCommon{
@@ -274,16 +262,12 @@ func (cfg *MevBoostConfig) GetParameters() []config.IParameter {
 		&cfg.Enable,
 		&cfg.Mode,
 		&cfg.SelectionMode,
-		&cfg.EnableRegulatedAllMev,
-		&cfg.EnableUnregulatedAllMev,
 		&cfg.FlashbotsRelay,
 		&cfg.BloxRouteMaxProfitRelay,
 		&cfg.BloxRouteRegulatedRelay,
 		&cfg.EdenRelay,
-		&cfg.UltrasoundRelay,
-		&cfg.AestusRelay,
-		&cfg.TitanGlobalRelay,
 		&cfg.TitanRegionalRelay,
+		&cfg.CustomRelays,
 		&cfg.Port,
 		&cfg.OpenRpcPort,
 		&cfg.ContainerTag,
@@ -297,22 +281,18 @@ func (cfg *MevBoostConfig) GetSubconfigs() map[string]config.IConfigSection {
 	return map[string]config.IConfigSection{}
 }
 
-// Get the profiles that are available for the current network
-func (cfg *MevBoostConfig) GetAvailableProfiles() (bool, bool) {
-	regulatedAllMev := false
-	unregulatedAllMev := false
-
+// Checks if any relays are available for the current network
+func (cfg *MevBoostConfig) HasRelays() bool {
 	currentNetwork := cfg.parent.Network.Value
 	for _, relay := range cfg.relays {
 		_, exists := relay.Urls[currentNetwork]
 		if !exists {
 			continue
 		}
-		regulatedAllMev = regulatedAllMev || relay.Regulated
-		unregulatedAllMev = unregulatedAllMev || !relay.Regulated
+		return true
 	}
 
-	return regulatedAllMev, unregulatedAllMev
+	return false
 }
 
 // Get the relays that are available for the current network
@@ -336,25 +316,17 @@ func (cfg *MevBoostConfig) GetEnabledMevRelays() []MevRelay {
 
 	currentNetwork := cfg.parent.Network.Value
 	switch cfg.SelectionMode.Value {
-	case MevSelectionMode_Profile:
+	case MevSelectionMode_All:
 		for _, relay := range cfg.relays {
 			_, exists := relay.Urls[currentNetwork]
 			if !exists {
 				// Skip relays that don't exist on the current network
 				continue
 			}
-			if relay.Regulated {
-				if cfg.EnableRegulatedAllMev.Value {
-					relays = append(relays, relay)
-				}
-			} else {
-				if cfg.EnableUnregulatedAllMev.Value {
-					relays = append(relays, relay)
-				}
-			}
+			relays = append(relays, relay)
 		}
 
-	case MevSelectionMode_Relay:
+	case MevSelectionMode_Manual:
 		if cfg.FlashbotsRelay.Value {
 			_, exists := cfg.relayMap[MevRelayID_Flashbots].Urls[currentNetwork]
 			if exists {
@@ -379,24 +351,6 @@ func (cfg *MevBoostConfig) GetEnabledMevRelays() []MevRelay {
 				relays = append(relays, cfg.relayMap[MevRelayID_Eden])
 			}
 		}
-		if cfg.UltrasoundRelay.Value {
-			_, exists := cfg.relayMap[MevRelayID_Ultrasound].Urls[currentNetwork]
-			if exists {
-				relays = append(relays, cfg.relayMap[MevRelayID_Ultrasound])
-			}
-		}
-		if cfg.AestusRelay.Value {
-			_, exists := cfg.relayMap[MevRelayID_Aestus].Urls[currentNetwork]
-			if exists {
-				relays = append(relays, cfg.relayMap[MevRelayID_Aestus])
-			}
-		}
-		if cfg.TitanGlobalRelay.Value {
-			_, exists := cfg.relayMap[MevRelayID_TitanGlobal].Urls[currentNetwork]
-			if exists {
-				relays = append(relays, cfg.relayMap[MevRelayID_TitanGlobal])
-			}
-		}
 		if cfg.TitanRegionalRelay.Value {
 			_, exists := cfg.relayMap[MevRelayID_TitanRegional].Urls[currentNetwork]
 			if exists {
@@ -416,6 +370,9 @@ func (cfg *MevBoostConfig) GetRelayString() string {
 	for _, relay := range relays {
 		relayUrls = append(relayUrls, relay.Urls[currentNetwork])
 	}
+	if cfg.CustomRelays.Value != "" {
+		relayUrls = append(relayUrls, cfg.CustomRelays.Value)
+	}
 
 	relayString := strings.Join(relayUrls, ",")
 	return relayString
@@ -433,7 +390,6 @@ func createDefaultRelays() []MevRelay {
 				config.Network_Mainnet: "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net?id=hyperdrive",
 				config.Network_Holesky: "https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@boost-relay-holesky.flashbots.net?id=hyperdrive",
 			},
-			Regulated: true,
 		},
 
 		// bloXroute Max Profit
@@ -443,9 +399,8 @@ func createDefaultRelays() []MevRelay {
 			Description: "Select this to enable the \"max profit\" relay from bloXroute.",
 			Urls: map[config.Network]string{
 				config.Network_Mainnet: "https://0x8b5d2e73e2a3a55c6c87b8b6eb92e0149a125c852751db1422fa951e42a09b82c142c3ea98d0d9930b056a3bc9896b8f@bloxroute.max-profit.blxrbdn.com?id=hyperdrive",
-				config.Network_Holesky: "https://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@bloxroute.holesky.blxrbdn.com?id=hyperdrive",
+				config.Network_Holesky: "https://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@bloxroute.holesky.blxrbdn.com",
 			},
-			Regulated: false,
 		},
 
 		// bloXroute Regulated
@@ -456,7 +411,6 @@ func createDefaultRelays() []MevRelay {
 			Urls: map[config.Network]string{
 				config.Network_Mainnet: "https://0xb0b07cd0abef743db4260b0ed50619cf6ad4d82064cb4fbec9d3ec530f7c5e6793d9f286c4e082c0244ffb9f2658fe88@bloxroute.regulated.blxrbdn.com?id=hyperdrive",
 			},
-			Regulated: true,
 		},
 
 		// Eden
@@ -468,129 +422,25 @@ func createDefaultRelays() []MevRelay {
 				config.Network_Mainnet: "https://0xb3ee7afcf27f1f1259ac1787876318c6584ee353097a50ed84f51a1f21a323b3736f271a895c7ce918c038e4265918be@relay.edennetwork.io?id=hyperdrive",
 				config.Network_Holesky: "https://0xb1d229d9c21298a87846c7022ebeef277dfc321fe674fa45312e20b5b6c400bfde9383f801848d7837ed5fc449083a12@relay-holesky.edennetwork.io?id=hyperdrive",
 			},
-			Regulated: true,
-		},
-
-		// Ultrasound
-		{
-			ID:          MevRelayID_Ultrasound,
-			Name:        "Ultra Sound",
-			Description: "The ultra sound relay is a credibly-neutral and permissionless relay — a public good from the ultrasound.money team.",
-			Urls: map[config.Network]string{
-				config.Network_Mainnet: "https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money?id=hyperdrive",
-			},
-			Regulated: false,
-		},
-
-		// Aestus
-		{
-			ID:          MevRelayID_Aestus,
-			Name:        "Aestus",
-			Description: "The Aestus MEV-Boost Relay is an independent and non-censoring relay. It is committed to neutrality and the development of a healthy MEV-Boost ecosystem.",
-			Urls: map[config.Network]string{
-				config.Network_Mainnet: "https://0xa15b52576bcbf1072f4a011c0f99f9fb6c66f3e1ff321f11f461d15e31b1cb359caa092c71bbded0bae5b5ea401aab7e@aestus.live?id=hyperdrive",
-				config.Network_Holesky: "https://0xab78bf8c781c58078c3beb5710c57940874dd96aef2835e7742c866b4c7c0406754376c2c8285a36c630346aa5c5f833@holesky.aestus.live?id=hyperdrive",
-			},
-			Regulated: false,
-		},
-
-		// Titan Global
-		{
-			ID:          MevRelayID_TitanGlobal,
-			Name:        "Titan Global (Unregulated)",
-			Description: "Titan Relay is a neutral, Rust-based MEV-Boost Relay optimized for low latency through put, geographical distribution, and robustness. This is the unregulated (non-censoring) version.",
-			Urls: map[config.Network]string{
-				config.Network_Mainnet: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@global.titanrelay.xyz",
-				config.Network_Holesky: "https://0xaa58208899c6105603b74396734a6263cc7d947f444f396a90f7b7d3e65d102aec7e5e5291b27e08d02c50a050825c2f@holesky.titanrelay.xyz",
-			},
-			Regulated: false,
 		},
 
 		// Titan Regional
 		{
 			ID:          MevRelayID_TitanRegional,
-			Name:        "Titan Regional (Regulated)",
+			Name:        "Titan Regional",
 			Description: "Titan Relay is a neutral, Rust-based MEV-Boost Relay optimized for low latency through put, geographical distribution, and robustness. This is the regulated (censoring) version.",
 			Urls: map[config.Network]string{
 				config.Network_Mainnet: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@regional.titanrelay.xyz",
 			},
-			Regulated: true,
 		},
 	}
 
 	return relays
 }
 
-// Generate one of the profile parameters
-func generateProfileParameter(id string, relays []MevRelay, regulated bool) config.Parameter[bool] {
-	name := "Enable "
-	description := "[lime]NOTE: You can enable multiple options.\n\n"
-
-	if regulated {
-		name += "Regulated "
-		description += RegulatedRelayDescription
-	} else {
-		name += "Unregulated "
-		description += UnregulatedRelayDescription
-	}
-
-	// Generate the Mainnet description
-	mainnetRelays := []string{}
-	mainnetDescription := description + "\n\nRelays: "
-	for _, relay := range relays {
-		_, exists := relay.Urls[config.Network_Mainnet]
-		if !exists {
-			continue
-		}
-		if relay.Regulated == regulated {
-			mainnetRelays = append(mainnetRelays, relay.Name)
-		}
-	}
-	mainnetDescription += strings.Join(mainnetRelays, ", ")
-
-	// Generate the Holesky description
-	holeskyRelays := []string{}
-	holeskyDescription := description + "\n\nRelays: "
-	for _, relay := range relays {
-		_, exists := relay.Urls[config.Network_Holesky]
-		if !exists {
-			continue
-		}
-		if relay.Regulated == regulated {
-			holeskyRelays = append(holeskyRelays, relay.Name)
-		}
-	}
-	holeskyDescription += strings.Join(holeskyRelays, ", ")
-
-	return config.Parameter[bool]{
-		ParameterCommon: &config.ParameterCommon{
-			ID:                 id,
-			Name:               name,
-			Description:        mainnetDescription,
-			AffectsContainers:  []config.ContainerID{config.ContainerID_MevBoost},
-			CanBeBlank:         false,
-			OverwriteOnUpgrade: false,
-			DescriptionsByNetwork: map[config.Network]string{
-				config.Network_Mainnet: mainnetDescription,
-				config.Network_Holesky: holeskyDescription,
-				Network_HoleskyDev:     holeskyDescription,
-			},
-		},
-		Default: map[config.Network]bool{
-			config.Network_All: false,
-		},
-	}
-}
-
 // Generate one of the relay parameters
 func generateRelayParameter(id string, relay MevRelay) config.Parameter[bool] {
 	description := fmt.Sprintf("[lime]NOTE: You can enable multiple options.\n\n[white]%s\n\n", relay.Description)
-
-	if relay.Regulated {
-		description += "Complies with Regulations: YES\n"
-	} else {
-		description += "Complies with Regulations: NO\n"
-	}
 
 	return config.Parameter[bool]{
 		ParameterCommon: &config.ParameterCommon{
