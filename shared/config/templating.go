@@ -380,7 +380,7 @@ func (cfg *HyperdriveConfig) GraffitiPrefix() string {
 		identifier = fmt.Sprintf("%s%s%s", ecInitial, bnInitial, modeFlag)
 	}
 
-	return fmt.Sprintf("HD%s %s", identifier, versionString)
+	return fmt.Sprintf("NS%s %s", identifier, versionString)
 }
 
 // Used by text/template to format validator.yml
