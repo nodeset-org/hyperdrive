@@ -3,10 +3,15 @@ package client
 import (
 	"fmt"
 	"reflect"
+	"time"
 
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
+)
+
+const (
+	externalIPTimeout time.Duration = 3 * time.Second
 )
 
 // Wrapper for global configuration
@@ -206,7 +211,7 @@ func (c *GlobalConfig) LoadExternalIP() {
 	}
 
 	// Get the external IP address
-	ip, err := config.GetExternalIP()
+	ip, err := config.GetExternalIP(externalIPTimeout)
 	if err != nil {
 		fmt.Println("Warning: couldn't get external IP address; if you're using Nimbus, Besu, or Teku, it may have trouble finding peers:")
 		fmt.Println(err.Error())
