@@ -61,7 +61,11 @@ func createMevModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 		case 2:
 			wiz.md.Config.Hyperdrive.MevBoost.Enable.Value = true
 			wiz.md.Config.Hyperdrive.MevBoost.Mode.Value = config.ClientMode_External
-			wiz.externalMevModal.show()
+			if wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_Local {
+				wiz.externalMevModal.show()
+			} else {
+				wiz.finishedModal.show()
+			}
 		case 3:
 			wiz.md.Config.Hyperdrive.MevBoost.Enable.Value = false
 			wiz.finishedModal.show()
