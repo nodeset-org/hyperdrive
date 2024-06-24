@@ -77,14 +77,29 @@ func (c *HyperdriveClient) SaveConfig(cfg *GlobalConfig) error {
 	return nil
 }
 
-// Load the Prometheus config template, do a template variable substitution, and save it
-func (c *HyperdriveClient) UpdatePrometheusConfiguration(config *GlobalConfig) error {
+// Create the metrics and modules folders, and deploy the config templates for Prometheus and Grafana
+func (c *HyperdriveClient) DeployMetricsConfigurations(config *GlobalConfig) error {
 	// Make sure the metrics path exists
-	metricsDirPath, err := createMetricsDir(c.Context.ConfigPath)
+	metricsDirPath := filepath.Join(c.Context.ConfigPath, metricsDir)
+	modulesDirPath := filepath.Join(metricsDirPath, hdconfig.ModulesName)
+	err := os.MkdirAll(modulesDirPath, metricsDirMode)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating metrics and modules directories [%s]: %w", modulesDirPath, err)
 	}
 
+	err = updatePrometheusConfiguration(config, metricsDirPath)
+	if err != nil {
+		return fmt.Errorf("error updating Prometheus configuration: %w", err)
+	}
+	err = updateGrafanaDatabaseConfiguration(config, metricsDirPath)
+	if err != nil {
+		return fmt.Errorf("error updating Grafana configuration: %w", err)
+	}
+	return nil
+}
+
+// Load the Prometheus config template, do a template variable substitution, and save it
+func updatePrometheusConfiguration(config *GlobalConfig, metricsDirPath string) error {
 	prometheusConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, prometheusConfigTemplate))
 	if err != nil {
 		return fmt.Errorf("error expanding Prometheus config template path: %w", err)
@@ -104,13 +119,7 @@ func (c *HyperdriveClient) UpdatePrometheusConfiguration(config *GlobalConfig) e
 }
 
 // Load the Grafana config template, do a template variable substitution, and save it
-func (c *HyperdriveClient) UpdateGrafanaDatabaseConfiguration(config *GlobalConfig) error {
-	// Make sure the metrics path exists
-	metricsDirPath, err := createMetricsDir(c.Context.ConfigPath)
-	if err != nil {
-		return err
-	}
-
+func updateGrafanaDatabaseConfiguration(config *GlobalConfig, metricsDirPath string) error {
 	grafanaConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, grafanaConfigTemplate))
 	if err != nil {
 		return fmt.Errorf("error expanding Grafana config template path: %w", err)
@@ -127,14 +136,4 @@ func (c *HyperdriveClient) UpdateGrafanaDatabaseConfiguration(config *GlobalConf
 	}
 
 	return t.Write(config)
-}
-
-// Create the metrics directory
-func createMetricsDir(cfgPath string) (string, error) {
-	metricsDirPath := filepath.Join(cfgPath, metricsDir)
-	err := os.MkdirAll(metricsDirPath, metricsDirMode)
-	if err != nil {
-		return "", fmt.Errorf("error creating metrics directory [%s]: %w", metricsDirPath, err)
-	}
-	return metricsDirPath, nil
 }

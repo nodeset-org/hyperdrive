@@ -57,11 +57,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 
 	// Update the Prometheus and Grafana config templates with the assigned ports
 	if cfg.Hyperdrive.Metrics.EnableMetrics.Value {
-		err := hd.UpdatePrometheusConfiguration(cfg)
-		if err != nil {
-			return err
-		}
-		err = hd.UpdateGrafanaDatabaseConfiguration(cfg)
+		err := hd.DeployMetricsConfigurations(cfg)
 		if err != nil {
 			return err
 		}
