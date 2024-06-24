@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	localRethWarning    string = "[orange]WARNING: Reth is still in beta and has been shown to have some incompatibilities with the StakeWise Operator service, preventing you from submitting validator deposits properly. We strongly recommend you pick a different client instead until the incompatibility is fixed."
-	externalRethWarning string = "[orange]WARNING: Reth is still in beta and has been shown to have some incompatibilities with the StakeWise Operator service, preventing you from submitting validator deposits properly. We strongly recommend avoiding it as your external client until the incompatibility is fixed."
+	localRethWarning    string = "[orange]WARNING: Reth has been shown to have some incompatibilities with the StakeWise Operator service, preventing you from submitting validator deposits properly. We strongly recommend you pick a different client instead until the incompatibility is fixed."
+	externalRethWarning string = "[orange]WARNING: Reth has been shown to have some incompatibilities with the StakeWise Operator service, preventing you from submitting validator deposits properly. We strongly recommend avoiding it as your external client until the incompatibility is fixed."
 )
 
 // Get a more verbose client description, including warnings
