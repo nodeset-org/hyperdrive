@@ -148,7 +148,7 @@ func recoverWallet(c *cli.Context) error {
 			fmt.Println("Your node is already registered with NodeSet.")
 
 		case swapi.NodesetRegistrationStatus_Unregistered:
-			fmt.Println("Please whitelist your node on your `nodeset.io` dashboard, then register it with `hyperdrive sw ns register`.")
+			fmt.Println("Please whitelist your node on your `nodeset.io` dashboard, then register it with `hyperdrive sw ns register-node`.")
 
 		case swapi.NodesetRegistrationStatus_Unknown:
 			fmt.Println("Hyperdrive couldn't check your node's registration status:")
