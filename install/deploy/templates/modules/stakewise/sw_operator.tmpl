@@ -27,7 +27,7 @@ services:
       - "--hot-wallet-password-file={{$module_dir}}/{{.Stakewise.PasswordFilename}}"
       - "--keystores-dir={{$module_dir}}/{{.ValidatorsDirectory}}/{{.Stakewise.GetModuleName}}"
       - "--keystores-password-file={{$module_dir}}/{{.ValidatorsDirectory}}/{{.Stakewise.GetModuleName}}/{{.Stakewise.KeystorePasswordFile}}"
-      {{- if .Hyperdrive.Metrics.EnableMetrics}}
+      {{- if .Hyperdrive.Metrics.EnableMetrics.Value}}
       - "--enable-metrics"
       {{end}}
       - "--metrics-host=0.0.0.0"
@@ -47,7 +47,7 @@ services:
       - no-new-privileges
 networks:
   net:
-    {{- if .Hyperdrive.EnableIPv6 }}
+    {{- if .Hyperdrive.EnableIPv6.Value }}
     enable_ipv6: true
     {{- end}}  
   {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}

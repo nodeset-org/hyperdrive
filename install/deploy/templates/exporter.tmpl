@@ -34,6 +34,6 @@ services:
     network_mode: host
 networks:
   net:
-    {{- if .Hyperdrive.EnableIPv6 }}
+    {{- if .Hyperdrive.EnableIPv6.Value }}
     enable_ipv6: true
     {{- end}}

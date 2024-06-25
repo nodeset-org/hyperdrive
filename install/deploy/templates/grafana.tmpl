@@ -25,7 +25,7 @@ services:
       {{- end}}
 networks:
   net:
-    {{- if .Hyperdrive.EnableIPv6 }}
+    {{- if .Hyperdrive.EnableIPv6.Value }}
     enable_ipv6: true
     {{- end}}
   {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
