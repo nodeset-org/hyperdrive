@@ -32,7 +32,6 @@ services:
       - {{$network}}
       {{- end}}
     environment:
-      - ENABLE_IPV6={{.Hyperdrive.EnableIPv6}}
       - NETWORK={{.Hyperdrive.Network}}
       - CLIENT={{.Hyperdrive.LocalBeaconClient.BeaconNode}}
       - EC_HTTP_ENDPOINT={{.Hyperdrive.GetEcHttpEndpoint}}
