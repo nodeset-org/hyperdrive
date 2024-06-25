@@ -7,6 +7,7 @@ const (
 	UserDirID                  string = "hdUserDir"
 	ApiPortID                  string = "apiPort"
 	NetworkID                  string = "network"
+	EnableIPv6ID               string = "enableIPv6"
 	ClientModeID               string = "clientMode"
 	UserDataPathID             string = "hdUserDataDir"
 	ProjectNameID              string = "projectName"
