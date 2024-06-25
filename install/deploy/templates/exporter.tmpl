@@ -34,3 +34,6 @@ services:
     network_mode: host
 networks:
   net:
+    {{- if .Hyperdrive.EnableIPv6 }}
+    enable_ipv6: true
+    {{- end}}
