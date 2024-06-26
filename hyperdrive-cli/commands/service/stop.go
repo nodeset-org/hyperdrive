@@ -23,5 +23,5 @@ func stopService(c *cli.Context) error {
 	}
 
 	// Pause service
-	return hd.PauseService(getComposeFiles(c))
+	return hd.StopService(getComposeFiles(c))
 }
