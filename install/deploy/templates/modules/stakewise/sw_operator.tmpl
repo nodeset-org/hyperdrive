@@ -18,6 +18,7 @@ services:
       - "src/main.py"
       - "start"
       - "--data-dir={{$module_dir}}"
+      - "--database-dir={{$module_dir}}/db/{{.Stakewise.Vault}}"
       - "--deposit-data-file={{$module_dir}}/{{.Stakewise.DepositDataFile}}"
       - "--network={{.Stakewise.Network}}"
       - "--vault={{.Stakewise.Vault}}"
