@@ -1,5 +1,5 @@
 Source: hyperdrive
-Maintainer: NodeSet LLC <info@nodeset.io>
+Maintainer: NodeSet Inc. <info@nodeset.io>
 Section: utils
 Priority: optional
 Build-Depends: debhelper (>= 13.4),
