@@ -168,7 +168,7 @@ func newHyperdriveConfigImpl(hdDir string, network config.Network) *HyperdriveCo
 			ParameterCommon: &config.ParameterCommon{
 				ID:                 ids.EnableIPv6ID,
 				Name:               "Enable IPv6",
-				Description:        "Enable IPv6 networking for Hyperdrive services. This is useful if you have an IPv6 network and want to use it for Hyperdrive.",
+				Description:        "Enable IPv6 networking for Hyperdrive services. This is useful if you have an IPv6 network and want to use it for Hyperdrive.\n\n[orange]NOTE: For IPv6 support to work, you must manually set up your Docker daemon to support it. Please follow the instructions at https://docs.docker.com/config/daemon/ipv6/#use-ipv6-for-the-default-bridge-network before checking this box.",
 				AffectsContainers:  []config.ContainerID{config.ContainerID_BeaconNode, config.ContainerID_Daemon, config.ContainerID_ExecutionClient, config.ContainerID_Exporter, config.ContainerID_Grafana, config.ContainerID_Prometheus, config.ContainerID_ValidatorClient},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
