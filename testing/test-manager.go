@@ -13,7 +13,6 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/server"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/osha"
-	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/node/services"
 )
@@ -37,7 +36,7 @@ type HyperdriveTestManager struct {
 
 // Creates a new HyperdriveTestManager instance.
 // `address` is the address to bind the Hyperdrive daemon to.
-func NewHyperdriveTestManager(address string, cfg *hdconfig.HyperdriveConfig, resources *config.NetworkResources) (*HyperdriveTestManager, error) {
+func NewHyperdriveTestManager(address string, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources) (*HyperdriveTestManager, error) {
 	tm, err := osha.NewTestManager()
 	if err != nil {
 		return nil, fmt.Errorf("error creating test manager: %w", err)
@@ -46,8 +45,9 @@ func NewHyperdriveTestManager(address string, cfg *hdconfig.HyperdriveConfig, re
 }
 
 // Creates a new HyperdriveTestManager instance with default test artifacts.
-// `address` is the address to bind the Hyperdrive daemon to.
-func NewHyperdriveTestManagerWithDefaults(address string) (*HyperdriveTestManager, error) {
+// `hyperdriveAddress` is the address to bind the Hyperdrive daemon to.
+// `nodesetAddress` is the URL for the NodeSet API server.
+func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddress string) (*HyperdriveTestManager, error) {
 	tm, err := osha.NewTestManager()
 	if err != nil {
 		return nil, fmt.Errorf("error creating test manager: %w", err)
@@ -56,16 +56,16 @@ func NewHyperdriveTestManagerWithDefaults(address string) (*HyperdriveTestManage
 	// Make a new Hyperdrive config
 	testDir := tm.GetTestDir()
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
-	resources := GetTestResources(beaconCfg)
+	resources := GetTestResources(beaconCfg, nodesetAddress)
 	cfg := hdconfig.NewHyperdriveConfigForNetwork(testDir, hdconfig.Network_LocalTest, resources)
 	cfg.Network.Value = hdconfig.Network_LocalTest
 
 	// Make test resources
-	return newHyperdriveTestManagerImpl(address, tm, cfg, resources)
+	return newHyperdriveTestManagerImpl(hyperdriveAddress, tm, cfg, resources)
 }
 
 // Implementation for creating a new HyperdriveTestManager
-func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdconfig.HyperdriveConfig, resources *config.NetworkResources) (*HyperdriveTestManager, error) {
+func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources) (*HyperdriveTestManager, error) {
 	// Make managers
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
 	ecManager := services.NewExecutionClientManager(tm.GetExecutionClient(), uint(beaconCfg.ChainID), time.Minute)

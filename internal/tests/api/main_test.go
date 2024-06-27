@@ -22,7 +22,7 @@ var (
 func TestMain(m *testing.M) {
 	wg = &sync.WaitGroup{}
 	var err error
-	testMgr, err = hdtesting.NewHyperdriveTestManagerWithDefaults("localhost")
+	testMgr, err = hdtesting.NewHyperdriveTestManagerWithDefaults("localhost", "localhost")
 	if err != nil {
 		fail("error creating test manager: %v", err)
 	}

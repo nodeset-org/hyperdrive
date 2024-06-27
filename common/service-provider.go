@@ -7,7 +7,6 @@ import (
 
 	"github.com/docker/docker/client"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
-	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/node/services"
 )
 
@@ -17,6 +16,7 @@ type ServiceProvider struct {
 
 	// Services
 	cfg *hdconfig.HyperdriveConfig
+	res *hdconfig.HyperdriveResources
 
 	// Path info
 	userDir string
@@ -50,14 +50,15 @@ func NewServiceProviderFromConfig(cfg *hdconfig.HyperdriveConfig) (*ServiceProvi
 		ServiceProvider: sp,
 		userDir:         cfg.GetUserDirectory(),
 		cfg:             cfg,
+		res:             cfg.GetResources(),
 	}
 	return provider, nil
 }
 
 // Creates a new ServiceProvider instance from custom services and artifacts
-func NewServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resources *config.NetworkResources, ecManager *services.ExecutionClientManager, bnManager *services.BeaconClientManager, docker client.APIClient) (*ServiceProvider, error) {
+func NewServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources, ecManager *services.ExecutionClientManager, bnManager *services.BeaconClientManager, docker client.APIClient) (*ServiceProvider, error) {
 	// Core provider
-	sp, err := services.NewServiceProviderWithCustomServices(cfg, resources, ecManager, bnManager, docker)
+	sp, err := services.NewServiceProviderWithCustomServices(cfg, resources.NetworkResources, ecManager, bnManager, docker)
 	if err != nil {
 		return nil, fmt.Errorf("error creating core service provider: %w", err)
 	}
@@ -67,6 +68,7 @@ func NewServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resour
 		ServiceProvider: sp,
 		userDir:         cfg.GetUserDirectory(),
 		cfg:             cfg,
+		res:             resources,
 	}
 	return provider, nil
 }
@@ -81,6 +83,10 @@ func (p *ServiceProvider) GetUserDir() string {
 
 func (p *ServiceProvider) GetConfig() *hdconfig.HyperdriveConfig {
 	return p.cfg
+}
+
+func (p *ServiceProvider) GetResources() *hdconfig.HyperdriveResources {
+	return p.res
 }
 
 // =============
