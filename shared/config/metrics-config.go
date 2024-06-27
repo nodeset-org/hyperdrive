@@ -8,7 +8,7 @@ import (
 func NewMetricsConfig() *config.MetricsConfig {
 	cfg := config.NewMetricsConfig()
 	cfg.BitflyNodeMetrics.MachineName.Default = map[config.Network]string{
-		config.Network_All: "HyperdriveNode",
+		config.Network_All: "Hyperdrive",
 	}
 	return cfg
 }
