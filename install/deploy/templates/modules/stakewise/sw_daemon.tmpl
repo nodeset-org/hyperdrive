@@ -41,6 +41,9 @@ services:
       - no-new-privileges
 networks:
   net:
+    {{- if .Hyperdrive.EnableIPv6.Value }}
+    enable_ipv6: true
+    {{- end}}
   {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
   {{$network}}:
     external: true

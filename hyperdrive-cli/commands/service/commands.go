@@ -184,6 +184,23 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			},
 
 			{
+				Name:    "down",
+				Aliases: []string{"d"},
+				Usage:   "Stop and delete the Hyperdrive service Docker containers and network. This will leave your private data (such as wallet, config, and validator keys) intact.",
+				Flags: []cli.Flag{
+					utils.YesFlag,
+					includeVolumesFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run command
+					return downService(c)
+				},
+			},
+
+			{
 				Name:      "logs",
 				Aliases:   []string{"l"},
 				Usage:     "View the Hyperdrive service logs",

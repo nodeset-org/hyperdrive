@@ -145,8 +145,8 @@ func (c *HyperdriveClient) StartService(composeFiles []string) error {
 	return c.printOutput(cmd)
 }
 
-// Pause the Hyperdrive service
-func (c *HyperdriveClient) PauseService(composeFiles []string) error {
+// Pause the Hyperdrive service, shutting it down without removing the Docker artifacts
+func (c *HyperdriveClient) StopService(composeFiles []string) error {
 	cmd, err := c.compose(composeFiles, "stop")
 	if err != nil {
 		return err
@@ -154,9 +154,13 @@ func (c *HyperdriveClient) PauseService(composeFiles []string) error {
 	return c.printOutput(cmd)
 }
 
-// Stop the Hyperdrive service
-func (c *HyperdriveClient) StopService(composeFiles []string) error {
-	cmd, err := c.compose(composeFiles, "down -v")
+// Stop the Hyperdrive service, shutting it down and removing the Docker artifacts
+func (c *HyperdriveClient) DownService(composeFiles []string, includeVolumes bool) error {
+	args := "down"
+	if includeVolumes {
+		args += " -v"
+	}
+	cmd, err := c.compose(composeFiles, args)
 	if err != nil {
 		return err
 	}
@@ -287,7 +291,7 @@ func (c *HyperdriveClient) PurgeData(composeFiles []string, restart bool) error 
 
 	// Shut down the containers
 	fmt.Println("Stopping containers...")
-	err = c.PauseService(composeFiles)
+	err = c.StopService(composeFiles)
 	if err != nil {
 		return fmt.Errorf("error stopping Docker containers: %w", err)
 	}

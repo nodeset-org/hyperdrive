@@ -35,7 +35,7 @@ func changeNetworks(c *cli.Context, hd *client.HyperdriveClient) error {
 
 	// Terminate the current setup
 	fmt.Print("Removing old installation... ")
-	err = hd.StopService(composeFiles)
+	err = hd.DownService(composeFiles, true)
 	if err != nil {
 		return fmt.Errorf("error terminating old installation: %w", err)
 	}

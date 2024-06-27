@@ -14,10 +14,12 @@ services:
 {{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .Stakewise.GetModuleName)}}
     volumes:
       - {{$module_dir}}:{{$module_dir}}
+      - {{.Stakewise.DataVolume}}:{{$module_dir}}/db/{{.Stakewise.Vault}}
     command:
       - "src/main.py"
       - "start"
       - "--data-dir={{$module_dir}}"
+      - "--database-dir={{$module_dir}}/db/{{.Stakewise.Vault}}"
       - "--deposit-data-file={{$module_dir}}/{{.Stakewise.DepositDataFile}}"
       - "--network={{.Stakewise.Network}}"
       - "--vault={{.Stakewise.Vault}}"
@@ -27,7 +29,7 @@ services:
       - "--hot-wallet-password-file={{$module_dir}}/{{.Stakewise.PasswordFilename}}"
       - "--keystores-dir={{$module_dir}}/{{.ValidatorsDirectory}}/{{.Stakewise.GetModuleName}}"
       - "--keystores-password-file={{$module_dir}}/{{.ValidatorsDirectory}}/{{.Stakewise.GetModuleName}}/{{.Stakewise.KeystorePasswordFile}}"
-      {{- if .Hyperdrive.Metrics.EnableMetrics}}
+      {{- if .Hyperdrive.Metrics.EnableMetrics.Value}}
       - "--enable-metrics"
       {{end}}
       - "--metrics-host=0.0.0.0"
@@ -47,7 +49,12 @@ services:
       - no-new-privileges
 networks:
   net:
+    {{- if .Hyperdrive.EnableIPv6.Value }}
+    enable_ipv6: true
+    {{- end}}  
   {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
   {{$network}}:
     external: true
   {{- end}}
+volumes:
+  {{.Stakewise.DataVolume}}:
