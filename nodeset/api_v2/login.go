@@ -54,7 +54,7 @@ type LoginData struct {
 
 // Logs into the NodeSet server, starting a new session
 func (c *NodeSetClient) Login(ctx context.Context, nonce string, address common.Address, signature []byte) (LoginData, error) {
-	// Create the request
+	// Create the request body
 	addressString := address.Hex()
 	signatureString := utils.EncodeHexWithPrefix(signature)
 	request := LoginRequest{

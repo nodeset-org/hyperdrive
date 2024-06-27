@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types"
 	"github.com/rocket-pool/node-manager-core/utils"
 )
@@ -47,12 +48,15 @@ type DepositDataMetaData struct {
 }
 
 // Get the aggregated deposit data from the server
-func (c *NodeSetClient) GetServerDepositData(ctx context.Context, vault common.Address) (DepositDataData, error) {
+func (c *NodeSetClient) DepositData_Get(ctx context.Context, vault common.Address, network string) (DepositDataData, error) {
+	// Create the request params
 	vaultString := utils.RemovePrefix(strings.ToLower(vault.Hex()))
 	params := map[string]string{
 		"vault":   vaultString,
-		"network": c.networkName,
+		"network": network,
 	}
+
+	// Send it
 	code, response, err := SubmitRequest[DepositDataData](c, ctx, true, http.MethodGet, nil, params, depositDataPath)
 	if err != nil {
 		return DepositDataData{}, fmt.Errorf("error getting deposit data: %w", err)
@@ -77,16 +81,19 @@ func (c *NodeSetClient) GetServerDepositData(ctx context.Context, vault common.A
 			return DepositDataData{}, ErrInvalidSession
 		}
 	}
-	return DepositDataData{}, fmt.Errorf("nodeset server responded to deposit-data request with code %d: [%s]", code, response.Message)
+	return DepositDataData{}, fmt.Errorf("nodeset server responded to deposit-data-get request with code %d: [%s]", code, response.Message)
 }
 
 // Get the current version of the aggregated deposit data on the server
-func (c *NodeSetClient) GetServerDepositDataVersion(ctx context.Context, vault common.Address) (DepositDataMetaData, error) {
+func (c *NodeSetClient) DepositDataMeta(ctx context.Context, vault common.Address, network string) (DepositDataMetaData, error) {
+	// Create the request params
 	vaultString := utils.RemovePrefix(strings.ToLower(vault.Hex()))
 	params := map[string]string{
 		"vault":   vaultString,
-		"network": c.networkName,
+		"network": network,
 	}
+
+	// Send it
 	code, response, err := SubmitRequest[DepositDataMetaData](c, ctx, true, http.MethodGet, nil, params, depositDataPath, metaPath)
 	if err != nil {
 		return DepositDataMetaData{}, fmt.Errorf("error getting deposit data version: %w", err)
@@ -115,8 +122,15 @@ func (c *NodeSetClient) GetServerDepositDataVersion(ctx context.Context, vault c
 }
 
 // Uploads deposit data to Nodeset
-func (c *NodeSetClient) UploadDepositData(ctx context.Context, depositData []byte) error {
-	code, response, err := SubmitRequest[struct{}](c, ctx, true, http.MethodPost, bytes.NewBuffer(depositData), nil, depositDataPath)
+func (c *NodeSetClient) DepositData_Post(ctx context.Context, depositData []*types.ExtendedDepositData) error {
+	// Create the request body
+	serializedData, err := json.Marshal(depositData)
+	if err != nil {
+		return fmt.Errorf("error serializing deposit data: %w", err)
+	}
+
+	// Send it
+	code, response, err := SubmitRequest[struct{}](c, ctx, true, http.MethodPost, bytes.NewBuffer(serializedData), nil, depositDataPath)
 	if err != nil {
 		return fmt.Errorf("error uploading deposit data: %w", err)
 	}
@@ -147,5 +161,5 @@ func (c *NodeSetClient) UploadDepositData(ctx context.Context, depositData []byt
 			return ErrInvalidPermissions
 		}
 	}
-	return fmt.Errorf("nodeset server responded to upload-deposit-data request with code %d: [%s]", code, response.Message)
+	return fmt.Errorf("nodeset server responded to deposit-data-post request with code %d: [%s]", code, response.Message)
 }

@@ -3,7 +3,6 @@ package api_v2
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -11,7 +10,6 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/nodeset-org/hyperdrive-daemon/nodeset"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/keys"
 	"github.com/rocket-pool/node-manager-core/log"
@@ -28,33 +26,26 @@ const (
 	authHeaderFormat string = "Bearer %s"
 )
 
-var (
-	// A login session hasn't been established yet
-	ErrNoSession error = errors.New("not logged in yet")
-)
-
 // Client for interacting with the NodeSet server
 type NodeSetClient struct {
-	baseUrl     string
-	session     *nodeset.Session
-	networkName string
-	client      *http.Client
+	baseUrl      string
+	sessionToken string
+	client       *http.Client
 }
 
 // Creates a new NodeSet client
 func NewNodeSetClient(resources *config.HyperdriveResources, timeout time.Duration) *NodeSetClient {
 	return &NodeSetClient{
-		baseUrl:     fmt.Sprintf("%s/%s", resources.NodeSetApiUrl, apiVersion),
-		networkName: resources.EthNetworkName,
+		baseUrl: fmt.Sprintf("%s/%s", resources.NodeSetApiUrl, apiVersion),
 		client: &http.Client{
 			Timeout: timeout,
 		},
 	}
 }
 
-// Set the session for the client after logging in
-func (c *NodeSetClient) SetSession(session *nodeset.Session) {
-	c.session = session
+// Set the session token for the client after logging in
+func (c *NodeSetClient) SetSessionToken(sessionToken string) {
+	c.sessionToken = sessionToken
 }
 
 // Send a request to the server and read the response
@@ -84,10 +75,10 @@ func SubmitRequest[DataType any](c *NodeSetClient, ctx context.Context, requireA
 
 	// Set the headers
 	if requireAuth {
-		if c.session == nil {
-			return 0, defaultVal, ErrNoSession
+		if c.sessionToken == "" {
+			return 0, defaultVal, ErrInvalidSession
 		}
-		request.Header.Set(authHeader, fmt.Sprintf(authHeaderFormat, c.session.Token))
+		request.Header.Set(authHeader, fmt.Sprintf(authHeaderFormat, c.sessionToken))
 	}
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 

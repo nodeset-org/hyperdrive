@@ -6,11 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/utils"
 )
 
@@ -51,13 +49,7 @@ type NodeAddressRequest struct {
 // Registers the node with the NodeSet server. Assumes wallet validation has already been done and the actual wallet address
 // is provided here; if it's not, the signature won't come from the node being registered so it will fail validation.
 func (c *NodeSetClient) NodeAddress(ctx context.Context, email string, nodeWallet common.Address, signature []byte) error {
-	// Get the logger
-	logger, exists := log.FromContext(ctx)
-	if !exists {
-		panic("context didn't have a logger!")
-	}
-
-	// Create the request
+	// Create the request body
 	signatureString := utils.EncodeHexWithPrefix(signature)
 	request := NodeAddressRequest{
 		Email:       email,
@@ -68,10 +60,6 @@ func (c *NodeSetClient) NodeAddress(ctx context.Context, email string, nodeWalle
 	if err != nil {
 		return fmt.Errorf("error marshalling registration request: %w", err)
 	}
-
-	logger.Debug("Sending NodeSet register node request",
-		slog.String(log.BodyKey, string(jsonData)),
-	)
 
 	// Submit the request
 	code, response, err := SubmitRequest[struct{}](c, ctx, false, http.MethodPost, bytes.NewBuffer(jsonData), nil, nodeAddressPath)
