@@ -6,8 +6,9 @@ hyperdrive (1.0.1) UNRELEASED; urgency=medium
   * Fixed a typo in `wallet init` and `wallet recover` to reflect the correct command name (`register-node`).
   * Hyperdrive now creates the `metrics/modules` folder while deploying the Grafana and Prometheus configurations to ensure proper permissions are set.
   * Added a toggle for IPv6 support.
+  * Moved the StakeWise Operator's database into its own Docker volume.
 
- -- NodeSet Inc. <info@nodeset.io>  Wed, 26 Jun 2024 14:14:01 +0000
+ -- NodeSet Inc. <info@nodeset.io>  Thu, 27 Jun 2024 19:33:02 +0000
 
 hyperdrive (1.0.0) unstable; urgency=medium
 
