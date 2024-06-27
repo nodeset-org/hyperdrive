@@ -15,11 +15,11 @@ import (
 )
 
 const (
+	// Format for signing node address messages
+	NodeAddressMessageFormat string = `{"email":"%s","node_address":"%s"}`
+
 	// Route for registering a node address with the NodeSet server
 	nodeAddressPath string = "node-address"
-
-	// Format for signing node address messages
-	nodeAddressMessageFormat string = `{"email":"%s","node_address":"%s"}`
 
 	// The node address has already been confirmed on a NodeSet account
 	addressAlreadyAuthorizedKey string = "address_already_authorized"
@@ -50,26 +50,19 @@ type NodeAddressRequest struct {
 
 // Registers the node with the NodeSet server. Assumes wallet validation has already been done and the actual wallet address
 // is provided here; if it's not, the signature won't come from the node being registered so it will fail validation.
-func (c *NodeSetClient) NodeAddress(ctx context.Context, email string, nodeWallet common.Address) error {
+func (c *NodeSetClient) NodeAddress(ctx context.Context, email string, nodeWallet common.Address, signature []byte) error {
 	// Get the logger
 	logger, exists := log.FromContext(ctx)
 	if !exists {
 		panic("context didn't have a logger!")
 	}
 
-	// Sign the message
-	message := fmt.Sprintf(nodeAddressMessageFormat, email, nodeWallet.Hex())
-	sigBytes, err := c.wallet.SignMessage([]byte(message))
-	if err != nil {
-		return fmt.Errorf("error signing registration message: %w", err)
-	}
-
 	// Create the request
-	signature := utils.EncodeHexWithPrefix(sigBytes)
+	signatureString := utils.EncodeHexWithPrefix(signature)
 	request := NodeAddressRequest{
 		Email:       email,
 		NodeAddress: nodeWallet.Hex(),
-		Signature:   signature,
+		Signature:   signatureString,
 	}
 	jsonData, err := json.Marshal(request)
 	if err != nil {

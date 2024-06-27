@@ -9,16 +9,15 @@ import (
 	"net/http"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/rocket-pool/node-manager-core/node/wallet"
 	"github.com/rocket-pool/node-manager-core/utils"
 )
 
 const (
+	// Format for signing login messages
+	LoginMessageFormat string = `{"nonce":"%s","address":"%s"}`
+
 	// Route for logging into the NodeSet server
 	loginPath string = "login"
-
-	// Format for signing login messages
-	loginMessageFormat string = `{"nonce":"%s","address":"%s"}`
 
 	// The provided nonce didn't match an expected one
 	invalidNonceKey string = "invalid_nonce"
@@ -54,24 +53,14 @@ type LoginData struct {
 }
 
 // Logs into the NodeSet server, starting a new session
-func (c *NodeSetClient) Login(ctx context.Context, nonce string, address common.Address) (LoginData, error) {
-	// Create the signature
-	addressString := address.Hex()
-	message := fmt.Sprintf(loginMessageFormat, nonce, addressString)
-	sigBytes, err := c.wallet.SignMessage([]byte(message))
-	if err != nil {
-		if errors.Is(err, wallet.ErrWalletNotLoaded) {
-			return LoginData{}, err
-		}
-		return LoginData{}, fmt.Errorf("error signing login message: %w", err)
-	}
-
+func (c *NodeSetClient) Login(ctx context.Context, nonce string, address common.Address, signature []byte) (LoginData, error) {
 	// Create the request
-	signature := utils.EncodeHexWithPrefix(sigBytes)
+	addressString := address.Hex()
+	signatureString := utils.EncodeHexWithPrefix(signature)
 	request := LoginRequest{
 		Nonce:     nonce,
 		Address:   addressString,
-		Signature: signature,
+		Signature: signatureString,
 	}
 	jsonData, err := json.Marshal(request)
 	if err != nil {

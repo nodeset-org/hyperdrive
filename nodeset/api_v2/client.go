@@ -9,12 +9,12 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/nodeset-org/hyperdrive-daemon/nodeset"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/keys"
 	"github.com/rocket-pool/node-manager-core/log"
-	"github.com/rocket-pool/node-manager-core/node/wallet"
 )
 
 const (
@@ -35,7 +35,6 @@ var (
 
 // Client for interacting with the NodeSet server
 type NodeSetClient struct {
-	wallet      *wallet.Wallet
 	baseUrl     string
 	session     *nodeset.Session
 	networkName string
@@ -43,12 +42,13 @@ type NodeSetClient struct {
 }
 
 // Creates a new NodeSet client
-func NewNodeSetClient(wallet *wallet.Wallet, resources *config.HyperdriveResources, client *http.Client) *NodeSetClient {
+func NewNodeSetClient(resources *config.HyperdriveResources, timeout time.Duration) *NodeSetClient {
 	return &NodeSetClient{
-		wallet:      wallet,
 		baseUrl:     fmt.Sprintf("%s/%s", resources.NodeSetApiUrl, apiVersion),
 		networkName: resources.EthNetworkName,
-		client:      client,
+		client: &http.Client{
+			Timeout: timeout,
+		},
 	}
 }
 

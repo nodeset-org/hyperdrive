@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"sync"
 
 	"github.com/nodeset-org/hyperdrive-daemon/module-utils/services"
+	"github.com/nodeset-org/hyperdrive-daemon/nodeset"
 	"github.com/nodeset-org/hyperdrive-daemon/nodeset/api_v2"
 	"github.com/nodeset-org/hyperdrive-daemon/nodeset/api_v2/types"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
@@ -25,8 +25,8 @@ type NodeSetServiceManager struct {
 	// Client for the v2 API
 	v2Client *api_v2.NodeSetClient
 
-	// Active session token
-	token string
+	// Active session
+	session *nodeset.Session
 
 	// The node wallet's registration status
 	nodeRegistrationStatus types.NodeSetRegistrationStatus
@@ -40,13 +40,9 @@ func NewNodeSetServiceManager(sp *ServiceProvider) *NodeSetServiceManager {
 	wallet := sp.GetWallet()
 	resources := sp.GetResources()
 
-	client := &http.Client{
-		Timeout: hdconfig.ClientTimeout,
-	}
-
 	return &NodeSetServiceManager{
 		wallet:                 wallet,
-		v2Client:               api_v2.NewNodeSetClient(wallet, resources, client),
+		v2Client:               api_v2.NewNodeSetClient(resources, hdconfig.ClientTimeout),
 		nodeRegistrationStatus: types.NodeSetRegistrationStatus_Unknown,
 		lock:                   &sync.Mutex{},
 	}
@@ -62,6 +58,32 @@ func (m *NodeSetServiceManager) GetRegistrationStatus() types.NodeSetRegistratio
 // Log in to the NodeSet server
 func (m *NodeSetServiceManager) Login(ctx context.Context) error {
 	return m.loginImpl(ctx)
+}
+
+// Register the node with the NodeSet server
+func (m *NodeSetServiceManager) RegisterNode(ctx context.Context, email string) error {
+	walletStatus, err := m.wallet.GetStatus()
+	if err != nil {
+		return fmt.Errorf("error getting wallet status: %w", err)
+	}
+	if !walletStatus.Wallet.IsLoaded {
+		return fmt.Errorf("can't register node with NodeSet, wallet not loaded")
+	}
+
+	// Make sure there's a session
+	if m.session == nil {
+		return fmt.Errorf("can't register node with NodeSet, not logged in")
+	}
+
+	// Create the signature
+	message := fmt.Sprintf(api_v2.NodeAddressMessageFormat, email, m.session.Address.Hex())
+	sigBytes, err := m.wallet.SignMessage([]byte(message))
+	if err != nil {
+		m.setRegistrationStatus(types.NodeSetRegistrationStatus_Unknown)
+		return fmt.Errorf("error signing registration message: %w", err)
+	}
+
+	return m.v2Client.NodeAddress(ctx, email, m.session.Address, sigBytes)
 }
 
 // ========================
@@ -99,10 +121,25 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 	logger.Debug("Got nonce for login",
 		slog.String(keys.NonceKey, nonceData.Nonce),
 	)
-	m.token = nonceData.Token // Store this as a temp token for the login request
+
+	// Create a new session
+	m.session = &nodeset.Session{
+		Nonce:   nonceData.Nonce,
+		Token:   nonceData.Token,
+		Address: walletStatus.Wallet.WalletAddress,
+	}
+	m.v2Client.SetSession(m.session)
+
+	// Create the signature
+	message := fmt.Sprintf(api_v2.LoginMessageFormat, m.session.Nonce, m.session.Address.Hex())
+	sigBytes, err := m.wallet.SignMessage([]byte(message))
+	if err != nil {
+		m.setRegistrationStatus(types.NodeSetRegistrationStatus_Unknown)
+		return fmt.Errorf("error signing login message: %w", err)
+	}
 
 	// Attempt a login
-	loginData, err := m.v2Client.Login(ctx, nonceData.Nonce, walletStatus.Wallet.WalletAddress)
+	loginData, err := m.v2Client.Login(ctx, nonceData.Nonce, m.session.Address, sigBytes)
 	if err != nil {
 		if errors.Is(err, wallet.ErrWalletNotLoaded) {
 			m.setRegistrationStatus(types.NodeSetRegistrationStatus_NoWallet)
@@ -113,7 +150,7 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 	}
 
 	// Success
-	m.token = loginData.Token // Save this as the persistent token for all other requests
+	m.session.Token = loginData.Token // Save this as the persistent token for all other requests
 	logger.Info("Logged into NodeSet server")
 	m.setRegistrationStatus(types.NodeSetRegistrationStatus_Registered)
 
