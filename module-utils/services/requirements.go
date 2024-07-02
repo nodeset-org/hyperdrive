@@ -28,6 +28,14 @@ const (
 	walletReadyCheckInterval       time.Duration = 15 * time.Second
 )
 
+var (
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrExecutionClientNotSynced error = errors.New("The Execution client is currently syncing. Please try again later.")
+
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrBeaconNodeNotSynced error = errors.New("The Beacon node is currently syncing. Please try again later.")
+)
+
 func (sp *ServiceProvider) RequireNodeAddress(status wallet.WalletStatus) error {
 	if !status.Address.HasAddress {
 		return errors.New("The node currently does not have an address set. Please run 'hyperdrive wallet init' and try again.")
@@ -47,7 +55,7 @@ func (sp *ServiceProvider) RequireEthClientSynced(ctx context.Context) error {
 	if synced {
 		return nil
 	}
-	return errors.New("The Execution client is currently syncing. Please try again later.")
+	return ErrExecutionClientNotSynced
 }
 
 func (sp *ServiceProvider) RequireBeaconClientSynced(ctx context.Context) error {
@@ -58,7 +66,7 @@ func (sp *ServiceProvider) RequireBeaconClientSynced(ctx context.Context) error 
 	if synced {
 		return nil
 	}
-	return errors.New("The Beacon client is currently syncing. Please try again later.")
+	return ErrBeaconNodeNotSynced
 }
 
 // Wait for the Executon client to sync; timeout of 0 indicates no timeout

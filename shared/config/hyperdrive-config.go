@@ -30,6 +30,7 @@ type HyperdriveConfig struct {
 	// General settings
 	Network                  config.Parameter[config.Network]
 	ClientMode               config.Parameter[config.ClientMode]
+	EnableIPv6               config.Parameter[bool]
 	ProjectName              config.Parameter[string]
 	ApiPort                  config.Parameter[uint16]
 	UserDataPath             config.Parameter[string]
@@ -160,6 +161,20 @@ func newHyperdriveConfigImpl(hdDir string, network config.Network) *HyperdriveCo
 			Options: getNetworkOptions(),
 			Default: map[config.Network]config.Network{
 				config.Network_All: config.Network_Mainnet,
+			},
+		},
+
+		EnableIPv6: config.Parameter[bool]{
+			ParameterCommon: &config.ParameterCommon{
+				ID:                 ids.EnableIPv6ID,
+				Name:               "Enable IPv6",
+				Description:        "Enable IPv6 networking for Hyperdrive services. This is useful if you have an IPv6 network and want to use it for Hyperdrive.\n\nIf this isn't the first time you're starting Hyperdrive, you'll have to recreate the network after changing this box with `hyperdrive service down` and `hyperdrive service start` for it to take effect.\n\n[orange]NOTE: For IPv6 support to work, you must manually set up your Docker daemon to support it. Please follow the instructions at https://docs.docker.com/config/daemon/ipv6/#dynamic-ipv6-subnet-allocation before checking this box.",
+				AffectsContainers:  []config.ContainerID{config.ContainerID_BeaconNode, config.ContainerID_Daemon, config.ContainerID_ExecutionClient, config.ContainerID_Exporter, config.ContainerID_Grafana, config.ContainerID_Prometheus, config.ContainerID_ValidatorClient},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[config.Network]bool{
+				config.Network_All: false,
 			},
 		},
 
@@ -304,6 +319,7 @@ func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 		&cfg.ProjectName,
 		&cfg.ApiPort,
 		&cfg.Network,
+		&cfg.EnableIPv6,
 		&cfg.ClientMode,
 		&cfg.AutoTxMaxFee,
 		&cfg.MaxPriorityFee,
