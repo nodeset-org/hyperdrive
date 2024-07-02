@@ -106,11 +106,11 @@ func printPatchNotes() {
 	fmt.Println("This version of Hyperdrive supports the Ethereum Mainnet. You can now access the Gravita vault if you're a StakeWise module user and stake ETH on Gravita's behalf.")
 	fmt.Println()
 
-	fmt.Printf("%s=== NodeSet Service ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("Fixed a race condition that caused Hyperdrive to occasionally state your node wasn't registered when it was. The whole registration checking process should be greatly improved now.")
+	fmt.Printf("%s=== IPv6 Support ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("There's a new toggle in the Hyperdrive section of the settings to enable IPv6 on the Hyperdrive services. Enabling it requires adding support to the Docker service itself first; please read the full patch notes for more information.")
 	fmt.Println()
 
-	fmt.Printf("%s=== MEV-Boost Overhaul ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("The list of MEV-Boost built-in relays has been adjusted and only includes regulated relays due to liability concerns. Hyperdrive now includes a \"Custom Relays\" box that allows you to add your own relay URLs that MEV-Boost will use in addition to any built-in ones that you enable.")
+	fmt.Printf("%s=== StakeWise DB ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("The StakeWise Operator database has been moved out of the user data directory and onto a dedicated Docker volume. When you start the StakeWise service for the first time if you were previously running v1.0.0, it will regenerate the database which will cause elevated CPU load for a few hours.")
 	fmt.Println()
 }
