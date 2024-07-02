@@ -1,14 +1,17 @@
-hyperdrive (1.0.1) UNRELEASED; urgency=medium
+hyperdrive (1.0.1) stable; urgency=low
 
-  * Updated Nethermind, Reth, Nimbus, Prysm, Teku, and Prometheus.
+  * Updated Nethermind, Reth, Nimbus, Prysm, Teku, Grafana, and Prometheus.
+  * Community contributions: fixed both API key validation and the default machine name used with Beaconcha.in integration.
   * The timeout on the external IP query during `service` commands has been reduced to 3 seconds to remove excessive command delay.
   * The config wizard no longer requires entering the external MEV-Boost URL when using externally managed clients.
   * Fixed a typo in `wallet init` and `wallet recover` to reflect the correct command name (`register-node`).
   * Hyperdrive now creates the `metrics/modules` folder while deploying the Grafana and Prometheus configurations to ensure proper permissions are set.
   * Added a toggle for IPv6 support.
+  * Added the `service down` command.
   * Moved the StakeWise Operator's database into its own Docker volume.
+  * `stakewise` commands that encounter a client error during a sync check will now report the error instead of stating the clients are not synced.
 
- -- NodeSet Inc. <info@nodeset.io>  Thu, 27 Jun 2024 19:33:02 +0000
+ -- NodeSet Inc. <info@nodeset.io>  Tue, 02 Jul 2024 02:37:22 +0000
 
 hyperdrive (1.0.0) unstable; urgency=medium
 
