@@ -10,11 +10,13 @@ import (
 
 // Binder for the Hyperdrive daemon API server
 type ApiClient struct {
-	context client.IRequesterContext
-	Service *ServiceRequester
-	Tx      *TxRequester
-	Utils   *UtilsRequester
-	Wallet  *WalletRequester
+	context           client.IRequesterContext
+	NodeSet           *NodeSetRequester
+	NodeSet_StakeWise *NodeSetStakeWiseRequester
+	Service           *ServiceRequester
+	Tx                *TxRequester
+	Utils             *UtilsRequester
+	Wallet            *WalletRequester
 }
 
 // Creates a new API client instance
@@ -22,11 +24,13 @@ func NewApiClient(apiUrl *url.URL, logger *slog.Logger, tracer *httptrace.Client
 	context := client.NewNetworkRequesterContext(apiUrl, logger, tracer)
 
 	client := &ApiClient{
-		context: context,
-		Service: NewServiceRequester(context),
-		Tx:      NewTxRequester(context),
-		Utils:   NewUtilsRequester(context),
-		Wallet:  NewWalletRequester(context),
+		context:           context,
+		NodeSet:           NewNodeSetRequester(context),
+		NodeSet_StakeWise: NewNodeSetStakeWiseRequester(context),
+		Service:           NewServiceRequester(context),
+		Tx:                NewTxRequester(context),
+		Utils:             NewUtilsRequester(context),
+		Wallet:            NewWalletRequester(context),
 	}
 	return client
 }

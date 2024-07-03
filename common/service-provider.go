@@ -17,6 +17,7 @@ type ServiceProvider struct {
 	// Services
 	cfg *hdconfig.HyperdriveConfig
 	res *hdconfig.HyperdriveResources
+	ns  *NodeSetServiceManager
 
 	// Path info
 	userDir string
@@ -52,6 +53,8 @@ func NewServiceProviderFromConfig(cfg *hdconfig.HyperdriveConfig) (*ServiceProvi
 		cfg:             cfg,
 		res:             cfg.GetResources(),
 	}
+	ns := NewNodeSetServiceManager(provider)
+	provider.ns = ns
 	return provider, nil
 }
 
@@ -70,6 +73,8 @@ func NewServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resour
 		cfg:             cfg,
 		res:             resources,
 	}
+	ns := NewNodeSetServiceManager(provider)
+	provider.ns = ns
 	return provider, nil
 }
 
@@ -87,6 +92,10 @@ func (p *ServiceProvider) GetConfig() *hdconfig.HyperdriveConfig {
 
 func (p *ServiceProvider) GetResources() *hdconfig.HyperdriveResources {
 	return p.res
+}
+
+func (p *ServiceProvider) GetNodeSetServiceManager() *NodeSetServiceManager {
+	return p.ns
 }
 
 // =============

@@ -91,19 +91,20 @@ func main() {
 			return fmt.Errorf("error creating user data directory [%s]: %w", dataDir, err)
 		}
 
-		// Create the server manager
+		// Start the task loop
+		fmt.Println("Starting task loop...")
+		taskLoop := tasks.NewTaskLoop(sp, stopWg)
+		err = taskLoop.Run()
+		if err != nil {
+			return fmt.Errorf("error starting task loop: %w", err)
+		}
+
+		// Start the server after the task loop so it can log into NodeSet before this starts serving registration status checks
 		ip := c.String(ipFlag.Name)
 		port := c.Uint64(portFlag.Name)
 		serverMgr, err := server.NewServerManager(sp, ip, uint16(port), stopWg)
 		if err != nil {
 			return fmt.Errorf("error creating server manager: %w", err)
-		}
-
-		// Start the task loop
-		taskLoop := tasks.NewTaskLoop(sp, stopWg)
-		err = taskLoop.Run()
-		if err != nil {
-			return fmt.Errorf("error starting task loop: %w", err)
 		}
 
 		// Handle process closures

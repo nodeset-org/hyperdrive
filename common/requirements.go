@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/node/services"
@@ -22,10 +23,11 @@ const (
 	PrimaryErrorKey         string = "primaryError"
 	FallbackErrorKey        string = "fallbackError"
 
-	ethClientStatusRefreshInterval time.Duration = 60 * time.Second
-	ethClientSyncPollInterval      time.Duration = 5 * time.Second
-	beaconClientSyncPollInterval   time.Duration = 5 * time.Second
-	walletReadyCheckInterval       time.Duration = 15 * time.Second
+	ethClientStatusRefreshInterval   time.Duration = 60 * time.Second
+	ethClientSyncPollInterval        time.Duration = 5 * time.Second
+	beaconClientSyncPollInterval     time.Duration = 5 * time.Second
+	walletReadyCheckInterval         time.Duration = 15 * time.Second
+	nodeSetRegistrationCheckInterval time.Duration = 15 * time.Second
 )
 
 // ====================
@@ -88,6 +90,25 @@ func (sp *ServiceProvider) RequireBeaconClientSynced(ctx context.Context) error 
 	return errors.New("The Beacon client is currently syncing. Please try again later.")
 }
 
+func (sp *ServiceProvider) RequireRegisteredWithNodeSet(ctx context.Context) error {
+	status, err := sp.ns.GetRegistrationStatus(ctx)
+	if err != nil {
+		return err
+	}
+	switch status {
+	case api.NodeSetRegistrationStatus_Registered:
+		return nil
+	case api.NodeSetRegistrationStatus_Unregistered:
+		return errors.New("The node is not registered with the Node Set. Please run 'hyperdrive nodeset register-node' and try again.")
+	case api.NodeSetRegistrationStatus_Unknown:
+		// Should be covered by the error check already
+		return errors.New("The NodeSet service couldn't be reached to check registration status. Please try again later.")
+	case api.NodeSetRegistrationStatus_NoWallet:
+		return errors.New("The node does not have a wallet ready yet. Please run 'hyperdrive wallet status' to learn more first.")
+	}
+	return fmt.Errorf("unknown registration status [%v]", status)
+}
+
 // Wait for the Executon client to sync; timeout of 0 indicates no timeout
 func (sp *ServiceProvider) WaitEthClientSynced(ctx context.Context, verbose bool) error {
 	_, err := sp.waitEthClientSynced(ctx, verbose)
@@ -118,6 +139,41 @@ func (sp *ServiceProvider) WaitForWallet(ctx context.Context) error {
 		)
 		if utils.SleepWithCancel(ctx, walletReadyCheckInterval) {
 			return nil
+		}
+	}
+}
+
+// Wait until the node has been registered with NodeSet.
+// Returns true if the context was cancelled and the caller should exit.
+func (sp *ServiceProvider) WaitForNodeSetRegistration(ctx context.Context) bool {
+	// Get the logger
+	logger, exists := log.FromContext(ctx)
+	if !exists {
+		panic("context didn't have a logger!")
+	}
+
+	// Wait for NodeSet registration
+	ns := sp.GetNodeSetServiceManager()
+	for {
+		status, err := ns.GetRegistrationStatus(ctx)
+		if status == api.NodeSetRegistrationStatus_Registered {
+			return false
+		}
+
+		var msg string
+		switch status {
+		case api.NodeSetRegistrationStatus_Unregistered:
+			msg = "Not registered with NodeSet yet"
+		case api.NodeSetRegistrationStatus_Unknown:
+			msg = fmt.Sprintf("Can't check NodeSet registration status (%s)", err.Error())
+		case api.NodeSetRegistrationStatus_NoWallet:
+			msg = "Can't check NodeSet registration status until node has a wallet"
+		}
+		logger.Info(msg,
+			slog.Duration("retry", nodeSetRegistrationCheckInterval),
+		)
+		if utils.SleepWithCancel(ctx, nodeSetRegistrationCheckInterval) {
+			return true
 		}
 	}
 }

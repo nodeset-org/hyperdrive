@@ -9,6 +9,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/nodeset-org/hyperdrive-daemon/common"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/utils"
 )
@@ -60,6 +61,9 @@ func NewTaskLoop(sp *common.ServiceProvider, wg *sync.WaitGroup) *TaskLoop {
 
 // Run daemon
 func (t *TaskLoop) Run() error {
+	// Log into the NodeSet server to check registration status
+	t.logIntoNodeSet()
+
 	// Run task loop
 	t.wg.Add(1)
 	go func() {
@@ -93,6 +97,40 @@ func (t *TaskLoop) Run() error {
 		}()
 	*/
 	return nil
+}
+
+// Log into the NodeSet server to check registration status
+func (t *TaskLoop) logIntoNodeSet() {
+	ns := t.sp.GetNodeSetServiceManager()
+	attempts := 3
+	for i := 0; i < attempts; i++ {
+		status, err := ns.GetRegistrationStatus(t.ctx)
+		switch status {
+		case api.NodeSetRegistrationStatus_Registered:
+			// Successful login
+			return
+		case api.NodeSetRegistrationStatus_NoWallet:
+			// Error was because the wallet isn't ready yet, so just return since logging in won't work yet
+			t.logger.Info("Can't log in, node doesn't have a wallet yet")
+			return
+		case api.NodeSetRegistrationStatus_Unregistered:
+			// Node's not registered yet, this isn't an actual error to report
+			t.logger.Info("Can't log in, node is not registered with NodeSet yet")
+			return
+		default:
+			// Error was because of a comms failure, so try again after 1 second
+			t.logger.Warn(
+				"Getting node registration status during NodeSet login attempt failed",
+				slog.String(log.ErrorKey, err.Error()),
+				slog.Int("attempt", i+1),
+			)
+			if utils.SleepWithCancel(t.ctx, time.Second) {
+				return
+			}
+		}
+
+	}
+	t.logger.Error("Max login attempts reached")
 }
 
 // Wait until the chains and other resources are ready to be queried
