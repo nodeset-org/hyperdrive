@@ -54,7 +54,7 @@ func (c *nodeSetGetRegistrationStatusContext) PrepareData(data *api.NodeSetGetRe
 	ns := sp.GetNodeSetServiceManager()
 	data.Status, err = ns.GetRegistrationStatus(ctx)
 	if err != nil {
-		return types.ResponseStatus_Error, err
+		data.ErrorMessage = err.Error()
 	}
 
 	return types.ResponseStatus_Success, nil

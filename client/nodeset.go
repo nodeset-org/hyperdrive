@@ -28,12 +28,12 @@ func (r *NodeSetRequester) GetContext() client.IRequesterContext {
 }
 
 // Gets the node's registration status with the NodeSet service
-func (r *ServiceRequester) GetRegistrationStatus() (*types.ApiResponse[api.NodeSetGetRegistrationStatusData], error) {
+func (r *NodeSetRequester) GetRegistrationStatus() (*types.ApiResponse[api.NodeSetGetRegistrationStatusData], error) {
 	return client.SendGetRequest[api.NodeSetGetRegistrationStatusData](r, "get-registration-status", "GetRegistrationStatus", nil)
 }
 
 // Registers the node with the NodeSet service
-func (r *ServiceRequester) RegisterNode(email string) (*types.ApiResponse[api.NodeSetRegisterNodeData], error) {
+func (r *NodeSetRequester) RegisterNode(email string) (*types.ApiResponse[api.NodeSetRegisterNodeData], error) {
 	args := map[string]string{
 		"email": email,
 	}
