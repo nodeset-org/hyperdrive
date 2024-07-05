@@ -314,7 +314,7 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 	}
 
 	// Attempt a login
-	_, err = m.v1Client.Login(ctx, nonceData.Nonce, walletStatus.Wallet.WalletAddress, sigBytes)
+	loginData, err := m.v1Client.Login(ctx, nonceData.Nonce, walletStatus.Wallet.WalletAddress, sigBytes)
 	if err != nil {
 		if errors.Is(err, wallet.ErrWalletNotLoaded) {
 			m.setRegistrationStatus(api.NodeSetRegistrationStatus_NoWallet)
@@ -325,7 +325,7 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 	}
 
 	// Success
-	m.setSessionToken(nonceData.Token)
+	m.setSessionToken(loginData.Token)
 	logger.Info("Logged into NodeSet server")
 	m.setRegistrationStatus(api.NodeSetRegistrationStatus_Registered)
 
