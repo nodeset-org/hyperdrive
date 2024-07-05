@@ -199,7 +199,7 @@ func (m *NodeSetServiceManager) StakeWise_UploadDepositData(ctx context.Context,
 }
 
 // Get the version of the latest deposit data set from the server
-func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Context, vault common.Address) ([]api.ValidatorStatus, error) {
+func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Context, vault common.Address) ([]apiv1.ValidatorStatus, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -220,17 +220,11 @@ func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Co
 	if err != nil {
 		return nil, fmt.Errorf("error getting registered validators: %w", err)
 	}
-
-	// Convert to a version-agnostic format
-	formattedValidators := make([]api.ValidatorStatus, len(data.Validators))
-	for i, v := range data.Validators {
-		formattedValidators[i] = api.ValidatorStatus(v)
-	}
-	return formattedValidators, nil
+	return data.Validators, nil
 }
 
 // Uploads signed exit messages set to the server
-func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.Context, exitData []api.ExitData) error {
+func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.Context, exitData []apiv1.ExitData) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -241,22 +235,9 @@ func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.C
 	}
 	logger.Debug("Uploading signed exit messages")
 
-	// Convert the exit data to the version-specific format
-	// TEMP until types are shared
-	v1ExitData := make([]apiv1.ExitData, len(exitData))
-	for i, e := range exitData {
-		v1ExitData[i] = apiv1.ExitData{
-			Pubkey: e.Pubkey,
-			ExitMessage: apiv1.ExitMessage{
-				Message:   apiv1.ExitMessageDetails(e.ExitMessage.Message),
-				Signature: e.ExitMessage.Signature,
-			},
-		}
-	}
-
 	// Run the request
 	err := m.runRequest(ctx, func(ctx context.Context) error {
-		return m.v1Client.Validators_Patch(ctx, v1ExitData, m.resources.EthNetworkName)
+		return m.v1Client.Validators_Patch(ctx, exitData, m.resources.EthNetworkName)
 	})
 	if err != nil {
 		return fmt.Errorf("error uploading signed exit messages: %w", err)

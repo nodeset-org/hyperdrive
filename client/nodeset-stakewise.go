@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
+	apiv1 "github.com/nodeset-org/nodeset-client-go/api-v1"
 	"github.com/rocket-pool/node-manager-core/api/client"
 	"github.com/rocket-pool/node-manager-core/api/types"
 	"github.com/rocket-pool/node-manager-core/beacon"
@@ -59,6 +60,6 @@ func (r *NodeSetStakeWiseRequester) UploadDepositData(data []beacon.ExtendedDepo
 }
 
 // Uploads signed exit messages to the NodeSet service
-func (r *NodeSetStakeWiseRequester) UploadSignedExits(data []api.ExitData) (*types.ApiResponse[types.SuccessData], error) {
+func (r *NodeSetStakeWiseRequester) UploadSignedExits(data []apiv1.ExitData) (*types.ApiResponse[types.SuccessData], error) {
 	return client.SendPostRequest[types.SuccessData](r, "upload-signed-exits", "UploadSignedExits", data)
 }
