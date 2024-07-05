@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/url"
 
+	hdcommon "github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -58,6 +59,10 @@ func (c *stakeWiseGetDepositDataSetVersionContext) PrepareData(data *api.NodeSet
 	}
 	err = sp.RequireRegisteredWithNodeSet(ctx)
 	if err != nil {
+		if errors.Is(err, hdcommon.ErrNotRegisteredWithNodeSet) {
+			data.NotRegistered = true
+			return types.ResponseStatus_Success, nil
+		}
 		return types.ResponseStatus_Error, err
 	}
 

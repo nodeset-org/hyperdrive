@@ -30,6 +30,38 @@ const (
 	nodeSetRegistrationCheckInterval time.Duration = 15 * time.Second
 )
 
+var (
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrNodeAddressNotSet error = errors.New("The node currently does not have an address set. Please run 'hyperdrive wallet restore-address' or 'hyperdrive wallet masquerade' and try again.")
+
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrNeedPassword error = errors.New("The node has a node wallet on disk but does not have the password for it loaded. Please run `hyperdrive wallet set-password` to load it.")
+
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrCantLoadWallet error = errors.New("The node has a node wallet and a password on disk but there was an error loading it - perhaps the password is incorrect? Please check the daemon logs for more information.")
+
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrNoKeystore error = errors.New("The node currently does not have a node wallet keystore. Please run 'hyperdrive wallet init' or 'hyperdrive wallet recover' and try again.")
+
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrNoAddress error = errors.New("The node currently does not have an address set. Please run 'hyperdrive wallet restore-address' or 'hyperdrive wallet masquerade' and try again.")
+
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrAddressMismatch error = errors.New("The node's wallet keystore does not match the node address. This node is currently in read-only mode.")
+
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrExecutionClientNotSynced error = errors.New("The Execution client is currently syncing. Please try again later.")
+
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrBeaconNodeNotSynced error = errors.New("The Beacon node is currently syncing. Please try again later.")
+
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrNotRegisteredWithNodeSet error = errors.New("The node is not registered with the Node Set. Please run 'hyperdrive nodeset register-node' and try again.")
+
+	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrWalletNotReady error = errors.New("The node does not have a wallet ready yet. Please run 'hyperdrive wallet status' to learn more first.")
+)
+
 // ====================
 // === Requirements ===
 // ====================
@@ -40,7 +72,7 @@ func (sp *ServiceProvider) RequireNodeAddress() error {
 		return err
 	}
 	if !status.Address.HasAddress {
-		return errors.New("The node currently does not have an address set. Please run 'hyperdrive wallet restore-address' or 'hyperdrive wallet masquerade' and try again.")
+		return ErrNodeAddressNotSet
 	}
 	return nil
 }
@@ -53,17 +85,17 @@ func (sp *ServiceProvider) RequireWalletReady() error {
 	if !status.Wallet.IsLoaded {
 		if status.Wallet.IsOnDisk {
 			if !status.Password.IsPasswordSaved {
-				return errors.New("The node has a node wallet on disk but does not have the password for it loaded. Please run `hyperdrive wallet set-password` to load it.")
+				return ErrNeedPassword
 			}
-			return errors.New("The node has a node wallet and a password on disk but there was an error loading it - perhaps the password is incorrect? Please check the daemon logs for more information.")
+			return ErrCantLoadWallet
 		}
-		return errors.New("The node currently does not have a node wallet keystore. Please run 'hyperdrive wallet init' or 'hyperdrive wallet recover' and try again.")
+		return ErrNoKeystore
 	}
 	if !status.Address.HasAddress {
-		return errors.New("The node currently does not have an address set. Please run 'hyperdrive wallet restore-address' or 'hyperdrive wallet masquerade' and try again.")
+		return ErrNoAddress
 	}
 	if status.Wallet.WalletAddress != status.Address.NodeAddress {
-		return errors.New("The node's wallet keystore does not match the node address. This node is currently in read-only mode.")
+		return ErrAddressMismatch
 	}
 	return nil
 }
@@ -76,7 +108,7 @@ func (sp *ServiceProvider) RequireEthClientSynced(ctx context.Context) error {
 	if synced {
 		return nil
 	}
-	return errors.New("The Execution client is currently syncing. Please try again later.")
+	return ErrExecutionClientNotSynced
 }
 
 func (sp *ServiceProvider) RequireBeaconClientSynced(ctx context.Context) error {
@@ -87,7 +119,7 @@ func (sp *ServiceProvider) RequireBeaconClientSynced(ctx context.Context) error 
 	if synced {
 		return nil
 	}
-	return errors.New("The Beacon client is currently syncing. Please try again later.")
+	return ErrBeaconNodeNotSynced
 }
 
 func (sp *ServiceProvider) RequireRegisteredWithNodeSet(ctx context.Context) error {
@@ -99,12 +131,9 @@ func (sp *ServiceProvider) RequireRegisteredWithNodeSet(ctx context.Context) err
 	case api.NodeSetRegistrationStatus_Registered:
 		return nil
 	case api.NodeSetRegistrationStatus_Unregistered:
-		return errors.New("The node is not registered with the Node Set. Please run 'hyperdrive nodeset register-node' and try again.")
-	case api.NodeSetRegistrationStatus_Unknown:
-		// Should be covered by the error check already
-		return errors.New("The NodeSet service couldn't be reached to check registration status. Please try again later.")
+		return ErrNotRegisteredWithNodeSet
 	case api.NodeSetRegistrationStatus_NoWallet:
-		return errors.New("The node does not have a wallet ready yet. Please run 'hyperdrive wallet status' to learn more first.")
+		return ErrWalletNotReady
 	}
 	return fmt.Errorf("unknown registration status [%v]", status)
 }

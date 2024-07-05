@@ -6,10 +6,22 @@ import (
 )
 
 type NodeSetStakeWise_GetRegisteredValidatorsData struct {
-	Validators []apiv1.ValidatorStatus `json:"validators"`
+	NotRegistered bool                    `json:"notRegistered"`
+	Validators    []apiv1.ValidatorStatus `json:"validators"`
 }
 
 type NodeSetStakeWise_GetDepositDataSetData struct {
-	Version     int                          `json:"version"`
-	DepositData []beacon.ExtendedDepositData `json:"depositData"`
+	NotRegistered bool                         `json:"notRegistered"`
+	Version       int                          `json:"version"`
+	DepositData   []beacon.ExtendedDepositData `json:"depositData"`
+}
+
+type NodeSetStakeWise_UploadDepositDataData struct {
+	NotRegistered      bool `json:"notRegistered"`
+	VaultNotFound      bool `json:"vaultNotFound"`
+	InvalidPermissions bool `json:"invalidPermissions"`
+}
+
+type NodeSetStakeWise_UploadSignedExitsData struct {
+	NotRegistered bool `json:"notRegistered"`
 }

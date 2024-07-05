@@ -55,11 +55,11 @@ func (r *NodeSetStakeWiseRequester) GetDepositDataSet(vault common.Address) (*ty
 }
 
 // Uploads new validator deposit data to the NodeSet service
-func (r *NodeSetStakeWiseRequester) UploadDepositData(data []beacon.ExtendedDepositData) (*types.ApiResponse[types.SuccessData], error) {
-	return client.SendPostRequest[types.SuccessData](r, "upload-deposit-data", "UploadDepositData", data)
+func (r *NodeSetStakeWiseRequester) UploadDepositData(data []beacon.ExtendedDepositData) (*types.ApiResponse[api.NodeSetStakeWise_UploadDepositDataData], error) {
+	return client.SendPostRequest[api.NodeSetStakeWise_UploadDepositDataData](r, "upload-deposit-data", "UploadDepositData", data)
 }
 
 // Uploads signed exit messages to the NodeSet service
-func (r *NodeSetStakeWiseRequester) UploadSignedExits(data []apiv1.ExitData) (*types.ApiResponse[types.SuccessData], error) {
-	return client.SendPostRequest[types.SuccessData](r, "upload-signed-exits", "UploadSignedExits", data)
+func (r *NodeSetStakeWiseRequester) UploadSignedExits(data []apiv1.ExitData) (*types.ApiResponse[api.NodeSetStakeWise_UploadSignedExitsData], error) {
+	return client.SendPostRequest[api.NodeSetStakeWise_UploadSignedExitsData](r, "upload-signed-exits", "UploadSignedExits", data)
 }
