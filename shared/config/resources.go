@@ -15,7 +15,7 @@ type HyperdriveResources struct {
 }
 
 // Creates a new resource collection for the given network
-func newHyperdriveResources(network config.Network) *HyperdriveResources {
+func NewHyperdriveResources(network config.Network) *HyperdriveResources {
 	// Mainnet
 	mainnetResources := &HyperdriveResources{
 		NetworkResources: config.NewResources(config.Network_Mainnet),

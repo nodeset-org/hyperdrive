@@ -501,7 +501,7 @@ func (cfg *HyperdriveConfig) GetResources() *HyperdriveResources {
 }
 
 func (cfg *HyperdriveConfig) updateResources() {
-	cfg.resources = newHyperdriveResources(cfg.Network.Value)
+	cfg.resources = NewHyperdriveResources(cfg.Network.Value)
 }
 
 func (cfg *HyperdriveConfig) GetUserDirectory() string {
