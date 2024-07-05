@@ -12,6 +12,7 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/server"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	nsserver "github.com/nodeset-org/nodeset-client-go/server-mock/server"
 	"github.com/nodeset-org/osha"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/node/services"
@@ -24,48 +25,65 @@ type HyperdriveTestManager struct {
 	// The service provider for the test environment
 	serviceProvider *common.ServiceProvider
 
+	// The mock for the nodeset.io service
+	nodesetMock *nsserver.NodeSetMockServer
+
 	// The Hyperdrive Daemon server
 	serverMgr *server.ServerManager
 
 	// The Hyperdrive Daemon client
 	apiClient *client.ApiClient
 
-	// Wait group for graceful shutdown
-	wg *sync.WaitGroup
+	// Wait groups for graceful shutdown
+	hdWg *sync.WaitGroup
+	nsWg *sync.WaitGroup
 }
 
-// Creates a new HyperdriveTestManager instance.
+// Creates a new HyperdriveTestManager instance. Requires management of your own nodeset.io server mock.
 // `address` is the address to bind the Hyperdrive daemon to.
-func NewHyperdriveTestManager(address string, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources) (*HyperdriveTestManager, error) {
+func NewHyperdriveTestManager(address string, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources, nsServer *nsserver.NodeSetMockServer, nsWaitGroup *sync.WaitGroup) (*HyperdriveTestManager, error) {
 	tm, err := osha.NewTestManager()
 	if err != nil {
 		return nil, fmt.Errorf("error creating test manager: %w", err)
 	}
-	return newHyperdriveTestManagerImpl(address, tm, cfg, resources)
+	return newHyperdriveTestManagerImpl(address, tm, cfg, resources, nsServer, nsWaitGroup)
 }
 
 // Creates a new HyperdriveTestManager instance with default test artifacts.
 // `hyperdriveAddress` is the address to bind the Hyperdrive daemon to.
-// `nodesetAddress` is the URL for the NodeSet API server.
+// `nodesetAddress` is the address to bind the nodeset.io server to.
 func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddress string) (*HyperdriveTestManager, error) {
 	tm, err := osha.NewTestManager()
 	if err != nil {
 		return nil, fmt.Errorf("error creating test manager: %w", err)
 	}
 
+	// Make the nodeset.io mock server
+	nsWg := &sync.WaitGroup{}
+	nodesetMock, err := nsserver.NewNodeSetMockServer(tm.GetLogger(), nodesetAddress, 0)
+	if err != nil {
+		closeTestManager(tm)
+		return nil, fmt.Errorf("error creating nodeset mock server: %v", err)
+	}
+	err = nodesetMock.Start(nsWg)
+	if err != nil {
+		closeTestManager(tm)
+		return nil, fmt.Errorf("error starting nodeset mock server: %v", err)
+	}
+
 	// Make a new Hyperdrive config
 	testDir := tm.GetTestDir()
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
-	resources := GetTestResources(beaconCfg, nodesetAddress)
+	resources := GetTestResources(beaconCfg, fmt.Sprintf("http://%s:%d/api/", nodesetAddress, nodesetMock.GetPort()))
 	cfg := hdconfig.NewHyperdriveConfigForNetwork(testDir, hdconfig.Network_LocalTest, resources)
 	cfg.Network.Value = hdconfig.Network_LocalTest
 
-	// Make test resources
-	return newHyperdriveTestManagerImpl(hyperdriveAddress, tm, cfg, resources)
+	// Make the test manager
+	return newHyperdriveTestManagerImpl(hyperdriveAddress, tm, cfg, resources, nodesetMock, nsWg)
 }
 
 // Implementation for creating a new HyperdriveTestManager
-func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources) (*HyperdriveTestManager, error) {
+func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources, nsServer *nsserver.NodeSetMockServer, nsWaitGroup *sync.WaitGroup) (*HyperdriveTestManager, error) {
 	// Make managers
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
 	ecManager := services.NewExecutionClientManager(tm.GetExecutionClient(), uint(beaconCfg.ChainID), time.Minute)
@@ -94,8 +112,8 @@ func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdc
 	}
 
 	// Create the server
-	wg := &sync.WaitGroup{}
-	serverMgr, err := server.NewServerManager(serviceProvider, address, 0, wg)
+	hdWg := &sync.WaitGroup{}
+	serverMgr, err := server.NewServerManager(serviceProvider, address, 0, hdWg)
 	if err != nil {
 		closeTestManager(tm)
 		return nil, fmt.Errorf("error creating hyperdrive server: %v", err)
@@ -114,9 +132,11 @@ func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdc
 	m := &HyperdriveTestManager{
 		TestManager:     tm,
 		serviceProvider: serviceProvider,
+		nodesetMock:     nsServer,
 		serverMgr:       serverMgr,
 		apiClient:       apiClient,
-		wg:              wg,
+		hdWg:            hdWg,
+		nsWg:            nsWaitGroup,
 	}
 	return m, nil
 }
@@ -124,6 +144,11 @@ func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdc
 // Returns the service provider for the test environment
 func (m *HyperdriveTestManager) GetServiceProvider() *common.ServiceProvider {
 	return m.serviceProvider
+}
+
+// Get the nodeset.io mock server
+func (m *HyperdriveTestManager) GetNodeSetMockServer() *nsserver.NodeSetMockServer {
+	return m.nodesetMock
 }
 
 // Returns the Hyperdrive Daemon server
@@ -138,10 +163,19 @@ func (m *HyperdriveTestManager) GetApiClient() *client.ApiClient {
 
 // Closes the Hyperdrive test manager, shutting down the daemon
 func (m *HyperdriveTestManager) Close() error {
+	if m.nodesetMock != nil {
+		err := m.nodesetMock.Stop()
+		if err != nil {
+			m.GetLogger().Warn("WARNING: nodeset server mock didn't shutdown cleanly", log.Err(err))
+		}
+		m.nsWg.Wait()
+		m.TestManager.GetLogger().Info("Stopped nodeset.io mock server")
+		m.nodesetMock = nil
+	}
 	if m.serverMgr != nil {
 		m.serverMgr.Stop()
-		m.wg.Wait()
-		m.TestManager.GetLogger().Info("Stopped server")
+		m.hdWg.Wait()
+		m.TestManager.GetLogger().Info("Stopped daemon API server")
 		m.serverMgr = nil
 	}
 	if m.TestManager != nil {
