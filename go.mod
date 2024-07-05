@@ -12,7 +12,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
-	github.com/nodeset-org/nodeset-client-go v0.0.0-20240705150442-aad7b515c707
+	github.com/nodeset-org/nodeset-client-go v0.0.0-20240705161624-e301897d5d3c
 	github.com/nodeset-org/osha v0.2.0
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/rocket-pool/node-manager-core v0.5.1
@@ -170,5 +170,3 @@ require (
 	lukechampine.com/blake3 v1.2.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
-
-replace github.com/nodeset-org/nodeset-client-go => ../nodeset-client-go
