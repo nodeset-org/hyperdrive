@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"

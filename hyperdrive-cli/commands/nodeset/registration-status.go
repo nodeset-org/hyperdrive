@@ -11,11 +11,7 @@ func registrationStatus(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	sw, err := client.NewStakewiseClientFromCtx(c, hd)
-	if err != nil {
-		return err
-	}
 
-	_, err = CheckRegistrationStatus(c, hd, sw)
+	_, err = CheckRegistrationStatus(c, hd)
 	return err
 }

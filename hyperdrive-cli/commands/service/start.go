@@ -9,7 +9,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 	cliwallet "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
@@ -172,10 +172,6 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	if !cfg.Stakewise.Enabled.Value {
 		return nil
 	}
-	sw, err := client.NewStakewiseClientFromCtx(c, hd)
-	if err != nil {
-		return err
-	}
 
 	// Get NodeSet registration status if this isn't a new wallet
 	isExistingWallet := status.Wallet.IsLoaded || status.Wallet.IsOnDisk
@@ -186,7 +182,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	fmt.Println("Checking node registration status...")
 	retries = 5
 	for i := 0; i < retries; i++ {
-		_, err = nodeset.CheckRegistrationStatus(c, hd, sw)
+		_, err = nodeset.CheckRegistrationStatus(c, hd)
 		if err != nil {
 			time.Sleep(time.Second)
 			continue

@@ -19,13 +19,9 @@ func registerNode(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	sw, err := client.NewStakewiseClientFromCtx(c, hd)
-	if err != nil {
-		return err
-	}
 
 	// Check if doesn't have a wallet it's already registered
-	hasWallet, shouldRegister, err := checkRegistrationStatusImpl(hd, sw)
+	hasWallet, shouldRegister, err := checkRegistrationStatusImpl(hd)
 	if err != nil {
 		return err
 	}
@@ -33,5 +29,5 @@ func registerNode(c *cli.Context) error {
 		return nil
 	}
 
-	return registerNodeImpl(c, sw)
+	return registerNodeImpl(c, hd)
 }
