@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
-	swapi "github.com/nodeset-org/hyperdrive-stakewise/shared/api"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
@@ -134,28 +134,27 @@ func recoverWallet(c *cli.Context) error {
 		}
 		fmt.Println("Stakewise wallet initialized.")
 		fmt.Println()
+	}
 
-		// Check if the wallet is registered with NodeSet
-		regResponse, err := sw.Api.Nodeset.RegistrationStatus()
-		if err != nil {
-			fmt.Println("Hyperdrive couldn't check your node's registration status:")
-			fmt.Println(err.Error())
-			fmt.Println("If your node isn't registered yet, you'll have to register it later.")
-			return nil
-		}
-		switch regResponse.Data.Status {
-		case swapi.NodesetRegistrationStatus_Registered:
-			fmt.Println("Your node is already registered with NodeSet.")
+	// Check if the wallet is registered with NodeSet
+	regResponse, err := hd.Api.NodeSet.GetRegistrationStatus()
+	if err != nil {
+		fmt.Println("Hyperdrive couldn't check your node's registration status:")
+		fmt.Println(err.Error())
+		fmt.Println("If your node isn't registered yet, you'll have to register it later.")
+		return nil
+	}
+	switch regResponse.Data.Status {
+	case api.NodeSetRegistrationStatus_Registered:
+		fmt.Println("Your node is already registered with NodeSet.")
 
-		case swapi.NodesetRegistrationStatus_Unregistered:
-			fmt.Println("Please whitelist your node on your `nodeset.io` dashboard, then register it with `hyperdrive sw ns register-node`.")
+	case api.NodeSetRegistrationStatus_Unregistered:
+		fmt.Println("Please whitelist your node on your `nodeset.io` dashboard, then register it with `hyperdrive ns register-node`.")
 
-		case swapi.NodesetRegistrationStatus_Unknown:
-			fmt.Println("Hyperdrive couldn't check your node's registration status:")
-			fmt.Println(regResponse.Data.ErrorMessage)
-			fmt.Println("If your node isn't registered yet, you'll have to register it later.")
-		}
-
+	case api.NodeSetRegistrationStatus_Unknown:
+		fmt.Println("Hyperdrive couldn't check your node's registration status:")
+		fmt.Println(regResponse.Data.ErrorMessage)
+		fmt.Println("If your node isn't registered yet, you'll have to register it later.")
 	}
 	return nil
 }

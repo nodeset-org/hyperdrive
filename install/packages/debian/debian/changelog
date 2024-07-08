@@ -1,3 +1,9 @@
+hyperdrive (1.1.0~dev) UNRELEASED; urgency=medium
+
+  * Moved the nodeset.io client into the Hyperdrive Daemon.
+
+ -- NodeSet Inc. <info@nodeset.io>  Fri, 05 Jul 2024 18:58:27 +0000
+
 hyperdrive (1.0.1) stable; urgency=low
 
   * Updated Nethermind, Reth, Nimbus, Prysm, Teku, Grafana, and Prometheus.
