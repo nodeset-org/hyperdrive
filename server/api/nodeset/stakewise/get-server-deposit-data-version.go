@@ -35,7 +35,7 @@ func (f *stakeWiseGetDepositDataSetVersionContextFactory) Create(args url.Values
 }
 
 func (f *stakeWiseGetDepositDataSetVersionContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessGet[*stakeWiseGetDepositDataSetVersionContext, api.NodeSetStakeWise_GetDepositDataSetData](
+	server.RegisterQuerylessGet[*stakeWiseGetDepositDataSetVersionContext, api.NodeSetStakeWise_GetDepositDataSetVersionData](
 		router, "get-deposit-data-set/version", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
 	)
 }
@@ -48,7 +48,7 @@ type stakeWiseGetDepositDataSetVersionContext struct {
 	vault   common.Address
 }
 
-func (c *stakeWiseGetDepositDataSetVersionContext) PrepareData(data *api.NodeSetStakeWise_GetDepositDataSetData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
+func (c *stakeWiseGetDepositDataSetVersionContext) PrepareData(data *api.NodeSetStakeWise_GetDepositDataSetVersionData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
 	sp := c.handler.serviceProvider
 	ctx := c.handler.ctx
 

@@ -10,6 +10,11 @@ type NodeSetStakeWise_GetRegisteredValidatorsData struct {
 	Validators    []apiv1.ValidatorStatus `json:"validators"`
 }
 
+type NodeSetStakeWise_GetDepositDataSetVersionData struct {
+	NotRegistered bool `json:"notRegistered"`
+	Version       int  `json:"version"`
+}
+
 type NodeSetStakeWise_GetDepositDataSetData struct {
 	NotRegistered bool                         `json:"notRegistered"`
 	Version       int                          `json:"version"`
