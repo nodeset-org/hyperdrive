@@ -28,7 +28,7 @@ type ServiceProvider struct {
 	hdClient     *client.ApiClient
 	ecManager    *services.ExecutionClientManager
 	bcManager    *services.BeaconClientManager
-	resources    *config.NetworkResources
+	resources    *hdconfig.HyperdriveResources
 	signer       *ModuleSigner
 	txMgr        *eth.TransactionManager
 	queryMgr     *eth.QueryManager
@@ -53,7 +53,7 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.UR
 	}
 
 	// Resources
-	resources := hdCfg.GetNetworkResources()
+	resources := hdCfg.GetResources()
 
 	// EC Manager
 	var ecManager *services.ExecutionClientManager
@@ -103,7 +103,7 @@ func NewServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.UR
 }
 
 // Creates a new ServiceProvider instance, using the given artifacts instead of creating ones based on the config parameters
-func NewServiceProviderFromArtifacts(hdClient *client.ApiClient, hdCfg *hdconfig.HyperdriveConfig, moduleCfg hdconfig.IModuleConfig, resources *config.NetworkResources, moduleDir string, moduleName string, clientLogName string, ecManager *services.ExecutionClientManager, bcManager *services.BeaconClientManager) (*ServiceProvider, error) {
+func NewServiceProviderFromArtifacts(hdClient *client.ApiClient, hdCfg *hdconfig.HyperdriveConfig, moduleCfg hdconfig.IModuleConfig, resources *hdconfig.HyperdriveResources, moduleDir string, moduleName string, clientLogName string, ecManager *services.ExecutionClientManager, bcManager *services.BeaconClientManager) (*ServiceProvider, error) {
 	// Set up the client logger
 	logPath := hdCfg.GetModuleLogFilePath(moduleName, clientLogName)
 	clientLogger, err := log.NewLogger(logPath, hdCfg.GetLoggerOptions())
@@ -211,7 +211,7 @@ func (p *ServiceProvider) GetHyperdriveClient() *client.ApiClient {
 	return p.hdClient
 }
 
-func (p *ServiceProvider) GetResources() *config.NetworkResources {
+func (p *ServiceProvider) GetResources() *hdconfig.HyperdriveResources {
 	return p.resources
 }
 

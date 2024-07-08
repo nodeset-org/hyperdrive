@@ -2,7 +2,7 @@ module github.com/nodeset-org/hyperdrive-daemon
 
 go 1.21
 
-toolchain go1.21.1
+toolchain go1.21.10
 
 require (
 	github.com/alessio/shellescape v1.4.2
@@ -12,6 +12,7 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
+	github.com/nodeset-org/nodeset-client-go v0.0.0-20240705161624-e301897d5d3c
 	github.com/nodeset-org/osha v0.2.0
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/rocket-pool/node-manager-core v0.5.1
@@ -19,7 +20,6 @@ require (
 	github.com/urfave/cli/v2 v2.27.1
 	github.com/wealdtech/go-ens/v3 v3.6.0
 	gopkg.in/yaml.v3 v3.0.1
-
 )
 
 require (

@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/nodeset-org/hyperdrive-daemon/common"
+	"github.com/nodeset-org/hyperdrive-daemon/server/api/nodeset"
 	"github.com/nodeset-org/hyperdrive-daemon/server/api/service"
 	"github.com/nodeset-org/hyperdrive-daemon/server/api/tx"
 	"github.com/nodeset-org/hyperdrive-daemon/server/api/utils"
@@ -59,6 +60,7 @@ func createServer(sp *common.ServiceProvider, ip string, port uint16) (*server.N
 	ctx := apiLogger.CreateContextWithLogger(sp.GetBaseContext())
 
 	handlers := []server.IHandler{
+		nodeset.NewNodeSetHandler(apiLogger, ctx, sp),
 		service.NewServiceHandler(apiLogger, ctx, sp),
 		tx.NewTxHandler(apiLogger, ctx, sp),
 		utils.NewUtilsHandler(apiLogger, ctx, sp),

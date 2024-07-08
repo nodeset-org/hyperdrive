@@ -68,7 +68,7 @@ type HyperdriveConfig struct {
 	// Internal fields
 	Version                 string
 	hyperdriveUserDirectory string
-	resources               *config.NetworkResources
+	resources               *HyperdriveResources
 }
 
 // Load configuration settings from a file
@@ -109,7 +109,7 @@ func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
 }
 
 // Creates a new Hyperdrive configuration instance for a custom network
-func NewHyperdriveConfigForNetwork(hdDir string, network config.Network, resources *config.NetworkResources) *HyperdriveConfig {
+func NewHyperdriveConfigForNetwork(hdDir string, network config.Network, resources *HyperdriveResources) *HyperdriveConfig {
 	cfg := newHyperdriveConfigImpl(hdDir, network)
 	cfg.resources = resources
 	return cfg
@@ -496,13 +496,12 @@ func getNetworkOptions() []*config.ParameterOption[config.Network] {
 	return options
 }
 
+func (cfg *HyperdriveConfig) GetResources() *HyperdriveResources {
+	return cfg.resources
+}
+
 func (cfg *HyperdriveConfig) updateResources() {
-	switch cfg.Network.Value {
-	case Network_HoleskyDev:
-		cfg.resources = config.NewResources(config.Network_Holesky)
-	default:
-		cfg.resources = config.NewResources(cfg.Network.Value)
-	}
+	cfg.resources = NewHyperdriveResources(cfg.Network.Value)
 }
 
 func (cfg *HyperdriveConfig) GetUserDirectory() string {
@@ -534,7 +533,7 @@ func (cfg *HyperdriveConfig) GetPasswordFilePath() string {
 }
 
 func (cfg *HyperdriveConfig) GetNetworkResources() *config.NetworkResources {
-	return cfg.resources
+	return cfg.resources.NetworkResources
 }
 
 func (cfg *HyperdriveConfig) GetExecutionClientUrls() (string, string) {

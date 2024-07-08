@@ -7,11 +7,14 @@ import (
 )
 
 // Returns a network resources instance with local testing network values
-func GetTestResources(beaconConfig *db.Config) *config.NetworkResources {
-	return &config.NetworkResources{
-		Network:            hdconfig.Network_LocalTest,
-		EthNetworkName:     "localtest",
-		ChainID:            uint(beaconConfig.ChainID),
-		GenesisForkVersion: beaconConfig.GenesisForkVersion,
+func GetTestResources(beaconConfig *db.Config, nodesetUrl string) *hdconfig.HyperdriveResources {
+	return &hdconfig.HyperdriveResources{
+		NetworkResources: &config.NetworkResources{
+			Network:            hdconfig.Network_LocalTest,
+			EthNetworkName:     "localtest",
+			ChainID:            uint(beaconConfig.ChainID),
+			GenesisForkVersion: beaconConfig.GenesisForkVersion,
+		},
+		NodeSetApiUrl: nodesetUrl,
 	}
 }
