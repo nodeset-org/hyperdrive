@@ -150,14 +150,14 @@ func (sp *ServiceProvider) WaitForNodeSetRegistration(ctx context.Context) bool 
 			msg = fmt.Sprintf("Can't check NodeSet registration status (%s)", err.Error())
 		} else {
 			switch response.Data.Status {
+			case api.NodeSetRegistrationStatus_NoWallet:
+				msg = "Can't check NodeSet registration status until node has a wallet"
 			case api.NodeSetRegistrationStatus_Registered:
 				return false
 			case api.NodeSetRegistrationStatus_Unregistered:
 				msg = "Not registered with NodeSet yet"
 			case api.NodeSetRegistrationStatus_Unknown:
 				msg = fmt.Sprintf("Can't check NodeSet registration status (%s)", response.Data.ErrorMessage)
-			case api.NodeSetRegistrationStatus_NoWallet:
-				msg = "Can't check NodeSet registration status until node has a wallet"
 			}
 		}
 

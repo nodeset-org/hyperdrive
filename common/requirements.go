@@ -191,12 +191,12 @@ func (sp *ServiceProvider) WaitForNodeSetRegistration(ctx context.Context) bool 
 
 		var msg string
 		switch status {
+		case api.NodeSetRegistrationStatus_NoWallet:
+			msg = "Can't check NodeSet registration status until node has a wallet"
 		case api.NodeSetRegistrationStatus_Unregistered:
 			msg = "Not registered with NodeSet yet"
 		case api.NodeSetRegistrationStatus_Unknown:
 			msg = fmt.Sprintf("Can't check NodeSet registration status (%s)", err.Error())
-		case api.NodeSetRegistrationStatus_NoWallet:
-			msg = "Can't check NodeSet registration status until node has a wallet"
 		}
 		logger.Info(msg,
 			slog.Duration("retry", nodeSetRegistrationCheckInterval),

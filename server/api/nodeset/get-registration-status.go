@@ -44,16 +44,11 @@ func (c *nodeSetGetRegistrationStatusContext) PrepareData(data *api.NodeSetGetRe
 	sp := c.handler.serviceProvider
 	ctx := c.handler.ctx
 
-	// Requirements
-	err := sp.RequireWalletReady()
-	if err != nil {
-		return types.ResponseStatus_WalletNotReady, err
-	}
-
-	// Register the node
+	// Get registration status
+	var err error
 	ns := sp.GetNodeSetServiceManager()
 	data.Status, err = ns.GetRegistrationStatus(ctx)
-	if err != nil {
+	if data.Status == api.NodeSetRegistrationStatus_Unknown && err != nil {
 		data.ErrorMessage = err.Error()
 	}
 

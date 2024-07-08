@@ -70,6 +70,7 @@ func (m *NodeSetServiceManager) GetRegistrationStatus(ctx context.Context) (api.
 func (m *NodeSetServiceManager) Login(ctx context.Context) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
+
 	return m.loginImpl(ctx)
 }
 
@@ -319,6 +320,10 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 		if errors.Is(err, wallet.ErrWalletNotLoaded) {
 			m.setRegistrationStatus(api.NodeSetRegistrationStatus_NoWallet)
 			return err
+		}
+		if errors.Is(err, apiv1.ErrUnregisteredNode) {
+			m.setRegistrationStatus(api.NodeSetRegistrationStatus_Unregistered)
+			return nil
 		}
 		m.setRegistrationStatus(api.NodeSetRegistrationStatus_Unknown)
 		return fmt.Errorf("error logging in: %w", err)
