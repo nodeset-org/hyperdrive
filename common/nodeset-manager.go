@@ -12,9 +12,11 @@ import (
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	apiv1 "github.com/nodeset-org/nodeset-client-go/api-v1"
+	apiv2 "github.com/nodeset-org/nodeset-client-go/api-v2"
 	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/node/wallet"
+	"github.com/rocket-pool/node-manager-core/utils"
 )
 
 // NodeSetServiceManager is a manager for interactions with the NodeSet service
@@ -27,6 +29,9 @@ type NodeSetServiceManager struct {
 
 	// Client for the v1 API
 	v1Client *apiv1.NodeSetClient
+
+	// Client for the v2 API
+	v2Client *apiv2.NodeSetClient
 
 	// The current session token
 	sessionToken string
@@ -47,6 +52,7 @@ func NewNodeSetServiceManager(sp *ServiceProvider) *NodeSetServiceManager {
 		wallet:                 wallet,
 		resources:              resources,
 		v1Client:               apiv1.NewNodeSetClient(resources.NodeSetApiUrl, hdconfig.ClientTimeout),
+		v2Client:               apiv2.NewNodeSetClient(resources.NodeSetApiUrl, hdconfig.ClientTimeout),
 		nodeRegistrationStatus: api.NodeSetRegistrationStatus_Unknown,
 		lock:                   &sync.Mutex{},
 	}
@@ -126,6 +132,10 @@ func (m *NodeSetServiceManager) RegisterNode(ctx context.Context, email string) 
 	}
 	return RegistrationResult_Success, nil
 }
+
+// =========================
+// === StakeWise Methods ===
+// =========================
 
 // Get the version of the latest deposit data set from the server
 func (m *NodeSetServiceManager) StakeWise_GetServerDepositDataVersion(ctx context.Context, vault common.Address) (int, error) {
@@ -246,6 +256,97 @@ func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.C
 	return nil
 }
 
+// =============================
+// === Constellation Methods ===
+// =============================
+
+// Gets a signature for registering / whitelisting the node with the Constellation contracts
+func (m *NodeSetServiceManager) Constellation_GetRegistrationSignature(ctx context.Context) ([]byte, error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	// Get the logger
+	logger, exists := log.FromContext(ctx)
+	if !exists {
+		panic("context didn't have a logger!")
+	}
+	logger.Debug("Registering with the Constellation contracts")
+
+	// Run the request
+	var data apiv2.WhitelistData
+	err := m.runRequest(ctx, func(ctx context.Context) error {
+		var err error
+		data, err = m.v2Client.Whitelist(ctx)
+		return err
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error registering with Constellation: %w", err)
+	}
+
+	// Decode the signature
+	sig, err := utils.DecodeHex(data.Signature)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding signature from server: %w", err)
+	}
+	return sig, nil
+}
+
+// Gets the available minipool count for the node from the Constellation contracts
+func (m *NodeSetServiceManager) Constellation_GetAvailableMinipoolCount(ctx context.Context) (int, error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	// Get the logger
+	logger, exists := log.FromContext(ctx)
+	if !exists {
+		panic("context didn't have a logger!")
+	}
+	logger.Debug("Getting available minipool count")
+
+	// Run the request
+	var data apiv2.MinipoolAvailableData
+	err := m.runRequest(ctx, func(ctx context.Context) error {
+		var err error
+		data, err = m.v2Client.MinipoolAvailable(ctx)
+		return err
+	})
+	if err != nil {
+		return 0, fmt.Errorf("error getting available minipool count: %w", err)
+	}
+	return data.Count, nil
+}
+
+// Gets the deposit signature for a minipool from the Constellation contracts
+func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Context, minipoolAddress common.Address, salt []byte) ([]byte, error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	// Get the logger
+	logger, exists := log.FromContext(ctx)
+	if !exists {
+		panic("context didn't have a logger!")
+	}
+	logger.Debug("Getting minipool deposit signature")
+
+	// Run the request
+	var data apiv2.MinipoolDepositSignatureData
+	err := m.runRequest(ctx, func(ctx context.Context) error {
+		var err error
+		data, err = m.v2Client.MinipoolDepositSignature(ctx, minipoolAddress, salt)
+		return err
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error getting deposit signature: %w", err)
+	}
+
+	// Decode the signature
+	sig, err := utils.DecodeHex(data.Signature)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding signature from server: %w", err)
+	}
+	return sig, nil
+}
+
 // ========================
 // === Internal Methods ===
 // ========================
@@ -341,6 +442,7 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 func (m *NodeSetServiceManager) setSessionToken(sessionToken string) {
 	m.sessionToken = sessionToken
 	m.v1Client.SetSessionToken(sessionToken)
+	m.v2Client.SetSessionToken(sessionToken)
 }
 
 // Sets the registration status of the node
