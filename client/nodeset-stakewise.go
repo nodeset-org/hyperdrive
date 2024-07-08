@@ -39,11 +39,11 @@ func (r *NodeSetStakeWiseRequester) GetRegisteredValidators(vault common.Address
 }
 
 // Gets the version of the latest deposit data set on the server for the provided vault
-func (r *NodeSetStakeWiseRequester) GetDepositDataSetVersion(vault common.Address) (*types.ApiResponse[api.NodeSetStakeWise_GetDepositDataSetData], error) {
+func (r *NodeSetStakeWiseRequester) GetDepositDataSetVersion(vault common.Address) (*types.ApiResponse[api.NodeSetStakeWise_GetDepositDataSetVersionData], error) {
 	args := map[string]string{
 		"vault": vault.Hex(),
 	}
-	return client.SendGetRequest[api.NodeSetStakeWise_GetDepositDataSetData](r, "get-deposit-data-set/version", "GetDepositDataSetVersion", args)
+	return client.SendGetRequest[api.NodeSetStakeWise_GetDepositDataSetVersionData](r, "get-deposit-data-set/version", "GetDepositDataSetVersion", args)
 }
 
 // Gets the latest deposit data set on the server for the provided vault
