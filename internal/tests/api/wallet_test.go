@@ -159,7 +159,7 @@ func TestWalletBalance(t *testing.T) {
 	// Regen the wallet
 	apiClient := testMgr.GetApiClient()
 	derivationPath := string(wallet.DerivationPath_Default)
-	index := uint64(0)
+	index := uint64(2)
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
