@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/nodeset-org/osha"
+	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
 	"github.com/nodeset-org/osha/keys"
 	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/rocket-pool/node-manager-core/wallet"
@@ -29,7 +29,7 @@ var (
 
 func TestWalletRecover_Success(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_Filesystem)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_Filesystem)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
@@ -49,7 +49,7 @@ func TestWalletRecover_Success(t *testing.T) {
 
 func TestWalletRecover_WrongIndex(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_Filesystem)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_Filesystem)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
@@ -68,7 +68,7 @@ func TestWalletRecover_WrongIndex(t *testing.T) {
 }
 
 func TestWalletRecover_WrongDerivationPath(t *testing.T) {
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_Filesystem)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_Filesystem)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
@@ -105,7 +105,7 @@ func TestWalletStatus_NotLoaded(t *testing.T) {
 
 func TestWalletStatus_Loaded(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients | osha.Service_Filesystem)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_EthClients | hdtesting.Service_Filesystem)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
@@ -143,7 +143,7 @@ func TestWalletStatus_Loaded(t *testing.T) {
 
 func TestWalletBalance(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients | osha.Service_Filesystem)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_EthClients | hdtesting.Service_Filesystem)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
@@ -176,7 +176,7 @@ func TestWalletBalance(t *testing.T) {
 
 func TestWalletSignMessage(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients | osha.Service_Filesystem)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_EthClients | hdtesting.Service_Filesystem)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
@@ -221,7 +221,7 @@ func TestWalletSignMessage(t *testing.T) {
 
 func TestWalletSend_EthSuccess(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients | osha.Service_Filesystem)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_EthClients | hdtesting.Service_Filesystem)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
@@ -285,7 +285,7 @@ func TestWalletSend_EthSuccess(t *testing.T) {
 
 func TestWalletSend_EthFailure(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients | osha.Service_Filesystem)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_EthClients | hdtesting.Service_Filesystem)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
