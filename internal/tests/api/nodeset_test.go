@@ -18,7 +18,7 @@ const (
 // Test registration with nodeset.io if the node doesn't have a wallet yet
 func TestNodeSetRegistration_NoWallet(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_NodeSet)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_Filesystem | hdtesting.Service_NodeSet)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
@@ -113,5 +113,11 @@ func nodeset_cleanup(snapshotName string) {
 		if err != nil {
 			fail("Error reverting to custom snapshot: %v", err)
 		}
+	}
+
+	// Reload the wallet to undo any changes made during the test
+	err := testMgr.GetServiceProvider().GetWallet().Reload(testMgr.GetLogger())
+	if err != nil {
+		fail("Error reloading wallet: %v", err)
 	}
 }
