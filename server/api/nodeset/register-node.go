@@ -66,6 +66,8 @@ func (c *nodeSetRegisterNodeContext) PrepareData(data *api.NodeSetRegisterNodeDa
 	switch result {
 	case common.RegistrationResult_Success:
 		data.Success = true
+		// Force a re-login to update the registration status
+		_ = sp.GetNodeSetServiceManager().Login(ctx)
 	case common.RegistrationResult_AlreadyRegistered:
 		data.Success = false
 		data.AlreadyRegistered = true
