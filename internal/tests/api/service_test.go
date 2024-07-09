@@ -7,14 +7,14 @@ import (
 
 	dtypes "github.com/docker/docker/api/types"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
-	"github.com/nodeset-org/osha"
+	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
 	"github.com/stretchr/testify/require"
 )
 
 // Test getting the client status of synced clients
 func TestClientStatus_Synced(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_EthClients)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
@@ -61,7 +61,7 @@ func TestServerVersion(t *testing.T) {
 
 func TestRestartContainer(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_Docker)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_Docker)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
