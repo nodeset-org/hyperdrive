@@ -11,9 +11,10 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/constellation"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
-	swcmd "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
@@ -120,9 +121,10 @@ func main() {
 	setDefaultPaths()
 
 	// Register commands
+	constellation.RegisterCommands(app, "constellation", []string{"cs"})
 	nodeset.RegisterCommands(app, "nodeset", []string{"ns"})
 	service.RegisterCommands(app, "service", []string{"s"})
-	swcmd.RegisterCommands(app, "stakewise", []string{"sw"})
+	stakewise.RegisterCommands(app, "stakewise", []string{"sw"})
 	wallet.RegisterCommands(app, "wallet", []string{"w"})
 
 	var hdCtx *context.HyperdriveContext

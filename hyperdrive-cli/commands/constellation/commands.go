@@ -1,4 +1,4 @@
-package swcmd
+package constellation
 
 import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/constellation/node"

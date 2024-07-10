@@ -1,4 +1,4 @@
-package swcmd
+package stakewise
 
 import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"

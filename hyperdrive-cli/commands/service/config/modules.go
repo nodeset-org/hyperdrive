@@ -11,13 +11,14 @@ const modulesPageID string = "modules"
 
 // The addons page
 type ModulesPage struct {
-	home          *settingsHome
-	page          *page
-	layout        *standardLayout
-	masterConfig  *client.GlobalConfig
-	stakewisePage *StakewiseConfigPage
-	categoryList  *tview.List
-	addonSubpages []settingsPage
+	home              *settingsHome
+	page              *page
+	layout            *standardLayout
+	masterConfig      *client.GlobalConfig
+	stakewisePage     *StakewiseConfigPage
+	constellationPage *ConstellationConfigPage
+	categoryList      *tview.List
+	addonSubpages     []settingsPage
 }
 
 // Create a new addons page
@@ -37,8 +38,10 @@ func NewModulesPage(home *settingsHome) *ModulesPage {
 
 	// Create the addon subpages
 	modulesPage.stakewisePage = NewStakewiseConfigPage(modulesPage)
+	modulesPage.constellationPage = NewConstellationConfigPage(modulesPage)
 	moduleSubpages := []settingsPage{
 		modulesPage.stakewisePage,
+		modulesPage.constellationPage,
 	}
 	modulesPage.addonSubpages = moduleSubpages
 
