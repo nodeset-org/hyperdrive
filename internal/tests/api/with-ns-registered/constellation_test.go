@@ -14,6 +14,7 @@ import (
 const (
 	whitelistAddressString     string = "0x3fdc08D815cc4ED3B7F69Ee246716f2C8bCD6b07"
 	expectedWhitelistSignature string = "0x38b8b7989b0f0695e8cb08253a3077b33c102c307a6b0a50c0a90dbb971ecd3f0e3fd38cd9ffecf696f1aa41151dceb86b405ed78259928c9be62f56d852e03c1b"
+	expectedMinipoolCount      int    = 10
 )
 
 // Test getting a signature for whitelisting a node
@@ -46,6 +47,27 @@ func TestConstellationWhitelistSignature(t *testing.T) {
 	sigHex := utils.EncodeHexWithPrefix(response.Data.Signature)
 	require.Equal(t, expectedWhitelistSignature, sigHex)
 	t.Logf("Whitelist signature is correct")
+}
+
+func TestGetMinipoolAvailabilityCount(t *testing.T) {
+	// Take a snapshot, revert at the end
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_EthClients | hdtesting.Service_Filesystem | hdtesting.Service_NodeSet)
+	if err != nil {
+		fail("Error creating custom snapshot: %v", err)
+	}
+	defer nodeset_cleanup(snapshotName)
+
+	// Set the minipool count
+	nsmock := testMgr.GetNodeSetMockServer()
+	nsmock.GetManager().SetAvailableConstellationMinipoolCount(nodeAddress, expectedMinipoolCount)
+
+	// Get the minipool count and assert
+	minipoolCountResponse, err := testMgr.GetApiClient().NodeSet_Constellation.GetAvailableMinipoolCount()
+	require.NoError(t, err)
+	require.Equal(t, expectedMinipoolCount, minipoolCountResponse.Data.Count)
+
+	t.Log("Minipool availability count is correct")
+
 }
 
 // Cleanup after a unit test
