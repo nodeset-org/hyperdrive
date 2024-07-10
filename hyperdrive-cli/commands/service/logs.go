@@ -16,8 +16,6 @@ func serviceLogs(c *cli.Context, aliasedNames ...string) error {
 			trueName = "ec"
 		case "cc", "cl", "bc", "eth2", "beacon", "consensus":
 			trueName = "bn"
-		case "vc":
-			trueName = "validator"
 		}
 		serviceNames = append(serviceNames, trueName)
 	}

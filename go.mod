@@ -8,7 +8,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/ethereum/go-ethereum v1.14.3
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240708180812-9e2a3dac7eb4
+	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240709204807-24ee43c46661
 	github.com/nodeset-org/hyperdrive-stakewise v1.0.3-0.20240708181242-ec30facd8630
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/node-manager-core v0.5.1
@@ -95,4 +95,6 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
-require github.com/nodeset-org/nodeset-client-go v0.0.0-20240705161624-e301897d5d3c // indirect
+require github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240710144645-4823b3024295
+
+require github.com/nodeset-org/nodeset-client-go v0.0.0-20240709204602-d660ec1e19ad // indirect

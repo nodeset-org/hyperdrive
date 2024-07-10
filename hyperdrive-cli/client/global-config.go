@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"time"
 
+	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
@@ -16,16 +17,18 @@ const (
 
 // Wrapper for global configuration
 type GlobalConfig struct {
-	ExternalIP string
-	Hyperdrive *hdconfig.HyperdriveConfig
-	Stakewise  *swconfig.StakeWiseConfig
+	ExternalIP    string
+	Hyperdrive    *hdconfig.HyperdriveConfig
+	Stakewise     *swconfig.StakeWiseConfig
+	Constellation *csconfig.ConstellationConfig
 }
 
 // Make a new global config
 func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig) *GlobalConfig {
 	cfg := &GlobalConfig{
-		Hyperdrive: hdCfg,
-		Stakewise:  swconfig.NewStakeWiseConfig(hdCfg),
+		Hyperdrive:    hdCfg,
+		Stakewise:     swconfig.NewStakeWiseConfig(hdCfg),
+		Constellation: csconfig.NewConstellationConfig(hdCfg),
 	}
 
 	for _, module := range cfg.GetAllModuleConfigs() {
@@ -38,6 +41,7 @@ func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig) *GlobalConfig {
 func (c *GlobalConfig) GetAllModuleConfigs() []hdconfig.IModuleConfig {
 	return []hdconfig.IModuleConfig{
 		c.Stakewise,
+		c.Constellation,
 	}
 }
 
@@ -61,20 +65,33 @@ func (c *GlobalConfig) DeserializeModules() error {
 			return fmt.Errorf("error deserializing stakewise configuration: %w", err)
 		}
 	}
+
+	// Load Constellation
+	constellationName := c.Constellation.GetModuleName()
+	section, exists = c.Hyperdrive.Modules[constellationName]
+	if exists {
+		configMap, ok := section.(map[string]any)
+		if !ok {
+			return fmt.Errorf("config module section [%s] is not a map, it's a %s", constellationName, reflect.TypeOf(section))
+		}
+		err := c.Constellation.Deserialize(configMap, c.Hyperdrive.Network.Value)
+		if err != nil {
+			return fmt.Errorf("error deserializing constellation configuration: %w", err)
+		}
+	}
 	return nil
 }
 
 // Creates a copy of the configuration
 func (c *GlobalConfig) CreateCopy() *GlobalConfig {
-	// Hyperdrive
 	hdCopy := c.Hyperdrive.Clone()
-
-	// Stakewise
 	swCopy := c.Stakewise.Clone().(*swconfig.StakeWiseConfig)
+	csCopy := c.Constellation.Clone().(*csconfig.ConstellationConfig)
 
 	return &GlobalConfig{
-		Hyperdrive: hdCopy,
-		Stakewise:  swCopy,
+		Hyperdrive:    hdCopy,
+		Stakewise:     swCopy,
+		Constellation: csCopy,
 	}
 }
 
@@ -147,6 +164,7 @@ func (c *GlobalConfig) Validate() []string {
 	portMap := make(map[uint16]bool)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.ApiPort, errors)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Stakewise.ApiPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.Constellation.ApiPort, errors)
 	if c.Hyperdrive.ClientMode.Value == config.ClientMode_Local {
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.HttpPort, errors)
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.WebsocketPort, errors)
@@ -167,6 +185,9 @@ func (c *GlobalConfig) Validate() []string {
 		if c.Stakewise.Enabled.Value {
 			portMap, errors = addAndCheckForDuplicate(portMap, c.Stakewise.VcCommon.MetricsPort, errors)
 		}
+		if c.Constellation.Enabled.Value {
+			portMap, errors = addAndCheckForDuplicate(portMap, c.Constellation.VcCommon.MetricsPort, errors)
+		}
 	}
 	if c.Hyperdrive.MevBoost.Enable.Value && c.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
 		_, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.MevBoost.Port, errors)
@@ -183,6 +204,7 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 	// Process all configs for changes
 	sectionList = getChanges(oldConfig.Hyperdrive, c.Hyperdrive, sectionList, changedContainers)
 	sectionList = getChanges(oldConfig.Stakewise, c.Stakewise, sectionList, changedContainers)
+	sectionList = getChanges(oldConfig.Constellation, c.Constellation, sectionList, changedContainers)
 
 	// Add all VCs to the list of changed containers if any change requires a VC change
 	if changedContainers[config.ContainerID_ValidatorClient] {
