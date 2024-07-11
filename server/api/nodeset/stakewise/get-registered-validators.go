@@ -36,7 +36,7 @@ func (f *stakeWiseGetRegisteredValidatorsContextFactory) Create(args url.Values)
 
 func (f *stakeWiseGetRegisteredValidatorsContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*stakeWiseGetRegisteredValidatorsContext, api.NodeSetStakeWise_GetRegisteredValidatorsData](
-		router, "get-registered-validators", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
+		router, "get-registered-validators", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
 	)
 }
 

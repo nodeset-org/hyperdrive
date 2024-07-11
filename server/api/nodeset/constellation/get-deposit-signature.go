@@ -38,7 +38,7 @@ func (f *constellationGetDepositSignatureContextFactory) Create(args url.Values)
 
 func (f *constellationGetDepositSignatureContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*constellationGetDepositSignatureContext, api.NodeSetConstellation_GetDepositSignatureData](
-		router, "get-deposit-signature", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
+		router, "get-deposit-signature", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
 	)
 }
 

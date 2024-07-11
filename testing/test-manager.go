@@ -23,7 +23,7 @@ type HyperdriveTestManager struct {
 	*osha.TestManager
 
 	// The service provider for the test environment
-	serviceProvider *common.ServiceProvider
+	serviceProvider *common.IServiceProvider
 
 	// The mock for the nodeset.io service
 	nodesetMock *nsserver.NodeSetMockServer
@@ -196,8 +196,8 @@ func (m *HyperdriveTestManager) Close() error {
 // ===============
 
 // Returns the service provider for the test environment
-func (m *HyperdriveTestManager) GetServiceProvider() *common.ServiceProvider {
-	return m.serviceProvider
+func (m *HyperdriveTestManager) GetServiceProvider() *common.IServiceProvider {
+	return m.IServiceProvider
 }
 
 // Get the nodeset.io mock server

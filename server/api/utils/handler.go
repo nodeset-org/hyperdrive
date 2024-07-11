@@ -12,11 +12,11 @@ import (
 type UtilsHandler struct {
 	logger          *log.Logger
 	ctx             context.Context
-	serviceProvider *common.ServiceProvider
+	serviceProvider *common.IServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewUtilsHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.ServiceProvider) *UtilsHandler {
+func NewUtilsHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.IServiceProvider) *UtilsHandler {
 	h := &UtilsHandler{
 		logger:          logger,
 		ctx:             ctx,

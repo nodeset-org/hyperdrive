@@ -12,11 +12,11 @@ import (
 type ConstellationHandler struct {
 	logger          *log.Logger
 	ctx             context.Context
-	serviceProvider *common.ServiceProvider
+	serviceProvider *common.IServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewConstellationHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.ServiceProvider) *ConstellationHandler {
+func NewConstellationHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.IServiceProvider) *ConstellationHandler {
 	h := &ConstellationHandler{
 		logger:          logger,
 		ctx:             ctx,

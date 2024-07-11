@@ -48,7 +48,7 @@ func RegisterQuerylessGet[ContextType IQuerylessCallContext[DataType], DataType 
 	functionName string,
 	factory IQuerylessGetContextFactory[ContextType, DataType],
 	logger *slog.Logger,
-	serviceProvider *services.ServiceProvider,
+	serviceProvider *services.IServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -91,7 +91,7 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 	functionName string,
 	factory IQuerylessPostContextFactory[ContextType, BodyType, DataType],
 	logger *slog.Logger,
-	serviceProvider *services.ServiceProvider,
+	serviceProvider *services.IServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -148,7 +148,7 @@ func RegisterQuerylessPost[ContextType IQuerylessCallContext[DataType], BodyType
 }
 
 // Run a route registered with no structured chain query pattern
-func runQuerylessRoute[DataType any](ctx IQuerylessCallContext[DataType], serviceProvider *services.ServiceProvider) (types.ResponseStatus, *types.ApiResponse[DataType], error) {
+func runQuerylessRoute[DataType any](ctx IQuerylessCallContext[DataType], serviceProvider *services.IServiceProvider) (types.ResponseStatus, *types.ApiResponse[DataType], error) {
 	// Get the services
 	hd := serviceProvider.GetHyperdriveClient()
 	signer := serviceProvider.GetSigner()

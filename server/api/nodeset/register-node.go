@@ -32,7 +32,7 @@ func (f *nodeSetRegisterNodeContextFactory) Create(args url.Values) (*nodeSetReg
 
 func (f *nodeSetRegisterNodeContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*nodeSetRegisterNodeContext, api.NodeSetRegisterNodeData](
-		router, "register-node", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
+		router, "register-node", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
 	)
 }
 

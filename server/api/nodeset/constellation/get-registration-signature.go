@@ -32,7 +32,7 @@ func (f *constellationGetRegistrationSignatureContextFactory) Create(args url.Va
 
 func (f *constellationGetRegistrationSignatureContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*constellationGetRegistrationSignatureContext, api.NodeSetConstellation_GetRegistrationSignatureData](
-		router, "get-registration-signature", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
+		router, "get-registration-signature", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
 	)
 }
 
