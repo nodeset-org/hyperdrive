@@ -14,13 +14,13 @@ import (
 type NodeSetHandler struct {
 	logger               *log.Logger
 	ctx                  context.Context
-	serviceProvider      *common.IServiceProvider
+	serviceProvider      *common.ServiceProvider
 	factories            []server.IContextFactory
 	stakeWiseHandler     *ns_stakewise.StakeWiseHandler
 	constellationHandler *ns_constellation.ConstellationHandler
 }
 
-func NewNodeSetHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.IServiceProvider) *NodeSetHandler {
+func NewNodeSetHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.ServiceProvider) *NodeSetHandler {
 	h := &NodeSetHandler{
 		logger:          logger,
 		ctx:             ctx,
@@ -40,10 +40,10 @@ func (h *NodeSetHandler) RegisterRoutes(router *mux.Router) {
 	}
 
 	// Register StakeWise routes
-	h.stakeWiseHandler = ns_stakewise.NewStakeWiseHandler(h.logger, h.ctx, h.IServiceProvider)
+	h.stakeWiseHandler = ns_stakewise.NewStakeWiseHandler(h.logger, h.ctx, h.serviceProvider)
 	h.stakeWiseHandler.RegisterRoutes(subrouter)
 
 	// Register Constellation routes
-	h.constellationHandler = ns_constellation.NewConstellationHandler(h.logger, h.ctx, h.IServiceProvider)
+	h.constellationHandler = ns_constellation.NewConstellationHandler(h.logger, h.ctx, h.serviceProvider)
 	h.constellationHandler.RegisterRoutes(subrouter)
 }

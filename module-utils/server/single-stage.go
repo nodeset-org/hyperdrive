@@ -53,7 +53,7 @@ func RegisterSingleStageRoute[ContextType ISingleStageCallContext[DataType], Dat
 	functionName string,
 	factory ISingleStageGetContextFactory[ContextType, DataType],
 	logger *slog.Logger,
-	serviceProvider *services.IServiceProvider,
+	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -96,7 +96,7 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 	functionName string,
 	factory ISingleStagePostContextFactory[ContextType, BodyType, DataType],
 	logger *slog.Logger,
-	serviceProvider *services.IServiceProvider,
+	serviceProvider *services.ServiceProvider,
 ) {
 	router.HandleFunc(fmt.Sprintf("/%s", functionName), func(w http.ResponseWriter, r *http.Request) {
 		// Log
@@ -153,7 +153,7 @@ func RegisterSingleStagePost[ContextType ISingleStageCallContext[DataType], Body
 }
 
 // Run a route registered with the common single-stage querying pattern
-func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], serviceProvider *services.IServiceProvider) (types.ResponseStatus, *types.ApiResponse[DataType], error) {
+func runSingleStageRoute[DataType any](ctx ISingleStageCallContext[DataType], serviceProvider *services.ServiceProvider) (types.ResponseStatus, *types.ApiResponse[DataType], error) {
 	// Get the services
 	q := serviceProvider.GetQueryManager()
 	hd := serviceProvider.GetHyperdriveClient()

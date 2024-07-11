@@ -21,7 +21,7 @@ type ServerManager struct {
 }
 
 // Creates a new server manager
-func NewServerManager(sp *common.IServiceProvider, ip string, port uint16, stopWg *sync.WaitGroup) (*ServerManager, error) {
+func NewServerManager(sp *common.ServiceProvider, ip string, port uint16, stopWg *sync.WaitGroup) (*ServerManager, error) {
 	// Start the API server
 	apiServer, err := createServer(sp, ip, port)
 	if err != nil {
@@ -55,7 +55,7 @@ func (m *ServerManager) Stop() {
 }
 
 // Creates a new Hyperdrive API server
-func createServer(sp *common.IServiceProvider, ip string, port uint16) (*server.NetworkSocketApiServer, error) {
+func createServer(sp *common.ServiceProvider, ip string, port uint16) (*server.NetworkSocketApiServer, error) {
 	apiLogger := sp.GetApiLogger()
 	ctx := apiLogger.CreateContextWithLogger(sp.GetBaseContext())
 

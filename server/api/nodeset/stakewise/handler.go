@@ -12,11 +12,11 @@ import (
 type StakeWiseHandler struct {
 	logger          *log.Logger
 	ctx             context.Context
-	serviceProvider *common.IServiceProvider
+	serviceProvider *common.ServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewStakeWiseHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.IServiceProvider) *StakeWiseHandler {
+func NewStakeWiseHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.ServiceProvider) *StakeWiseHandler {
 	h := &StakeWiseHandler{
 		logger:          logger,
 		ctx:             ctx,
