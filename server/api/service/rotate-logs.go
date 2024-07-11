@@ -27,7 +27,7 @@ func (f *serviceRotateLogsContextFactory) Create(args url.Values) (*serviceRotat
 
 func (f *serviceRotateLogsContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*serviceRotateLogsContext, types.SuccessData](
-		router, "rotate", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
+		router, "rotate", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
 	)
 }
 

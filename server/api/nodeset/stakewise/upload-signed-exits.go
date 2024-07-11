@@ -31,7 +31,7 @@ func (f *stakeWiseUploadSignedExitsContextFactory) Create(body []apiv1.ExitData)
 
 func (f *stakeWiseUploadSignedExitsContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessPost[*stakeWiseUploadSignedExitsContext, []apiv1.ExitData, api.NodeSetStakeWise_UploadSignedExitsData](
-		router, "upload-signed-exits", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
+		router, "upload-signed-exits", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
 	)
 }
 

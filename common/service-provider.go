@@ -12,7 +12,7 @@ import (
 
 // A container for all of the various services used by Hyperdrive
 type ServiceProvider struct {
-	*services.ServiceProvider
+	services.IServiceProvider
 
 	// Services
 	cfg *hdconfig.HyperdriveConfig
@@ -48,10 +48,10 @@ func NewServiceProviderFromConfig(cfg *hdconfig.HyperdriveConfig) (*ServiceProvi
 
 	// Create the provider
 	provider := &ServiceProvider{
-		ServiceProvider: sp,
-		userDir:         cfg.GetUserDirectory(),
-		cfg:             cfg,
-		res:             cfg.GetResources(),
+		IServiceProvider: sp,
+		userDir:          cfg.GetUserDirectory(),
+		cfg:              cfg,
+		res:              cfg.GetResources(),
 	}
 	ns := NewNodeSetServiceManager(provider)
 	provider.ns = ns
@@ -68,10 +68,10 @@ func NewServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resour
 
 	// Create the provider
 	provider := &ServiceProvider{
-		ServiceProvider: sp,
-		userDir:         cfg.GetUserDirectory(),
-		cfg:             cfg,
-		res:             resources,
+		IServiceProvider: sp,
+		userDir:          cfg.GetUserDirectory(),
+		cfg:              cfg,
+		res:              resources,
 	}
 	ns := NewNodeSetServiceManager(provider)
 	provider.ns = ns

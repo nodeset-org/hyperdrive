@@ -43,7 +43,7 @@ func (f *walletSendContextFactory) Create(args url.Values) (*walletSendContext, 
 
 func (f *walletSendContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*walletSendContext, api.WalletSendData](
-		router, "send", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
+		router, "send", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
 	)
 }
 
