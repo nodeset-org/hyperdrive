@@ -28,7 +28,7 @@ func (f *nodeSetGetRegistrationStatusContextFactory) Create(args url.Values) (*n
 
 func (f *nodeSetGetRegistrationStatusContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*nodeSetGetRegistrationStatusContext, api.NodeSetGetRegistrationStatusData](
-		router, "get-registration-status", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
+		router, "get-registration-status", f, f.handler.logger.Logger, f.handler.serviceProvider,
 	)
 }
 

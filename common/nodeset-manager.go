@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/nodeset-org/hyperdrive-daemon/module-utils/services"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	apiv1 "github.com/nodeset-org/nodeset-client-go/api-v1"
@@ -44,7 +43,7 @@ type NodeSetServiceManager struct {
 }
 
 // Creates a new NodeSet service manager
-func NewNodeSetServiceManager(sp *ServiceProvider) *NodeSetServiceManager {
+func NewNodeSetServiceManager(sp IHyperdriveServiceProvider) *NodeSetServiceManager {
 	wallet := sp.GetWallet()
 	resources := sp.GetResources()
 
@@ -385,7 +384,7 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("error getting wallet status for login: %w", err)
 	}
-	err = services.CheckIfWalletReady(walletStatus)
+	err = CheckIfWalletReady(walletStatus)
 	if err != nil {
 		m.nodeRegistrationStatus = api.NodeSetRegistrationStatus_NoWallet
 		return fmt.Errorf("can't log into nodeset, hyperdrive wallet not initialized yet")

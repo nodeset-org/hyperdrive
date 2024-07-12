@@ -44,18 +44,18 @@ var (
 	ErrWalletNotReady error = errors.New("The node does not have a wallet ready yet. Please run 'hyperdrive wallet status' to learn more first.")
 )
 
-func (sp *ServiceProvider) RequireNodeAddress(status wallet.WalletStatus) error {
+func (sp *moduleServiceProvider) RequireNodeAddress(status wallet.WalletStatus) error {
 	if !status.Address.HasAddress {
 		return errors.New("The node currently does not have an address set. Please run 'hyperdrive wallet init' and try again.")
 	}
 	return nil
 }
 
-func (sp *ServiceProvider) RequireWalletReady(status wallet.WalletStatus) error {
+func (sp *moduleServiceProvider) RequireWalletReady(status wallet.WalletStatus) error {
 	return CheckIfWalletReady(status)
 }
 
-func (sp *ServiceProvider) RequireEthClientSynced(ctx context.Context) error {
+func (sp *moduleServiceProvider) RequireEthClientSynced(ctx context.Context) error {
 	synced, _, err := sp.checkExecutionClientStatus(ctx)
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func (sp *ServiceProvider) RequireEthClientSynced(ctx context.Context) error {
 	return ErrExecutionClientNotSynced
 }
 
-func (sp *ServiceProvider) RequireBeaconClientSynced(ctx context.Context) error {
+func (sp *moduleServiceProvider) RequireBeaconClientSynced(ctx context.Context) error {
 	synced, err := sp.checkBeaconClientStatus(ctx)
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func (sp *ServiceProvider) RequireBeaconClientSynced(ctx context.Context) error 
 	return ErrBeaconNodeNotSynced
 }
 
-func (sp *ServiceProvider) RequireRegisteredWithNodeSet(ctx context.Context) error {
+func (sp *moduleServiceProvider) RequireRegisteredWithNodeSet(ctx context.Context) error {
 	response, err := sp.hdClient.NodeSet.GetRegistrationStatus()
 	if err != nil {
 		return err
@@ -94,19 +94,19 @@ func (sp *ServiceProvider) RequireRegisteredWithNodeSet(ctx context.Context) err
 }
 
 // Wait for the Executon client to sync; timeout of 0 indicates no timeout
-func (sp *ServiceProvider) WaitEthClientSynced(ctx context.Context, verbose bool) error {
+func (sp *moduleServiceProvider) WaitEthClientSynced(ctx context.Context, verbose bool) error {
 	_, err := sp.waitEthClientSynced(ctx, verbose)
 	return err
 }
 
 // Wait for the Beacon client to sync; timeout of 0 indicates no timeout
-func (sp *ServiceProvider) WaitBeaconClientSynced(ctx context.Context, verbose bool) error {
+func (sp *moduleServiceProvider) WaitBeaconClientSynced(ctx context.Context, verbose bool) error {
 	_, err := sp.waitBeaconClientSynced(ctx, verbose)
 	return err
 }
 
 // Wait for the Hyperdrive wallet to be ready
-func (sp *ServiceProvider) WaitForWallet(ctx context.Context) error {
+func (sp *moduleServiceProvider) WaitForWallet(ctx context.Context) error {
 	// Get the logger
 	logger, exists := log.FromContext(ctx)
 	if !exists {
@@ -134,7 +134,7 @@ func (sp *ServiceProvider) WaitForWallet(ctx context.Context) error {
 
 // Wait until the node has been registered with NodeSet.
 // Returns true if the context was cancelled and the caller should exit.
-func (sp *ServiceProvider) WaitForNodeSetRegistration(ctx context.Context) bool {
+func (sp *moduleServiceProvider) WaitForNodeSetRegistration(ctx context.Context) bool {
 	// Get the logger
 	logger, exists := log.FromContext(ctx)
 	if !exists {
@@ -172,7 +172,7 @@ func (sp *ServiceProvider) WaitForNodeSetRegistration(ctx context.Context) bool 
 
 // Check if the primary and fallback Execution clients are synced
 // TODO: Move this into ec-manager and stop exposing the primary and fallback directly...
-func (sp *ServiceProvider) checkExecutionClientStatus(ctx context.Context) (bool, eth.IExecutionClient, error) {
+func (sp *moduleServiceProvider) checkExecutionClientStatus(ctx context.Context) (bool, eth.IExecutionClient, error) {
 	// Check the EC status
 	ecMgr := sp.GetEthClient()
 	mgrStatus := ecMgr.CheckStatus(ctx, true) // Always check the chain ID for now
@@ -219,7 +219,7 @@ func (sp *ServiceProvider) checkExecutionClientStatus(ctx context.Context) (bool
 }
 
 // Check if the primary and fallback Beacon clients are synced
-func (sp *ServiceProvider) checkBeaconClientStatus(ctx context.Context) (bool, error) {
+func (sp *moduleServiceProvider) checkBeaconClientStatus(ctx context.Context) (bool, error) {
 	// Check the BC status
 	bcMgr := sp.GetBeaconClient()
 	mgrStatus := bcMgr.CheckStatus(ctx, true) // Always check the chain ID for now
@@ -266,7 +266,7 @@ func (sp *ServiceProvider) checkBeaconClientStatus(ctx context.Context) (bool, e
 }
 
 // Wait for the primary or fallback Execution client to be synced
-func (sp *ServiceProvider) waitEthClientSynced(ctx context.Context, verbose bool) (bool, error) {
+func (sp *moduleServiceProvider) waitEthClientSynced(ctx context.Context, verbose bool) (bool, error) {
 	synced, clientToCheck, err := sp.checkExecutionClientStatus(ctx)
 	if err != nil {
 		return false, err
@@ -334,7 +334,7 @@ func (sp *ServiceProvider) waitEthClientSynced(ctx context.Context, verbose bool
 }
 
 // Wait for the primary or fallback Beacon client to be synced
-func (sp *ServiceProvider) waitBeaconClientSynced(ctx context.Context, verbose bool) (bool, error) {
+func (sp *moduleServiceProvider) waitBeaconClientSynced(ctx context.Context, verbose bool) (bool, error) {
 	synced, err := sp.checkBeaconClientStatus(ctx)
 	if err != nil {
 		return false, err

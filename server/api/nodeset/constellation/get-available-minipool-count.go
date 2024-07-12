@@ -31,7 +31,7 @@ func (f *constellationGetAvailableMinipoolCountContextFactory) Create(args url.V
 
 func (f *constellationGetAvailableMinipoolCountContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*constellationGetAvailableMinipoolCountContext, api.NodeSetConstellation_GetAvailableMinipoolCount](
-		router, "get-available-minipool-count", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
+		router, "get-available-minipool-count", f, f.handler.logger.Logger, f.handler.serviceProvider,
 	)
 }
 

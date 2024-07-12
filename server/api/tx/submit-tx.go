@@ -42,7 +42,7 @@ func (f *txSubmitTxContextFactory) Create(body api.SubmitTxBody) (*txSubmitTxCon
 
 func (f *txSubmitTxContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessPost[*txSubmitTxContext, api.SubmitTxBody, api.TxData](
-		router, "submit-tx", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
+		router, "submit-tx", f, f.handler.logger.Logger, f.handler.serviceProvider,
 	)
 }
 

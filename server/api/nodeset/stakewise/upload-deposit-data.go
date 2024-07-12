@@ -32,7 +32,7 @@ func (f *stakeWiseUploadDepositDataContextFactory) Create(body []beacon.Extended
 
 func (f *stakeWiseUploadDepositDataContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessPost[*stakeWiseUploadDepositDataContext, []beacon.ExtendedDepositData, api.NodeSetStakeWise_UploadDepositDataData](
-		router, "upload-deposit-data", f, f.handler.logger.Logger, f.handler.serviceProvider.IServiceProvider,
+		router, "upload-deposit-data", f, f.handler.logger.Logger, f.handler.serviceProvider,
 	)
 }
 

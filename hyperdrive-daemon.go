@@ -79,7 +79,7 @@ func main() {
 		stopWg := new(sync.WaitGroup)
 
 		// Create the service provider
-		sp, err := common.NewServiceProvider(userDir)
+		sp, err := common.NewHyperdriveServiceProvider(userDir)
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}

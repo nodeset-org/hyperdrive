@@ -23,7 +23,7 @@ type HyperdriveTestManager struct {
 	*osha.TestManager
 
 	// The service provider for the test environment
-	serviceProvider *common.ServiceProvider
+	serviceProvider common.IHyperdriveServiceProvider
 
 	// The mock for the nodeset.io service
 	nodesetMock *nsserver.NodeSetMockServer
@@ -81,7 +81,7 @@ func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddre
 	testDir := tm.GetTestDir()
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
 	resources := GetTestResources(beaconCfg, fmt.Sprintf("http://%s:%d/api/", nodesetAddress, nodesetMock.GetPort()))
-	cfg := hdconfig.NewHyperdriveConfigForNetwork(testDir, hdconfig.Network_LocalTest, resources)
+	cfg := hdconfig.NewHyperdriveConfigForNetwork(testDir, hdconfig.Network_LocalTest)
 	cfg.Network.Value = hdconfig.Network_LocalTest
 
 	// Make the test manager
@@ -96,7 +96,7 @@ func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdc
 	bnManager := services.NewBeaconClientManager(tm.GetBeaconClient(), uint(beaconCfg.ChainID), time.Minute)
 
 	// Make a new service provider
-	serviceProvider, err := common.NewServiceProviderFromCustomServices(
+	serviceProvider, err := common.NewHyperdriveServiceProviderFromCustomServices(
 		cfg,
 		resources,
 		ecManager,
@@ -196,7 +196,7 @@ func (m *HyperdriveTestManager) Close() error {
 // ===============
 
 // Returns the service provider for the test environment
-func (m *HyperdriveTestManager) GetServiceProvider() *common.ServiceProvider {
+func (m *HyperdriveTestManager) GetServiceProvider() common.IHyperdriveServiceProvider {
 	return m.serviceProvider
 }
 

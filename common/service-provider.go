@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,8 +11,61 @@ import (
 	"github.com/rocket-pool/node-manager-core/node/services"
 )
 
+// Provides Hyperdrive's configuration
+type IHyperdriveConfigProvider interface {
+	// Gets Hyperdrive's configuration
+	GetConfig() *hdconfig.HyperdriveConfig
+
+	// Gets Hyperdrive's list of resources
+	GetResources() *hdconfig.HyperdriveResources
+}
+
+// Provides a manager for nodeset.io communications
+type INodeSetManagerProvider interface {
+	// Gets the NodeSetServiceManager
+	GetNodeSetServiceManager() *NodeSetServiceManager
+}
+
+// Provides methods for requiring or waiting for various conditions to be met
+type IRequirementsProvider interface {
+	// Require Hyperdrive has a node address set
+	RequireNodeAddress() error
+
+	// Require Hyperdrive has a wallet that's loaded and ready for transactions
+	RequireWalletReady() error
+
+	// Require that the Ethereum client is synced
+	RequireEthClientSynced(ctx context.Context) error
+
+	// Require that the Beacon chain client is synced
+	RequireBeaconClientSynced(ctx context.Context) error
+
+	// Require the node has been registered with a nodeset.io account
+	RequireRegisteredWithNodeSet(ctx context.Context) error
+
+	// Wait for the Ethereum client to be synced
+	WaitEthClientSynced(ctx context.Context, verbose bool) error
+
+	// Wait for the Beacon chain client to be synced
+	WaitBeaconClientSynced(ctx context.Context, verbose bool) error
+
+	// Wait for the node to have a wallet loaded and ready for transactions
+	WaitForWallet(ctx context.Context) error
+
+	// Wait for the node to be registered with a nodeset.io account
+	WaitForNodeSetRegistration(ctx context.Context) bool
+}
+
+// Provides access to all of Hyperdrive's services
+type IHyperdriveServiceProvider interface {
+	IHyperdriveConfigProvider
+	INodeSetManagerProvider
+	IRequirementsProvider
+	services.IServiceProvider
+}
+
 // A container for all of the various services used by Hyperdrive
-type ServiceProvider struct {
+type serviceProvider struct {
 	services.IServiceProvider
 
 	// Services
@@ -23,8 +77,8 @@ type ServiceProvider struct {
 	userDir string
 }
 
-// Creates a new ServiceProvider instance by loading the Hyperdrive config in the provided directory
-func NewServiceProvider(userDir string) (*ServiceProvider, error) {
+// Creates a new IHyperdriveServiceProvider instance by loading the Hyperdrive config in the provided directory
+func NewHyperdriveServiceProvider(userDir string) (IHyperdriveServiceProvider, error) {
 	// Config
 	cfgPath := filepath.Join(userDir, hdconfig.ConfigFilename)
 	cfg, err := loadConfigFromFile(os.ExpandEnv(cfgPath))
@@ -35,31 +89,34 @@ func NewServiceProvider(userDir string) (*ServiceProvider, error) {
 		return nil, fmt.Errorf("hyperdrive config settings file [%s] not found", cfgPath)
 	}
 
-	return NewServiceProviderFromConfig(cfg)
+	// Make the resources
+	resources := hdconfig.NewHyperdriveResources(cfg.Network.Value)
+
+	return NewHyperdriveServiceProviderFromConfig(cfg, resources)
 }
 
-// Creates a new ServiceProvider instance directly from a Hyperdrive config instead of loading it from the filesystem
-func NewServiceProviderFromConfig(cfg *hdconfig.HyperdriveConfig) (*ServiceProvider, error) {
+// Creates a new IHyperdriveServiceProvider instance directly from a Hyperdrive config and resources list instead of loading them from the filesystem
+func NewHyperdriveServiceProviderFromConfig(cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources) (IHyperdriveServiceProvider, error) {
 	// Core provider
-	sp, err := services.NewServiceProvider(cfg, hdconfig.ClientTimeout)
+	sp, err := services.NewServiceProvider(cfg, resources.NetworkResources, hdconfig.ClientTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("error creating core service provider: %w", err)
 	}
 
 	// Create the provider
-	provider := &ServiceProvider{
+	provider := &serviceProvider{
 		IServiceProvider: sp,
 		userDir:          cfg.GetUserDirectory(),
 		cfg:              cfg,
-		res:              cfg.GetResources(),
+		res:              resources,
 	}
 	ns := NewNodeSetServiceManager(provider)
 	provider.ns = ns
 	return provider, nil
 }
 
-// Creates a new ServiceProvider instance from custom services and artifacts
-func NewServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources, ecManager *services.ExecutionClientManager, bnManager *services.BeaconClientManager, docker client.APIClient) (*ServiceProvider, error) {
+// Creates a new IHyperdriveServiceProvider instance from custom services and artifacts
+func NewHyperdriveServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources, ecManager *services.ExecutionClientManager, bnManager *services.BeaconClientManager, docker client.APIClient) (IHyperdriveServiceProvider, error) {
 	// Core provider
 	sp, err := services.NewServiceProviderWithCustomServices(cfg, resources.NetworkResources, ecManager, bnManager, docker)
 	if err != nil {
@@ -67,7 +124,7 @@ func NewServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resour
 	}
 
 	// Create the provider
-	provider := &ServiceProvider{
+	provider := &serviceProvider{
 		IServiceProvider: sp,
 		userDir:          cfg.GetUserDirectory(),
 		cfg:              cfg,
@@ -82,19 +139,15 @@ func NewServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resour
 // === Getters ===
 // ===============
 
-func (p *ServiceProvider) GetUserDir() string {
-	return p.userDir
-}
-
-func (p *ServiceProvider) GetConfig() *hdconfig.HyperdriveConfig {
+func (p *serviceProvider) GetConfig() *hdconfig.HyperdriveConfig {
 	return p.cfg
 }
 
-func (p *ServiceProvider) GetResources() *hdconfig.HyperdriveResources {
+func (p *serviceProvider) GetResources() *hdconfig.HyperdriveResources {
 	return p.res
 }
 
-func (p *ServiceProvider) GetNodeSetServiceManager() *NodeSetServiceManager {
+func (p *serviceProvider) GetNodeSetServiceManager() *NodeSetServiceManager {
 	return p.ns
 }
 
