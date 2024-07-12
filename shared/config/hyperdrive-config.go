@@ -68,7 +68,6 @@ type HyperdriveConfig struct {
 	// Internal fields
 	Version                 string
 	hyperdriveUserDirectory string
-	resources               *HyperdriveResources
 }
 
 // Load configuration settings from a file
@@ -103,20 +102,11 @@ func LoadFromFile(path string) (*HyperdriveConfig, error) {
 
 // Creates a new Hyperdrive configuration instance
 func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
-	cfg := newHyperdriveConfigImpl(hdDir, config.Network_Mainnet) // Default to mainnet
-	cfg.updateResources()
-	return cfg
+	return NewHyperdriveConfigForNetwork(hdDir, config.Network_Mainnet) // Default to mainnet
 }
 
-// Creates a new Hyperdrive configuration instance for a custom network
-func NewHyperdriveConfigForNetwork(hdDir string, network config.Network, resources *HyperdriveResources) *HyperdriveConfig {
-	cfg := newHyperdriveConfigImpl(hdDir, network)
-	cfg.resources = resources
-	return cfg
-}
-
-// Implementation of the Hyperdrive config constructor
-func newHyperdriveConfigImpl(hdDir string, network config.Network) *HyperdriveConfig {
+// Creates a new Hyperdrive configuration instance for a specific network
+func NewHyperdriveConfigForNetwork(hdDir string, network config.Network) *HyperdriveConfig {
 	cfg := &HyperdriveConfig{
 		hyperdriveUserDirectory: hdDir,
 		Modules:                 map[string]any{},
@@ -427,7 +417,6 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 		cfg.Modules = map[string]any{}
 	}
 
-	cfg.updateResources()
 	return nil
 }
 
@@ -442,14 +431,12 @@ func (cfg *HyperdriveConfig) ChangeNetwork(newNetwork config.Network) {
 
 	// Run the changes
 	config.ChangeNetwork(cfg, oldNetwork, newNetwork)
-	cfg.updateResources()
 }
 
 // Creates a copy of the configuration
 func (cfg *HyperdriveConfig) Clone() *HyperdriveConfig {
 	clone := NewHyperdriveConfig(cfg.hyperdriveUserDirectory)
 	config.Clone(cfg, clone, cfg.Network.Value)
-	clone.updateResources()
 	clone.Version = cfg.Version
 	return clone
 }
@@ -496,14 +483,6 @@ func getNetworkOptions() []*config.ParameterOption[config.Network] {
 	return options
 }
 
-func (cfg *HyperdriveConfig) GetResources() *HyperdriveResources {
-	return cfg.resources
-}
-
-func (cfg *HyperdriveConfig) updateResources() {
-	cfg.resources = NewHyperdriveResources(cfg.Network.Value)
-}
-
 func (cfg *HyperdriveConfig) GetUserDirectory() string {
 	return cfg.hyperdriveUserDirectory
 }
@@ -530,10 +509,6 @@ func (cfg *HyperdriveConfig) GetWalletFilePath() string {
 
 func (cfg *HyperdriveConfig) GetPasswordFilePath() string {
 	return filepath.Join(cfg.UserDataPath.Value, UserPasswordFilename)
-}
-
-func (cfg *HyperdriveConfig) GetNetworkResources() *config.NetworkResources {
-	return cfg.resources.NetworkResources
 }
 
 func (cfg *HyperdriveConfig) GetExecutionClientUrls() (string, string) {

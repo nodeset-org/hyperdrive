@@ -13,11 +13,11 @@ import (
 type NodeSetHandler struct {
 	logger          *log.Logger
 	ctx             context.Context
-	serviceProvider *common.ServiceProvider
+	serviceProvider common.IHyperdriveServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewNodeSetHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.ServiceProvider) *NodeSetHandler {
+func NewNodeSetHandler(logger *log.Logger, ctx context.Context, serviceProvider common.IHyperdriveServiceProvider) *NodeSetHandler {
 	h := &NodeSetHandler{
 		logger:          logger,
 		ctx:             ctx,
