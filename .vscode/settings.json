@@ -5,5 +5,9 @@
     "go.testFlags": [
         "-p",
         "1"
+    ],
+    "go.lintFlags": [
+        "-e",
+        "ST1005"
     ]
 }

@@ -31,17 +31,10 @@ const (
 )
 
 var (
-	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
 	ErrExecutionClientNotSynced error = errors.New("The Execution client is currently syncing. Please try again later.")
-
-	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
-	ErrBeaconNodeNotSynced error = errors.New("The Beacon node is currently syncing. Please try again later.")
-
-	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
+	ErrBeaconNodeNotSynced      error = errors.New("The Beacon node is currently syncing. Please try again later.")
 	ErrNotRegisteredWithNodeSet error = errors.New("The node is not registered with the Node Set. Please run 'hyperdrive nodeset register-node' and try again.")
-
-	//lint:ignore ST1005 These are printed to the user and need to be in proper grammatical format
-	ErrWalletNotReady error = errors.New("The node does not have a wallet ready yet. Please run 'hyperdrive wallet status' to learn more first.")
+	ErrWalletNotReady           error = errors.New("The node does not have a wallet ready yet. Please run 'hyperdrive wallet status' to learn more first.")
 )
 
 func (sp *moduleServiceProvider) RequireNodeAddress(status wallet.WalletStatus) error {
