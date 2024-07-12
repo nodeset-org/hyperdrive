@@ -84,6 +84,9 @@ type IRequirementsProvider interface {
 	// Wait for the Beacon chain client to be synced
 	WaitBeaconClientSynced(ctx context.Context, verbose bool) error
 
+	// Wait for Hyperdrive to have a node address assigned
+	WaitForNodeAddress(ctx context.Context) error
+
 	// Wait for the node to have a wallet loaded and ready for transactions
 	WaitForWallet(ctx context.Context) error
 
