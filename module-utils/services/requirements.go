@@ -46,7 +46,7 @@ var (
 
 func (sp *moduleServiceProvider) RequireNodeAddress(status wallet.WalletStatus) error {
 	if !status.Address.HasAddress {
-		return errors.New("The node currently does not have an address set. Please run 'hyperdrive wallet init' and try again.")
+		return ErrNodeAddressNotSet
 	}
 	return nil
 }
