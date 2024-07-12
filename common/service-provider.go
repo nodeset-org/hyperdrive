@@ -11,6 +11,10 @@ import (
 	"github.com/rocket-pool/node-manager-core/node/services"
 )
 
+// ==================
+// === Interfaces ===
+// ==================
+
 // Provides Hyperdrive's configuration
 type IHyperdriveConfigProvider interface {
 	// Gets Hyperdrive's configuration
@@ -63,6 +67,10 @@ type IHyperdriveServiceProvider interface {
 	IRequirementsProvider
 	services.IServiceProvider
 }
+
+// ========================
+// === Service Provider ===
+// ========================
 
 // A container for all of the various services used by Hyperdrive
 type serviceProvider struct {

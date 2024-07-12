@@ -22,6 +22,10 @@ import (
 	"github.com/rocket-pool/node-manager-core/wallet"
 )
 
+// ==================
+// === Interfaces ===
+// ==================
+
 // Provides the configurations for Hyperdrive and the module
 type IModuleConfigProvider interface {
 	// Gets Hyperdrive's configuration
@@ -101,6 +105,10 @@ type IModuleServiceProvider interface {
 	services.IContextProvider
 	io.Closer
 }
+
+// ========================
+// === Service Provider ===
+// ========================
 
 // A container for all of the various services used by Hyperdrive
 type moduleServiceProvider struct {
