@@ -7,7 +7,9 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 )
 
 const (
@@ -31,7 +33,7 @@ func (c *HyperdriveClient) LoadConfig() (*GlobalConfig, bool, error) {
 		return nil, false, fmt.Errorf("error expanding settings file path: %w", err)
 	}
 
-	cfg, err := LoadConfigFromFile(expandedPath)
+	cfg, err := LoadConfigFromFile(c.Context.NetworksDir, expandedPath)
 	if err != nil {
 		return nil, false, err
 	}
@@ -42,9 +44,32 @@ func (c *HyperdriveClient) LoadConfig() (*GlobalConfig, bool, error) {
 		return cfg, false, nil
 	}
 
-	// Config wasn't loaded, but there was no error- we should create one.
-	hdCfg := hdconfig.NewHyperdriveConfig(c.Context.ConfigPath)
-	c.cfg = NewGlobalConfig(hdCfg)
+	// Config wasn't loaded, but there was no error - we should create one.
+
+	// Get the Hyperdrive settings
+	hdSettings, err := LoadHyperdriveSettings(c.Context.NetworksDir)
+	if err != nil {
+		return nil, false, err
+	}
+
+	// Get the StakeWise settings
+	swSettings, err := LoadStakeWiseSettings(c.Context.NetworksDir)
+	if err != nil {
+		return nil, false, err
+	}
+
+	hdCfg, err := hdconfig.NewHyperdriveConfig(c.Context.ConfigPath, hdSettings)
+	if err != nil {
+		return nil, false, fmt.Errorf("error creating Hyperdrive config: %w", err)
+	}
+	swCfg, err := swconfig.NewStakeWiseConfig(hdCfg, swSettings)
+	if err != nil {
+		return nil, false, fmt.Errorf("error creating StakeWise config: %w", err)
+	}
+	c.cfg, err = NewGlobalConfig(hdCfg, hdSettings, swCfg, swSettings)
+	if err != nil {
+		return nil, false, fmt.Errorf("error creating global config: %w", err)
+	}
 	c.isNewCfg = true
 	return c.cfg, true, nil
 }
@@ -57,7 +82,7 @@ func (c *HyperdriveClient) LoadBackupConfig() (*GlobalConfig, error) {
 		return nil, fmt.Errorf("error expanding backup settings file path: %w", err)
 	}
 
-	return LoadConfigFromFile(expandedPath)
+	return LoadConfigFromFile(c.Context.NetworksDir, expandedPath)
 }
 
 // Save the config
@@ -87,11 +112,11 @@ func (c *HyperdriveClient) DeployMetricsConfigurations(config *GlobalConfig) err
 		return fmt.Errorf("error creating metrics and modules directories [%s]: %w", modulesDirPath, err)
 	}
 
-	err = updatePrometheusConfiguration(config, metricsDirPath)
+	err = updatePrometheusConfiguration(c.Context, config, metricsDirPath)
 	if err != nil {
 		return fmt.Errorf("error updating Prometheus configuration: %w", err)
 	}
-	err = updateGrafanaDatabaseConfiguration(config, metricsDirPath)
+	err = updateGrafanaDatabaseConfiguration(c.Context, config, metricsDirPath)
 	if err != nil {
 		return fmt.Errorf("error updating Grafana configuration: %w", err)
 	}
@@ -99,8 +124,8 @@ func (c *HyperdriveClient) DeployMetricsConfigurations(config *GlobalConfig) err
 }
 
 // Load the Prometheus config template, do a template variable substitution, and save it
-func updatePrometheusConfiguration(config *GlobalConfig, metricsDirPath string) error {
-	prometheusConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, prometheusConfigTemplate))
+func updatePrometheusConfiguration(ctx *context.HyperdriveContext, config *GlobalConfig, metricsDirPath string) error {
+	prometheusConfigTemplatePath, err := homedir.Expand(filepath.Join(ctx.TemplatesDir, prometheusConfigTemplate))
 	if err != nil {
 		return fmt.Errorf("error expanding Prometheus config template path: %w", err)
 	}
@@ -119,8 +144,8 @@ func updatePrometheusConfiguration(config *GlobalConfig, metricsDirPath string) 
 }
 
 // Load the Grafana config template, do a template variable substitution, and save it
-func updateGrafanaDatabaseConfiguration(config *GlobalConfig, metricsDirPath string) error {
-	grafanaConfigTemplatePath, err := homedir.Expand(filepath.Join(templatesDir, grafanaConfigTemplate))
+func updateGrafanaDatabaseConfiguration(ctx *context.HyperdriveContext, config *GlobalConfig, metricsDirPath string) error {
+	grafanaConfigTemplatePath, err := homedir.Expand(filepath.Join(ctx.TemplatesDir, grafanaConfigTemplate))
 	if err != nil {
 		return fmt.Errorf("error expanding Grafana config template path: %w", err)
 	}

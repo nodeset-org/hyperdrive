@@ -169,7 +169,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Check if StakeWise is enabled
-	if !cfg.Stakewise.Enabled.Value {
+	if !cfg.StakeWise.Enabled.Value {
 		return nil
 	}
 

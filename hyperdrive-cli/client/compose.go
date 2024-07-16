@@ -68,7 +68,7 @@ func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, 
 func (c *HyperdriveClient) deployTemplates(cfg *GlobalConfig, hyperdriveDir string) ([]string, error) {
 	// Prep the override folder
 	overrideFolder := filepath.Join(hyperdriveDir, overrideDir)
-	err := copyOverrideFiles(overrideSourceDir, overrideFolder)
+	err := copyOverrideFiles(c.Context.OverrideSourceDir, overrideFolder)
 	if err != nil {
 		return []string{}, fmt.Errorf("error copying override files: %w", err)
 	}
@@ -99,7 +99,7 @@ func (c *HyperdriveClient) deployTemplates(cfg *GlobalConfig, hyperdriveDir stri
 
 	composePaths := template.ComposePaths{
 		RuntimePath:  runtimeFolder,
-		TemplatePath: templatesDir,
+		TemplatePath: c.Context.TemplatesDir,
 		OverridePath: overrideFolder,
 	}
 
@@ -250,7 +250,7 @@ func (c *HyperdriveClient) composeModule(global *GlobalConfig, module hdconfig.I
 	moduleName := module.GetModuleName()
 	composePaths := template.ComposePaths{
 		RuntimePath:  filepath.Join(hyperdriveDir, runtimeDir, hdconfig.ModulesName, moduleName),
-		TemplatePath: filepath.Join(templatesDir, hdconfig.ModulesName, moduleName),
+		TemplatePath: filepath.Join(c.Context.TemplatesDir, hdconfig.ModulesName, moduleName),
 		OverridePath: filepath.Join(hyperdriveDir, overrideDir, hdconfig.ModulesName, moduleName),
 	}
 

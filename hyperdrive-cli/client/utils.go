@@ -10,6 +10,7 @@ import (
 
 	"github.com/alessio/shellescape"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"gopkg.in/yaml.v2"
 )
 
@@ -20,23 +21,65 @@ func SyncRatioToPercent(in float64) float64 {
 	return math.Min(99.99, in*100)
 }
 
+// Load the Hyperdrive settings from the network settings files on disk
+func LoadHyperdriveSettings(networksDir string) ([]*config.HyperdriveSettings, error) {
+	settings, err := config.LoadSettingsFiles(networksDir)
+	if err != nil {
+		return nil, fmt.Errorf("error loading Hyperdrive settings files from [%s]: %w", networksDir, err)
+	}
+	return settings, nil
+}
+
+// Load the StakeWise settings from the network settings files on disk
+func LoadStakeWiseSettings(networksDir string) ([]*swconfig.StakeWiseSettings, error) {
+	swSettingsDir := filepath.Join(networksDir, config.ModulesName, swconfig.ModuleName)
+	settings, err := swconfig.LoadSettingsFiles(swSettingsDir)
+	if err != nil {
+		return nil, fmt.Errorf("error loading StakeWise settings files from [%s]: %w", swSettingsDir, err)
+	}
+	return settings, nil
+}
+
 // Loads a config without updating it if it exists
-func LoadConfigFromFile(path string) (*GlobalConfig, error) {
-	_, err := os.Stat(path)
+func LoadConfigFromFile(networksDir string, configPath string) (*GlobalConfig, error) {
+	// Make sure the config file exists
+	_, err := os.Stat(configPath)
 	if os.IsNotExist(err) {
 		return nil, nil
 	}
 
-	hdCfg, err := config.LoadFromFile(path)
+	// Get the Hyperdrive settings
+	hdSettings, err := LoadHyperdriveSettings(networksDir)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the StakeWise settings
+	swSettings, err := LoadStakeWiseSettings(networksDir)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the Hyperdrive config
+	hdCfg, err := config.LoadFromFile(configPath, hdSettings)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the StakeWise config
+	swCfg, err := swconfig.NewStakeWiseConfig(hdCfg, swSettings)
 	if err != nil {
 		return nil, err
 	}
 
 	// Load the module configs
-	cfg := NewGlobalConfig(hdCfg)
+	cfg, err := NewGlobalConfig(hdCfg, hdSettings, swCfg, swSettings)
+	if err != nil {
+		return nil, fmt.Errorf("error creating global configuration: %w", err)
+	}
 	err = cfg.DeserializeModules()
 	if err != nil {
-		return nil, fmt.Errorf("error loading module configs from [%s]: %w", path, err)
+		return nil, fmt.Errorf("error loading module configs from [%s]: %w", configPath, err)
 	}
 
 	return cfg, nil

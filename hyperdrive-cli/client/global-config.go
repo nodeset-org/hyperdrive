@@ -17,27 +17,62 @@ const (
 // Wrapper for global configuration
 type GlobalConfig struct {
 	ExternalIP string
-	Hyperdrive *hdconfig.HyperdriveConfig
-	Stakewise  *swconfig.StakeWiseConfig
+
+	// Hyperdrive
+	Hyperdrive          *hdconfig.HyperdriveConfig
+	HyperdriveResources *hdconfig.MergedResources
+
+	// StakeWise
+	StakeWise          *swconfig.StakeWiseConfig
+	StakeWiseResources *swconfig.StakeWiseResources
 }
 
 // Make a new global config
-func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig) *GlobalConfig {
+func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig, hdSettings []*hdconfig.HyperdriveSettings, swCfg *swconfig.StakeWiseConfig, swSettings []*swconfig.StakeWiseSettings) (*GlobalConfig, error) {
+	// Make the config
 	cfg := &GlobalConfig{
 		Hyperdrive: hdCfg,
-		Stakewise:  swconfig.NewStakeWiseConfig(hdCfg),
+		StakeWise:  swCfg,
 	}
 
-	for _, module := range cfg.GetAllModuleConfigs() {
-		config.ApplyDefaults(module, hdCfg.Network.Value)
+	// Get the HD resources
+	network := hdCfg.Network.Value
+	for _, setting := range hdSettings {
+		if setting.Key == network {
+			cfg.HyperdriveResources = &hdconfig.MergedResources{
+				NetworkResources:    setting.NetworkResources,
+				HyperdriveResources: setting.HyperdriveResources,
+			}
+			break
+		}
 	}
-	return cfg
+	if cfg.HyperdriveResources == nil {
+		return nil, fmt.Errorf("could not find hyperdrive resources for network [%s]", network)
+	}
+
+	// Get the StakeWise resources
+	for _, setting := range swSettings {
+		if setting.Key == network {
+			cfg.StakeWiseResources = setting.StakeWiseResources
+			break
+		}
+	}
+	if cfg.StakeWiseResources == nil {
+		return nil, fmt.Errorf("could not find stakewise resources for network [%s]", network)
+	}
+
+	/*
+		for _, module := range cfg.GetAllModuleConfigs() {
+			config.ApplyDefaults(module, hdCfg.Network.Value)
+		}
+	*/
+	return cfg, nil
 }
 
 // Get the configs for all of the modules in the system
 func (c *GlobalConfig) GetAllModuleConfigs() []hdconfig.IModuleConfig {
 	return []hdconfig.IModuleConfig{
-		c.Stakewise,
+		c.StakeWise,
 	}
 }
 
@@ -49,14 +84,14 @@ func (c *GlobalConfig) Serialize() map[string]any {
 // Deserialize the config's modules (assumes the Hyperdrive config itself has already been deserialized)
 func (c *GlobalConfig) DeserializeModules() error {
 	// Load Stakewise
-	stakewiseName := c.Stakewise.GetModuleName()
+	stakewiseName := c.StakeWise.GetModuleName()
 	section, exists := c.Hyperdrive.Modules[stakewiseName]
 	if exists {
 		configMap, ok := section.(map[string]any)
 		if !ok {
 			return fmt.Errorf("config module section [%s] is not a map, it's a %s", stakewiseName, reflect.TypeOf(section))
 		}
-		err := c.Stakewise.Deserialize(configMap, c.Hyperdrive.Network.Value)
+		err := c.StakeWise.Deserialize(configMap, c.Hyperdrive.Network.Value)
 		if err != nil {
 			return fmt.Errorf("error deserializing stakewise configuration: %w", err)
 		}
@@ -70,11 +105,11 @@ func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 	hdCopy := c.Hyperdrive.Clone()
 
 	// Stakewise
-	swCopy := c.Stakewise.Clone().(*swconfig.StakeWiseConfig)
+	swCopy := c.StakeWise.Clone().(*swconfig.StakeWiseConfig)
 
 	return &GlobalConfig{
 		Hyperdrive: hdCopy,
-		Stakewise:  swCopy,
+		StakeWise:  swCopy,
 	}
 }
 
@@ -85,7 +120,6 @@ func (c *GlobalConfig) ChangeNetwork(newNetwork config.Network) {
 	if oldNetwork == newNetwork {
 		return
 	}
-	c.Hyperdrive.Network.Value = newNetwork
 
 	// Run the changes
 	c.Hyperdrive.ChangeNetwork(newNetwork)
@@ -146,7 +180,7 @@ func (c *GlobalConfig) Validate() []string {
 	// Ensure the selected port numbers are unique. Keeps track of all the errors
 	portMap := make(map[uint16]bool)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.ApiPort, errors)
-	portMap, errors = addAndCheckForDuplicate(portMap, c.Stakewise.ApiPort, errors)
+	portMap, errors = addAndCheckForDuplicate(portMap, c.StakeWise.ApiPort, errors)
 	if c.Hyperdrive.ClientMode.Value == config.ClientMode_Local {
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.HttpPort, errors)
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.WebsocketPort, errors)
@@ -164,8 +198,8 @@ func (c *GlobalConfig) Validate() []string {
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.ExporterMetricsPort, errors)
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.Grafana.Port, errors)
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.DaemonMetricsPort, errors)
-		if c.Stakewise.Enabled.Value {
-			portMap, errors = addAndCheckForDuplicate(portMap, c.Stakewise.VcCommon.MetricsPort, errors)
+		if c.StakeWise.Enabled.Value {
+			portMap, errors = addAndCheckForDuplicate(portMap, c.StakeWise.VcCommon.MetricsPort, errors)
 		}
 	}
 	if c.Hyperdrive.MevBoost.Enable.Value && c.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
@@ -182,7 +216,7 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 
 	// Process all configs for changes
 	sectionList = getChanges(oldConfig.Hyperdrive, c.Hyperdrive, sectionList, changedContainers)
-	sectionList = getChanges(oldConfig.Stakewise, c.Stakewise, sectionList, changedContainers)
+	sectionList = getChanges(oldConfig.StakeWise, c.StakeWise, sectionList, changedContainers)
 
 	// Add all VCs to the list of changed containers if any change requires a VC change
 	if changedContainers[config.ContainerID_ValidatorClient] {

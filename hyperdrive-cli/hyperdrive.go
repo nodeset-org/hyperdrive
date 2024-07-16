@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
@@ -23,6 +24,15 @@ import (
 const (
 	defaultConfigFolder string      = ".hyperdrive"
 	traceMode           os.FileMode = 0644
+
+	// System dir path for Linux
+	linuxSystemDir string = "/usr/share/hyperdrive"
+
+	// Subfolders under the system dir
+	scriptsDir        string = "scripts"
+	templatesDir      string = "templates"
+	overrideSourceDir string = "overrides"
+	networksDir       string = "networks"
 )
 
 // Flags
@@ -140,13 +150,17 @@ func main() {
 			fmt.Fprint(os.Stderr, err.Error())
 			os.Exit(1)
 		}
+		setSystemPaths(hdCtx)
+		return nil
+	}
+	app.After = func(c *cli.Context) error {
+		if hdCtx != nil && hdCtx.HttpTraceFile != nil {
+			_ = hdCtx.HttpTraceFile.Close()
+		}
 		return nil
 	}
 
 	// Run application
-	if hdCtx != nil && hdCtx.HttpTraceFile != nil {
-		defer hdCtx.HttpTraceFile.Close()
-	}
 	fmt.Println()
 	if err := app.Run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
@@ -167,6 +181,22 @@ func setDefaultPaths() {
 	// Default config folder path
 	defaultConfigPath := filepath.Join(homeDir, defaultConfigFolder)
 	configPathFlag.Value = defaultConfigPath
+}
+
+// Set the paths for Hyperdrive system directories
+func setSystemPaths(ctx *context.HyperdriveContext) {
+	var systemDir string
+	switch runtime.GOOS {
+	// This is where to add different paths for different OS's like macOS
+	default:
+		// By default just use the Linux path
+		systemDir = linuxSystemDir
+	}
+
+	ctx.ScriptsDir = filepath.Join(systemDir, scriptsDir)
+	ctx.TemplatesDir = filepath.Join(systemDir, templatesDir)
+	ctx.OverrideSourceDir = filepath.Join(systemDir, overrideSourceDir)
+	ctx.NetworksDir = filepath.Join(systemDir, networksDir)
 }
 
 // Validate the global flags

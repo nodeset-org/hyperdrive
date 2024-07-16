@@ -22,8 +22,6 @@ const (
 	nethermindPruneStarterCommand string          = "DELETE_ME"
 	nethermindAdminUrl            string          = "http://127.0.0.1:7434"
 
-	templatesDir       string = "/usr/share/hyperdrive/templates"
-	overrideSourceDir  string = "/usr/share/hyperdrive/override"
 	overrideDir        string = "override"
 	runtimeDir         string = "runtime"
 	metricsDir         string = "metrics"

@@ -59,14 +59,14 @@ func (configPage *StakewiseConfigPage) createContent() {
 	configPage.layout.setupEscapeReturnHomeHandler(configPage.modulesPage.home.md, configPage.modulesPage.page)
 
 	// Set up the form items
-	configPage.enableStakewiseBox = createParameterizedCheckbox(&configPage.masterConfig.Stakewise.Enabled)
-	configPage.stakewiseItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.GetParameters(), configPage.layout.descriptionBox)
-	configPage.vcCommonItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.VcCommon.GetParameters(), configPage.layout.descriptionBox)
-	configPage.lighthouseItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.Lighthouse.GetParameters(), configPage.layout.descriptionBox)
-	configPage.lodestarItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.Lodestar.GetParameters(), configPage.layout.descriptionBox)
-	configPage.nimbusItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.Nimbus.GetParameters(), configPage.layout.descriptionBox)
-	configPage.prysmItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.Prysm.GetParameters(), configPage.layout.descriptionBox)
-	configPage.tekuItems = createParameterizedFormItems(configPage.masterConfig.Stakewise.Teku.GetParameters(), configPage.layout.descriptionBox)
+	configPage.enableStakewiseBox = createParameterizedCheckbox(&configPage.masterConfig.StakeWise.Enabled)
+	configPage.stakewiseItems = createParameterizedFormItems(configPage.masterConfig.StakeWise.GetParameters(), configPage.layout.descriptionBox)
+	configPage.vcCommonItems = createParameterizedFormItems(configPage.masterConfig.StakeWise.VcCommon.GetParameters(), configPage.layout.descriptionBox)
+	configPage.lighthouseItems = createParameterizedFormItems(configPage.masterConfig.StakeWise.Lighthouse.GetParameters(), configPage.layout.descriptionBox)
+	configPage.lodestarItems = createParameterizedFormItems(configPage.masterConfig.StakeWise.Lodestar.GetParameters(), configPage.layout.descriptionBox)
+	configPage.nimbusItems = createParameterizedFormItems(configPage.masterConfig.StakeWise.Nimbus.GetParameters(), configPage.layout.descriptionBox)
+	configPage.prysmItems = createParameterizedFormItems(configPage.masterConfig.StakeWise.Prysm.GetParameters(), configPage.layout.descriptionBox)
+	configPage.tekuItems = createParameterizedFormItems(configPage.masterConfig.StakeWise.Teku.GetParameters(), configPage.layout.descriptionBox)
 
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.enableStakewiseBox)
@@ -80,10 +80,10 @@ func (configPage *StakewiseConfigPage) createContent() {
 
 	// Set up the setting callbacks
 	configPage.enableStakewiseBox.item.(*tview.Checkbox).SetChangedFunc(func(checked bool) {
-		if configPage.masterConfig.Stakewise.Enabled.Value == checked {
+		if configPage.masterConfig.StakeWise.Enabled.Value == checked {
 			return
 		}
-		configPage.masterConfig.Stakewise.Enabled.Value = checked
+		configPage.masterConfig.StakeWise.Enabled.Value = checked
 		configPage.handleLayoutChanged()
 	})
 
@@ -96,7 +96,7 @@ func (configPage *StakewiseConfigPage) handleLayoutChanged() {
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.enableStakewiseBox.item)
 
-	if configPage.masterConfig.Stakewise.Enabled.Value {
+	if configPage.masterConfig.StakeWise.Enabled.Value {
 		// Remove the Stakewise enable param since it's already there
 		stakewiseItems := []*parameterizedFormItem{}
 		for _, item := range configPage.stakewiseItems {

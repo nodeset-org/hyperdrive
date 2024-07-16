@@ -37,6 +37,18 @@ type HyperdriveContext struct {
 
 	// The HTTP trace file if tracing is enabled
 	HttpTraceFile *os.File
+
+	// The system path for Hyperdrive scripts used in the Docker containers
+	ScriptsDir string
+
+	// The system path for Hyperdrive templates
+	TemplatesDir string
+
+	// The system path for the source files to put in the user's override directory
+	OverrideSourceDir string
+
+	// The system path for built-in network settings and resource definitions
+	NetworksDir string
 }
 
 // Add the Hyperdrive context into a CLI context
