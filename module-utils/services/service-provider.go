@@ -32,7 +32,7 @@ type IModuleConfigProvider interface {
 	GetHyperdriveConfig() *hdconfig.HyperdriveConfig
 
 	// Gets Hyperdrive's list of resources
-	GetHyperdriveResources() *hdconfig.HyperdriveResources
+	GetHyperdriveResources() *hdconfig.MergedResources
 
 	// Gets the module's configuration
 	GetModuleConfig() hdconfig.IModuleConfig
@@ -121,7 +121,7 @@ type moduleServiceProvider struct {
 	hdClient     *client.ApiClient
 	ecManager    *services.ExecutionClientManager
 	bcManager    *services.BeaconClientManager
-	resources    *hdconfig.HyperdriveResources
+	resources    *hdconfig.MergedResources
 	signer       *ModuleSigner
 	txMgr        *eth.TransactionManager
 	queryMgr     *eth.QueryManager
@@ -139,14 +139,11 @@ type moduleServiceProvider struct {
 }
 
 // Creates a new IModuleServiceProvider instance
-func NewModuleServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) ConfigType, clientTimeout time.Duration) (IModuleServiceProvider, error) {
-	hdCfg, hdClient, err := getHdConfig(hyperdriveUrl)
+func NewModuleServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) (ConfigType, error), clientTimeout time.Duration) (IModuleServiceProvider, error) {
+	hdCfg, resources, hdClient, err := getHdConfig(hyperdriveUrl)
 	if err != nil {
 		return nil, fmt.Errorf("error getting Hyperdrive config: %w", err)
 	}
-
-	// Resources
-	resources := hdconfig.NewHyperdriveResources(hdCfg.Network.Value)
 
 	// EC Manager
 	var ecManager *services.ExecutionClientManager
@@ -178,7 +175,10 @@ func NewModuleServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *
 	}
 
 	// Get the module config
-	moduleCfg := factory(hdCfg)
+	moduleCfg, err := factory(hdCfg)
+	if err != nil {
+		return nil, fmt.Errorf("error creating module config: %w", err)
+	}
 	modCfgEnrty, exists := hdCfg.Modules[moduleName]
 	if !exists {
 		return nil, fmt.Errorf("config section for module [%s] not found", moduleName)
@@ -196,7 +196,7 @@ func NewModuleServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *
 }
 
 // Creates a new IModuleServiceProvider instance, using the given artifacts instead of creating ones based on the config parameters
-func NewModuleServiceProviderFromArtifacts(hdClient *client.ApiClient, hdCfg *hdconfig.HyperdriveConfig, moduleCfg hdconfig.IModuleConfig, resources *hdconfig.HyperdriveResources, moduleDir string, moduleName string, clientLogName string, ecManager *services.ExecutionClientManager, bcManager *services.BeaconClientManager) (IModuleServiceProvider, error) {
+func NewModuleServiceProviderFromArtifacts(hdClient *client.ApiClient, hdCfg *hdconfig.HyperdriveConfig, moduleCfg hdconfig.IModuleConfig, resources *hdconfig.MergedResources, moduleDir string, moduleName string, clientLogName string, ecManager *services.ExecutionClientManager, bcManager *services.BeaconClientManager) (IModuleServiceProvider, error) {
 	// Set up the client logger
 	logPath := hdCfg.GetModuleLogFilePath(moduleName, clientLogName)
 	clientLogger, err := log.NewLogger(logPath, hdCfg.GetLoggerOptions())
@@ -285,6 +285,10 @@ func (p *moduleServiceProvider) GetHyperdriveConfig() *hdconfig.HyperdriveConfig
 	return p.hdCfg
 }
 
+func (p *moduleServiceProvider) GetHyperdriveResources() *hdconfig.MergedResources {
+	return p.resources
+}
+
 func (p *moduleServiceProvider) GetModuleConfig() hdconfig.IModuleConfig {
 	return p.moduleConfig
 }
@@ -299,10 +303,6 @@ func (p *moduleServiceProvider) GetBeaconClient() *services.BeaconClientManager 
 
 func (p *moduleServiceProvider) GetHyperdriveClient() *client.ApiClient {
 	return p.hdClient
-}
-
-func (p *moduleServiceProvider) GetHyperdriveResources() *hdconfig.HyperdriveResources {
-	return p.resources
 }
 
 func (p *moduleServiceProvider) GetSigner() *ModuleSigner {
@@ -341,7 +341,7 @@ func (p *moduleServiceProvider) CancelContextOnShutdown() {
 // === Internal Functions ===
 // ==========================
 
-func getHdConfig(hyperdriveUrl *url.URL) (*hdconfig.HyperdriveConfig, *client.ApiClient, error) {
+func getHdConfig(hyperdriveUrl *url.URL) (*hdconfig.HyperdriveConfig, *hdconfig.MergedResources, *client.ApiClient, error) {
 	// Add the API client route if missing
 	hyperdriveUrl.Path = strings.TrimSuffix(hyperdriveUrl.Path, "/")
 	if hyperdriveUrl.Path == "" {
@@ -352,16 +352,30 @@ func getHdConfig(hyperdriveUrl *url.URL) (*hdconfig.HyperdriveConfig, *client.Ap
 	defaultLogger := slog.Default()
 	hdClient := client.NewApiClient(hyperdriveUrl, defaultLogger, nil)
 
-	// Get the Hyperdrive config
-	hdCfg := hdconfig.NewHyperdriveConfig("")
+	// Get the Hyperdrive settings for the selected network
+	settingsResponse, err := hdClient.Service.GetNetworkSettings()
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("error getting resources from Hyperdrive server: %w", err)
+	}
+	settings := settingsResponse.Data.Settings
+
+	// Create the Hyperdrive network
+	hdCfg, err := hdconfig.NewHyperdriveConfig("", []*hdconfig.HyperdriveSettings{settings})
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("error creating Hyperdrive config: %w", err)
+	}
 	cfgResponse, err := hdClient.Service.GetConfig()
 	if err != nil {
-		return nil, nil, fmt.Errorf("error getting config from Hyperdrive server: %w", err)
+		return nil, nil, nil, fmt.Errorf("error getting config from Hyperdrive server: %w", err)
 	}
 	err = hdCfg.Deserialize(cfgResponse.Data.Config)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error deserializing Hyperdrive config: %w", err)
+		return nil, nil, nil, fmt.Errorf("error deserializing Hyperdrive config: %w", err)
 	}
 
-	return hdCfg, hdClient, nil
+	res := &hdconfig.MergedResources{
+		NetworkResources:    settings.NetworkResources,
+		HyperdriveResources: settings.HyperdriveResources,
+	}
+	return hdCfg, res, hdClient, nil
 }

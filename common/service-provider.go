@@ -21,7 +21,7 @@ type IHyperdriveConfigProvider interface {
 	GetConfig() *hdconfig.HyperdriveConfig
 
 	// Gets Hyperdrive's list of resources
-	GetResources() *hdconfig.HyperdriveResources
+	GetResources() *hdconfig.MergedResources
 }
 
 // Provides a manager for nodeset.io communications
@@ -78,7 +78,7 @@ type serviceProvider struct {
 
 	// Services
 	cfg *hdconfig.HyperdriveConfig
-	res *hdconfig.HyperdriveResources
+	res *hdconfig.MergedResources
 	ns  *NodeSetServiceManager
 
 	// Path info
@@ -86,10 +86,16 @@ type serviceProvider struct {
 }
 
 // Creates a new IHyperdriveServiceProvider instance by loading the Hyperdrive config in the provided directory
-func NewHyperdriveServiceProvider(userDir string) (IHyperdriveServiceProvider, error) {
-	// Config
+func NewHyperdriveServiceProvider(userDir string, resourcesDir string) (IHyperdriveServiceProvider, error) {
+	// Load the network settings
+	settingsList, err := hdconfig.LoadSettingsFiles(resourcesDir)
+	if err != nil {
+		return nil, fmt.Errorf("error loading network settings: %w", err)
+	}
+
+	// Create the config
 	cfgPath := filepath.Join(userDir, hdconfig.ConfigFilename)
-	cfg, err := loadConfigFromFile(os.ExpandEnv(cfgPath))
+	cfg, err := loadConfigFromFile(os.ExpandEnv(cfgPath), settingsList)
 	if err != nil {
 		return nil, fmt.Errorf("error loading hyperdrive config: %w", err)
 	}
@@ -97,14 +103,26 @@ func NewHyperdriveServiceProvider(userDir string) (IHyperdriveServiceProvider, e
 		return nil, fmt.Errorf("hyperdrive config settings file [%s] not found", cfgPath)
 	}
 
-	// Make the resources
-	resources := hdconfig.NewHyperdriveResources(cfg.Network.Value)
+	// Get the resources from the selected network
+	var selectedResources *hdconfig.MergedResources
+	for _, network := range settingsList {
+		if network.Key == cfg.Network.Value {
+			selectedResources = &hdconfig.MergedResources{
+				NetworkResources:    network.NetworkResources,
+				HyperdriveResources: network.HyperdriveResources,
+			}
+			break
+		}
+	}
+	if selectedResources == nil {
+		return nil, fmt.Errorf("no resources found for selected network [%s]", cfg.Network.Value)
+	}
 
-	return NewHyperdriveServiceProviderFromConfig(cfg, resources)
+	return NewHyperdriveServiceProviderFromConfig(cfg, selectedResources)
 }
 
 // Creates a new IHyperdriveServiceProvider instance directly from a Hyperdrive config and resources list instead of loading them from the filesystem
-func NewHyperdriveServiceProviderFromConfig(cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources) (IHyperdriveServiceProvider, error) {
+func NewHyperdriveServiceProviderFromConfig(cfg *hdconfig.HyperdriveConfig, resources *hdconfig.MergedResources) (IHyperdriveServiceProvider, error) {
 	// Core provider
 	sp, err := services.NewServiceProvider(cfg, resources.NetworkResources, hdconfig.ClientTimeout)
 	if err != nil {
@@ -124,7 +142,7 @@ func NewHyperdriveServiceProviderFromConfig(cfg *hdconfig.HyperdriveConfig, reso
 }
 
 // Creates a new IHyperdriveServiceProvider instance from custom services and artifacts
-func NewHyperdriveServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources, ecManager *services.ExecutionClientManager, bnManager *services.BeaconClientManager, docker client.APIClient) (IHyperdriveServiceProvider, error) {
+func NewHyperdriveServiceProviderFromCustomServices(cfg *hdconfig.HyperdriveConfig, resources *hdconfig.MergedResources, ecManager *services.ExecutionClientManager, bnManager *services.BeaconClientManager, docker client.APIClient) (IHyperdriveServiceProvider, error) {
 	// Core provider
 	sp, err := services.NewServiceProviderWithCustomServices(cfg, resources.NetworkResources, ecManager, bnManager, docker)
 	if err != nil {
@@ -151,7 +169,7 @@ func (p *serviceProvider) GetConfig() *hdconfig.HyperdriveConfig {
 	return p.cfg
 }
 
-func (p *serviceProvider) GetResources() *hdconfig.HyperdriveResources {
+func (p *serviceProvider) GetResources() *hdconfig.MergedResources {
 	return p.res
 }
 
@@ -164,13 +182,13 @@ func (p *serviceProvider) GetNodeSetServiceManager() *NodeSetServiceManager {
 // =============
 
 // Loads a Hyperdrive config without updating it if it exists
-func loadConfigFromFile(path string) (*hdconfig.HyperdriveConfig, error) {
-	_, err := os.Stat(path)
+func loadConfigFromFile(configPath string, networks []*hdconfig.HyperdriveSettings) (*hdconfig.HyperdriveConfig, error) {
+	_, err := os.Stat(configPath)
 	if os.IsNotExist(err) {
 		return nil, nil
 	}
 
-	cfg, err := hdconfig.LoadFromFile(path)
+	cfg, err := hdconfig.LoadFromFile(configPath, networks)
 	if err != nil {
 		return nil, err
 	}

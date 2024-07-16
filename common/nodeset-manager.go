@@ -22,7 +22,7 @@ type NodeSetServiceManager struct {
 	wallet *wallet.Wallet
 
 	// Resources for the current network
-	resources *hdconfig.HyperdriveResources
+	resources *hdconfig.MergedResources
 
 	// Client for the v1 API
 	v1Client *apiv1.NodeSetClient

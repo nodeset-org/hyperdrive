@@ -9,7 +9,7 @@ const (
 	Network_HoleskyDev config.Network = "holesky-dev"
 
 	// Local test network for development
-	Network_LocalTest config.Network = "hd-local-test"
+	Network_LocalTest config.Network = "local-test"
 )
 
 type MevRelayID string

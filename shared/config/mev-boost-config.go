@@ -19,7 +19,7 @@ type MevRelay struct {
 	ID          MevRelayID
 	Name        string
 	Description string
-	Urls        map[config.Network]string
+	Urls        map[string]string
 }
 
 // Configuration for MEV-Boost
@@ -283,9 +283,14 @@ func (cfg *MevBoostConfig) GetSubconfigs() map[string]config.IConfigSection {
 
 // Checks if any relays are available for the current network
 func (cfg *MevBoostConfig) HasRelays() bool {
-	currentNetwork := cfg.parent.Network.Value
+	networkName := cfg.parent.GetEthNetworkName()
+	if networkName == "" {
+		return false
+	}
+
+	// Check if any of the relays are available for that Eth network
 	for _, relay := range cfg.relays {
-		_, exists := relay.Urls[currentNetwork]
+		_, exists := relay.Urls[networkName]
 		if !exists {
 			continue
 		}
@@ -298,27 +303,33 @@ func (cfg *MevBoostConfig) HasRelays() bool {
 // Get the relays that are available for the current network
 func (cfg *MevBoostConfig) GetAvailableRelays() []MevRelay {
 	relays := []MevRelay{}
-	currentNetwork := cfg.parent.Network.Value
+	networkName := cfg.parent.GetEthNetworkName()
+	if networkName == "" {
+		return relays
+	}
+
 	for _, relay := range cfg.relays {
-		_, exists := relay.Urls[currentNetwork]
+		_, exists := relay.Urls[networkName]
 		if !exists {
 			continue
 		}
 		relays = append(relays, relay)
 	}
-
 	return relays
 }
 
 // Get which MEV-boost relays are enabled
 func (cfg *MevBoostConfig) GetEnabledMevRelays() []MevRelay {
 	relays := []MevRelay{}
+	networkName := cfg.parent.GetEthNetworkName()
+	if networkName == "" {
+		return relays
+	}
 
-	currentNetwork := cfg.parent.Network.Value
 	switch cfg.SelectionMode.Value {
 	case MevSelectionMode_All:
 		for _, relay := range cfg.relays {
-			_, exists := relay.Urls[currentNetwork]
+			_, exists := relay.Urls[networkName]
 			if !exists {
 				// Skip relays that don't exist on the current network
 				continue
@@ -328,31 +339,31 @@ func (cfg *MevBoostConfig) GetEnabledMevRelays() []MevRelay {
 
 	case MevSelectionMode_Manual:
 		if cfg.FlashbotsRelay.Value {
-			_, exists := cfg.relayMap[MevRelayID_Flashbots].Urls[currentNetwork]
+			_, exists := cfg.relayMap[MevRelayID_Flashbots].Urls[networkName]
 			if exists {
 				relays = append(relays, cfg.relayMap[MevRelayID_Flashbots])
 			}
 		}
 		if cfg.BloxRouteMaxProfitRelay.Value {
-			_, exists := cfg.relayMap[MevRelayID_BloxrouteMaxProfit].Urls[currentNetwork]
+			_, exists := cfg.relayMap[MevRelayID_BloxrouteMaxProfit].Urls[networkName]
 			if exists {
 				relays = append(relays, cfg.relayMap[MevRelayID_BloxrouteMaxProfit])
 			}
 		}
 		if cfg.BloxRouteRegulatedRelay.Value {
-			_, exists := cfg.relayMap[MevRelayID_BloxrouteRegulated].Urls[currentNetwork]
+			_, exists := cfg.relayMap[MevRelayID_BloxrouteRegulated].Urls[networkName]
 			if exists {
 				relays = append(relays, cfg.relayMap[MevRelayID_BloxrouteRegulated])
 			}
 		}
 		if cfg.EdenRelay.Value {
-			_, exists := cfg.relayMap[MevRelayID_Eden].Urls[currentNetwork]
+			_, exists := cfg.relayMap[MevRelayID_Eden].Urls[networkName]
 			if exists {
 				relays = append(relays, cfg.relayMap[MevRelayID_Eden])
 			}
 		}
 		if cfg.TitanRegionalRelay.Value {
-			_, exists := cfg.relayMap[MevRelayID_TitanRegional].Urls[currentNetwork]
+			_, exists := cfg.relayMap[MevRelayID_TitanRegional].Urls[networkName]
 			if exists {
 				relays = append(relays, cfg.relayMap[MevRelayID_TitanRegional])
 			}
@@ -364,11 +375,14 @@ func (cfg *MevBoostConfig) GetEnabledMevRelays() []MevRelay {
 
 func (cfg *MevBoostConfig) GetRelayString() string {
 	relayUrls := []string{}
-	currentNetwork := cfg.parent.Network.Value
+	networkName := cfg.parent.GetEthNetworkName()
+	if networkName == "" {
+		return ""
+	}
 
 	relays := cfg.GetEnabledMevRelays()
 	for _, relay := range relays {
-		relayUrls = append(relayUrls, relay.Urls[currentNetwork])
+		relayUrls = append(relayUrls, relay.Urls[networkName])
 	}
 	if cfg.CustomRelays.Value != "" {
 		relayUrls = append(relayUrls, cfg.CustomRelays.Value)
@@ -386,9 +400,9 @@ func createDefaultRelays() []MevRelay {
 			ID:          MevRelayID_Flashbots,
 			Name:        "Flashbots",
 			Description: "Flashbots is the developer of MEV-Boost, and one of the best-known and most trusted relays in the space.",
-			Urls: map[config.Network]string{
-				config.Network_Mainnet: "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net?id=hyperdrive",
-				config.Network_Holesky: "https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@boost-relay-holesky.flashbots.net?id=hyperdrive",
+			Urls: map[string]string{
+				config.EthNetwork_Mainnet: "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net?id=hyperdrive",
+				config.EthNetwork_Holesky: "https://0xafa4c6985aa049fb79dd37010438cfebeb0f2bd42b115b89dd678dab0670c1de38da0c4e9138c9290a398ecd9a0b3110@boost-relay-holesky.flashbots.net?id=hyperdrive",
 			},
 		},
 
@@ -397,9 +411,9 @@ func createDefaultRelays() []MevRelay {
 			ID:          MevRelayID_BloxrouteMaxProfit,
 			Name:        "bloXroute Max Profit",
 			Description: "Select this to enable the \"max profit\" relay from bloXroute.",
-			Urls: map[config.Network]string{
-				config.Network_Mainnet: "https://0x8b5d2e73e2a3a55c6c87b8b6eb92e0149a125c852751db1422fa951e42a09b82c142c3ea98d0d9930b056a3bc9896b8f@bloxroute.max-profit.blxrbdn.com?id=hyperdrive",
-				config.Network_Holesky: "https://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@bloxroute.holesky.blxrbdn.com",
+			Urls: map[string]string{
+				config.EthNetwork_Mainnet: "https://0x8b5d2e73e2a3a55c6c87b8b6eb92e0149a125c852751db1422fa951e42a09b82c142c3ea98d0d9930b056a3bc9896b8f@bloxroute.max-profit.blxrbdn.com?id=hyperdrive",
+				config.EthNetwork_Holesky: "https://0x821f2a65afb70e7f2e820a925a9b4c80a159620582c1766b1b09729fec178b11ea22abb3a51f07b288be815a1a2ff516@bloxroute.holesky.blxrbdn.com",
 			},
 		},
 
@@ -408,8 +422,8 @@ func createDefaultRelays() []MevRelay {
 			ID:          MevRelayID_BloxrouteRegulated,
 			Name:        "bloXroute Regulated",
 			Description: "Select this to enable the \"regulated\" relay from bloXroute.",
-			Urls: map[config.Network]string{
-				config.Network_Mainnet: "https://0xb0b07cd0abef743db4260b0ed50619cf6ad4d82064cb4fbec9d3ec530f7c5e6793d9f286c4e082c0244ffb9f2658fe88@bloxroute.regulated.blxrbdn.com?id=hyperdrive",
+			Urls: map[string]string{
+				config.EthNetwork_Mainnet: "https://0xb0b07cd0abef743db4260b0ed50619cf6ad4d82064cb4fbec9d3ec530f7c5e6793d9f286c4e082c0244ffb9f2658fe88@bloxroute.regulated.blxrbdn.com?id=hyperdrive",
 			},
 		},
 
@@ -418,9 +432,9 @@ func createDefaultRelays() []MevRelay {
 			ID:          MevRelayID_Eden,
 			Name:        "Eden Network",
 			Description: "Eden Network is the home of Eden Relay, a block building hub focused on optimising block rewards for validators.",
-			Urls: map[config.Network]string{
-				config.Network_Mainnet: "https://0xb3ee7afcf27f1f1259ac1787876318c6584ee353097a50ed84f51a1f21a323b3736f271a895c7ce918c038e4265918be@relay.edennetwork.io?id=hyperdrive",
-				config.Network_Holesky: "https://0xb1d229d9c21298a87846c7022ebeef277dfc321fe674fa45312e20b5b6c400bfde9383f801848d7837ed5fc449083a12@relay-holesky.edennetwork.io?id=hyperdrive",
+			Urls: map[string]string{
+				config.EthNetwork_Mainnet: "https://0xb3ee7afcf27f1f1259ac1787876318c6584ee353097a50ed84f51a1f21a323b3736f271a895c7ce918c038e4265918be@relay.edennetwork.io?id=hyperdrive",
+				config.EthNetwork_Holesky: "https://0xb1d229d9c21298a87846c7022ebeef277dfc321fe674fa45312e20b5b6c400bfde9383f801848d7837ed5fc449083a12@relay-holesky.edennetwork.io?id=hyperdrive",
 			},
 		},
 
@@ -429,8 +443,8 @@ func createDefaultRelays() []MevRelay {
 			ID:          MevRelayID_TitanRegional,
 			Name:        "Titan Regional",
 			Description: "Titan Relay is a neutral, Rust-based MEV-Boost Relay optimized for low latency through put, geographical distribution, and robustness. This is the regulated (censoring) version.",
-			Urls: map[config.Network]string{
-				config.Network_Mainnet: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@regional.titanrelay.xyz",
+			Urls: map[string]string{
+				config.EthNetwork_Mainnet: "https://0x8c4ed5e24fe5c6ae21018437bde147693f68cda427cd1122cf20819c30eda7ed74f72dece09bb313f2a1855595ab677d@regional.titanrelay.xyz",
 			},
 		},
 	}

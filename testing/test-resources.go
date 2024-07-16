@@ -13,16 +13,17 @@ const (
 )
 
 // Returns a network resources instance with local testing network values
-func GetTestResources(beaconConfig *db.Config, nodesetUrl string) *hdconfig.HyperdriveResources {
-	return &hdconfig.HyperdriveResources{
+func GetTestResources(beaconConfig *db.Config, nodesetUrl string) *hdconfig.MergedResources {
+	return &hdconfig.MergedResources{
 		NetworkResources: &config.NetworkResources{
-			Network:               hdconfig.Network_LocalTest,
 			EthNetworkName:        "localtest",
 			ChainID:               uint(beaconConfig.ChainID),
 			GenesisForkVersion:    beaconConfig.GenesisForkVersion,
 			MulticallAddress:      common.HexToAddress(multicallAddressString),
 			BalanceBatcherAddress: common.HexToAddress(balanceBatcherAddressString),
 		},
-		NodeSetApiUrl: nodesetUrl,
+		HyperdriveResources: &hdconfig.HyperdriveResources{
+			NodeSetApiUrl: nodesetUrl,
+		},
 	}
 }

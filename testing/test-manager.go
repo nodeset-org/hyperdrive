@@ -47,7 +47,7 @@ type HyperdriveTestManager struct {
 
 // Creates a new HyperdriveTestManager instance. Requires management of your own nodeset.io server mock.
 // `address` is the address to bind the Hyperdrive daemon to.
-func NewHyperdriveTestManager(address string, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources, nsServer *nsserver.NodeSetMockServer) (*HyperdriveTestManager, error) {
+func NewHyperdriveTestManager(address string, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.MergedResources, nsServer *nsserver.NodeSetMockServer) (*HyperdriveTestManager, error) {
 	tm, err := osha.NewTestManager()
 	if err != nil {
 		return nil, fmt.Errorf("error creating test manager: %w", err)
@@ -81,7 +81,11 @@ func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddre
 	testDir := tm.GetTestDir()
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
 	resources := GetTestResources(beaconCfg, fmt.Sprintf("http://%s:%d/api/", nodesetAddress, nodesetMock.GetPort()))
-	cfg := hdconfig.NewHyperdriveConfigForNetwork(testDir, hdconfig.Network_LocalTest)
+	cfg, err := hdconfig.NewHyperdriveConfigForNetwork(testDir, []*hdconfig.HyperdriveSettings{}, hdconfig.Network_LocalTest)
+	if err != nil {
+		closeTestManager(tm)
+		return nil, fmt.Errorf("error creating Hyperdrive config: %v", err)
+	}
 	cfg.Network.Value = hdconfig.Network_LocalTest
 
 	// Make the test manager
@@ -89,7 +93,7 @@ func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddre
 }
 
 // Implementation for creating a new HyperdriveTestManager
-func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.HyperdriveResources, nsServer *nsserver.NodeSetMockServer, nsWaitGroup *sync.WaitGroup) (*HyperdriveTestManager, error) {
+func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.MergedResources, nsServer *nsserver.NodeSetMockServer, nsWaitGroup *sync.WaitGroup) (*HyperdriveTestManager, error) {
 	// Make managers
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
 	ecManager := services.NewExecutionClientManager(tm.GetExecutionClient(), uint(beaconCfg.ChainID), time.Minute)
