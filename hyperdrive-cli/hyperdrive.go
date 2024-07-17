@@ -31,7 +31,7 @@ const (
 	// Subfolders under the system dir
 	scriptsDir        string = "scripts"
 	templatesDir      string = "templates"
-	overrideSourceDir string = "overrides"
+	overrideSourceDir string = "override"
 	networksDir       string = "networks"
 )
 

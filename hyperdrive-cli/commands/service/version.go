@@ -114,6 +114,7 @@ func serviceVersion(c *cli.Context) error {
 		return fmt.Errorf("unknown client mode [%v]", clientMode)
 	}
 
+	// MEV-Boost
 	var mevBoostString string
 	if cfg.Hyperdrive.MevBoost.Enable.Value {
 		if cfg.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
@@ -125,11 +126,41 @@ func serviceVersion(c *cli.Context) error {
 		mevBoostString = "Disabled"
 	}
 
+	// StakeWise
+	var stakeWiseVersion string
+	if cfg.StakeWise.Enabled.Value {
+		// Get StakeWise client
+		sw, err := client.NewStakewiseClientFromCtx(c, hd)
+		if err != nil {
+			return err
+		}
+
+		// Get StakeWise service version
+		stakeWiseVersion, err = sw.GetServiceVersion()
+		if err != nil {
+			return err
+		}
+	}
+
 	// Print version info
-	fmt.Printf("Hyperdrive client version: %s\n", c.App.Version)
-	fmt.Printf("Hyperdrive daemon version: %s\n", serviceVersion)
+	fmt.Println("Hyperdrive:")
+	fmt.Printf("CLI version: %s\n", c.App.Version)
+	fmt.Printf("Daemon version: %s\n", serviceVersion)
 	fmt.Printf("Selected Execution Client: %s\n", executionClientString)
 	fmt.Printf("Selected Beacon Node: %s\n", beaconNodeString)
 	fmt.Printf("MEV-Boost client: %s\n", mevBoostString)
+
+	// Print module info
+	if stakeWiseVersion != "" {
+		// At least one module is enabled
+		fmt.Println()
+		fmt.Println("Modules:")
+	}
+
+	// Print StakeWise info
+	if stakeWiseVersion != "" {
+		fmt.Printf("StakeWise version: %s\n", stakeWiseVersion)
+	}
+
 	return nil
 }

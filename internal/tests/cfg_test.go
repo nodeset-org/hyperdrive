@@ -37,7 +37,7 @@ func TestNewConfig_Holesky(t *testing.T) {
 		ConfigPath:        cfgPath,
 		ScriptsDir:        "../../install/deploy/scripts",
 		TemplatesDir:      "../../install/deploy/templates",
-		OverrideSourceDir: "../../install/deploy/overrides",
+		OverrideSourceDir: "../../install/deploy/override",
 		NetworksDir:       "../../install/deploy/networks",
 	}
 	hdClient, err := hdclient.NewHyperdriveClientFromHyperdriveCtx(&hdCtx)

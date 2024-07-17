@@ -7,7 +7,7 @@ require (
 	github.com/ethereum/go-ethereum v1.14.7
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240716181702-006ab94892f2
-	github.com/nodeset-org/hyperdrive-stakewise v1.0.3-0.20240716182333-d30008f76c1a
+	github.com/nodeset-org/hyperdrive-stakewise v1.0.3-0.20240717182546-5ec8a454abe3
 	github.com/nodeset-org/osha v0.2.1-0.20240716181202-365d8870bd39
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/node-manager-core v0.5.2-0.20240716172402-55e038b8f0e5
