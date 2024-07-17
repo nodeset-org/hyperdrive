@@ -1,11 +1,12 @@
 package client
 
 import (
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	"github.com/rocket-pool/node-manager-core/api/client"
 	"github.com/rocket-pool/node-manager-core/api/types"
-	"github.com/rocket-pool/node-manager-core/utils"
 )
 
 // Requester for Constellation module calls to the nodeset.io service
@@ -40,10 +41,10 @@ func (r *NodeSetConstellationRequester) GetAvailableMinipoolCount() (*types.ApiR
 }
 
 // Gets the deposit signature for a minipool from the Constellation contracts
-func (r *NodeSetConstellationRequester) GetDepositSignature(minipoolAddress common.Address, salt []byte) (*types.ApiResponse[api.NodeSetConstellation_GetDepositSignatureData], error) {
+func (r *NodeSetConstellationRequester) GetDepositSignature(minipoolAddress common.Address, salt *big.Int) (*types.ApiResponse[api.NodeSetConstellation_GetDepositSignatureData], error) {
 	args := map[string]string{
 		"minipoolAddress": minipoolAddress.Hex(),
-		"salt":            utils.EncodeHexWithPrefix(salt),
+		"salt":            salt.String(),
 	}
 	return client.SendGetRequest[api.NodeSetConstellation_GetDepositSignatureData](r, "get-deposit-signature", "GetDepositSignature", args)
 }

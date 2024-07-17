@@ -326,7 +326,6 @@ func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Co
 		panic("context didn't have a logger!")
 	}
 	logger.Debug("Getting minipool deposit signature")
-
 	// Run the request
 	var data apiv2.MinipoolDepositSignatureData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
