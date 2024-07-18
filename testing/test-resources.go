@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	multicallAddressString      string = "0x59F2f1fCfE2474fD5F0b9BA1E73ca90b143Eb8d0"
-	balanceBatcherAddressString string = "0xC6bA8C3233eCF65B761049ef63466945c362EdD2"
+	multicallAddressString      string = "0x05Aa229Aec102f78CE0E852A812a388F076Aa555"
+	balanceBatcherAddressString string = "0x0b48aF34f4c854F5ae1A3D587da471FeA45bAD52"
 )
 
 // Returns a network resources instance with local testing network values
