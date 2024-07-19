@@ -71,7 +71,7 @@ func (c *constellationGetDepositSignatureContext) PrepareData(data *api.NodeSetC
 
 	// Get the set version
 	ns := sp.GetNodeSetServiceManager()
-	signature, err := ns.Constellation_GetDepositSignature(ctx, c.minipoolAddress, c.salt)
+	timestamp, signature, err := ns.Constellation_GetDepositSignatureAndTime(ctx, c.minipoolAddress, c.salt)
 	if err != nil {
 		if errors.Is(err, apiv2.ErrNotAuthorized) {
 			data.NotAuthorized = true
@@ -89,5 +89,6 @@ func (c *constellationGetDepositSignatureContext) PrepareData(data *api.NodeSetC
 	}
 
 	data.Signature = signature
+	data.Time = timestamp
 	return types.ResponseStatus_Success, nil
 }

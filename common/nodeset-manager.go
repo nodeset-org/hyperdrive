@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math/big"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
@@ -259,8 +261,8 @@ func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.C
 // === Constellation Methods ===
 // =============================
 
-// Gets a signature for registering / whitelisting the node with the Constellation contracts
-func (m *NodeSetServiceManager) Constellation_GetRegistrationSignature(ctx context.Context) ([]byte, error) {
+// Gets a signature for registering / whitelisting the node with the Constellation contracts and the timestamp it was created
+func (m *NodeSetServiceManager) Constellation_GetRegistrationSignatureAndTime(ctx context.Context) (time.Time, []byte, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -275,19 +277,22 @@ func (m *NodeSetServiceManager) Constellation_GetRegistrationSignature(ctx conte
 	var data apiv2.WhitelistData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Whitelist(ctx)
+		data, err = m.v2Client.Whitelist(ctx, big.NewInt(int64(m.resources.ChainID)))
 		return err
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error registering with Constellation: %w", err)
+		return time.Time{}, nil, fmt.Errorf("error registering with Constellation: %w", err)
 	}
 
 	// Decode the signature
 	sig, err := utils.DecodeHex(data.Signature)
 	if err != nil {
-		return nil, fmt.Errorf("error decoding signature from server: %w", err)
+		return time.Time{}, nil, fmt.Errorf("error decoding signature from server: %w", err)
 	}
-	return sig, nil
+
+	// Get the time from the timestamp
+	timestamp := time.Unix(data.Time, 0)
+	return timestamp, sig, nil
 }
 
 // Gets the available minipool count for the node from the Constellation contracts
@@ -315,8 +320,8 @@ func (m *NodeSetServiceManager) Constellation_GetAvailableMinipoolCount(ctx cont
 	return data.Count, nil
 }
 
-// Gets the deposit signature for a minipool from the Constellation contracts
-func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Context, minipoolAddress common.Address, salt []byte) ([]byte, error) {
+// Gets the deposit signature for a minipool from the Constellation contracts and the timestamp it was created
+func (m *NodeSetServiceManager) Constellation_GetDepositSignatureAndTime(ctx context.Context, minipoolAddress common.Address, salt []byte) (time.Time, []byte, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -330,19 +335,22 @@ func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Co
 	var data apiv2.MinipoolDepositSignatureData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.MinipoolDepositSignature(ctx, minipoolAddress, salt)
+		data, err = m.v2Client.MinipoolDepositSignature(ctx, minipoolAddress, salt, big.NewInt(int64(m.resources.ChainID)))
 		return err
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error getting deposit signature: %w", err)
+		return time.Time{}, nil, fmt.Errorf("error getting deposit signature: %w", err)
 	}
 
 	// Decode the signature
 	sig, err := utils.DecodeHex(data.Signature)
 	if err != nil {
-		return nil, fmt.Errorf("error decoding signature from server: %w", err)
+		return time.Time{}, nil, fmt.Errorf("error decoding signature from server: %w", err)
 	}
-	return sig, nil
+
+	// Get the time from the timestamp
+	timestamp := time.Unix(data.Time, 0)
+	return timestamp, sig, nil
 }
 
 // ========================

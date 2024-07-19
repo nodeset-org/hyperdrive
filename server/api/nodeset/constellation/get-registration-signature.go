@@ -63,7 +63,7 @@ func (c *constellationGetRegistrationSignatureContext) PrepareData(data *api.Nod
 
 	// Get the registration signature
 	ns := sp.GetNodeSetServiceManager()
-	signature, err := ns.Constellation_GetRegistrationSignature(ctx)
+	timestamp, signature, err := ns.Constellation_GetRegistrationSignatureAndTime(ctx)
 	if err != nil {
 		if errors.Is(err, apiv2.ErrNotAuthorized) {
 			data.NotAuthorized = true
@@ -73,5 +73,6 @@ func (c *constellationGetRegistrationSignatureContext) PrepareData(data *api.Nod
 	}
 
 	data.Signature = signature
+	data.Time = timestamp
 	return types.ResponseStatus_Success, nil
 }
