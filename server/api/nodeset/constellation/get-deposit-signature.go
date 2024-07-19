@@ -2,6 +2,7 @@ package ns_constellation
 
 import (
 	"errors"
+	"math/big"
 	"net/url"
 
 	hdcommon "github.com/nodeset-org/hyperdrive-daemon/common"
@@ -31,7 +32,7 @@ func (f *constellationGetDepositSignatureContextFactory) Create(args url.Values)
 	}
 	inputErrs := []error{
 		server.ValidateArg("minipoolAddress", args, input.ValidateAddress, &c.minipoolAddress),
-		server.ValidateArg("salt", args, input.ValidateByteArray, &c.salt),
+		server.ValidateArg("salt", args, input.ValidateBigInt, &c.salt),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -48,7 +49,7 @@ func (f *constellationGetDepositSignatureContextFactory) RegisterRoute(router *m
 type constellationGetDepositSignatureContext struct {
 	handler         *ConstellationHandler
 	minipoolAddress common.Address
-	salt            []byte
+	salt            *big.Int
 }
 
 func (c *constellationGetDepositSignatureContext) PrepareData(data *api.NodeSetConstellation_GetDepositSignatureData, opts *bind.TransactOpts) (types.ResponseStatus, error) {

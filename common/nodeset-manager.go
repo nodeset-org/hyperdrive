@@ -321,7 +321,7 @@ func (m *NodeSetServiceManager) Constellation_GetAvailableMinipoolCount(ctx cont
 }
 
 // Gets the deposit signature for a minipool from the Constellation contracts and the timestamp it was created
-func (m *NodeSetServiceManager) Constellation_GetDepositSignatureAndTime(ctx context.Context, minipoolAddress common.Address, salt []byte) (time.Time, []byte, error) {
+func (m *NodeSetServiceManager) Constellation_GetDepositSignatureAndTime(ctx context.Context, minipoolAddress common.Address, salt *big.Int) (time.Time, []byte, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
