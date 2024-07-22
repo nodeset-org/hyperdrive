@@ -3,6 +3,7 @@ package with_ns_registered
 import (
 	"runtime/debug"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
@@ -12,8 +13,9 @@ import (
 )
 
 const (
-	whitelistAddressString     string = "0x3fdc08D815cc4ED3B7F69Ee246716f2C8bCD6b07"
-	expectedWhitelistSignature string = "0x38b8b7989b0f0695e8cb08253a3077b33c102c307a6b0a50c0a90dbb971ecd3f0e3fd38cd9ffecf696f1aa41151dceb86b405ed78259928c9be62f56d852e03c1b"
+	whitelistTimestamp         int64  = 1721417393
+	whitelistAddressString     string = "0x1E3b98102e19D3a164d239BdD190913C2F02E756"
+	expectedWhitelistSignature string = "0xdd45a03d896d93e4fd2ee947bed23fb4f87a24d528cd5ecfe847f4c521cba8c1519f4fbc74d9a12d40fa64244a0616370ae709394a0217659d028351bb8dc3c21b"
 	expectedMinipoolCount      int    = 10
 )
 
@@ -33,14 +35,15 @@ func TestConstellationWhitelistSignature(t *testing.T) {
 	require.NoError(t, err)
 
 	// Set up the nodeset.io mock
+	manualTime := time.Unix(whitelistTimestamp, 0)
 	whitelistAddress := common.HexToAddress(whitelistAddressString)
 	nsMgr := testMgr.GetNodeSetMockServer().GetManager()
 	nsMgr.SetConstellationAdminPrivateKey(adminKey)
-	nsMgr.SetConstellationWhitelistAddress(whitelistAddress)
+	nsMgr.SetManualSignatureTimestamp(&manualTime)
 
 	// Get a whitelist signature
 	hd := testMgr.GetApiClient()
-	response, err := hd.NodeSet_Constellation.GetRegistrationSignature()
+	response, err := hd.NodeSet_Constellation.GetRegistrationSignature(whitelistAddress)
 	require.NoError(t, err)
 	require.False(t, response.Data.NotAuthorized)
 	require.False(t, response.Data.NotRegistered)

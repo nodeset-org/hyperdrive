@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 
 	// Generate a new wallet
 	derivationPath := string(wallet.DerivationPath_Default)
-	index := uint64(0)
+	index := uint64(4)
 	password := "test_password123"
 	hd := testMgr.GetApiClient()
 	recoverResponse, err := hd.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, password, true)

@@ -262,7 +262,7 @@ func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.C
 // =============================
 
 // Gets a signature for registering / whitelisting the node with the Constellation contracts and the timestamp it was created
-func (m *NodeSetServiceManager) Constellation_GetRegistrationSignatureAndTime(ctx context.Context) (time.Time, []byte, error) {
+func (m *NodeSetServiceManager) Constellation_GetRegistrationSignatureAndTime(ctx context.Context, whitelistAddress common.Address) (time.Time, []byte, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -277,7 +277,8 @@ func (m *NodeSetServiceManager) Constellation_GetRegistrationSignatureAndTime(ct
 	var data apiv2.WhitelistData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Whitelist(ctx, big.NewInt(int64(m.resources.ChainID)))
+		chainID := big.NewInt(int64(m.resources.ChainID))
+		data, err = m.v2Client.Whitelist(ctx, chainID, whitelistAddress)
 		return err
 	})
 	if err != nil {
@@ -321,7 +322,7 @@ func (m *NodeSetServiceManager) Constellation_GetAvailableMinipoolCount(ctx cont
 }
 
 // Gets the deposit signature for a minipool from the Constellation contracts and the timestamp it was created
-func (m *NodeSetServiceManager) Constellation_GetDepositSignatureAndTime(ctx context.Context, minipoolAddress common.Address, salt []byte) (time.Time, []byte, error) {
+func (m *NodeSetServiceManager) Constellation_GetDepositSignatureAndTime(ctx context.Context, minipoolAddress common.Address, salt *big.Int, superNodeAddress common.Address) (time.Time, []byte, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -335,7 +336,8 @@ func (m *NodeSetServiceManager) Constellation_GetDepositSignatureAndTime(ctx con
 	var data apiv2.MinipoolDepositSignatureData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.MinipoolDepositSignature(ctx, minipoolAddress, salt, big.NewInt(int64(m.resources.ChainID)))
+		chainID := big.NewInt(int64(m.resources.ChainID))
+		data, err = m.v2Client.MinipoolDepositSignature(ctx, minipoolAddress, salt, superNodeAddress, chainID)
 		return err
 	})
 	if err != nil {

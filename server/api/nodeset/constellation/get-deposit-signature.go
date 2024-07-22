@@ -2,6 +2,7 @@ package ns_constellation
 
 import (
 	"errors"
+	"math/big"
 	"net/url"
 
 	hdcommon "github.com/nodeset-org/hyperdrive-daemon/common"
@@ -31,7 +32,8 @@ func (f *constellationGetDepositSignatureContextFactory) Create(args url.Values)
 	}
 	inputErrs := []error{
 		server.ValidateArg("minipoolAddress", args, input.ValidateAddress, &c.minipoolAddress),
-		server.ValidateArg("salt", args, input.ValidateByteArray, &c.salt),
+		server.ValidateArg("salt", args, input.ValidateBigInt, &c.salt),
+		server.ValidateArg("superNodeAddress", args, input.ValidateAddress, &c.superNodeAddress),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -46,9 +48,11 @@ func (f *constellationGetDepositSignatureContextFactory) RegisterRoute(router *m
 // === Context ===
 // ===============
 type constellationGetDepositSignatureContext struct {
-	handler         *ConstellationHandler
-	minipoolAddress common.Address
-	salt            []byte
+	handler *ConstellationHandler
+
+	minipoolAddress  common.Address
+	salt             *big.Int
+	superNodeAddress common.Address
 }
 
 func (c *constellationGetDepositSignatureContext) PrepareData(data *api.NodeSetConstellation_GetDepositSignatureData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
@@ -71,7 +75,7 @@ func (c *constellationGetDepositSignatureContext) PrepareData(data *api.NodeSetC
 
 	// Get the set version
 	ns := sp.GetNodeSetServiceManager()
-	timestamp, signature, err := ns.Constellation_GetDepositSignatureAndTime(ctx, c.minipoolAddress, c.salt)
+	timestamp, signature, err := ns.Constellation_GetDepositSignatureAndTime(ctx, c.minipoolAddress, c.salt, c.superNodeAddress)
 	if err != nil {
 		if errors.Is(err, apiv2.ErrNotAuthorized) {
 			data.NotAuthorized = true

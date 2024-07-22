@@ -9,10 +9,12 @@ import (
 	apiv2 "github.com/nodeset-org/nodeset-client-go/api-v2"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -27,7 +29,10 @@ func (f *constellationGetRegistrationSignatureContextFactory) Create(args url.Va
 	c := &constellationGetRegistrationSignatureContext{
 		handler: f.handler,
 	}
-	return c, nil
+	inputErrs := []error{
+		server.ValidateArg("whitelistAddress", args, input.ValidateAddress, &c.whitelistAddress),
+	}
+	return c, errors.Join(inputErrs...)
 }
 
 func (f *constellationGetRegistrationSignatureContextFactory) RegisterRoute(router *mux.Router) {
@@ -41,6 +46,8 @@ func (f *constellationGetRegistrationSignatureContextFactory) RegisterRoute(rout
 // ===============
 type constellationGetRegistrationSignatureContext struct {
 	handler *ConstellationHandler
+
+	whitelistAddress common.Address
 }
 
 func (c *constellationGetRegistrationSignatureContext) PrepareData(data *api.NodeSetConstellation_GetRegistrationSignatureData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
@@ -63,7 +70,7 @@ func (c *constellationGetRegistrationSignatureContext) PrepareData(data *api.Nod
 
 	// Get the registration signature
 	ns := sp.GetNodeSetServiceManager()
-	timestamp, signature, err := ns.Constellation_GetRegistrationSignatureAndTime(ctx)
+	timestamp, signature, err := ns.Constellation_GetRegistrationSignatureAndTime(ctx, c.whitelistAddress)
 	if err != nil {
 		if errors.Is(err, apiv2.ErrNotAuthorized) {
 			data.NotAuthorized = true
