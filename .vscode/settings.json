@@ -4,6 +4,8 @@
     },
     "go.testFlags": [
         "-p",
+        "1",
+        "-count",
         "1"
     ],
     "go.lintFlags": [
