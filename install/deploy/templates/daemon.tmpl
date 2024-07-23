@@ -16,12 +16,15 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - {{.Hyperdrive.GetUserDirectory}}:{{.Hyperdrive.GetUserDirectory}}
       - {{.Hyperdrive.UserDataPath}}:{{.Hyperdrive.UserDataPath}}
+      - /usr/share/hyperdrive/networks:/usr/share/hyperdrive/networks:ro
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - /var/lib/hyperdrive/global:/var/lib/hyperdrive/global
       - /var/lib/hyperdrive/data/{{.Hyperdrive.ProjectName}}:/var/lib/hyperdrive/data/{{.Hyperdrive.ProjectName}}
     command:
       - --user-dir
       - "{{.Hyperdrive.GetUserDirectory}}"
+      - --settings-folder
+      - "/usr/share/hyperdrive/networks"
       - --ip
       - "0.0.0.0" # Open to all Docker traffic
       - --port

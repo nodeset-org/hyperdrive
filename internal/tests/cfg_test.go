@@ -32,14 +32,27 @@ func TestNewConfig_Holesky(t *testing.T) {
 
 	cfgPath := testMgr.GetTestDir()
 
-	// Make a new Hyperdrive client
+	// Make a new Hyperdrive context
 	hdCtx := context.HyperdriveContext{
-		ConfigPath:        cfgPath,
-		ScriptsDir:        "../../install/deploy/scripts",
-		TemplatesDir:      "../../install/deploy/templates",
-		OverrideSourceDir: "../../install/deploy/override",
-		NetworksDir:       "../../install/deploy/networks",
+		ConfigPath: cfgPath,
+		InstallationInfo: &context.InstallationInfo{
+			ScriptsDir:        "../../install/deploy/scripts",
+			TemplatesDir:      "../../install/deploy/templates",
+			OverrideSourceDir: "../../install/deploy/override",
+			NetworksDir:       "../../install/deploy/networks",
+		},
 	}
+
+	// Load the network settings
+	hdNetworkSettings, err := hdconfig.LoadSettingsFiles(hdCtx.NetworksDir)
+	require.NoError(t, err)
+	swNetSettingsDir := filepath.Join(hdCtx.NetworksDir, hdconfig.ModulesName, swconfig.ModuleName)
+	swNetworkSettings, err := swconfig.LoadSettingsFiles(swNetSettingsDir)
+	require.NoError(t, err)
+	hdCtx.HyperdriveNetworkSettings = hdNetworkSettings
+	hdCtx.StakeWiseNetworkSettings = swNetworkSettings
+
+	// Make a new Hyperdrive client
 	hdClient, err := hdclient.NewHyperdriveClientFromHyperdriveCtx(&hdCtx)
 	require.NoError(t, err)
 

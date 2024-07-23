@@ -33,7 +33,7 @@ func (c *HyperdriveClient) LoadConfig() (*GlobalConfig, bool, error) {
 		return nil, false, fmt.Errorf("error expanding settings file path: %w", err)
 	}
 
-	cfg, err := LoadConfigFromFile(c.Context.NetworksDir, expandedPath)
+	cfg, err := LoadConfigFromFile(expandedPath, c.Context.HyperdriveNetworkSettings, c.Context.StakeWiseNetworkSettings)
 	if err != nil {
 		return nil, false, err
 	}
@@ -45,28 +45,15 @@ func (c *HyperdriveClient) LoadConfig() (*GlobalConfig, bool, error) {
 	}
 
 	// Config wasn't loaded, but there was no error - we should create one.
-
-	// Get the Hyperdrive settings
-	hdSettings, err := LoadHyperdriveSettings(c.Context.NetworksDir)
-	if err != nil {
-		return nil, false, err
-	}
-
-	// Get the StakeWise settings
-	swSettings, err := LoadStakeWiseSettings(c.Context.NetworksDir)
-	if err != nil {
-		return nil, false, err
-	}
-
-	hdCfg, err := hdconfig.NewHyperdriveConfig(c.Context.ConfigPath, hdSettings)
+	hdCfg, err := hdconfig.NewHyperdriveConfig(c.Context.ConfigPath, c.Context.HyperdriveNetworkSettings)
 	if err != nil {
 		return nil, false, fmt.Errorf("error creating Hyperdrive config: %w", err)
 	}
-	swCfg, err := swconfig.NewStakeWiseConfig(hdCfg, swSettings)
+	swCfg, err := swconfig.NewStakeWiseConfig(hdCfg, c.Context.StakeWiseNetworkSettings)
 	if err != nil {
 		return nil, false, fmt.Errorf("error creating StakeWise config: %w", err)
 	}
-	c.cfg, err = NewGlobalConfig(hdCfg, hdSettings, swCfg, swSettings)
+	c.cfg, err = NewGlobalConfig(hdCfg, c.Context.HyperdriveNetworkSettings, swCfg, c.Context.StakeWiseNetworkSettings)
 	if err != nil {
 		return nil, false, fmt.Errorf("error creating global config: %w", err)
 	}
@@ -82,7 +69,7 @@ func (c *HyperdriveClient) LoadBackupConfig() (*GlobalConfig, error) {
 		return nil, fmt.Errorf("error expanding backup settings file path: %w", err)
 	}
 
-	return LoadConfigFromFile(c.Context.NetworksDir, expandedPath)
+	return LoadConfigFromFile(expandedPath, c.Context.HyperdriveNetworkSettings, c.Context.StakeWiseNetworkSettings)
 }
 
 // Save the config

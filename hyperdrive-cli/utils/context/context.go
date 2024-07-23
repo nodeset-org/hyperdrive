@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"os"
 
+	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/urfave/cli/v2"
 )
 
@@ -14,6 +16,8 @@ const (
 
 // Context for global settings
 type HyperdriveContext struct {
+	*InstallationInfo
+
 	// The path to the configuration file
 	ConfigPath string
 
@@ -38,17 +42,11 @@ type HyperdriveContext struct {
 	// The HTTP trace file if tracing is enabled
 	HttpTraceFile *os.File
 
-	// The system path for Hyperdrive scripts used in the Docker containers
-	ScriptsDir string
+	// The list of networks options and corresponding settings
+	HyperdriveNetworkSettings []*hdconfig.HyperdriveSettings
 
-	// The system path for Hyperdrive templates
-	TemplatesDir string
-
-	// The system path for the source files to put in the user's override directory
-	OverrideSourceDir string
-
-	// The system path for built-in network settings and resource definitions
-	NetworksDir string
+	// The list of networks options and corresponding settings
+	StakeWiseNetworkSettings []*swconfig.StakeWiseSettings
 }
 
 // Add the Hyperdrive context into a CLI context

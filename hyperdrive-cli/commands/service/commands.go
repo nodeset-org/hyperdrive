@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 
+	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
@@ -60,7 +62,7 @@ func createFlagsFromConfigParams(sectionName string, params []config.IParameter,
 */
 
 // Register commands
-func RegisterCommands(app *cli.App, name string, aliases []string) {
+func RegisterCommands(app *cli.App, name string, aliases []string, hdNetSettings []*hdconfig.HyperdriveSettings, swNetSettings []*swconfig.StakeWiseSettings) {
 	configFlags := []cli.Flag{
 		configUpdateDefaultsFlag,
 	}

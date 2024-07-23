@@ -6,29 +6,29 @@
 # for more information on overriding specific parameters of docker-compose files.
 
 services:
-  {{.Stakewise.OperatorContainerName}}:
-    image: {{.Stakewise.OperatorContainerTag.Value}}
+  {{.StakeWise.OperatorContainerName}}:
+    image: {{.StakeWise.OperatorContainerTag.Value}}
     user: root
-    container_name: {{.Hyperdrive.ProjectName}}_{{.Stakewise.OperatorContainerName}}
+    container_name: {{.Hyperdrive.ProjectName}}_{{.StakeWise.OperatorContainerName}}
     restart: unless-stopped
-{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .Stakewise.GetModuleName)}}
+{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .StakeWise.GetModuleName)}}
     volumes:
       - {{$module_dir}}:{{$module_dir}}
-      - {{.Stakewise.DataVolume}}:{{$module_dir}}/db/{{.Stakewise.Vault}}
+      - {{.StakeWise.DataVolume}}:{{$module_dir}}/db/{{.StakeWiseResources.Vault}}
     command:
       - "src/main.py"
       - "start"
       - "--data-dir={{$module_dir}}"
-      - "--database-dir={{$module_dir}}/db/{{.Stakewise.Vault}}"
-      - "--deposit-data-file={{$module_dir}}/{{.Stakewise.DepositDataFile}}"
-      - "--network={{.Stakewise.Network}}"
-      - "--vault={{.Stakewise.Vault}}"
+      - "--database-dir={{$module_dir}}/db/{{.StakeWiseResources.Vault}}"
+      - "--deposit-data-file={{$module_dir}}/{{.StakeWise.DepositDataFile}}"
+      - "--network={{.Hyperdrive.GetEthNetworkName}}"
+      - "--vault={{.StakeWiseResources.Vault}}"
       - "--execution-endpoints={{.Hyperdrive.GetEcHttpEndpointsWithFallback}}"
       - "--consensus-endpoints={{.Hyperdrive.GetBnHttpEndpointsWithFallback}}"
-      - "--hot-wallet-file={{$module_dir}}/{{.Stakewise.WalletFilename}}"
-      - "--hot-wallet-password-file={{$module_dir}}/{{.Stakewise.PasswordFilename}}"
-      - "--keystores-dir={{$module_dir}}/{{.ValidatorsDirectory}}/{{.Stakewise.GetModuleName}}"
-      - "--keystores-password-file={{$module_dir}}/{{.ValidatorsDirectory}}/{{.Stakewise.GetModuleName}}/{{.Stakewise.KeystorePasswordFile}}"
+      - "--hot-wallet-file={{$module_dir}}/{{.StakeWise.WalletFilename}}"
+      - "--hot-wallet-password-file={{$module_dir}}/{{.StakeWise.PasswordFilename}}"
+      - "--keystores-dir={{$module_dir}}/{{.ValidatorsDirectory}}/{{.StakeWise.GetModuleName}}"
+      - "--keystores-password-file={{$module_dir}}/{{.ValidatorsDirectory}}/{{.StakeWise.GetModuleName}}/{{.StakeWise.KeystorePasswordFile}}"
       {{- if .Hyperdrive.Metrics.EnableMetrics.Value}}
       - "--enable-metrics"
       {{end}}
@@ -57,4 +57,4 @@ networks:
     external: true
   {{- end}}
 volumes:
-  {{.Stakewise.DataVolume}}:
+  {{.StakeWise.DataVolume}}:

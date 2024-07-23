@@ -6,12 +6,12 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
-	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
 	swcmd "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise"
@@ -126,12 +126,26 @@ func main() {
 		secureSessionFlag,
 	}
 
+	// Load the network settings
+	installInfo := context.NewInstallationInfo()
+	hdNetworkSettings, err := hdconfig.LoadSettingsFiles(installInfo.NetworksDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading network settings from path [%s]: %s", installInfo.NetworksDir, err.Error())
+		os.Exit(1)
+	}
+	swNetSettingsDir := filepath.Join(installInfo.NetworksDir, hdconfig.ModulesName, swconfig.ModuleName)
+	swNetworkSettings, err := swconfig.LoadSettingsFiles(swNetSettingsDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading network settings from path [%s]: %s", swNetSettingsDir, err.Error())
+		os.Exit(1)
+	}
+
 	// Set default paths for flags before parsing the provided values
 	setDefaultPaths()
 
 	// Register commands
 	nodeset.RegisterCommands(app, "nodeset", []string{"ns"})
-	service.RegisterCommands(app, "service", []string{"s"})
+	service.RegisterCommands(app, "service", []string{"s"}, hdNetworkSettings, swNetworkSettings)
 	swcmd.RegisterCommands(app, "stakewise", []string{"sw"})
 	wallet.RegisterCommands(app, "wallet", []string{"w"})
 
@@ -150,7 +164,9 @@ func main() {
 			fmt.Fprint(os.Stderr, err.Error())
 			os.Exit(1)
 		}
-		setSystemPaths(hdCtx)
+		hdCtx.InstallationInfo = installInfo
+		hdCtx.HyperdriveNetworkSettings = hdNetworkSettings
+		hdCtx.StakeWiseNetworkSettings = swNetworkSettings
 		return nil
 	}
 	app.After = func(c *cli.Context) error {
@@ -181,22 +197,6 @@ func setDefaultPaths() {
 	// Default config folder path
 	defaultConfigPath := filepath.Join(homeDir, defaultConfigFolder)
 	configPathFlag.Value = defaultConfigPath
-}
-
-// Set the paths for Hyperdrive system directories
-func setSystemPaths(ctx *context.HyperdriveContext) {
-	var systemDir string
-	switch runtime.GOOS {
-	// This is where to add different paths for different OS's like macOS
-	default:
-		// By default just use the Linux path
-		systemDir = linuxSystemDir
-	}
-
-	ctx.ScriptsDir = filepath.Join(systemDir, scriptsDir)
-	ctx.TemplatesDir = filepath.Join(systemDir, templatesDir)
-	ctx.OverrideSourceDir = filepath.Join(systemDir, overrideSourceDir)
-	ctx.NetworksDir = filepath.Join(systemDir, networksDir)
 }
 
 // Validate the global flags
@@ -230,7 +230,7 @@ func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error parsing API address [%s]: %w", hdCtx.ApiUrl, err)
 		}
-		hdCtx.ApiUrl = baseUrl.JoinPath(config.HyperdriveApiClientRoute)
+		hdCtx.ApiUrl = baseUrl.JoinPath(hdconfig.HyperdriveApiClientRoute)
 	}
 
 	// Get the HTTP trace flag

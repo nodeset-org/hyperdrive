@@ -41,23 +41,11 @@ func LoadStakeWiseSettings(networksDir string) ([]*swconfig.StakeWiseSettings, e
 }
 
 // Loads a config without updating it if it exists
-func LoadConfigFromFile(networksDir string, configPath string) (*GlobalConfig, error) {
+func LoadConfigFromFile(configPath string, hdSettings []*config.HyperdriveSettings, swSettings []*swconfig.StakeWiseSettings) (*GlobalConfig, error) {
 	// Make sure the config file exists
 	_, err := os.Stat(configPath)
 	if os.IsNotExist(err) {
 		return nil, nil
-	}
-
-	// Get the Hyperdrive settings
-	hdSettings, err := LoadHyperdriveSettings(networksDir)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get the StakeWise settings
-	swSettings, err := LoadStakeWiseSettings(networksDir)
-	if err != nil {
-		return nil, err
 	}
 
 	// Get the Hyperdrive config

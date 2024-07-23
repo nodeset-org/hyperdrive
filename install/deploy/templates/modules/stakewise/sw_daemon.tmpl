@@ -18,9 +18,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - {{.Hyperdrive.GetUserDirectory}}:{{.Hyperdrive.GetUserDirectory}}
       - {{$module_dir}}:{{$module_dir}}
+      - /usr/share/hyperdrive/networks/modules/stakewise:/usr/share/hyperdrive/networks/modules/stakewise:ro
     command:
       - "--module-dir"
       - "{{$module_dir}}"
+      - --settings-folder
+      - "/usr/share/hyperdrive/networks/modules/stakewise"
       - --hyperdrive-url
       - "http://{{.Hyperdrive.DaemonContainerName}}:{{.Hyperdrive.ApiPort}}/"
       - --ip
