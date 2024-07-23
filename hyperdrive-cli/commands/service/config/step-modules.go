@@ -2,7 +2,7 @@ package config
 
 func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWizardStep {
 	// Create the labels
-	stakewiseCfg := wiz.md.Config.Stakewise
+	stakewiseCfg := wiz.md.Config.StakeWise
 	stakewiseLabel := stakewiseCfg.GetTitle()
 	constellationCfg := wiz.md.Config.Constellation
 	constellationLabel := constellationCfg.GetTitle()
@@ -21,7 +21,7 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 		for label, box := range modal.checkboxes {
 			switch label {
 			case stakewiseLabel:
-				box.SetChecked(wiz.md.Config.Stakewise.Enabled.Value)
+				box.SetChecked(wiz.md.Config.StakeWise.Enabled.Value)
 			case constellationLabel:
 				box.SetChecked(wiz.md.Config.Constellation.Enabled.Value)
 			}

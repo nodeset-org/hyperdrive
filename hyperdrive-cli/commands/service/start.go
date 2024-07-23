@@ -169,7 +169,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	}
 
 	// Check if StakeWise or Constellation is enabled
-	if !cfg.Stakewise.Enabled.Value && !cfg.Constellation.Enabled.Value {
+	if !cfg.StakeWise.Enabled.Value && !cfg.Constellation.Enabled.Value {
 		return nil
 	}
 

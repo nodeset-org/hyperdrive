@@ -56,6 +56,11 @@ type ConstellationClient struct {
 // Create new Hyperdrive client from CLI context
 func NewHyperdriveClientFromCtx(c *cli.Context) (*HyperdriveClient, error) {
 	hdCtx := context.GetHyperdriveContext(c)
+	return NewHyperdriveClientFromHyperdriveCtx(hdCtx)
+}
+
+// Create new Hyperdrive client from a custom context
+func NewHyperdriveClientFromHyperdriveCtx(hdCtx *context.HyperdriveContext) (*HyperdriveClient, error) {
 	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, config.HyperdriveDaemonRoute))
 
 	// Create the tracer if required
@@ -96,6 +101,12 @@ func NewHyperdriveClientFromCtx(c *cli.Context) (*HyperdriveClient, error) {
 // Only use this function from commands that may work if the Daemon service doesn't exist
 func NewStakewiseClientFromCtx(c *cli.Context, hdClient *HyperdriveClient) (*StakewiseClient, error) {
 	hdCtx := context.GetHyperdriveContext(c)
+	return NewStakewiseClientFromHyperdriveCtx(hdCtx, hdClient)
+}
+
+// Create new Stakewise client from a custom context
+// Only use this function from commands that may work if the Daemon service doesn't exist
+func NewStakewiseClientFromHyperdriveCtx(hdCtx *context.HyperdriveContext, hdClient *HyperdriveClient) (*StakewiseClient, error) {
 	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, swconfig.ModuleName))
 
 	// Create the tracer if required
@@ -118,12 +129,12 @@ func NewStakewiseClientFromCtx(c *cli.Context, hdClient *HyperdriveClient) (*Sta
 	url := hdCtx.ApiUrl
 	if url == nil {
 		var err error
-		url, err = url.Parse(fmt.Sprintf("http://localhost:%d/%s", hdClient.cfg.Stakewise.ApiPort.Value, swconfig.ApiClientRoute))
+		url, err = url.Parse(fmt.Sprintf("http://localhost:%d/%s", hdClient.cfg.StakeWise.ApiPort.Value, swconfig.ApiClientRoute))
 		if err != nil {
 			return nil, fmt.Errorf("error parsing StakeWise API URL: %w", err)
 		}
 	} else {
-		host := fmt.Sprintf("%s://%s:%d/%s", url.Scheme, url.Hostname(), hdClient.cfg.Stakewise.ApiPort.Value, swconfig.ApiClientRoute)
+		host := fmt.Sprintf("%s://%s:%d/%s", url.Scheme, url.Hostname(), hdClient.cfg.StakeWise.ApiPort.Value, swconfig.ApiClientRoute)
 		var err error
 		url, err = url.Parse(host)
 		if err != nil {

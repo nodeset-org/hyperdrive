@@ -133,7 +133,7 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 	fmt.Printf("Node account: %s%s%s\n", terminal.ColorBlue, response.Data.AccountAddress.Hex(), terminal.ColorReset)
 
 	// Initialize the StakeWise wallet if it's enabled
-	if cfg.Stakewise.Enabled.Value {
+	if cfg.StakeWise.Enabled.Value {
 		fmt.Println()
 		fmt.Println("You have the Stakewise module enabled. Initializing it with your new wallet...")
 		sw, err := client.NewStakewiseClientFromCtx(c, hd)

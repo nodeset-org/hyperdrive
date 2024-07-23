@@ -5,6 +5,9 @@ import (
 	"net/url"
 	"os"
 
+	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/urfave/cli/v2"
 )
 
@@ -14,6 +17,8 @@ const (
 
 // Context for global settings
 type HyperdriveContext struct {
+	*InstallationInfo
+
 	// The path to the configuration file
 	ConfigPath string
 
@@ -37,6 +42,15 @@ type HyperdriveContext struct {
 
 	// The HTTP trace file if tracing is enabled
 	HttpTraceFile *os.File
+
+	// The list of networks options and corresponding settings for Hyperdrive itself
+	HyperdriveNetworkSettings []*hdconfig.HyperdriveSettings
+
+	// The list of networks options and corresponding settings for the StakeWise module
+	StakeWiseNetworkSettings []*swconfig.StakeWiseSettings
+
+	// The list of networks options and corresponding settings for the Constellation module
+	ConstellationNetworkSettings []*csconfig.ConstellationSettings
 }
 
 // Add the Hyperdrive context into a CLI context

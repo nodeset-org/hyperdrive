@@ -139,8 +139,7 @@ func getTxWatchUrl(hd *client.HyperdriveClient) string {
 		fmt.Print("Settings file not found. Please run `hyperdrive service config` to set up Hyperdrive.")
 		return ""
 	}
-	resources := cfg.Hyperdrive.GetNetworkResources()
-	return resources.TxWatchUrl
+	return cfg.HyperdriveResources.TxWatchUrl
 }
 
 // Convert a Unix datetime to a string, or `---` if it's zero
