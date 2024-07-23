@@ -62,7 +62,7 @@ func TestGetMinipoolAvailabilityCount(t *testing.T) {
 
 	// Set the minipool count
 	nsmock := testMgr.GetNodeSetMockServer()
-	nsmock.GetManager().SetAvailableConstellationMinipoolCount(nodeAddress, expectedMinipoolCount)
+	nsmock.GetManager().SetAvailableConstellationMinipoolCount(nsEmail, expectedMinipoolCount)
 
 	// Get the minipool count and assert
 	minipoolCountResponse, err := testMgr.GetApiClient().NodeSet_Constellation.GetAvailableMinipoolCount()

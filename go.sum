@@ -360,8 +360,8 @@ github.com/multiformats/go-varint v0.0.7/go.mod h1:r8PUYw/fD/SjBCiKOoDlGF6QawOEL
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
-github.com/nodeset-org/nodeset-client-go v0.0.0-20240722155242-3deafab3b9f5 h1:+m4rRHbrYeLdYlKG03NbdAUQiJBl015JsjrO8Ukb7/8=
-github.com/nodeset-org/nodeset-client-go v0.0.0-20240722155242-3deafab3b9f5/go.mod h1:a38gBF1yDdFduCb7IJF9xUZ4IFYsYKX9JGYAd7IaLNQ=
+github.com/nodeset-org/nodeset-client-go v0.0.0-20240723171817-3ebe1c5bd16d h1:RdhjHyuT3bf7tErGjxfYXZBzp12EJaYzWqHtreMnvB4=
+github.com/nodeset-org/nodeset-client-go v0.0.0-20240723171817-3ebe1c5bd16d/go.mod h1:QVa1BhsD5KKtbyvt7Uh9zMxF5A/nMmJvl4+erak/5b4=
 github.com/nodeset-org/osha v0.2.1-0.20240716181202-365d8870bd39 h1:l6PueXrz7hs+41jj41V8MkznsU0FqeAGO1+5CniPHCA=
 github.com/nodeset-org/osha v0.2.1-0.20240716181202-365d8870bd39/go.mod h1:dhbzQNZcilQ7Xfg0c6Qapbw38gKEpwwSnBVwxbIYnYU=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
