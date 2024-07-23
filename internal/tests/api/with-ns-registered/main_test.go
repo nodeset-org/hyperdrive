@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
 	"github.com/nodeset-org/osha/keys"
+	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/wallet"
 )
@@ -27,7 +28,9 @@ var (
 func TestMain(m *testing.M) {
 	wg = &sync.WaitGroup{}
 	var err error
-	testMgr, err = hdtesting.NewHyperdriveTestManagerWithDefaults("localhost", "localhost")
+	testMgr, err = hdtesting.NewHyperdriveTestManagerWithDefaults("localhost", "localhost", func(ns *config.NetworkSettings) *config.NetworkSettings {
+		return ns
+	})
 	if err != nil {
 		fail("error creating test manager: %v", err)
 	}

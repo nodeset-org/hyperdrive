@@ -14,9 +14,13 @@ import (
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	nsserver "github.com/nodeset-org/nodeset-client-go/server-mock/server"
 	"github.com/nodeset-org/osha"
+	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/rocket-pool/node-manager-core/node/services"
 )
+
+// A custom provisioning function that can alter or update the network settings used by the test manager prior to starting the Hyperdrive daemon
+type NetworkSettingsProvisioner func(*config.NetworkSettings) *config.NetworkSettings
 
 // HyperdriveTestManager provides bootstrapping and a test service provider, useful for testing
 type HyperdriveTestManager struct {
@@ -58,7 +62,7 @@ func NewHyperdriveTestManager(address string, cfg *hdconfig.HyperdriveConfig, re
 // Creates a new HyperdriveTestManager instance with default test artifacts.
 // `hyperdriveAddress` is the address to bind the Hyperdrive daemon to.
 // `nodesetAddress` is the address to bind the nodeset.io server to.
-func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddress string) (*HyperdriveTestManager, error) {
+func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddress string, netSettingsProvisioner NetworkSettingsProvisioner) (*HyperdriveTestManager, error) {
 	tm, err := osha.NewTestManager()
 	if err != nil {
 		return nil, fmt.Errorf("error creating test manager: %w", err)
@@ -80,8 +84,14 @@ func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddre
 	// Make a new Hyperdrive config
 	testDir := tm.GetTestDir()
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
-	resources := GetTestResources(beaconCfg, fmt.Sprintf("http://%s:%d/api/", nodesetAddress, nodesetMock.GetPort()))
-	cfg, err := hdconfig.NewHyperdriveConfigForNetwork(testDir, []*hdconfig.HyperdriveSettings{}, hdconfig.Network_LocalTest)
+	networkSettings := GetDefaultTestNetworkSettings(beaconCfg)
+	networkSettings = netSettingsProvisioner(networkSettings)
+	resources := getTestResources(networkSettings.NetworkResources, fmt.Sprintf("http://%s:%d/api/", nodesetAddress, nodesetMock.GetPort()))
+	hdNetSettings := &hdconfig.HyperdriveSettings{
+		NetworkSettings:     networkSettings,
+		HyperdriveResources: resources.HyperdriveResources,
+	}
+	cfg, err := hdconfig.NewHyperdriveConfigForNetwork(testDir, []*hdconfig.HyperdriveSettings{hdNetSettings}, hdconfig.Network_LocalTest)
 	if err != nil {
 		closeTestManager(tm)
 		return nil, fmt.Errorf("error creating Hyperdrive config: %v", err)

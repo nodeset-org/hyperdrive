@@ -529,6 +529,7 @@ func (cfg *HyperdriveConfig) GetEthNetworkName() string {
 	return cfg.ethNetworkName
 }
 
+// Get all loaded network settings
 func (cfg *HyperdriveConfig) GetNetworkSettings() []*HyperdriveSettings {
 	return cfg.networkSettings
 }

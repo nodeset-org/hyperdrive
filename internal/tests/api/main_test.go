@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
+	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/log"
 )
 
@@ -22,7 +23,9 @@ var (
 func TestMain(m *testing.M) {
 	wg = &sync.WaitGroup{}
 	var err error
-	testMgr, err = hdtesting.NewHyperdriveTestManagerWithDefaults("localhost", "localhost")
+	testMgr, err = hdtesting.NewHyperdriveTestManagerWithDefaults("localhost", "localhost", func(ns *config.NetworkSettings) *config.NetworkSettings {
+		return ns
+	})
 	if err != nil {
 		fail("error creating test manager: %v", err)
 	}
