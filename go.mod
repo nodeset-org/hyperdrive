@@ -6,16 +6,16 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/ethereum/go-ethereum v1.14.7
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240723141307-76f9041af660
-	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240722163659-9da27c257bf7
+	github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240727002516-61a22c646e14
+	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240723155047-7acad1b84e2c
 	github.com/nodeset-org/hyperdrive-stakewise v1.0.3-0.20240717182546-5ec8a454abe3
-	github.com/nodeset-org/osha v0.2.1-0.20240716181202-365d8870bd39
+	github.com/nodeset-org/osha v0.2.1-0.20240725195912-8bc75c30efa2
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20240722141309-0a3f0e72cf11
+	github.com/rocket-pool/node-manager-core v0.5.2-0.20240726164639-fd383b1fc853
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sync v0.7.0
 	golang.org/x/term v0.22.0
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -134,6 +134,8 @@ require (
 	github.com/prysmaticlabs/prysm/v5 v5.0.3 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rocket-pool/batch-query v1.0.0 // indirect
+	github.com/rocket-pool/rocketpool-go/v2 v2.0.0-b2.0.20240709170030-c27aeb5fb99b // indirect
+	github.com/rocket-pool/smartnode/v2 v2.0.0-olddev.0.20240710181452-edcbd6208bdd // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sethvargo/go-password v0.3.1 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
@@ -151,6 +153,7 @@ require (
 	github.com/wealdtech/go-eth2-types/v2 v2.8.2 // indirect
 	github.com/wealdtech/go-eth2-util v1.8.2 // indirect
 	github.com/wealdtech/go-eth2-wallet-encryptor-keystorev4 v1.4.1 // indirect
+	github.com/wealdtech/go-merkletree v1.0.1-0.20190605192610-2bb163c2ea2a // indirect
 	github.com/wealdtech/go-multicodec v1.4.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
@@ -175,13 +178,7 @@ require (
 	google.golang.org/grpc v1.65.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
-)
-
-require (
-	github.com/rocket-pool/rocketpool-go/v2 v2.0.0-b2.0.20240709170030-c27aeb5fb99b // indirect
-	github.com/rocket-pool/smartnode/v2 v2.0.0-olddev.0.20240710181452-edcbd6208bdd // indirect
-	github.com/wealdtech/go-merkletree v1.0.1-0.20190605192610-2bb163c2ea2a // indirect
 )

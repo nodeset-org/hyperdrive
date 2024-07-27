@@ -12,7 +12,7 @@ import (
 	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // When printing sync percents, we should avoid printing 100%.

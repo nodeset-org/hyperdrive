@@ -5,7 +5,7 @@ import (
 
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/urfave/cli/v2"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // Generate a YAML file that shows the current configuration schema, including all of the parameters and their descriptions
