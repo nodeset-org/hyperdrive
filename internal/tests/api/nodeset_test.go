@@ -25,7 +25,7 @@ func TestNodeSetRegistration_NoWallet(t *testing.T) {
 	defer nodeset_cleanup(snapshotName)
 
 	// Run the round-trip test
-	hd := testMgr.GetApiClient()
+	hd := hdNode.GetApiClient()
 	response, err := hd.NodeSet.GetRegistrationStatus()
 	require.NoError(t, err)
 	require.Equal(t, api.NodeSetRegistrationStatus_NoWallet, response.Data.Status)
@@ -44,7 +44,7 @@ func TestNodeSetRegistration_NoRegistration(t *testing.T) {
 	// Recover a wallet
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
-	recoverResponse, err := testMgr.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	recoverResponse, err := hdNode.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
 
@@ -53,7 +53,7 @@ func TestNodeSetRegistration_NoRegistration(t *testing.T) {
 	t.Log("Received correct wallet address")
 
 	// Run the round-trip test
-	hd := testMgr.GetApiClient()
+	hd := hdNode.GetApiClient()
 	registrationResponse, err := hd.NodeSet.GetRegistrationStatus()
 	require.NoError(t, err)
 	require.Equal(t, api.NodeSetRegistrationStatus_Unregistered, registrationResponse.Data.Status)
@@ -72,7 +72,7 @@ func TestNodeSetRegistration_Registered(t *testing.T) {
 	// Recover a wallet
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
-	recoverResponse, err := testMgr.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	recoverResponse, err := hdNode.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
 
@@ -81,7 +81,7 @@ func TestNodeSetRegistration_Registered(t *testing.T) {
 	t.Log("Received correct wallet address")
 
 	// Register the node with nodeset.io
-	hd := testMgr.GetApiClient()
+	hd := hdNode.GetApiClient()
 	nsMgr := testMgr.GetNodeSetMockServer().GetManager()
 	err = nsMgr.AddUser(nsEmail)
 	require.NoError(t, err)
@@ -116,7 +116,7 @@ func nodeset_cleanup(snapshotName string) {
 	}
 
 	// Reload the wallet to undo any changes made during the test
-	err := testMgr.GetServiceProvider().GetWallet().Reload(testMgr.GetLogger())
+	err := hdNode.GetServiceProvider().GetWallet().Reload(testMgr.GetLogger())
 	if err != nil {
 		fail("Error reloading wallet: %v", err)
 	}

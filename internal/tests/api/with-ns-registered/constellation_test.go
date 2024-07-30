@@ -42,7 +42,7 @@ func TestConstellationWhitelistSignature(t *testing.T) {
 	nsMgr.SetManualSignatureTimestamp(&manualTime)
 
 	// Get a whitelist signature
-	hd := testMgr.GetApiClient()
+	hd := hdNode.GetApiClient()
 	response, err := hd.NodeSet_Constellation.GetRegistrationSignature(whitelistAddress)
 	require.NoError(t, err)
 	require.False(t, response.Data.NotAuthorized)
@@ -65,7 +65,7 @@ func TestGetMinipoolAvailabilityCount(t *testing.T) {
 	nsmock.GetManager().SetAvailableConstellationMinipoolCount(nsEmail, expectedMinipoolCount)
 
 	// Get the minipool count and assert
-	minipoolCountResponse, err := testMgr.GetApiClient().NodeSet_Constellation.GetAvailableMinipoolCount()
+	minipoolCountResponse, err := hdNode.GetApiClient().NodeSet_Constellation.GetAvailableMinipoolCount()
 	require.NoError(t, err)
 	require.Equal(t, expectedMinipoolCount, minipoolCountResponse.Data.Count)
 

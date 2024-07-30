@@ -22,13 +22,14 @@ var (
 	logger      *slog.Logger                     = nil
 	nodeAddress common.Address
 	nsEmail     string = "test@nodeset.io"
+	hdNode      *hdtesting.HyperdriveNode
 )
 
 // Initialize a common server used by all tests
 func TestMain(m *testing.M) {
 	wg = &sync.WaitGroup{}
 	var err error
-	testMgr, err = hdtesting.NewHyperdriveTestManagerWithDefaults("localhost", "localhost", func(ns *config.NetworkSettings) *config.NetworkSettings {
+	testMgr, err = hdtesting.NewHyperdriveTestManagerWithDefaults(func(ns *config.NetworkSettings) *config.NetworkSettings {
 		return ns
 	})
 	if err != nil {
@@ -40,7 +41,8 @@ func TestMain(m *testing.M) {
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(4)
 	password := "test_password123"
-	hd := testMgr.GetApiClient()
+	hdNode = testMgr.GetNode()
+	hd := hdNode.GetApiClient()
 	recoverResponse, err := hd.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, password, true)
 	if err != nil {
 		fail("error generating wallet: %v", err)

@@ -38,7 +38,7 @@ func TestWalletRecover_Success(t *testing.T) {
 	// Run the round-trip test
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
-	response, err := testMgr.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	response, err := hdNode.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
 
@@ -58,7 +58,7 @@ func TestWalletRecover_WrongIndex(t *testing.T) {
 	// Run the round-trip test
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(1)
-	response, err := testMgr.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	response, err := hdNode.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
 
@@ -77,7 +77,7 @@ func TestWalletRecover_WrongDerivationPath(t *testing.T) {
 	// Run the round-trip test
 	derivationPath := string(wallet.DerivationPath_LedgerLive)
 	index := uint64(0)
-	response, err := testMgr.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
+	response, err := hdNode.GetApiClient().Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
 
@@ -87,7 +87,7 @@ func TestWalletRecover_WrongDerivationPath(t *testing.T) {
 }
 
 func TestWalletStatus_NotLoaded(t *testing.T) {
-	apiClient := testMgr.GetApiClient()
+	apiClient := hdNode.GetApiClient()
 	response, err := apiClient.Wallet.Status()
 	require.NoError(t, err)
 	t.Log("Status called")
@@ -121,7 +121,7 @@ func TestWalletStatus_Loaded(t *testing.T) {
 	// Regen the wallet
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
-	apiClient := testMgr.GetApiClient()
+	apiClient := hdNode.GetApiClient()
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
 	require.NoError(t, err)
 	t.Log("Recover called")
@@ -157,7 +157,7 @@ func TestWalletBalance(t *testing.T) {
 	}
 
 	// Regen the wallet
-	apiClient := testMgr.GetApiClient()
+	apiClient := hdNode.GetApiClient()
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(2)
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
@@ -190,7 +190,7 @@ func TestWalletSignMessage(t *testing.T) {
 	}
 
 	// Regen the wallet
-	apiClient := testMgr.GetApiClient()
+	apiClient := hdNode.GetApiClient()
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
@@ -235,7 +235,7 @@ func TestWalletSend_EthSuccess(t *testing.T) {
 	}
 
 	// Regen the wallet
-	apiClient := testMgr.GetApiClient()
+	apiClient := hdNode.GetApiClient()
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
@@ -268,7 +268,7 @@ func TestWalletSend_EthSuccess(t *testing.T) {
 	t.Log("Waiting complete")
 
 	// Check the balance
-	sp := testMgr.GetServiceProvider()
+	sp := hdNode.GetServiceProvider()
 	ctx := sp.GetBaseContext()
 
 	ecManager := sp.GetEthClient()
@@ -299,7 +299,7 @@ func TestWalletSend_EthFailure(t *testing.T) {
 	}
 
 	// Regen the wallet
-	apiClient := testMgr.GetApiClient()
+	apiClient := hdNode.GetApiClient()
 	derivationPath := string(wallet.DerivationPath_Default)
 	index := uint64(0)
 	_, err = apiClient.Wallet.Recover(&derivationPath, keys.DefaultMnemonic, &index, goodPassword, true)
@@ -336,7 +336,7 @@ func wallet_cleanup(snapshotName string) {
 	}
 
 	// Reload the wallet to undo any changes made during the test
-	err = testMgr.GetServiceProvider().GetWallet().Reload(testMgr.GetLogger())
+	err = hdNode.GetServiceProvider().GetWallet().Reload(testMgr.GetLogger())
 	if err != nil {
 		fail("Error reloading wallet: %v", err)
 	}

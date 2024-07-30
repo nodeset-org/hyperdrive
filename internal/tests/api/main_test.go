@@ -17,19 +17,21 @@ var (
 	testMgr *hdtesting.HyperdriveTestManager = nil
 	wg      *sync.WaitGroup                  = nil
 	logger  *slog.Logger                     = nil
+	hdNode  *hdtesting.HyperdriveNode
 )
 
 // Initialize a common server used by all tests
 func TestMain(m *testing.M) {
 	wg = &sync.WaitGroup{}
 	var err error
-	testMgr, err = hdtesting.NewHyperdriveTestManagerWithDefaults("localhost", "localhost", func(ns *config.NetworkSettings) *config.NetworkSettings {
+	testMgr, err = hdtesting.NewHyperdriveTestManagerWithDefaults(func(ns *config.NetworkSettings) *config.NetworkSettings {
 		return ns
 	})
 	if err != nil {
 		fail("error creating test manager: %v", err)
 	}
 	logger = testMgr.GetLogger()
+	hdNode = testMgr.GetNode()
 
 	// Run tests
 	code := m.Run()

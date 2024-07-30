@@ -2,15 +2,12 @@ package testing
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 
-	"github.com/nodeset-org/hyperdrive-daemon/client"
 	"github.com/nodeset-org/hyperdrive-daemon/common"
-	"github.com/nodeset-org/hyperdrive-daemon/server"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	nsserver "github.com/nodeset-org/nodeset-client-go/server-mock/server"
 	"github.com/nodeset-org/osha"
@@ -26,17 +23,11 @@ type NetworkSettingsProvisioner func(*config.NetworkSettings) *config.NetworkSet
 type HyperdriveTestManager struct {
 	*osha.TestManager
 
-	// The service provider for the test environment
-	serviceProvider common.IHyperdriveServiceProvider
+	// The Hyperdrive node owned by this test manager
+	node *HyperdriveNode
 
 	// The mock for the nodeset.io service
 	nodesetMock *nsserver.NodeSetMockServer
-
-	// The Hyperdrive Daemon server
-	serverMgr *server.ServerManager
-
-	// The Hyperdrive Daemon client
-	apiClient *client.ApiClient
 
 	// Snapshot ID from the baseline - the initial state of the nodeset.io service prior to running any tests
 	baselineSnapshotID string
@@ -45,13 +36,12 @@ type HyperdriveTestManager struct {
 	snapshotServiceMap map[string]Service
 
 	// Wait groups for graceful shutdown
-	hdWg *sync.WaitGroup
 	nsWg *sync.WaitGroup
 }
 
 // Creates a new HyperdriveTestManager instance. Requires management of your own nodeset.io server mock.
 // `address` is the address to bind the Hyperdrive daemon to.
-func NewHyperdriveTestManager(address string, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.MergedResources, nsServer *nsserver.NodeSetMockServer) (*HyperdriveTestManager, error) {
+func NewHyperdriveTestManager(address string, port uint, cfg *hdconfig.HyperdriveConfig, resources *hdconfig.MergedResources, nsServer *nsserver.NodeSetMockServer) (*HyperdriveTestManager, error) {
 	tm, err := osha.NewTestManager()
 	if err != nil {
 		return nil, fmt.Errorf("error creating test manager: %w", err)
@@ -60,9 +50,7 @@ func NewHyperdriveTestManager(address string, cfg *hdconfig.HyperdriveConfig, re
 }
 
 // Creates a new HyperdriveTestManager instance with default test artifacts.
-// `hyperdriveAddress` is the address to bind the Hyperdrive daemon to.
-// `nodesetAddress` is the address to bind the nodeset.io server to.
-func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddress string, netSettingsProvisioner NetworkSettingsProvisioner) (*HyperdriveTestManager, error) {
+func NewHyperdriveTestManagerWithDefaults(netSettingsProvisioner NetworkSettingsProvisioner) (*HyperdriveTestManager, error) {
 	tm, err := osha.NewTestManager()
 	if err != nil {
 		return nil, fmt.Errorf("error creating test manager: %w", err)
@@ -70,7 +58,7 @@ func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddre
 
 	// Make the nodeset.io mock server
 	nsWg := &sync.WaitGroup{}
-	nodesetMock, err := nsserver.NewNodeSetMockServer(tm.GetLogger(), nodesetAddress, 0)
+	nodesetMock, err := nsserver.NewNodeSetMockServer(tm.GetLogger(), "localhost", 0)
 	if err != nil {
 		closeTestManager(tm)
 		return nil, fmt.Errorf("error creating nodeset mock server: %v", err)
@@ -86,7 +74,7 @@ func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddre
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
 	networkSettings := GetDefaultTestNetworkSettings(beaconCfg)
 	networkSettings = netSettingsProvisioner(networkSettings)
-	resources := getTestResources(networkSettings.NetworkResources, fmt.Sprintf("http://%s:%d/api/", nodesetAddress, nodesetMock.GetPort()))
+	resources := getTestResources(networkSettings.NetworkResources, fmt.Sprintf("http://%s:%d/api/", "localhost", nodesetMock.GetPort()))
 	hdNetSettings := &hdconfig.HyperdriveSettings{
 		NetworkSettings:     networkSettings,
 		HyperdriveResources: resources.HyperdriveResources,
@@ -97,9 +85,10 @@ func NewHyperdriveTestManagerWithDefaults(hyperdriveAddress string, nodesetAddre
 		return nil, fmt.Errorf("error creating Hyperdrive config: %v", err)
 	}
 	cfg.Network.Value = hdconfig.Network_LocalTest
+	cfg.ApiPort.Value = 0
 
 	// Make the test manager
-	return newHyperdriveTestManagerImpl(hyperdriveAddress, tm, cfg, resources, nodesetMock, nsWg)
+	return newHyperdriveTestManagerImpl("localhost", tm, cfg, resources, nodesetMock, nsWg)
 }
 
 // Implementation for creating a new HyperdriveTestManager
@@ -131,31 +120,18 @@ func newHyperdriveTestManagerImpl(address string, tm *osha.TestManager, cfg *hdc
 		return nil, fmt.Errorf("error creating data and modules directories [%s]: %v", moduleDir, err)
 	}
 
-	// Create the server
-	hdWg := &sync.WaitGroup{}
-	serverMgr, err := server.NewServerManager(serviceProvider, address, 0, hdWg)
+	// Make the Hyperdrive node
+	node, err := newHyperdriveNode(serviceProvider, address, tm.GetLogger())
 	if err != nil {
 		closeTestManager(tm)
-		return nil, fmt.Errorf("error creating hyperdrive server: %v", err)
+		return nil, fmt.Errorf("error creating Hyperdrive node: %v", err)
 	}
-
-	// Create the client
-	urlString := fmt.Sprintf("http://%s:%d/%s", address, serverMgr.GetPort(), hdconfig.HyperdriveApiClientRoute)
-	url, err := url.Parse(urlString)
-	if err != nil {
-		closeTestManager(tm)
-		return nil, fmt.Errorf("error parsing client URL [%s]: %v", urlString, err)
-	}
-	apiClient := client.NewApiClient(url, tm.GetLogger(), nil)
 
 	// Return
 	m := &HyperdriveTestManager{
 		TestManager:        tm,
-		serviceProvider:    serviceProvider,
+		node:               node,
 		nodesetMock:        nsServer,
-		serverMgr:          serverMgr,
-		apiClient:          apiClient,
-		hdWg:               hdWg,
 		nsWg:               nsWaitGroup,
 		snapshotServiceMap: map[string]Service{},
 	}
@@ -191,11 +167,9 @@ func (m *HyperdriveTestManager) Close() error {
 		}
 		m.nodesetMock = nil
 	}
-	if m.serverMgr != nil {
-		m.serverMgr.Stop()
-		m.hdWg.Wait()
-		m.TestManager.GetLogger().Info("Stopped daemon API server")
-		m.serverMgr = nil
+	err := m.node.Close()
+	if err != nil {
+		return fmt.Errorf("error closing Hyperdrive node: %w", err)
 	}
 	if m.TestManager != nil {
 		err := m.TestManager.Close()
@@ -209,24 +183,14 @@ func (m *HyperdriveTestManager) Close() error {
 // === Getters ===
 // ===============
 
-// Returns the service provider for the test environment
-func (m *HyperdriveTestManager) GetServiceProvider() common.IHyperdriveServiceProvider {
-	return m.serviceProvider
+// Get the Hyperdrive node
+func (m *HyperdriveTestManager) GetNode() *HyperdriveNode {
+	return m.node
 }
 
 // Get the nodeset.io mock server
 func (m *HyperdriveTestManager) GetNodeSetMockServer() *nsserver.NodeSetMockServer {
 	return m.nodesetMock
-}
-
-// Returns the Hyperdrive Daemon server
-func (m *HyperdriveTestManager) GetServerManager() *server.ServerManager {
-	return m.serverMgr
-}
-
-// Returns the Hyperdrive Daemon client
-func (m *HyperdriveTestManager) GetApiClient() *client.ApiClient {
-	return m.apiClient
 }
 
 // ====================

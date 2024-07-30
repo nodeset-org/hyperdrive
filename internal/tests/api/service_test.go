@@ -28,7 +28,7 @@ func TestClientStatus_Synced(t *testing.T) {
 	}
 
 	// Run the round-trip test
-	response, err := testMgr.GetApiClient().Service.ClientStatus()
+	response, err := hdNode.GetApiClient().Service.ClientStatus()
 	require.NoError(t, err)
 	require.True(t, response.Data.EcManagerStatus.PrimaryClientStatus.IsSynced)
 	require.True(t, response.Data.EcManagerStatus.PrimaryClientStatus.IsWorking)
@@ -53,7 +53,7 @@ func TestServerVersion(t *testing.T) {
 	version := shared.HyperdriveVersion
 
 	// Run the round-trip test
-	response, err := testMgr.GetApiClient().Service.Version()
+	response, err := hdNode.GetApiClient().Service.Version()
 	require.NoError(t, err)
 	require.Equal(t, version, response.Data.Version)
 	t.Logf("Received correct version: %s", version)
@@ -68,7 +68,7 @@ func TestRestartContainer(t *testing.T) {
 	defer service_cleanup(snapshotName)
 
 	// Get some services
-	sp := testMgr.GetServiceProvider()
+	sp := hdNode.GetServiceProvider()
 	cfg := sp.GetConfig()
 	ctx := sp.GetBaseContext()
 
@@ -96,7 +96,7 @@ func TestRestartContainer(t *testing.T) {
 	t.Log("Created mock VC")
 
 	// Run the client call
-	_, err = testMgr.GetApiClient().Service.RestartContainer(containerName)
+	_, err = hdNode.GetApiClient().Service.RestartContainer(containerName)
 	require.NoError(t, err)
 	t.Log("Restart called")
 
