@@ -12,21 +12,19 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 		Aliases: aliases,
 		Usage:   "Manage your Constellation node",
 		Subcommands: []*cli.Command{
-			/*
-				{
-					Name:    "status",
-					Aliases: []string{"s"},
-					Flags:   []cli.Flag{},
-					Usage:   "Get the node's status.",
-					Action: func(c *cli.Context) error {
-						// Validate args
-						utils.ValidateArgCount(c, 0)
+			{
+				Name:    "status",
+				Aliases: []string{"s"},
+				Flags:   []cli.Flag{},
+				Usage:   "Get the node's status.",
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
 
-						// Run
-						return getStatus(c)
-					},
+					// Run
+					return getStatus(c)
 				},
-			*/
+			},
 			{
 				Name:    "create",
 				Aliases: []string{"c"},
@@ -43,23 +41,22 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 					return createMinipool(c)
 				},
 			},
-			/*
-				{
-					Name:    "stake",
-					Aliases: []string{"k"},
-					Flags: []cli.Flag{
-						utils.YesFlag,
-					},
-					Usage: "Stake one or minipools that are still in prelaunch but have passed the Rocket Pool scrub check.",
-					Action: func(c *cli.Context) error {
-						// Validate args
-						utils.ValidateArgCount(c, 0)
-
-						// Run
-						return stake(c)
-					},
+			{
+				Name:    "stake",
+				Aliases: []string{"k"},
+				Flags: []cli.Flag{
+					utils.YesFlag,
+					stakeMinipoolsFlag,
 				},
-			*/
+				Usage: "Stake one or minipools that are still in prelaunch but have passed the Rocket Pool scrub check.",
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run
+					return stake(c)
+				},
+			},
 		},
 	})
 }
