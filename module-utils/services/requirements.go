@@ -99,7 +99,7 @@ func (sp *moduleServiceProvider) WaitBeaconClientSynced(ctx context.Context, ver
 }
 
 // Wait for Hyperdrive to have a node address assigned
-func (sp *moduleServiceProvider) WaitForNodeAddress(ctx context.Context) error {
+func (sp *moduleServiceProvider) WaitForNodeAddress(ctx context.Context) (*wallet.WalletStatus, error) {
 	// Get the logger
 	logger, exists := log.FromContext(ctx)
 	if !exists {
@@ -109,25 +109,25 @@ func (sp *moduleServiceProvider) WaitForNodeAddress(ctx context.Context) error {
 	for {
 		hdWalletStatus, err := sp.GetHyperdriveClient().Wallet.Status()
 		if err != nil {
-			return fmt.Errorf("error getting Hyperdrive wallet status: %w", err)
+			return nil, fmt.Errorf("error getting Hyperdrive wallet status: %w", err)
 		}
 
 		status := hdWalletStatus.Data.WalletStatus
 		if status.Address.HasAddress {
-			return nil
+			return &status, nil
 		}
 
 		logger.Info("Node address not present yet",
 			slog.Duration("retry", walletReadyCheckInterval),
 		)
 		if utils.SleepWithCancel(ctx, walletReadyCheckInterval) {
-			return nil
+			return nil, nil
 		}
 	}
 }
 
 // Wait for the Hyperdrive wallet to be ready
-func (sp *moduleServiceProvider) WaitForWallet(ctx context.Context) error {
+func (sp *moduleServiceProvider) WaitForWallet(ctx context.Context) (*wallet.WalletStatus, error) {
 	// Get the logger
 	logger, exists := log.FromContext(ctx)
 	if !exists {
@@ -137,18 +137,18 @@ func (sp *moduleServiceProvider) WaitForWallet(ctx context.Context) error {
 	for {
 		hdWalletStatus, err := sp.GetHyperdriveClient().Wallet.Status()
 		if err != nil {
-			return fmt.Errorf("error getting Hyperdrive wallet status: %w", err)
+			return nil, fmt.Errorf("error getting Hyperdrive wallet status: %w", err)
 		}
 
 		if CheckIfWalletReady(hdWalletStatus.Data.WalletStatus) == nil {
-			return nil
+			return &hdWalletStatus.Data.WalletStatus, nil
 		}
 
 		logger.Info("Hyperdrive wallet not ready yet",
 			slog.Duration("retry", walletReadyCheckInterval),
 		)
 		if utils.SleepWithCancel(ctx, walletReadyCheckInterval) {
-			return nil
+			return nil, nil
 		}
 	}
 }

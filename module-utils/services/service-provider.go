@@ -85,10 +85,10 @@ type IRequirementsProvider interface {
 	WaitBeaconClientSynced(ctx context.Context, verbose bool) error
 
 	// Wait for Hyperdrive to have a node address assigned
-	WaitForNodeAddress(ctx context.Context) error
+	WaitForNodeAddress(ctx context.Context) (*wallet.WalletStatus, error)
 
 	// Wait for the node to have a wallet loaded and ready for transactions
-	WaitForWallet(ctx context.Context) error
+	WaitForWallet(ctx context.Context) (*wallet.WalletStatus, error)
 
 	// Wait for the node to be registered with a nodeset.io account
 	WaitForNodeSetRegistration(ctx context.Context) bool
