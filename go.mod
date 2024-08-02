@@ -10,13 +10,14 @@ require (
 	github.com/goccy/go-json v0.10.3
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
-	github.com/nodeset-org/nodeset-client-go v0.0.0-20240723171817-3ebe1c5bd16d
+	github.com/nodeset-org/nodeset-client-go v0.0.0-20240802192556-ee6117c1993c
 	github.com/nodeset-org/osha v0.2.1-0.20240716181202-365d8870bd39
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/rocket-pool/node-manager-core v0.5.2-0.20240722141309-0a3f0e72cf11
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2
 	github.com/wealdtech/go-ens/v3 v3.6.0
+	golang.org/x/sync v0.7.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -153,7 +154,6 @@ require (
 	golang.org/x/crypto v0.25.0 // indirect
 	golang.org/x/exp v0.0.0-20240716160929-1d5bc16f04a8 // indirect
 	golang.org/x/net v0.27.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
