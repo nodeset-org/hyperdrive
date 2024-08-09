@@ -16,13 +16,13 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Name:    "status",
 				Aliases: []string{"s"},
 				Flags:   []cli.Flag{},
-				Usage:   "Get the node's status.",
+				Usage:   "Get the status of the node's minipools.",
 				Action: func(c *cli.Context) error {
 					// Validate args
 					utils.ValidateArgCount(c, 0)
 
 					// Run
-					return getStatus(c)
+					return getMinipoolStatus(c)
 				},
 			},
 			{
@@ -54,7 +54,24 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 					utils.ValidateArgCount(c, 0)
 
 					// Run
-					return stake(c)
+					return stakeMinipools(c)
+				},
+			},
+			{
+				Name:    "exit",
+				Aliases: []string{"e"},
+				Flags: []cli.Flag{
+					utils.YesFlag,
+					exitMinipoolsFlag,
+					exitVerboseFlag,
+				},
+				Usage: "Voluntarily exit one or more minipools from the Beacon Chain, ending validation duties and withdrawing their full balances back to the Execution layer.",
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run
+					return exitMinipools(c)
 				},
 			},
 		},

@@ -20,7 +20,7 @@ var (
 	}
 )
 
-func stake(c *cli.Context) error {
+func stakeMinipools(c *cli.Context) error {
 	// Get the client
 	hd, err := client.NewHyperdriveClientFromCtx(c)
 	if err != nil {

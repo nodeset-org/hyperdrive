@@ -21,7 +21,7 @@ const (
 	statusIncludeFinalizedFlag string = "include-finalized"
 )
 
-func getStatus(c *cli.Context) error {
+func getMinipoolStatus(c *cli.Context) error {
 	// Get RP client
 	hd, err := client.NewHyperdriveClientFromCtx(c)
 	if err != nil {
