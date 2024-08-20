@@ -6,7 +6,7 @@ import (
 
 	hdcommon "github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
-	apiv2 "github.com/nodeset-org/nodeset-client-go/api-v2"
+	v2constellation "github.com/nodeset-org/nodeset-client-go/api-v2/constellation"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -14,7 +14,6 @@ import (
 
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/api/types"
-	"github.com/rocket-pool/node-manager-core/utils/input"
 )
 
 // ===============
@@ -29,9 +28,7 @@ func (f *constellationGetRegistrationSignatureContextFactory) Create(args url.Va
 	c := &constellationGetRegistrationSignatureContext{
 		handler: f.handler,
 	}
-	inputErrs := []error{
-		server.ValidateArg("whitelistAddress", args, input.ValidateAddress, &c.whitelistAddress),
-	}
+	inputErrs := []error{}
 	return c, errors.Join(inputErrs...)
 }
 
@@ -70,9 +67,9 @@ func (c *constellationGetRegistrationSignatureContext) PrepareData(data *api.Nod
 
 	// Get the registration signature
 	ns := sp.GetNodeSetServiceManager()
-	timestamp, signature, err := ns.Constellation_GetRegistrationSignatureAndTime(ctx, c.whitelistAddress)
+	timestamp, signature, err := ns.Constellation_GetRegistrationSignatureAndTime(ctx)
 	if err != nil {
-		if errors.Is(err, apiv2.ErrNotAuthorized) {
+		if errors.Is(err, v2constellation.ErrNotAuthorized) {
 			data.NotAuthorized = true
 			return types.ResponseStatus_Success, nil
 		}

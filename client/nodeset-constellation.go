@@ -31,10 +31,8 @@ func (r *NodeSetConstellationRequester) GetContext() client.IRequesterContext {
 }
 
 // Gets a signature for registering / whitelisting the node with the Constellation contracts
-func (r *NodeSetConstellationRequester) GetRegistrationSignature(whitelistAddress common.Address) (*types.ApiResponse[api.NodeSetConstellation_GetRegistrationSignatureData], error) {
-	args := map[string]string{
-		"whitelistAddress": whitelistAddress.Hex(),
-	}
+func (r *NodeSetConstellationRequester) GetRegistrationSignature() (*types.ApiResponse[api.NodeSetConstellation_GetRegistrationSignatureData], error) {
+	args := map[string]string{}
 	return client.SendGetRequest[api.NodeSetConstellation_GetRegistrationSignatureData](r, "get-registration-signature", "GetRegistrationSignature", args)
 }
 

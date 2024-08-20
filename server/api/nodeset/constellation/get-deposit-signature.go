@@ -7,7 +7,7 @@ import (
 
 	hdcommon "github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
-	apiv2 "github.com/nodeset-org/nodeset-client-go/api-v2"
+	v2constellation "github.com/nodeset-org/nodeset-client-go/api-v2/constellation"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -77,15 +77,15 @@ func (c *constellationGetDepositSignatureContext) PrepareData(data *api.NodeSetC
 	ns := sp.GetNodeSetServiceManager()
 	timestamp, signature, err := ns.Constellation_GetDepositSignatureAndTime(ctx, c.minipoolAddress, c.salt, c.superNodeAddress)
 	if err != nil {
-		if errors.Is(err, apiv2.ErrNotAuthorized) {
+		if errors.Is(err, v2constellation.ErrNotAuthorized) {
 			data.NotAuthorized = true
 			return types.ResponseStatus_Success, nil
 		}
-		if errors.Is(err, apiv2.ErrMinipoolLimitReached) {
+		if errors.Is(err, v2constellation.ErrMinipoolLimitReached) {
 			data.LimitReached = true
 			return types.ResponseStatus_Success, nil
 		}
-		if errors.Is(err, apiv2.ErrMissingExitMessage) {
+		if errors.Is(err, v2constellation.ErrMissingExitMessage) {
 			data.MissingExitMessage = true
 			return types.ResponseStatus_Success, nil
 		}

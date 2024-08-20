@@ -7,7 +7,8 @@ import (
 	"github.com/gorilla/mux"
 	hdcommon "github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
-	apiv1 "github.com/nodeset-org/nodeset-client-go/api-v1"
+	apiv0 "github.com/nodeset-org/nodeset-client-go/api-v0"
+	"github.com/nodeset-org/nodeset-client-go/common/stakewise"
 	"github.com/rocket-pool/node-manager-core/beacon"
 
 	"github.com/rocket-pool/node-manager-core/api/server"
@@ -66,11 +67,11 @@ func (c *stakeWiseUploadDepositDataContext) PrepareData(data *api.NodeSetStakeWi
 	ns := sp.GetNodeSetServiceManager()
 	err = ns.StakeWise_UploadDepositData(ctx, c.body)
 	if err != nil {
-		if errors.Is(err, apiv1.ErrVaultNotFound) {
+		if errors.Is(err, apiv0.ErrVaultNotFound) {
 			data.VaultNotFound = true
 			return types.ResponseStatus_Success, nil
 		}
-		if errors.Is(err, apiv1.ErrInvalidPermissions) {
+		if errors.Is(err, stakewise.ErrInvalidPermissions) {
 			data.InvalidPermissions = true
 			return types.ResponseStatus_Success, nil
 		}

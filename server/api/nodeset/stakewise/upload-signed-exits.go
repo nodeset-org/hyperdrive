@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	hdcommon "github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
-	apiv1 "github.com/nodeset-org/nodeset-client-go/api-v1"
+	nscommon "github.com/nodeset-org/nodeset-client-go/common"
 
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/api/types"
@@ -21,7 +21,7 @@ type stakeWiseUploadSignedExitsContextFactory struct {
 	handler *StakeWiseHandler
 }
 
-func (f *stakeWiseUploadSignedExitsContextFactory) Create(body []apiv1.ExitData) (*stakeWiseUploadSignedExitsContext, error) {
+func (f *stakeWiseUploadSignedExitsContextFactory) Create(body []nscommon.ExitData) (*stakeWiseUploadSignedExitsContext, error) {
 	c := &stakeWiseUploadSignedExitsContext{
 		handler: f.handler,
 		body:    body,
@@ -30,7 +30,7 @@ func (f *stakeWiseUploadSignedExitsContextFactory) Create(body []apiv1.ExitData)
 }
 
 func (f *stakeWiseUploadSignedExitsContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessPost[*stakeWiseUploadSignedExitsContext, []apiv1.ExitData, api.NodeSetStakeWise_UploadSignedExitsData](
+	server.RegisterQuerylessPost[*stakeWiseUploadSignedExitsContext, []nscommon.ExitData, api.NodeSetStakeWise_UploadSignedExitsData](
 		router, "upload-signed-exits", f, f.handler.logger.Logger, f.handler.serviceProvider,
 	)
 }
@@ -40,7 +40,7 @@ func (f *stakeWiseUploadSignedExitsContextFactory) RegisterRoute(router *mux.Rou
 // ===============
 type stakeWiseUploadSignedExitsContext struct {
 	handler *StakeWiseHandler
-	body    []apiv1.ExitData
+	body    []nscommon.ExitData
 }
 
 func (c *stakeWiseUploadSignedExitsContext) PrepareData(data *api.NodeSetStakeWise_UploadSignedExitsData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
