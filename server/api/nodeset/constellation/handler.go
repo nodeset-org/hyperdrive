@@ -23,7 +23,6 @@ func NewConstellationHandler(logger *log.Logger, ctx context.Context, servicePro
 		serviceProvider: serviceProvider,
 	}
 	h.factories = []server.IContextFactory{
-		&constellationGetAvailableMinipoolCountContextFactory{h},
 		&constellationGetDepositSignatureContextFactory{h},
 		&constellationGetRegistrationSignatureContextFactory{h},
 	}

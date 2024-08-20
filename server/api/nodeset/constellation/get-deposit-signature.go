@@ -33,7 +33,6 @@ func (f *constellationGetDepositSignatureContextFactory) Create(args url.Values)
 	inputErrs := []error{
 		server.ValidateArg("minipoolAddress", args, input.ValidateAddress, &c.minipoolAddress),
 		server.ValidateArg("salt", args, input.ValidateBigInt, &c.salt),
-		server.ValidateArg("superNodeAddress", args, input.ValidateAddress, &c.superNodeAddress),
 	}
 	return c, errors.Join(inputErrs...)
 }
@@ -50,9 +49,8 @@ func (f *constellationGetDepositSignatureContextFactory) RegisterRoute(router *m
 type constellationGetDepositSignatureContext struct {
 	handler *ConstellationHandler
 
-	minipoolAddress  common.Address
-	salt             *big.Int
-	superNodeAddress common.Address
+	minipoolAddress common.Address
+	salt            *big.Int
 }
 
 func (c *constellationGetDepositSignatureContext) PrepareData(data *api.NodeSetConstellation_GetDepositSignatureData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
@@ -75,7 +73,7 @@ func (c *constellationGetDepositSignatureContext) PrepareData(data *api.NodeSetC
 
 	// Get the set version
 	ns := sp.GetNodeSetServiceManager()
-	timestamp, signature, err := ns.Constellation_GetDepositSignatureAndTime(ctx, c.minipoolAddress, c.salt, c.superNodeAddress)
+	signature, err := ns.Constellation_GetDepositSignature(ctx, c.minipoolAddress, c.salt)
 	if err != nil {
 		if errors.Is(err, v2constellation.ErrNotAuthorized) {
 			data.NotAuthorized = true
@@ -93,6 +91,5 @@ func (c *constellationGetDepositSignatureContext) PrepareData(data *api.NodeSetC
 	}
 
 	data.Signature = signature
-	data.Time = timestamp
 	return types.ResponseStatus_Success, nil
 }

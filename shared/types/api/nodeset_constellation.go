@@ -1,12 +1,9 @@
 package api
 
-import "time"
-
 type NodeSetConstellation_GetRegistrationSignatureData struct {
-	NotRegistered bool      `json:"notRegistered"`
-	NotAuthorized bool      `json:"notAuthorized"`
-	Signature     []byte    `json:"signature"`
-	Time          time.Time `json:time`
+	NotRegistered bool   `json:"notRegistered"`
+	NotAuthorized bool   `json:"notAuthorized"`
+	Signature     []byte `json:"signature"`
 }
 
 type NodeSetConstellation_GetAvailableMinipoolCount struct {
@@ -15,10 +12,9 @@ type NodeSetConstellation_GetAvailableMinipoolCount struct {
 }
 
 type NodeSetConstellation_GetDepositSignatureData struct {
-	NotRegistered      bool      `json:"notRegistered"`
-	NotAuthorized      bool      `json:"notAuthorized"`
-	LimitReached       bool      `json:"limitReached"`
-	MissingExitMessage bool      `json:"missingExitMessage"`
-	Signature          []byte    `json:"signature"`
-	Time               time.Time `json:time`
+	NotRegistered      bool   `json:"notRegistered"`
+	NotAuthorized      bool   `json:"notAuthorized"`
+	LimitReached       bool   `json:"limitReached"`
+	MissingExitMessage bool   `json:"missingExitMessage"`
+	Signature          []byte `json:"signature"`
 }

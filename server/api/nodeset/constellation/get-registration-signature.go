@@ -67,7 +67,7 @@ func (c *constellationGetRegistrationSignatureContext) PrepareData(data *api.Nod
 
 	// Get the registration signature
 	ns := sp.GetNodeSetServiceManager()
-	timestamp, signature, err := ns.Constellation_GetRegistrationSignatureAndTime(ctx)
+	signature, err := ns.Constellation_GetRegistrationSignature(ctx)
 	if err != nil {
 		if errors.Is(err, v2constellation.ErrNotAuthorized) {
 			data.NotAuthorized = true
@@ -77,6 +77,5 @@ func (c *constellationGetRegistrationSignatureContext) PrepareData(data *api.Nod
 	}
 
 	data.Signature = signature
-	data.Time = timestamp
 	return types.ResponseStatus_Success, nil
 }

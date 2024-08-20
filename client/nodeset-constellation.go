@@ -36,17 +36,11 @@ func (r *NodeSetConstellationRequester) GetRegistrationSignature() (*types.ApiRe
 	return client.SendGetRequest[api.NodeSetConstellation_GetRegistrationSignatureData](r, "get-registration-signature", "GetRegistrationSignature", args)
 }
 
-// Gets the available minipool count for the node from the Constellation contracts
-func (r *NodeSetConstellationRequester) GetAvailableMinipoolCount() (*types.ApiResponse[api.NodeSetConstellation_GetAvailableMinipoolCount], error) {
-	return client.SendGetRequest[api.NodeSetConstellation_GetAvailableMinipoolCount](r, "get-available-minipool-count", "GetAvailableMinipoolCount", nil)
-}
-
 // Gets the deposit signature for a minipool from the Constellation contracts
-func (r *NodeSetConstellationRequester) GetDepositSignature(minipoolAddress common.Address, salt *big.Int, superNodeAddress common.Address) (*types.ApiResponse[api.NodeSetConstellation_GetDepositSignatureData], error) {
+func (r *NodeSetConstellationRequester) GetDepositSignature(minipoolAddress common.Address, salt *big.Int) (*types.ApiResponse[api.NodeSetConstellation_GetDepositSignatureData], error) {
 	args := map[string]string{
-		"minipoolAddress":  minipoolAddress.Hex(),
-		"salt":             salt.String(),
-		"superNodeAddress": superNodeAddress.Hex(),
+		"minipoolAddress": minipoolAddress.Hex(),
+		"salt":            salt.String(),
 	}
 	return client.SendGetRequest[api.NodeSetConstellation_GetDepositSignatureData](r, "get-deposit-signature", "GetDepositSignature", args)
 }
