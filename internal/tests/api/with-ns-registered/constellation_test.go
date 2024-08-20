@@ -1,11 +1,14 @@
 package with_ns_registered
 
 import (
+	"math/big"
 	"runtime/debug"
 	"testing"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
+	"github.com/nodeset-org/nodeset-client-go/server-mock/db"
 	"github.com/nodeset-org/osha/keys"
 	"github.com/rocket-pool/node-manager-core/utils"
 	"github.com/stretchr/testify/require"
@@ -34,10 +37,16 @@ func TestConstellationWhitelistSignature(t *testing.T) {
 	require.NoError(t, err)
 
 	// Set up the nodeset.io mock
+	res := testMgr.GetNode().GetServiceProvider().GetResources()
 	manualTime := time.Unix(whitelistTimestamp, 0)
 	nsMgr := testMgr.GetNodeSetMockServer().GetManager()
 	nsMgr.SetConstellationAdminPrivateKey(adminKey)
 	nsMgr.SetManualSignatureTimestamp(&manualTime)
+	nsMgr.SetDeployment(&db.Deployment{
+		DeploymentID:     res.DeploymentName,
+		WhitelistAddress: common.HexToAddress(whitelistAddressString),
+		ChainID:          new(big.Int).SetUint64(uint64(res.ChainID)),
+	})
 
 	// Get a whitelist signature
 	hd := hdNode.GetApiClient()
@@ -59,8 +68,14 @@ func TestGetMinipoolAvailabilityCount(t *testing.T) {
 	defer nodeset_cleanup(snapshotName)
 
 	// Set the minipool count
+	res := testMgr.GetNode().GetServiceProvider().GetResources()
 	nsmock := testMgr.GetNodeSetMockServer()
-	nsmock.GetManager().SetAvailableConstellationMinipoolCount(nsEmail, expectedMinipoolCount)
+	nsMgr := nsmock.GetManager()
+	nsMgr.SetAvailableConstellationMinipoolCount(nsEmail, expectedMinipoolCount)
+	nsMgr.SetDeployment(&db.Deployment{
+		DeploymentID: res.DeploymentName,
+		ChainID:      new(big.Int).SetUint64(uint64(res.ChainID)),
+	})
 
 	// Get the minipool count and assert
 	minipoolCountResponse, err := hdNode.GetApiClient().NodeSet_Constellation.GetAvailableMinipoolCount()
