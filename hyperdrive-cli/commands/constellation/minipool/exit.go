@@ -2,6 +2,7 @@ package minipool
 
 import (
 	"fmt"
+	"strconv"
 
 	csapi "github.com/nodeset-org/hyperdrive-constellation/shared/api"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
@@ -10,6 +11,7 @@ import (
 	"github.com/rocket-pool/rocketpool-go/v2/types"
 	"github.com/urfave/cli/v2"
 
+	"github.com/rocket-pool/node-manager-core/beacon"
 	ncli "github.com/rocket-pool/node-manager-core/cli/utils"
 )
 
@@ -25,6 +27,24 @@ var (
 		Aliases: []string{"v"},
 		Usage:   "Display all minipool details, not just ones that are eligible for exiting",
 	}
+
+	exitManualModeFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "enable-manual-mode",
+		Aliases: []string{"emm"},
+		Usage:   "Bypass the exit viability check and enable manual exit mode, using the 'mp' and 'mi' flags. Only use this if you know what you're doing.",
+	}
+
+	exitManualPubkeyFlag *cli.StringFlag = &cli.StringFlag{
+		Name:    "manual-pubkey",
+		Aliases: []string{"mp"},
+		Usage:   "Manually specify the pubkey of the locally-stored validator to exit. Requires the 'emm' and 'mi' flags.",
+	}
+
+	exitManualIndexFlag *cli.IntFlag = &cli.IntFlag{
+		Name:    "manual-index",
+		Aliases: []string{"mi"},
+		Usage:   "Manually specify the index of the locally-stored validator to exit. Requires the 'emm' and 'mp' flags.",
+	}
 )
 
 func exitMinipools(c *cli.Context) error {
@@ -38,36 +58,65 @@ func exitMinipools(c *cli.Context) error {
 		return err
 	}
 
-	// Get eligible minipools
-	verbose := c.Bool(exitVerboseFlag.Name)
-	detailsResponse, err := cs.Api.Minipool.GetExitDetails(verbose)
-	if err != nil {
-		return err
-	}
+	// Get the local force flag
+	enableManualMode := c.Bool(exitManualModeFlag.Name)
 
-	// Check for active minipools
-	details := detailsResponse.Data.Details
-	if len(details) == 0 {
-		fmt.Println("No minipools can be exited.")
-		return nil
-	}
-
-	// Get selected minipools
-	options := make([]ncli.SelectionOption[csapi.MinipoolExitDetails], len(details))
-	for i, mp := range details {
-		option := &options[i]
-		option.Element = &details[i]
-		option.ID = fmt.Sprint(mp.Address)
-
-		if mp.MinipoolStatus == types.MinipoolStatus_Staking {
-			option.Display = fmt.Sprintf("%s (staking since %s)", mp.Address.Hex(), mp.MinipoolStatusTime.Format(TimeFormat))
-		} else {
-			option.Display = fmt.Sprintf("%s (dissolved since %s)", mp.Address.Hex(), mp.MinipoolStatusTime.Format(TimeFormat))
+	// Normal exit
+	var selectedMinipools []*csapi.MinipoolExitDetails
+	if !enableManualMode {
+		// Get eligible minipools
+		verbose := c.Bool(exitVerboseFlag.Name)
+		detailsResponse, err := cs.Api.Minipool.GetExitDetails(verbose)
+		if err != nil {
+			return err
 		}
-	}
-	selectedMinipools, err := utils.GetMultiselectIndices(c, exitMinipoolsFlag.Name, options, "Please select a minipool to exit:")
-	if err != nil {
-		return fmt.Errorf("error determining minipool selection: %w", err)
+
+		// Check for active minipools
+		details := detailsResponse.Data.Details
+		if len(details) == 0 {
+			fmt.Println("No minipools can be exited.")
+			return nil
+		}
+
+		// Get selected minipools
+		options := make([]ncli.SelectionOption[csapi.MinipoolExitDetails], len(details))
+		for i, mp := range details {
+			option := &options[i]
+			option.Element = &details[i]
+			option.ID = fmt.Sprint(mp.Address)
+
+			if mp.MinipoolStatus == types.MinipoolStatus_Staking {
+				option.Display = fmt.Sprintf("%s (staking since %s)", mp.Address.Hex(), mp.MinipoolStatusTime.Format(TimeFormat))
+			} else {
+				option.Display = fmt.Sprintf("%s (dissolved since %s)", mp.Address.Hex(), mp.MinipoolStatusTime.Format(TimeFormat))
+			}
+		}
+		selectedMinipools, err = utils.GetMultiselectIndices(c, exitMinipoolsFlag.Name, options, "Please select a minipool to exit:")
+		if err != nil {
+			return fmt.Errorf("error determining minipool selection: %w", err)
+		}
+	} else {
+		// Manual exit
+		pubkeyString := c.String(exitManualPubkeyFlag.Name)
+		index := c.Int(exitManualIndexFlag.Name)
+		if pubkeyString == "" {
+			return fmt.Errorf("pubkey is required when using the manual exit flag")
+		}
+		if index == 0 {
+			return fmt.Errorf("index is required when using the manual exit flag")
+		}
+
+		// Make a fake exit details with the manual info
+		pubkey, err := beacon.HexToValidatorPubkey(pubkeyString)
+		if err != nil {
+			return fmt.Errorf("error parsing pubkey: %w", err)
+		}
+		selectedMinipools = []*csapi.MinipoolExitDetails{
+			{
+				Pubkey: pubkey,
+				Index:  strconv.FormatInt(int64(index), 10),
+			},
+		}
 	}
 
 	// Show a warning message

@@ -74,7 +74,7 @@ func createMinipool(c *cli.Context) error {
 		if response.Data.InsufficientLiquidity {
 			fmt.Println("- Constellation doesn't have enough ETH or RPL liquidity in its vaults to fund a new minipool. Please wait for more deposits to its vaults.")
 		}
-		if response.Data.InsufficientMinipoolCount {
+		if response.Data.MissingExitMessage {
 			fmt.Println("- Your node is not allowed to make any more minipools. Ensure you have uploaded signed exit messages for your existing minipools first, then try again.")
 		}
 		if response.Data.NodeSetDepositingDisabled {

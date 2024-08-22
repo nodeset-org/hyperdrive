@@ -64,6 +64,9 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 					utils.YesFlag,
 					exitMinipoolsFlag,
 					exitVerboseFlag,
+					exitManualModeFlag,
+					exitManualPubkeyFlag,
+					exitManualIndexFlag,
 				},
 				Usage: "Voluntarily exit one or more minipools from the Beacon Chain, ending validation duties and withdrawing their full balances back to the Execution layer.",
 				Action: func(c *cli.Context) error {

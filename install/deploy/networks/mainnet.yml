@@ -11,3 +11,4 @@ networkResources:
   flashbotsProtectUrl: https://rpc.flashbots.net/
 hyperdriveResources:
   nodeSetApiUrl: https://nodeset.io/api
+  deploymentName: mainnet

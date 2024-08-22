@@ -11,3 +11,4 @@ networkResources:
   flashbotsProtectUrl: https://rpc-holesky.flashbots.net/
 hyperdriveResources:
   nodeSetApiUrl: https://staging.nodeset.io/api
+  deploymentName: holesky
