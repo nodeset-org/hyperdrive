@@ -11,7 +11,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
-	apiv0 "github.com/nodeset-org/nodeset-client-go/api-v0"
 	apiv2 "github.com/nodeset-org/nodeset-client-go/api-v2"
 	v2constellation "github.com/nodeset-org/nodeset-client-go/api-v2/constellation"
 	nscommon "github.com/nodeset-org/nodeset-client-go/common"
@@ -30,9 +29,6 @@ type NodeSetServiceManager struct {
 
 	// Resources for the current network
 	resources *hdconfig.MergedResources
-
-	// Client for the v0 API
-	v0Client *apiv0.NodeSetClient
 
 	// Client for the v2 API
 	v2Client *apiv2.NodeSetClient
@@ -55,7 +51,6 @@ func NewNodeSetServiceManager(sp IHyperdriveServiceProvider) *NodeSetServiceMana
 	return &NodeSetServiceManager{
 		wallet:                 wallet,
 		resources:              resources,
-		v0Client:               apiv0.NewNodeSetClient(resources.NodeSetApiUrl, hdconfig.ClientTimeout),
 		v2Client:               apiv2.NewNodeSetClient(resources.NodeSetApiUrl, hdconfig.ClientTimeout),
 		nodeRegistrationStatus: api.NodeSetRegistrationStatus_Unknown,
 		lock:                   &sync.Mutex{},
@@ -124,7 +119,7 @@ func (m *NodeSetServiceManager) RegisterNode(ctx context.Context, email string) 
 	}
 
 	// Run the request
-	err = m.v0Client.NodeAddress(ctx, email, walletStatus.Wallet.WalletAddress, sigBytes)
+	err = m.v2Client.Core.NodeAddress(ctx, email, walletStatus.Wallet.WalletAddress, sigBytes)
 	if err != nil {
 		m.setRegistrationStatus(api.NodeSetRegistrationStatus_Unknown)
 		if errors.Is(err, core.ErrAlreadyRegistered) {
@@ -157,7 +152,7 @@ func (m *NodeSetServiceManager) StakeWise_GetServerDepositDataVersion(ctx contex
 	var data stakewise.DepositDataMetaData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v0Client.DepositDataMeta(ctx, vault, m.resources.EthNetworkName)
+		data, err = m.v2Client.StakeWise.DepositDataMeta(ctx, m.resources.DeploymentName, vault)
 		return err
 	})
 	if err != nil {
@@ -182,7 +177,7 @@ func (m *NodeSetServiceManager) StakeWise_GetServerDepositData(ctx context.Conte
 	var data stakewise.DepositDataData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v0Client.DepositData_Get(ctx, vault, m.resources.EthNetworkName)
+		data, err = m.v2Client.StakeWise.DepositData_Get(ctx, m.resources.DeploymentName, vault)
 		return err
 	})
 	if err != nil {
@@ -192,7 +187,7 @@ func (m *NodeSetServiceManager) StakeWise_GetServerDepositData(ctx context.Conte
 }
 
 // Uploads local deposit data set to the server
-func (m *NodeSetServiceManager) StakeWise_UploadDepositData(ctx context.Context, depositData []beacon.ExtendedDepositData) error {
+func (m *NodeSetServiceManager) StakeWise_UploadDepositData(ctx context.Context, vault common.Address, depositData []beacon.ExtendedDepositData) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -205,7 +200,7 @@ func (m *NodeSetServiceManager) StakeWise_UploadDepositData(ctx context.Context,
 
 	// Run the request
 	err := m.runRequest(ctx, func(ctx context.Context) error {
-		return m.v0Client.DepositData_Post(ctx, depositData)
+		return m.v2Client.StakeWise.DepositData_Post(ctx, m.resources.DeploymentName, vault, depositData)
 	})
 	if err != nil {
 		return fmt.Errorf("error uploading deposit data: %w", err)
@@ -229,7 +224,7 @@ func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Co
 	var data stakewise.ValidatorsData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v0Client.Validators_Get(ctx, m.resources.EthNetworkName)
+		data, err = m.v2Client.StakeWise.Validators_Get(ctx, m.resources.DeploymentName, vault)
 		return err
 	})
 	if err != nil {
@@ -239,7 +234,7 @@ func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Co
 }
 
 // Uploads signed exit messages set to the server
-func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.Context, exitData []nscommon.ExitData) error {
+func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.Context, vault common.Address, exitData []nscommon.ExitData) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -252,7 +247,7 @@ func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.C
 
 	// Run the request
 	err := m.runRequest(ctx, func(ctx context.Context) error {
-		return m.v0Client.Validators_Patch(ctx, exitData, m.resources.EthNetworkName)
+		return m.v2Client.StakeWise.Validators_Patch(ctx, m.resources.DeploymentName, vault, exitData)
 	})
 	if err != nil {
 		return fmt.Errorf("error uploading signed exit messages: %w", err)
@@ -373,7 +368,7 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 	logger.Info("Not authenticated with the NodeSet server, logging in")
 
 	// Get the nonce
-	nonceData, err := m.v0Client.Nonce(ctx)
+	nonceData, err := m.v2Client.Core.Nonce(ctx)
 	if err != nil {
 		m.setRegistrationStatus(api.NodeSetRegistrationStatus_Unknown)
 		return fmt.Errorf("error getting nonce for login: %w", err)
@@ -394,7 +389,7 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 	}
 
 	// Attempt a login
-	loginData, err := m.v0Client.Login(ctx, nonceData.Nonce, walletStatus.Wallet.WalletAddress, sigBytes)
+	loginData, err := m.v2Client.Core.Login(ctx, nonceData.Nonce, walletStatus.Wallet.WalletAddress, sigBytes)
 	if err != nil {
 		if errors.Is(err, wallet.ErrWalletNotLoaded) {
 			m.setRegistrationStatus(api.NodeSetRegistrationStatus_NoWallet)
@@ -419,7 +414,6 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 // Sets the session token for the client after logging in
 func (m *NodeSetServiceManager) setSessionToken(sessionToken string) {
 	m.sessionToken = sessionToken
-	m.v0Client.SetSessionToken(sessionToken)
 	m.v2Client.SetSessionToken(sessionToken)
 }
 

@@ -9,7 +9,6 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	apiv0 "github.com/nodeset-org/nodeset-client-go/api-v0"
 	"github.com/nodeset-org/nodeset-client-go/common/stakewise"
-	"github.com/rocket-pool/node-manager-core/beacon"
 
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/api/types"
@@ -23,7 +22,7 @@ type stakeWiseUploadDepositDataContextFactory struct {
 	handler *StakeWiseHandler
 }
 
-func (f *stakeWiseUploadDepositDataContextFactory) Create(body []beacon.ExtendedDepositData) (*stakeWiseUploadDepositDataContext, error) {
+func (f *stakeWiseUploadDepositDataContextFactory) Create(body api.NodeSetStakeWise_UploadDepositDataRequestBody) (*stakeWiseUploadDepositDataContext, error) {
 	c := &stakeWiseUploadDepositDataContext{
 		handler: f.handler,
 		body:    body,
@@ -32,7 +31,7 @@ func (f *stakeWiseUploadDepositDataContextFactory) Create(body []beacon.Extended
 }
 
 func (f *stakeWiseUploadDepositDataContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessPost[*stakeWiseUploadDepositDataContext, []beacon.ExtendedDepositData, api.NodeSetStakeWise_UploadDepositDataData](
+	server.RegisterQuerylessPost[*stakeWiseUploadDepositDataContext, api.NodeSetStakeWise_UploadDepositDataRequestBody, api.NodeSetStakeWise_UploadDepositDataData](
 		router, "upload-deposit-data", f, f.handler.logger.Logger, f.handler.serviceProvider,
 	)
 }
@@ -42,7 +41,7 @@ func (f *stakeWiseUploadDepositDataContextFactory) RegisterRoute(router *mux.Rou
 // ===============
 type stakeWiseUploadDepositDataContext struct {
 	handler *StakeWiseHandler
-	body    []beacon.ExtendedDepositData
+	body    api.NodeSetStakeWise_UploadDepositDataRequestBody
 }
 
 func (c *stakeWiseUploadDepositDataContext) PrepareData(data *api.NodeSetStakeWise_UploadDepositDataData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
@@ -65,7 +64,7 @@ func (c *stakeWiseUploadDepositDataContext) PrepareData(data *api.NodeSetStakeWi
 
 	// Upload the deposit data
 	ns := sp.GetNodeSetServiceManager()
-	err = ns.StakeWise_UploadDepositData(ctx, c.body)
+	err = ns.StakeWise_UploadDepositData(ctx, c.body.Vault, c.body.DepositData)
 	if err != nil {
 		if errors.Is(err, apiv0.ErrVaultNotFound) {
 			data.VaultNotFound = true

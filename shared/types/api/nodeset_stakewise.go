@@ -1,6 +1,8 @@
 package api
 
 import (
+	"github.com/ethereum/go-ethereum/common"
+	nscommon "github.com/nodeset-org/nodeset-client-go/common"
 	"github.com/nodeset-org/nodeset-client-go/common/stakewise"
 	"github.com/rocket-pool/node-manager-core/beacon"
 )
@@ -21,10 +23,20 @@ type NodeSetStakeWise_GetDepositDataSetData struct {
 	DepositData   []beacon.ExtendedDepositData `json:"depositData"`
 }
 
+type NodeSetStakeWise_UploadDepositDataRequestBody struct {
+	Vault       common.Address               `json:"vault"`
+	DepositData []beacon.ExtendedDepositData `json:"depositData"`
+}
+
 type NodeSetStakeWise_UploadDepositDataData struct {
 	NotRegistered      bool `json:"notRegistered"`
 	VaultNotFound      bool `json:"vaultNotFound"`
 	InvalidPermissions bool `json:"invalidPermissions"`
+}
+
+type NodeSetStakeWise_UploadSignedExitsRequestBody struct {
+	Vault    common.Address      `json:"vault"`
+	ExitData []nscommon.ExitData `json:"exitData"`
 }
 
 type NodeSetStakeWise_UploadSignedExitsData struct {

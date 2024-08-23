@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 	hdcommon "github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
-	nscommon "github.com/nodeset-org/nodeset-client-go/common"
 
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/api/types"
@@ -21,7 +20,7 @@ type stakeWiseUploadSignedExitsContextFactory struct {
 	handler *StakeWiseHandler
 }
 
-func (f *stakeWiseUploadSignedExitsContextFactory) Create(body []nscommon.ExitData) (*stakeWiseUploadSignedExitsContext, error) {
+func (f *stakeWiseUploadSignedExitsContextFactory) Create(body api.NodeSetStakeWise_UploadSignedExitsRequestBody) (*stakeWiseUploadSignedExitsContext, error) {
 	c := &stakeWiseUploadSignedExitsContext{
 		handler: f.handler,
 		body:    body,
@@ -30,7 +29,7 @@ func (f *stakeWiseUploadSignedExitsContextFactory) Create(body []nscommon.ExitDa
 }
 
 func (f *stakeWiseUploadSignedExitsContextFactory) RegisterRoute(router *mux.Router) {
-	server.RegisterQuerylessPost[*stakeWiseUploadSignedExitsContext, []nscommon.ExitData, api.NodeSetStakeWise_UploadSignedExitsData](
+	server.RegisterQuerylessPost[*stakeWiseUploadSignedExitsContext, api.NodeSetStakeWise_UploadSignedExitsRequestBody, api.NodeSetStakeWise_UploadSignedExitsData](
 		router, "upload-signed-exits", f, f.handler.logger.Logger, f.handler.serviceProvider,
 	)
 }
@@ -40,7 +39,7 @@ func (f *stakeWiseUploadSignedExitsContextFactory) RegisterRoute(router *mux.Rou
 // ===============
 type stakeWiseUploadSignedExitsContext struct {
 	handler *StakeWiseHandler
-	body    []nscommon.ExitData
+	body    api.NodeSetStakeWise_UploadSignedExitsRequestBody
 }
 
 func (c *stakeWiseUploadSignedExitsContext) PrepareData(data *api.NodeSetStakeWise_UploadSignedExitsData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
@@ -63,7 +62,7 @@ func (c *stakeWiseUploadSignedExitsContext) PrepareData(data *api.NodeSetStakeWi
 
 	// Upload the deposit data
 	ns := sp.GetNodeSetServiceManager()
-	err = ns.StakeWise_UploadSignedExitMessages(ctx, c.body)
+	err = ns.StakeWise_UploadSignedExitMessages(ctx, c.body.Vault, c.body.ExitData)
 	if err != nil {
 		return types.ResponseStatus_Error, err
 	}
