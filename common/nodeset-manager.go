@@ -300,9 +300,10 @@ func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Co
 	if !exists {
 		panic("context didn't have a logger!")
 	}
-	logger.Debug("Getting minipool deposit signature")
+
 	// Run the request
 	var data v2constellation.MinipoolDepositSignatureData
+	logger.Debug("Getting minipool deposit signature")
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
 		data, err = m.v2Client.Constellation.MinipoolDepositSignature(ctx, m.resources.HyperdriveResources.DeploymentName, minipoolAddress, salt)
@@ -318,6 +319,53 @@ func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Co
 		return nil, fmt.Errorf("error decoding signature from server: %w", err)
 	}
 	return sig, nil
+}
+
+// Get the validators that NodeSet has on record for this node
+func (m *NodeSetServiceManager) Constellation_GetValidators(ctx context.Context) ([]v2constellation.ValidatorStatus, error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	// Get the logger
+	logger, exists := log.FromContext(ctx)
+	if !exists {
+		panic("context didn't have a logger!")
+	}
+
+	// Run the request
+	var data v2constellation.ValidatorsData
+	logger.Debug("Getting validators for node")
+	err := m.runRequest(ctx, func(ctx context.Context) error {
+		var err error
+		data, err = m.v2Client.Constellation.Validators_Get(ctx, m.resources.HyperdriveResources.DeploymentName)
+		return err
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error getting validators for node: %w", err)
+	}
+	return data.Validators, nil
+}
+
+// Upload signed exit messages for Constellation minipools to the NodeSet service
+func (m *NodeSetServiceManager) Constellation_UploadSignedExitMessages(ctx context.Context, exitMessages []nscommon.ExitData) error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	// Get the logger
+	logger, exists := log.FromContext(ctx)
+	if !exists {
+		panic("context didn't have a logger!")
+	}
+
+	// Run the request
+	logger.Debug("Submitting signed exit messages to nodeset")
+	err := m.runRequest(ctx, func(ctx context.Context) error {
+		return m.v2Client.Constellation.Validators_Patch(ctx, m.resources.HyperdriveResources.DeploymentName, exitMessages)
+	})
+	if err != nil {
+		return fmt.Errorf("error submitting signed exit messages: %w", err)
+	}
+	return nil
 }
 
 // ========================

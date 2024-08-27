@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
+	nscommon "github.com/nodeset-org/nodeset-client-go/common"
 	"github.com/rocket-pool/node-manager-core/api/client"
 	"github.com/rocket-pool/node-manager-core/api/types"
 )
@@ -43,4 +44,18 @@ func (r *NodeSetConstellationRequester) GetDepositSignature(minipoolAddress comm
 		"salt":            salt.String(),
 	}
 	return client.SendGetRequest[api.NodeSetConstellation_GetDepositSignatureData](r, "get-deposit-signature", "GetDepositSignature", args)
+}
+
+// Gets the validators that have been registered with the NodeSet service for this node as part of Constellation
+func (r *NodeSetConstellationRequester) GetValidators() (*types.ApiResponse[api.NodeSetConstellation_GetValidatorsData], error) {
+	args := map[string]string{}
+	return client.SendGetRequest[api.NodeSetConstellation_GetValidatorsData](r, "get-validators", "GetValidators", args)
+}
+
+// Uploads signed exit messages to the NodeSet service
+func (r *NodeSetConstellationRequester) UploadSignedExits(exitMessages []nscommon.ExitData) (*types.ApiResponse[api.NodeSetConstellation_UploadSignedExitsData], error) {
+	body := api.NodeSetConstellation_UploadSignedExitsRequestBody{
+		ExitMessages: exitMessages,
+	}
+	return client.SendPostRequest[api.NodeSetConstellation_UploadSignedExitsData](r, "upload-signed-exits", "UploadSignedExits", body)
 }

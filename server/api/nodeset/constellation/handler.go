@@ -25,6 +25,8 @@ func NewConstellationHandler(logger *log.Logger, ctx context.Context, servicePro
 	h.factories = []server.IContextFactory{
 		&constellationGetDepositSignatureContextFactory{h},
 		&constellationGetRegistrationSignatureContextFactory{h},
+		&constellationGetValidatorsContextFactory{h},
+		&constellationUploadSignedExitsContextFactory{h},
 	}
 	return h
 }
