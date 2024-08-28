@@ -5,6 +5,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	csapi "github.com/nodeset-org/hyperdrive-constellation/shared/api"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
@@ -12,8 +13,6 @@ import (
 	nmc_utils "github.com/rocket-pool/node-manager-core/utils"
 	"github.com/rocket-pool/node-manager-core/utils/math"
 	"github.com/rocket-pool/rocketpool-go/v2/types"
-	"github.com/rocket-pool/smartnode/v2/shared/types/api"
-	snapi "github.com/rocket-pool/smartnode/v2/shared/types/api"
 	"github.com/urfave/cli/v2"
 )
 
@@ -39,31 +38,30 @@ func getMinipoolStatus(c *cli.Context) error {
 	}
 
 	// Get minipools by status
-	statusMinipools := map[string][]snapi.MinipoolDetails{}
-	refundableMinipools := []snapi.MinipoolDetails{}
-	closeableMinipools := []snapi.MinipoolDetails{}
-	finalisedMinipools := []snapi.MinipoolDetails{}
+	statusMinipools := map[string][]csapi.MinipoolDetails{}
+	refundableMinipools := []csapi.MinipoolDetails{}
+	closeableMinipools := []csapi.MinipoolDetails{}
+	finalisedMinipools := []csapi.MinipoolDetails{}
 	for _, minipool := range status.Data.Minipools {
-
-		if !minipool.Finalised {
-			// Add to status list
-			statusName := minipool.Status.Status.String()
-			if _, ok := statusMinipools[statusName]; !ok {
-				statusMinipools[statusName] = []snapi.MinipoolDetails{}
-			}
-			statusMinipools[statusName] = append(statusMinipools[statusName], minipool)
-
-			// Add to actionable lists
-			if minipool.RefundAvailable {
-				refundableMinipools = append(refundableMinipools, minipool)
-			}
-			if minipool.CloseAvailable {
-				closeableMinipools = append(closeableMinipools, minipool)
-			}
-		} else {
+		if minipool.Finalised {
 			finalisedMinipools = append(finalisedMinipools, minipool)
+			continue
 		}
 
+		// Add to status list
+		statusName := minipool.Status.Status.String()
+		if _, ok := statusMinipools[statusName]; !ok {
+			statusMinipools[statusName] = []csapi.MinipoolDetails{}
+		}
+		statusMinipools[statusName] = append(statusMinipools[statusName], minipool)
+
+		// Add to actionable lists
+		if minipool.RefundAvailable {
+			refundableMinipools = append(refundableMinipools, minipool)
+		}
+		if minipool.CloseAvailable {
+			closeableMinipools = append(closeableMinipools, minipool)
+		}
 	}
 
 	// Return if there aren't any minipools
@@ -139,8 +137,7 @@ func getMinipoolStatus(c *cli.Context) error {
 
 }
 
-func printMinipoolDetails(minipool api.MinipoolDetails, latestDelegate common.Address) {
-
+func printMinipoolDetails(minipool csapi.MinipoolDetails, latestDelegate common.Address) {
 	fmt.Printf("--------------------\n")
 	fmt.Printf("\n")
 
@@ -190,6 +187,11 @@ func printMinipoolDetails(minipool api.MinipoolDetails, latestDelegate common.Ad
 			}
 			fmt.Printf("Beacon balance (CL):   %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Validator.Balance), 6))
 			fmt.Printf("Your portion:          %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Validator.NodeBalance), 6))
+			if minipool.SignedExitUploaded {
+				fmt.Printf("Signed exit uploaded:  yes\n")
+			} else {
+				fmt.Printf("Signed exit uploaded:  no\n")
+			}
 		} else {
 			fmt.Printf("Validator seen:        no\n")
 		}
