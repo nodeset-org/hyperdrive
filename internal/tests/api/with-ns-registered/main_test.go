@@ -51,14 +51,12 @@ func TestMain(m *testing.M) {
 
 	// Make a NodeSet account
 	nsServer := testMgr.GetNodeSetMockServer().GetManager()
-	err = nsServer.AddUser(nsEmail)
+	nsDB := nsServer.GetDatabase()
+	user, err := nsDB.Core.AddUser(nsEmail)
 	if err != nil {
 		fail("error adding user to nodeset: %v", err)
 	}
-	err = nsServer.WhitelistNodeAccount(nsEmail, nodeAddress)
-	if err != nil {
-		fail("error adding node account to nodeset: %v", err)
-	}
+	user.WhitelistNode(nodeAddress)
 
 	// Register with NodeSet
 	response, err := hd.NodeSet.RegisterNode(nsEmail)

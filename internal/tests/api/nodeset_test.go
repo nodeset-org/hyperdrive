@@ -83,9 +83,10 @@ func TestNodeSetRegistration_Registered(t *testing.T) {
 	// Register the node with nodeset.io
 	hd := hdNode.GetApiClient()
 	nsMgr := testMgr.GetNodeSetMockServer().GetManager()
-	err = nsMgr.AddUser(nsEmail)
+	nsDB := nsMgr.GetDatabase()
+	user, err := nsDB.Core.AddUser(nsEmail)
 	require.NoError(t, err)
-	err = nsMgr.WhitelistNodeAccount(nsEmail, expectedWalletAddress)
+	_ = user.WhitelistNode(expectedWalletAddress)
 	require.NoError(t, err)
 	registerResponse, err := hd.NodeSet.RegisterNode(nsEmail)
 	require.NoError(t, err)

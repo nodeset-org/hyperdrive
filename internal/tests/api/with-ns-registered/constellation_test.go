@@ -7,7 +7,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
-	"github.com/nodeset-org/nodeset-client-go/server-mock/db"
 	"github.com/nodeset-org/osha/keys"
 	"github.com/rocket-pool/node-manager-core/utils"
 	"github.com/stretchr/testify/require"
@@ -37,12 +36,14 @@ func TestConstellationWhitelistSignature(t *testing.T) {
 	// Set up the nodeset.io mock
 	res := testMgr.GetNode().GetServiceProvider().GetResources()
 	nsMgr := testMgr.GetNodeSetMockServer().GetManager()
-	nsMgr.SetConstellationAdminPrivateKey(adminKey)
-	nsMgr.SetDeployment(&db.Deployment{
-		DeploymentID:     res.DeploymentName,
-		WhitelistAddress: common.HexToAddress(whitelistAddressString),
-		ChainID:          new(big.Int).SetUint64(uint64(res.ChainID)),
-	})
+	nsDB := nsMgr.GetDatabase()
+	deployment := nsDB.Constellation.AddDeployment(
+		res.DeploymentName,
+		new(big.Int).SetUint64(uint64(res.ChainID)),
+		common.HexToAddress(whitelistAddressString),
+		common.Address{},
+	)
+	deployment.SetAdminPrivateKey(adminKey)
 
 	// Get a whitelist signature
 	hd := hdNode.GetApiClient()
