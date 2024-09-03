@@ -10,10 +10,10 @@ require (
 	github.com/goccy/go-json v0.10.3
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
-	github.com/nodeset-org/nodeset-client-go v0.0.0-20240830211916-38c7c05b8662
+	github.com/nodeset-org/nodeset-client-go v0.0.0-20240830215146-dd4f3de8c767
 	github.com/nodeset-org/osha v0.2.1-0.20240716181202-365d8870bd39
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20240722141309-0a3f0e72cf11
+	github.com/rocket-pool/node-manager-core v0.5.2-0.20240903185110-65b3ec0f1045
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2
 	github.com/wealdtech/go-ens/v3 v3.6.0
