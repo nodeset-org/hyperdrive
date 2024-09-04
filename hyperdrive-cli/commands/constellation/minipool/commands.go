@@ -58,6 +58,22 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				},
 			},
 			{
+				Name:    "upload-signed-exits",
+				Aliases: []string{"u"},
+				Flags: []cli.Flag{
+					utils.YesFlag,
+					uploadSignedExitsMinipoolsFlag,
+				},
+				Usage: "Upload signed exit messages for one or more validators to the NodeSet service if it doesn't already have them.",
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run
+					return uploadSignedExits(c)
+				},
+			},
+			{
 				Name:    "exit",
 				Aliases: []string{"e"},
 				Flags: []cli.Flag{

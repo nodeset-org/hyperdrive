@@ -33,7 +33,7 @@ func uploadSignedExits(c *cli.Context) error {
 		return err
 	}
 
-	// Normal exit
+	// Get the details about each minipool
 	var selectedMinipools []*csapi.MinipoolExitDetails
 	detailsResponse, err := cs.Api.Minipool.GetExitDetails(true)
 	if err != nil {
@@ -66,15 +66,15 @@ func uploadSignedExits(c *cli.Context) error {
 		return err
 	}
 	for _, mp := range filteredMinipools {
-		hasExit := false
+		requiresExit := true
 		for _, validatorInfo := range validatorsResponse.Data.Validators {
 			if mp.Pubkey != validatorInfo.Pubkey {
 				continue
 			}
-			hasExit = validatorInfo.ExitMessageUploaded
+			requiresExit = validatorInfo.RequiresExitMessage
 			break
 		}
-		if !hasExit {
+		if requiresExit {
 			outstandingMinipools = append(outstandingMinipools, mp)
 		}
 	}
@@ -82,7 +82,7 @@ func uploadSignedExits(c *cli.Context) error {
 	// Check for active minipools
 	details := outstandingMinipools
 	if len(details) == 0 {
-		fmt.Println("No minipools can have signed exits uploaded to NodeSet.")
+		fmt.Println("No minipools need signed exits uploaded to NodeSet.")
 		return nil
 	}
 
