@@ -71,6 +71,9 @@ func createMinipool(c *cli.Context) error {
 			additionalEthRequired := new(big.Int).Sub(response.Data.NodeBalance, response.Data.LockupAmount)
 			fmt.Printf("- You don't have enough ETH in your node wallet to make a new minipool. Your node requires at least %.6f more ETH.\n", eth.WeiToEth(additionalEthRequired))
 		}
+		if response.Data.MaxMinipoolsReached {
+			fmt.Println("- You have reached the maximum number of minipools you can create.")
+		}
 		if response.Data.InsufficientLiquidity {
 			fmt.Println("- Constellation doesn't have enough ETH or RPL liquidity in its vaults to fund a new minipool. Please wait for more deposits to its vaults.")
 		}

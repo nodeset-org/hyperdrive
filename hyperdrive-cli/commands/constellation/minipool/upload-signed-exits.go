@@ -127,7 +127,7 @@ func uploadSignedExits(c *cli.Context) error {
 	if _, err := cs.Api.Minipool.UploadSignedExits(exitInfos); err != nil {
 		return fmt.Errorf("error while uploading signed exits: %w\n", err)
 	} else {
-		fmt.Println("Successfully uploaded signed exit message for all selected minipools to NodeSet.")
+		fmt.Println("Successfully uploaded signed exit messages for all selected minipools to NodeSet.")
 	}
 
 	// Return

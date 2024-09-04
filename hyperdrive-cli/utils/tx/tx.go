@@ -18,6 +18,16 @@ import (
 
 // Handle a transaction, either printing its details, signing it, or submitting it and waiting for it to be included
 func HandleTx(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.TransactionInfo, confirmMessage string, identifier string, submissionMessage string) (bool, error) {
+	return handleTxImpl(c, hd, txInfo, confirmMessage, identifier, submissionMessage, false)
+}
+
+// Handle a transaction, either printing its details, signing it, or submitting it and waiting for it to be included, explicitly requiring the user to enter "I Agree" in the confirmation prompt
+func HandleTxWithIAgree(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.TransactionInfo, confirmMessage string, identifier string, submissionMessage string) (bool, error) {
+	return handleTxImpl(c, hd, txInfo, confirmMessage, identifier, submissionMessage, true)
+}
+
+// Implementation of the transaction handling logic
+func handleTxImpl(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.TransactionInfo, confirmMessage string, identifier string, submissionMessage string, useIAgree bool) (bool, error) {
 	// Print the TX data if requested
 	if c.Bool(utils.PrintTxDataFlag.Name) {
 		fmt.Printf("TX Data for %s:\n", identifier)
@@ -68,7 +78,13 @@ func HandleTx(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.Transacti
 	}
 
 	// Confirm submission
-	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm(confirmMessage)) {
+	var confirmFunc func(string) bool
+	if useIAgree {
+		confirmFunc = utils.ConfirmWithIAgree
+	} else {
+		confirmFunc = utils.Confirm
+	}
+	if !(confirmFunc(confirmMessage)) {
 		fmt.Println("Cancelled.")
 		return false, nil
 	}
