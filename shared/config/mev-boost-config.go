@@ -42,9 +42,6 @@ type MevBoostConfig struct {
 	// bloXroute regulated relay
 	BloxRouteRegulatedRelay config.Parameter[bool]
 
-	// Eden relay
-	EdenRelay config.Parameter[bool]
-
 	// Titan regional relay
 	TitanRegionalRelay config.Parameter[bool]
 
@@ -161,7 +158,6 @@ func NewMevBoostConfig(parent *HyperdriveConfig) *MevBoostConfig {
 		FlashbotsRelay:          generateRelayParameter(ids.MevBoostFlashbotsID, relayMap[MevRelayID_Flashbots]),
 		BloxRouteMaxProfitRelay: generateRelayParameter(ids.MevBoostBloxRouteMaxProfitID, relayMap[MevRelayID_BloxrouteMaxProfit]),
 		BloxRouteRegulatedRelay: generateRelayParameter(ids.MevBoostBloxRouteRegulatedID, relayMap[MevRelayID_BloxrouteRegulated]),
-		EdenRelay:               generateRelayParameter(ids.MevBoostEdenID, relayMap[MevRelayID_Eden]),
 		TitanRegionalRelay:      generateRelayParameter(ids.MevBoostTitanRegionalID, relayMap[MevRelayID_TitanRegional]),
 
 		CustomRelays: config.Parameter[string]{
@@ -265,7 +261,6 @@ func (cfg *MevBoostConfig) GetParameters() []config.IParameter {
 		&cfg.FlashbotsRelay,
 		&cfg.BloxRouteMaxProfitRelay,
 		&cfg.BloxRouteRegulatedRelay,
-		&cfg.EdenRelay,
 		&cfg.TitanRegionalRelay,
 		&cfg.CustomRelays,
 		&cfg.Port,
@@ -356,12 +351,6 @@ func (cfg *MevBoostConfig) GetEnabledMevRelays() []MevRelay {
 				relays = append(relays, cfg.relayMap[MevRelayID_BloxrouteRegulated])
 			}
 		}
-		if cfg.EdenRelay.Value {
-			_, exists := cfg.relayMap[MevRelayID_Eden].Urls[networkName]
-			if exists {
-				relays = append(relays, cfg.relayMap[MevRelayID_Eden])
-			}
-		}
 		if cfg.TitanRegionalRelay.Value {
 			_, exists := cfg.relayMap[MevRelayID_TitanRegional].Urls[networkName]
 			if exists {
@@ -424,17 +413,6 @@ func createDefaultRelays() []MevRelay {
 			Description: "Select this to enable the \"regulated\" relay from bloXroute.",
 			Urls: map[string]string{
 				config.EthNetwork_Mainnet: "https://0xb0b07cd0abef743db4260b0ed50619cf6ad4d82064cb4fbec9d3ec530f7c5e6793d9f286c4e082c0244ffb9f2658fe88@bloxroute.regulated.blxrbdn.com?id=hyperdrive",
-			},
-		},
-
-		// Eden
-		{
-			ID:          MevRelayID_Eden,
-			Name:        "Eden Network",
-			Description: "Eden Network is the home of Eden Relay, a block building hub focused on optimising block rewards for validators.",
-			Urls: map[string]string{
-				config.EthNetwork_Mainnet: "https://0xb3ee7afcf27f1f1259ac1787876318c6584ee353097a50ed84f51a1f21a323b3736f271a895c7ce918c038e4265918be@relay.edennetwork.io?id=hyperdrive",
-				config.EthNetwork_Holesky: "https://0xb1d229d9c21298a87846c7022ebeef277dfc321fe674fa45312e20b5b6c400bfde9383f801848d7837ed5fc449083a12@relay-holesky.edennetwork.io?id=hyperdrive",
 			},
 		},
 

@@ -20,7 +20,6 @@ const (
 	MevRelayID_Flashbots          MevRelayID = "flashbots"
 	MevRelayID_BloxrouteMaxProfit MevRelayID = "bloxrouteMaxProfit"
 	MevRelayID_BloxrouteRegulated MevRelayID = "bloxrouteRegulated"
-	MevRelayID_Eden               MevRelayID = "eden"
 	MevRelayID_TitanRegional      MevRelayID = "titanRegional"
 )
 
