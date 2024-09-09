@@ -364,6 +364,8 @@ github.com/nodeset-org/nodeset-client-go v0.0.0-20240905203136-c80a74df8b2e h1:D
 github.com/nodeset-org/nodeset-client-go v0.0.0-20240905203136-c80a74df8b2e/go.mod h1:QVa1BhsD5KKtbyvt7Uh9zMxF5A/nMmJvl4+erak/5b4=
 github.com/nodeset-org/osha v0.2.1-0.20240716181202-365d8870bd39 h1:l6PueXrz7hs+41jj41V8MkznsU0FqeAGO1+5CniPHCA=
 github.com/nodeset-org/osha v0.2.1-0.20240716181202-365d8870bd39/go.mod h1:dhbzQNZcilQ7Xfg0c6Qapbw38gKEpwwSnBVwxbIYnYU=
+github.com/nodeset-org/osha v0.2.1-0.20240909201548-2fd453c5235d h1:B5Gz7FMUJK2t0zxP5pJAjmNSyIfqFopB8R8QH89p/d4=
+github.com/nodeset-org/osha v0.2.1-0.20240909201548-2fd453c5235d/go.mod h1:dhbzQNZcilQ7Xfg0c6Qapbw38gKEpwwSnBVwxbIYnYU=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
