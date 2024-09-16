@@ -110,16 +110,8 @@ func (m *NodeSetServiceManager) RegisterNode(ctx context.Context, email string) 
 		return RegistrationResult_Unknown, fmt.Errorf("can't register node with NodeSet, wallet not loaded")
 	}
 
-	// Create the signature
-	message := fmt.Sprintf(core.NodeAddressMessageFormat, email, walletStatus.Wallet.WalletAddress.Hex())
-	sigBytes, err := m.wallet.SignMessage([]byte(message))
-	if err != nil {
-		m.setRegistrationStatus(api.NodeSetRegistrationStatus_Unknown)
-		return RegistrationResult_Unknown, fmt.Errorf("error signing registration message: %w", err)
-	}
-
 	// Run the request
-	err = m.v2Client.Core.NodeAddress(ctx, email, walletStatus.Wallet.WalletAddress, sigBytes)
+	err = m.v2Client.Core.NodeAddress(ctx, email, walletStatus.Wallet.WalletAddress, m.wallet.SignMessage)
 	if err != nil {
 		m.setRegistrationStatus(api.NodeSetRegistrationStatus_Unknown)
 		if errors.Is(err, core.ErrAlreadyRegistered) {
@@ -428,16 +420,8 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 	// Create a new session
 	m.setSessionToken(nonceData.Token)
 
-	// Create the signature
-	message := fmt.Sprintf(core.LoginMessageFormat, nonceData.Nonce, walletStatus.Wallet.WalletAddress.Hex())
-	sigBytes, err := m.wallet.SignMessage([]byte(message))
-	if err != nil {
-		m.setRegistrationStatus(api.NodeSetRegistrationStatus_Unknown)
-		return fmt.Errorf("error signing login message: %w", err)
-	}
-
 	// Attempt a login
-	loginData, err := m.v2Client.Core.Login(ctx, nonceData.Nonce, walletStatus.Wallet.WalletAddress, sigBytes)
+	loginData, err := m.v2Client.Core.Login(ctx, nonceData.Nonce, walletStatus.Wallet.WalletAddress, m.wallet.SignMessage)
 	if err != nil {
 		if errors.Is(err, wallet.ErrWalletNotLoaded) {
 			m.setRegistrationStatus(api.NodeSetRegistrationStatus_NoWallet)
