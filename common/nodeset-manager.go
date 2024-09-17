@@ -262,7 +262,7 @@ func (m *NodeSetServiceManager) Constellation_GetRegisteredAddress(ctx context.C
 	if !exists {
 		panic("context didn't have a logger!")
 	}
-	logger.Debug("Registering with the Constellation contracts")
+	logger.Debug("Getting registered Constellation address")
 
 	// Run the request
 	var data v2constellation.Whitelist_GetData
@@ -274,6 +274,10 @@ func (m *NodeSetServiceManager) Constellation_GetRegisteredAddress(ctx context.C
 	if err != nil {
 		return nil, fmt.Errorf("error getting registered Constellation address: %w", err)
 	}
+	logger.Debug("NodeSet responded",
+		slog.Bool("whitelisted", data.Whitelisted),
+		slog.String("address", data.Address.Hex()),
+	)
 
 	// Return the address if whitelisted
 	if data.Whitelisted {
