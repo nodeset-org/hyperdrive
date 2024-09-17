@@ -6,10 +6,10 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/ethereum/go-ethereum v1.14.7
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240904202030-e195437d7879
-	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240904201151-b5268586e0f6
+	github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240917181833-1050f28a6e0b
+	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240917074637-e2d2ec3cd9b3
 	github.com/nodeset-org/hyperdrive-stakewise v1.0.3-0.20240904170547-29eb5cd73467
-	github.com/nodeset-org/osha v0.2.1-0.20240730134808-bc24a42c233e
+	github.com/nodeset-org/osha v0.2.1-0.20240909201548-2fd453c5235d
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/node-manager-core v0.5.2-0.20240903185110-65b3ec0f1045
 	github.com/stretchr/testify v1.9.0
@@ -116,7 +116,7 @@ require (
 	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/nodeset-org/nodeset-client-go v0.0.0-20240904201004-7c9c8392558c // indirect
+	github.com/nodeset-org/nodeset-client-go v0.0.0-20240917061847-f71fb99145be // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/opencontainers/runtime-spec v1.2.0 // indirect
