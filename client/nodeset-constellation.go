@@ -31,6 +31,12 @@ func (r *NodeSetConstellationRequester) GetContext() client.IRequesterContext {
 	return r.context
 }
 
+// Gets the address the node's user has assigned as the registered Constellation address
+func (r *NodeSetConstellationRequester) GetRegisteredAddress() (*types.ApiResponse[api.NodeSetConstellation_GetRegisteredAddressData], error) {
+	args := map[string]string{}
+	return client.SendGetRequest[api.NodeSetConstellation_GetRegisteredAddressData](r, "get-registered-address", "GetRegisteredAddress", args)
+}
+
 // Gets a signature for registering / whitelisting the node with the Constellation contracts
 func (r *NodeSetConstellationRequester) GetRegistrationSignature() (*types.ApiResponse[api.NodeSetConstellation_GetRegistrationSignatureData], error) {
 	args := map[string]string{}

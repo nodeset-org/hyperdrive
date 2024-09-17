@@ -1,9 +1,16 @@
 package api
 
 import (
+	"github.com/ethereum/go-ethereum/common"
 	v2constellation "github.com/nodeset-org/nodeset-client-go/api-v2/constellation"
 	nscommon "github.com/nodeset-org/nodeset-client-go/common"
 )
+
+type NodeSetConstellation_GetRegisteredAddressData struct {
+	NotRegisteredWithNodeSet       bool           `json:"notRegisteredWithNodeSet"`
+	NotRegisteredWithConstellation bool           `json:"notRegisteredWithConstellation"`
+	RegisteredAddress              common.Address `json:"registeredAddress"`
+}
 
 type NodeSetConstellation_GetRegistrationSignatureData struct {
 	NotRegistered bool   `json:"notRegistered"`

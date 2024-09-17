@@ -9,7 +9,6 @@ import (
 	v2constellation "github.com/nodeset-org/nodeset-client-go/api-v2/constellation"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/mux"
 
 	"github.com/rocket-pool/node-manager-core/api/server"
@@ -43,8 +42,6 @@ func (f *constellationGetRegistrationSignatureContextFactory) RegisterRoute(rout
 // ===============
 type constellationGetRegistrationSignatureContext struct {
 	handler *ConstellationHandler
-
-	whitelistAddress common.Address
 }
 
 func (c *constellationGetRegistrationSignatureContext) PrepareData(data *api.NodeSetConstellation_GetRegistrationSignatureData, opts *bind.TransactOpts) (types.ResponseStatus, error) {

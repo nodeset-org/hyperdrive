@@ -83,7 +83,7 @@ func (c *constellationGetDepositSignatureContext) PrepareData(data *api.NodeSetC
 			data.LimitReached = true
 			return types.ResponseStatus_Success, nil
 		}
-		if errors.Is(err, v2constellation.ErrMissingExitMessage) {
+		if errors.Is(err, v2constellation.ErrValidatorRequiresExitMessage) {
 			data.MissingExitMessage = true
 			return types.ResponseStatus_Success, nil
 		}

@@ -251,6 +251,37 @@ func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.C
 // === Constellation Methods ===
 // =============================
 
+// Gets the address that has been registered by the node's user for Constellation.
+// Returns nil if the user hasn't registered with NodeSet for Constellation usage yet.
+func (m *NodeSetServiceManager) Constellation_GetRegisteredAddress(ctx context.Context) (*common.Address, error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	// Get the logger
+	logger, exists := log.FromContext(ctx)
+	if !exists {
+		panic("context didn't have a logger!")
+	}
+	logger.Debug("Registering with the Constellation contracts")
+
+	// Run the request
+	var data v2constellation.Whitelist_GetData
+	err := m.runRequest(ctx, func(ctx context.Context) error {
+		var err error
+		data, err = m.v2Client.Constellation.Whitelist_Get(ctx, m.resources.HyperdriveResources.DeploymentName)
+		return err
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error getting registered Constellation address: %w", err)
+	}
+
+	// Return the address if whitelisted
+	if data.Whitelisted {
+		return &data.Address, nil
+	}
+	return nil, nil
+}
+
 // Gets a signature for registering / whitelisting the node with the Constellation contracts
 func (m *NodeSetServiceManager) Constellation_GetRegistrationSignature(ctx context.Context) ([]byte, error) {
 	m.lock.Lock()
@@ -264,10 +295,10 @@ func (m *NodeSetServiceManager) Constellation_GetRegistrationSignature(ctx conte
 	logger.Debug("Registering with the Constellation contracts")
 
 	// Run the request
-	var data v2constellation.WhitelistData
+	var data v2constellation.Whitelist_PostData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Constellation.Whitelist(ctx, m.resources.HyperdriveResources.DeploymentName)
+		data, err = m.v2Client.Constellation.Whitelist_Post(ctx, m.resources.HyperdriveResources.DeploymentName)
 		return err
 	})
 	if err != nil {
