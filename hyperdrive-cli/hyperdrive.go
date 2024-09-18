@@ -28,13 +28,13 @@ const (
 	traceMode           os.FileMode = 0644
 
 	// System dir path for Linux
-	linuxSystemDir string = "/usr/share/hyperdrive"
+	LinuxSystemDir string = "/usr/share/hyperdrive"
 
 	// Subfolders under the system dir
-	scriptsDir        string = "scripts"
-	templatesDir      string = "templates"
-	overrideSourceDir string = "override"
-	networksDir       string = "networks"
+	ScriptsDir        string = "scripts"
+	TemplatesDir      string = "templates"
+	OverrideSourceDir string = "override"
+	NetworksDir       string = "networks"
 )
 
 // Flags
