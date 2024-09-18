@@ -1,5 +1,5 @@
 # The builder for building the CLIs
-FROM golang:1.21-bookworm AS builder
+FROM golang:1.22-bookworm AS builder
 COPY . /hyperdrive
 ENV CGO_ENABLED=0
 WORKDIR /hyperdrive/hyperdrive-cli

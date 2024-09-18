@@ -188,9 +188,9 @@ func printMinipoolDetails(minipool csapi.MinipoolDetails, latestDelegate common.
 			fmt.Printf("Beacon balance (CL):   %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Validator.Balance), 6))
 			fmt.Printf("Your portion:          %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Validator.NodeBalance), 6))
 			if minipool.RequiresSignedExit {
-				fmt.Printf("Requires signed exit:  no\n")
-			} else {
 				fmt.Printf("Requires signed exit:  yes\n")
+			} else {
+				fmt.Printf("Requires signed exit:  no\n")
 			}
 		} else {
 			fmt.Printf("Validator seen:        no\n")

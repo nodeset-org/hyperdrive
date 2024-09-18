@@ -382,7 +382,7 @@ func (c *HyperdriveClient) GetDirSizeViaEcMigrator(container string, targetDir s
 // === StakeWise ===
 // =================
 
-// Get the StakeWise service version
+// Get the service version
 func (c *StakewiseClient) GetServiceVersion() (string, error) {
 	// Get service container version output
 	response, err := c.Api.Service.Version()
@@ -395,6 +395,29 @@ func (c *StakewiseClient) GetServiceVersion() (string, error) {
 	version, err := semver.Make(versionString)
 	if err != nil {
 		return "", fmt.Errorf("error parsing StakeWise service version number from output '%s': %w", versionString, err)
+	}
+
+	// Return the parsed semantic version (extra safety)
+	return version.String(), nil
+}
+
+// =====================
+// === Constellation ===
+// =====================
+
+// Get the service version
+func (c *ConstellationClient) GetServiceVersion() (string, error) {
+	// Get service container version output
+	response, err := c.Api.Service.Version()
+	if err != nil {
+		return "", fmt.Errorf("error requesting Constellation service version: %w", err)
+	}
+	versionString := response.Data.Version
+
+	// Make sure it's a semantic version
+	version, err := semver.Make(versionString)
+	if err != nil {
+		return "", fmt.Errorf("error parsing Constellation service version number from output '%s': %w", versionString, err)
 	}
 
 	// Return the parsed semantic version (extra safety)

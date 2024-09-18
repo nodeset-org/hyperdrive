@@ -93,6 +93,24 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 					return exitMinipools(c)
 				},
 			},
+			{
+				Name:    "find-vanity-address",
+				Aliases: []string{"v"},
+				Usage:   "Search for a custom vanity minipool address",
+				Flags: []cli.Flag{
+					vanityPrefixFlag,
+					vanitySaltFlag,
+					vanityThreadsFlag,
+					vanityAddressFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run
+					return findVanitySalt(c)
+				},
+			},
 		},
 	})
 }

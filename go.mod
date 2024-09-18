@@ -1,17 +1,19 @@
 module github.com/nodeset-org/hyperdrive
 
-go 1.21.10
+go 1.22
+
+toolchain go1.22.7
 
 require (
 	github.com/blang/semver/v4 v4.0.0
-	github.com/ethereum/go-ethereum v1.14.7
+	github.com/ethereum/go-ethereum v1.14.8
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240917181833-1050f28a6e0b
-	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240917074637-e2d2ec3cd9b3
-	github.com/nodeset-org/hyperdrive-stakewise v1.0.3-0.20240904170547-29eb5cd73467
-	github.com/nodeset-org/osha v0.2.1-0.20240909201548-2fd453c5235d
+	github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240918194431-5c627d9924fe
+	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240918191417-afe6c2eac9f0
+	github.com/nodeset-org/hyperdrive-stakewise v1.0.3-0.20240918195129-2503f45d5eb9
+	github.com/nodeset-org/osha v0.2.1-0.20240918190450-6a8fd55b69ef
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20240903185110-65b3ec0f1045
+	github.com/rocket-pool/node-manager-core v0.5.2-0.20240918185909-415c5fb7e3be
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/sync v0.7.0
 	golang.org/x/term v0.22.0
@@ -28,7 +30,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/btcsuite/btcd v0.24.2 // indirect
-	github.com/btcsuite/btcd/btcec/v2 v2.3.3 // indirect
+	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.5 // indirect
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -81,8 +83,8 @@ require (
 	github.com/hashicorp/go-memdb v1.3.4 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
-	github.com/herumi/bls-eth-go-binary v1.35.0 // indirect
-	github.com/holiman/uint256 v1.3.0 // indirect
+	github.com/herumi/bls-eth-go-binary v1.36.1 // indirect
+	github.com/holiman/uint256 v1.3.1 // indirect
 	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
@@ -128,10 +130,10 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
-	github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44 // indirect
-	github.com/prysmaticlabs/go-bitfield v0.0.0-20210809151128-385d8c5e3fb7 // indirect
-	github.com/prysmaticlabs/gohashtree v0.0.4-beta // indirect
-	github.com/prysmaticlabs/prysm/v5 v5.0.3 // indirect
+	github.com/prysmaticlabs/fastssz v0.0.0-20240620202422-a981b8ef89d3 // indirect
+	github.com/prysmaticlabs/go-bitfield v0.0.0-20240328144219-a1caa50c3a1e // indirect
+	github.com/prysmaticlabs/gohashtree v0.0.4-beta.0.20240624100937-73632381301b // indirect
+	github.com/prysmaticlabs/prysm/v5 v5.1.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rocket-pool/batch-query v1.0.0 // indirect
 	github.com/rocket-pool/rocketpool-go/v2 v2.0.0-b2.0.20240709170030-c27aeb5fb99b
@@ -182,5 +184,7 @@ require (
 	lukechampine.com/blake3 v1.2.1 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
+
+require github.com/dustin/go-humanize v1.0.1
 
 replace github.com/rocket-pool/smartnode/v2 => github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20240729151944-127e460038df

@@ -142,6 +142,22 @@ func serviceVersion(c *cli.Context) error {
 		}
 	}
 
+	// Constellation
+	var constellationVersion string
+	if cfg.Constellation.Enabled.Value {
+		// Get Constellation client
+		cs, err := client.NewConstellationClientFromCtx(c, hd)
+		if err != nil {
+			return err
+		}
+
+		// Get Constellation service version
+		constellationVersion, err = cs.GetServiceVersion()
+		if err != nil {
+			return err
+		}
+	}
+
 	// Print version info
 	fmt.Println("Hyperdrive:")
 	fmt.Printf("CLI version: %s\n", c.App.Version)
@@ -151,15 +167,16 @@ func serviceVersion(c *cli.Context) error {
 	fmt.Printf("MEV-Boost client: %s\n", mevBoostString)
 
 	// Print module info
-	if stakeWiseVersion != "" {
+	if stakeWiseVersion != "" || constellationVersion != "" {
 		// At least one module is enabled
 		fmt.Println()
 		fmt.Println("Modules:")
 	}
-
-	// Print StakeWise info
 	if stakeWiseVersion != "" {
 		fmt.Printf("StakeWise version: %s\n", stakeWiseVersion)
+	}
+	if constellationVersion != "" {
+		fmt.Printf("Constellation version: %s\n", constellationVersion)
 	}
 
 	return nil
