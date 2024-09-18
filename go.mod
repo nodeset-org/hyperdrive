@@ -79,7 +79,7 @@ require (
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-memdb v1.3.4 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
-	github.com/herumi/bls-eth-go-binary v1.35.0 // indirect
+	github.com/herumi/bls-eth-go-binary v1.36.1 // indirect
 	github.com/holiman/uint256 v1.3.1 // indirect
 	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
