@@ -232,7 +232,7 @@ func NewMevBoostConfig(parent *HyperdriveConfig) *MevBoostConfig {
 			ParameterCommon: &config.ParameterCommon{
 				ID:                 ids.MevBoostExternalUrlID,
 				Name:               "External URL",
-				Description:        "The URL of the external MEV-Boost client or provider",
+				Description:        "The URL of the external MEV-Boost client or provider.\nNOTE: If you are running it on the same machine as this node, addresses like `localhost` and `127.0.0.1` will not work due to Docker limitations. Enter your machine's LAN IP address instead, for example 'http://192.168.1.100:18550'.",
 				AffectsContainers:  []config.ContainerID{config.ContainerID_BeaconNode},
 				CanBeBlank:         true,
 				OverwriteOnUpgrade: false,
