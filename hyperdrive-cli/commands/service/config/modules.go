@@ -96,7 +96,7 @@ func (p *ModulesPage) createContent() {
 	})
 
 	// Make it the content of the layout and set the default description text
-	p.layout.setContent(categoryList, categoryList.Box, "Select an Addon")
+	p.layout.setContent(categoryList, categoryList.Box, "Select a Module")
 	p.layout.descriptionBox.SetText(p.addonSubpages[0].getPage().description)
 
 	// Make the footer
