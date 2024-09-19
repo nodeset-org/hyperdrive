@@ -72,17 +72,90 @@ func exitMinipools(c *cli.Context) error {
 		}
 
 		// Check for active minipools
-		details := detailsResponse.Data.Details
-		if len(details) == 0 {
+		var eligibleMpDetails []csapi.MinipoolExitDetails
+		if !verbose {
+			eligibleMpDetails = detailsResponse.Data.Details
+		} else {
+			eligibleMpDetails = []csapi.MinipoolExitDetails{}
+			alreadyFinalizedDetails := []csapi.MinipoolExitDetails{}
+			invalidStatusDetails := []csapi.MinipoolExitDetails{}
+			invalidValidatorDetails := []csapi.MinipoolExitDetails{}
+			validatorTooYoungDetails := []csapi.MinipoolExitDetails{}
+			validatorNotSeenYetDetails := []csapi.MinipoolExitDetails{}
+			for _, mp := range detailsResponse.Data.Details {
+				if mp.CanExit {
+					eligibleMpDetails = append(eligibleMpDetails, mp)
+					continue
+				}
+				if mp.AlreadyFinalized {
+					alreadyFinalizedDetails = append(alreadyFinalizedDetails, mp)
+					continue
+				}
+				if mp.InvalidMinipoolStatus {
+					invalidStatusDetails = append(invalidStatusDetails, mp)
+					continue
+				}
+				if mp.InvalidValidatorStatus {
+					invalidValidatorDetails = append(invalidValidatorDetails, mp)
+					continue
+				}
+				if mp.ValidatorTooYoung {
+					validatorTooYoungDetails = append(validatorTooYoungDetails, mp)
+					continue
+				}
+				if mp.ValidatorNotSeenYet {
+					validatorNotSeenYetDetails = append(validatorNotSeenYetDetails, mp)
+					continue
+				}
+			}
+
+			// Print details
+			if len(alreadyFinalizedDetails) > 0 {
+				fmt.Println("The following minipools are already finalized:")
+				for _, mp := range alreadyFinalizedDetails {
+					fmt.Printf("  %s\n", mp.Address.Hex())
+				}
+				fmt.Println()
+			}
+			if len(invalidStatusDetails) > 0 {
+				fmt.Println("The following minipools are not in an exitable state:")
+				for _, mp := range invalidStatusDetails {
+					fmt.Printf("  %s\n", mp.Address.Hex())
+				}
+				fmt.Println()
+			}
+			if len(invalidValidatorDetails) > 0 {
+				fmt.Println("The following minipools have validators that are not in an exitable state:")
+				for _, mp := range invalidValidatorDetails {
+					fmt.Printf("  %s\n", mp.Address.Hex())
+				}
+				fmt.Println()
+			}
+			if len(validatorTooYoungDetails) > 0 {
+				fmt.Println("The following minipools have validators that are too young to exit:")
+				for _, mp := range validatorTooYoungDetails {
+					fmt.Printf("  %s\n", mp.Address.Hex())
+				}
+				fmt.Println()
+			}
+			if len(validatorNotSeenYetDetails) > 0 {
+				fmt.Println("The following minipools have validators that have not been seen on the Beacon Chain yet:")
+				for _, mp := range validatorNotSeenYetDetails {
+					fmt.Printf("  %s\n", mp.Address.Hex())
+				}
+				fmt.Println()
+			}
+		}
+		if len(eligibleMpDetails) == 0 {
 			fmt.Println("No minipools can be exited.")
 			return nil
 		}
 
 		// Get selected minipools
-		options := make([]ncli.SelectionOption[csapi.MinipoolExitDetails], len(details))
-		for i, mp := range details {
+		options := make([]ncli.SelectionOption[csapi.MinipoolExitDetails], len(eligibleMpDetails))
+		for i, mp := range eligibleMpDetails {
 			option := &options[i]
-			option.Element = &details[i]
+			option.Element = &eligibleMpDetails[i]
 			option.ID = fmt.Sprint(mp.Address)
 
 			if mp.MinipoolStatus == types.MinipoolStatus_Staking {
