@@ -12,11 +12,11 @@ import (
 type ServiceHandler struct {
 	logger          *log.Logger
 	ctx             context.Context
-	serviceProvider *common.ServiceProvider
+	serviceProvider common.IHyperdriveServiceProvider
 	factories       []server.IContextFactory
 }
 
-func NewServiceHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.ServiceProvider) *ServiceHandler {
+func NewServiceHandler(logger *log.Logger, ctx context.Context, serviceProvider common.IHyperdriveServiceProvider) *ServiceHandler {
 	h := &ServiceHandler{
 		logger:          logger,
 		ctx:             ctx,
@@ -25,6 +25,8 @@ func NewServiceHandler(logger *log.Logger, ctx context.Context, serviceProvider 
 	h.factories = []server.IContextFactory{
 		&serviceClientStatusContextFactory{h},
 		&serviceGetConfigContextFactory{h},
+		&serviceGetNetworkSettingsContextFactory{h},
+		&serviceGetResourcesContextFactory{h},
 		&serviceRestartContainerContextFactory{h},
 		&serviceRotateLogsContextFactory{h},
 		&serviceVersionContextFactory{h},

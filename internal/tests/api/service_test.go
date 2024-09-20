@@ -7,14 +7,14 @@ import (
 
 	dtypes "github.com/docker/docker/api/types"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
-	"github.com/nodeset-org/osha"
+	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
 	"github.com/stretchr/testify/require"
 )
 
 // Test getting the client status of synced clients
 func TestClientStatus_Synced(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_EthClients)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_EthClients)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
@@ -28,7 +28,7 @@ func TestClientStatus_Synced(t *testing.T) {
 	}
 
 	// Run the round-trip test
-	response, err := testMgr.GetApiClient().Service.ClientStatus()
+	response, err := hdNode.GetApiClient().Service.ClientStatus()
 	require.NoError(t, err)
 	require.True(t, response.Data.EcManagerStatus.PrimaryClientStatus.IsSynced)
 	require.True(t, response.Data.EcManagerStatus.PrimaryClientStatus.IsWorking)
@@ -53,7 +53,7 @@ func TestServerVersion(t *testing.T) {
 	version := shared.HyperdriveVersion
 
 	// Run the round-trip test
-	response, err := testMgr.GetApiClient().Service.Version()
+	response, err := hdNode.GetApiClient().Service.Version()
 	require.NoError(t, err)
 	require.Equal(t, version, response.Data.Version)
 	t.Logf("Received correct version: %s", version)
@@ -61,14 +61,14 @@ func TestServerVersion(t *testing.T) {
 
 func TestRestartContainer(t *testing.T) {
 	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_Docker)
+	snapshotName, err := testMgr.CreateCustomSnapshot(hdtesting.Service_Docker)
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
 	defer service_cleanup(snapshotName)
 
 	// Get some services
-	sp := testMgr.GetServiceProvider()
+	sp := hdNode.GetServiceProvider()
 	cfg := sp.GetConfig()
 	ctx := sp.GetBaseContext()
 
@@ -96,7 +96,7 @@ func TestRestartContainer(t *testing.T) {
 	t.Log("Created mock VC")
 
 	// Run the client call
-	_, err = testMgr.GetApiClient().Service.RestartContainer(containerName)
+	_, err = hdNode.GetApiClient().Service.RestartContainer(containerName)
 	require.NoError(t, err)
 	t.Log("Restart called")
 

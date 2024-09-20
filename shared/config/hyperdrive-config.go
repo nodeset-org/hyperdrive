@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"strings"
+	"sort"
 
 	"github.com/alessio/shellescape"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
@@ -68,11 +68,12 @@ type HyperdriveConfig struct {
 	// Internal fields
 	Version                 string
 	hyperdriveUserDirectory string
-	resources               *HyperdriveResources
+	ethNetworkName          string
+	networkSettings         []*HyperdriveSettings
 }
 
 // Load configuration settings from a file
-func LoadFromFile(path string) (*HyperdriveConfig, error) {
+func LoadFromFile(path string, networks []*HyperdriveSettings) (*HyperdriveConfig, error) {
 	// Return nil if the file doesn't exist
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -92,7 +93,10 @@ func LoadFromFile(path string) (*HyperdriveConfig, error) {
 	}
 
 	// Deserialize it into a config object
-	cfg := NewHyperdriveConfig(filepath.Dir(path))
+	cfg, err := NewHyperdriveConfig(filepath.Dir(path), networks)
+	if err != nil {
+		return nil, fmt.Errorf("could not create Hyperdrive config: %w", err)
+	}
 	err = cfg.Deserialize(settings)
 	if err != nil {
 		return nil, fmt.Errorf("could not deserialize settings file: %w", err)
@@ -102,23 +106,15 @@ func LoadFromFile(path string) (*HyperdriveConfig, error) {
 }
 
 // Creates a new Hyperdrive configuration instance
-func NewHyperdriveConfig(hdDir string) *HyperdriveConfig {
-	cfg := newHyperdriveConfigImpl(hdDir, config.Network_Mainnet) // Default to mainnet
-	cfg.updateResources()
-	return cfg
+func NewHyperdriveConfig(hdDir string, networks []*HyperdriveSettings) (*HyperdriveConfig, error) {
+	return NewHyperdriveConfigForNetwork(hdDir, networks, config.Network_Mainnet) // Default to mainnet
 }
 
-// Creates a new Hyperdrive configuration instance for a custom network
-func NewHyperdriveConfigForNetwork(hdDir string, network config.Network, resources *HyperdriveResources) *HyperdriveConfig {
-	cfg := newHyperdriveConfigImpl(hdDir, network)
-	cfg.resources = resources
-	return cfg
-}
-
-// Implementation of the Hyperdrive config constructor
-func newHyperdriveConfigImpl(hdDir string, network config.Network) *HyperdriveConfig {
+// Creates a new Hyperdrive configuration instance for a specific network
+func NewHyperdriveConfigForNetwork(hdDir string, networks []*HyperdriveSettings, selectedNetwork config.Network) (*HyperdriveConfig, error) {
 	cfg := &HyperdriveConfig{
 		hyperdriveUserDirectory: hdDir,
+		networkSettings:         networks,
 		Modules:                 map[string]any{},
 
 		ProjectName: config.Parameter[string]{
@@ -154,13 +150,13 @@ func newHyperdriveConfigImpl(hdDir string, network config.Network) *HyperdriveCo
 				ID:                 ids.NetworkID,
 				Name:               "Network",
 				Description:        "The Ethereum network you want to use - select Holesky Testnet to practice with fake ETH, or Mainnet to stake on the real network using real ETH.",
-				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ExecutionClient, config.ContainerID_BeaconNode, config.ContainerID_ValidatorClient},
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon, config.ContainerID_ExecutionClient, config.ContainerID_BeaconNode, config.ContainerID_ValidatorClient, config.ContainerID_MevBoost},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
-			Options: getNetworkOptions(),
+			Options: getNetworkOptions(networks),
 			Default: map[config.Network]config.Network{
-				config.Network_All: config.Network_Mainnet,
+				config.Network_All: selectedNetwork,
 			},
 		},
 
@@ -293,19 +289,30 @@ func newHyperdriveConfigImpl(hdDir string, network config.Network) *HyperdriveCo
 
 	// Create the subconfigs
 	cfg.Logging = config.NewLoggerConfig()
-	cfg.LocalExecutionClient = NewLocalExecutionClient()
+	cfg.LocalExecutionClient = config.NewLocalExecutionConfig()
 	cfg.ExternalExecutionClient = config.NewExternalExecutionConfig()
-	cfg.LocalBeaconClient = NewLocalBeaconClient()
+	cfg.LocalBeaconClient = config.NewLocalBeaconConfig()
 	cfg.ExternalBeaconClient = config.NewExternalBeaconConfig()
 	cfg.Fallback = config.NewFallbackConfig()
 	cfg.Metrics = NewMetricsConfig()
 	cfg.MevBoost = NewMevBoostConfig(cfg)
 
+	// Provision the defaults for each network
+	for _, network := range networks {
+		err := config.SetDefaultsForNetworks(cfg, network.DefaultConfigSettings, network.Key)
+		if err != nil {
+			return nil, fmt.Errorf("could not set defaults for network %s: %w", network.Key, err)
+		}
+		if network.Key == selectedNetwork {
+			cfg.ethNetworkName = network.NetworkResources.EthNetworkName
+		}
+	}
+
 	// Apply the default values for the network
-	cfg.Network.Value = network
+	cfg.Network.Value = selectedNetwork
 	cfg.applyAllDefaults()
 
-	return cfg
+	return cfg, nil
 }
 
 // Get the title for this config
@@ -351,6 +358,7 @@ func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig, includeUserDir b
 	hdMap := config.Serialize(cfg)
 	masterMap[ids.VersionID] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	masterMap[ids.RootConfigID] = hdMap
+	masterMap[ids.EthNetworkNameID] = cfg.ethNetworkName
 
 	if includeUserDir {
 		masterMap[ids.UserDirID] = cfg.hyperdriveUserDirectory
@@ -414,6 +422,10 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	if exists {
 		cfg.hyperdriveUserDirectory = userDir.(string)
 	}
+	ethNetworkName, exists := masterMap[ids.EthNetworkNameID]
+	if exists {
+		cfg.ethNetworkName = ethNetworkName.(string)
+	}
 
 	// Handle modules
 	modules, exists := masterMap[ModulesName]
@@ -427,7 +439,6 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 		cfg.Modules = map[string]any{}
 	}
 
-	cfg.updateResources()
 	return nil
 }
 
@@ -440,17 +451,24 @@ func (cfg *HyperdriveConfig) ChangeNetwork(newNetwork config.Network) {
 	}
 	cfg.Network.Value = newNetwork
 
+	// Change the Eth network name
+	for _, settings := range cfg.networkSettings {
+		if settings.Key == newNetwork {
+			cfg.ethNetworkName = settings.NetworkResources.EthNetworkName
+			break
+		}
+	}
+
 	// Run the changes
 	config.ChangeNetwork(cfg, oldNetwork, newNetwork)
-	cfg.updateResources()
 }
 
 // Creates a copy of the configuration
 func (cfg *HyperdriveConfig) Clone() *HyperdriveConfig {
-	clone := NewHyperdriveConfig(cfg.hyperdriveUserDirectory)
+	clone, _ := NewHyperdriveConfig(cfg.hyperdriveUserDirectory, cfg.networkSettings)
 	config.Clone(cfg, clone, cfg.Network.Value)
-	clone.updateResources()
 	clone.Version = cfg.Version
+	clone.ethNetworkName = cfg.ethNetworkName
 	return clone
 }
 
@@ -465,43 +483,55 @@ func (cfg *HyperdriveConfig) applyAllDefaults() {
 }
 
 // Get the list of options for networks to run on
-func getNetworkOptions() []*config.ParameterOption[config.Network] {
-	options := []*config.ParameterOption[config.Network]{
-		{
-			ParameterOptionCommon: &config.ParameterOptionCommon{
-				Name:        "Ethereum Mainnet",
-				Description: "This is the real Ethereum main network, using real ETH to make real validators.",
-			},
-			Value: config.Network_Mainnet,
-		},
-		{
-			ParameterOptionCommon: &config.ParameterOptionCommon{
-				Name:        "Holesky Testnet",
-				Description: "This is the Holešky (Holešovice) test network, which is the next generation of long-lived testnets for Ethereum. It uses free fake ETH to make fake validators.\nUse this if you want to practice running Hyperdrive in a free, safe environment before moving to Mainnet.",
-			},
-			Value: config.Network_Holesky,
-		},
-	}
-
-	if strings.HasSuffix(shared.HyperdriveVersion, "-dev") {
+func getNetworkOptions(networks []*HyperdriveSettings) []*config.ParameterOption[config.Network] {
+	// Create the options
+	options := []*config.ParameterOption[config.Network]{}
+	for _, network := range networks {
 		options = append(options, &config.ParameterOption[config.Network]{
 			ParameterOptionCommon: &config.ParameterOptionCommon{
-				Name:        "Devnet",
-				Description: "This is a development network used by Hyperdrive engineers to test new features and contract upgrades before they are promoted to Holesky for staging. You should not use this network unless invited to do so by the developers.",
+				Name:        network.Name,
+				Description: network.Description,
 			},
-			Value: Network_HoleskyDev,
+			Value: network.Key,
 		})
 	}
+
+	// Sort the options so mainnet comes first and holesky comes second
+	sort.SliceStable(options, func(i, j int) bool {
+		firstOption := options[i]
+		secondOption := options[j]
+
+		// Mainnet comes first
+		if firstOption.Value == config.Network_Mainnet {
+			return true
+		}
+		if secondOption.Value == config.Network_Mainnet {
+			return false
+		}
+
+		// Holesky comes second
+		if firstOption.Value == config.Network_Holesky {
+			return true
+		}
+		if secondOption.Value == config.Network_Holesky {
+			return false
+		}
+
+		// The rest doesn't matter so just sort it alphabetically
+		return firstOption.Value < secondOption.Value
+	})
 
 	return options
 }
 
-func (cfg *HyperdriveConfig) GetResources() *HyperdriveResources {
-	return cfg.resources
+// Get the Eth network name of the selected network
+func (cfg *HyperdriveConfig) GetEthNetworkName() string {
+	return cfg.ethNetworkName
 }
 
-func (cfg *HyperdriveConfig) updateResources() {
-	cfg.resources = NewHyperdriveResources(cfg.Network.Value)
+// Get all loaded network settings
+func (cfg *HyperdriveConfig) GetNetworkSettings() []*HyperdriveSettings {
+	return cfg.networkSettings
 }
 
 func (cfg *HyperdriveConfig) GetUserDirectory() string {
@@ -530,10 +560,6 @@ func (cfg *HyperdriveConfig) GetWalletFilePath() string {
 
 func (cfg *HyperdriveConfig) GetPasswordFilePath() string {
 	return filepath.Join(cfg.UserDataPath.Value, UserPasswordFilename)
-}
-
-func (cfg *HyperdriveConfig) GetNetworkResources() *config.NetworkResources {
-	return cfg.resources.NetworkResources
 }
 
 func (cfg *HyperdriveConfig) GetExecutionClientUrls() (string, string) {

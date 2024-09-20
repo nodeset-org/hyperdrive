@@ -36,7 +36,7 @@ func (f *stakeWiseGetDepositDataSetContextFactory) Create(args url.Values) (*sta
 
 func (f *stakeWiseGetDepositDataSetContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*stakeWiseGetDepositDataSetContext, api.NodeSetStakeWise_GetDepositDataSetData](
-		router, "get-deposit-data-set", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
+		router, "get-deposit-data-set", f, f.handler.logger.Logger, f.handler.serviceProvider,
 	)
 }
 

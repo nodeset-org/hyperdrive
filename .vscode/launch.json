@@ -12,7 +12,9 @@
             "program": "${workspaceFolder}",
             "args": [
                 "-u",
-                "${env:HOME}/.hyperdrive"
+                "${env:HOME}/.hyperdrive",
+                "-s",
+                "/usr/share/hyperdrive/networks"
             ]
         }
     ]

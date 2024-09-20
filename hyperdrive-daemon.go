@@ -47,6 +47,12 @@ func main() {
 		Usage:    "The path of the user data directory, which contains the configuration file to load and all of the user's runtime data",
 		Required: true,
 	}
+	settingsFolderFlag := &cli.StringFlag{
+		Name:     "settings-folder",
+		Aliases:  []string{"s"},
+		Usage:    "The path to the folder containing the network settings files",
+		Required: true,
+	}
 	ipFlag := &cli.StringFlag{
 		Name:    "ip",
 		Aliases: []string{"i"},
@@ -62,11 +68,12 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		userDirFlag,
+		settingsFolderFlag,
 		ipFlag,
 		portFlag,
 	}
 	app.Action = func(c *cli.Context) error {
-		// Get the config file
+		// Get the config file path
 		userDir := c.String(userDirFlag.Name)
 		cfgPath := filepath.Join(userDir, config.ConfigFilename)
 		_, err := os.Stat(cfgPath)
@@ -75,11 +82,23 @@ func main() {
 			os.Exit(1)
 		}
 
+		// Get the settings file path
+		settingsFolder := c.String(settingsFolderFlag.Name)
+		if settingsFolder == "" {
+			fmt.Println("No settings folder provided.")
+			os.Exit(1)
+		}
+		_, err = os.Stat(settingsFolder)
+		if errors.Is(err, fs.ErrNotExist) {
+			fmt.Printf("Settings folder not found at [%s].", settingsFolder)
+			os.Exit(1)
+		}
+
 		// Wait group to handle graceful stopping
 		stopWg := new(sync.WaitGroup)
 
 		// Create the service provider
-		sp, err := common.NewServiceProvider(userDir)
+		sp, err := common.NewHyperdriveServiceProvider(userDir, settingsFolder)
 		if err != nil {
 			return fmt.Errorf("error creating service provider: %w", err)
 		}

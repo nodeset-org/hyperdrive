@@ -9,7 +9,7 @@ const (
 	Network_HoleskyDev config.Network = "holesky-dev"
 
 	// Local test network for development
-	Network_LocalTest config.Network = "hd-local-test"
+	Network_LocalTest config.Network = "local-test"
 )
 
 type MevRelayID string
@@ -20,7 +20,6 @@ const (
 	MevRelayID_Flashbots          MevRelayID = "flashbots"
 	MevRelayID_BloxrouteMaxProfit MevRelayID = "bloxrouteMaxProfit"
 	MevRelayID_BloxrouteRegulated MevRelayID = "bloxrouteRegulated"
-	MevRelayID_Eden               MevRelayID = "eden"
 	MevRelayID_TitanRegional      MevRelayID = "titanRegional"
 )
 

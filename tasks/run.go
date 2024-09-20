@@ -36,7 +36,7 @@ type TaskLoop struct {
 	// Services
 	ctx    context.Context
 	logger *log.Logger
-	sp     *common.ServiceProvider
+	sp     common.IHyperdriveServiceProvider
 	wg     *sync.WaitGroup
 
 	// Internal
@@ -44,7 +44,7 @@ type TaskLoop struct {
 	wasBeaconClientSynced    bool
 }
 
-func NewTaskLoop(sp *common.ServiceProvider, wg *sync.WaitGroup) *TaskLoop {
+func NewTaskLoop(sp common.IHyperdriveServiceProvider, wg *sync.WaitGroup) *TaskLoop {
 	logger := sp.GetTasksLogger()
 	ctx := logger.CreateContextWithLogger(sp.GetBaseContext())
 	taskLoop := &TaskLoop{

@@ -43,7 +43,7 @@ func (f *walletSendContextFactory) Create(args url.Values) (*walletSendContext, 
 
 func (f *walletSendContextFactory) RegisterRoute(router *mux.Router) {
 	server.RegisterQuerylessGet[*walletSendContext, api.WalletSendData](
-		router, "send", f, f.handler.logger.Logger, f.handler.serviceProvider.ServiceProvider,
+		router, "send", f, f.handler.logger.Logger, f.handler.serviceProvider,
 	)
 }
 
@@ -89,7 +89,7 @@ func (c *walletSendContext) PrepareData(data *api.WalletSendData, opts *bind.Tra
 		tokenAddress := common.HexToAddress(c.token)
 
 		// Make a binding for it
-		tokenContract, err := contracts.NewErc20Contract(tokenAddress, ec, qMgr, txMgr, nil)
+		tokenContract, err = contracts.NewErc20Contract(tokenAddress, ec, qMgr, txMgr, nil)
 		if err != nil {
 			return types.ResponseStatus_Error, fmt.Errorf("error creating ERC20 contract binding: %w", err)
 		}

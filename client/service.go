@@ -31,6 +31,16 @@ func (r *ServiceRequester) ClientStatus() (*types.ApiResponse[api.ServiceClientS
 	return client.SendGetRequest[api.ServiceClientStatusData](r, "client-status", "ClientStatus", nil)
 }
 
+// Gets the resources for the daemon's selected network
+func (r *ServiceRequester) GetResources() (*types.ApiResponse[api.ServiceGetResourcesData], error) {
+	return client.SendGetRequest[api.ServiceGetResourcesData](r, "get-resources", "GetResources", nil)
+}
+
+// Gets the network settings for the daemon's selected network
+func (r *ServiceRequester) GetNetworkSettings() (*types.ApiResponse[api.ServiceGetNetworkSettingsData], error) {
+	return client.SendGetRequest[api.ServiceGetNetworkSettingsData](r, "get-network-settings", "GetNetworkSettings", nil)
+}
+
 // Gets the Hyperdrive configuration
 func (r *ServiceRequester) GetConfig() (*types.ApiResponse[api.ServiceGetConfigData], error) {
 	return client.SendGetRequest[api.ServiceGetConfigData](r, "get-config", "GetConfig", nil)

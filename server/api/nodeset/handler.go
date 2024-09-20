@@ -5,19 +5,22 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nodeset-org/hyperdrive-daemon/common"
+	ns_constellation "github.com/nodeset-org/hyperdrive-daemon/server/api/nodeset/constellation"
 	ns_stakewise "github.com/nodeset-org/hyperdrive-daemon/server/api/nodeset/stakewise"
 	"github.com/rocket-pool/node-manager-core/api/server"
 	"github.com/rocket-pool/node-manager-core/log"
 )
 
 type NodeSetHandler struct {
-	logger          *log.Logger
-	ctx             context.Context
-	serviceProvider *common.ServiceProvider
-	factories       []server.IContextFactory
+	logger               *log.Logger
+	ctx                  context.Context
+	serviceProvider      common.IHyperdriveServiceProvider
+	factories            []server.IContextFactory
+	stakeWiseHandler     *ns_stakewise.StakeWiseHandler
+	constellationHandler *ns_constellation.ConstellationHandler
 }
 
-func NewNodeSetHandler(logger *log.Logger, ctx context.Context, serviceProvider *common.ServiceProvider) *NodeSetHandler {
+func NewNodeSetHandler(logger *log.Logger, ctx context.Context, serviceProvider common.IHyperdriveServiceProvider) *NodeSetHandler {
 	h := &NodeSetHandler{
 		logger:          logger,
 		ctx:             ctx,
@@ -37,6 +40,10 @@ func (h *NodeSetHandler) RegisterRoutes(router *mux.Router) {
 	}
 
 	// Register StakeWise routes
-	stakeWiseHandler := ns_stakewise.NewStakeWiseHandler(h.logger, h.ctx, h.serviceProvider)
-	stakeWiseHandler.RegisterRoutes(subrouter)
+	h.stakeWiseHandler = ns_stakewise.NewStakeWiseHandler(h.logger, h.ctx, h.serviceProvider)
+	h.stakeWiseHandler.RegisterRoutes(subrouter)
+
+	// Register Constellation routes
+	h.constellationHandler = ns_constellation.NewConstellationHandler(h.logger, h.ctx, h.serviceProvider)
+	h.constellationHandler.RegisterRoutes(subrouter)
 }

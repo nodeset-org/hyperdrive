@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/rocket-pool/node-manager-core/api/types"
 )
 
@@ -16,6 +17,14 @@ type ServiceCreateFeeRecipientFileData struct {
 type ServiceClientStatusData struct {
 	EcManagerStatus types.ClientManagerStatus `json:"ecManagerStatus"`
 	BcManagerStatus types.ClientManagerStatus `json:"bcManagerStatus"`
+}
+
+type ServiceGetResourcesData struct {
+	Resources *config.MergedResources `json:"resources"`
+}
+
+type ServiceGetNetworkSettingsData struct {
+	Settings *config.HyperdriveSettings `json:"settings"`
 }
 
 type ServiceGetConfigData struct {
