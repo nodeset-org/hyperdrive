@@ -206,9 +206,9 @@ func exitMinipools(c *cli.Context) error {
 	}
 
 	// Exit minipools
-	exitInfos := make([]csapi.MinipoolExitInfo, len(selectedMinipools))
+	exitInfos := make([]csapi.MinipoolValidatorInfo, len(selectedMinipools))
 	for i, mp := range selectedMinipools {
-		exitInfos[i] = csapi.MinipoolExitInfo{
+		exitInfos[i] = csapi.MinipoolValidatorInfo{
 			Address: mp.Address,
 			Pubkey:  mp.Pubkey,
 			Index:   mp.Index,

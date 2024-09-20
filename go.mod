@@ -8,10 +8,10 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/ethereum/go-ethereum v1.14.8
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240918234152-18a3d21190a9
-	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240918233404-ecebbc173573
+	github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240920193237-7931e5618a13
+	github.com/nodeset-org/hyperdrive-daemon v1.0.2-0.20240919072557-1da8bdc44c7f
 	github.com/nodeset-org/hyperdrive-stakewise v1.0.3-0.20240918234902-6f2178c87888
-	github.com/nodeset-org/osha v0.2.1-0.20240918232802-f44f9894c6ab
+	github.com/nodeset-org/osha v0.3.0
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
 	github.com/rocket-pool/node-manager-core v0.5.2-0.20240918224929-a9cee1201bee
 	github.com/stretchr/testify v1.9.0
