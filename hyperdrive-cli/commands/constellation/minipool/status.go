@@ -16,8 +16,12 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const (
-	statusIncludeFinalizedFlag string = "include-finalized"
+var (
+	statusIncludeFinalizedFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "include-finalized",
+		Aliases: []string{"f"},
+		Usage:   "Include finalized minipools in the output",
+	}
 )
 
 func getMinipoolStatus(c *cli.Context) error {
@@ -71,7 +75,7 @@ func getMinipoolStatus(c *cli.Context) error {
 	}
 
 	// Return if all minipools are finalized and they are hidden
-	if len(status.Data.Minipools) == len(finalisedMinipools) && !c.Bool(statusIncludeFinalizedFlag) {
+	if len(status.Data.Minipools) == len(finalisedMinipools) && !c.Bool(statusIncludeFinalizedFlag.Name) {
 		fmt.Println("All of this node's minipools have been finalized.")
 		fmt.Println("To show finalized minipools, re-run this command with the `-f` flag.")
 		return nil
@@ -92,7 +96,7 @@ func getMinipoolStatus(c *cli.Context) error {
 
 		// Minipools
 		for _, minipool := range minipools {
-			if !minipool.Finalised || c.Bool(statusIncludeFinalizedFlag) {
+			if !minipool.Finalised || c.Bool(statusIncludeFinalizedFlag.Name) {
 				printMinipoolDetails(minipool, status.Data.LatestDelegate)
 			}
 		}
@@ -101,7 +105,7 @@ func getMinipoolStatus(c *cli.Context) error {
 	}
 
 	// Handle finalized minipools
-	if c.Bool(statusIncludeFinalizedFlag) {
+	if c.Bool(statusIncludeFinalizedFlag.Name) {
 		fmt.Printf("%d finalized minipool(s):\n", len(finalisedMinipools))
 		fmt.Println()
 

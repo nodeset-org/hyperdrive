@@ -15,8 +15,10 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 			{
 				Name:    "status",
 				Aliases: []string{"s"},
-				Flags:   []cli.Flag{},
-				Usage:   "Get the status of the node's minipools.",
+				Flags: []cli.Flag{
+					statusIncludeFinalizedFlag,
+				},
+				Usage: "Get the status of the node's minipools.",
 				Action: func(c *cli.Context) error {
 					// Validate args
 					utils.ValidateArgCount(c, 0)
