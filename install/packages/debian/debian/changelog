@@ -1,8 +1,14 @@
-hyperdrive (1.1.0~dev) UNRELEASED; urgency=medium
+hyperdrive (1.1.0~b1) unstable; urgency=medium
 
-  * Moved the nodeset.io client into the Hyperdrive Daemon.
+  * Added the Constellation module. It can be accessed via the `hyperdrive cs` command.
+  * Updated Besu, Geth, Nethermind, Reth, Lighthouse, Lodestar, Nimbus, Prysm, Teku, Prometheus, and the Node Exporter.
+  * Moved the nodeset.io client from the StakeWise module into the Hyperdrive daemon, so the old `stakewise nodeset register-node` and `stakewise nodeset registration-status` commands are now just `nodeset register-node` and `nodeset registration-status`.
+  * Updated the nodeset.io client to use the new NodeSet v2 API.
+  * `service version` now prints the versions of each enabled module.
+  * Generating validator deposit data (for any module) now prints the BLS signature details to the debug log for easy reference.
+  * Updated to Go v1.22.
 
- -- NodeSet Inc. <info@nodeset.io>  Fri, 05 Jul 2024 18:58:27 +0000
+ -- NodeSet Inc. <info@nodeset.io>  Mon, 23 Sep 2024 06:23:59 +0000
 
 hyperdrive (1.0.1) stable; urgency=low
 
