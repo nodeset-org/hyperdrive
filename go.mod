@@ -8,7 +8,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/ethereum/go-ethereum v1.14.8
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/nodeset-org/hyperdrive-constellation v0.0.0-20240920193237-7931e5618a13
+	github.com/nodeset-org/hyperdrive-constellation v1.0.0-b1
 	github.com/nodeset-org/hyperdrive-daemon v1.1.0-b1
 	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b1
 	github.com/nodeset-org/osha v0.3.0
