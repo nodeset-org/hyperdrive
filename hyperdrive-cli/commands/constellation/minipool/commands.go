@@ -10,7 +10,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 	cmd.Subcommands = append(cmd.Subcommands, &cli.Command{
 		Name:    name,
 		Aliases: aliases,
-		Usage:   "Manage your Constellation node",
+		Usage:   "Manage your Constellation minipools",
 		Subcommands: []*cli.Command{
 			{
 				Name:    "status",
