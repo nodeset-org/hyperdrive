@@ -6,13 +6,13 @@
 # for more information on overriding specific parameters of docker-compose files.
 
 services:
-  {{.Stakewise.VcContainerName}}:
-    image: {{.Stakewise.GetVcContainerTag}}
+  {{.StakeWise.VcContainerName}}:
+    image: {{.StakeWise.GetVcContainerTag}}
     user: root
-    container_name: {{.Hyperdrive.ProjectName}}_{{.Stakewise.VcContainerName}}
+    container_name: {{.Hyperdrive.ProjectName}}_{{.StakeWise.VcContainerName}}
     restart: unless-stopped
     stop_grace_period: 3m
-{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .Stakewise.GetModuleName)}}
+{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .StakeWise.GetModuleName)}}
     volumes:
       - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
       - {{$module_dir}}/{{.ValidatorsDirectory}}:/{{.ValidatorsDirectory}}
@@ -28,17 +28,17 @@ services:
       - BN_RPC_ENDPOINT={{.Hyperdrive.BnRpcUrl}}
       - FALLBACK_BN_API_ENDPOINT={{.Hyperdrive.FallbackBnHttpUrl}}
       - FALLBACK_BN_RPC_ENDPOINT={{.Hyperdrive.FallbackBnRpcUrl}}
-      - FEE_RECIPIENT={{.Stakewise.FeeRecipient}}
+      - FEE_RECIPIENT={{.StakeWiseResources.FeeRecipient}}
       - ENABLE_METRICS={{.Hyperdrive.Metrics.EnableMetrics}}
-      - VC_METRICS_PORT={{.Stakewise.VcCommon.MetricsPort}}
-      - DOPPELGANGER_DETECTION={{.Stakewise.VcCommon.DoppelgangerDetection}}
-      - VC_ADDITIONAL_FLAGS={{.Stakewise.GetVcAdditionalFlags}}
+      - VC_METRICS_PORT={{.StakeWise.VcCommon.MetricsPort}}
+      - DOPPELGANGER_DETECTION={{.StakeWise.VcCommon.DoppelgangerDetection}}
+      - VC_ADDITIONAL_FLAGS={{.StakeWise.GetVcAdditionalFlags}}
       - ENABLE_BITFLY_NODE_METRICS={{.Hyperdrive.Metrics.EnableBitflyNodeMetrics}}
       - BITFLY_NODE_METRICS_SECRET={{.Hyperdrive.Metrics.BitflyNodeMetrics.Secret}}
       - BITFLY_NODE_METRICS_ENDPOINT={{.Hyperdrive.Metrics.BitflyNodeMetrics.Endpoint}}
       - BITFLY_NODE_METRICS_MACHINE_NAME={{.Hyperdrive.Metrics.BitflyNodeMetrics.MachineName}}
       - ENABLE_MEV_BOOST={{.Hyperdrive.MevBoost.Enable}}
-      - GRAFFITI={{.Stakewise.Graffiti}}
+      - GRAFFITI={{.StakeWise.Graffiti}}
     entrypoint: sh
     command: "/usr/share/hyperdrive/scripts/{{.Hyperdrive.GetVcStartScript}}"
     cap_drop:

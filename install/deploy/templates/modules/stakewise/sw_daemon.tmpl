@@ -6,27 +6,30 @@
 # for more information on overriding specific parameters of docker-compose files.
 
 services:
-  {{.Stakewise.DaemonContainerName}}:
-    image: {{.Stakewise.GetDaemonContainerTag}}
+  {{.StakeWise.DaemonContainerName}}:
+    image: {{.StakeWise.GetDaemonContainerTag}}
     user: root
-    container_name: {{.Hyperdrive.ProjectName}}_{{.Stakewise.DaemonContainerName}}
+    container_name: {{.Hyperdrive.ProjectName}}_{{.StakeWise.DaemonContainerName}}
     restart: unless-stopped
     ports:
-      - "127.0.0.1:{{.Stakewise.ApiPort}}:{{.Stakewise.ApiPort}}/tcp" # Restricted to localhost outside of Docker
-{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .Stakewise.GetModuleName)}}
+      - "127.0.0.1:{{.StakeWise.ApiPort}}:{{.StakeWise.ApiPort}}/tcp" # Restricted to localhost outside of Docker
+{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .StakeWise.GetModuleName)}}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - {{.Hyperdrive.GetUserDirectory}}:{{.Hyperdrive.GetUserDirectory}}
       - {{$module_dir}}:{{$module_dir}}
+      - /usr/share/hyperdrive/networks/modules/stakewise:/usr/share/hyperdrive/networks/modules/stakewise:ro
     command:
       - "--module-dir"
       - "{{$module_dir}}"
+      - --settings-folder
+      - "/usr/share/hyperdrive/networks/modules/stakewise"
       - --hyperdrive-url
       - "http://{{.Hyperdrive.DaemonContainerName}}:{{.Hyperdrive.ApiPort}}/"
       - --ip
       - "0.0.0.0" # Open to all Docker traffic
       - --port
-      - "{{.Stakewise.ApiPort}}"
+      - "{{.StakeWise.ApiPort}}"
     networks:
       - net
       {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}

@@ -1,0 +1,14 @@
+key: mainnet
+name: Ethereum Mainnet
+description: This is the real Ethereum main network, using real ETH to make real validators.
+networkResources:
+  ethNetworkName: mainnet
+  chainID: 1
+  genesisForkVersion: 0x00000000
+  multicallAddress: 0x5BA1e12693Dc8F9c48aAD8770482f4739bEeD696
+  balanceBatcherAddress: 0xb1f8e55c7f64d203c1400b9d8555d050f94adf39
+  txWatchUrl: https://etherscan.io/tx
+  flashbotsProtectUrl: https://rpc.flashbots.net/
+hyperdriveResources:
+  nodeSetApiUrl: https://nodeset.io/api
+  deploymentName: mainnet

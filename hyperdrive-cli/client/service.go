@@ -22,14 +22,16 @@ const (
 	nethermindPruneStarterCommand string          = "DELETE_ME"
 	nethermindAdminUrl            string          = "http://127.0.0.1:7434"
 
-	templatesDir       string = "/usr/share/hyperdrive/templates"
-	overrideSourceDir  string = "/usr/share/hyperdrive/override"
 	overrideDir        string = "override"
 	runtimeDir         string = "runtime"
 	metricsDir         string = "metrics"
 	extraScrapeJobsDir string = "extra-scrape-jobs"
 	modulePrometheusSd string = "prometheus-sd"
 )
+
+// ==================
+// === Hyperdrive ===
+// ==================
 
 // Install Hyperdrive
 func (c *HyperdriveClient) InstallService(verbose bool, noDeps bool, version string, path string, useLocalInstaller bool) error {
@@ -374,4 +376,50 @@ func (c *HyperdriveClient) GetDirSizeViaEcMigrator(container string, targetDir s
 	}
 
 	return dirSize, nil
+}
+
+// =================
+// === StakeWise ===
+// =================
+
+// Get the service version
+func (c *StakewiseClient) GetServiceVersion() (string, error) {
+	// Get service container version output
+	response, err := c.Api.Service.Version()
+	if err != nil {
+		return "", fmt.Errorf("error requesting StakeWise service version: %w", err)
+	}
+	versionString := response.Data.Version
+
+	// Make sure it's a semantic version
+	version, err := semver.Make(versionString)
+	if err != nil {
+		return "", fmt.Errorf("error parsing StakeWise service version number from output '%s': %w", versionString, err)
+	}
+
+	// Return the parsed semantic version (extra safety)
+	return version.String(), nil
+}
+
+// =====================
+// === Constellation ===
+// =====================
+
+// Get the service version
+func (c *ConstellationClient) GetServiceVersion() (string, error) {
+	// Get service container version output
+	response, err := c.Api.Service.Version()
+	if err != nil {
+		return "", fmt.Errorf("error requesting Constellation service version: %w", err)
+	}
+	versionString := response.Data.Version
+
+	// Make sure it's a semantic version
+	version, err := semver.Make(versionString)
+	if err != nil {
+		return "", fmt.Errorf("error parsing Constellation service version number from output '%s': %w", versionString, err)
+	}
+
+	// Return the parsed semantic version (extra safety)
+	return version.String(), nil
 }

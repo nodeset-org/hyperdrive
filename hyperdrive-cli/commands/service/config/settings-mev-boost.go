@@ -21,7 +21,6 @@ type MevBoostConfigPage struct {
 	flashbotsBox          *parameterizedFormItem
 	bloxrouteMaxProfitBox *parameterizedFormItem
 	bloxrouteRegulatedBox *parameterizedFormItem
-	edenBox               *parameterizedFormItem
 	titanRegionalBox      *parameterizedFormItem
 }
 
@@ -76,12 +75,11 @@ func (configPage *MevBoostConfigPage) createContent() {
 	configPage.flashbotsBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.FlashbotsRelay)
 	configPage.bloxrouteMaxProfitBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.BloxRouteMaxProfitRelay)
 	configPage.bloxrouteRegulatedBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.BloxRouteRegulatedRelay)
-	configPage.edenBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.EdenRelay)
 	configPage.titanRegionalBox = createParameterizedCheckbox(&configPage.masterConfig.Hyperdrive.MevBoost.TitanRegionalRelay)
 
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.enableBox, configPage.modeBox, configPage.selectionModeBox)
-	configPage.layout.mapParameterizedFormItems(configPage.flashbotsBox, configPage.bloxrouteMaxProfitBox, configPage.bloxrouteRegulatedBox, configPage.edenBox, configPage.titanRegionalBox)
+	configPage.layout.mapParameterizedFormItems(configPage.flashbotsBox, configPage.bloxrouteMaxProfitBox, configPage.bloxrouteRegulatedBox, configPage.titanRegionalBox)
 	configPage.layout.mapParameterizedFormItems(configPage.localItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.externalItems...)
 
@@ -153,8 +151,6 @@ func (configPage *MevBoostConfigPage) handleSelectionModeChanged() {
 				configPage.layout.form.AddFormItem(configPage.bloxrouteMaxProfitBox.item)
 			case hdconfig.MevRelayID_BloxrouteRegulated:
 				configPage.layout.form.AddFormItem(configPage.bloxrouteRegulatedBox.item)
-			case hdconfig.MevRelayID_Eden:
-				configPage.layout.form.AddFormItem(configPage.edenBox.item)
 			case hdconfig.MevRelayID_TitanRegional:
 				configPage.layout.form.AddFormItem(configPage.titanRegionalBox.item)
 			}

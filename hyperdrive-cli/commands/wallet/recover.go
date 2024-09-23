@@ -121,7 +121,7 @@ func recoverWallet(c *cli.Context) error {
 	}
 
 	// Initialize the StakeWise wallet if it's enabled
-	if cfg.Stakewise.Enabled.Value {
+	if cfg.StakeWise.Enabled.Value {
 		fmt.Println()
 		fmt.Println("You have the Stakewise module enabled. Initializing it with your new wallet...")
 		sw, err := client.NewStakewiseClientFromCtx(c, hd)

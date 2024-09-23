@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
+	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
@@ -64,6 +65,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 		for container := range totalAffectedContainers {
 			if container == config.ContainerID_Daemon {
 				totalAffectedContainers[swconfig.ContainerID_StakewiseDaemon] = true
+				totalAffectedContainers[csconfig.ContainerID_ConstellationDaemon] = true
 			}
 		}
 

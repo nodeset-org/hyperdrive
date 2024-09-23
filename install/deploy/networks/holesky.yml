@@ -1,0 +1,14 @@
+key: holesky
+name: Holesky Testnet
+description: This is the Holešky (Holešovice) test network, which is the next generation of long-lived testnets for Ethereum. It uses free fake ETH to make fake validators.\nUse this if you want to practice running Hyperdrive in a free, safe environment before moving to Mainnet.
+networkResources:
+  ethNetworkName: holesky
+  chainID: 17000
+  genesisForkVersion: 0x01017000
+  multicallAddress: 0x0540b786f03c9491f3a2ab4b0e3ae4ecd4f63ce7
+  balanceBatcherAddress: 0xfAa2e7C84eD801dd9D27Ac1ed957274530796140
+  txWatchUrl: https://holesky.etherscan.io/tx
+  flashbotsProtectUrl: https://rpc-holesky.flashbots.net/
+hyperdriveResources:
+  nodeSetApiUrl: https://nodeset.io/api
+  deploymentName: holesky

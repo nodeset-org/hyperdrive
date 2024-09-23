@@ -2,12 +2,12 @@
 
 mark_for_release() {
     # Debian
-    docker run -it --rm -w /hyperdrive -v ./debian:/hyperdrive --entrypoint dch nodeset/hyperdrive-deb-builder:v1.0.1 -r -M
+    docker run -it --rm -w /hyperdrive -v ./debian:/hyperdrive --entrypoint dch nodeset/hyperdrive-deb-builder:v1.0.3 -r -M
 }
 
 update_changelog() {
     # Debian
-    docker run -it --rm -w /hyperdrive -v ./debian:/hyperdrive --entrypoint dch nodeset/hyperdrive-deb-builder:v1.0.1 -M -v $VERSION
+    docker run -it --rm -w /hyperdrive -v ./debian:/hyperdrive --entrypoint dch nodeset/hyperdrive-deb-builder:v1.0.3 -M -v $VERSION
 }
 
 # Print usage

@@ -1,0 +1,14 @@
+key: holesky-dev
+name: Holesky Dev
+description: This is a development network used by Hyperdrive engineers to test new features and contract upgrades before they are promoted to Holesky for staging. You should not use this network unless invited to do so by the developers.
+networkResources:
+  ethNetworkName: holesky
+  chainID: 17000
+  genesisForkVersion: 0x01017000
+  multicallAddress: 0x0540b786f03c9491f3a2ab4b0e3ae4ecd4f63ce7
+  balanceBatcherAddress: 0xfAa2e7C84eD801dd9D27Ac1ed957274530796140
+  txWatchUrl: https://holesky.etherscan.io/tx
+  flashbotsProtectUrl: https://rpc-holesky.flashbots.net/
+hyperdriveResources:
+  nodeSetApiUrl: https://staging.nodeset.io/api
+  deploymentName: holesky
