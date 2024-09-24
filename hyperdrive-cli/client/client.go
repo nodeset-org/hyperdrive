@@ -73,6 +73,12 @@ func NewHyperdriveClientFromHyperdriveCtx(hdCtx *context.HyperdriveContext) (*Hy
 		}
 	}
 
+	// Load the network settings from disk
+	err := hdCtx.LoadNetworkSettings()
+	if err != nil {
+		return nil, fmt.Errorf("error loading network settings: %w", err)
+	}
+
 	// Make the client
 	hdClient := &HyperdriveClient{
 		Context: hdCtx,

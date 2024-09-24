@@ -9,10 +9,8 @@ import (
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
-	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
-	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/constellation"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
@@ -128,33 +126,13 @@ func main() {
 		secureSessionFlag,
 	}
 
-	// Load the network settings
-	installInfo := context.NewInstallationInfo()
-	hdNetworkSettings, err := hdconfig.LoadSettingsFiles(installInfo.NetworksDir)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading network settings from path [%s]: %s", installInfo.NetworksDir, err.Error())
-		os.Exit(1)
-	}
-	swNetSettingsDir := filepath.Join(installInfo.NetworksDir, hdconfig.ModulesName, swconfig.ModuleName)
-	swNetworkSettings, err := swconfig.LoadSettingsFiles(swNetSettingsDir)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading network settings from path [%s]: %s", swNetSettingsDir, err.Error())
-		os.Exit(1)
-	}
-	csNetSettingsDir := filepath.Join(installInfo.NetworksDir, hdconfig.ModulesName, csconfig.ModuleName)
-	csNetworkSettings, err := csconfig.LoadSettingsFiles(csNetSettingsDir)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading network settings from path [%s]: %s", csNetSettingsDir, err.Error())
-		os.Exit(1)
-	}
-
 	// Set default paths for flags before parsing the provided values
 	setDefaultPaths()
 
 	// Register commands
 	constellation.RegisterCommands(app, "constellation", []string{"cs"})
 	nodeset.RegisterCommands(app, "nodeset", []string{"ns"})
-	service.RegisterCommands(app, "service", []string{"s"}, hdNetworkSettings, swNetworkSettings, csNetworkSettings)
+	service.RegisterCommands(app, "service", []string{"s"})
 	stakewise.RegisterCommands(app, "stakewise", []string{"sw"})
 	wallet.RegisterCommands(app, "wallet", []string{"w"})
 
@@ -173,10 +151,6 @@ func main() {
 			fmt.Fprint(os.Stderr, err.Error())
 			os.Exit(1)
 		}
-		hdCtx.InstallationInfo = installInfo
-		hdCtx.HyperdriveNetworkSettings = hdNetworkSettings
-		hdCtx.StakeWiseNetworkSettings = swNetworkSettings
-		hdCtx.ConstellationNetworkSettings = csNetworkSettings
 		return nil
 	}
 	app.After = func(c *cli.Context) error {
@@ -211,12 +185,17 @@ func setDefaultPaths() {
 
 // Validate the global flags
 func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
-	hdCtx := &context.HyperdriveContext{
-		MaxFee:         c.Float64(maxFeeFlag.Name),
-		MaxPriorityFee: c.Float64(maxPriorityFeeFlag.Name),
-		DebugEnabled:   c.Bool(debugFlag.Name),
-		SecureSession:  c.Bool(secureSessionFlag.Name),
+	// Make sure the config directory exists
+	configPath := c.String(configPathFlag.Name)
+	path, err := homedir.Expand(strings.TrimSpace(configPath))
+	if err != nil {
+		return nil, fmt.Errorf("error expanding config path [%s]: %w", configPath, err)
 	}
+	hdCtx := context.NewHyperdriveContext(path, nil)
+	hdCtx.MaxFee = c.Float64(maxFeeFlag.Name)
+	hdCtx.MaxPriorityFee = c.Float64(maxPriorityFeeFlag.Name)
+	hdCtx.DebugEnabled = c.Bool(debugFlag.Name)
+	hdCtx.SecureSession = c.Bool(secureSessionFlag.Name)
 
 	// If set, validate custom nonce
 	hdCtx.Nonce = big.NewInt(0)
@@ -224,14 +203,6 @@ func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
 		customNonce := c.Uint64(nonceFlag.Name)
 		hdCtx.Nonce.SetUint64(customNonce)
 	}
-
-	// Make sure the config directory exists
-	configPath := c.String(configPathFlag.Name)
-	path, err := homedir.Expand(strings.TrimSpace(configPath))
-	if err != nil {
-		return nil, fmt.Errorf("error expanding config path [%s]: %w", configPath, err)
-	}
-	hdCtx.ConfigPath = path
 
 	// Get the API URL
 	address := c.String(apiAddressFlag.Name)

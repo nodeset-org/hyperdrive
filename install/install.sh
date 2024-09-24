@@ -11,10 +11,10 @@ COLOR_YELLOW='\033[33m'
 COLOR_RESET='\033[0m'
 
 # Require root access for installation
-if [ "$(id -u)" -ne "0" ]; then
-     echo "This script requires root."
-     exit 1
-fi
+#if [ "$(id -u)" -ne "0" ]; then
+#     echo "This script requires root."
+#     exit 1
+#fi
 
 # Print a failure message to stderr and exit
 fail() {
@@ -72,10 +72,12 @@ install() {
 
     # Parse arguments
     PACKAGE_VERSION="latest"
-    while getopts "dlv:" FLAG; do
+    while getopts "dl:i:r:v:" FLAG; do
         case "$FLAG" in
             d) NO_DEPS=true ;;
-            l) LOCAL_PACKAGE=true ;;
+            l) LOCAL_PACKAGE_PATH="$OPTARG" ;;
+            i) HD_INSTALL_PATH="$OPTARG" ;;
+            r) HD_RUNTIME_PATH="$OPTARG" ;;
             v) PACKAGE_VERSION="$OPTARG" ;;
             *) fail "Incorrect usage." ;;
         esac
@@ -319,36 +321,37 @@ install() {
         esac
     fi
 
-    # Create hyperdrive dir & files
-    HD_BIN_PATH=/usr/bin/hyperdrive
-    HD_SHARE_PATH=/usr/share/hyperdrive
-    HD_VAR_PATH=/var/lib/hyperdrive
+    # Create hyperdrive dir & files - default to Linux paths for now if not set
+    if [ -z "$HD_INSTALL_PATH" ]; then
+        HD_INSTALL_PATH="/usr/share/hyperdrive"
+    fi
+    if [ -z "$HD_RUNTIME_PATH" ]; then
+        HD_RUNTIME_PATH="/var/lib/hyperdrive"
+    fi
 
     progress 4 "Creating Hyperdrive directory structure..."
-    { mkdir -p "$HD_SHARE_PATH" || fail "Could not create the Hyperdrive resources directory."; } >&2
-    { mkdir -p "$HD_VAR_PATH/data" || fail "Could not create the Hyperdrive system data directory."; } >&2
-    { mkdir -p "$HD_VAR_PATH/global" || fail "Could not create the Hyperdrive system global directory."; } >&2
-    { chmod 0700 "$HD_VAR_PATH/data" || fail "Could not set the Hyperdrive data directory permissions."; } >&2
-    { chmod 0700 "$HD_VAR_PATH/global" || fail "Could not set the Hyperdrive global directory permissions."; } >&2
+    { mkdir -p "$HD_INSTALL_PATH" || fail "Could not create the Hyperdrive resources directory."; } >&2
+    { mkdir -p "$HD_RUNTIME_PATH/data" || fail "Could not create the Hyperdrive system data directory."; } >&2
+    { mkdir -p "$HD_RUNTIME_PATH/global" || fail "Could not create the Hyperdrive system global directory."; } >&2
+    { chmod 0700 "$HD_RUNTIME_PATH/data" || fail "Could not set the Hyperdrive data directory permissions."; } >&2
+    { chmod 0700 "$HD_RUNTIME_PATH/global" || fail "Could not set the Hyperdrive global directory permissions."; } >&2
 
     # Download and extract package files
     progress 5 "Downloading Hyperdrive package files..."
-    if [ -z "$LOCAL_PACKAGE" ]; then
+    if [ -z "$LOCAL_PACKAGE_PATH" ]; then
         { curl -L "$PACKAGE_URL" | tar -xJ -C "$TEMPDIR" || fail "Could not download and extract the Hyperdrive package files."; } >&2
     else
-        if [ ! -f $PACKAGE_NAME ]; then
-            fail "Installer package $PACKAGE_NAME does not exist." >&2
+        if [ ! -f $LOCAL_PACKAGE_PATH ]; then
+            fail "Installer package [$LOCAL_PACKAGE_PATH] does not exist." >&2
         fi
-        { tar -f "$PACKAGE_NAME" -xJ -C "$TEMPDIR" || fail "Could not extract the local Hyperdrive package files."; } >&2
+        { tar -f "$LOCAL_PACKAGE_PATH" -xJ -C "$TEMPDIR" || fail "Could not extract the local Hyperdrive package files."; } >&2
     fi
     { test -d "$PACKAGE_FILES_PATH" || fail "Could not extract the Hyperdrive package files."; } >&2
 
     # Copy package files
     progress 6 "Copying package files to Hyperdrive system directory..."
-    { cp -r "$PACKAGE_FILES_PATH/override" "$HD_SHARE_PATH" || fail "Could not copy override folder to the Hyperdrive system directory."; } >&2
-    { cp -r "$PACKAGE_FILES_PATH/scripts" "$HD_SHARE_PATH" || fail "Could not copy scripts folder to the Hyperdrive system directory."; } >&2
-    { cp -r "$PACKAGE_FILES_PATH/templates" "$HD_SHARE_PATH" || fail "Could not copy templates folder to the Hyperdrive system directory."; } >&2
-    { find "$HD_SHARE_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
+    { find "$PACKAGE_FILES_PATH" -exec cp -r {} "$HD_INSTALL_PATH" \; || fail "Could not copy deployment artifacts ($PACKAGE_FILES_PATH) to the Hyperdrive system directory ($HD_INSTALL_PATH)."; } >&2
+    { find "$HD_INSTALL_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
 
     # Clean up unnecessary files from old installations
     progress 7 "Cleaning up obsolete files from previous installs..."
