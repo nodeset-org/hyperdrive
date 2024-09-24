@@ -18,7 +18,7 @@ type command struct {
 }
 
 // Create a command to be run by Hyperdrive
-func (c *HyperdriveClient) newCommand(cmdText string) *command {
+func newCommand(cmdText string) *command {
 	return &command{
 		cmd: exec.Command("sh", "-c", cmdText),
 	}
@@ -77,15 +77,15 @@ func (c *command) OutputPipes() (io.Reader, io.Reader, error) {
 	return cmdOut, cmdErr, err
 }
 
-// ==============
-// === Client ===
-// ==============
+// =============
+// === Utils ===
+// =============
 
 // Get the command used to escalate privileges on the system
-func (c *HyperdriveClient) getEscalationCommand() (string, error) {
+func getEscalationCommand() (string, error) {
 	// Check for sudo first
 	sudo := "sudo"
-	exists, err := c.checkIfCommandExists(sudo)
+	exists, err := checkIfCommandExists(sudo)
 	if err != nil {
 		return "", fmt.Errorf("error checking if %s exists: %w", sudo, err)
 	}
@@ -95,7 +95,7 @@ func (c *HyperdriveClient) getEscalationCommand() (string, error) {
 
 	// Check for doas next
 	doas := "doas"
-	exists, err = c.checkIfCommandExists(doas)
+	exists, err = checkIfCommandExists(doas)
 	if err != nil {
 		return "", fmt.Errorf("error checking if %s exists: %w", doas, err)
 	}
@@ -106,10 +106,11 @@ func (c *HyperdriveClient) getEscalationCommand() (string, error) {
 	return "", fmt.Errorf("no privilege escalation command found")
 }
 
-func (c *HyperdriveClient) checkIfCommandExists(command string) (bool, error) {
+// Checks if a command exists on the system
+func checkIfCommandExists(command string) (bool, error) {
 	// Run `type` to check for existence
 	cmd := fmt.Sprintf("type %s", command)
-	output, err := c.readOutput(cmd)
+	output, err := readOutput(cmd)
 
 	if err != nil {
 		exitErr, isExitErr := err.(*exec.ExitError)
@@ -129,9 +130,9 @@ func (c *HyperdriveClient) checkIfCommandExists(command string) (bool, error) {
 }
 
 // Run a command and print its output
-func (c *HyperdriveClient) printOutput(cmdText string) error {
+func printOutput(cmdText string) error {
 	// Initialize command
-	cmd := c.newCommand(cmdText)
+	cmd := newCommand(cmdText)
 	cmd.SetStdout(os.Stdout)
 	cmd.SetStderr(os.Stderr)
 
@@ -145,9 +146,9 @@ func (c *HyperdriveClient) printOutput(cmdText string) error {
 }
 
 // Run a command and return its output
-func (c *HyperdriveClient) readOutput(cmdText string) ([]byte, error) {
+func readOutput(cmdText string) ([]byte, error) {
 	// Initialize command
-	cmd := c.newCommand(cmdText)
+	cmd := newCommand(cmdText)
 
 	// Run command and return output
 	return cmd.Output()

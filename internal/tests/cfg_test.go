@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"sync"
 	"testing"
 
@@ -29,20 +28,13 @@ func TestNewConfig_Holesky(t *testing.T) {
 	if err != nil {
 		fail("Error creating custom snapshot: %v", err)
 	}
-	defer cfg_cleanup(snapshotName)
+	defer basicTestCleanup(snapshotName)
 
 	cfgPath := testMgr.GetTestDir()
 
 	// Make a new Hyperdrive context
-	hdCtx := context.HyperdriveContext{
-		ConfigPath: cfgPath,
-		InstallationInfo: &context.InstallationInfo{
-			ScriptsDir:        "../../install/deploy/scripts",
-			TemplatesDir:      "../../install/deploy/templates",
-			OverrideSourceDir: "../../install/deploy/override",
-			NetworksDir:       "../../install/deploy/networks",
-		},
-	}
+	os.Setenv(context.TestSystemDirEnvVar, "../../install/deploy")
+	hdCtx := context.NewHyperdriveContext(cfgPath, nil)
 
 	// Load the network settings
 	hdNetworkSettings, err := hdconfig.LoadSettingsFiles(hdCtx.NetworksDir)
@@ -58,7 +50,7 @@ func TestNewConfig_Holesky(t *testing.T) {
 	hdCtx.ConstellationNetworkSettings = csNetworkSettings
 
 	// Make a new Hyperdrive client
-	hdClient, err := hdclient.NewHyperdriveClientFromHyperdriveCtx(&hdCtx)
+	hdClient, err := hdclient.NewHyperdriveClientFromHyperdriveCtx(hdCtx)
 	require.NoError(t, err)
 
 	// Make a new config
@@ -122,21 +114,4 @@ func TestNewConfig_Holesky(t *testing.T) {
 	expectedForkVersion := config.HoleskyResourcesReference.GenesisForkVersion
 	require.Equal(t, expectedForkVersion, swRes.MergedResources.GenesisForkVersion)
 	t.Logf("Genesis fork version was correct: %x", swRes.MergedResources.GenesisForkVersion)
-}
-
-func cfg_cleanup(snapshotName string) {
-	// Handle panics
-	r := recover()
-	if r != nil {
-		debug.PrintStack()
-		fail("Recovered from panic: %v", r)
-	}
-
-	// Revert to the snapshot taken at the start of the test
-	if snapshotName != "" {
-		err := testMgr.RevertToCustomSnapshot(snapshotName)
-		if err != nil {
-			fail("Error reverting to custom snapshot: %v", err)
-		}
-	}
 }

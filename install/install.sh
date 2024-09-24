@@ -11,10 +11,10 @@ COLOR_YELLOW='\033[33m'
 COLOR_RESET='\033[0m'
 
 # Require root access for installation
-if [ "$(id -u)" -ne "0" ]; then
-     echo "This script requires root."
-     exit 1
-fi
+#if [ "$(id -u)" -ne "0" ]; then
+#     echo "This script requires root."
+#     exit 1
+#fi
 
 # Print a failure message to stderr and exit
 fail() {
@@ -72,10 +72,12 @@ install() {
 
     # Parse arguments
     PACKAGE_VERSION="latest"
-    while getopts "dlv:" FLAG; do
+    while getopts "dl:i:r:v:" FLAG; do
         case "$FLAG" in
             d) NO_DEPS=true ;;
-            l) LOCAL_PACKAGE=true ;;
+            l) LOCAL_PACKAGE_PATH="$OPTARG" ;;
+            i) HD_INSTALL_PATH="$OPTARG" ;;
+            r) HD_RUNTIME_PATH="$OPTARG" ;;
             v) PACKAGE_VERSION="$OPTARG" ;;
             *) fail "Incorrect usage." ;;
         esac
@@ -236,119 +238,40 @@ install() {
 
     esac
     else
-        echo "Skipping steps 1 - 2 (OS dependencies & docker)"
-        case "$PLATFORM" in
-            # Ubuntu / Debian / Raspbian
-            Ubuntu|Debian|Raspbian)
-
-                # Get platform name
-                PLATFORM_NAME=$(echo "$PLATFORM" | tr '[:upper:]' '[:lower:]')
-
-                # Check for existing docker-compose-plugin installation
-                progress 3 "Checking if docker-compose-plugin is installed..."
-                dpkg-query -W -f='${Status}' docker-compose-plugin 2>&1 | grep -q -P '^install ok installed$' > /dev/null
-                if [ $? != "0" ]; then
-                    echo "Installing docker-compose-plugin..."
-                    if [ ! -f /etc/apt/sources.list.d/docker.list ]; then
-                        # Install the Docker repo, removing the legacy one if it exists
-                        { add-apt-repository --remove "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/$PLATFORM_NAME $(lsb_release -cs) stable"; } 2>/dev/null
-                        { mkdir -p /etc/apt/keyrings || fail "Could not create APT keyrings directory."; } >&2
-                        { curl -fsSL "https://download.docker.com/linux/$PLATFORM_NAME/gpg" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg || fail "Could not add docker repository key."; } >&2
-                        { echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/$PLATFORM_NAME $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null || fail "Could not add Docker repository."; } >&2
-                    fi
-                    { apt-get -y update || fail "Could not update OS package definitions."; } >&2
-                    { apt-get -y install docker-compose-plugin || fail "Could not install docker-compose-plugin."; } >&2
-                    { systemctl restart docker || fail "Could not restart docker daemon."; } >&2
-                else
-                    echo "Already installed."
-                fi
-
-            ;;
-
-            # Centos
-            CentOS)
-
-                # Check for existing docker-compose-plugin installation
-                progress 3 "Checking if docker-compose-plugin is installed..."
-                yum -q list installed docker-compose-plugin 2>/dev/null 1>/dev/null
-                if [ $? != "0" ]; then
-                    echo "Installing docker-compose-plugin..."
-                    { yum install -y docker-compose-plugin || fail "Could not install docker-compose-plugin."; } >&2
-                    { systemctl restart docker || fail "Could not restart docker daemon."; } >&2
-                else
-                    echo "Already installed."
-                fi
-
-            ;;
-
-            # Fedora
-            Fedora)
-
-                # Check for existing docker-compose-plugin installation
-                progress 3 "Checking if docker-compose-plugin is installed..."
-                dnf -q list installed docker-compose-plugin 2>/dev/null 1>/dev/null
-                if [ $? != "0" ]; then
-                    echo "Installing docker-compose-plugin..."
-                    { dnf install -y docker-compose-plugin || fail "Could not install docker-compose-plugin."; } >&2
-                    { systemctl restart docker || fail "Could not restart docker daemon."; } >&2
-                else
-                    echo "Already installed."
-                fi
-
-            ;;
-
-            # Everything else
-            *)
-                # Check for existing docker-compose-plugin installation
-                progress 3 "Checking if docker-compose-plugin is installed..."
-                if docker compose 2>/dev/null 1>/dev/null ; then
-                    echo "Already installed."
-                else
-                    RED='\033[0;31m'
-                    echo ""
-                    echo -e "${RED}**ERROR**"
-                    echo "The docker-compose-plugin package is not installed."
-                    echo "Since automatic dependency installation for the $PLATFORM operating system is not supported, you will need to install it manually."
-                    echo "Please install docker-compose-plugin manually, then try running `hyperdrive service install -d` again to finish updating."
-                    echo -e "${RESET}"
-                    exit 1
-                fi
-
-            ;;
-
-        esac
+        echo "Skipping steps 1 - 3 (OS dependencies & docker)"
     fi
 
-    # Create hyperdrive dir & files
-    HD_BIN_PATH=/usr/bin/hyperdrive
-    HD_SHARE_PATH=/usr/share/hyperdrive
-    HD_VAR_PATH=/var/lib/hyperdrive
+    # Create hyperdrive dir & files - default to Linux paths for now if not set
+    if [ -z "$HD_INSTALL_PATH" ]; then
+        HD_INSTALL_PATH="/usr/share/hyperdrive"
+    fi
+    if [ -z "$HD_RUNTIME_PATH" ]; then
+        HD_RUNTIME_PATH="/var/lib/hyperdrive"
+    fi
 
     progress 4 "Creating Hyperdrive directory structure..."
-    { mkdir -p "$HD_SHARE_PATH" || fail "Could not create the Hyperdrive resources directory."; } >&2
-    { mkdir -p "$HD_VAR_PATH/data" || fail "Could not create the Hyperdrive system data directory."; } >&2
-    { mkdir -p "$HD_VAR_PATH/global" || fail "Could not create the Hyperdrive system global directory."; } >&2
-    { chmod 0700 "$HD_VAR_PATH/data" || fail "Could not set the Hyperdrive data directory permissions."; } >&2
-    { chmod 0700 "$HD_VAR_PATH/global" || fail "Could not set the Hyperdrive global directory permissions."; } >&2
+    { mkdir -p "$HD_INSTALL_PATH" || fail "Could not create the Hyperdrive resources directory."; } >&2
+    { mkdir -p "$HD_RUNTIME_PATH/data" || fail "Could not create the Hyperdrive system data directory."; } >&2
+    { mkdir -p "$HD_RUNTIME_PATH/global" || fail "Could not create the Hyperdrive system global directory."; } >&2
+    { chmod 0700 "$HD_RUNTIME_PATH/data" || fail "Could not set the Hyperdrive data directory permissions."; } >&2
+    { chmod 0700 "$HD_RUNTIME_PATH/global" || fail "Could not set the Hyperdrive global directory permissions."; } >&2
 
     # Download and extract package files
     progress 5 "Downloading Hyperdrive package files..."
-    if [ -z "$LOCAL_PACKAGE" ]; then
+    if [ -z "$LOCAL_PACKAGE_PATH" ]; then
         { curl -L "$PACKAGE_URL" | tar -xJ -C "$TEMPDIR" || fail "Could not download and extract the Hyperdrive package files."; } >&2
     else
-        if [ ! -f $PACKAGE_NAME ]; then
-            fail "Installer package $PACKAGE_NAME does not exist." >&2
+        if [ ! -f $LOCAL_PACKAGE_PATH ]; then
+            fail "Installer package [$LOCAL_PACKAGE_PATH] does not exist." >&2
         fi
-        { tar -f "$PACKAGE_NAME" -xJ -C "$TEMPDIR" || fail "Could not extract the local Hyperdrive package files."; } >&2
+        { tar -f "$LOCAL_PACKAGE_PATH" -xJ -C "$TEMPDIR" || fail "Could not extract the local Hyperdrive package files."; } >&2
     fi
     { test -d "$PACKAGE_FILES_PATH" || fail "Could not extract the Hyperdrive package files."; } >&2
 
     # Copy package files
     progress 6 "Copying package files to Hyperdrive system directory..."
-    { cp -r "$PACKAGE_FILES_PATH/override" "$HD_SHARE_PATH" || fail "Could not copy override folder to the Hyperdrive system directory."; } >&2
-    { cp -r "$PACKAGE_FILES_PATH/scripts" "$HD_SHARE_PATH" || fail "Could not copy scripts folder to the Hyperdrive system directory."; } >&2
-    { cp -r "$PACKAGE_FILES_PATH/templates" "$HD_SHARE_PATH" || fail "Could not copy templates folder to the Hyperdrive system directory."; } >&2
-    { find "$HD_SHARE_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
+    { find "$PACKAGE_FILES_PATH" -exec cp -r {} "$HD_INSTALL_PATH" \; || fail "Could not copy deployment artifacts ($PACKAGE_FILES_PATH) to the Hyperdrive system directory ($HD_INSTALL_PATH)."; } >&2
+    { find "$HD_INSTALL_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
 
     # Clean up unnecessary files from old installations
     progress 7 "Cleaning up obsolete files from previous installs..."

@@ -21,21 +21,21 @@ var (
 		Aliases: []string{"d"},
 		Usage:   "Do not install Operating System dependencies",
 	}
-	installPathFlag *cli.StringFlag = &cli.StringFlag{
-		Name:    "path",
-		Aliases: []string{"p"},
-		Usage:   "A custom path to install Hyperdrive to",
-	}
 	installVersionFlag *cli.StringFlag = &cli.StringFlag{
 		Name:    "version",
 		Aliases: []string{"v"},
 		Usage:   "The Hyperdrive package version to install",
 		Value:   fmt.Sprintf("v%s", shared.HyperdriveVersion),
 	}
-	installLocalFlag *cli.BoolFlag = &cli.BoolFlag{
+	installLocalScriptFlag *cli.StringFlag = &cli.StringFlag{
 		Name:    "local-script",
-		Aliases: []string{"l"},
-		Usage:   fmt.Sprintf("Use a local installer script instead of pulling it down from the source repository. The script and the installer package must be in your current working directory.%sMake sure you absolutely trust the script before using this flag.%s", terminal.ColorRed, terminal.ColorReset),
+		Aliases: []string{"ls"},
+		Usage:   fmt.Sprintf("Path to a local installer script. If this is specified, Hyperdrive will use it instead of pulling the script down from the source repository. %sMake sure you absolutely trust the script before using this flag.%s", terminal.ColorRed, terminal.ColorReset),
+	}
+	installLocalPackageFlag *cli.StringFlag = &cli.StringFlag{
+		Name:    "local-package",
+		Aliases: []string{"lp"},
+		Usage:   fmt.Sprintf("Path to a local installer package. If this is specified, Hyperdrive will use it instead of pulling the package down from the source repository. Requires -ls. %sMake sure you absolutely trust the script before using this flag.%s", terminal.ColorRed, terminal.ColorReset),
 	}
 )
 
@@ -50,20 +50,17 @@ func installService(c *cli.Context) error {
 		return nil
 	}
 
-	// Get Hyperdrive client
-	hd, err := client.NewHyperdriveClientFromCtx(c)
-	if err != nil {
-		return err
-	}
-
 	// Install service
-	err = hd.InstallService(
-		c.Bool(installVersionFlag.Name),
-		c.Bool(installNoDepsFlag.Name),
-		c.String(installVersionFlag.Name),
-		c.String(installPathFlag.Name),
-		c.Bool(installLocalFlag.Name),
-	)
+	err := client.InstallService(client.InstallOptions{
+		RequireEscalation:       true,
+		Verbose:                 c.Bool(installVerboseFlag.Name),
+		NoDeps:                  c.Bool(installNoDepsFlag.Name),
+		Version:                 c.String(installVersionFlag.Name),
+		InstallPath:             "",
+		RuntimePath:             "",
+		LocalInstallScriptPath:  c.String(installLocalScriptFlag.Name),
+		LocalInstallPackagePath: c.String(installLocalPackageFlag.Name),
+	})
 	if err != nil {
 		return err
 	}
@@ -73,6 +70,12 @@ func installService(c *cli.Context) error {
 	fmt.Println("The Hyperdrive service was successfully installed!")
 
 	printPatchNotes()
+
+	// Get Hyperdrive client
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 
 	// Reload the config after installation
 	_, isNew, err := hd.LoadConfig()

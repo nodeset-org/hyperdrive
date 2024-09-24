@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime/debug"
 	"testing"
 
 	"github.com/nodeset-org/osha"
@@ -31,17 +32,17 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	// Clean up and exit
-	cleanup()
+	mainCleanup()
 	os.Exit(code)
 }
 
 func fail(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, format, args...)
-	cleanup()
+	mainCleanup()
 	os.Exit(1)
 }
 
-func cleanup() {
+func mainCleanup() {
 	if testMgr == nil {
 		return
 	}
@@ -50,4 +51,21 @@ func cleanup() {
 		logger.Error("Error closing test manager", log.Err(err))
 	}
 	testMgr = nil
+}
+
+func basicTestCleanup(snapshotName string) {
+	// Handle panics
+	r := recover()
+	if r != nil {
+		debug.PrintStack()
+		fail("Recovered from panic: %v", r)
+	}
+
+	// Revert to the snapshot taken at the start of the test
+	if snapshotName != "" {
+		err := testMgr.RevertToCustomSnapshot(snapshotName)
+		if err != nil {
+			fail("Error reverting to custom snapshot: %v", err)
+		}
+	}
 }

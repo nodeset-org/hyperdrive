@@ -3,9 +3,6 @@ package service
 import (
 	"fmt"
 
-	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
-	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
-	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
@@ -63,11 +60,7 @@ func createFlagsFromConfigParams(sectionName string, params []config.IParameter,
 */
 
 // Register commands
-func RegisterCommands(app *cli.App, name string, aliases []string,
-	hdNetSettings []*hdconfig.HyperdriveSettings,
-	swNetSettings []*swconfig.StakeWiseSettings,
-	csNetSettings []*csconfig.ConstellationSettings,
-) {
+func RegisterCommands(app *cli.App, name string, aliases []string) {
 	configFlags := []cli.Flag{
 		configUpdateDefaultsFlag,
 	}
@@ -101,9 +94,9 @@ func RegisterCommands(app *cli.App, name string, aliases []string,
 					utils.YesFlag,
 					installVerboseFlag,
 					installNoDepsFlag,
-					installPathFlag,
 					installVersionFlag,
-					installLocalFlag,
+					installLocalScriptFlag,
+					installLocalPackageFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args

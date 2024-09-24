@@ -146,7 +146,7 @@ func InitWallet(c *cli.Context, hd *client.HyperdriveClient) error {
 		}
 		fmt.Println("Stakewise wallet initialized.")
 		fmt.Println()
-		fmt.Println("Please whitelist your node on your `nodeset.io` dashboard, then register it with `hyperdrive sw ns register-node`.")
+		fmt.Println("Please whitelist your node on your `nodeset.io` dashboard, then register it with `hyperdrive ns register-node`.")
 	}
 	return nil
 }
