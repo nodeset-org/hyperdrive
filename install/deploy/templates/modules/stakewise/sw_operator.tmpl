@@ -21,7 +21,7 @@ services:
       - "--data-dir={{$module_dir}}"
       - "--database-dir={{$module_dir}}/db/{{.StakeWiseResources.Vault}}"
       - "--deposit-data-file={{$module_dir}}/{{.StakeWise.DepositDataFile}}"
-      - "--network={{.Hyperdrive.GetEthNetworkName}}"
+      - "--network={{.HyperdriveResources.EthNetworkName}}"
       - "--vault={{.StakeWiseResources.Vault}}"
       - "--execution-endpoints={{.Hyperdrive.GetEcHttpEndpointsWithFallback}}"
       - "--consensus-endpoints={{.Hyperdrive.GetBnHttpEndpointsWithFallback}}"
