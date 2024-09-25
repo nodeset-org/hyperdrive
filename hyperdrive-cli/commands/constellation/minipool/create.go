@@ -68,8 +68,8 @@ func createMinipool(c *cli.Context) error {
 			fmt.Println("- Your node is not registered with Constellation. Please register it with `hyperdrive cs n r`, then try again.")
 		}
 		if response.Data.InsufficientBalance {
-			additionalEthRequired := new(big.Int).Sub(response.Data.NodeBalance, response.Data.LockupAmount)
-			fmt.Printf("- You don't have enough ETH in your node wallet to make a new minipool. Your node requires at least %.6f more ETH.\n", eth.WeiToEth(additionalEthRequired))
+			additionalEthRequired := new(big.Int).Sub(response.Data.LockupAmount, response.Data.NodeBalance)
+			fmt.Printf("- You don't have enough ETH in your node wallet to make a new minipool. Your node requires at least %.6f more ETH (plus enough for gas).\n", eth.WeiToEth(additionalEthRequired))
 		}
 		if response.Data.MaxMinipoolsReached {
 			fmt.Println("- You have reached the maximum number of minipools you can create.")
