@@ -1,5 +1,5 @@
 package shared
 
 const (
-	HyperdriveVersion string = "1.1.0-b1"
+	HyperdriveVersion string = "1.1.0-dev"
 )

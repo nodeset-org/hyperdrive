@@ -68,7 +68,6 @@ type HyperdriveConfig struct {
 	// Internal fields
 	Version                 string
 	hyperdriveUserDirectory string
-	ethNetworkName          string
 	networkSettings         []*HyperdriveSettings
 }
 
@@ -303,9 +302,6 @@ func NewHyperdriveConfigForNetwork(hdDir string, networks []*HyperdriveSettings,
 		if err != nil {
 			return nil, fmt.Errorf("could not set defaults for network %s: %w", network.Key, err)
 		}
-		if network.Key == selectedNetwork {
-			cfg.ethNetworkName = network.NetworkResources.EthNetworkName
-		}
 	}
 
 	// Apply the default values for the network
@@ -358,7 +354,6 @@ func (cfg *HyperdriveConfig) Serialize(modules []IModuleConfig, includeUserDir b
 	hdMap := config.Serialize(cfg)
 	masterMap[ids.VersionID] = fmt.Sprintf("v%s", shared.HyperdriveVersion)
 	masterMap[ids.RootConfigID] = hdMap
-	masterMap[ids.EthNetworkNameID] = cfg.ethNetworkName
 
 	if includeUserDir {
 		masterMap[ids.UserDirID] = cfg.hyperdriveUserDirectory
@@ -422,10 +417,6 @@ func (cfg *HyperdriveConfig) Deserialize(masterMap map[string]any) error {
 	if exists {
 		cfg.hyperdriveUserDirectory = userDir.(string)
 	}
-	ethNetworkName, exists := masterMap[ids.EthNetworkNameID]
-	if exists {
-		cfg.ethNetworkName = ethNetworkName.(string)
-	}
 
 	// Handle modules
 	modules, exists := masterMap[ModulesName]
@@ -451,14 +442,6 @@ func (cfg *HyperdriveConfig) ChangeNetwork(newNetwork config.Network) {
 	}
 	cfg.Network.Value = newNetwork
 
-	// Change the Eth network name
-	for _, settings := range cfg.networkSettings {
-		if settings.Key == newNetwork {
-			cfg.ethNetworkName = settings.NetworkResources.EthNetworkName
-			break
-		}
-	}
-
 	// Run the changes
 	config.ChangeNetwork(cfg, oldNetwork, newNetwork)
 }
@@ -468,7 +451,6 @@ func (cfg *HyperdriveConfig) Clone() *HyperdriveConfig {
 	clone, _ := NewHyperdriveConfig(cfg.hyperdriveUserDirectory, cfg.networkSettings)
 	config.Clone(cfg, clone, cfg.Network.Value)
 	clone.Version = cfg.Version
-	clone.ethNetworkName = cfg.ethNetworkName
 	return clone
 }
 
@@ -526,7 +508,12 @@ func getNetworkOptions(networks []*HyperdriveSettings) []*config.ParameterOption
 
 // Get the Eth network name of the selected network
 func (cfg *HyperdriveConfig) GetEthNetworkName() string {
-	return cfg.ethNetworkName
+	for _, network := range cfg.networkSettings {
+		if network.Key == cfg.Network.Value {
+			return network.NetworkResources.EthNetworkName
+		}
+	}
+	return ""
 }
 
 // Get all loaded network settings
