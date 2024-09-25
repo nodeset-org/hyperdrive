@@ -3,6 +3,7 @@ package node
 import (
 	"fmt"
 
+	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
@@ -22,12 +23,22 @@ func registerNode(c *cli.Context) error {
 	}
 
 	// Check if the node's already registered
-	statusResponse, err := cs.Api.Node.GetRegistrationStatus()
+	csRegResponse, err := cs.Api.Node.GetRegistrationStatus()
 	if err != nil {
 		return err
 	}
-	if statusResponse.Data.Registered {
+	if csRegResponse.Data.Registered {
 		fmt.Println("Your node is already registered with Constellation.")
+		return nil
+	}
+
+	// Check if the node's registered with NodeSet
+	nsRegResponse, err := hd.Api.NodeSet.GetRegistrationStatus()
+	if err != nil {
+		return err
+	}
+	if nsRegResponse.Data.Status != api.NodeSetRegistrationStatus_Registered {
+		fmt.Println("Your node is not registered with NodeSet. Please register it with `hyperdrive nodeset register-node` first.")
 		return nil
 	}
 
