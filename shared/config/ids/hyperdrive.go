@@ -5,7 +5,6 @@ const (
 	RootConfigID               string = "hyperdrive"
 	VersionID                  string = "version"
 	UserDirID                  string = "hdUserDir"
-	EthNetworkNameID           string = "ethNetworkName"
 	ApiPortID                  string = "apiPort"
 	NetworkID                  string = "network"
 	EnableIPv6ID               string = "enableIPv6"
