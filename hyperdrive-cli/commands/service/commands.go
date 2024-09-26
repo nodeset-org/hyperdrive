@@ -229,6 +229,16 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			},
 
 			{
+				Name:    "stats",
+				Aliases: []string{"a"},
+				Usage:   "DEPRECATED - No longer supported",
+				Action: func(c *cli.Context) error {
+					// Run command
+					return serviceStats()
+				},
+			},
+
+			{
 				Name:  "compose",
 				Usage: "View the Hyperdrive service docker compose config",
 				Action: func(c *cli.Context) error {
