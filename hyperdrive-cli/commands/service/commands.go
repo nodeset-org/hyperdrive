@@ -229,19 +229,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			},
 
 			{
-				Name:    "stats",
-				Aliases: []string{"a"},
-				Usage:   "View the Hyperdrive service stats",
-				Action: func(c *cli.Context) error {
-					// Validate args
-					utils.ValidateArgCount(c, 0)
-
-					// Run command
-					return serviceStats(c)
-				},
-			},
-
-			{
 				Name:  "compose",
 				Usage: "View the Hyperdrive service docker compose config",
 				Action: func(c *cli.Context) error {

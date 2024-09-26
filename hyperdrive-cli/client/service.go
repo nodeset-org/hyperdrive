@@ -262,23 +262,6 @@ func (c *HyperdriveClient) PrintDaemonLogs(composeFiles []string, tail string, l
 	return printOutput(cmd)
 }
 
-// Print the Hyperdrive service stats
-func (c *HyperdriveClient) PrintServiceStats(composeFiles []string) error {
-	// Get service container IDs
-	cmd, err := c.compose(composeFiles, "ps -q")
-	if err != nil {
-		return err
-	}
-	containers, err := readOutput(cmd)
-	if err != nil {
-		return err
-	}
-	containerIds := strings.Split(strings.TrimSpace(string(containers)), "\n")
-
-	// Print stats
-	return printOutput(fmt.Sprintf("docker stats %s", strings.Join(containerIds, " ")))
-}
-
 // Print the Hyperdrive service compose config
 func (c *HyperdriveClient) PrintServiceCompose(composeFiles []string) error {
 	cmd, err := c.compose(composeFiles, "config")
