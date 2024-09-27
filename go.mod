@@ -6,14 +6,14 @@ toolchain go1.22.7
 
 require (
 	github.com/alessio/shellescape v1.4.2
-	github.com/docker/docker v27.0.3+incompatible
+	github.com/docker/docker v27.3.1+incompatible
 	github.com/ethereum/go-ethereum v1.14.8
 	github.com/fatih/color v1.17.0
 	github.com/goccy/go-json v0.10.3
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
-	github.com/nodeset-org/nodeset-client-go v1.0.0
-	github.com/nodeset-org/osha v0.3.0
+	github.com/nodeset-org/nodeset-client-go v1.0.1-0.20240927160821-e348e05e2363
+	github.com/nodeset-org/osha v0.3.1-0.20240927160812-d66358d4e091
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/rocket-pool/node-manager-core v0.5.2-0.20240918224929-a9cee1201bee
 	github.com/stretchr/testify v1.9.0
@@ -101,6 +101,7 @@ require (
 	github.com/moby/sys/signal v0.7.0 // indirect
 	github.com/moby/sys/symlink v0.2.0 // indirect
 	github.com/moby/sys/user v0.1.0 // indirect
+	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/moby/term v0.5.0 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
