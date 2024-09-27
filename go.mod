@@ -12,7 +12,7 @@ require (
 	github.com/goccy/go-json v0.10.3
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
-	github.com/nodeset-org/nodeset-client-go v1.0.0
+	github.com/nodeset-org/nodeset-client-go v1.0.1-0.20240927052958-f1dd9ba69993
 	github.com/nodeset-org/osha v0.3.0
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/rocket-pool/node-manager-core v0.5.2-0.20240918224929-a9cee1201bee

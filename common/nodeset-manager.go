@@ -111,7 +111,7 @@ func (m *NodeSetServiceManager) RegisterNode(ctx context.Context, email string) 
 	}
 
 	// Run the request
-	err = m.v2Client.Core.NodeAddress(ctx, email, walletStatus.Wallet.WalletAddress, m.wallet.SignMessage)
+	err = m.v2Client.Core.NodeAddress(ctx, logger.Logger, email, walletStatus.Wallet.WalletAddress, m.wallet.SignMessage)
 	if err != nil {
 		m.setRegistrationStatus(api.NodeSetRegistrationStatus_Unknown)
 		if errors.Is(err, core.ErrAlreadyRegistered) {
@@ -144,7 +144,7 @@ func (m *NodeSetServiceManager) StakeWise_GetServerDepositDataVersion(ctx contex
 	var data stakewise.DepositDataMetaData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.StakeWise.DepositDataMeta(ctx, m.resources.DeploymentName, vault)
+		data, err = m.v2Client.StakeWise.DepositDataMeta(ctx, logger.Logger, m.resources.DeploymentName, vault)
 		return err
 	})
 	if err != nil {
@@ -169,7 +169,7 @@ func (m *NodeSetServiceManager) StakeWise_GetServerDepositData(ctx context.Conte
 	var data stakewise.DepositDataData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.StakeWise.DepositData_Get(ctx, m.resources.DeploymentName, vault)
+		data, err = m.v2Client.StakeWise.DepositData_Get(ctx, logger.Logger, m.resources.DeploymentName, vault)
 		return err
 	})
 	if err != nil {
@@ -192,7 +192,7 @@ func (m *NodeSetServiceManager) StakeWise_UploadDepositData(ctx context.Context,
 
 	// Run the request
 	err := m.runRequest(ctx, func(ctx context.Context) error {
-		return m.v2Client.StakeWise.DepositData_Post(ctx, m.resources.DeploymentName, vault, depositData)
+		return m.v2Client.StakeWise.DepositData_Post(ctx, logger.Logger, m.resources.DeploymentName, vault, depositData)
 	})
 	if err != nil {
 		return fmt.Errorf("error uploading deposit data: %w", err)
@@ -216,7 +216,7 @@ func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Co
 	var data stakewise.ValidatorsData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.StakeWise.Validators_Get(ctx, m.resources.DeploymentName, vault)
+		data, err = m.v2Client.StakeWise.Validators_Get(ctx, logger.Logger, m.resources.DeploymentName, vault)
 		return err
 	})
 	if err != nil {
@@ -239,7 +239,7 @@ func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.C
 
 	// Run the request
 	err := m.runRequest(ctx, func(ctx context.Context) error {
-		return m.v2Client.StakeWise.Validators_Patch(ctx, m.resources.DeploymentName, vault, exitData)
+		return m.v2Client.StakeWise.Validators_Patch(ctx, logger.Logger, m.resources.DeploymentName, vault, exitData)
 	})
 	if err != nil {
 		return fmt.Errorf("error uploading signed exit messages: %w", err)
@@ -268,7 +268,7 @@ func (m *NodeSetServiceManager) Constellation_GetRegisteredAddress(ctx context.C
 	var data v2constellation.Whitelist_GetData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Constellation.Whitelist_Get(ctx, m.resources.HyperdriveResources.DeploymentName)
+		data, err = m.v2Client.Constellation.Whitelist_Get(ctx, logger.Logger, m.resources.HyperdriveResources.DeploymentName)
 		return err
 	})
 	if err != nil {
@@ -302,7 +302,7 @@ func (m *NodeSetServiceManager) Constellation_GetRegistrationSignature(ctx conte
 	var data v2constellation.Whitelist_PostData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Constellation.Whitelist_Post(ctx, m.resources.HyperdriveResources.DeploymentName)
+		data, err = m.v2Client.Constellation.Whitelist_Post(ctx, logger.Logger, m.resources.HyperdriveResources.DeploymentName)
 		return err
 	})
 	if err != nil {
@@ -333,7 +333,7 @@ func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Co
 	logger.Debug("Getting minipool deposit signature")
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Constellation.MinipoolDepositSignature(ctx, m.resources.HyperdriveResources.DeploymentName, minipoolAddress, salt)
+		data, err = m.v2Client.Constellation.MinipoolDepositSignature(ctx, logger.Logger, m.resources.HyperdriveResources.DeploymentName, minipoolAddress, salt)
 		return err
 	})
 	if err != nil {
@@ -364,7 +364,7 @@ func (m *NodeSetServiceManager) Constellation_GetValidators(ctx context.Context)
 	logger.Debug("Getting validators for node")
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Constellation.Validators_Get(ctx, m.resources.HyperdriveResources.DeploymentName)
+		data, err = m.v2Client.Constellation.Validators_Get(ctx, logger.Logger, m.resources.HyperdriveResources.DeploymentName)
 		return err
 	})
 	if err != nil {
@@ -387,7 +387,7 @@ func (m *NodeSetServiceManager) Constellation_UploadSignedExitMessages(ctx conte
 	// Run the request
 	logger.Debug("Submitting signed exit messages to nodeset")
 	err := m.runRequest(ctx, func(ctx context.Context) error {
-		return m.v2Client.Constellation.Validators_Patch(ctx, m.resources.HyperdriveResources.DeploymentName, exitMessages)
+		return m.v2Client.Constellation.Validators_Patch(ctx, logger.Logger, m.resources.HyperdriveResources.DeploymentName, exitMessages)
 	})
 	if err != nil {
 		return fmt.Errorf("error submitting signed exit messages: %w", err)
@@ -443,7 +443,7 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 	logger.Info("Not authenticated with the NodeSet server, logging in")
 
 	// Get the nonce
-	nonceData, err := m.v2Client.Core.Nonce(ctx)
+	nonceData, err := m.v2Client.Core.Nonce(ctx, logger.Logger)
 	if err != nil {
 		m.setRegistrationStatus(api.NodeSetRegistrationStatus_Unknown)
 		return fmt.Errorf("error getting nonce for login: %w", err)
@@ -456,7 +456,7 @@ func (m *NodeSetServiceManager) loginImpl(ctx context.Context) error {
 	m.setSessionToken(nonceData.Token)
 
 	// Attempt a login
-	loginData, err := m.v2Client.Core.Login(ctx, nonceData.Nonce, walletStatus.Wallet.WalletAddress, m.wallet.SignMessage)
+	loginData, err := m.v2Client.Core.Login(ctx, logger.Logger, nonceData.Nonce, walletStatus.Wallet.WalletAddress, m.wallet.SignMessage)
 	if err != nil {
 		if errors.Is(err, wallet.ErrWalletNotLoaded) {
 			m.setRegistrationStatus(api.NodeSetRegistrationStatus_NoWallet)
