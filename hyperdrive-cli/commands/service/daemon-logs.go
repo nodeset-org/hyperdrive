@@ -31,6 +31,7 @@ func daemonLogs(c *cli.Context, serviceNames ...string) error {
 
 	// Get the module log file arg names => log file names
 	moduleLogLookup := map[string]string{}
+	argNames := []string{"api", "tasks"}
 	for _, mod := range cfg.GetAllModuleConfigs() {
 		modName := mod.GetModuleName()
 		shortModName := mod.GetShortName()
@@ -41,7 +42,17 @@ func daemonLogs(c *cli.Context, serviceNames ...string) error {
 			argName := shortModName + "-" + strings.TrimSuffix(logFileName, ext)
 			absLogFilePath := cfg.Hyperdrive.GetModuleLogFilePath(modName, logFileName)
 			moduleLogLookup[argName] = absLogFilePath
+			argNames = append(argNames, argName)
 		}
+	}
+
+	// Print available options if there are no service names
+	if len(serviceNames) == 0 {
+		fmt.Println("Available service logs:")
+		for _, name := range argNames {
+			fmt.Println("\t" + name)
+		}
+		return nil
 	}
 
 	// TODO: Get log paths from service names
