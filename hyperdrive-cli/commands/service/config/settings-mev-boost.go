@@ -7,6 +7,10 @@ import (
 	"github.com/rocket-pool/node-manager-core/config"
 )
 
+const (
+	mevWarning string = "[orange]NOTE: You have externally-managed client mode selected and MEV-Boost enabled. You must have MEV-Boost enabled in your externally-managed Beacon Node's configuration for this to function properly - otherwise you may not be able to publish blocks and will miss significant rewards!"
+)
+
 // The page wrapper for the MEV-boost config
 type MevBoostConfigPage struct {
 	home                  *settingsHome
@@ -162,6 +166,22 @@ func (configPage *MevBoostConfigPage) handleSelectionModeChanged() {
 
 // Handle a bulk redraw request
 func (configPage *MevBoostConfigPage) handleLayoutChanged() {
+	// Patch to add a MEV-Boost warning if in hybrid mode
+	enableParam := configPage.masterConfig.Hyperdrive.MevBoost.Enable
+	if enableParam.DescriptionsByNetwork == nil {
+		enableParam.DescriptionsByNetwork = map[config.Network]string{}
+	}
+	description := enableParam.Description
+	augmentedDescription := description + "\n\n" + mevWarning
+	for _, option := range configPage.masterConfig.Hyperdrive.Network.Options {
+		network := option.Value
+		if configPage.masterConfig.Hyperdrive.ClientMode.Value == config.ClientMode_External {
+			enableParam.DescriptionsByNetwork[network] = augmentedDescription
+		} else {
+			enableParam.DescriptionsByNetwork[network] = description
+		}
+	}
+
 	// Rebuild the parameter maps based on the selected network
 	configPage.handleModeChanged()
 }

@@ -448,8 +448,8 @@ github.com/nodeset-org/hyperdrive-constellation v1.0.0-b1.0.20240927181424-49653
 github.com/nodeset-org/hyperdrive-constellation v1.0.0-b1.0.20240927181424-49653a316a20/go.mod h1:8gvihGSvHp1gxmI6ky7GZjKMfM8qEBi/KWBBlDYHebg=
 github.com/nodeset-org/hyperdrive-daemon v1.1.0-b1.0.20240927170333-9fee16a048f0 h1:E0k1xWwUBGA00P5cA2dtt0TdrN+k33hBmsWbUZ1w49Y=
 github.com/nodeset-org/hyperdrive-daemon v1.1.0-b1.0.20240927170333-9fee16a048f0/go.mod h1:sT7SE+9qhmATtO1Rvyfo5D+752OfZa7UEVEYsMnmtEE=
-github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b1.0.20240925070320-bce5c78f04f8 h1:IGCTYVbOYINLxNJ4pY9x9C4qNcjinWotATc+JY8vaJM=
-github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b1.0.20240925070320-bce5c78f04f8/go.mod h1:U6fGpE2EgXxpDYQ+YGQqq8Wm3uVl3SW8jl8XJ0YV50I=
+github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b1.0.20240930165456-a849d41acf24 h1:nSF3UNWaf8Itfg1AarPxE7/lQyf3IOZFBRjrSkwcnGk=
+github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b1.0.20240930165456-a849d41acf24/go.mod h1:dJzKkDmSzAFhilduv/zGzlABjmId+HTEXxmLM/tFmzs=
 github.com/nodeset-org/nodeset-client-go v1.0.1-0.20240927160821-e348e05e2363 h1:iivCknAFZlpxPwbIDjPc9E2bnj55c2STrXT9MvuMzQM=
 github.com/nodeset-org/nodeset-client-go v1.0.1-0.20240927160821-e348e05e2363/go.mod h1:slpwejkJ/vYU9SKA3SYw4hIPJLzDUeQxcx+Cm04kkIA=
 github.com/nodeset-org/osha v0.3.1-0.20240927160812-d66358d4e091 h1:oAs4/Yx4jnsNdWh3vTKum1sXC8VCvsY1H2VFSRRkgjc=
