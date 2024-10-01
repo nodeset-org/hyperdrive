@@ -155,8 +155,8 @@ func printMinipoolDetails(minipool csapi.MinipoolDetails, latestDelegate common.
 		fmt.Printf("%sInfractions:           %d%s\n", terminal.ColorRed, minipool.Penalties, terminal.ColorReset)
 	}
 	fmt.Printf("Status updated:        %s\n", minipool.Status.StatusTime.Format(TimeFormat))
-	fmt.Printf("Node fee:              %f%%\n", minipool.Node.Fee*100)
-	fmt.Printf("Node deposit:          %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Node.DepositBalance), 6))
+	fmt.Printf("Commission:            %f%%\n", minipool.Node.Fee*100)
+	fmt.Printf("Constellation deposit: %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Node.DepositBalance), 6))
 
 	// Queue position
 	if minipool.Queue.Position != 0 {
@@ -173,7 +173,7 @@ func printMinipoolDetails(minipool csapi.MinipoolDetails, latestDelegate common.
 			fmt.Printf("RP ETH assigned:       no\n")
 		}
 		fmt.Printf("Minipool Balance (EL): %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Balances.Eth), 6))
-		fmt.Printf("Your portion:          %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.NodeShareOfEthBalance), 6))
+		fmt.Printf("Constellation portion: %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.NodeShareOfEthBalance), 6))
 		fmt.Printf("Available refund:      %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Node.RefundBalance), 6))
 		fmt.Printf("Total EL rewards:      %.6f ETH\n", math.RoundDown(eth.WeiToEth(totalRewards), 6))
 	}
@@ -190,7 +190,7 @@ func printMinipoolDetails(minipool csapi.MinipoolDetails, latestDelegate common.
 				fmt.Printf("Validator active:      no\n")
 			}
 			fmt.Printf("Beacon balance (CL):   %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Validator.Balance), 6))
-			fmt.Printf("Your portion:          %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Validator.NodeBalance), 6))
+			fmt.Printf("Constellation portion: %.6f ETH\n", math.RoundDown(eth.WeiToEth(minipool.Validator.NodeBalance), 6))
 			if minipool.RequiresSignedExit {
 				fmt.Printf("Requires signed exit:  yes\n")
 			} else {
