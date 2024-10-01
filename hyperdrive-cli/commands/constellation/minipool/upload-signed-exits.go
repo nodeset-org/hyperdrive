@@ -59,9 +59,15 @@ func uploadSignedExits(c *cli.Context) error {
 		}
 	}
 
+	// Get the current deployment
+	resResponse, err := cs.Api.Service.GetResources()
+	if err != nil {
+		return err
+	}
+
 	// Get the list of validators with exits already uploaded
 	outstandingMinipools := []csapi.MinipoolExitDetails{}
-	validatorsResponse, err := hd.Api.NodeSet_Constellation.GetValidators()
+	validatorsResponse, err := hd.Api.NodeSet_Constellation.GetValidators(resResponse.Data.Resources.DeploymentName)
 	if err != nil {
 		return err
 	}

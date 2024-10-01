@@ -15,9 +15,9 @@ require (
 	github.com/goccy/go-json v0.10.3
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nodeset-org/hyperdrive-constellation v1.0.0-b1.0.20241001164901-ef2c7eb6ba4e
-	github.com/nodeset-org/hyperdrive-daemon v1.1.0-b1.0.20241001161138-fa43cad5c631
-	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b1.0.20241001165150-0cd44bdfd6f9
+	github.com/nodeset-org/hyperdrive-constellation v1.0.0-b1.0.20241001194414-bd5ba3c5fde2
+	github.com/nodeset-org/hyperdrive-daemon v1.1.0-b1.0.20241001192501-b11ba9e5209f
+	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b1.0.20241001200731-88e20a15b576
 	github.com/nodeset-org/osha v0.3.1-0.20240927160812-d66358d4e091
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE

@@ -1,5 +1,6 @@
 key: holesky
 constellationResources:
+  deploymentName: holesky
   directory: 0x925D0700407fB0C855Ae9903B3a2727F1e88576c
   rocketStorage: 0x594Fb75D3dc2DFa0150Ad03F99F97817747dd4E1
   feeRecipient: 0xA347C391bc8f740CAbA37672157c8aAcD08Ac567
