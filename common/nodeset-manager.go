@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"math/big"
 	"sync"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
@@ -47,11 +48,12 @@ type NodeSetServiceManager struct {
 func NewNodeSetServiceManager(sp IHyperdriveServiceProvider) *NodeSetServiceManager {
 	wallet := sp.GetWallet()
 	resources := sp.GetResources()
+	cfg := sp.GetConfig()
 
 	return &NodeSetServiceManager{
 		wallet:                 wallet,
 		resources:              resources,
-		v2Client:               apiv2.NewNodeSetClient(resources.NodeSetApiUrl, hdconfig.ClientTimeout),
+		v2Client:               apiv2.NewNodeSetClient(resources.NodeSetApiUrl, time.Duration(cfg.ClientTimeout.Value)*time.Second),
 		nodeRegistrationStatus: api.NodeSetRegistrationStatus_Unknown,
 		lock:                   &sync.Mutex{},
 	}

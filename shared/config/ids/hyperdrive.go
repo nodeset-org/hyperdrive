@@ -16,6 +16,7 @@ const (
 	AutoTxGasThresholdID       string = "autoTxGasThreshold"
 	AdditionalDockerNetworksID string = "additionalDockerNetworks"
 	ContainerTagID             string = "containerTag"
+	ClientTimeoutID            string = "clientTimeout"
 
 	// Subconfig IDs
 	LoggingID           string = "logging"

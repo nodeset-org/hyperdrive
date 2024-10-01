@@ -15,7 +15,7 @@ require (
 	github.com/nodeset-org/nodeset-client-go v1.0.1-0.20240927160821-e348e05e2363
 	github.com/nodeset-org/osha v0.3.1-0.20240927160812-d66358d4e091
 	github.com/rocket-pool/batch-query v1.0.0
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20240918224929-a9cee1201bee
+	github.com/rocket-pool/node-manager-core v0.5.2-0.20241001041416-40f4fb819f98
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2
 	github.com/wealdtech/go-ens/v3 v3.6.0

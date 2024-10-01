@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/docker/docker/client"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
@@ -124,7 +125,7 @@ func NewHyperdriveServiceProvider(userDir string, resourcesDir string) (IHyperdr
 // Creates a new IHyperdriveServiceProvider instance directly from a Hyperdrive config and resources list instead of loading them from the filesystem
 func NewHyperdriveServiceProviderFromConfig(cfg *hdconfig.HyperdriveConfig, resources *hdconfig.MergedResources) (IHyperdriveServiceProvider, error) {
 	// Core provider
-	sp, err := services.NewServiceProvider(cfg, resources.NetworkResources, hdconfig.ClientTimeout)
+	sp, err := services.NewServiceProvider(cfg, resources.NetworkResources, time.Duration(cfg.ClientTimeout.Value)*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("error creating core service provider: %w", err)
 	}
