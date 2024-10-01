@@ -5,6 +5,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 const settingsHomeID string = "settings-home"
@@ -26,6 +27,7 @@ type settingsHome struct {
 	settingsSubpages []settingsPage
 	content          tview.Primitive
 	md               *mainDisplay
+	warningModal     *choiceModalLayout
 }
 
 // Creates a new SettingsHome instance and adds (and its subpages) it to the main display.
@@ -66,6 +68,9 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 	home.createContent()
 	homePage.content = home.content
 	md.pages.AddPage(homePage.id, home.content, true, false)
+
+	// Make the MEV-Boost warning
+	home.createMevWarningModal()
 	return home
 }
 
@@ -161,10 +166,12 @@ func (home *settingsHome) createFooter() (tview.Primitive, int) {
 		return event
 	})
 	saveButton.SetSelectedFunc(func() {
-		home.md.pages.RemovePage(reviewPageID)
-		reviewPage := NewReviewPage(home.md, home.md.PreviousConfig, home.md.Config)
-		home.md.pages.AddPage(reviewPage.page.id, reviewPage.page.content, true, true)
-		home.md.setPage(reviewPage.page)
+		// Show the MEV-Boost warning modal first if applicable
+		if home.md.Config.Hyperdrive.MevBoost.Enable.Value && home.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_External {
+			home.showMevWarningModal()
+		} else {
+			home.showReviewPage()
+		}
 	})
 	saveButton.SetStyle(tcell.StyleDefault.Background(HomeButtonUnfocusedBackgroundColor).Foreground(HomeButtonUnfocusedTextColor))
 	//saveButton.SetDisabledStyle(tcell.StyleDefault.Background(HomeButtonUnfocusedBackgroundColor).Foreground(HomeButtonUnfocusedTextColor))
@@ -242,4 +249,52 @@ func (home *settingsHome) refresh() {
 	if home.metricsPage != nil {
 		home.metricsPage.layout.refresh()
 	}
+}
+
+// Shows the review page
+func (home *settingsHome) showReviewPage() {
+	home.md.pages.RemovePage(reviewPageID)
+	reviewPage := NewReviewPage(home.md, home.md.PreviousConfig, home.md.Config)
+	home.md.pages.AddPage(reviewPage.page.id, reviewPage.page.content, true, true)
+	home.md.setPage(reviewPage.page)
+}
+
+func (home *settingsHome) createMevWarningModal() {
+	// Create the modal
+	modal := newChoiceModalLayout(
+		home.md.app,
+		"MEV-Boost",
+		76,
+		mevWarning,
+		[]string{"Ok"},
+		[]string{},
+		DirectionalModalHorizontal,
+	)
+
+	back := func() {
+		home.showReviewPage()
+	}
+
+	done := func(buttonIndex int, buttonLabel string) {
+		back()
+	}
+
+	modal.done = done
+	modal.back = back
+
+	page := newPage(
+		home.homePage,
+		"mev-warning-modal",
+		"",
+		"",
+		modal.borderGrid,
+	)
+	home.md.pages.AddPage(page.id, page.content, true, false)
+	modal.page = page
+	home.warningModal = modal
+}
+
+func (home *settingsHome) showMevWarningModal() {
+	home.md.setPage(home.warningModal.page)
+	home.warningModal.focus(0)
 }
