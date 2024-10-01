@@ -38,6 +38,7 @@ type HyperdriveConfig struct {
 	MaxPriorityFee           config.Parameter[float64]
 	AutoTxGasThreshold       config.Parameter[float64]
 	AdditionalDockerNetworks config.Parameter[string]
+	ClientTimeout            config.Parameter[uint16]
 
 	// The Docker Hub tag for the daemon container
 	ContainerTag config.Parameter[string]
@@ -271,6 +272,20 @@ func NewHyperdriveConfigForNetwork(hdDir string, networks []*HyperdriveSettings,
 			},
 		},
 
+		ClientTimeout: config.Parameter[uint16]{
+			ParameterCommon: &config.ParameterCommon{
+				ID:                 ids.ClientTimeoutID,
+				Name:               "Client Timeout",
+				Description:        "The maximum time (in seconds) that Hyperdrive will wait for a response during HTTP requests (such as Execution Client, Beacon Node, or nodeset.io requests) before timing out.",
+				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
+				CanBeBlank:         false,
+				OverwriteOnUpgrade: false,
+			},
+			Default: map[config.Network]uint16{
+				config.Network_All: 30,
+			},
+		},
+
 		ContainerTag: config.Parameter[string]{
 			ParameterCommon: &config.ParameterCommon{
 				ID:                 ids.ContainerTagID,
@@ -329,6 +344,7 @@ func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
 		&cfg.AutoTxGasThreshold,
 		&cfg.UserDataPath,
 		&cfg.AdditionalDockerNetworks,
+		&cfg.ClientTimeout,
 		&cfg.ContainerTag,
 	}
 }

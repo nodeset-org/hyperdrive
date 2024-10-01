@@ -139,11 +139,12 @@ type moduleServiceProvider struct {
 }
 
 // Creates a new IModuleServiceProvider instance
-func NewModuleServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) (ConfigType, error), clientTimeout time.Duration) (IModuleServiceProvider, error) {
+func NewModuleServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) (ConfigType, error)) (IModuleServiceProvider, error) {
 	hdCfg, resources, hdClient, err := getHdConfig(hyperdriveUrl)
 	if err != nil {
 		return nil, fmt.Errorf("error getting Hyperdrive config: %w", err)
 	}
+	clientTimeout := time.Duration(hdCfg.ClientTimeout.Value) * time.Second
 
 	// EC Manager
 	var ecManager *services.ExecutionClientManager

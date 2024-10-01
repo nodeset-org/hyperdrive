@@ -1,7 +1,5 @@
 package config
 
-import "time"
-
 const (
 	EventLogInterval         int    = 1000
 	HyperdriveDaemonRoute    string = "hyperdrive"
@@ -20,9 +18,6 @@ const (
 	BnStartScript       string = "start-bn.sh"
 	VcStartScript       string = "start-vc.sh"
 	MevBoostStartScript string = "start-mev-boost.sh"
-
-	// HTTP
-	ClientTimeout time.Duration = 1 * time.Minute
 
 	// Volumes
 	ExecutionClientDataVolume string = "ecdata"
