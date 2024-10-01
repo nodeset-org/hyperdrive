@@ -64,7 +64,7 @@ func (c *constellationUploadSignedExitsContext) PrepareData(data *api.NodeSetCon
 
 	// Upload the deposit data
 	ns := sp.GetNodeSetServiceManager()
-	err = ns.Constellation_UploadSignedExitMessages(ctx, c.body.ExitMessages)
+	err = ns.Constellation_UploadSignedExitMessages(ctx, c.body.Deployment, c.body.ExitMessages)
 	if err != nil {
 		if errors.Is(err, v2constellation.ErrNotAuthorized) {
 			data.NotAuthorized = true

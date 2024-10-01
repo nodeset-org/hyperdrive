@@ -26,7 +26,9 @@ func (f *constellationGetRegisteredAddressContextFactory) Create(args url.Values
 	c := &constellationGetRegisteredAddressContext{
 		handler: f.handler,
 	}
-	inputErrs := []error{}
+	inputErrs := []error{
+		server.GetStringFromVars("deployment", args, &c.deployment),
+	}
 	return c, errors.Join(inputErrs...)
 }
 
@@ -42,6 +44,8 @@ func (f *constellationGetRegisteredAddressContextFactory) RegisterRoute(router *
 
 type constellationGetRegisteredAddressContext struct {
 	handler *ConstellationHandler
+
+	deployment string
 }
 
 func (c *constellationGetRegisteredAddressContext) PrepareData(data *api.NodeSetConstellation_GetRegisteredAddressData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
@@ -64,7 +68,7 @@ func (c *constellationGetRegisteredAddressContext) PrepareData(data *api.NodeSet
 
 	// Get the registered address
 	ns := sp.GetNodeSetServiceManager()
-	address, err := ns.Constellation_GetRegisteredAddress(ctx)
+	address, err := ns.Constellation_GetRegisteredAddress(ctx, c.deployment)
 	if err != nil {
 		return types.ResponseStatus_Error, err
 	}

@@ -16,6 +16,7 @@ const (
 	whitelistAddressString     string = "0xA9e6Bfa2BF53dE88FEb19761D9b2eE2e821bF1Bf"
 	expectedWhitelistSignature string = "0xf2b73cd729a9b15e8f17ce0189c4ddfe63ad35917f63e2b1ffa7ea1dc527bdf535ba05ba44d2dce733096b8c389472e81a4548b1d75a600633c4ac4bcb8e7c6f1b"
 	expectedMinipoolCount      int    = 10
+	deploymentName                    = "localtest"
 )
 
 // Test getting a signature for whitelisting a node
@@ -38,7 +39,7 @@ func TestConstellationWhitelistSignature(t *testing.T) {
 	nsMgr := testMgr.GetNodeSetMockServer().GetManager()
 	nsDB := nsMgr.GetDatabase()
 	deployment := nsDB.Constellation.AddDeployment(
-		res.DeploymentName,
+		deploymentName,
 		new(big.Int).SetUint64(uint64(res.ChainID)),
 		common.HexToAddress(whitelistAddressString),
 		common.Address{},
@@ -47,7 +48,7 @@ func TestConstellationWhitelistSignature(t *testing.T) {
 
 	// Get a whitelist signature
 	hd := hdNode.GetApiClient()
-	response, err := hd.NodeSet_Constellation.GetRegistrationSignature()
+	response, err := hd.NodeSet_Constellation.GetRegistrationSignature(deploymentName)
 	require.NoError(t, err)
 	require.False(t, response.Data.NotAuthorized)
 	require.False(t, response.Data.NotRegistered)

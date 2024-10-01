@@ -17,12 +17,6 @@ const (
 
 	// The nodeset.io URL for development / staging
 	NodesetUrlStaging string = "https://staging.nodeset.io/api"
-
-	// The deployment name for Mainnet
-	NodesetDeploymentMainnet string = "mainnet"
-
-	// The deployment name for Holesky testing
-	NodesetDeploymentHolesky string = "holesky"
 )
 
 var (
@@ -54,9 +48,6 @@ type HyperdriveSettings struct {
 type HyperdriveResources struct {
 	// The URL for the NodeSet API server
 	NodeSetApiUrl string `yaml:"nodeSetApiUrl" json:"nodeSetApiUrl"`
-
-	// The name of the deployment used by this instance of Hyperdrive
-	DeploymentName string `yaml:"deploymentName" json:"deploymentName"`
 }
 
 // An aggregated collection of resources for the selected network, including Hyperdrive resources

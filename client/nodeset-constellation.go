@@ -32,20 +32,25 @@ func (r *NodeSetConstellationRequester) GetContext() client.IRequesterContext {
 }
 
 // Gets the address the node's user has assigned as the registered Constellation address
-func (r *NodeSetConstellationRequester) GetRegisteredAddress() (*types.ApiResponse[api.NodeSetConstellation_GetRegisteredAddressData], error) {
-	args := map[string]string{}
+func (r *NodeSetConstellationRequester) GetRegisteredAddress(deployment string) (*types.ApiResponse[api.NodeSetConstellation_GetRegisteredAddressData], error) {
+	args := map[string]string{
+		"deployment": deployment,
+	}
 	return client.SendGetRequest[api.NodeSetConstellation_GetRegisteredAddressData](r, "get-registered-address", "GetRegisteredAddress", args)
 }
 
 // Gets a signature for registering / whitelisting the node with the Constellation contracts
-func (r *NodeSetConstellationRequester) GetRegistrationSignature() (*types.ApiResponse[api.NodeSetConstellation_GetRegistrationSignatureData], error) {
-	args := map[string]string{}
+func (r *NodeSetConstellationRequester) GetRegistrationSignature(deployment string) (*types.ApiResponse[api.NodeSetConstellation_GetRegistrationSignatureData], error) {
+	args := map[string]string{
+		"deployment": deployment,
+	}
 	return client.SendGetRequest[api.NodeSetConstellation_GetRegistrationSignatureData](r, "get-registration-signature", "GetRegistrationSignature", args)
 }
 
 // Gets the deposit signature for a minipool from the Constellation contracts
-func (r *NodeSetConstellationRequester) GetDepositSignature(minipoolAddress common.Address, salt *big.Int) (*types.ApiResponse[api.NodeSetConstellation_GetDepositSignatureData], error) {
+func (r *NodeSetConstellationRequester) GetDepositSignature(deployment string, minipoolAddress common.Address, salt *big.Int) (*types.ApiResponse[api.NodeSetConstellation_GetDepositSignatureData], error) {
 	args := map[string]string{
+		"deployment":      deployment,
 		"minipoolAddress": minipoolAddress.Hex(),
 		"salt":            salt.String(),
 	}
@@ -53,14 +58,17 @@ func (r *NodeSetConstellationRequester) GetDepositSignature(minipoolAddress comm
 }
 
 // Gets the validators that have been registered with the NodeSet service for this node as part of Constellation
-func (r *NodeSetConstellationRequester) GetValidators() (*types.ApiResponse[api.NodeSetConstellation_GetValidatorsData], error) {
-	args := map[string]string{}
+func (r *NodeSetConstellationRequester) GetValidators(deployment string) (*types.ApiResponse[api.NodeSetConstellation_GetValidatorsData], error) {
+	args := map[string]string{
+		"deployment": deployment,
+	}
 	return client.SendGetRequest[api.NodeSetConstellation_GetValidatorsData](r, "get-validators", "GetValidators", args)
 }
 
 // Uploads signed exit messages to the NodeSet service
-func (r *NodeSetConstellationRequester) UploadSignedExits(exitMessages []nscommon.ExitData) (*types.ApiResponse[api.NodeSetConstellation_UploadSignedExitsData], error) {
+func (r *NodeSetConstellationRequester) UploadSignedExits(deployment string, exitMessages []nscommon.ExitData) (*types.ApiResponse[api.NodeSetConstellation_UploadSignedExitsData], error) {
 	body := api.NodeSetConstellation_UploadSignedExitsRequestBody{
+		Deployment:   deployment,
 		ExitMessages: exitMessages,
 	}
 	return client.SendPostRequest[api.NodeSetConstellation_UploadSignedExitsData](r, "upload-signed-exits", "UploadSignedExits", body)

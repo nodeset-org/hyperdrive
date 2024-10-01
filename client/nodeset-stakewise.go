@@ -31,32 +31,36 @@ func (r *NodeSetStakeWiseRequester) GetContext() client.IRequesterContext {
 }
 
 // Gets the list of validators that the node has registered with the provided vault
-func (r *NodeSetStakeWiseRequester) GetRegisteredValidators(vault common.Address) (*types.ApiResponse[api.NodeSetStakeWise_GetRegisteredValidatorsData], error) {
+func (r *NodeSetStakeWiseRequester) GetRegisteredValidators(deployment string, vault common.Address) (*types.ApiResponse[api.NodeSetStakeWise_GetRegisteredValidatorsData], error) {
 	args := map[string]string{
-		"vault": vault.Hex(),
+		"deployment": deployment,
+		"vault":      vault.Hex(),
 	}
 	return client.SendGetRequest[api.NodeSetStakeWise_GetRegisteredValidatorsData](r, "get-registered-validators", "GetRegisteredValidators", args)
 }
 
 // Gets the version of the latest deposit data set on the server for the provided vault
-func (r *NodeSetStakeWiseRequester) GetDepositDataSetVersion(vault common.Address) (*types.ApiResponse[api.NodeSetStakeWise_GetDepositDataSetVersionData], error) {
+func (r *NodeSetStakeWiseRequester) GetDepositDataSetVersion(deployment string, vault common.Address) (*types.ApiResponse[api.NodeSetStakeWise_GetDepositDataSetVersionData], error) {
 	args := map[string]string{
-		"vault": vault.Hex(),
+		"deployment": deployment,
+		"vault":      vault.Hex(),
 	}
 	return client.SendGetRequest[api.NodeSetStakeWise_GetDepositDataSetVersionData](r, "get-deposit-data-set/version", "GetDepositDataSetVersion", args)
 }
 
 // Gets the latest deposit data set on the server for the provided vault
-func (r *NodeSetStakeWiseRequester) GetDepositDataSet(vault common.Address) (*types.ApiResponse[api.NodeSetStakeWise_GetDepositDataSetData], error) {
+func (r *NodeSetStakeWiseRequester) GetDepositDataSet(deployment string, vault common.Address) (*types.ApiResponse[api.NodeSetStakeWise_GetDepositDataSetData], error) {
 	args := map[string]string{
-		"vault": vault.Hex(),
+		"deployment": deployment,
+		"vault":      vault.Hex(),
 	}
 	return client.SendGetRequest[api.NodeSetStakeWise_GetDepositDataSetData](r, "get-deposit-data-set", "GetDepositDataSet", args)
 }
 
 // Uploads new validator deposit data to the NodeSet service
-func (r *NodeSetStakeWiseRequester) UploadDepositData(vault common.Address, data []beacon.ExtendedDepositData) (*types.ApiResponse[api.NodeSetStakeWise_UploadDepositDataData], error) {
+func (r *NodeSetStakeWiseRequester) UploadDepositData(deployment string, vault common.Address, data []beacon.ExtendedDepositData) (*types.ApiResponse[api.NodeSetStakeWise_UploadDepositDataData], error) {
 	body := api.NodeSetStakeWise_UploadDepositDataRequestBody{
+		Deployment:  deployment,
 		Vault:       vault,
 		DepositData: data,
 	}
@@ -64,10 +68,11 @@ func (r *NodeSetStakeWiseRequester) UploadDepositData(vault common.Address, data
 }
 
 // Uploads signed exit messages to the NodeSet service
-func (r *NodeSetStakeWiseRequester) UploadSignedExits(vault common.Address, data []nscommon.ExitData) (*types.ApiResponse[api.NodeSetStakeWise_UploadSignedExitsData], error) {
+func (r *NodeSetStakeWiseRequester) UploadSignedExits(deployment string, vault common.Address, data []nscommon.ExitData) (*types.ApiResponse[api.NodeSetStakeWise_UploadSignedExitsData], error) {
 	body := api.NodeSetStakeWise_UploadSignedExitsRequestBody{
-		Vault:    vault,
-		ExitData: data,
+		Deployment: deployment,
+		Vault:      vault,
+		ExitData:   data,
 	}
 	return client.SendPostRequest[api.NodeSetStakeWise_UploadSignedExitsData](r, "upload-signed-exits", "UploadSignedExits", body)
 }

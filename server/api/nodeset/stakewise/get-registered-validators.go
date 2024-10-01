@@ -29,6 +29,7 @@ func (f *stakeWiseGetRegisteredValidatorsContextFactory) Create(args url.Values)
 		handler: f.handler,
 	}
 	inputErrs := []error{
+		server.GetStringFromVars("deployment", args, &c.deployment),
 		server.ValidateArg("vault", args, input.ValidateAddress, &c.vault),
 	}
 	return c, errors.Join(inputErrs...)
@@ -45,7 +46,9 @@ func (f *stakeWiseGetRegisteredValidatorsContextFactory) RegisterRoute(router *m
 // ===============
 type stakeWiseGetRegisteredValidatorsContext struct {
 	handler *StakeWiseHandler
-	vault   common.Address
+
+	deployment string
+	vault      common.Address
 }
 
 func (c *stakeWiseGetRegisteredValidatorsContext) PrepareData(data *api.NodeSetStakeWise_GetRegisteredValidatorsData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
@@ -68,7 +71,7 @@ func (c *stakeWiseGetRegisteredValidatorsContext) PrepareData(data *api.NodeSetS
 
 	// Get the registered validators
 	ns := sp.GetNodeSetServiceManager()
-	response, err := ns.StakeWise_GetRegisteredValidators(ctx, c.vault)
+	response, err := ns.StakeWise_GetRegisteredValidators(ctx, c.deployment, c.vault)
 	if err != nil {
 		return types.ResponseStatus_Error, err
 	}
