@@ -46,6 +46,7 @@ type wizard struct {
 	mevModeModal     *choiceWizardStep
 	localMevModal    *checkBoxWizardStep
 	externalMevModal *textBoxWizardStep
+	mevWarningModal  *choiceWizardStep
 
 	// Done
 	finishedModal *choiceWizardStep
@@ -108,6 +109,7 @@ func newWizard(md *mainDisplay) *wizard {
 	wiz.mevModeModal = createMevModeStep(wiz, stepCount, totalSteps)
 	wiz.localMevModal = createLocalMevStep(wiz, stepCount, totalSteps)
 	wiz.externalMevModal = createExternalMevStep(wiz, stepCount, totalSteps)
+	wiz.mevWarningModal = createMevWarningStep(wiz, stepCount, totalSteps)
 	stepCount++
 
 	// Done

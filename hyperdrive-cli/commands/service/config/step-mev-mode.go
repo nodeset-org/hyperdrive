@@ -52,19 +52,27 @@ func createMevModeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 			wiz.md.Config.Hyperdrive.MevBoost.Enable.Value = true
 			wiz.md.Config.Hyperdrive.MevBoost.Mode.Value = config.ClientMode_Local
 			wiz.md.Config.Hyperdrive.MevBoost.SelectionMode.Value = hdconfig.MevSelectionMode_All
-			wiz.finishedModal.show()
+			if wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_External {
+				wiz.mevWarningModal.show()
+			} else {
+				wiz.finishedModal.show()
+			}
 		case 1:
 			wiz.md.Config.Hyperdrive.MevBoost.Enable.Value = true
 			wiz.md.Config.Hyperdrive.MevBoost.Mode.Value = config.ClientMode_Local
 			wiz.md.Config.Hyperdrive.MevBoost.SelectionMode.Value = hdconfig.MevSelectionMode_Manual
-			wiz.localMevModal.show()
+			if wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_External {
+				wiz.mevWarningModal.show()
+			} else {
+				wiz.localMevModal.show()
+			}
 		case 2:
 			wiz.md.Config.Hyperdrive.MevBoost.Enable.Value = true
 			wiz.md.Config.Hyperdrive.MevBoost.Mode.Value = config.ClientMode_External
-			if wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_Local {
-				wiz.externalMevModal.show()
+			if wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_External {
+				wiz.mevWarningModal.show()
 			} else {
-				wiz.finishedModal.show()
+				wiz.externalMevModal.show()
 			}
 		case 3:
 			wiz.md.Config.Hyperdrive.MevBoost.Enable.Value = false
