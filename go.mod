@@ -15,13 +15,13 @@ require (
 	github.com/goccy/go-json v0.10.3
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nodeset-org/hyperdrive-constellation v1.0.0-b1.0.20240927181424-49653a316a20
-	github.com/nodeset-org/hyperdrive-daemon v1.1.0-b1.0.20240927170333-9fee16a048f0
-	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b1.0.20240930165456-a849d41acf24
+	github.com/nodeset-org/hyperdrive-constellation v1.0.0-b1.0.20241001164901-ef2c7eb6ba4e
+	github.com/nodeset-org/hyperdrive-daemon v1.1.0-b1.0.20241001161138-fa43cad5c631
+	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b1.0.20241001165150-0cd44bdfd6f9
 	github.com/nodeset-org/osha v0.3.1-0.20240927160812-d66358d4e091
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20240918224929-a9cee1201bee
+	github.com/rocket-pool/node-manager-core v0.5.2-0.20241001041416-40f4fb819f98
 	github.com/rocket-pool/rocketpool-go/v2 v2.0.0-b2.0.20240709170030-c27aeb5fb99b
 	github.com/stretchr/testify v1.9.0
 	github.com/tyler-smith/go-bip39 v1.1.0

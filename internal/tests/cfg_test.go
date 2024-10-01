@@ -100,7 +100,7 @@ func TestNewConfig_Holesky(t *testing.T) {
 	require.NoError(t, err)
 	modSp, err := modservices.NewModuleServiceProvider(hdApiUrl, swModDir, swconfig.ModuleName, swconfig.ClientLogName, func(hdCfg *hdconfig.HyperdriveConfig) (*swconfig.StakeWiseConfig, error) {
 		return swconfig.NewStakeWiseConfig(hdCfg, swSettings)
-	}, hdconfig.ClientTimeout)
+	})
 	require.NoError(t, err)
 	swSp, err := swcommon.NewStakeWiseServiceProvider(modSp, swSettings)
 	require.NoError(t, err)
