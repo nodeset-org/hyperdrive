@@ -36,15 +36,19 @@ type AuthorizationManager struct {
 
 	// The amount of time a request is valid for
 	requestLifespan time.Duration
+
+	// The name to use for the issuer (for source tracing in logs)
+	clientName string
 }
 
 // Creates a new API authorization manager.
 // Note that the key is not loaded until one of the load methods is called or it's lazy loaded via AddAuthHeader.
-func NewAuthorizationManager(keyPath string, requestLifespan time.Duration) *AuthorizationManager {
+func NewAuthorizationManager(keyPath string, clientName string, requestLifespan time.Duration) *AuthorizationManager {
 	return &AuthorizationManager{
 		keyPath:         keyPath,
 		signingMethod:   jwt.SigningMethodHS384,
 		requestLifespan: requestLifespan,
+		clientName:      clientName,
 	}
 }
 
@@ -78,6 +82,7 @@ func (m *AuthorizationManager) AddAuthHeader(request *http.Request) error {
 	// Create a new token from the secret
 	now := time.Now()
 	claims := &jwt.RegisteredClaims{
+		Issuer:    m.clientName,
 		IssuedAt:  jwt.NewNumericDate(now),
 		ExpiresAt: jwt.NewNumericDate(now.Add(m.requestLifespan)),
 	}
@@ -87,59 +92,64 @@ func (m *AuthorizationManager) AddAuthHeader(request *http.Request) error {
 		return fmt.Errorf("error signing API token: %w", err)
 	}
 
-	// Add the token to the request header
+	// Add the token to the request headers
 	request.Header.Add(AuthorizationHeader, BearerPrefix+tokenString)
 	return nil
 }
 
 // Validates the provided request by checking the authorization header.
 // If the key is not loaded, this will attempt to load it.
-func (m *AuthorizationManager) ValidateRequest(request *http.Request) error {
+func (m *AuthorizationManager) ValidateRequest(request *http.Request) (string, error) {
 	// Lazy load the key
 	if m.key == nil {
 		err := m.LoadAuthKey()
 		if err != nil {
-			return fmt.Errorf("error loading API key: %w", err)
+			return "", fmt.Errorf("error loading API key: %w", err)
 		}
 	}
 
 	// Make sure the header exists
 	header := request.Header.Get(AuthorizationHeader)
 	if header == "" {
-		return errors.New("missing authorization header")
+		return "", errors.New("missing authorization header")
 	}
 
 	// Check the header prefix
 	if !strings.HasPrefix(header, BearerPrefix) {
-		return errors.New("authorization header is missing the expected prefix")
+		return "", errors.New("authorization header is missing the expected prefix")
 	}
 	tokenString := strings.TrimPrefix(header, BearerPrefix)
 
 	// Parse the token
-	token, err := jwt.Parse(string(tokenString), m.keyFunc, jwt.WithValidMethods(
+	var claims jwt.RegisteredClaims
+	token, err := jwt.ParseWithClaims(string(tokenString), &claims, m.keyFunc, jwt.WithValidMethods(
 		[]string{
 			m.signingMethod.Alg(),
 		},
 	))
+
+	// Return
+	clientName := claims.Issuer
 	if err != nil {
-		return fmt.Errorf("error parsing JWT token: %w", err)
+		return clientName, fmt.Errorf("error parsing JWT token: %w", err)
 	}
 	if !token.Valid {
-		return errors.New("invalid JWT token")
+		return clientName, errors.New("invalid JWT token")
 	}
-	return nil
+	return clientName, nil
 }
 
 // Returns a request handler that validates the request before passing it to the next handler.
 func (m *AuthorizationManager) GetRequestHandler(logger *slog.Logger, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		err := m.ValidateRequest(r)
+		clientName, err := m.ValidateRequest(r)
 		if err != nil {
 			logger.Warn("Request failed authorization",
 				log.Err(err),
 				slog.String("path", r.URL.Path),
 				slog.String("method", r.Method),
 				slog.String("remoteAddr", r.RemoteAddr),
+				slog.String("clientName", clientName),
 			)
 
 			// Create the response
@@ -158,6 +168,7 @@ func (m *AuthorizationManager) GetRequestHandler(logger *slog.Logger, next http.
 					slog.String("path", r.URL.Path),
 					slog.String("method", r.Method),
 					slog.String("remoteAddr", r.RemoteAddr),
+					slog.String("clientName", clientName),
 				)
 			}
 			return
@@ -168,6 +179,7 @@ func (m *AuthorizationManager) GetRequestHandler(logger *slog.Logger, next http.
 			slog.String("path", r.URL.Path),
 			slog.String("method", r.Method),
 			slog.String("remoteAddr", r.RemoteAddr),
+			slog.String("clientName", clientName),
 		)
 		next.ServeHTTP(w, r)
 	})

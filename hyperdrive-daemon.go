@@ -104,7 +104,7 @@ func main() {
 
 		// Make an API auth manager
 		apiKeyPath := c.String(apiKeyFlag.Name)
-		authMgr := auth.NewAuthorizationManager(apiKeyPath, auth.DefaultRequestLifespan)
+		authMgr := auth.NewAuthorizationManager(apiKeyPath, "hd-daemon", auth.DefaultRequestLifespan)
 		err = authMgr.LoadAuthKey()
 		if err != nil {
 			return fmt.Errorf("error loading API key: %w", err)

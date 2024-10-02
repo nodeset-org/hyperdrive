@@ -43,9 +43,9 @@ func newHyperdriveNode(sp common.IHyperdriveServiceProvider, address string, cli
 	// Create the server
 	wg := &sync.WaitGroup{}
 	cfg := sp.GetConfig()
-	authMgr := auth.NewAuthorizationManager("", auth.DefaultRequestLifespan)
-	authMgr.SetKey([]byte(apiAuthKey))
-	serverMgr, err := server.NewServerManager(sp, address, cfg.ApiPort.Value, wg, authMgr)
+	serverAuthMgr := auth.NewAuthorizationManager("", "server", auth.DefaultRequestLifespan)
+	serverAuthMgr.SetKey([]byte(apiAuthKey))
+	serverMgr, err := server.NewServerManager(sp, address, cfg.ApiPort.Value, wg, serverAuthMgr)
 	if err != nil {
 		return nil, fmt.Errorf("error creating hyperdrive server: %v", err)
 	}
@@ -56,7 +56,9 @@ func newHyperdriveNode(sp common.IHyperdriveServiceProvider, address string, cli
 	if err != nil {
 		return nil, fmt.Errorf("error parsing client URL [%s]: %v", urlString, err)
 	}
-	apiClient := client.NewApiClient(url, clientLogger, nil, authMgr)
+	clientAuthMgr := auth.NewAuthorizationManager("", "client", auth.DefaultRequestLifespan)
+	clientAuthMgr.SetKey([]byte(apiAuthKey))
+	apiClient := client.NewApiClient(url, clientLogger, nil, clientAuthMgr)
 
 	return &HyperdriveNode{
 		sp:        sp,
