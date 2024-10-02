@@ -13,6 +13,7 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/server"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/auth"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/tasks"
 	"github.com/urfave/cli/v2"
@@ -65,12 +66,19 @@ func main() {
 		Usage:   "The port to bind the API server to",
 		Value:   uint(config.DefaultApiPort),
 	}
+	apiKeyFlag := &cli.StringFlag{
+		Name:     "api-key",
+		Aliases:  []string{"k"},
+		Usage:    "Path of the key to use for authenticating incoming API requests",
+		Required: true,
+	}
 
 	app.Flags = []cli.Flag{
 		userDirFlag,
 		settingsFolderFlag,
 		ipFlag,
 		portFlag,
+		apiKeyFlag,
 	}
 	app.Action = func(c *cli.Context) error {
 		// Get the config file path
@@ -92,6 +100,14 @@ func main() {
 		if errors.Is(err, fs.ErrNotExist) {
 			fmt.Printf("Settings folder not found at [%s].", settingsFolder)
 			os.Exit(1)
+		}
+
+		// Make an API auth manager
+		apiKeyPath := c.String(apiKeyFlag.Name)
+		authMgr := auth.NewAuthorizationManager(apiKeyPath, "hd-daemon", auth.DefaultRequestLifespan)
+		err = authMgr.LoadAuthKey()
+		if err != nil {
+			return fmt.Errorf("error loading API key: %w", err)
 		}
 
 		// Wait group to handle graceful stopping
@@ -121,7 +137,7 @@ func main() {
 		// Start the server after the task loop so it can log into NodeSet before this starts serving registration status checks
 		ip := c.String(ipFlag.Name)
 		port := c.Uint64(portFlag.Name)
-		serverMgr, err := server.NewServerManager(sp, ip, uint16(port), stopWg)
+		serverMgr, err := server.NewServerManager(sp, ip, uint16(port), stopWg, authMgr)
 		if err != nil {
 			return fmt.Errorf("error creating server manager: %w", err)
 		}

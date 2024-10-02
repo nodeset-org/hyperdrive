@@ -1,5 +1,7 @@
 package config
 
+import "path/filepath"
+
 const (
 	EventLogInterval         int    = 1000
 	HyperdriveDaemonRoute    string = "hyperdrive"
@@ -27,4 +29,14 @@ const (
 	LogDir       string = "logs"
 	ApiLogName   string = "api.log"
 	TasksLogName string = "tasks.log"
+
+	// API Keys
+	SecretsDir        string = "secrets"
+	ApiDir            string = "api"
+	DaemonKeyFilename string = "daemon.key"
+)
+
+var (
+	// API Keys directory
+	DaemonKeyPath string = filepath.Join(SecretsDir, ApiDir, DaemonKeyFilename)
 )
