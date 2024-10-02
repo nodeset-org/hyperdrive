@@ -10,6 +10,8 @@ import (
 
 const (
 	// The default length of the API authorization key, in bytes
+	// Since the auth manager uses HS384, the default key length is 384 bits (equal to the output size of the underlying hash function).
+	// See https://datatracker.ietf.org/doc/html/rfc2104#section-3 for more info.
 	DefaultKeyLength int = 384 / 8
 
 	// The permissions to set on the API authorization key file
@@ -18,8 +20,8 @@ const (
 
 // Generates a new authorization secret key if it's not already on disk.
 // If the key already exists, this does nothing.
-// NOTE: key length must be 48 bytes or higher for security.
-// See https://github.com/nodeset-org/hyperdrive-daemon/pull/32#discussion_r1784899614
+// NOTE: key length must be 48 bytes (hash size of HS384) or higher for security.
+// See https://datatracker.ietf.org/doc/html/rfc2104#section-3
 func GenerateAuthKeyIfNotPresent(path string, keyLengthInBytes int) error {
 	// Check if the file exists
 	exists := true
