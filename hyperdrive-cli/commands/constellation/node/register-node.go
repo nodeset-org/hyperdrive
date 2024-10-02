@@ -11,6 +11,13 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var (
+	registerForceFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:  "force",
+		Usage: "Force registration on nodeset.io, even if the node is already registered with the Constellation contracts",
+	}
+)
+
 func registerNode(c *cli.Context) error {
 	// Get the client
 	hd, err := client.NewHyperdriveClientFromCtx(c)
@@ -23,13 +30,15 @@ func registerNode(c *cli.Context) error {
 	}
 
 	// Check if the node's already registered
-	csRegResponse, err := cs.Api.Node.GetRegistrationStatus()
-	if err != nil {
-		return err
-	}
-	if csRegResponse.Data.Registered {
-		fmt.Println("Your node is already registered with Constellation.")
-		return nil
+	if !c.Bool(registerForceFlag.Name) {
+		csRegResponse, err := cs.Api.Node.GetRegistrationStatus()
+		if err != nil {
+			return err
+		}
+		if csRegResponse.Data.Registered {
+			fmt.Println("Your node is already registered with Constellation.")
+			return nil
+		}
 	}
 
 	// Check if the node's registered with NodeSet

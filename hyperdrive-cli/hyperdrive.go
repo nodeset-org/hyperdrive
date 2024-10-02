@@ -42,7 +42,7 @@ var (
 		Aliases: []string{"r"},
 		Usage:   "Allow hyperdrive to be run as the root user",
 	}
-	configPathFlag *cli.StringFlag = &cli.StringFlag{
+	userDirPathFlag *cli.StringFlag = &cli.StringFlag{
 		Name:    "config-path",
 		Aliases: []string{"c"},
 		Usage:   "Directory to install and save all of Hyperdrive's configuration and data to",
@@ -114,7 +114,7 @@ func main() {
 	// Set application flags
 	app.Flags = []cli.Flag{
 		allowRootFlag,
-		configPathFlag,
+		userDirPathFlag,
 		apiAddressFlag,
 		maxFeeFlag,
 		maxPriorityFeeFlag,
@@ -179,14 +179,14 @@ func setDefaultPaths() {
 	}
 
 	// Default config folder path
-	defaultConfigPath := filepath.Join(homeDir, defaultConfigFolder)
-	configPathFlag.Value = defaultConfigPath
+	defaultUserDirPath := filepath.Join(homeDir, defaultConfigFolder)
+	userDirPathFlag.Value = defaultUserDirPath
 }
 
 // Validate the global flags
 func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
 	// Make sure the config directory exists
-	configPath := c.String(configPathFlag.Name)
+	configPath := c.String(userDirPathFlag.Name)
 	path, err := homedir.Expand(strings.TrimSpace(configPath))
 	if err != nil {
 		return nil, fmt.Errorf("error expanding config path [%s]: %w", configPath, err)

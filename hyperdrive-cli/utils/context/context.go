@@ -21,8 +21,8 @@ const (
 type HyperdriveContext struct {
 	*InstallationInfo
 
-	// The path to the configuration file
-	ConfigPath string
+	// The path to the Hyperdrive user directory
+	UserDirPath string
 
 	// The max fee for transactions
 	MaxFee float64
@@ -56,12 +56,12 @@ type HyperdriveContext struct {
 }
 
 // Creates a new Hyperdrive context. If installationInfo is nil, a new one will be created using the system configuration.
-func NewHyperdriveContext(cfgPath string, installationInfo *InstallationInfo) *HyperdriveContext {
+func NewHyperdriveContext(userDirPath string, installationInfo *InstallationInfo) *HyperdriveContext {
 	if installationInfo == nil {
 		installationInfo = NewInstallationInfo()
 	}
 	return &HyperdriveContext{
-		ConfigPath:       cfgPath,
+		UserDirPath:      userDirPath,
 		InstallationInfo: installationInfo,
 	}
 }

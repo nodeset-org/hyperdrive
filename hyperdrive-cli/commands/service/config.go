@@ -31,9 +31,9 @@ func configureService(c *cli.Context) error {
 	}
 
 	// Make sure the config directory exists first
-	err = os.MkdirAll(hd.Context.ConfigPath, 0700)
+	err = os.MkdirAll(hd.Context.UserDirPath, 0700)
 	if err != nil {
-		fmt.Printf("%sYour Hyperdrive user configuration directory of [%s] could not be created:%s.%s\n", terminal.ColorYellow, hd.Context.ConfigPath, err.Error(), terminal.ColorReset)
+		fmt.Printf("%sYour Hyperdrive user configuration directory of [%s] could not be created:%s.%s\n", terminal.ColorYellow, hd.Context.UserDirPath, err.Error(), terminal.ColorReset)
 		return nil
 	}
 

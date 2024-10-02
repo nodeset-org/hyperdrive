@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http/httptrace"
+	"path/filepath"
 
 	docker "github.com/docker/docker/client"
 	"github.com/fatih/color"
 	csclient "github.com/nodeset-org/hyperdrive-constellation/client"
 	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/client"
-	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/auth"
+	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	swclient "github.com/nodeset-org/hyperdrive-stakewise/client"
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
@@ -61,7 +63,7 @@ func NewHyperdriveClientFromCtx(c *cli.Context) (*HyperdriveClient, error) {
 
 // Create new Hyperdrive client from a custom context
 func NewHyperdriveClientFromHyperdriveCtx(hdCtx *context.HyperdriveContext) (*HyperdriveClient, error) {
-	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, config.HyperdriveDaemonRoute))
+	logger := log.NewTerminalLogger(hdCtx.DebugEnabled, terminalLogColor).With(slog.String(log.OriginKey, hdconfig.HyperdriveDaemonRoute))
 
 	// Create the tracer if required
 	var tracer *httptrace.ClientTrace
@@ -94,12 +96,18 @@ func NewHyperdriveClientFromHyperdriveCtx(hdCtx *context.HyperdriveContext) (*Hy
 			return nil, fmt.Errorf("error loading config: %w", err)
 		}
 
-		url, err = url.Parse(fmt.Sprintf("http://localhost:%d/%s", cfg.Hyperdrive.ApiPort.Value, config.HyperdriveApiClientRoute))
+		url, err = url.Parse(fmt.Sprintf("http://localhost:%d/%s", cfg.Hyperdrive.ApiPort.Value, hdconfig.HyperdriveApiClientRoute))
 		if err != nil {
 			return nil, fmt.Errorf("error parsing Hyperdrive API URL: %w", err)
 		}
 	}
-	hdClient.Api = client.NewApiClient(url, logger, tracer)
+
+	// Create the auth manager
+	authPath := filepath.Join(hdCtx.UserDirPath, hdApiKeyRelPath)
+	authMgr := auth.NewAuthorizationManager(authPath)
+
+	// Create the API client
+	hdClient.Api = client.NewApiClient(url, logger, tracer, authMgr)
 	return hdClient, nil
 }
 
@@ -148,7 +156,12 @@ func NewStakewiseClientFromHyperdriveCtx(hdCtx *context.HyperdriveContext, hdCli
 		}
 	}
 
-	swClient.Api = swclient.NewApiClient(url, logger, tracer)
+	// Create the auth manager
+	authPath := filepath.Join(hdCtx.UserDirPath, swApiKeyRelPath)
+	authMgr := auth.NewAuthorizationManager(authPath)
+
+	// Create the API client
+	swClient.Api = swclient.NewApiClient(url, logger, tracer, authMgr)
 	return swClient, nil
 }
 
@@ -191,7 +204,12 @@ func NewConstellationClientFromCtx(c *cli.Context, hdClient *HyperdriveClient) (
 		}
 	}
 
-	csClient.Api = csclient.NewApiClient(url, logger, tracer)
+	// Create the auth manager
+	authPath := filepath.Join(hdCtx.UserDirPath, csApiKeyRelPath)
+	authMgr := auth.NewAuthorizationManager(authPath)
+
+	// Create the API client
+	csClient.Api = csclient.NewApiClient(url, logger, tracer, authMgr)
 	return csClient, nil
 }
 
