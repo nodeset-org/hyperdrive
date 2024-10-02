@@ -13,6 +13,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/nodeset-org/hyperdrive-daemon/client"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/auth"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	bclient "github.com/rocket-pool/node-manager-core/beacon/client"
 	"github.com/rocket-pool/node-manager-core/config"
@@ -139,8 +140,8 @@ type moduleServiceProvider struct {
 }
 
 // Creates a new IModuleServiceProvider instance
-func NewModuleServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) (ConfigType, error)) (IModuleServiceProvider, error) {
-	hdCfg, resources, hdClient, err := getHdConfig(hyperdriveUrl)
+func NewModuleServiceProvider[ConfigType hdconfig.IModuleConfig](hyperdriveUrl *url.URL, moduleDir string, moduleName string, clientLogName string, factory func(*hdconfig.HyperdriveConfig) (ConfigType, error), authMgr *auth.AuthorizationManager) (IModuleServiceProvider, error) {
+	hdCfg, resources, hdClient, err := getHdConfig(hyperdriveUrl, authMgr)
 	if err != nil {
 		return nil, fmt.Errorf("error getting Hyperdrive config: %w", err)
 	}
@@ -342,7 +343,7 @@ func (p *moduleServiceProvider) CancelContextOnShutdown() {
 // === Internal Functions ===
 // ==========================
 
-func getHdConfig(hyperdriveUrl *url.URL) (*hdconfig.HyperdriveConfig, *hdconfig.MergedResources, *client.ApiClient, error) {
+func getHdConfig(hyperdriveUrl *url.URL, authMgr *auth.AuthorizationManager) (*hdconfig.HyperdriveConfig, *hdconfig.MergedResources, *client.ApiClient, error) {
 	// Add the API client route if missing
 	hyperdriveUrl.Path = strings.TrimSuffix(hyperdriveUrl.Path, "/")
 	if hyperdriveUrl.Path == "" {
@@ -351,7 +352,7 @@ func getHdConfig(hyperdriveUrl *url.URL) (*hdconfig.HyperdriveConfig, *hdconfig.
 
 	// Create a client for the Hyperdrive daemon
 	defaultLogger := slog.Default()
-	hdClient := client.NewApiClient(hyperdriveUrl, defaultLogger, nil)
+	hdClient := client.NewApiClient(hyperdriveUrl, defaultLogger, nil, authMgr)
 
 	// Get the Hyperdrive settings for the selected network
 	settingsResponse, err := hdClient.Service.GetNetworkSettings()

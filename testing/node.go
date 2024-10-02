@@ -11,8 +11,13 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/client"
 	"github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/server"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/auth"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+)
+
+const (
+	apiAuthKey string = "test-key"
 )
 
 // A complete Hyperdrive node instance
@@ -38,7 +43,9 @@ func newHyperdriveNode(sp common.IHyperdriveServiceProvider, address string, cli
 	// Create the server
 	wg := &sync.WaitGroup{}
 	cfg := sp.GetConfig()
-	serverMgr, err := server.NewServerManager(sp, address, cfg.ApiPort.Value, wg)
+	authMgr := auth.NewAuthorizationManager("")
+	authMgr.SetKey([]byte(apiAuthKey))
+	serverMgr, err := server.NewServerManager(sp, address, cfg.ApiPort.Value, wg, authMgr)
 	if err != nil {
 		return nil, fmt.Errorf("error creating hyperdrive server: %v", err)
 	}
@@ -49,7 +56,7 @@ func newHyperdriveNode(sp common.IHyperdriveServiceProvider, address string, cli
 	if err != nil {
 		return nil, fmt.Errorf("error parsing client URL [%s]: %v", urlString, err)
 	}
-	apiClient := client.NewApiClient(url, clientLogger, nil)
+	apiClient := client.NewApiClient(url, clientLogger, nil, authMgr)
 
 	return &HyperdriveNode{
 		sp:        sp,
