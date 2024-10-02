@@ -12,6 +12,7 @@ import (
 	hdcommon "github.com/nodeset-org/hyperdrive-daemon/common"
 	modservices "github.com/nodeset-org/hyperdrive-daemon/module-utils/services"
 	hdserver "github.com/nodeset-org/hyperdrive-daemon/server"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/auth"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	swcommon "github.com/nodeset-org/hyperdrive-stakewise/common"
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
@@ -20,6 +21,10 @@ import (
 	"github.com/nodeset-org/osha"
 	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	hdTestApiKey string = "hd-api-key"
 )
 
 func TestNewConfig_Holesky(t *testing.T) {
@@ -82,10 +87,12 @@ func TestNewConfig_Holesky(t *testing.T) {
 	t.Log("Config saved successfully")
 
 	// Make a Hyperdrive daemon server
-	hdSp, err := hdcommon.NewHyperdriveServiceProvider(hdCtx.ConfigPath, hdCtx.NetworksDir)
+	hdSp, err := hdcommon.NewHyperdriveServiceProvider(hdCtx.UserDirPath, hdCtx.NetworksDir)
 	require.NoError(t, err)
 	hdWg := &sync.WaitGroup{}
-	hdServer, err := hdserver.NewServerManager(hdSp, "localhost", 0, hdWg)
+	serverAuthMgr := auth.NewAuthorizationManager("", "server", auth.DefaultRequestLifespan)
+	serverAuthMgr.SetKey([]byte(hdTestApiKey))
+	hdServer, err := hdserver.NewServerManager(hdSp, "localhost", 0, hdWg, serverAuthMgr)
 	require.NoError(t, err)
 	hdServerPort := hdServer.GetPort()
 	defer hdServer.Stop()
@@ -98,9 +105,12 @@ func TestNewConfig_Holesky(t *testing.T) {
 	require.NoError(t, err)
 	swSettings, err := hdclient.LoadStakeWiseSettings(hdCtx.NetworksDir)
 	require.NoError(t, err)
+
+	clientAuthMgr := auth.NewAuthorizationManager("", "client", auth.DefaultRequestLifespan)
+	clientAuthMgr.SetKey([]byte(hdTestApiKey))
 	modSp, err := modservices.NewModuleServiceProvider(hdApiUrl, swModDir, swconfig.ModuleName, swconfig.ClientLogName, func(hdCfg *hdconfig.HyperdriveConfig) (*swconfig.StakeWiseConfig, error) {
 		return swconfig.NewStakeWiseConfig(hdCfg, swSettings)
-	})
+	}, clientAuthMgr)
 	require.NoError(t, err)
 	swSp, err := swcommon.NewStakeWiseServiceProvider(modSp, swSettings)
 	require.NoError(t, err)

@@ -29,6 +29,8 @@ services:
       - "0.0.0.0" # Open to all Docker traffic
       - --port
       - "{{.Hyperdrive.ApiPort}}"
+      - --api-key
+      - "{{.Hyperdrive.GetUserDirectory}}/{{.HyperdriveApiKeyPath}}"
     networks:
       - net
       {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}

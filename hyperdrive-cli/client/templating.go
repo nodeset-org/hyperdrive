@@ -20,3 +20,15 @@ func (c *GlobalConfig) ModulesDirectory() string {
 func (c *GlobalConfig) ValidatorsDirectory() string {
 	return config.ValidatorsDirectory
 }
+
+func (c *GlobalConfig) HyperdriveApiKeyPath() string {
+	return hdApiKeyRelPath
+}
+
+func (c *GlobalConfig) StakeWiseApiKeyPath() string {
+	return swApiKeyRelPath
+}
+
+func (c *GlobalConfig) ConstellationApiKeyPath() string {
+	return csApiKeyRelPath
+}

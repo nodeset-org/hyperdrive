@@ -18,7 +18,7 @@ import (
 // Build a docker compose command
 func (c *HyperdriveClient) compose(composeFiles []string, args string) (string, error) {
 	// Get the expanded config path
-	expandedConfigPath, err := homedir.Expand(c.Context.ConfigPath)
+	expandedConfigPath, err := homedir.Expand(c.Context.UserDirPath)
 	if err != nil {
 		return "", err
 	}

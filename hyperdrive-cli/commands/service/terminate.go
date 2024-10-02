@@ -24,5 +24,5 @@ func terminateService(c *cli.Context) error {
 	}
 
 	// Stop service
-	return hd.TerminateService(getComposeFiles(c), hd.Context.ConfigPath)
+	return hd.TerminateService(getComposeFiles(c), hd.Context.UserDirPath)
 }

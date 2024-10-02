@@ -30,6 +30,10 @@ services:
       - "0.0.0.0" # Open to all Docker traffic
       - --port
       - "{{.Constellation.ApiPort}}"
+      - --api-key
+      - "{{.Hyperdrive.GetUserDirectory}}/{{.ConstellationApiKeyPath}}"
+      - --hd-api-key
+      - "{{.Hyperdrive.GetUserDirectory}}/{{.HyperdriveApiKeyPath}}"
     networks:
       - net
       {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}

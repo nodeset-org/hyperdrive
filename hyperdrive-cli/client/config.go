@@ -28,7 +28,7 @@ func (c *HyperdriveClient) LoadConfig() (*GlobalConfig, bool, error) {
 		return c.cfg, c.isNewCfg, nil
 	}
 
-	settingsFilePath := filepath.Join(c.Context.ConfigPath, SettingsFile)
+	settingsFilePath := filepath.Join(c.Context.UserDirPath, SettingsFile)
 	expandedPath, err := homedir.Expand(settingsFilePath)
 	if err != nil {
 		return nil, false, fmt.Errorf("error expanding settings file path: %w", err)
@@ -46,7 +46,7 @@ func (c *HyperdriveClient) LoadConfig() (*GlobalConfig, bool, error) {
 	}
 
 	// Config wasn't loaded, but there was no error - we should create one.
-	hdCfg, err := hdconfig.NewHyperdriveConfig(c.Context.ConfigPath, c.Context.HyperdriveNetworkSettings)
+	hdCfg, err := hdconfig.NewHyperdriveConfig(c.Context.UserDirPath, c.Context.HyperdriveNetworkSettings)
 	if err != nil {
 		return nil, false, fmt.Errorf("error creating Hyperdrive config: %w", err)
 	}
@@ -68,7 +68,7 @@ func (c *HyperdriveClient) LoadConfig() (*GlobalConfig, bool, error) {
 
 // Load the backup config
 func (c *HyperdriveClient) LoadBackupConfig() (*GlobalConfig, error) {
-	settingsFilePath := filepath.Join(c.Context.ConfigPath, BackupSettingsFile)
+	settingsFilePath := filepath.Join(c.Context.UserDirPath, BackupSettingsFile)
 	expandedPath, err := homedir.Expand(settingsFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("error expanding backup settings file path: %w", err)
@@ -79,7 +79,7 @@ func (c *HyperdriveClient) LoadBackupConfig() (*GlobalConfig, error) {
 
 // Save the config
 func (c *HyperdriveClient) SaveConfig(cfg *GlobalConfig) error {
-	settingsFileDirectoryPath, err := homedir.Expand(c.Context.ConfigPath)
+	settingsFileDirectoryPath, err := homedir.Expand(c.Context.UserDirPath)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (c *HyperdriveClient) SaveConfig(cfg *GlobalConfig) error {
 // Create the metrics and modules folders, and deploy the config templates for Prometheus and Grafana
 func (c *HyperdriveClient) DeployMetricsConfigurations(config *GlobalConfig) error {
 	// Make sure the metrics path exists
-	metricsDirPath := filepath.Join(c.Context.ConfigPath, metricsDir)
+	metricsDirPath := filepath.Join(c.Context.UserDirPath, metricsDir)
 	modulesDirPath := filepath.Join(metricsDirPath, hdconfig.ModulesName)
 	err := os.MkdirAll(modulesDirPath, metricsDirMode)
 	if err != nil {

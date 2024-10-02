@@ -30,6 +30,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Aliases: []string{"r"},
 				Flags: []cli.Flag{
 					utils.YesFlag,
+					registerForceFlag,
 				},
 				Usage: "Registers your node with Constellation so you can create and run minipools.",
 				Action: func(c *cli.Context) error {
