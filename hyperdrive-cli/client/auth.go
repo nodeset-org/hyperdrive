@@ -2,17 +2,12 @@ package client
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/auth"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
-)
-
-const (
-	authDirMode os.FileMode = 0700
 )
 
 var (
