@@ -164,7 +164,7 @@ func (m *AuthorizationManager) GetRequestHandler(logger *slog.Logger, next http.
 		}
 
 		// Valid request
-		logger.Info("Request authorized",
+		logger.Debug("Request authorized",
 			slog.String("path", r.URL.Path),
 			slog.String("method", r.Method),
 			slog.String("remoteAddr", r.RemoteAddr),
