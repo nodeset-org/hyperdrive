@@ -1,6 +1,6 @@
 key: holesky-dev
-name: Holesky Dev
-description: This is a development network used by Hyperdrive engineers to test new features and contract upgrades before they are promoted to Holesky for staging. You should not use this network unless invited to do so by the developers.
+name: Holesky Staging
+description: This is a staging network used by Hyperdrive engineers to test new features and contract upgrades before they are promoted to the production Holesky test network. You should not use this network unless invited to do so by the developers.
 networkResources:
   ethNetworkName: holesky
   chainID: 17000
