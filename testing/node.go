@@ -43,7 +43,7 @@ func newHyperdriveNode(sp common.IHyperdriveServiceProvider, address string, cli
 	// Create the server
 	wg := &sync.WaitGroup{}
 	cfg := sp.GetConfig()
-	authMgr := auth.NewAuthorizationManager("")
+	authMgr := auth.NewAuthorizationManager("", auth.DefaultRequestLifespan)
 	authMgr.SetKey([]byte(apiAuthKey))
 	serverMgr, err := server.NewServerManager(sp, address, cfg.ApiPort.Value, wg, authMgr)
 	if err != nil {

@@ -3,12 +3,16 @@ package auth
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/goccy/go-json"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/rocket-pool/node-manager-core/api/types"
+	"github.com/rocket-pool/node-manager-core/log"
 )
 
 const (
@@ -16,7 +20,7 @@ const (
 	BearerPrefix        string = "Bearer "
 
 	// How long a JWT is valid for after sending a request
-	ValidTime time.Duration = time.Second * 5
+	DefaultRequestLifespan time.Duration = time.Second * 5
 )
 
 // Manager for API authorization
@@ -29,14 +33,18 @@ type AuthorizationManager struct {
 
 	// The JWT signing method
 	signingMethod jwt.SigningMethod
+
+	// The amount of time a request is valid for
+	requestLifespan time.Duration
 }
 
 // Creates a new API authorization manager.
 // Note that the key is not loaded until one of the load methods is called or it's lazy loaded via AddAuthHeader.
-func NewAuthorizationManager(keyPath string) *AuthorizationManager {
+func NewAuthorizationManager(keyPath string, requestLifespan time.Duration) *AuthorizationManager {
 	return &AuthorizationManager{
-		keyPath:       keyPath,
-		signingMethod: jwt.SigningMethodHS384,
+		keyPath:         keyPath,
+		signingMethod:   jwt.SigningMethodHS384,
+		requestLifespan: requestLifespan,
 	}
 }
 
@@ -71,7 +79,7 @@ func (m *AuthorizationManager) AddAuthHeader(request *http.Request) error {
 	now := time.Now()
 	claims := &jwt.RegisteredClaims{
 		IssuedAt:  jwt.NewNumericDate(now),
-		ExpiresAt: jwt.NewNumericDate(now.Add(ValidTime)),
+		ExpiresAt: jwt.NewNumericDate(now.Add(m.requestLifespan)),
 	}
 	token := jwt.NewWithClaims(m.signingMethod, claims)
 	tokenString, err := token.SignedString(m.key)
@@ -120,6 +128,49 @@ func (m *AuthorizationManager) ValidateRequest(request *http.Request) error {
 		return errors.New("invalid JWT token")
 	}
 	return nil
+}
+
+// Returns a request handler that validates the request before passing it to the next handler.
+func (m *AuthorizationManager) GetRequestHandler(logger *slog.Logger, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := m.ValidateRequest(r)
+		if err != nil {
+			logger.Warn("Request failed authorization",
+				log.Err(err),
+				slog.String("path", r.URL.Path),
+				slog.String("method", r.Method),
+				slog.String("remoteAddr", r.RemoteAddr),
+			)
+
+			// Create the response
+			msg := types.ApiResponse[any]{
+				Error: fmt.Sprintf("Authorization failed (%s)", err.Error()),
+			}
+			bytes, _ := json.Marshal(msg)
+			w.Header().Add("Content-Type", "application/json")
+
+			// Write it
+			w.WriteHeader(http.StatusUnauthorized)
+			_, writeErr := w.Write(bytes)
+			if writeErr != nil {
+				logger.Error("Error writing auth failure response",
+					log.Err(writeErr),
+					slog.String("path", r.URL.Path),
+					slog.String("method", r.Method),
+					slog.String("remoteAddr", r.RemoteAddr),
+				)
+			}
+			return
+		}
+
+		// Valid request
+		logger.Info("Request authorized",
+			slog.String("path", r.URL.Path),
+			slog.String("method", r.Method),
+			slog.String("remoteAddr", r.RemoteAddr),
+		)
+		next.ServeHTTP(w, r)
+	})
 }
 
 // Returns the key expected for JWT signatures. Used by JWT's parser.

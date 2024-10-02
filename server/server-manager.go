@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 	"sync"
 
@@ -15,7 +14,6 @@ import (
 	"github.com/nodeset-org/hyperdrive-daemon/shared/auth"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/rocket-pool/node-manager-core/api/server"
-	"github.com/rocket-pool/node-manager-core/log"
 )
 
 // ServerManager manages the API server run by the daemon
@@ -80,21 +78,7 @@ func createServer(sp common.IHyperdriveServiceProvider, ip string, port uint16, 
 
 	// Add the authorization middleware
 	server.GetApiRouter().Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			err = authMgr.ValidateRequest(r)
-			if err != nil {
-				apiLogger.Error("Error validating request authorization",
-					log.Err(err),
-					slog.String("path", r.URL.Path),
-					slog.String("method", r.Method),
-				)
-				http.Error(w, "Authorization failed", http.StatusUnauthorized)
-				return
-			}
-
-			// Valid request
-			next.ServeHTTP(w, r)
-		})
+		return authMgr.GetRequestHandler(apiLogger.Logger, next)
 	})
 	return server, nil
 }
