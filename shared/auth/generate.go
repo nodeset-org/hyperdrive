@@ -10,7 +10,7 @@ import (
 
 const (
 	// The default length of the API authorization key, in bytes
-	DefaultKeyLength int = 32
+	DefaultKeyLength int = 384 / 8
 
 	// The permissions to set on the API authorization key file
 	KeyPermissions fs.FileMode = 0600
@@ -18,6 +18,8 @@ const (
 
 // Generates a new authorization secret key if it's not already on disk.
 // If the key already exists, this does nothing.
+// NOTE: key length must be 48 bytes or higher for security.
+// See https://github.com/nodeset-org/hyperdrive-daemon/pull/32#discussion_r1784899614
 func GenerateAuthKeyIfNotPresent(path string, keyLengthInBytes int) error {
 	// Check if the file exists
 	exists := true
@@ -34,6 +36,9 @@ func GenerateAuthKeyIfNotPresent(path string, keyLengthInBytes int) error {
 	}
 
 	// Generate the key
+	if keyLengthInBytes < DefaultKeyLength {
+		return fmt.Errorf("key length must be at least %d bytes", DefaultKeyLength)
+	}
 	buffer := make([]byte, keyLengthInBytes)
 	_, err = rand.Read(buffer)
 	if err != nil {

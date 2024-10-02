@@ -77,6 +77,9 @@ func (m *AuthorizationManager) AddAuthHeader(request *http.Request) error {
 		if err != nil {
 			return fmt.Errorf("error loading API key: %w", err)
 		}
+		if len(m.key) == 0 {
+			return errors.New("API key is empty")
+		}
 	}
 
 	// Create a new token from the secret
@@ -105,6 +108,9 @@ func (m *AuthorizationManager) ValidateRequest(request *http.Request) (string, e
 		err := m.LoadAuthKey()
 		if err != nil {
 			return "", fmt.Errorf("error loading API key: %w", err)
+		}
+		if len(m.key) == 0 {
+			return "", errors.New("API key is empty")
 		}
 	}
 
