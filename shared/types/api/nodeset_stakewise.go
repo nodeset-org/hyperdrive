@@ -24,6 +24,7 @@ type NodeSetStakeWise_GetDepositDataSetData struct {
 }
 
 type NodeSetStakeWise_UploadDepositDataRequestBody struct {
+	Deployment  string                       `json:"deployment"`
 	Vault       common.Address               `json:"vault"`
 	DepositData []beacon.ExtendedDepositData `json:"depositData"`
 }
@@ -35,8 +36,9 @@ type NodeSetStakeWise_UploadDepositDataData struct {
 }
 
 type NodeSetStakeWise_UploadSignedExitsRequestBody struct {
-	Vault    common.Address      `json:"vault"`
-	ExitData []nscommon.ExitData `json:"exitData"`
+	Deployment string              `json:"deployment"`
+	Vault      common.Address      `json:"vault"`
+	ExitData   []nscommon.ExitData `json:"exitData"`
 }
 
 type NodeSetStakeWise_UploadSignedExitsData struct {

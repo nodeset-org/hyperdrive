@@ -74,7 +74,7 @@ func NewHyperdriveTestManagerWithDefaults(netSettingsProvisioner NetworkSettings
 	beaconCfg := tm.GetBeaconMockManager().GetConfig()
 	networkSettings := GetDefaultTestNetworkSettings(beaconCfg)
 	networkSettings = netSettingsProvisioner(networkSettings)
-	resources := getTestResources(networkSettings.NetworkResources, fmt.Sprintf("http://%s:%d/api/", "localhost", nodesetMock.GetPort()), "localtest")
+	resources := getTestResources(networkSettings.NetworkResources, fmt.Sprintf("http://%s:%d/api/", "localhost", nodesetMock.GetPort()))
 	hdNetSettings := &hdconfig.HyperdriveSettings{
 		NetworkSettings:     networkSettings,
 		HyperdriveResources: resources.HyperdriveResources,

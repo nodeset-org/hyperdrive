@@ -27,7 +27,9 @@ func (f *constellationGetValidatorsContextFactory) Create(args url.Values) (*con
 	c := &constellationGetValidatorsContext{
 		handler: f.handler,
 	}
-	inputErrs := []error{}
+	inputErrs := []error{
+		server.GetStringFromVars("deployment", args, &c.deployment),
+	}
 	return c, errors.Join(inputErrs...)
 }
 
@@ -43,6 +45,8 @@ func (f *constellationGetValidatorsContextFactory) RegisterRoute(router *mux.Rou
 
 type constellationGetValidatorsContext struct {
 	handler *ConstellationHandler
+
+	deployment string
 }
 
 func (c *constellationGetValidatorsContext) PrepareData(data *api.NodeSetConstellation_GetValidatorsData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
@@ -65,7 +69,7 @@ func (c *constellationGetValidatorsContext) PrepareData(data *api.NodeSetConstel
 
 	// Get the registered validators
 	ns := sp.GetNodeSetServiceManager()
-	validators, err := ns.Constellation_GetValidators(ctx)
+	validators, err := ns.Constellation_GetValidators(ctx, c.deployment)
 	if err != nil {
 		if errors.Is(err, v2constellation.ErrNotAuthorized) {
 			data.NotAuthorized = true

@@ -27,12 +27,11 @@ func GetDefaultTestNetworkSettings(beaconConfig *db.Config) *config.NetworkSetti
 }
 
 // Returns a network resources instance with local testing network values
-func getTestResources(networkResources *config.NetworkResources, nodesetUrl string, deploymentName string) *hdconfig.MergedResources {
+func getTestResources(networkResources *config.NetworkResources, nodesetUrl string) *hdconfig.MergedResources {
 	return &hdconfig.MergedResources{
 		NetworkResources: networkResources,
 		HyperdriveResources: &hdconfig.HyperdriveResources{
-			NodeSetApiUrl:  nodesetUrl,
-			DeploymentName: deploymentName,
+			NodeSetApiUrl: nodesetUrl,
 		},
 	}
 }

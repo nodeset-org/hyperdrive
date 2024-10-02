@@ -33,6 +33,7 @@ type NodeSetConstellation_GetValidatorsData struct {
 }
 
 type NodeSetConstellation_UploadSignedExitsRequestBody struct {
+	Deployment   string              `json:"deployment"`
 	ExitMessages []nscommon.ExitData `json:"exitMessages"`
 }
 

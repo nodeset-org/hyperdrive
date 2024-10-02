@@ -64,7 +64,7 @@ func (c *stakeWiseUploadDepositDataContext) PrepareData(data *api.NodeSetStakeWi
 
 	// Upload the deposit data
 	ns := sp.GetNodeSetServiceManager()
-	err = ns.StakeWise_UploadDepositData(ctx, c.body.Vault, c.body.DepositData)
+	err = ns.StakeWise_UploadDepositData(ctx, c.body.Deployment, c.body.Vault, c.body.DepositData)
 	if err != nil {
 		if errors.Is(err, apiv0.ErrVaultNotFound) {
 			data.VaultNotFound = true

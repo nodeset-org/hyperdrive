@@ -62,7 +62,7 @@ func (c *stakeWiseUploadSignedExitsContext) PrepareData(data *api.NodeSetStakeWi
 
 	// Upload the deposit data
 	ns := sp.GetNodeSetServiceManager()
-	err = ns.StakeWise_UploadSignedExitMessages(ctx, c.body.Vault, c.body.ExitData)
+	err = ns.StakeWise_UploadSignedExitMessages(ctx, c.body.Deployment, c.body.Vault, c.body.ExitData)
 	if err != nil {
 		return types.ResponseStatus_Error, err
 	}

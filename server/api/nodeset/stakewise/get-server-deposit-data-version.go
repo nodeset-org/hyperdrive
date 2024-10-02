@@ -29,6 +29,7 @@ func (f *stakeWiseGetDepositDataSetVersionContextFactory) Create(args url.Values
 		handler: f.handler,
 	}
 	inputErrs := []error{
+		server.GetStringFromVars("deployment", args, &c.deployment),
 		server.ValidateArg("vault", args, input.ValidateAddress, &c.vault),
 	}
 	return c, errors.Join(inputErrs...)
@@ -45,7 +46,9 @@ func (f *stakeWiseGetDepositDataSetVersionContextFactory) RegisterRoute(router *
 // ===============
 type stakeWiseGetDepositDataSetVersionContext struct {
 	handler *StakeWiseHandler
-	vault   common.Address
+
+	deployment string
+	vault      common.Address
 }
 
 func (c *stakeWiseGetDepositDataSetVersionContext) PrepareData(data *api.NodeSetStakeWise_GetDepositDataSetVersionData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
@@ -68,7 +71,7 @@ func (c *stakeWiseGetDepositDataSetVersionContext) PrepareData(data *api.NodeSet
 
 	// Get the set version
 	ns := sp.GetNodeSetServiceManager()
-	version, err := ns.StakeWise_GetServerDepositDataVersion(ctx, c.vault)
+	version, err := ns.StakeWise_GetServerDepositDataVersion(ctx, c.deployment, c.vault)
 	if err != nil {
 		return types.ResponseStatus_Error, err
 	}

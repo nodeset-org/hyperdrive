@@ -27,7 +27,9 @@ func (f *constellationGetRegistrationSignatureContextFactory) Create(args url.Va
 	c := &constellationGetRegistrationSignatureContext{
 		handler: f.handler,
 	}
-	inputErrs := []error{}
+	inputErrs := []error{
+		server.GetStringFromVars("deployment", args, &c.deployment),
+	}
 	return c, errors.Join(inputErrs...)
 }
 
@@ -42,6 +44,8 @@ func (f *constellationGetRegistrationSignatureContextFactory) RegisterRoute(rout
 // ===============
 type constellationGetRegistrationSignatureContext struct {
 	handler *ConstellationHandler
+
+	deployment string
 }
 
 func (c *constellationGetRegistrationSignatureContext) PrepareData(data *api.NodeSetConstellation_GetRegistrationSignatureData, opts *bind.TransactOpts) (types.ResponseStatus, error) {
@@ -64,7 +68,7 @@ func (c *constellationGetRegistrationSignatureContext) PrepareData(data *api.Nod
 
 	// Get the registration signature
 	ns := sp.GetNodeSetServiceManager()
-	signature, err := ns.Constellation_GetRegistrationSignature(ctx)
+	signature, err := ns.Constellation_GetRegistrationSignature(ctx, c.deployment)
 	if err != nil {
 		if errors.Is(err, v2constellation.ErrNotAuthorized) {
 			data.NotAuthorized = true

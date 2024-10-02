@@ -131,7 +131,7 @@ func (m *NodeSetServiceManager) RegisterNode(ctx context.Context, email string) 
 // =========================
 
 // Get the version of the latest deposit data set from the server
-func (m *NodeSetServiceManager) StakeWise_GetServerDepositDataVersion(ctx context.Context, vault common.Address) (int, error) {
+func (m *NodeSetServiceManager) StakeWise_GetServerDepositDataVersion(ctx context.Context, deployment string, vault common.Address) (int, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -146,7 +146,7 @@ func (m *NodeSetServiceManager) StakeWise_GetServerDepositDataVersion(ctx contex
 	var data stakewise.DepositDataMetaData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.StakeWise.DepositDataMeta(ctx, logger.Logger, m.resources.DeploymentName, vault)
+		data, err = m.v2Client.StakeWise.DepositDataMeta(ctx, logger.Logger, deployment, vault)
 		return err
 	})
 	if err != nil {
@@ -156,7 +156,7 @@ func (m *NodeSetServiceManager) StakeWise_GetServerDepositDataVersion(ctx contex
 }
 
 // Get the deposit data set from the server
-func (m *NodeSetServiceManager) StakeWise_GetServerDepositData(ctx context.Context, vault common.Address) (int, []beacon.ExtendedDepositData, error) {
+func (m *NodeSetServiceManager) StakeWise_GetServerDepositData(ctx context.Context, deployment string, vault common.Address) (int, []beacon.ExtendedDepositData, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -171,7 +171,7 @@ func (m *NodeSetServiceManager) StakeWise_GetServerDepositData(ctx context.Conte
 	var data stakewise.DepositDataData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.StakeWise.DepositData_Get(ctx, logger.Logger, m.resources.DeploymentName, vault)
+		data, err = m.v2Client.StakeWise.DepositData_Get(ctx, logger.Logger, deployment, vault)
 		return err
 	})
 	if err != nil {
@@ -181,7 +181,7 @@ func (m *NodeSetServiceManager) StakeWise_GetServerDepositData(ctx context.Conte
 }
 
 // Uploads local deposit data set to the server
-func (m *NodeSetServiceManager) StakeWise_UploadDepositData(ctx context.Context, vault common.Address, depositData []beacon.ExtendedDepositData) error {
+func (m *NodeSetServiceManager) StakeWise_UploadDepositData(ctx context.Context, deployment string, vault common.Address, depositData []beacon.ExtendedDepositData) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -194,7 +194,7 @@ func (m *NodeSetServiceManager) StakeWise_UploadDepositData(ctx context.Context,
 
 	// Run the request
 	err := m.runRequest(ctx, func(ctx context.Context) error {
-		return m.v2Client.StakeWise.DepositData_Post(ctx, logger.Logger, m.resources.DeploymentName, vault, depositData)
+		return m.v2Client.StakeWise.DepositData_Post(ctx, logger.Logger, deployment, vault, depositData)
 	})
 	if err != nil {
 		return fmt.Errorf("error uploading deposit data: %w", err)
@@ -203,7 +203,7 @@ func (m *NodeSetServiceManager) StakeWise_UploadDepositData(ctx context.Context,
 }
 
 // Get the version of the latest deposit data set from the server
-func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Context, vault common.Address) ([]stakewise.ValidatorStatus, error) {
+func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Context, deployment string, vault common.Address) ([]stakewise.ValidatorStatus, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -218,7 +218,7 @@ func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Co
 	var data stakewise.ValidatorsData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.StakeWise.Validators_Get(ctx, logger.Logger, m.resources.DeploymentName, vault)
+		data, err = m.v2Client.StakeWise.Validators_Get(ctx, logger.Logger, deployment, vault)
 		return err
 	})
 	if err != nil {
@@ -228,7 +228,7 @@ func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Co
 }
 
 // Uploads signed exit messages set to the server
-func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.Context, vault common.Address, exitData []nscommon.ExitData) error {
+func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.Context, deployment string, vault common.Address, exitData []nscommon.ExitData) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -241,7 +241,7 @@ func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.C
 
 	// Run the request
 	err := m.runRequest(ctx, func(ctx context.Context) error {
-		return m.v2Client.StakeWise.Validators_Patch(ctx, logger.Logger, m.resources.DeploymentName, vault, exitData)
+		return m.v2Client.StakeWise.Validators_Patch(ctx, logger.Logger, deployment, vault, exitData)
 	})
 	if err != nil {
 		return fmt.Errorf("error uploading signed exit messages: %w", err)
@@ -255,7 +255,7 @@ func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.C
 
 // Gets the address that has been registered by the node's user for Constellation.
 // Returns nil if the user hasn't registered with NodeSet for Constellation usage yet.
-func (m *NodeSetServiceManager) Constellation_GetRegisteredAddress(ctx context.Context) (*common.Address, error) {
+func (m *NodeSetServiceManager) Constellation_GetRegisteredAddress(ctx context.Context, deployment string) (*common.Address, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -270,7 +270,7 @@ func (m *NodeSetServiceManager) Constellation_GetRegisteredAddress(ctx context.C
 	var data v2constellation.Whitelist_GetData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Constellation.Whitelist_Get(ctx, logger.Logger, m.resources.HyperdriveResources.DeploymentName)
+		data, err = m.v2Client.Constellation.Whitelist_Get(ctx, logger.Logger, deployment)
 		return err
 	})
 	if err != nil {
@@ -289,7 +289,7 @@ func (m *NodeSetServiceManager) Constellation_GetRegisteredAddress(ctx context.C
 }
 
 // Gets a signature for registering / whitelisting the node with the Constellation contracts
-func (m *NodeSetServiceManager) Constellation_GetRegistrationSignature(ctx context.Context) ([]byte, error) {
+func (m *NodeSetServiceManager) Constellation_GetRegistrationSignature(ctx context.Context, deployment string) ([]byte, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -304,7 +304,7 @@ func (m *NodeSetServiceManager) Constellation_GetRegistrationSignature(ctx conte
 	var data v2constellation.Whitelist_PostData
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Constellation.Whitelist_Post(ctx, logger.Logger, m.resources.HyperdriveResources.DeploymentName)
+		data, err = m.v2Client.Constellation.Whitelist_Post(ctx, logger.Logger, deployment)
 		return err
 	})
 	if err != nil {
@@ -320,7 +320,7 @@ func (m *NodeSetServiceManager) Constellation_GetRegistrationSignature(ctx conte
 }
 
 // Gets the deposit signature for a minipool from the Constellation contracts
-func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Context, minipoolAddress common.Address, salt *big.Int) ([]byte, error) {
+func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Context, deployment string, minipoolAddress common.Address, salt *big.Int) ([]byte, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -335,7 +335,7 @@ func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Co
 	logger.Debug("Getting minipool deposit signature")
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Constellation.MinipoolDepositSignature(ctx, logger.Logger, m.resources.HyperdriveResources.DeploymentName, minipoolAddress, salt)
+		data, err = m.v2Client.Constellation.MinipoolDepositSignature(ctx, logger.Logger, deployment, minipoolAddress, salt)
 		return err
 	})
 	if err != nil {
@@ -351,7 +351,7 @@ func (m *NodeSetServiceManager) Constellation_GetDepositSignature(ctx context.Co
 }
 
 // Get the validators that NodeSet has on record for this node
-func (m *NodeSetServiceManager) Constellation_GetValidators(ctx context.Context) ([]v2constellation.ValidatorStatus, error) {
+func (m *NodeSetServiceManager) Constellation_GetValidators(ctx context.Context, deployment string) ([]v2constellation.ValidatorStatus, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -366,7 +366,7 @@ func (m *NodeSetServiceManager) Constellation_GetValidators(ctx context.Context)
 	logger.Debug("Getting validators for node")
 	err := m.runRequest(ctx, func(ctx context.Context) error {
 		var err error
-		data, err = m.v2Client.Constellation.Validators_Get(ctx, logger.Logger, m.resources.HyperdriveResources.DeploymentName)
+		data, err = m.v2Client.Constellation.Validators_Get(ctx, logger.Logger, deployment)
 		return err
 	})
 	if err != nil {
@@ -376,7 +376,7 @@ func (m *NodeSetServiceManager) Constellation_GetValidators(ctx context.Context)
 }
 
 // Upload signed exit messages for Constellation minipools to the NodeSet service
-func (m *NodeSetServiceManager) Constellation_UploadSignedExitMessages(ctx context.Context, exitMessages []nscommon.ExitData) error {
+func (m *NodeSetServiceManager) Constellation_UploadSignedExitMessages(ctx context.Context, deployment string, exitMessages []nscommon.ExitData) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -389,7 +389,7 @@ func (m *NodeSetServiceManager) Constellation_UploadSignedExitMessages(ctx conte
 	// Run the request
 	logger.Debug("Submitting signed exit messages to nodeset")
 	err := m.runRequest(ctx, func(ctx context.Context) error {
-		return m.v2Client.Constellation.Validators_Patch(ctx, logger.Logger, m.resources.HyperdriveResources.DeploymentName, exitMessages)
+		return m.v2Client.Constellation.Validators_Patch(ctx, logger.Logger, deployment, exitMessages)
 	})
 	if err != nil {
 		return fmt.Errorf("error submitting signed exit messages: %w", err)
