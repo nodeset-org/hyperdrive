@@ -90,9 +90,9 @@ func TestNewConfig_Holesky(t *testing.T) {
 	hdSp, err := hdcommon.NewHyperdriveServiceProvider(hdCtx.UserDirPath, hdCtx.NetworksDir)
 	require.NoError(t, err)
 	hdWg := &sync.WaitGroup{}
-	authMgr := auth.NewAuthorizationManager("")
-	authMgr.SetKey([]byte(hdTestApiKey))
-	hdServer, err := hdserver.NewServerManager(hdSp, "localhost", 0, hdWg, authMgr)
+	serverAuthMgr := auth.NewAuthorizationManager("", "server", auth.DefaultRequestLifespan)
+	serverAuthMgr.SetKey([]byte(hdTestApiKey))
+	hdServer, err := hdserver.NewServerManager(hdSp, "localhost", 0, hdWg, serverAuthMgr)
 	require.NoError(t, err)
 	hdServerPort := hdServer.GetPort()
 	defer hdServer.Stop()
@@ -105,9 +105,12 @@ func TestNewConfig_Holesky(t *testing.T) {
 	require.NoError(t, err)
 	swSettings, err := hdclient.LoadStakeWiseSettings(hdCtx.NetworksDir)
 	require.NoError(t, err)
+
+	clientAuthMgr := auth.NewAuthorizationManager("", "client", auth.DefaultRequestLifespan)
+	clientAuthMgr.SetKey([]byte(hdTestApiKey))
 	modSp, err := modservices.NewModuleServiceProvider(hdApiUrl, swModDir, swconfig.ModuleName, swconfig.ClientLogName, func(hdCfg *hdconfig.HyperdriveConfig) (*swconfig.StakeWiseConfig, error) {
 		return swconfig.NewStakeWiseConfig(hdCfg, swSettings)
-	}, authMgr)
+	}, clientAuthMgr)
 	require.NoError(t, err)
 	swSp, err := swcommon.NewStakeWiseServiceProvider(modSp, swSettings)
 	require.NoError(t, err)

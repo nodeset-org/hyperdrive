@@ -31,9 +31,9 @@ services:
       - --port
       - "{{.StakeWise.ApiPort}}"
       - --api-key
-      - "{{.Hyperdrive.GetUserDirectory}}//{{.StakeWiseApiKeyPath}}"
+      - "{{.Hyperdrive.GetUserDirectory}}/{{.StakeWiseApiKeyPath}}"
       - --hd-api-key
-      - "{{.Hyperdrive.GetUserDirectory}}//{{.HyperdriveApiKeyPath}}"
+      - "{{.Hyperdrive.GetUserDirectory}}/{{.HyperdriveApiKeyPath}}"
     networks:
       - net
       {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}

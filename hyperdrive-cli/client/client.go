@@ -29,6 +29,8 @@ const (
 	BackupSettingsFile string = "user-settings-backup.yml"
 
 	terminalLogColor color.Attribute = color.FgHiYellow
+
+	cliIssuer string = "hd-cli"
 )
 
 // Hyperdrive client
@@ -104,7 +106,7 @@ func NewHyperdriveClientFromHyperdriveCtx(hdCtx *context.HyperdriveContext) (*Hy
 
 	// Create the auth manager
 	authPath := filepath.Join(hdCtx.UserDirPath, hdApiKeyRelPath)
-	authMgr := auth.NewAuthorizationManager(authPath)
+	authMgr := auth.NewAuthorizationManager(authPath, cliIssuer, auth.DefaultRequestLifespan)
 
 	// Create the API client
 	hdClient.Api = client.NewApiClient(url, logger, tracer, authMgr)
@@ -158,7 +160,7 @@ func NewStakewiseClientFromHyperdriveCtx(hdCtx *context.HyperdriveContext, hdCli
 
 	// Create the auth manager
 	authPath := filepath.Join(hdCtx.UserDirPath, swApiKeyRelPath)
-	authMgr := auth.NewAuthorizationManager(authPath)
+	authMgr := auth.NewAuthorizationManager(authPath, cliIssuer, auth.DefaultRequestLifespan)
 
 	// Create the API client
 	swClient.Api = swclient.NewApiClient(url, logger, tracer, authMgr)
@@ -206,7 +208,7 @@ func NewConstellationClientFromCtx(c *cli.Context, hdClient *HyperdriveClient) (
 
 	// Create the auth manager
 	authPath := filepath.Join(hdCtx.UserDirPath, csApiKeyRelPath)
-	authMgr := auth.NewAuthorizationManager(authPath)
+	authMgr := auth.NewAuthorizationManager(authPath, cliIssuer, auth.DefaultRequestLifespan)
 
 	// Create the API client
 	csClient.Api = csclient.NewApiClient(url, logger, tracer, authMgr)

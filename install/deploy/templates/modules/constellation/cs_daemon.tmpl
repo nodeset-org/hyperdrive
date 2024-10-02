@@ -31,9 +31,9 @@ services:
       - --port
       - "{{.Constellation.ApiPort}}"
       - --api-key
-      - "{{.Hyperdrive.GetUserDirectory}}//{{.ConstellationApiKeyPath}}"
+      - "{{.Hyperdrive.GetUserDirectory}}/{{.ConstellationApiKeyPath}}"
       - --hd-api-key
-      - "{{.Hyperdrive.GetUserDirectory}}//{{.HyperdriveApiKeyPath}}"
+      - "{{.Hyperdrive.GetUserDirectory}}/{{.HyperdriveApiKeyPath}}"
     networks:
       - net
       {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
