@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 )
 
 const (
@@ -16,6 +17,9 @@ const (
 
 	// The permissions to set on the API authorization key file
 	KeyPermissions fs.FileMode = 0600
+
+	// The permissions to set on the API authorization key directory
+	KeyDirPermissions fs.FileMode = 0700
 )
 
 // Generates a new authorization secret key if it's not already on disk.
@@ -48,7 +52,12 @@ func GenerateAuthKeyIfNotPresent(path string, keyLengthInBytes int) error {
 	}
 
 	// Write the key to disk
-	err = os.WriteFile(path, buffer, KeyPermissions)
+	dir := filepath.Dir(path)
+	err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("error creating key directory [%s]: %w", dir, err)
+	}
+	err = os.WriteFile(path, buffer, KeyDirPermissions)
 	if err != nil {
 		return fmt.Errorf("error writing key to [%s]: %w", path, err)
 	}
