@@ -53,11 +53,11 @@ func GenerateAuthKeyIfNotPresent(path string, keyLengthInBytes int) error {
 
 	// Write the key to disk
 	dir := filepath.Dir(path)
-	err = os.MkdirAll(dir, os.ModePerm)
+	err = os.MkdirAll(dir, KeyDirPermissions)
 	if err != nil {
 		return fmt.Errorf("error creating key directory [%s]: %w", dir, err)
 	}
-	err = os.WriteFile(path, buffer, KeyDirPermissions)
+	err = os.WriteFile(path, buffer, KeyPermissions)
 	if err != nil {
 		return fmt.Errorf("error writing key to [%s]: %w", path, err)
 	}
