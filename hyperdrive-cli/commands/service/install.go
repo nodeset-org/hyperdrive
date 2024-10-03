@@ -78,9 +78,15 @@ func installService(c *cli.Context) error {
 	}
 
 	// Reload the config after installation
-	_, isNew, err := hd.LoadConfig()
+	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("error loading new configuration: %w", err)
+	}
+
+	// Generate the daemon API keys
+	err = hd.GenerateDaemonAuthKeys(cfg)
+	if err != nil {
+		return fmt.Errorf("error generating daemon API keys: %w", err)
 	}
 
 	// Report next steps
@@ -105,15 +111,11 @@ func printPatchNotes() {
 	fmt.Printf("%s=== Hyperdrive v%s ===%s\n\n", terminal.ColorGreen, shared.HyperdriveVersion, terminal.ColorReset)
 	fmt.Printf("Changes you should be aware of before starting:\n\n")
 
-	fmt.Printf("%s=== Mainnet Support! ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("This version of Hyperdrive supports the Ethereum Mainnet. You can now access the Gravita vault if you're a StakeWise module user and stake ETH on Gravita's behalf.")
+	fmt.Printf("%s=== Constellation Support ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("This version of Hyperdrive supports the long-awaited Constellation module. You can now register as a Constellation operator and create Rocket Pool minipools without needing to bond your own ETH or RPL (aside from a small 12-hour lockup for security). For more info, visit https://docs.nodeset.io/constellation/introduction.")
 	fmt.Println()
 
-	fmt.Printf("%s=== IPv6 Support ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("There's a new toggle in the Hyperdrive section of the settings to enable IPv6 on the Hyperdrive services. Enabling it requires adding support to the Docker service itself first; please read the full patch notes for more information.")
-	fmt.Println()
-
-	fmt.Printf("%s=== StakeWise DB ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("The StakeWise Operator database has been moved out of the user data directory and onto a dedicated Docker volume. When you start the StakeWise service for the first time if you were previously running v1.0.0, it will regenerate the database which will cause elevated CPU load for a few hours.")
+	fmt.Printf("%s=== File-Based Networks ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("Hyperdrive now supports creating your own custom network definitions in the networks directory (default for Linux: /usr/share/hyperdrive/networks). Add your own files, and they'll become selectable choices in the TUI!")
 	fmt.Println()
 }
