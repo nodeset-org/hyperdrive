@@ -11,3 +11,4 @@ networkResources:
   flashbotsProtectUrl: https://rpc-holesky.flashbots.net/
 hyperdriveResources:
   nodeSetApiUrl: https://nodeset.io/api
+  encryptionPubkey: placeholder
