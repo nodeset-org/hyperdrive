@@ -1,13 +1,23 @@
 package testing
 
 import (
+	"filippo.io/age"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/osha/beacon/db"
 	"github.com/rocket-pool/node-manager-core/config"
 )
 
 const (
+	// ETH network name to use for test networks
 	TestNetworkEthName string = "hardhat"
+
+	// Serialized nodeset.io deployment dummy encryption ID
+	EncryptionIdentityString string = "AGE-SECRET-KEY-19N32FTRU5JJ66DNTVE8NTTE04CUQC3R3FC5QD9QKA97AZWCUW74ST78LD3"
+)
+
+var (
+	// Nodeset.io deployment dummy encryption ID
+	EncryptionIdentity, _ = age.ParseX25519Identity(EncryptionIdentityString)
 )
 
 // Creates a new set of network settings designed for usage in local testing with Hardat.
@@ -31,7 +41,8 @@ func getTestResources(networkResources *config.NetworkResources, nodesetUrl stri
 	return &hdconfig.MergedResources{
 		NetworkResources: networkResources,
 		HyperdriveResources: &hdconfig.HyperdriveResources{
-			NodeSetApiUrl: nodesetUrl,
+			NodeSetApiUrl:    nodesetUrl,
+			EncryptionPubkey: EncryptionIdentity.Recipient().String(),
 		},
 	}
 }

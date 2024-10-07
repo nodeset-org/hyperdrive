@@ -228,7 +228,7 @@ func (m *NodeSetServiceManager) StakeWise_GetRegisteredValidators(ctx context.Co
 }
 
 // Uploads signed exit messages set to the server
-func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.Context, deployment string, vault common.Address, exitData []nscommon.ExitData) error {
+func (m *NodeSetServiceManager) StakeWise_UploadSignedExitMessages(ctx context.Context, deployment string, vault common.Address, exitData []nscommon.EncryptedExitData) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -376,7 +376,7 @@ func (m *NodeSetServiceManager) Constellation_GetValidators(ctx context.Context,
 }
 
 // Upload signed exit messages for Constellation minipools to the NodeSet service
-func (m *NodeSetServiceManager) Constellation_UploadSignedExitMessages(ctx context.Context, deployment string, exitMessages []nscommon.ExitData) error {
+func (m *NodeSetServiceManager) Constellation_UploadSignedExitMessages(ctx context.Context, deployment string, exitMessages []nscommon.EncryptedExitData) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 

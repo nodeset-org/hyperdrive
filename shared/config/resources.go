@@ -48,6 +48,9 @@ type HyperdriveSettings struct {
 type HyperdriveResources struct {
 	// The URL for the NodeSet API server
 	NodeSetApiUrl string `yaml:"nodeSetApiUrl" json:"nodeSetApiUrl"`
+
+	// The pubkey used to encrypt messages to nodeset.io
+	EncryptionPubkey string `yaml:"encryptionPubkey" json:"encryptionPubkey"`
 }
 
 // An aggregated collection of resources for the selected network, including Hyperdrive resources
