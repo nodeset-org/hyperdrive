@@ -36,9 +36,9 @@ type NodeSetStakeWise_UploadDepositDataData struct {
 }
 
 type NodeSetStakeWise_UploadSignedExitsRequestBody struct {
-	Deployment string              `json:"deployment"`
-	Vault      common.Address      `json:"vault"`
-	ExitData   []nscommon.ExitData `json:"exitData"`
+	Deployment string                       `json:"deployment"`
+	Vault      common.Address               `json:"vault"`
+	ExitData   []nscommon.EncryptedExitData `json:"exitData"`
 }
 
 type NodeSetStakeWise_UploadSignedExitsData struct {

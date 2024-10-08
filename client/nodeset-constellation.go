@@ -66,7 +66,7 @@ func (r *NodeSetConstellationRequester) GetValidators(deployment string) (*types
 }
 
 // Uploads signed exit messages to the NodeSet service
-func (r *NodeSetConstellationRequester) UploadSignedExits(deployment string, exitMessages []nscommon.ExitData) (*types.ApiResponse[api.NodeSetConstellation_UploadSignedExitsData], error) {
+func (r *NodeSetConstellationRequester) UploadSignedExits(deployment string, exitMessages []nscommon.EncryptedExitData) (*types.ApiResponse[api.NodeSetConstellation_UploadSignedExitsData], error) {
 	body := api.NodeSetConstellation_UploadSignedExitsRequestBody{
 		Deployment:   deployment,
 		ExitMessages: exitMessages,

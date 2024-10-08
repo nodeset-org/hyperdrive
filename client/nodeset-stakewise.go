@@ -68,7 +68,7 @@ func (r *NodeSetStakeWiseRequester) UploadDepositData(deployment string, vault c
 }
 
 // Uploads signed exit messages to the NodeSet service
-func (r *NodeSetStakeWiseRequester) UploadSignedExits(deployment string, vault common.Address, data []nscommon.ExitData) (*types.ApiResponse[api.NodeSetStakeWise_UploadSignedExitsData], error) {
+func (r *NodeSetStakeWiseRequester) UploadSignedExits(deployment string, vault common.Address, data []nscommon.EncryptedExitData) (*types.ApiResponse[api.NodeSetStakeWise_UploadSignedExitsData], error) {
 	body := api.NodeSetStakeWise_UploadSignedExitsRequestBody{
 		Deployment: deployment,
 		Vault:      vault,
