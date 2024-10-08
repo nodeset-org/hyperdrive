@@ -15,9 +15,9 @@ require (
 	github.com/goccy/go-json v0.10.3
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nodeset-org/hyperdrive-constellation v1.0.0-b2
-	github.com/nodeset-org/hyperdrive-daemon v1.1.0-b2
-	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b2
+	github.com/nodeset-org/hyperdrive-constellation v1.0.0-b2.0.20241007164006-9d0f52c8f3d2
+	github.com/nodeset-org/hyperdrive-daemon v1.1.0-b2.0.20241007163607-e439ed3db62f
+	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-b2.0.20241007164355-afd2c06e4b0e
 	github.com/nodeset-org/osha v0.3.1
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
@@ -32,6 +32,7 @@ require (
 )
 
 require (
+	filippo.io/age v1.2.0 // indirect
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20240716105424-66b64c4bb379 // indirect
 	github.com/AdamKorcz/go-118-fuzz-build v0.0.0-20231105174938-2b5cbb29f3e2 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
@@ -136,7 +137,7 @@ require (
 	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/nodeset-org/nodeset-client-go v1.1.0 // indirect
+	github.com/nodeset-org/nodeset-client-go v1.1.1-0.20241007162432-cba11fc62963 // indirect
 	github.com/nwaples/rardecode/v2 v2.0.0-beta.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
