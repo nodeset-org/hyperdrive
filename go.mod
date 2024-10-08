@@ -14,7 +14,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-version v1.6.0
-	github.com/nodeset-org/nodeset-client-go v1.1.1-0.20241007162432-cba11fc62963
+	github.com/nodeset-org/nodeset-client-go v1.2.0
 	github.com/nodeset-org/osha v0.3.1
 	github.com/rocket-pool/batch-query v1.0.0
 	github.com/rocket-pool/node-manager-core v0.5.2-0.20241003024529-05c829d805c6
