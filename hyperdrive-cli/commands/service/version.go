@@ -6,6 +6,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/rocket-pool/node-manager-core/config"
+	"github.com/rocket-pool/node-manager-core/log"
 	"github.com/urfave/cli/v2"
 )
 
@@ -132,13 +133,19 @@ func serviceVersion(c *cli.Context) error {
 		// Get StakeWise client
 		sw, err := client.NewStakewiseClientFromCtx(c, hd)
 		if err != nil {
-			return err
-		}
-
-		// Get StakeWise service version
-		stakeWiseVersion, err = sw.GetServiceVersion()
-		if err != nil {
-			return err
+			sw.Logger.Debug("Error creating StakeWise client",
+				log.Err(err),
+			)
+			stakeWiseVersion = "<unknown>"
+		} else {
+			// Get StakeWise service version
+			stakeWiseVersion, err = sw.GetServiceVersion()
+			if err != nil {
+				sw.Logger.Debug("Error getting StakeWise service version",
+					log.Err(err),
+				)
+				stakeWiseVersion = "<unknown>"
+			}
 		}
 	}
 
@@ -148,13 +155,19 @@ func serviceVersion(c *cli.Context) error {
 		// Get Constellation client
 		cs, err := client.NewConstellationClientFromCtx(c, hd)
 		if err != nil {
-			return err
-		}
-
-		// Get Constellation service version
-		constellationVersion, err = cs.GetServiceVersion()
-		if err != nil {
-			return err
+			cs.Logger.Debug("Error creating Constellation client",
+				log.Err(err),
+			)
+			constellationVersion = "<unknown>"
+		} else {
+			// Get Constellation service version
+			constellationVersion, err = cs.GetServiceVersion()
+			if err != nil {
+				cs.Logger.Debug("Error getting Constellation service version",
+					log.Err(err),
+				)
+				constellationVersion = "<unknown>"
+			}
 		}
 	}
 
