@@ -1,3 +1,11 @@
+hyperdrive (1.1.0~rc1) unstable; urgency=medium
+
+  * Updated Nethermind and Teku.
+  * Signed exit messages are now encrypted locally before being sent to nodeset.io.
+  * Added backwards-compatibility support for the CLI to work with the v1.0.1 and v1.1.0-b1 daemons.
+
+ -- NodeSet Inc. <info@nodeset.io>  Tue, 08 Oct 2024 20:31:38 +0000
+
 hyperdrive (1.1.0~b2) unstable; urgency=medium
 
   * Updated Geth, Reth, and Nimbus.
