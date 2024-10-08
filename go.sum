@@ -431,6 +431,8 @@ github.com/rocket-pool/batch-query v1.0.0 h1:5HejmT1n1fIdLIqUhTNwbkG2PGOPl3IVjCp
 github.com/rocket-pool/batch-query v1.0.0/go.mod h1:d1CmxShzk0fioJ4yX0eFGhz2an1odnW/LZ2cp3eDGIQ=
 github.com/rocket-pool/node-manager-core v0.5.2-0.20241003024529-05c829d805c6 h1:QITxx3McsLw6Ov/6acjz58MI496Y05s4cn63zCXQskk=
 github.com/rocket-pool/node-manager-core v0.5.2-0.20241003024529-05c829d805c6/go.mod h1:/H1wq3skacZi4zjgnKTtnm0wBLJH7H5r0CvLtWFs19Y=
+github.com/rocket-pool/node-manager-core v0.5.2-0.20241008173134-e04f3c1b9051 h1:fUi7ZDDGsNK6lDmCaAwu2x2bRHSEj5KmMkRwA9p3yVU=
+github.com/rocket-pool/node-manager-core v0.5.2-0.20241008173134-e04f3c1b9051/go.mod h1:/H1wq3skacZi4zjgnKTtnm0wBLJH7H5r0CvLtWFs19Y=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
 github.com/rs/cors v1.7.0 h1:+88SsELBHx5r+hZ8TCkggzSstaWNbDvThkVK8H6f9ik=
