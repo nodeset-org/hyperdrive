@@ -1,7 +1,4 @@
 key: holesky
-defaultConfigSettings:
-  teku:
-    containerTag: consensys/teku:24.10.1
 constellationResources:
   deploymentName: holesky
   directory: 0x925D0700407fB0C855Ae9903B3a2727F1e88576c

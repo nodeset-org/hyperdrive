@@ -1,7 +1,4 @@
 key: mainnet
-defaultConfigSettings:
-  teku:
-    containerTag: consensys/teku:24.10.1
 constellationResources:
   deploymentName: mainnet
   directory: 0x0000000000000000000000000000000000000000
