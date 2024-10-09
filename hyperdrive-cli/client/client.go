@@ -106,6 +106,10 @@ func NewHyperdriveClientFromHyperdriveCtx(hdCtx *context.HyperdriveContext) (*Hy
 
 	// Create the auth manager
 	authPath := filepath.Join(hdCtx.UserDirPath, hdApiKeyRelPath)
+	err = auth.GenerateAuthKeyIfNotPresent(authPath, auth.DefaultKeyLength)
+	if err != nil {
+		return nil, fmt.Errorf("error generating Hyperdrive daemon API key: %w", err)
+	}
 	authMgr := auth.NewAuthorizationManager(authPath, cliIssuer, auth.DefaultRequestLifespan)
 
 	// Create the API client
@@ -160,6 +164,10 @@ func NewStakewiseClientFromHyperdriveCtx(hdCtx *context.HyperdriveContext, hdCli
 
 	// Create the auth manager
 	authPath := filepath.Join(hdCtx.UserDirPath, swApiKeyRelPath)
+	err := auth.GenerateAuthKeyIfNotPresent(authPath, auth.DefaultKeyLength)
+	if err != nil {
+		return nil, fmt.Errorf("error generating StakeWise module API key: %w", err)
+	}
 	authMgr := auth.NewAuthorizationManager(authPath, cliIssuer, auth.DefaultRequestLifespan)
 
 	// Create the API client
@@ -208,6 +216,10 @@ func NewConstellationClientFromCtx(c *cli.Context, hdClient *HyperdriveClient) (
 
 	// Create the auth manager
 	authPath := filepath.Join(hdCtx.UserDirPath, csApiKeyRelPath)
+	err := auth.GenerateAuthKeyIfNotPresent(authPath, auth.DefaultKeyLength)
+	if err != nil {
+		return nil, fmt.Errorf("error generating Constellation module API key: %w", err)
+	}
 	authMgr := auth.NewAuthorizationManager(authPath, cliIssuer, auth.DefaultRequestLifespan)
 
 	// Create the API client

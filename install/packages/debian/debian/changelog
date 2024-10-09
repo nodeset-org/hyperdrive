@@ -1,3 +1,11 @@
+hyperdrive (1.1.0~rc1) unstable; urgency=medium
+
+  * Updated Nethermind, Teku, and MEV-Boost.
+  * Signed exit messages are now encrypted locally before being sent to nodeset.io.
+  * The CLI now ensures the existence of daemon JWT authentication keys on every command for enhanced backwards compatibility.
+
+ -- NodeSet Inc. <info@nodeset.io>  Tue, 08 Oct 2024 20:31:38 +0000
+
 hyperdrive (1.1.0~b2) unstable; urgency=medium
 
   * Updated Geth, Reth, and Nimbus.

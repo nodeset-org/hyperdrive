@@ -11,9 +11,10 @@ import (
 )
 
 var (
-	hdApiKeyRelPath string = filepath.Join(hdconfig.SecretsDir, hdconfig.DaemonKeyFilename)
-	swApiKeyRelPath string = filepath.Join(hdconfig.SecretsDir, hdconfig.ModulesName, swconfig.ModuleName, hdconfig.DaemonKeyFilename)
-	csApiKeyRelPath string = filepath.Join(hdconfig.SecretsDir, hdconfig.ModulesName, csconfig.ModuleName, hdconfig.DaemonKeyFilename)
+	hdApiKeyRelPath     string = filepath.Join(hdconfig.SecretsDir, hdconfig.DaemonKeyFilename)
+	moduleApiKeyRelPath string = filepath.Join(hdconfig.SecretsDir, hdconfig.ModulesName)
+	swApiKeyRelPath     string = filepath.Join(moduleApiKeyRelPath, swconfig.ModuleName, hdconfig.DaemonKeyFilename)
+	csApiKeyRelPath     string = filepath.Join(moduleApiKeyRelPath, csconfig.ModuleName, hdconfig.DaemonKeyFilename)
 )
 
 // Create the metrics and modules folders, and deploy the config templates for Prometheus and Grafana

@@ -9,6 +9,9 @@ networkResources:
   balanceBatcherAddress: 0xfAa2e7C84eD801dd9D27Ac1ed957274530796140
   txWatchUrl: https://holesky.etherscan.io/tx
   flashbotsProtectUrl: https://rpc-holesky.flashbots.net/
+defaultConfigSettings:
+  mevBoost:
+    containerTag: flashbots/mev-boost:1.8.1
 hyperdriveResources:
   nodeSetApiUrl: https://nodeset.io/api
-  encryptionPubkey: placeholder
+  encryptionPubkey: age1hs87f8pl369tel4xpprtmaxwhg2e3gynvz8q45h48hed4m4h4d0s6t8caa
