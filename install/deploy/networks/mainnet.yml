@@ -9,6 +9,9 @@ networkResources:
   balanceBatcherAddress: 0xb1f8e55c7f64d203c1400b9d8555d050f94adf39
   txWatchUrl: https://etherscan.io/tx
   flashbotsProtectUrl: https://rpc.flashbots.net/
+defaultConfigSettings:
+  mevBoost:
+    containerTag: flashbots/mev-boost:1.8.1
 hyperdriveResources:
   nodeSetApiUrl: https://nodeset.io/api
   encryptionPubkey: age1hs87f8pl369tel4xpprtmaxwhg2e3gynvz8q45h48hed4m4h4d0s6t8caa
