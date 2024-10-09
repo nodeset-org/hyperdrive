@@ -63,6 +63,12 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		}
 	}
 
+	// Generate the daemon API keys
+	err = hd.GenerateDaemonAuthKeys(cfg)
+	if err != nil {
+		return fmt.Errorf("error generating daemon API keys: %w", err)
+	}
+
 	// Validate the config
 	errors := cfg.Validate()
 	if len(errors) > 0 {

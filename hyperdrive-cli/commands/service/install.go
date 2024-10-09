@@ -78,9 +78,15 @@ func installService(c *cli.Context) error {
 	}
 
 	// Reload the config after installation
-	_, isNew, err := hd.LoadConfig()
+	cfg, isNew, err := hd.LoadConfig()
 	if err != nil {
 		return fmt.Errorf("error loading new configuration: %w", err)
+	}
+
+	// Generate the daemon API keys
+	err = hd.GenerateDaemonAuthKeys(cfg)
+	if err != nil {
+		return fmt.Errorf("error generating daemon API keys: %w", err)
 	}
 
 	// Report next steps
