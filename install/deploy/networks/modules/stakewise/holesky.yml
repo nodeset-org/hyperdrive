@@ -1,4 +1,5 @@
 key: holesky
+defaultConfigSettings:
 stakeWiseResources:
   deploymentName: holesky
   vault: 0x646F5285D195e08E309cF9A5aDFDF68D6Fcc51C4

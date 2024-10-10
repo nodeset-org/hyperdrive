@@ -1,4 +1,5 @@
 key: holesky-dev
+defaultConfigSettings:
 constellationResources:
   deploymentName: holesky-staging
   directory: 0x21d1528fccaF017D02C219978786115255cfB946

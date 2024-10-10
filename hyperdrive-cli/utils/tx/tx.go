@@ -84,7 +84,7 @@ func handleTxImpl(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.Trans
 	} else {
 		confirmFunc = utils.Confirm
 	}
-	if !(confirmFunc(confirmMessage)) {
+	if !(c.Bool(utils.YesFlag.Name) || confirmFunc(confirmMessage)) {
 		fmt.Println("Cancelled.")
 		return false, nil
 	}
