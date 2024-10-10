@@ -31,6 +31,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+require github.com/rocket-pool/smartnode/v2 v2.0.0-olddev.0.20240710181452-edcbd6208bdd
+
 require (
 	filippo.io/age v1.2.0 // indirect
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20240716105424-66b64c4bb379 // indirect
@@ -156,7 +158,6 @@ require (
 	github.com/prysmaticlabs/prysm/v5 v5.1.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rocket-pool/batch-query v1.0.0 // indirect
-	github.com/rocket-pool/smartnode/v2 v2.0.0-olddev.0.20240710181452-edcbd6208bdd // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sethvargo/go-password v0.3.1 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
@@ -205,4 +206,4 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
-replace github.com/rocket-pool/smartnode/v2 => github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20240729151944-127e460038df
+replace github.com/rocket-pool/smartnode/v2 => github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20241002073413-7c50008efc66

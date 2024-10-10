@@ -458,8 +458,8 @@ github.com/nodeset-org/nodeset-client-go v1.2.0 h1:16GfFTkjMdgGiAdXWyLLMnLVHd+E6
 github.com/nodeset-org/nodeset-client-go v1.2.0/go.mod h1:TATOnCsIvDjC7C+h1izgw0+t35N40Hr/CxhgaLK78e4=
 github.com/nodeset-org/osha v0.3.1 h1:xHDjCswxGDazY/UsZ0QOpcu7gTVnEuUwXcKGVAz72lI=
 github.com/nodeset-org/osha v0.3.1/go.mod h1:47D6kYMuxYDTbul3w/YtE1LKA0hfzbXzCEC3M9oQlOU=
-github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20240729151944-127e460038df h1:6QxnKZQMlkPD33l1Q1dOhg1cHgr4kl0t/P/0JTf1BzU=
-github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20240729151944-127e460038df/go.mod h1:7YhZ9H66Y3wKVX6he8ljqBeex3fgPTumyfgqsBdKbBU=
+github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20241002073413-7c50008efc66 h1:buIjoSU+scq/fjq1OfvQiYzsoVFiPw/qoXtNO7+vu/Y=
+github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20241002073413-7c50008efc66/go.mod h1:LNR6m7IpsEBDBm8T6vVsWOiepx8Fzumpf2laHKOjbGU=
 github.com/nwaples/rardecode/v2 v2.0.0-beta.2 h1:e3mzJFJs4k83GXBEiTaQ5HgSc/kOK8q0rDaRO0MPaOk=
 github.com/nwaples/rardecode/v2 v2.0.0-beta.2/go.mod h1:yntwv/HfMc/Hbvtq9I19D1n58te3h6KsqCf3GxyfBGY=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
