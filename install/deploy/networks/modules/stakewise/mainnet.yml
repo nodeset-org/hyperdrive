@@ -1,4 +1,5 @@
 key: mainnet
+defaultConfigSettings:
 stakeWiseResources:
   deploymentName: mainnet
   vault: 0xE2AEECC76839692AEa35a8D119181b14ebf411c9

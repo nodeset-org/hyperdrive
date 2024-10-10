@@ -1,4 +1,5 @@
 key: mainnet
+defaultConfigSettings:
 constellationResources:
   deploymentName: mainnet
   directory: 0x0000000000000000000000000000000000000000

@@ -93,7 +93,7 @@ func createMinipool(c *cli.Context) error {
 	fmt.Printf("%sNOTE: Creating a new minipool will require a temporary deposit of %.2f ETH. It will be returned to you when your minipool passes the scrub check and your node issues its second deposit (or you call `stake` manually with the `hyperdrive cs m k` command).\n%s", terminal.ColorYellow, eth.WeiToEth(response.Data.LockupAmount), terminal.ColorReset)
 
 	// Prompt for confirmation
-	if !(c.Bool("yes") || utils.Confirm("Would you like to continue?")) {
+	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to continue?")) {
 		fmt.Println("Cancelled.")
 		return nil
 	}
