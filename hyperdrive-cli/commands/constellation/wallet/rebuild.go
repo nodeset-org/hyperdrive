@@ -69,7 +69,7 @@ func rebuildValidatorKeys(c *cli.Context) error {
 	}
 
 	// Confirm
-	if !(c.Bool("yes") || utils.Confirm("Are you ready to rebuild these keys?")) {
+	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Are you ready to rebuild these keys?")) {
 		fmt.Println("Cancelled.")
 		return nil
 	}
