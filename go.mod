@@ -15,9 +15,9 @@ require (
 	github.com/goccy/go-json v0.10.3
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nodeset-org/hyperdrive-constellation v1.0.0-rc1
-	github.com/nodeset-org/hyperdrive-daemon v1.1.0-rc1
-	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-rc1
+	github.com/nodeset-org/hyperdrive-constellation v1.0.0-rc1.0.20241010061629-a929b396a49a
+	github.com/nodeset-org/hyperdrive-daemon v1.1.0-rc1.0.20241010055911-fb487fa8c4b3
+	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-rc1.0.20241010060437-05e801c81ff4
 	github.com/nodeset-org/osha v0.3.1
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
@@ -30,6 +30,8 @@ require (
 	golang.org/x/term v0.22.0
 	gopkg.in/yaml.v3 v3.0.1
 )
+
+require github.com/rocket-pool/smartnode/v2 v2.0.0-olddev.0.20240710181452-edcbd6208bdd
 
 require (
 	filippo.io/age v1.2.0 // indirect
@@ -156,7 +158,6 @@ require (
 	github.com/prysmaticlabs/prysm/v5 v5.1.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rocket-pool/batch-query v1.0.0 // indirect
-	github.com/rocket-pool/smartnode/v2 v2.0.0-olddev.0.20240710181452-edcbd6208bdd // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sethvargo/go-password v0.3.1 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
@@ -205,4 +206,4 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
-replace github.com/rocket-pool/smartnode/v2 => github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20240729151944-127e460038df
+replace github.com/rocket-pool/smartnode/v2 => github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20241002073413-7c50008efc66

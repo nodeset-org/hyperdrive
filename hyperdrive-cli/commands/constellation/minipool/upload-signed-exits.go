@@ -116,7 +116,7 @@ func uploadSignedExits(c *cli.Context) error {
 	fmt.Printf("NodeSet will not submit these message under normal circumstances; if you want to voluntarily exit the validator yourself while it's still in good standing, you must do so manually via the Hyperdrive exit command.\n\n%s", terminal.ColorReset)
 
 	// Prompt for confirmation
-	if !(c.Bool("yes") || utils.ConfirmWithIAgree(fmt.Sprintf("Are you ready to send signed exits for %d minipool(s)?", len(selectedMinipools)))) {
+	if !(c.Bool(utils.YesFlag.Name) || utils.ConfirmWithIAgree(fmt.Sprintf("Are you ready to send signed exits for %d minipool(s)?", len(selectedMinipools)))) {
 		fmt.Println("Cancelled.")
 		return nil
 	}

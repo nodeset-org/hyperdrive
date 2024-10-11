@@ -58,7 +58,7 @@ func registerNode(c *cli.Context) error {
 	fmt.Printf("If you proceed, Hyperdrive will retrieve this signature for you automatically which will lock this node as your account's Constellation node (even if you aren't ready to submit the registration transaction yet).\n\n%s", terminal.ColorReset)
 
 	// Prompt for confirmation
-	if !(c.Bool("yes") || utils.ConfirmWithIAgree("Are you ready to assign this node as your account's Constellation node?")) {
+	if !(c.Bool(utils.YesFlag.Name) || utils.ConfirmWithIAgree("Are you ready to assign this node as your account's Constellation node?")) {
 		fmt.Println("Cancelled.")
 		return nil
 	}

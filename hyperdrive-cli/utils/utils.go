@@ -16,6 +16,7 @@ import (
 	"github.com/rocket-pool/node-manager-core/eth"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/rocket-pool/node-manager-core/wallet"
+	"github.com/rocket-pool/smartnode/v2/rocketpool-cli/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -227,7 +228,7 @@ func ParseFloat(c *cli.Context, name string, value string, isFraction bool) (*bi
 
 	trueVal := eth.EthToWei(floatValue)
 	fmt.Printf("Your value will be multiplied by 10^18 to be used in the contracts, which results in:\n\n\t[%s]\n\n", trueVal.String())
-	if !(c.Bool("yes") || Confirm("Please make sure this is what you want and does not have any floating-point errors.\n\nIs this result correct?")) {
+	if !(c.Bool(utils.YesFlag.Name) || Confirm("Please make sure this is what you want and does not have any floating-point errors.\n\nIs this result correct?")) {
 		fmt.Printf("Cancelled. Please try again with the '--%s' flag and provide an explicit value instead.\n", RawFlag.Name)
 		return nil, nil
 	}
