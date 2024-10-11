@@ -15,13 +15,13 @@ require (
 	github.com/goccy/go-json v0.10.3
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nodeset-org/hyperdrive-constellation v1.0.0-rc1.0.20241010061629-a929b396a49a
-	github.com/nodeset-org/hyperdrive-daemon v1.1.0-rc1.0.20241010055911-fb487fa8c4b3
-	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-rc1.0.20241010060437-05e801c81ff4
+	github.com/nodeset-org/hyperdrive-constellation v1.0.0-rc1.0.20241011055855-9523a5a815d4
+	github.com/nodeset-org/hyperdrive-daemon v1.1.0-rc1.0.20241011040058-749953f33ddd
+	github.com/nodeset-org/hyperdrive-stakewise v1.1.0-rc1.0.20241011043954-e47615ae9897
 	github.com/nodeset-org/osha v0.3.1
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20241009172604-e8458aa7509b
+	github.com/rocket-pool/node-manager-core v0.5.2-0.20241011014615-2cf2a45afa0a
 	github.com/rocket-pool/rocketpool-go/v2 v2.0.0-b2.0.20240709170030-c27aeb5fb99b
 	github.com/stretchr/testify v1.9.0
 	github.com/tyler-smith/go-bip39 v1.1.0
@@ -139,7 +139,7 @@ require (
 	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/nodeset-org/nodeset-client-go v1.2.0 // indirect
+	github.com/nodeset-org/nodeset-client-go v1.2.1 // indirect
 	github.com/nwaples/rardecode/v2 v2.0.0-beta.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect

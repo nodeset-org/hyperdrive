@@ -78,7 +78,7 @@ func createMinipool(c *cli.Context) error {
 			fmt.Println("- Constellation doesn't have enough ETH or RPL liquidity in its vaults to fund a new minipool. Please wait for more deposits to its vaults.")
 		}
 		if response.Data.MissingExitMessage {
-			fmt.Println("- Your node is not allowed to make any more minipools. Ensure you have uploaded signed exit messages for your existing minipools first, then try again.")
+			fmt.Println("- nodeset.io is missing a signed exit message for at least one of your previous validators. If you recently created a new minipool, you'll have to wait until it's been given an index on the Beacon Chain; Hyperdrive will upload a signed exit message automatically once an index is available.")
 		}
 		if response.Data.NodeSetDepositingDisabled {
 			fmt.Println("- NodeSet has currently disabled new minipool creation.")
@@ -86,6 +86,13 @@ func createMinipool(c *cli.Context) error {
 		if response.Data.RocketPoolDepositingDisabled {
 			fmt.Println("- Rocket Pool has currently disabled new minipool creation.")
 		}
+		if response.Data.IncorrectNodeAddress {
+			fmt.Println("- You have a different node registered for Constellation. You can only create minipools from that node.")
+		}
+		if response.Data.InvalidPermissions {
+			fmt.Println("- Your user account does not have the required permissions to use this Constellation deployment. Please reach out to the NodeSet administrators for help.")
+		}
+
 		return nil
 	}
 

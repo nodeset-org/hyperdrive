@@ -79,6 +79,14 @@ func registerNode(c *cli.Context) error {
 		fmt.Println("Your NodeSet account is not permitted to register with Constellation yet.")
 		return nil
 	}
+	if response.Data.IncorrectNodeAddress {
+		fmt.Println("Your user account has a different node registered for Constellation. You won't be able to use this node for the Constellation module.")
+		return nil
+	}
+	if response.Data.InvalidPermissions {
+		fmt.Println("Your user account does not have the required permissions to use this Constellation deployment. Please reach out to the NodeSet administrators for help.")
+		return nil
+	}
 
 	// Run the TX
 	validated, err := tx.HandleTx(c, hd, response.Data.TxInfo,

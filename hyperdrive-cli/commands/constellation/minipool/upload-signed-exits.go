@@ -71,6 +71,22 @@ func uploadSignedExits(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	if validatorsResponse.Data.NotRegistered {
+		fmt.Println("The node is not registered with NodeSet yet. Please run `hyperdrive ns r` to register your node.")
+		return nil
+	}
+	if validatorsResponse.Data.NotWhitelisted {
+		fmt.Println("The node is not registered with Constellation yet. Please run `hyperdrive cs n r` to register your node.")
+		return nil
+	}
+	if validatorsResponse.Data.IncorrectNodeAddress {
+		fmt.Println("Your user account has a different node registered for Constellation. You won't be able to use this node for the Constellation module.")
+		return nil
+	}
+	if validatorsResponse.Data.InvalidPermissions {
+		fmt.Println("Your user account does not have the required permissions to use this Constellation deployment. Please reach out to the NodeSet administrators for help.")
+		return nil
+	}
 	for _, mp := range filteredMinipools {
 		requiresExit := true
 		for _, validatorInfo := range validatorsResponse.Data.Validators {

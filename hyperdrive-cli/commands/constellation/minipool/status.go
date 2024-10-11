@@ -40,6 +40,22 @@ func getMinipoolStatus(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	if status.Data.NotRegisteredWithNodeSet {
+		fmt.Println("The node is not registered with NodeSet yet. Please run `hyperdrive ns r` to register your node.")
+		return nil
+	}
+	if status.Data.NotWhitelistedWithConstellation {
+		fmt.Println("The node is not registered with Constellation yet. Please run `hyperdrive cs n r` to register your node.")
+		return nil
+	}
+	if status.Data.IncorrectNodeAddress {
+		fmt.Println("Your user account has a different node registered for Constellation. You won't be able to use this node for the Constellation module.")
+		return nil
+	}
+	if status.Data.InvalidPermissions {
+		fmt.Println("- Your user account does not have the required permissions to use this Constellation deployment. Please reach out to the NodeSet administrators for help.")
+		return nil
+	}
 
 	// Get minipools by status
 	statusMinipools := map[string][]csapi.MinipoolDetails{}
