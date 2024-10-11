@@ -6,6 +6,7 @@ import (
 
 	hdcommon "github.com/nodeset-org/hyperdrive-daemon/common"
 	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
+	"github.com/nodeset-org/nodeset-client-go/common"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/mux"
@@ -70,6 +71,10 @@ func (c *constellationGetRegisteredAddressContext) PrepareData(data *api.NodeSet
 	ns := sp.GetNodeSetServiceManager()
 	address, err := ns.Constellation_GetRegisteredAddress(ctx, c.deployment)
 	if err != nil {
+		if errors.Is(err, common.ErrInvalidPermissions) {
+			data.InvalidPermissions = true
+			return types.ResponseStatus_Success, nil
+		}
 		return types.ResponseStatus_Error, err
 	}
 
