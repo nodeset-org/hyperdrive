@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/rocket-pool/node-manager-core/eth"
@@ -33,8 +34,13 @@ func getStats(c *cli.Context) error {
 	rplStakeInEth.Div(rplStakeInEth, oneEth)
 
 	ethBond := big.NewInt(int64(response.Data.ActiveMinipoolCount * 8)) // Hard-code LEB8s for now
-	bondedRatio := big.NewInt(0).Div(rplStakeInEth, ethBond)
-	borrowedRatio := big.NewInt(0).Div(bondedRatio, big.NewInt(24/8))
+	bondedRatio := big.NewInt(0)
+	borrowedRatio := big.NewInt(0)
+
+	if ethBond.Cmp(common.Big0) > 0 {
+		bondedRatio.Div(rplStakeInEth, ethBond)
+		borrowedRatio.Div(bondedRatio, big.NewInt(24/8))
+	}
 
 	// Print the stats
 	fmt.Printf("%s======== Network Settings =========%s\n", terminal.ColorGreen, terminal.ColorReset)
