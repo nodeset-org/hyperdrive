@@ -107,49 +107,21 @@ func createMinipool(c *cli.Context) error {
 
 	// Print salt and minipool address info
 	if c.String(saltFlag.Name) != "" {
-		fmt.Printf("Using custom salt %s, your minipool address will be %s.\n\n", c.String(saltFlag.Name), response.Data.MinipoolAddress.Hex())
-	}
-
-	// Run the TX
-	validated, err := tx.HandleTx(c, hd, response.Data.TxInfo,
-		"Exiting this minipool capital cannot be done until your minipool has been *active* on the Beacon Chain for 256 epochs (approx. 27 hours).",
-		"creating minipool",
-		"Creating minipool...",
-	)
-	if err != nil {
-		return err
-	}
-	if !validated {
-		// Prompt for saving the key
-		if c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to save the private key for this validator to disk? You'll need to do this if you plan to submit that transaction later and want to be able to attest with this validator.") {
-			_, err = cs.Api.Wallet.CreateValidatorKey(response.Data.ValidatorPubkey, response.Data.Index, 1)
-			if err != nil {
-				return fmt.Errorf("error saving validator key to disk: %w", err)
-			}
-		}
-		return nil
+		fmt.Printf("Using custom salt %s, your minipool address will be %s%s%s.\n\n", c.String(saltFlag.Name), terminal.ColorBlue, response.Data.MinipoolAddress.Hex(), terminal.ColorReset)
 	}
 
 	// Save the validator key to disk
 	_, err = cs.Api.Wallet.CreateValidatorKey(response.Data.ValidatorPubkey, response.Data.Index, 1)
 	if err != nil {
 		fmt.Printf("%sError saving validator key to disk: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
-		fmt.Println("Please rebuild your Constellation wallet manually to regenerate and save the validator key. Otherwise you will not be able to validate when it becomes active on the Beacon Chain!")
+		fmt.Println("Your deposit has *not* been sent for safety.")
 		return nil
+	} else {
+		fmt.Printf("%sValidator key %s%s%s successfully saved to disk.%s\n", terminal.ColorGreen, terminal.ColorBlue, response.Data.ValidatorPubkey.HexWithPrefix(), terminal.ColorGreen, terminal.ColorReset)
+		fmt.Println()
 	}
 
-	// Log & return
-	fmt.Printf("Minipool created successfully! You have temporarily locked up %.2f ETH.\n", math.RoundDown(eth.WeiToEth(response.Data.LockupAmount), 6))
-	fmt.Printf("Your new minipool's address is: %s\n", response.Data.MinipoolAddress)
-	fmt.Printf("The validator pubkey is: %s\n\n", response.Data.ValidatorPubkey.HexWithPrefix())
-
-	fmt.Println("Your minipool is now in Initialized status.")
-	fmt.Println("Once the remaining ETH has been assigned to your minipool from Rocket Pool's staking pool, it will move to Prelaunch status.")
-	fmt.Printf("After that, it will move to Staking status once %s have passed.\n", response.Data.ScrubPeriod)
-	fmt.Println("You can watch its progress using `hyperdrive s dl cs-tasks`.")
-
-	fmt.Println()
-
+	// Prompt for a VC restart
 	fmt.Println("Your Constellation Validator Client must be restarted in order to load the new validator key so it can begin attesting once it has been activated on the Beacon Chain.")
 	if c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to restart the Constellation Validator Client now?") {
 		_, err := hd.Api.Service.RestartContainer(string(csconfig.ContainerID_ConstellationValidator))
@@ -159,12 +131,47 @@ func createMinipool(c *cli.Context) error {
 			fmt.Printf("%sIf you don't restart it, you will miss attestations and lose ETH!%s\n", terminal.ColorYellow, terminal.ColorReset)
 		} else {
 			fmt.Println("Successfully restarted the Constellation Validator Client. Your new validator key is now loaded.")
-			return nil
 		}
 	} else {
 		fmt.Println("Please restart the Constellation Validator Client manually before your validator becomes active in order to load the new validator key.")
 		fmt.Printf("%sIf you don't restart it, you will miss attestations and lose ETH, and may be ejected from NodeSet!%s\n", terminal.ColorYellow, terminal.ColorReset)
 	}
+	fmt.Println()
+
+	// Print a note about gas price
+	if hd.Context.MaxFee == 0 { // Ignore if the user set their own gas fee
+		fmt.Printf("%sNOTE: Minipool creation is a very expensive transaction, and may take a very long time to break even if you set the gas price too high. Please review the gas price carefully in the next step!%s\n", terminal.ColorYellow, terminal.ColorReset)
+		fmt.Println()
+		if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Please confirm you understand the above warning.")) {
+			fmt.Println("Cancelled.")
+			return nil
+		}
+	}
+
+	// Run the TX
+	validated, err := tx.HandleTx(c, hd, response.Data.TxInfo,
+		"Exiting this minipool capital cannot be done until your minipool has been *active* on the Beacon Chain for 256 epochs (approx. 27 hours). Are you ready to create this minipool?",
+		"creating minipool",
+		"Creating minipool...",
+	)
+	if err != nil {
+		return err
+	}
+	if !validated {
+		return nil
+	}
+
+	// Log & return
+	fmt.Printf("Minipool created successfully! You have temporarily locked up %.2f ETH.\n", math.RoundDown(eth.WeiToEth(response.Data.LockupAmount), 6))
+	fmt.Printf("Your new minipool's address is: %s%s%s\n", terminal.ColorBlue, response.Data.MinipoolAddress, terminal.ColorReset)
+	fmt.Printf("The validator pubkey is: %s%s%s\n\n", terminal.ColorBlue, response.Data.ValidatorPubkey.HexWithPrefix(), terminal.ColorReset)
+
+	fmt.Println("Your minipool is now in Initialized status.")
+	fmt.Println("Once the remaining ETH has been assigned to your minipool from Rocket Pool's staking pool, it will move to Prelaunch status.")
+	fmt.Printf("After that, it will move to Staking status once %s have passed.\n", response.Data.ScrubPeriod)
+	fmt.Println("You can watch its progress using `hyperdrive s dl cs-tasks`.")
+
+	fmt.Println()
 
 	return nil
 }
