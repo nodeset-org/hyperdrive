@@ -1,3 +1,14 @@
+hyperdrive (1.1.0) stable; urgency=medium
+
+  * Improved error handling on nodeset.io requests to provide more information on what's wrong.
+  * Increased the task cooldown when the system is not ready yet to 15 seconds.
+  * Fixed a bug that erroneously printed log warnings about validators with already-uploaded signed exits not being included when uploading a new signed exit.
+  * Added `cs network stats` to view info about the Constellation settings and deposit pool status.
+  * `cs minipool create` once again saves the validator pubkey before sending the TX.
+  * Fixed the text on `cs minipool exit`.
+
+ -- NodeSet Inc. <info@nodeset.io>  Tue, 15 Oct 2024 21:22:15 +0000
+
 hyperdrive (1.1.0~rc1) unstable; urgency=medium
 
   * Updated Nethermind, Teku, and MEV-Boost.
