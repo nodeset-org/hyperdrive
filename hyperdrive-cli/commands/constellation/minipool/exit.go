@@ -197,7 +197,7 @@ func exitMinipools(c *cli.Context) error {
 	fmt.Println("You are about to exit your minipool. This will tell each one's validator to stop all activities on the Beacon Chain.")
 	fmt.Println("Please continue to run your validators until each one you've exited has been processed by the exit queue.\nYou can watch their progress on the https://beaconcha.in explorer.")
 	fmt.Println("Your funds will be locked on the Beacon Chain until they've been withdrawn, which will happen automatically (this may take a few days).")
-	fmt.Printf("Once your funds have been withdrawn, you can run `rocketpool minipool close` to distribute them to your withdrawal address and close the minipool.\n\n%s", terminal.ColorReset)
+	fmt.Printf("Once your funds have been withdrawn, your minipool will enter a queue to be processed automatically by Constellation. You don't need to take any action to distribute your minipool's balance.\n\n%s", terminal.ColorReset)
 
 	// Prompt for confirmation
 	if !(c.Bool(utils.YesFlag.Name) || utils.ConfirmWithIAgree(fmt.Sprintf("Are you sure you want to exit %d minipool(s)? This action cannot be undone!", len(selectedMinipools)))) {
