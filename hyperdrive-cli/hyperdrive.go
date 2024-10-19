@@ -102,6 +102,9 @@ func main() {
 	// Initialize app metadata
 	app.Metadata = make(map[string]interface{})
 
+	// Enable Bash Completion
+	app.EnableBashCompletion = true
+
 	// Set application flags
 	app.Flags = []cli.Flag{
 		allowRootFlag,
