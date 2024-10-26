@@ -1,3 +1,12 @@
+hyperdrive (1.1.1) UNRELEASED; urgency=medium
+
+  * Updated Besu, Nethermind, Reth, Prysm, Teku, and Prometheus.
+  * Fixed another bug that caused certain commands to hang on single-CPU systems.
+  * New global flag: `--itsf` can be used to ignore TX simulation failues and sign / submit TXs anyway, even if they will revert. Do NOT use this unless you know what you're doing and have a good reason.
+  * Added `--sbc` and `--slc` to `cs minipool create` which skip node balance and Constellation liquidity checks. Only use this if you intent to sign (but not submit) a TX for manual bundling or submission at a later date when the on-chain conditions become correct.
+
+ -- NodeSet Inc. <info@nodeset.io>  Sat, 26 Oct 2024 08:58:43 +0000
+
 hyperdrive (1.1.0) stable; urgency=medium
 
   * Improved error handling on nodeset.io requests to provide more information on what's wrong.
