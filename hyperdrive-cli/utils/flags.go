@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"fmt"
+
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -24,6 +27,11 @@ var (
 		Name:    "sign-tx-only",
 		Aliases: []string{"st"},
 		Usage:   "Sign any TXs and print the results, but don't submit it to the network. Useful if you want to save a TX for later or bundle it up with a service like Flashbots.",
+	}
+	IgnoreTxSimFailureFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "ignore-tx-sim-failure",
+		Aliases: []string{"itsf"},
+		Usage:   fmt.Sprintf("Ignore any transaction simulation failures and sign / submit transactions even if they will revert. %sThis can result in failed transactions and loss of funds. Only use this if you absolutely know what you're doing.%s", terminal.ColorRed, terminal.ColorReset),
 	}
 	RawFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name: "raw",

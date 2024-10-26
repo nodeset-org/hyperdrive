@@ -21,6 +21,16 @@ var (
 		Aliases: []string{"l"},
 		Usage:   "An optional seed to use when generating the new minipool's address. Use this if you want it to have a custom vanity address.",
 	}
+	createSkipLiquidityCheckFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "skip-liquidity-check",
+		Aliases: []string{"slc"},
+		Usage:   "Skip the check for sufficient ETH and RPL liquidity in Constellation's vaults during minipool creation. Only use this if you plan to print / sign the TX without submitting it and will manually ensure the liquidity is available before submission.",
+	}
+	createSkipBalanceCheckFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "skip-balance-check",
+		Aliases: []string{"sbc"},
+		Usage:   "Skip the check for sufficient ETH in your node wallet during minipool creation. Only use this if you plan to print / sign the TX without submitting it and will manually ensure the balance is sufficient before submission.",
+	}
 )
 
 func createMinipool(c *cli.Context) error {
@@ -53,7 +63,9 @@ func createMinipool(c *cli.Context) error {
 	}
 
 	// Build the TX
-	response, err := cs.Api.Minipool.Create(salt)
+	skipLiquidityCheck := c.Bool(createSkipLiquidityCheckFlag.Name)
+	skipBalanceCheck := c.Bool(createSkipBalanceCheckFlag.Name)
+	response, err := cs.Api.Minipool.Create(salt, skipLiquidityCheck, skipBalanceCheck)
 	if err != nil {
 		return err
 	}

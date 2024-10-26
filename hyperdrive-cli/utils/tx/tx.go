@@ -46,7 +46,11 @@ func handleTxImpl(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.Trans
 
 	// Make sure the TX was successful
 	if txInfo.SimulationResult.SimulationError != "" {
-		return false, fmt.Errorf("simulating %s failed: %s", identifier, txInfo.SimulationResult.SimulationError)
+		if c.Bool(utils.IgnoreTxSimFailureFlag.Name) {
+			fmt.Printf("%sWARNING: '%s' failed simulation: %s\nThis transaction will likely revert if you submit it.%s\n", terminal.ColorYellow, identifier, txInfo.SimulationResult.SimulationError, terminal.ColorReset)
+		} else {
+			return false, fmt.Errorf("simulating %s failed: %s", identifier, txInfo.SimulationResult.SimulationError)
+		}
 	}
 
 	// Assign max fees
@@ -132,7 +136,11 @@ func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.T
 	// Make sure the TXs were successful
 	for i, txInfo := range txInfos {
 		if txInfo.SimulationResult.SimulationError != "" {
-			return false, fmt.Errorf("simulating %s failed: %s", identifierFunc(i), txInfo.SimulationResult.SimulationError)
+			if c.Bool(utils.IgnoreTxSimFailureFlag.Name) {
+				fmt.Printf("%sWARNING: '%s' failed simulation: %s\nThis transaction will likely revert if you submit it.%s\n", terminal.ColorYellow, identifierFunc(i), txInfo.SimulationResult.SimulationError, terminal.ColorReset)
+			} else {
+				return false, fmt.Errorf("simulating %s failed: %s", identifierFunc(i), txInfo.SimulationResult.SimulationError)
+			}
 		}
 	}
 
