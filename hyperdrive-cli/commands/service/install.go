@@ -37,15 +37,25 @@ var (
 		Aliases: []string{"lp"},
 		Usage:   fmt.Sprintf("Path to a local installer package. If this is specified, Hyperdrive will use it instead of pulling the package down from the source repository. Requires -ls. %sMake sure you absolutely trust the script before using this flag.%s", terminal.ColorRed, terminal.ColorReset),
 	}
+	installNoRestartFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "no-restart",
+		Aliases: []string{"nr"},
+		Usage:   "Do not restart Hyperdrive services after installation",
+	}
 )
 
 // Install the Hyperdrive service
 func installService(c *cli.Context) error {
 	// Prompt for confirmation
-	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm(fmt.Sprintf(
-		"Hyperdrive will be installed --Version: %s\n\n%sIf you're upgrading, your existing configuration will be backed up and preserved.\nAll of your previous settings will be migrated automatically.%s\nAre you sure you want to continue?",
-		c.String(installVersionFlag.Name), terminal.ColorGreen, terminal.ColorReset,
-	))) {
+	fmt.Printf("Hyperdrive will be installed --Version: %s\n\n%sIf you're upgrading, your existing configuration will be backed up and preserved.\nAll of your previous settings will be migrated automatically.%s\n", c.String(installVersionFlag.Name), terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println()
+
+	if !c.Bool(installNoRestartFlag.Name) {
+		fmt.Printf("%sNOTE: after installing, all Hyperdrive-managed services (including your clients) will be restarted. If you have doppelganger detection enabled, any active validators will miss the next few attestations while it runs.%s\n", terminal.ColorYellow, terminal.ColorReset)
+		fmt.Println()
+	}
+
+	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Are you ready to continue?")) {
 		fmt.Println("Cancelled.")
 		return nil
 	}
@@ -89,18 +99,26 @@ func installService(c *cli.Context) error {
 		return fmt.Errorf("error generating daemon API keys: %w", err)
 	}
 
-	// Report next steps
-	fmt.Printf("%s\n=== Next Steps ===\n", terminal.ColorBlue)
-	fmt.Printf("Run 'hyperdrive service config' to review the settings changes for this update, or to continue setting up your node.%s\n", terminal.ColorReset)
-
-	// Print the docker permissions notice
 	if isNew {
+		fmt.Printf("%s\n=== Next Steps ===\n", terminal.ColorBlue)
+		fmt.Printf("Run 'hyperdrive service config' to review the settings changes for this update, or to continue setting up your node.%s\n", terminal.ColorReset)
+
+		// Print the docker permissions notice on first install
 		fmt.Printf("\n%sNOTE:\nSince this is your first time installing Hyperdrive, please start a new shell session by logging out and back in or restarting the machine.\n", terminal.ColorYellow)
 		fmt.Printf("This is necessary for your user account to have permissions to use Docker.%s", terminal.ColorReset)
+	} else if !c.Bool(installNoRestartFlag.Name) {
+		// Restart services
+		fmt.Println("Restarting Hyperdrive services...")
+		err = startService(c, true)
+		if err != nil {
+			return fmt.Errorf("error restarting services: %w", err)
+		}
+		fmt.Println("Services restarted successfully.")
+	} else {
+		fmt.Println("Remember to run `hyperdrive service start` to update to the new services!")
 	}
 
 	return nil
-
 }
 
 // Print the latest patch notes for this release

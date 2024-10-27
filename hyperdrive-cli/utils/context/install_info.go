@@ -11,13 +11,13 @@ const (
 	TestSystemDirEnvVar string = "HYPERDRIVE_TEST_SYSTEM_DIR"
 
 	// System dir path for Linux
-	linuxSystemDir string = "/usr/share/hyperdrive"
+	LinuxSystemDir string = "/usr/share/hyperdrive"
 
 	// Subfolders under the system dir
-	scriptsDir        string = "scripts"
-	templatesDir      string = "templates"
-	overrideSourceDir string = "override"
-	networksDir       string = "networks"
+	ScriptsDir        string = "scripts"
+	TemplatesDir      string = "templates"
+	OverrideSourceDir string = "override"
+	NetworksDir       string = "networks"
 )
 
 // Holds information about Hyperdrive's installation on the system
@@ -43,14 +43,19 @@ func NewInstallationInfo() *InstallationInfo {
 		// This is where to add different paths for different OS's like macOS
 		default:
 			// By default just use the Linux path
-			systemDir = linuxSystemDir
+			systemDir = LinuxSystemDir
 		}
 	}
 
+	return NewInstallationInfoForSystemDir(systemDir)
+}
+
+// Creates a new installation info instance with the given system directory
+func NewInstallationInfoForSystemDir(systemDir string) *InstallationInfo {
 	return &InstallationInfo{
-		ScriptsDir:        filepath.Join(systemDir, scriptsDir),
-		TemplatesDir:      filepath.Join(systemDir, templatesDir),
-		OverrideSourceDir: filepath.Join(systemDir, overrideSourceDir),
-		NetworksDir:       filepath.Join(systemDir, networksDir),
+		ScriptsDir:        filepath.Join(systemDir, ScriptsDir),
+		TemplatesDir:      filepath.Join(systemDir, TemplatesDir),
+		OverrideSourceDir: filepath.Join(systemDir, OverrideSourceDir),
+		NetworksDir:       filepath.Join(systemDir, NetworksDir),
 	}
 }

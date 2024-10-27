@@ -23,7 +23,10 @@ func CheckRegistrationStatus(c *cli.Context, hd *client.HyperdriveClient) (bool,
 	}
 
 	// Prompt for registration
-	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Would you like to register your node now?")) {
+	if c.Bool(utils.YesFlag.Name) {
+		return false, nil
+	}
+	if !utils.Confirm("Would you like to register your node now?") {
 		fmt.Println("Cancelled.")
 		return false, nil
 	}

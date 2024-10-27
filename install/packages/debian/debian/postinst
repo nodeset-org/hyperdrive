@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/bin/hyperdrive --allow-root service safe-start-after-install /usr/share/hyperdrive
