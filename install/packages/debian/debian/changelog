@@ -1,9 +1,10 @@
 hyperdrive (1.1.1) UNRELEASED; urgency=medium
 
   * Updated Besu, Nethermind, Reth, Prysm, Teku, and Prometheus.
-  * Fixed another bug that caused certain commands to hang on single-CPU systems.
-  * New global flag: `--itsf` can be used to ignore TX simulation failues and sign / submit TXs anyway, even if they will revert. Do NOT use this unless you know what you're doing and have a good reason.
+  * Fixed a bug that caused Rocket Pool contract queries to hang on single-CPU systems.
+  * New global flags: `--itsf` can be used to ignore TX simulation failues and sign / submit TXs anyway, even if they will revert. `--fgl` can force a specific gas limit on all transactions created by whatever command is being run. Do NOT use these unless you know what you're doing and have a good reason.
   * Added `--sbc` and `--slc` to `cs minipool create` which skip node balance and Constellation liquidity checks. Only use this if you intent to sign (but not submit) a TX for manual bundling or submission at a later date when the on-chain conditions become correct.
+  * The max fee selection prompt now properly shows the low and high transaction cost range, instead of just showing the high cost twice.
 
  -- NodeSet Inc. <info@nodeset.io>  Sat, 26 Oct 2024 08:58:43 +0000
 

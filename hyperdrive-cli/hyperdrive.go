@@ -113,6 +113,7 @@ func main() {
 		utils.PrintTxDataFlag,
 		utils.SignTxOnlyFlag,
 		utils.IgnoreTxSimFailureFlag,
+		utils.ForceGasLimitFlag,
 		debugFlag,
 		httpTracePathFlag,
 		secureSessionFlag,

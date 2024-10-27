@@ -33,6 +33,11 @@ var (
 		Aliases: []string{"itsf"},
 		Usage:   fmt.Sprintf("Ignore any transaction simulation failures and sign / submit transactions even if they will revert. %sThis can result in failed transactions and loss of funds. Only use this if you absolutely know what you're doing.%s", terminal.ColorRed, terminal.ColorReset),
 	}
+	ForceGasLimitFlag *cli.Uint64Flag = &cli.Uint64Flag{
+		Name:    "force-gas-limit",
+		Aliases: []string{"fgl"},
+		Usage:   fmt.Sprintf("Force a specific gas limit for all transactions produced by the command being run, overriding the gas limit estimated by transaction simulation. %sOnly use this if you know what you're doing.%s", terminal.ColorRed, terminal.ColorReset),
+	}
 	RawFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name: "raw",
 	}
