@@ -1,0 +1,13 @@
+#!/bin/sh -e
+
+# Source debconf
+. /usr/share/debconf/confmodule
+
+# Check if this is a new install or an upgrade
+if [ ! -z "$2" ]; then
+    # Ask about restarting
+    db_input critical hyperdrive/restart || true
+    db_go
+else
+    db_set hyperdrive/restart false
+fi

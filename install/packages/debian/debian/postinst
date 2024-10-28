@@ -1,3 +1,14 @@
 #!/bin/sh
 
-/usr/bin/hyperdrive --allow-root service safe-start-after-install /usr/share/hyperdrive
+# Source debconf
+. /usr/share/debconf/confmodule
+
+# Restart the service if requested
+db_get hyperdrive/restart
+if [ "$RET" = "true" ]; then
+    /usr/bin/hyperdrive --allow-root service safe-start-after-install /usr/share/hyperdrive || true
+fi
+
+# Reset the debconf "seen" flag for the next install 
+db_fset hyperdrive/restart seen false
+db_go
