@@ -5,6 +5,8 @@ hyperdrive (1.1.1) UNRELEASED; urgency=medium
   * New global flags: `--itsf` can be used to ignore TX simulation failues and sign / submit TXs anyway, even if they will revert. `--fgl` can force a specific gas limit on all transactions created by whatever command is being run. Do NOT use these unless you know what you're doing and have a good reason.
   * Added `--sbc` and `--slc` to `cs minipool create` which skip node balance and Constellation liquidity checks. Only use this if you intent to sign (but not submit) a TX for manual bundling or submission at a later date when the on-chain conditions become correct.
   * The max fee selection prompt now properly shows the low and high transaction cost range, instead of just showing the high cost twice.
+  * Running Constellation or StakeWise commands without them enabled will now print a proper error message instead of a connection error.
+  * Removed delegate info from `cs minipool status` since it is not relevant for Constellation node operators.
 
  -- NodeSet Inc. <info@nodeset.io>  Sat, 26 Oct 2024 08:58:43 +0000
 

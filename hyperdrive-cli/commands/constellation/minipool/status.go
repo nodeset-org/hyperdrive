@@ -7,7 +7,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	csapi "github.com/nodeset-org/hyperdrive-constellation/shared/api"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/rocket-pool/node-manager-core/eth"
 	nmc_utils "github.com/rocket-pool/node-manager-core/utils"
@@ -33,6 +32,14 @@ func getMinipoolStatus(c *cli.Context) error {
 	cs, err := client.NewConstellationClientFromCtx(c, hd)
 	if err != nil {
 		return err
+	}
+	cfg, _, err := hd.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("error loading Hyperdrive config: %w", err)
+	}
+	if !cfg.Constellation.Enabled.Value {
+		fmt.Println("The Constellation module is not enabled in your Hyperdrive configuration.")
+		return nil
 	}
 
 	// Get minipool statuses
@@ -215,25 +222,6 @@ func printMinipoolDetails(minipool csapi.MinipoolDetails, latestDelegate common.
 		} else {
 			fmt.Printf("Validator seen:        no\n")
 		}
-	}
-
-	// Withdrawal details - withdrawable minipools
-	if minipool.Status.Status == types.MinipoolStatus_Withdrawable {
-		fmt.Printf("Withdrawal available:  yes\n")
-	}
-
-	// Delegate details
-	if minipool.UseLatestDelegate {
-		fmt.Printf("Use latest delegate:   yes\n")
-	} else {
-		fmt.Printf("Use latest delegate:   no\n")
-	}
-	fmt.Printf("Delegate address:      %s\n", utils.GetPrettyAddress(minipool.Delegate))
-	fmt.Printf("Rollback delegate:     %s\n", utils.GetPrettyAddress(minipool.PreviousDelegate))
-	fmt.Printf("Effective delegate:    %s\n", utils.GetPrettyAddress(minipool.EffectiveDelegate))
-
-	if minipool.EffectiveDelegate != latestDelegate {
-		fmt.Printf("%s*Minipool can be upgraded to delegate %s!%s\n", terminal.ColorYellow, latestDelegate.Hex(), terminal.ColorReset)
 	}
 
 	fmt.Println()

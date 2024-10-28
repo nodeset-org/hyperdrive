@@ -17,6 +17,14 @@ func getStatus(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	cfg, _, err := hd.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("error loading Hyperdrive config: %w", err)
+	}
+	if !cfg.Constellation.Enabled.Value {
+		fmt.Println("The Constellation module is not enabled in your Hyperdrive configuration.")
+		return nil
+	}
 
 	// Get the node status
 	response, err := cs.Api.Node.GetRegistrationStatus()
