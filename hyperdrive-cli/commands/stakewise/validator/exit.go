@@ -40,6 +40,14 @@ func exit(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	cfg, _, err := hd.LoadConfig()
+	if err != nil {
+		return fmt.Errorf("error loading Hyperdrive config: %w", err)
+	}
+	if !cfg.StakeWise.Enabled.Value {
+		fmt.Println("The StakeWise module is not enabled in your Hyperdrive configuration.")
+		return nil
+	}
 
 	// Check wallet status
 	_, ready, err := utils.CheckIfWalletReady(hd)

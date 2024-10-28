@@ -195,8 +195,8 @@ func (c *GlobalConfig) Validate() []string {
 		case config.ClientMode_Local:
 			// In local MEV-boost mode, the user has to have at least one relay
 			relays := c.Hyperdrive.MevBoost.GetEnabledMevRelays()
-			if len(relays) == 0 {
-				errors = append(errors, "You have MEV-boost enabled in local mode but don't have any profiles or relays enabled. Please select at least one profile or relay to use MEV-boost.")
+			if len(relays) == 0 && c.Hyperdrive.MevBoost.CustomRelays.Value == "" {
+				errors = append(errors, "You have MEV-boost enabled in local mode but don't have any profiles or relays enabled, and don't have any custom relays entered. Please select at least one profile or relay, or enter at least one custom relay, to use MEV-boost.")
 			}
 		case config.ClientMode_External:
 			// In external MEV-boost mode, the user has to have an external URL if they're running Docker mode
@@ -251,13 +251,20 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 
 	// Process all configs for changes
 	sectionList = getChanges(oldConfig.Hyperdrive, c.Hyperdrive, sectionList, changedContainers)
-	sectionList = getChanges(oldConfig.StakeWise, c.StakeWise, sectionList, changedContainers)
-	sectionList = getChanges(oldConfig.Constellation, c.Constellation, sectionList, changedContainers)
+	if c.StakeWise.Enabled.Value {
+		sectionList = getChanges(oldConfig.StakeWise, c.StakeWise, sectionList, changedContainers)
+	}
+	if c.Constellation.Enabled.Value {
+		sectionList = getChanges(oldConfig.Constellation, c.Constellation, sectionList, changedContainers)
+	}
 
 	// Add all VCs to the list of changed containers if any change requires a VC change
 	if changedContainers[config.ContainerID_ValidatorClient] {
 		delete(changedContainers, config.ContainerID_ValidatorClient)
 		for _, module := range c.GetAllModuleConfigs() {
+			if !module.IsEnabled() {
+				continue
+			}
 			vcInfo := module.GetValidatorContainerTagInfo()
 			for name := range vcInfo {
 				changedContainers[name] = true

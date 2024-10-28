@@ -64,8 +64,12 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 		// TEMP: Restart all of the module daemons if the HD daemon is being restarted
 		for container := range totalAffectedContainers {
 			if container == config.ContainerID_Daemon {
-				totalAffectedContainers[swconfig.ContainerID_StakewiseDaemon] = true
-				totalAffectedContainers[csconfig.ContainerID_ConstellationDaemon] = true
+				if newConfig.StakeWise.Enabled.Value {
+					totalAffectedContainers[swconfig.ContainerID_StakewiseDaemon] = true
+				}
+				if newConfig.Constellation.Enabled.Value {
+					totalAffectedContainers[csconfig.ContainerID_ConstellationDaemon] = true
+				}
 			}
 		}
 
