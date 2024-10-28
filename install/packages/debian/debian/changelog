@@ -8,6 +8,10 @@ hyperdrive (1.1.1) UNRELEASED; urgency=medium
   * Running Constellation or StakeWise commands without them enabled will now print a proper error message instead of a connection error.
   * Removed delegate info from `cs minipool status` since it is not relevant for Constellation node operators.
   * The `service config` validation routine will now work properly if you don't have any of the default MEV-Boost relays enabled but do have your own custom relays.
+  * The default max fee has been reduced to 20, and the default max priority fee has been reduced to 0.1. Note this only affects new users that are configuring Hyperdrive for the first time.
+  * Automatic TXs will now ignore the gas threshold setting if a manual max fee is specified, as the threshold setting is only useful for dynamic network-based fees.
+  * Automatic TXs will now lower the max priority fee down to the max fee if the priority fee is greater than the max fee.
+  * Added additional validation to `service config` so the above conditions should not normally be possible anyway.
 
  -- NodeSet Inc. <info@nodeset.io>  Sat, 26 Oct 2024 08:58:43 +0000
 
