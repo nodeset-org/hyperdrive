@@ -7,6 +7,7 @@ hyperdrive (1.1.1) UNRELEASED; urgency=medium
   * The max fee selection prompt now properly shows the low and high transaction cost range, instead of just showing the high cost twice.
   * Running Constellation or StakeWise commands without them enabled will now print a proper error message instead of a connection error.
   * Removed delegate info from `cs minipool status` since it is not relevant for Constellation node operators.
+  * The `service config` validation routine will now work properly if you don't have any of the default MEV-Boost relays enabled but do have your own custom relays.
 
  -- NodeSet Inc. <info@nodeset.io>  Sat, 26 Oct 2024 08:58:43 +0000
 
