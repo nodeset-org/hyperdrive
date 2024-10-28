@@ -24,15 +24,6 @@ import (
 const (
 	defaultConfigFolder string      = ".hyperdrive"
 	traceMode           os.FileMode = 0644
-
-	// System dir path for Linux
-	LinuxSystemDir string = "/usr/share/hyperdrive"
-
-	// Subfolders under the system dir
-	ScriptsDir        string = "scripts"
-	TemplatesDir      string = "templates"
-	OverrideSourceDir string = "override"
-	NetworksDir       string = "networks"
 )
 
 // Flags
@@ -121,6 +112,8 @@ func main() {
 		nonceFlag,
 		utils.PrintTxDataFlag,
 		utils.SignTxOnlyFlag,
+		utils.IgnoreTxSimFailureFlag,
+		utils.ForceGasLimitFlag,
 		debugFlag,
 		httpTracePathFlag,
 		secureSessionFlag,

@@ -28,6 +28,13 @@ func HandleTxWithIAgree(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth
 
 // Implementation of the transaction handling logic
 func handleTxImpl(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.TransactionInfo, confirmMessage string, identifier string, submissionMessage string, useIAgree bool) (bool, error) {
+	// Overwrite the gas limit if requested
+	if c.IsSet(utils.ForceGasLimitFlag.Name) {
+		manualLimit := c.Uint64(utils.ForceGasLimitFlag.Name)
+		txInfo.SimulationResult.EstimatedGasLimit = manualLimit
+		txInfo.SimulationResult.SafeGasLimit = manualLimit
+	}
+
 	// Print the TX data if requested
 	if c.Bool(utils.PrintTxDataFlag.Name) {
 		fmt.Printf("TX Data for %s:\n", identifier)
@@ -46,7 +53,11 @@ func handleTxImpl(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.Trans
 
 	// Make sure the TX was successful
 	if txInfo.SimulationResult.SimulationError != "" {
-		return false, fmt.Errorf("simulating %s failed: %s", identifier, txInfo.SimulationResult.SimulationError)
+		if c.Bool(utils.IgnoreTxSimFailureFlag.Name) {
+			fmt.Printf("%sWARNING: '%s' failed simulation: %s\nThis transaction will likely revert if you submit it.%s\n", terminal.ColorYellow, identifier, txInfo.SimulationResult.SimulationError, terminal.ColorReset)
+		} else {
+			return false, fmt.Errorf("simulating %s failed: %s", identifier, txInfo.SimulationResult.SimulationError)
+		}
 	}
 
 	// Assign max fees
@@ -108,6 +119,15 @@ func handleTxImpl(c *cli.Context, hd *client.HyperdriveClient, txInfo *eth.Trans
 
 // Handle a batch of transactions, either printing their details, signing them, or submitting them and waiting for them to be included
 func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.TransactionInfo, confirmMessage string, identifierFunc func(int) string, submissionMessage string) (bool, error) {
+	// Overwrite the gas limit if requested
+	if c.IsSet(utils.ForceGasLimitFlag.Name) {
+		manualLimit := c.Uint64(utils.ForceGasLimitFlag.Name)
+		for _, txInfo := range txInfos {
+			txInfo.SimulationResult.EstimatedGasLimit = manualLimit
+			txInfo.SimulationResult.SafeGasLimit = manualLimit
+		}
+	}
+
 	// Print the TX data if requested
 	if c.Bool(utils.PrintTxDataFlag.Name) {
 		for i, info := range txInfos {
@@ -132,7 +152,11 @@ func HandleTxBatch(c *cli.Context, hd *client.HyperdriveClient, txInfos []*eth.T
 	// Make sure the TXs were successful
 	for i, txInfo := range txInfos {
 		if txInfo.SimulationResult.SimulationError != "" {
-			return false, fmt.Errorf("simulating %s failed: %s", identifierFunc(i), txInfo.SimulationResult.SimulationError)
+			if c.Bool(utils.IgnoreTxSimFailureFlag.Name) {
+				fmt.Printf("%sWARNING: '%s' failed simulation: %s\nThis transaction will likely revert if you submit it.%s\n", terminal.ColorYellow, identifierFunc(i), txInfo.SimulationResult.SimulationError, terminal.ColorReset)
+			} else {
+				return false, fmt.Errorf("simulating %s failed: %s", identifierFunc(i), txInfo.SimulationResult.SimulationError)
+			}
 		}
 	}
 

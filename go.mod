@@ -9,20 +9,21 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/docker/docker v27.3.1+incompatible
 	github.com/dustin/go-humanize v1.0.1
-	github.com/ethereum/go-ethereum v1.14.8
+	github.com/ethereum/go-ethereum v1.14.11
 	github.com/fatih/color v1.17.0
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/goccy/go-json v0.10.3
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nodeset-org/hyperdrive-constellation v1.0.0
-	github.com/nodeset-org/hyperdrive-daemon v1.1.0
+	github.com/nodeset-org/hyperdrive-constellation v1.0.1-0.20241026081320-11e85b6985dc
+	github.com/nodeset-org/hyperdrive-daemon v1.1.1-0.20241026055334-466e711d8cf9
 	github.com/nodeset-org/hyperdrive-stakewise v1.1.0
 	github.com/nodeset-org/osha v0.3.1
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20241011014615-2cf2a45afa0a
+	github.com/rocket-pool/node-manager-core v0.5.2-0.20241026054448-4827602a297b
 	github.com/rocket-pool/rocketpool-go/v2 v2.0.0-b2.0.20240709170030-c27aeb5fb99b
+	github.com/rocket-pool/smartnode/v2 v2.0.0-olddev.0.20240710181452-edcbd6208bdd
 	github.com/stretchr/testify v1.9.0
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.27.2
@@ -30,8 +31,6 @@ require (
 	golang.org/x/term v0.22.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-require github.com/rocket-pool/smartnode/v2 v2.0.0-olddev.0.20240710181452-edcbd6208bdd
 
 require (
 	filippo.io/age v1.2.0 // indirect
@@ -66,6 +65,7 @@ require (
 	github.com/containerd/ttrpc v1.2.5 // indirect
 	github.com/containerd/typeurl/v2 v2.2.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
+	github.com/crate-crypto/go-ipa v0.0.0-20240223125850-b1e8a79f509c // indirect
 	github.com/crate-crypto/go-kzg-4844 v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
@@ -78,6 +78,7 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/ethereum/c-kzg-4844 v1.0.2 // indirect
+	github.com/ethereum/go-verkle v0.1.1-0.20240829091221-dffa7562dbe9 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/ferranbt/fastssz v0.1.3 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
@@ -163,7 +164,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
-	github.com/supranational/blst v0.3.12 // indirect
+	github.com/supranational/blst v0.3.13 // indirect
 	github.com/therootcompany/xz v1.0.1 // indirect
 	github.com/thomaso-mirodin/intmath v0.0.0-20160323211736-5dc6d854e46e // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect

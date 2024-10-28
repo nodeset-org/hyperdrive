@@ -33,6 +33,8 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Flags: []cli.Flag{
 					utils.YesFlag,
 					saltFlag,
+					createSkipLiquidityCheckFlag,
+					createSkipBalanceCheckFlag,
 				},
 				Usage: "Create a new minipool.",
 				Action: func(c *cli.Context) error {

@@ -57,7 +57,7 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 			etherchainData, err := gas.GetEtherchainGasPrices()
 			if err == nil {
 				// Print the Etherchain data and ask for an amount
-				maxFeeGwei = handleEtherchainGasPrices(etherchainData, simResult, maxPriorityFeeGwei, simResult.SafeGasLimit)
+				maxFeeGwei = handleEtherchainGasPrices(etherchainData, simResult, maxPriorityFeeGwei, 0)
 
 			} else {
 				// Fallback to Etherscan
@@ -65,7 +65,7 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 				etherscanData, err := gas.GetEtherscanGasPrices()
 				if err == nil {
 					// Print the Etherscan data and ask for an amount
-					maxFeeGwei = handleEtherscanGasPrices(etherscanData, simResult, maxPriorityFeeGwei, simResult.SafeGasLimit)
+					maxFeeGwei = handleEtherscanGasPrices(etherscanData, simResult, maxPriorityFeeGwei, 0)
 				} else {
 					return nil, nil, fmt.Errorf("Error getting gas price suggestions: %w", err)
 				}

@@ -226,7 +226,6 @@ if [ "$CLIENT" = "prysm" ]; then
         --grpc-gateway-port ${BN_API_PORT:-5052} \
         --eth1-header-req-limit 150 \
         --jwt-secret=/secrets/jwtsecret \
-        --api-timeout 600 \
         --enable-experimental-backfill \
         $BN_ADDITIONAL_FLAGS"
 
