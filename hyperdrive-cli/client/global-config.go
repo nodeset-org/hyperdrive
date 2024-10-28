@@ -258,6 +258,9 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 	if changedContainers[config.ContainerID_ValidatorClient] {
 		delete(changedContainers, config.ContainerID_ValidatorClient)
 		for _, module := range c.GetAllModuleConfigs() {
+			if !module.IsEnabled() {
+				continue
+			}
 			vcInfo := module.GetValidatorContainerTagInfo()
 			for name := range vcInfo {
 				changedContainers[name] = true

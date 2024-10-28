@@ -118,8 +118,9 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 
 	// Write a note on doppelganger protection
 	for _, module := range cfg.GetAllModuleConfigs() {
-		if module.IsDoppelgangerEnabled() {
+		if module.IsEnabled() && module.IsDoppelgangerEnabled() {
 			fmt.Printf("%sNOTE: You currently have Doppelganger Protection enabled on at least one module.\nYour Validator Client will miss up to 3 attestations when it starts.\nThis is *intentional* and does not indicate a problem with your node.%s\n\n", terminal.ColorBold, terminal.ColorReset)
+			break
 		}
 	}
 
