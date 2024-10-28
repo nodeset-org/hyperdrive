@@ -226,7 +226,7 @@ func NewHyperdriveConfigForNetwork(hdDir string, networks []*HyperdriveSettings,
 				OverwriteOnUpgrade: false,
 			},
 			Default: map[config.Network]float64{
-				config.Network_All: float64(1),
+				config.Network_All: float64(0.1),
 			},
 		},
 
@@ -234,13 +234,13 @@ func NewHyperdriveConfigForNetwork(hdDir string, networks []*HyperdriveSettings,
 			ParameterCommon: &config.ParameterCommon{
 				ID:                 ids.AutoTxGasThresholdID,
 				Name:               "Automatic TX Gas Threshold",
-				Description:        "The threshold (in gwei) that the recommended network gas price must be under in order for automated transactions to be submitted when due.\n\nA value of 0 will disable non-essential automatic transactions.",
+				Description:        "The threshold (in gwei) that the recommended network gas price must be under in order for automated transactions to be submitted when due. A value of 0 will disable non-essential automatic transactions.\n\nNOTE: If Auto TX Max Fee is set, this setting will be ignored.",
 				AffectsContainers:  []config.ContainerID{config.ContainerID_Daemon},
 				CanBeBlank:         false,
 				OverwriteOnUpgrade: false,
 			},
 			Default: map[config.Network]float64{
-				config.Network_All: float64(100),
+				config.Network_All: float64(20),
 			},
 		},
 

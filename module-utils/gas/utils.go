@@ -20,15 +20,19 @@ const (
 	TotalMaxCostKey    string = "totalMaxCost"
 )
 
-// Print the gas price and cost of a TX
+// Print the gas price and cost of a TX. If gasThresholdGwei is negative, the threshold is ignored.
 func PrintAndCheckGasInfo(simResult eth.SimulationResult, checkThreshold bool, gasThresholdGwei float64, logger *slog.Logger, maxFeeWei *big.Int, gasLimit uint64) bool {
 	// Check the gas threshold if requested
 	if checkThreshold {
-		gasThresholdWei := math.RoundUp(gasThresholdGwei*eth.WeiPerGwei, 0)
-		gasThreshold := new(big.Int).SetUint64(uint64(gasThresholdWei))
-		if maxFeeWei.Cmp(gasThreshold) != -1 {
-			logger.Warn("Current network gas price is too high, aborting the transaction.", slog.Float64(CurrentMaxFeeKey, eth.WeiToGwei(maxFeeWei)), slog.Float64(ThresholdMaxFeeKey, gasThresholdGwei))
-			return false
+		if gasThresholdGwei < 0 {
+			logger.Info("Gas threshold is being ignored, continuing...")
+		} else {
+			gasThresholdWei := math.RoundUp(gasThresholdGwei*eth.WeiPerGwei, 0)
+			gasThreshold := new(big.Int).SetUint64(uint64(gasThresholdWei))
+			if maxFeeWei.Cmp(gasThreshold) != -1 {
+				logger.Warn("Current network gas price is too high, aborting the transaction.", slog.Float64(CurrentMaxFeeKey, eth.WeiToGwei(maxFeeWei)), slog.Float64(ThresholdMaxFeeKey, gasThresholdGwei))
+				return false
+			}
 		}
 	} else {
 		logger.Info("This transaction does not check the gas threshold limit, continuing...")
@@ -50,15 +54,19 @@ func PrintAndCheckGasInfo(simResult eth.SimulationResult, checkThreshold bool, g
 	return true
 }
 
-// Print the gas price and cost of a TX batch
+// Print the gas price and cost of a TX batch. If gasThresholdGwei is negative, the threshold is ignored.
 func PrintAndCheckGasInfoForBatch(submissions []*eth.TransactionSubmission, checkThreshold bool, gasThresholdGwei float64, logger *slog.Logger, maxFeeWei *big.Int) bool {
 	// Check the gas threshold if requested
 	if checkThreshold {
-		gasThresholdWei := math.RoundUp(gasThresholdGwei*eth.WeiPerGwei, 0)
-		gasThreshold := new(big.Int).SetUint64(uint64(gasThresholdWei))
-		if maxFeeWei.Cmp(gasThreshold) != -1 {
-			logger.Warn("Current network gas price is too high, aborting the transaction.", slog.Float64(CurrentMaxFeeKey, eth.WeiToGwei(maxFeeWei)), slog.Float64(ThresholdMaxFeeKey, gasThresholdGwei))
-			return false
+		if gasThresholdGwei < 0 {
+			logger.Info("Gas threshold is being ignored, continuing...")
+		} else {
+			gasThresholdWei := math.RoundUp(gasThresholdGwei*eth.WeiPerGwei, 0)
+			gasThreshold := new(big.Int).SetUint64(uint64(gasThresholdWei))
+			if maxFeeWei.Cmp(gasThreshold) != -1 {
+				logger.Warn("Current network gas price is too high, aborting the transaction.", slog.Float64(CurrentMaxFeeKey, eth.WeiToGwei(maxFeeWei)), slog.Float64(ThresholdMaxFeeKey, gasThresholdGwei))
+				return false
+			}
 		}
 	} else {
 		logger.Info("This transaction does not check the gas threshold limit, continuing...")

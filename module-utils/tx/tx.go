@@ -15,6 +15,13 @@ import (
 
 // Prints a TX's details to the logger and waits for it to validated.
 func PrintAndWaitForTransaction(res *config.NetworkResources, txMgr *eth.TransactionManager, logger *slog.Logger, txInfo *eth.TransactionInfo, opts *bind.TransactOpts) error {
+	if opts.GasTipCap != nil && opts.GasFeeCap != nil && opts.GasTipCap.Cmp(opts.GasFeeCap) > 0 {
+		logger.Warn("Max priority fee is higher than max fee, setting max priority fee to max fee.",
+			slog.Float64("maxFee", eth.WeiToGwei(opts.GasFeeCap)),
+			slog.Float64("maxPriorityFee", eth.WeiToGwei(opts.GasTipCap)),
+		)
+		opts.GasTipCap = new(big.Int).Set(opts.GasFeeCap)
+	}
 	tx, err := txMgr.ExecuteTransaction(txInfo, opts)
 	if err != nil {
 		return fmt.Errorf("error submitting transaction: %w", err)
@@ -43,6 +50,13 @@ func PrintAndWaitForTransaction(res *config.NetworkResources, txMgr *eth.Transac
 
 // Prints a TX's details to the logger and waits for it to validated.
 func PrintAndWaitForTransactionBatch(res *config.NetworkResources, txMgr *eth.TransactionManager, logger *slog.Logger, submissions []*eth.TransactionSubmission, opts *bind.TransactOpts) error {
+	if opts.GasTipCap != nil && opts.GasFeeCap != nil && opts.GasTipCap.Cmp(opts.GasFeeCap) > 0 {
+		logger.Warn("Max priority fee is higher than max fee, setting max priority fee to max fee.",
+			slog.Float64("maxFee", eth.WeiToGwei(opts.GasFeeCap)),
+			slog.Float64("maxPriorityFee", eth.WeiToGwei(opts.GasTipCap)),
+		)
+		opts.GasTipCap = new(big.Int).Set(opts.GasFeeCap)
+	}
 	txs, err := txMgr.BatchExecuteTransactions(submissions, opts)
 	if err != nil {
 		return fmt.Errorf("error submitting transactions: %w", err)
@@ -108,9 +122,19 @@ func GetAutoTxInfo(cfg *hdconfig.HyperdriveConfig, logger *slog.Logger) (*big.In
 	// Get the user-requested max fee
 	priorityFeeGwei := cfg.MaxPriorityFee.Value
 	var priorityFee *big.Int
-	if priorityFeeGwei == 0 {
-		logger.Warn("Priority fee was missing or 0, setting a default of 2.")
-		priorityFee = eth.GweiToWei(2)
+	if priorityFeeGwei <= 0 {
+		defaultFee := cfg.MaxPriorityFee.Default[config.Network_All]
+		if defaultFee == 0 {
+			// Safety check just in case the all-network default goes away
+			defaultFee = cfg.MaxPriorityFee.Default[config.Network_Mainnet]
+			if defaultFee == 0 {
+				defaultFee = 0.1 // Double safety
+			}
+		}
+		logger.Warn("Priority fee was missing or 0, using default value.",
+			slog.Float64("default", defaultFee),
+		)
+		priorityFee = eth.GweiToWei(defaultFee)
 	} else {
 		priorityFee = eth.GweiToWei(priorityFeeGwei)
 	}
