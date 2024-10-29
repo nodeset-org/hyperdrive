@@ -189,6 +189,29 @@ func (c *GlobalConfig) Validate() []string {
 	}
 	*/
 
+	// Ensure the fee settings are ok
+	autoTxMaxFee := c.Hyperdrive.AutoTxMaxFee.Value
+	prioFee := c.Hyperdrive.MaxPriorityFee.Value
+	gasThreshold := c.Hyperdrive.AutoTxGasThreshold.Value
+	if autoTxMaxFee < 0 {
+		errors = append(errors, "Auto TX Max Fee cannot be negative.")
+	}
+	if prioFee <= 0 {
+		errors = append(errors, "Max Priority Fee must be greater than 0.")
+	}
+	if gasThreshold < 0 {
+		errors = append(errors, "Auto TX Gas Threshold cannot be negative.")
+	}
+	if autoTxMaxFee > 0 && prioFee > autoTxMaxFee {
+		errors = append(errors, "Max Priority Fee cannot be greater than Auto TX Max Fee.")
+	}
+	if gasThreshold > 0 && prioFee > gasThreshold {
+		errors = append(errors, "Max Priority Fee cannot be greater than Auto TX Gas Threshold.")
+	}
+	if autoTxMaxFee > 0 && gasThreshold > 0 && autoTxMaxFee >= gasThreshold {
+		errors = append(errors, "Auto TX Max Fee must be less than Auto TX Gas Threshold.")
+	}
+
 	// Ensure there's a MEV-boost URL
 	if c.Hyperdrive.MevBoost.Enable.Value {
 		switch c.Hyperdrive.MevBoost.Mode.Value {
