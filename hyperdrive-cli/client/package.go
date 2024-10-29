@@ -24,7 +24,7 @@ func StartServiceAsUser(uid uint32, hyperdriveBin string, configPath string) boo
 		hyperdriveCmd = append(hyperdriveCmd, "--allow-root")
 	}
 	hyperdriveCmd = append(hyperdriveCmd, "--config-path", configPath, "service", "start", "-y")
-	hyperdriveCmdStr := fmt.Sprintf("%s", strings.Join(hyperdriveCmd, " "))
+	hyperdriveCmdStr := strings.Join(hyperdriveCmd, " ")
 
 	// Run `su` to start Hyperdrive as the user
 	cmd := &command{
