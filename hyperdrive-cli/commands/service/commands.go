@@ -97,6 +97,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					installVersionFlag,
 					installLocalScriptFlag,
 					installLocalPackageFlag,
+					installNoRestartFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
@@ -382,6 +383,24 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 
 					// Run command
 					return terminateService(c)
+				},
+			},
+
+			// Used by the package installers only
+			{
+				Name:    "safe-start-after-install",
+				Aliases: []string{"ssaf"},
+				Usage:   "Install the Hyperdrive service",
+				Hidden:  true,
+				Flags:   []cli.Flag{},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 1)
+					systemDir := c.Args().Get(0)
+
+					// Run command
+					safeStartAfterInstall(systemDir)
+					return nil
 				},
 			},
 		},

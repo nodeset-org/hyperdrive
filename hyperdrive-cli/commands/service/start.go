@@ -11,6 +11,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 	cliwallet "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/rocket-pool/node-manager-core/utils/input"
@@ -91,11 +92,19 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 			fmt.Println()
 			fmt.Println("**If you did NOT change clients, you can safely ignore this warning.**")
 			fmt.Println()
+			if c.Bool(utils.YesFlag.Name) {
+				fmt.Println("Aborting auto-start sequence due to non-interactive mode.")
+				return nil
+			}
 			if !cliutils.Confirm(fmt.Sprintf("Press y when you understand the above warning, have waited, and are ready to start Hyperdrive:%s", terminal.ColorReset)) {
 				fmt.Println("Cancelled.")
 				return nil
 			}
 		} else if firstRun {
+			if c.Bool(utils.YesFlag.Name) {
+				fmt.Println("It looks like this is your first time starting a Validator Client, but auto-start is being aborted for safety due to non-interactive mode. Please run `hyperdrive service start` manually when you can.")
+				return nil
+			}
 			fmt.Println("It looks like this is your first time starting a Validator Client.")
 			existingNode := cliutils.Confirm("Just to be sure, does your node have any existing, active validators attesting on the Beacon Chain?")
 			if !existingNode {
@@ -157,9 +166,12 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	} else {
 		// Prompt for password
 		if status.Wallet.IsOnDisk {
-			err := promptForPassword(c, hd)
+			isLoaded, err := promptForPassword(c, hd)
 			if err != nil {
 				return err
+			}
+			if !isLoaded {
+				return nil
 			}
 		} else {
 			// Init
@@ -204,8 +216,12 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 }
 
 // Prompt for the wallet password upon startup if it isn't available, but a wallet is on disk
-func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) error {
+func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) (bool, error) {
 	fmt.Println("Your node wallet is saved, but the password is not stored on disk so it cannot be loaded automatically.")
+	if c.Bool(utils.YesFlag.Name) {
+		return false, nil
+	}
+
 	// Get the password
 	passwordString := c.String(cliwallet.PasswordFlag.Name)
 	if passwordString == "" {
@@ -213,7 +229,7 @@ func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) error {
 	}
 	password, err := input.ValidateNodePassword("password", passwordString)
 	if err != nil {
-		return fmt.Errorf("error validating password: %w", err)
+		return false, fmt.Errorf("error validating password: %w", err)
 	}
 
 	// Get the save flag
@@ -224,7 +240,7 @@ func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) error {
 	if err != nil {
 		fmt.Printf("%sError setting password: %s%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
 		fmt.Println("Your service has started, but you'll need to provide the node wallet password later with `hyperdrive wallet set-password`.")
-		return nil
+		return false, nil
 	}
 
 	// Refresh the status
@@ -232,16 +248,16 @@ func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) error {
 	if err != nil {
 		fmt.Printf("Wallet password set.\n%sError checking node wallet: %s%s\n", terminal.ColorYellow, err.Error(), terminal.ColorReset)
 		fmt.Println("Please check the service logs with `hyperdrive service logs daemon` for more information.")
-		return nil
+		return false, nil
 	}
 	status := response.Data.WalletStatus
 	if !status.Wallet.IsLoaded {
 		fmt.Println("Wallet password set, but the node wallet could not be loaded.")
 		fmt.Println("Please check the service logs with `hyperdrive service logs daemon` for more information.")
-		return nil
+		return false, nil
 	}
 	fmt.Printf("Your node wallet with address %s%s%s is now loaded and ready to use.\n", terminal.ColorBlue, status.Wallet.WalletAddress.Hex(), terminal.ColorReset)
-	return nil
+	return true, nil
 }
 
 // Check if any of the VCs has changed and force a wait for slashing protection, since all VCs are tied to the BN selection

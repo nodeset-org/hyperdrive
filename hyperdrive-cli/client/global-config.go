@@ -274,18 +274,33 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 
 	// Process all configs for changes
 	sectionList = getChanges(oldConfig.Hyperdrive, c.Hyperdrive, sectionList, changedContainers)
-	if c.StakeWise.Enabled.Value {
+	if c.StakeWise.Enabled.Value || oldConfig.StakeWise.Enabled.Value {
 		sectionList = getChanges(oldConfig.StakeWise, c.StakeWise, sectionList, changedContainers)
 	}
-	if c.Constellation.Enabled.Value {
+	if c.Constellation.Enabled.Value || oldConfig.Constellation.Enabled.Value {
 		sectionList = getChanges(oldConfig.Constellation, c.Constellation, sectionList, changedContainers)
 	}
 
 	// Add all VCs to the list of changed containers if any change requires a VC change
 	if changedContainers[config.ContainerID_ValidatorClient] {
 		delete(changedContainers, config.ContainerID_ValidatorClient)
+		oldConfigs := oldConfig.GetAllModuleConfigs()
 		for _, module := range c.GetAllModuleConfigs() {
+			includeVc := true
 			if !module.IsEnabled() {
+				// If it's not enabled, see if it was enabled before so it's been disabled now
+				for _, oldModule := range oldConfigs {
+					if oldModule.GetModuleName() != module.GetModuleName() {
+						continue
+					}
+					if !oldModule.IsEnabled() {
+						// If it's disabled now and was disabled before, ignore the VC
+						includeVc = false
+					}
+					break
+				}
+			}
+			if !includeVc {
 				continue
 			}
 			vcInfo := module.GetValidatorContainerTagInfo()
