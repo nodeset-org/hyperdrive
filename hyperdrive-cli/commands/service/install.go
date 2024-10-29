@@ -46,15 +46,16 @@ var (
 
 // Install the Hyperdrive service
 func installService(c *cli.Context) error {
-	// Prompt for confirmation
-	fmt.Printf("Hyperdrive will be installed --Version: %s\n\n%sIf you're upgrading, your existing configuration will be backed up and preserved.\nAll of your previous settings will be migrated automatically.%s\n", c.String(installVersionFlag.Name), terminal.ColorGreen, terminal.ColorReset)
+	fmt.Printf("Hyperdrive will be installed --Version: %s\n\n%sIf you're upgrading, your existing configuration will be backed up and preserved.\nAll of your previous settings will be migrated automatically.", c.String(installVersionFlag.Name), terminal.ColorGreen)
 	fmt.Println()
 
 	if !c.Bool(installNoRestartFlag.Name) {
-		fmt.Printf("%sNOTE: after installing, all Hyperdrive-managed services (including your clients) will be restarted. If you have doppelganger detection enabled, any active validators will miss the next few attestations while it runs.%s\n", terminal.ColorYellow, terminal.ColorReset)
-		fmt.Println()
+		fmt.Print("The service will restart to apply the update (including restarting your clients). If you have doppelganger detection enabled, any active validators will miss the next few attestations while it runs.")
 	}
+	fmt.Printf("%s\n", terminal.ColorReset)
+	fmt.Println()
 
+	// Prompt for confirmation
 	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Are you ready to continue?")) {
 		fmt.Println("Cancelled.")
 		return nil
@@ -113,7 +114,6 @@ func installService(c *cli.Context) error {
 		if err != nil {
 			return fmt.Errorf("error restarting services: %w", err)
 		}
-		fmt.Println("Services restarted successfully.")
 	} else {
 		fmt.Println("Remember to run `hyperdrive service start` to update to the new services!")
 	}
