@@ -23,12 +23,17 @@ func getComposeFiles(c *cli.Context) []string {
 }
 
 // Handle a network change by terminating the service, deleting everything, and starting over
-func changeNetworks(c *cli.Context, hd *client.HyperdriveClient) error {
+func changeNetworks(c *cli.Context) error {
+	// Create a new Hyperdrive client - important to ensure the config is loaded from disk and isn't the stale old one
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
 	composeFiles := getComposeFiles(c)
 
 	// Purge the data folder
 	fmt.Print("Purging data folder... ")
-	err := hd.PurgeData(composeFiles, false)
+	err = hd.PurgeData(composeFiles, false)
 	if err != nil {
 		return fmt.Errorf("error purging data folder: %w", err)
 	}

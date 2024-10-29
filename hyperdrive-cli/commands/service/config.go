@@ -103,7 +103,7 @@ func configureService(c *cli.Context) error {
 				return nil
 			}
 
-			err = changeNetworks(c, hd)
+			err = changeNetworks(c)
 			if err != nil {
 				fmt.Printf("%s%s%s\nHyperdrive could not automatically change networks for you, so you will have to remove your old data folder manually.\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
 			}
