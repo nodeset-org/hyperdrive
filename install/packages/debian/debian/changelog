@@ -1,6 +1,8 @@
 hyperdrive (1.1.1) UNRELEASED; urgency=medium
 
   * Updated Besu, Nethermind, Reth, Prysm, Teku, and Prometheus.
+  * Installing Hyperdrive updates via `apt update` now prompts you to automatically restart the service so the daemons will be up to date.
+  * Installing manually via `hyperdrive service install` will now automatically restart the service unless the `--no-restart` flag is provided.
   * Fixed a bug that caused Rocket Pool contract queries to hang on single-CPU systems.
   * New global flags: `--itsf` can be used to ignore TX simulation failues and sign / submit TXs anyway, even if they will revert. `--fgl` can force a specific gas limit on all transactions created by whatever command is being run. Do NOT use these unless you know what you're doing and have a good reason.
   * Added `--sbc` and `--slc` to `cs minipool create` which skip node balance and Constellation liquidity checks. Only use this if you intent to sign (but not submit) a TX for manual bundling or submission at a later date when the on-chain conditions become correct.
