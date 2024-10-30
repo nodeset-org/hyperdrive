@@ -22,5 +22,6 @@ Depends:  chrony (>= 4.0),
           containerd.io (>= 1.6.4),
           util-linux,
           debconf,
+          apt-utils,
           ${misc:Depends}, ${shlibs:Depends}
 Description: Hyperdrive is an all-in-one node management system for NodeSet node operators.
