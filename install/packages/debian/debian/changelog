@@ -1,6 +1,6 @@
 hyperdrive (1.1.1) UNRELEASED; urgency=medium
 
-  * Updated Besu, Nethermind, Reth, Prysm, Teku, and Prometheus.
+  * Updated Besu, Nethermind, Reth, Nimbus, Prysm, Teku, and Prometheus.
   * Switching networks in the `service config` network dropdown now properly loads the new network settings before starting the containers again.
   * Installing Hyperdrive updates via `apt update` now prompts you to automatically restart the service so the daemons will be up to date.
   * Installing manually via `hyperdrive service install` will now automatically restart the service unless the `--no-restart` flag is provided.

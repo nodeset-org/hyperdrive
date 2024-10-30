@@ -1,13 +1,27 @@
-#!/bin/sh -e
+#!/bin/sh
 
 # Source debconf
 . /usr/share/debconf/confmodule
 
-# Check if this is a new install or an upgrade
-if [ ! -z "$2" ]; then
-    # Ask about restarting
-    db_input critical hyperdrive/restart || true
-    db_go
-else
+# Check if this is a new install or an upgrade.
+# $2 will be empty if it's new, and the old version if it's an upgrade
+if [ -z "$2" ]; then
+    # First time install so there's no point in restarting
     db_set hyperdrive/restart false
+else
+    # Ask about restarting
+    db_input critical hyperdrive/restart
+    if [ "$RET" = "30 question skipped" ]; then
+        # Non-interactive mode, check if the answer has been pre-populated
+        db_fget hyperdrive/restart seen
+        if [ "$RET" = "true" ]; then
+            return
+        fi
+
+        # If not, default to restarting 
+        db_set hyperdrive/restart true
+    else
+        # Interactive mode, prompt the user
+        db_go
+    fi
 fi
