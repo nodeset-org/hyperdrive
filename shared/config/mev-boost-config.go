@@ -162,9 +162,12 @@ func NewMevBoostConfig(parent *HyperdriveConfig) *MevBoostConfig {
 
 		CustomRelays: config.Parameter[string]{
 			ParameterCommon: &config.ParameterCommon{
-				ID:          ids.MevBoostCustomRelaysID,
-				Name:        "Custom Relays",
-				Description: "Add custom relay URLs to MEV-Boost that aren't part of the built-in set. You can add multiple relays by separating each one with a comma. Any relay URLs can be used as long as they match your selected Ethereum network.\n\nFor a comprehensive list of available relays, we recommend the list maintained by ETHStaker:\nhttps://github.com/eth-educators/ethstaker-guides/blob/main/MEV-relay-list.md",
+				ID:                 ids.MevBoostCustomRelaysID,
+				Name:               "Custom Relays",
+				Description:        "Add custom relay URLs to MEV-Boost that aren't part of the built-in set. You can add multiple relays by separating each one with a comma. Any relay URLs can be used as long as they match your selected Ethereum network.\n\nFor a comprehensive list of available relays, we recommend the list maintained by ETHStaker:\nhttps://github.com/eth-educators/ethstaker-guides/blob/main/MEV-relay-list.md",
+				AffectsContainers:  []config.ContainerID{config.ContainerID_MevBoost},
+				CanBeBlank:         true,
+				OverwriteOnUpgrade: false,
 			},
 			Default: map[config.Network]string{
 				config.Network_All: "",
