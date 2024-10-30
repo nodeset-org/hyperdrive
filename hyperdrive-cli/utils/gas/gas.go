@@ -41,6 +41,10 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 
 	// Use the requested max fee and priority fee if provided
 	if maxFeeGwei != 0 {
+		if maxPriorityFeeGwei > maxFeeGwei {
+			fmt.Printf("NOTE: Priority fee cannot be greater than max fee. Lowering priority fee to %.2f gwei.\n", maxFeeGwei)
+			maxPriorityFeeGwei = maxFeeGwei
+		}
 		fmt.Printf("%sUsing the requested max fee of %.2f gwei (including a max priority fee of %.2f gwei).\n", terminal.ColorYellow, maxFeeGwei, maxPriorityFeeGwei)
 		lowLimit := maxFeeGwei / eth.WeiPerGwei * float64(simResult.EstimatedGasLimit)
 		highLimit := maxFeeGwei / eth.WeiPerGwei * float64(simResult.SafeGasLimit)
@@ -71,11 +75,11 @@ func GetMaxFees(c *cli.Context, hd *client.HyperdriveClient, simResult eth.Simul
 				}
 			}
 		}
+		if maxPriorityFeeGwei > maxFeeGwei {
+			fmt.Printf("NOTE: Priority fee cannot be greater than max fee. Lowering priority fee to %.2f gwei.\n", maxFeeGwei)
+			maxPriorityFeeGwei = maxFeeGwei
+		}
 		fmt.Printf("%sUsing a max fee of %.2f gwei and a priority fee of %.2f gwei.\n%s", terminal.ColorBlue, maxFeeGwei, maxPriorityFeeGwei, terminal.ColorReset)
-	}
-
-	if maxPriorityFeeGwei > maxFeeGwei {
-		return nil, nil, fmt.Errorf("Priority fee cannot be greater than max fee.")
 	}
 
 	// Verify the node has enough ETH to use this max fee
