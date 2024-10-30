@@ -1,4 +1,10 @@
-hyperdrive (1.1.1) UNRELEASED; urgency=medium
+hyperdrive (1.2.0~dev) UNRELEASED; urgency=medium
+
+  * Placeholder
+
+ -- NodeSet Inc. <info@nodeset.io>  Wed, 30 Oct 2024 21:52:04 +0000
+
+hyperdrive (1.1.1) stable; urgency=high
 
   * Updated Besu, Nethermind, Reth, Nimbus, Prysm, Teku, and Prometheus.
   * Switching networks in the `service config` network dropdown now properly loads the new network settings before starting the containers again.
@@ -18,7 +24,7 @@ hyperdrive (1.1.1) UNRELEASED; urgency=medium
   * Automatic TXs will now lower the max priority fee down to the max fee if the priority fee is greater than the max fee.
   * Added additional validation to `service config` so the above conditions should not normally be possible anyway.
 
- -- NodeSet Inc. <info@nodeset.io>  Sat, 26 Oct 2024 08:58:43 +0000
+ -- NodeSet Inc. <info@nodeset.io>  Wed, 30 Oct 2024 21:50:19 +0000
 
 hyperdrive (1.1.0) stable; urgency=medium
 
