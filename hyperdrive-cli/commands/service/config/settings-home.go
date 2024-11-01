@@ -217,10 +217,10 @@ func (home *settingsHome) createFooter() (tview.Primitive, int) {
 
 // Refreshes the settings on all of the config pages to match the config's values
 func (home *settingsHome) refresh() {
-	/*
-		if home.hyperdrivePage != nil {
-			home.hyperdrivePage.layout.refresh()
-		}*/
+	if home.hyperdrivePage != nil {
+		// The TX endpoint mode box may change based on network selection so the whole page needs to be regenerated
+		home.hyperdrivePage.handleLayoutChanged()
+	}
 
 	if home.loggingPage != nil {
 		home.loggingPage.layout.refresh()

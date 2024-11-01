@@ -1,5 +1,6 @@
 hyperdrive (1.2.0~dev) UNRELEASED; urgency=medium
 
+  * New config option under Hyperdrive and TX Fees: "TX Endpoint Mode" lets you decide how to submit transactions. Use your execution client and fallback client (by default), an alternate provider like Flashbots Protect that offers gas-free revert protection, or a custom RPC URL of your own. Note that this is still **experimental** - use with caution!
   * Removed the Holesky Staging network option from the default list.
 
  -- NodeSet Inc. <info@nodeset.io>  Wed, 30 Oct 2024 21:52:04 +0000

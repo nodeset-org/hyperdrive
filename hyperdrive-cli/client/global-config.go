@@ -15,9 +15,19 @@ const (
 	externalIPTimeout time.Duration = 3 * time.Second
 )
 
+type NetworkSettings struct {
+	Hyperdrive    map[config.Network]*hdconfig.HyperdriveSettings
+	StakeWise     map[config.Network]*swconfig.StakeWiseSettings
+	Constellation map[config.Network]*csconfig.ConstellationSettings
+}
+
 // Wrapper for global configuration
 type GlobalConfig struct {
 	ExternalIP string
+
+	// A complete list of all network settings and resources present in the system.
+	// Use this to get the settings or resources for a specific network, even if it's not the currently selected one.
+	AllNetworkSettings *NetworkSettings
 
 	// Hyperdrive
 	Hyperdrive          *hdconfig.HyperdriveConfig
@@ -36,6 +46,11 @@ type GlobalConfig struct {
 func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig, hdSettings []*hdconfig.HyperdriveSettings, swCfg *swconfig.StakeWiseConfig, swSettings []*swconfig.StakeWiseSettings, csCfg *csconfig.ConstellationConfig, csSettings []*csconfig.ConstellationSettings) (*GlobalConfig, error) {
 	// Make the config
 	cfg := &GlobalConfig{
+		AllNetworkSettings: &NetworkSettings{
+			Hyperdrive:    map[config.Network]*hdconfig.HyperdriveSettings{},
+			StakeWise:     map[config.Network]*swconfig.StakeWiseSettings{},
+			Constellation: map[config.Network]*csconfig.ConstellationSettings{},
+		},
 		Hyperdrive:    hdCfg,
 		StakeWise:     swCfg,
 		Constellation: csCfg,
@@ -44,12 +59,12 @@ func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig, hdSettings []*hdconfig.Hy
 	// Get the HD resources
 	network := hdCfg.Network.Value
 	for _, setting := range hdSettings {
+		cfg.AllNetworkSettings.Hyperdrive[setting.Key] = setting
 		if setting.Key == network {
 			cfg.HyperdriveResources = &hdconfig.MergedResources{
 				NetworkResources:    setting.NetworkResources,
 				HyperdriveResources: setting.HyperdriveResources,
 			}
-			break
 		}
 	}
 	if cfg.HyperdriveResources == nil {
@@ -58,9 +73,9 @@ func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig, hdSettings []*hdconfig.Hy
 
 	// Get the StakeWise resources
 	for _, setting := range swSettings {
+		cfg.AllNetworkSettings.StakeWise[setting.Key] = setting
 		if setting.Key == network {
 			cfg.StakeWiseResources = setting.StakeWiseResources
-			break
 		}
 	}
 	if cfg.StakeWiseResources == nil {
@@ -69,9 +84,9 @@ func NewGlobalConfig(hdCfg *hdconfig.HyperdriveConfig, hdSettings []*hdconfig.Hy
 
 	// Get the Constellation resources
 	for _, setting := range csSettings {
+		cfg.AllNetworkSettings.Constellation[setting.Key] = setting
 		if setting.Key == network {
 			cfg.ConstellationResources = setting.ConstellationResources
-			break
 		}
 	}
 	if cfg.ConstellationResources == nil {
@@ -138,6 +153,14 @@ func (c *GlobalConfig) CreateCopy() *GlobalConfig {
 	csCopy := c.Constellation.Clone().(*csconfig.ConstellationConfig)
 
 	return &GlobalConfig{
+		// These are all just used in a read-only way so they're copied directly
+		AllNetworkSettings:     c.AllNetworkSettings,
+		HyperdriveResources:    c.HyperdriveResources,
+		StakeWiseResources:     c.StakeWiseResources,
+		ConstellationResources: c.ConstellationResources,
+
+		// These are all mutable so they need to be cloned
+		ExternalIP:    c.ExternalIP,
 		Hyperdrive:    hdCopy,
 		StakeWise:     swCopy,
 		Constellation: csCopy,
