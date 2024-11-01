@@ -9,6 +9,7 @@ networkResources:
   balanceBatcherAddress: 0xfAa2e7C84eD801dd9D27Ac1ed957274530796140
   txWatchUrl: https://holesky.etherscan.io/tx
   flashbotsProtectUrl: https://rpc-holesky.flashbots.net/
+  mevBlockerUrl: ""
 defaultConfigSettings:
 hyperdriveResources:
   nodeSetApiUrl: https://nodeset.io/api
