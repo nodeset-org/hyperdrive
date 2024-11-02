@@ -18,12 +18,15 @@ services:
       {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
       - {{$network}}
       {{- end}}
-    environment:
-      - NETWORK={{.Hyperdrive.Network}}
-      - MEV_BOOST_PORT={{.Hyperdrive.MevBoost.Port}}
-      - MEV_BOOST_RELAYS={{.Hyperdrive.MevBoost.GetRelayString}}
-    entrypoint: sh
-    command: "/usr/share/hyperdrive/scripts/{{.Hyperdrive.GetMevBoostStartScript}}"
+    command:
+      - "exec"
+      - "/app/mev-boost"
+      - "-${{.HyperdriveResources.EthNetworkName}}"
+      - "-addr"
+      - "0.0.0.0:{{.Hyperdrive.MevBoost.Port}}"
+      - "-relay-check"
+      - "-relays"
+      - "{{.Hyperdrive.MevBoost.GetRelayString}}"
     cap_drop:
       - all
     cap_add:

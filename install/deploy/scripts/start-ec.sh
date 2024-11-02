@@ -29,28 +29,6 @@ define_perf_prefix() {
     echo "Performance tuning: $PERF_PREFIX"
 }
 
-# Set up the network-based flags
-if [ "$NETWORK" = "mainnet" ]; then
-    GETH_NETWORK=""
-    HD_NETHERMIND_NETWORK="mainnet"
-    BESU_NETWORK="--network=mainnet"
-    RETH_NETWORK="--chain mainnet"
-elif [ "$NETWORK" = "holesky-dev" ]; then
-    GETH_NETWORK="--holesky"
-    HD_NETHERMIND_NETWORK="holesky"
-    BESU_NETWORK="--network=holesky"
-    RETH_NETWORK="--chain holesky"
-elif [ "$NETWORK" = "holesky" ]; then
-    GETH_NETWORK="--holesky"
-    HD_NETHERMIND_NETWORK="holesky"
-    BESU_NETWORK="--network=holesky"
-    RETH_NETWORK="--chain holesky"
-else
-    echo "Unknown network [$NETWORK]"
-    exit 1
-fi
-
-
 # Geth startup
 if [ "$CLIENT" = "geth" ]; then
     # Performance tuning for ARM systems
@@ -68,12 +46,13 @@ if [ "$CLIENT" = "geth" ]; then
     # Check for the prune flag and run that first if requested
     if [ -f "/ethclient/prune.lock" ]; then
 
-        $PERF_PREFIX /usr/local/bin/geth snapshot prune-state $GETH_NETWORK --datadir /ethclient/geth ; rm /ethclient/prune.lock
+        $PERF_PREFIX /usr/local/bin/geth snapshot prune-state --$ETH_NETWORK --datadir /ethclient/geth ; rm /ethclient/prune.lock
 
     # Run Geth normally
     else
 
-        CMD="$PERF_PREFIX /usr/local/bin/geth $GETH_NETWORK \
+        CMD="$PERF_PREFIX /usr/local/bin/geth \
+            --$ETH_NETWORK \
             --datadir /ethclient/geth \
             --http \
             --http.addr 0.0.0.0 \
@@ -158,7 +137,7 @@ if [ "$CLIENT" = "nethermind" ]; then
     fi
 
     CMD="$PERF_PREFIX $NETHERMIND_BINARY \
-        --config $HD_NETHERMIND_NETWORK \
+        --config $ETH_NETWORK \
         --Sync.SnapSync true \
         --datadir /ethclient/nethermind \
         --JsonRpc.Enabled true \
@@ -234,12 +213,12 @@ if [ "$CLIENT" = "besu" ]; then
 
     # Check for the prune flag and run that first if requested
     if [ -f "/ethclient/prune.lock" ]; then
-        $PERF_PREFIX /opt/besu/bin/besu $BESU_NETWORK --data-path=/ethclient/besu storage trie-log prune ; rm /ethclient/prune.lock
+        $PERF_PREFIX /opt/besu/bin/besu --network=$ETH_NETWORK --data-path=/ethclient/besu storage trie-log prune ; rm /ethclient/prune.lock
     
     # Run Besu normally
     else
         CMD="$PERF_PREFIX /opt/besu/bin/besu \
-        $BESU_NETWORK \
+        --network=$ETH_NETWORK \
         --data-path=/ethclient/besu \
         --fast-sync-min-peers=3 \
         --rpc-http-enabled \
@@ -297,7 +276,8 @@ if [ "$CLIENT" = "reth" ]; then
         echo -n "$(head -c 32 /dev/urandom | od -A n -t x1 | tr -d '[:space:]')" > /secrets/jwtsecret
     fi
 
-    CMD="$PERF_PREFIX /usr/local/bin/reth node $RETH_NETWORK \
+    CMD="$PERF_PREFIX /usr/local/bin/reth node \
+        --chain $ETH_NETWORK \
         --datadir /ethclient/reth \
         --http \
         --http.addr 0.0.0.0 \

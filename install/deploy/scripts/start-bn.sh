@@ -17,31 +17,6 @@ if [ "$UNAME_VAL" = "arm64" ] || [ "$UNAME_VAL" = "aarch64" ]; then
     fi
 fi
 
-# Set up the network-based flags
-if [ "$NETWORK" = "mainnet" ]; then
-    LH_NETWORK="mainnet"
-    LODESTAR_NETWORK="mainnet"
-    NIMBUS_NETWORK="mainnet"
-    PRYSM_NETWORK="--mainnet"
-    TEKU_NETWORK="mainnet"
-    PRYSM_GENESIS_STATE=""
-elif [ "$NETWORK" = "holesky-dev" ]; then
-    LH_NETWORK="holesky"
-    LODESTAR_NETWORK="holesky"
-    NIMBUS_NETWORK="holesky"
-    PRYSM_NETWORK="--holesky"
-    TEKU_NETWORK="holesky"
-elif [ "$NETWORK" = "holesky" ]; then
-    LH_NETWORK="holesky"
-    LODESTAR_NETWORK="holesky"
-    NIMBUS_NETWORK="holesky"
-    PRYSM_NETWORK="--holesky"
-    TEKU_NETWORK="holesky"
-else
-    echo "Unknown network [$NETWORK]"
-    exit 1
-fi
-
 # Check for the JWT auth file
 if [ ! -f "/secrets/jwtsecret" ]; then
     echo "JWT secret file not found, please try again when the Execution Client has created one."
@@ -52,7 +27,7 @@ fi
 if [ "$CLIENT" = "lighthouse" ]; then
 
     CMD="$PERF_PREFIX /usr/local/bin/lighthouse beacon \
-        --network $LH_NETWORK \
+        --network $ETH_NETWORK \
         --datadir /ethclient/lighthouse \
         --port $BN_P2P_PORT \
         --discovery-port $BN_P2P_PORT \
@@ -102,7 +77,7 @@ fi
 if [ "$CLIENT" = "lodestar" ]; then
 
     CMD="$PERF_PREFIX /usr/local/bin/node --max-http-header-size=65536 /usr/app/packages/cli/bin/lodestar beacon \
-        --network $LODESTAR_NETWORK \
+        --network $ETH_NETWORK \
         --dataDir /ethclient/lodestar \
         --port $BN_P2P_PORT \
         --execution.urls $EC_ENGINE_ENDPOINT \
@@ -154,7 +129,7 @@ if [ "$CLIENT" = "nimbus" ]; then
             echo "Nimbus database already exists, ignoring checkpoint sync."
         else 
             echo "Starting checkpoint sync for Nimbus..."
-            $PERF_PREFIX /home/user/nimbus-eth2/build/nimbus_beacon_node trustedNodeSync --network=$NIMBUS_NETWORK --data-dir=/ethclient/nimbus --trusted-node-url=$CHECKPOINT_SYNC_URL --backfill=false
+            $PERF_PREFIX /home/user/nimbus-eth2/build/nimbus_beacon_node trustedNodeSync --network=$ETH_NETWORK --data-dir=/ethclient/nimbus --trusted-node-url=$CHECKPOINT_SYNC_URL --backfill=false
             echo "Checkpoint sync complete!"
         fi
     fi
@@ -162,7 +137,7 @@ if [ "$CLIENT" = "nimbus" ]; then
     CMD="$PERF_PREFIX /home/user/nimbus-eth2/build/nimbus_beacon_node \
         --non-interactive \
         --enr-auto-update \
-        --network=$NIMBUS_NETWORK \
+        --network=$ETH_NETWORK \
         --data-dir=/ethclient/nimbus \
         --tcp-port=$BN_P2P_PORT \
         --udp-port=$BN_P2P_PORT \
@@ -201,7 +176,7 @@ fi
 if [ "$CLIENT" = "prysm" ]; then
 
     # Grab the Holesky genesis state if needed
-    if [ "$NETWORK" = "holesky" -o "$NETWORK" = "holesky-dev" ]; then
+    if [ "$ETH_NETWORK" = "holesky" ]; then
         echo "Prysm is configured to use Holesky, genesis state required."
         if [ ! -f "/ethclient/holesky-genesis.ssz" ]; then
             echo "Downloading from Github..."
@@ -214,8 +189,7 @@ if [ "$CLIENT" = "prysm" ]; then
 
     CMD="$PERF_PREFIX /app/cmd/beacon-chain/beacon-chain \
         --accept-terms-of-use \
-        $PRYSM_NETWORK \
-        $PRYSM_GENESIS_STATE \
+        --$ETH_NETWORK \
         --datadir /ethclient/prysm \
         --p2p-tcp-port $BN_P2P_PORT \
         --p2p-udp-port $BN_P2P_PORT \
@@ -243,7 +217,7 @@ if [ "$CLIENT" = "prysm" ]; then
         CMD="$CMD --disable-monitoring"
     fi
 
-    if [ "$NETWORK" = "holesky" ]; then
+    if [ "$ETH_NETWORK" = "holesky" ]; then
         CMD="$CMD --genesis-state /ethclient/holesky-genesis.ssz"
     fi
 
@@ -259,7 +233,7 @@ fi
 if [ "$CLIENT" = "teku" ]; then
 
     CMD="$PERF_PREFIX /opt/teku/bin/teku \
-        --network=$TEKU_NETWORK \
+        --network=$ETH_NETWORK \
         --data-path=/ethclient/teku \
         --p2p-port=$BN_P2P_PORT \
         --ee-endpoint=$EC_ENGINE_ENDPOINT \
