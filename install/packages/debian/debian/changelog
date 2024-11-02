@@ -1,5 +1,6 @@
 hyperdrive (1.2.0~dev) UNRELEASED; urgency=medium
 
+  * Fixed the URL used by Prysm for downloading the initial Holesky genesis state when setting it up for the first time.
   * Removed the Holesky Staging network option from the default list.
 
  -- NodeSet Inc. <info@nodeset.io>  Wed, 30 Oct 2024 21:52:04 +0000

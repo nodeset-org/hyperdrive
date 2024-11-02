@@ -22,7 +22,7 @@ services:
       - {{$network}}
       {{- end}}
     environment:
-      - NETWORK={{.Hyperdrive.Network}}
+      - ETH_NETWORK={{.HyperdriveResources.EthNetworkName}}
       - CLIENT={{.Hyperdrive.GetSelectedBeaconNode}}
       - BN_API_ENDPOINT={{.Hyperdrive.BnHttpUrl}}
       - BN_RPC_ENDPOINT={{.Hyperdrive.BnRpcUrl}}

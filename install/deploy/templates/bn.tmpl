@@ -32,7 +32,7 @@ services:
       - {{$network}}
       {{- end}}
     environment:
-      - NETWORK={{.Hyperdrive.Network}}
+      - ETH_NETWORK={{.HyperdriveResources.EthNetworkName}}
       - CLIENT={{.Hyperdrive.LocalBeaconClient.BeaconNode}}
       - EC_HTTP_ENDPOINT={{.Hyperdrive.GetEcHttpEndpoint}}
       - EC_WS_ENDPOINT={{.Hyperdrive.GetEcWsEndpoint}}
