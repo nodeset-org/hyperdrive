@@ -11,17 +11,14 @@ services:
     container_name: {{.Hyperdrive.ProjectName}}_{{.Hyperdrive.MevBoostContainerName}}
     restart: unless-stopped
     ports: [{{.Hyperdrive.GetMevBoostOpenPorts}}]
-    volumes:
-      - /usr/share/hyperdrive/scripts:/usr/share/hyperdrive/scripts:ro
     networks:
       - net
       {{- range $network := .Hyperdrive.GetAdditionalDockerNetworks}}
       - {{$network}}
       {{- end}}
+    entrypoint: /app/mev-boost
     command:
-      - "exec"
-      - "/app/mev-boost"
-      - "-${{.HyperdriveResources.EthNetworkName}}"
+      - "-{{.HyperdriveResources.EthNetworkName}}"
       - "-addr"
       - "0.0.0.0:{{.Hyperdrive.MevBoost.Port}}"
       - "-relay-check"
