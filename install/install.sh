@@ -102,6 +102,7 @@ install() {
 
     # Get temporary data paths
     PACKAGE_FILES_PATH="$TEMPDIR/install/deploy"
+    AUTOCOMPLETE_FILES_PATH="$TEMPDIR/install/autocomplete"
 
 
     ##
@@ -286,13 +287,13 @@ install() {
 
     # Copy bash completion helper
     if [ -d "$BASH_COMPLETION_PATH" ]; then
-        { cp "$HD_INSTALL_PATH/autocomplete/bash_autocomplete" "$BASH_COMPLETION_PATH/hyperdrive" 2>/dev/null || fail "Could not install bash completion file."; } >&2
+        { cp "$AUTOCOMPLETE_FILES_PATH/bash_autocomplete" "$BASH_COMPLETION_PATH/hyperdrive" 2>/dev/null || fail "Could not install bash completion file."; } >&2
     else
         warn "No directory at expected path for bash_completion '$BASH_COMPLETION_PATH' - skipping."
     fi
     # Copy zsh completion helper
     if [ -d "$ZSH_COMPLETION_PATH" ]; then
-        { cp "$HD_INSTALL_PATH/autocomplete/zsh_autocomplete" "$ZSH_COMPLETION_PATH/_hyperdrive" 2>/dev/null || fail "Could not install zsh completion file."; } >&2
+        { cp "$AUTOCOMPLETE_FILES_PATH/zsh_autocomplete" "$ZSH_COMPLETION_PATH/_hyperdrive" 2>/dev/null || fail "Could not install zsh completion file."; } >&2
     else
         warn "No directory at expected path for zsh_completion '$ZSH_COMPLETION_PATH' - skipping."
     fi

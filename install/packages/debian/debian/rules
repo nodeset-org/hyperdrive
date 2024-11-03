@@ -41,5 +41,10 @@ override_dh_auto_install:
 	mkdir -p debian/hyperdrive/usr/share/hyperdrive/
 	cp -r deploy/* debian/hyperdrive/usr/share/hyperdrive/
 	chmod -R +x debian/hyperdrive/usr/share/hyperdrive/scripts
+# Copy the autocomplete scripts
+	mkdir -p debian/hyperdrive/usr/share/bash-completion/completions/
+	cp autocomplete/bash_autocomplete debian/hyperdrive/usr/share/bash-completion/completions/hyperdrive
+	mkdir -p debian/hyperdrive/usr/share/zsh/vendor-completions/
+	cp autocomplete/zsh_autocomplete debian/hyperdrive/usr/share/zsh/vendor-completions/_hyperdrive
 
 override_dh_auto_test:

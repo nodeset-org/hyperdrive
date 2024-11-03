@@ -7,6 +7,7 @@ COPY . /hyperdrive/debian
 WORKDIR /hyperdrive/debian
 
 RUN rm -rf /hyperdrive/debian/build && \
+    mv /hyperdrive/debian/install/autocomplete /hyperdrive/debian/autocomplete && \
     mv /hyperdrive/debian/install/packages/debian/debian /hyperdrive/debian/debian && \
     mv /hyperdrive/debian/install/deploy /hyperdrive/debian/deploy
 
