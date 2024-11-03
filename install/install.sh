@@ -75,7 +75,7 @@ install() {
 
     # Parse arguments
     PACKAGE_VERSION="latest"
-    while getopts "dl:i:r:v:b:z:h" FLAG; do
+    while getopts "dl:i:r:v:b:h" FLAG; do
         case "$FLAG" in
             d) NO_DEPS=true ;;
             l) LOCAL_PACKAGE_PATH="$OPTARG" ;;
@@ -83,7 +83,6 @@ install() {
             r) HD_RUNTIME_PATH="$OPTARG" ;;
             v) PACKAGE_VERSION="$OPTARG" ;;
             b) BASH_COMPLETION_PATH="$OPTARG" ;;
-            z) ZSH_COMPLETION_PATH="$OPTARG" ;;
             *) fail "Incorrect usage." ;;
         esac
     done
@@ -257,9 +256,6 @@ install() {
     if [ -z "$BASH_COMPLETION_PATH" ]; then
         BASH_COMPLETION_PATH="/usr/share/bash-completion/completions"
     fi
-    if [ -z "$ZSH_COMPLETION_PATH" ]; then
-        ZSH_COMPLETION_PATH="/usr/share/zsh/vendor-completions"
-    fi
 
     progress 4 "Creating Hyperdrive directory structure..."
     { mkdir -p "$HD_INSTALL_PATH" || fail "Could not create the Hyperdrive resources directory."; } >&2
@@ -290,12 +286,6 @@ install() {
         { cp "$AUTOCOMPLETE_FILES_PATH/bash_autocomplete" "$BASH_COMPLETION_PATH/hyperdrive" 2>/dev/null || fail "Could not install bash completion file."; } >&2
     else
         warn "No directory at expected path for bash_completion '$BASH_COMPLETION_PATH' - skipping."
-    fi
-    # Copy zsh completion helper
-    if [ -d "$ZSH_COMPLETION_PATH" ]; then
-        { cp "$AUTOCOMPLETE_FILES_PATH/zsh_autocomplete" "$ZSH_COMPLETION_PATH/_hyperdrive" 2>/dev/null || fail "Could not install zsh completion file."; } >&2
-    else
-        warn "No directory at expected path for zsh_completion '$ZSH_COMPLETION_PATH' - skipping."
     fi
 
     # Clean up unnecessary files from old installations
