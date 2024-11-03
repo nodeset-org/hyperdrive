@@ -46,6 +46,11 @@ var (
 		Aliases: []string{"f"},
 		Usage:   "Supplemental Docker compose files for custom containers to include when performing service commands such as 'start' and 'stop'; this flag may be defined multiple times",
 	}
+	UserDirPathFlag *cli.StringFlag = &cli.StringFlag{
+		Name:    "config-path",
+		Aliases: []string{"c"},
+		Usage:   "Directory to install and save all of Hyperdrive's configuration and data to",
+	}
 )
 
 func InstantiateFlag[FlagType cli.Flag](prototype FlagType, description string) cli.Flag {

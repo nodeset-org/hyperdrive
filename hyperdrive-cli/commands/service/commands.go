@@ -227,6 +227,10 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					// Run command
 					return daemonLogs(c, c.Args().Slice()...)
 				},
+				BashComplete: func(c *cli.Context) {
+					// Run bash completion
+					daemonLogs_BashCompletion(c)
+				},
 			},
 
 			{

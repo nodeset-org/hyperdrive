@@ -33,11 +33,6 @@ var (
 		Aliases: []string{"r"},
 		Usage:   "Allow hyperdrive to be run as the root user",
 	}
-	userDirPathFlag *cli.StringFlag = &cli.StringFlag{
-		Name:    "config-path",
-		Aliases: []string{"c"},
-		Usage:   "Directory to install and save all of Hyperdrive's configuration and data to",
-	}
 	maxFeeFlag *cli.Float64Flag = &cli.Float64Flag{
 		Name:    "max-fee",
 		Aliases: []string{"f"},
@@ -108,7 +103,7 @@ func main() {
 	// Set application flags
 	app.Flags = []cli.Flag{
 		allowRootFlag,
-		userDirPathFlag,
+		utils.UserDirPathFlag,
 		apiAddressFlag,
 		maxFeeFlag,
 		maxPriorityFeeFlag,
@@ -155,6 +150,17 @@ func main() {
 		}
 		return nil
 	}
+	app.BashComplete = func(c *cli.Context) {
+		// Load the context and flags prior to autocomplete
+		err := app.Before(c)
+		if err != nil {
+			fmt.Fprint(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+
+		// Run the default autocomplete
+		cli.DefaultAppComplete(c)
+	}
 
 	// Run application
 	fmt.Println()
@@ -176,13 +182,13 @@ func setDefaultPaths() {
 
 	// Default config folder path
 	defaultUserDirPath := filepath.Join(homeDir, defaultConfigFolder)
-	userDirPathFlag.Value = defaultUserDirPath
+	utils.UserDirPathFlag.Value = defaultUserDirPath
 }
 
 // Validate the global flags
 func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
 	// Make sure the config directory exists
-	configPath := c.String(userDirPathFlag.Name)
+	configPath := c.String(utils.UserDirPathFlag.Name)
 	path, err := homedir.Expand(strings.TrimSpace(configPath))
 	if err != nil {
 		return nil, fmt.Errorf("error expanding config path [%s]: %w", configPath, err)

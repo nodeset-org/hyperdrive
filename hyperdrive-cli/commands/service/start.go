@@ -106,7 +106,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 				return nil
 			}
 			fmt.Println("It looks like this is your first time starting a Validator Client.")
-			existingNode := cliutils.Confirm("Just to be sure, does your node have any existing, active validators attesting on the Beacon Chain?")
+			existingNode := cliutils.Confirm("Just to be sure, do have any existing, active validators attesting on the Beacon Chain that were created with your Hyperdrive node wallet (if you have one)?")
 			if !existingNode {
 				fmt.Println("Okay, great! You're safe to start. Have fun!")
 			} else {

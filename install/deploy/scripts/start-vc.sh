@@ -1,28 +1,6 @@
 #!/bin/sh
 # This script launches validator clients for Hyperdrive's docker stack; only edit if you know what you're doing ;)
 
-# Set up the network-based flags
-if [ "$NETWORK" = "mainnet" ]; then
-    LH_NETWORK="mainnet"
-    LODESTAR_NETWORK="mainnet"
-    PRYSM_NETWORK="--mainnet"
-    TEKU_NETWORK="mainnet"
-elif [ "$NETWORK" = "holesky-dev" ]; then
-    LH_NETWORK="holesky"
-    LODESTAR_NETWORK="holesky"
-    PRYSM_NETWORK="--holesky"
-    TEKU_NETWORK="holesky"
-elif [ "$NETWORK" = "holesky" ]; then
-    LH_NETWORK="holesky"
-    LODESTAR_NETWORK="holesky"
-    PRYSM_NETWORK="--holesky"
-    TEKU_NETWORK="holesky"
-else
-    echo "Unknown network [$NETWORK]"
-    exit 1
-fi
-
-
 # Lighthouse startup
 if [ "$CLIENT" = "lighthouse" ]; then
 
@@ -33,7 +11,7 @@ if [ "$CLIENT" = "lighthouse" ]; then
     fi
 
     CMD="/usr/local/bin/lighthouse validator \
-        --network $LH_NETWORK \
+        --network $ETH_NETWORK \
         --datadir /validators/lighthouse \
         --init-slashing-protection \
         --logfile-max-number 0 \
@@ -74,7 +52,7 @@ if [ "$CLIENT" = "lodestar" ]; then
     fi
 
     CMD="/usr/app/node_modules/.bin/lodestar validator \
-        --network $LODESTAR_NETWORK \
+        --network $ETH_NETWORK \
         --dataDir /validators/lodestar \
         --beacon-nodes $BN_URL_STRING \
         $FALLBACK_BN_STRING \
@@ -161,7 +139,7 @@ if [ "$CLIENT" = "prysm" ]; then
 
     CMD="/app/cmd/validator/validator \
         --accept-terms-of-use \
-        $PRYSM_NETWORK \
+        --$ETH_NETWORK \
         --wallet-dir /validators/prysm-non-hd \
         --wallet-password-file /validators/prysm-non-hd/direct/accounts/secret \
         --beacon-rpc-provider $BN_URL_STRING \
@@ -204,7 +182,7 @@ if [ "$CLIENT" = "teku" ]; then
     fi
 
     CMD="/opt/teku/bin/teku validator-client \
-        --network=$TEKU_NETWORK \
+        --network=$ETH_NETWORK \
         --data-path=/validators/teku \
         --validator-keys=/validators/teku/keys:/validators/teku/passwords \
         --beacon-node-api-endpoints=$BN_URL_STRING \

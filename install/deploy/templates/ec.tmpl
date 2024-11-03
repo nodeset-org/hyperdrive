@@ -24,7 +24,7 @@ services:
       - {{$network}}
       {{- end}}
     environment:
-      - NETWORK={{.Hyperdrive.Network}}
+      - ETH_NETWORK={{.HyperdriveResources.EthNetworkName}}
       - CLIENT={{.Hyperdrive.LocalExecutionClient.ExecutionClient}}
       - EC_MAX_PEERS={{.Hyperdrive.GetEcMaxPeers}}
       - EC_P2P_PORT={{$p2p}}
