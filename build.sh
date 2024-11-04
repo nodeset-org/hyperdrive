@@ -36,7 +36,7 @@ build_distro_packages() {
 # Builds the .tar.xz file packages with the HD configuration files
 build_install_packages() {
     echo -n "Building Hyperdrive installer packages... "
-    tar cfJ build/$VERSION/hyperdrive-install.tar.xz install/deploy || fail "Error building installer package."
+    tar cfJ build/$VERSION/hyperdrive-install.tar.xz install/deploy install/autocomplete || fail "Error building installer package."
     cp install/install.sh build/$VERSION
     echo "done!"
 }

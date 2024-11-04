@@ -17,7 +17,8 @@ import (
 )
 
 const (
-	deploySrc string = "../../install/deploy"
+	autocompleteSrc string = "../../install/autocomplete"
+	deploySrc       string = "../../install/deploy"
 )
 
 func TestManualInstall(t *testing.T) {
@@ -47,11 +48,14 @@ func TestManualInstall(t *testing.T) {
 
 	// Run the installer
 	installerScriptPath := filepath.Join("..", "..", "install", "install.sh")
-	installPath := filepath.Join(oshaDir, "install_usr", "share", "hyperdrive")
+	installPath := filepath.Join(oshaDir, "install_usr", "share")
 	err = os.MkdirAll(installPath, 0755)
 	require.NoError(t, err)
-	runtimePath := filepath.Join(oshaDir, "install_var", "lib", "hyperdrive")
+	runtimePath := filepath.Join(oshaDir, "install_var", "lib")
 	err = os.MkdirAll(runtimePath, 0755)
+	require.NoError(t, err)
+	autocompletePath := filepath.Join(oshaDir, "install_usr", "share", "bash-completion", "completions")
+	err = os.MkdirAll(autocompletePath, 0755)
 	require.NoError(t, err)
 	err = client.InstallService(client.InstallOptions{
 		RequireEscalation:       false,
@@ -62,6 +66,7 @@ func TestManualInstall(t *testing.T) {
 		RuntimePath:             runtimePath,
 		LocalInstallScriptPath:  installerScriptPath,
 		LocalInstallPackagePath: pkgFilePath,
+		BashCompletionPath:      autocompletePath,
 	})
 	require.NoError(t, err)
 	t.Logf("Service installed")
@@ -81,13 +86,20 @@ func TestManualInstall(t *testing.T) {
 		return nil
 	})
 	require.NoError(t, err)
+
+	// Check the autocomplete file
+	autocompleteFile := filepath.Join(autocompletePath, "hyperdrive")
+	_, err = os.Stat(autocompleteFile)
+	require.NoError(t, err)
+	t.Logf("File deployed: %s", autocompleteFile)
 	t.Logf("All files deployed correctly")
 }
 
 // Create the install package
 func createInstallPackage(pkgFilePath string) error {
 	files, err := archiver.FilesFromDisk(nil, map[string]string{
-		deploySrc: "install/deploy",
+		deploySrc:       "install/deploy",
+		autocompleteSrc: "install/autocomplete",
 	})
 	if err != nil {
 		return fmt.Errorf("error traversing deploy directory: %w", err)

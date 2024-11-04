@@ -23,6 +23,10 @@ fail() {
     exit 1
 }
 
+warn() {
+    MESSAGE=$1
+    >&2 echo -e "\n${COLOR_YELLOW}**WARNING**\n$MESSAGE${COLOR_RESET}"
+}
 
 # Get CPU architecture
 UNAME_VAL=$(uname -m)
@@ -63,7 +67,6 @@ add_user_docker() {
     usermod -aG docker $USER || fail "Could not add user to docker group."
 }
 
-
 # Install
 install() {
     ##
@@ -72,13 +75,14 @@ install() {
 
     # Parse arguments
     PACKAGE_VERSION="latest"
-    while getopts "dl:i:r:v:" FLAG; do
+    while getopts "dl:i:r:v:b:h" FLAG; do
         case "$FLAG" in
             d) NO_DEPS=true ;;
             l) LOCAL_PACKAGE_PATH="$OPTARG" ;;
             i) HD_INSTALL_PATH="$OPTARG" ;;
             r) HD_RUNTIME_PATH="$OPTARG" ;;
             v) PACKAGE_VERSION="$OPTARG" ;;
+            b) BASH_COMPLETION_PATH="$OPTARG" ;;
             *) fail "Incorrect usage." ;;
         esac
     done
@@ -97,6 +101,7 @@ install() {
 
     # Get temporary data paths
     PACKAGE_FILES_PATH="$TEMPDIR/install/deploy"
+    AUTOCOMPLETE_FILES_PATH="$TEMPDIR/install/autocomplete"
 
 
     ##
@@ -248,6 +253,9 @@ install() {
     if [ -z "$HD_RUNTIME_PATH" ]; then
         HD_RUNTIME_PATH="/var/lib/hyperdrive"
     fi
+    if [ -z "$BASH_COMPLETION_PATH" ]; then
+        BASH_COMPLETION_PATH="/usr/share/bash-completion/completions"
+    fi
 
     progress 4 "Creating Hyperdrive directory structure..."
     { mkdir -p "$HD_INSTALL_PATH" || fail "Could not create the Hyperdrive resources directory."; } >&2
@@ -272,6 +280,13 @@ install() {
     progress 6 "Copying package files to Hyperdrive system directory..."
     { find "$PACKAGE_FILES_PATH" -exec cp -r {} "$HD_INSTALL_PATH" \; || fail "Could not copy deployment artifacts ($PACKAGE_FILES_PATH) to the Hyperdrive system directory ($HD_INSTALL_PATH)."; } >&2
     { find "$HD_INSTALL_PATH/scripts" -name "*.sh" -exec chmod +x {} \; 2>/dev/null || fail "Could not set executable permissions on package files."; } >&2
+
+    # Copy bash completion helper
+    if [ -d "$BASH_COMPLETION_PATH" ]; then
+        { cp "$AUTOCOMPLETE_FILES_PATH/bash_autocomplete" "$BASH_COMPLETION_PATH/hyperdrive" 2>/dev/null || fail "Could not install bash completion file."; } >&2
+    else
+        warn "No directory at expected path for bash_completion '$BASH_COMPLETION_PATH' - skipping."
+    fi
 
     # Clean up unnecessary files from old installations
     progress 7 "Cleaning up obsolete files from previous installs..."
