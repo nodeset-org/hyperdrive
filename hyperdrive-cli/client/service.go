@@ -44,6 +44,7 @@ type InstallOptions struct {
 	RuntimePath             string
 	LocalInstallScriptPath  string
 	LocalInstallPackagePath string
+	BashCompletionPath      string
 }
 
 // Install Hyperdrive
@@ -57,6 +58,9 @@ func InstallService(opts InstallOptions) error {
 	}
 	if opts.RuntimePath != "" {
 		flags = append(flags, fmt.Sprintf("-r %s", shellescape.Quote(opts.RuntimePath)))
+	}
+	if opts.BashCompletionPath != "" {
+		flags = append(flags, fmt.Sprintf("-b %s", shellescape.Quote(opts.BashCompletionPath)))
 	}
 	if opts.NoDeps {
 		flags = append(flags, "-d")
