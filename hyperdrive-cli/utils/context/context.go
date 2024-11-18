@@ -5,11 +5,8 @@ import (
 	"math/big"
 	"net/url"
 	"os"
-	"path/filepath"
 
-	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
-	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
-	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/urfave/cli/v2"
 )
 
@@ -47,12 +44,6 @@ type HyperdriveContext struct {
 
 	// The list of networks options and corresponding settings for Hyperdrive itself
 	HyperdriveNetworkSettings []*hdconfig.HyperdriveSettings
-
-	// The list of networks options and corresponding settings for the StakeWise module
-	StakeWiseNetworkSettings []*swconfig.StakeWiseSettings
-
-	// The list of networks options and corresponding settings for the Constellation module
-	ConstellationNetworkSettings []*csconfig.ConstellationSettings
 }
 
 // Creates a new Hyperdrive context. If installationInfo is nil, a new one will be created using the system configuration.
@@ -75,18 +66,6 @@ func (c *HyperdriveContext) LoadNetworkSettings() error {
 	c.HyperdriveNetworkSettings, err = hdconfig.LoadSettingsFiles(installInfo.NetworksDir)
 	if err != nil {
 		return fmt.Errorf("error loading hyperdrive network settings from path [%s]: %s", installInfo.NetworksDir, err.Error())
-	}
-
-	swNetSettingsDir := filepath.Join(installInfo.NetworksDir, hdconfig.ModulesName, swconfig.ModuleName)
-	c.StakeWiseNetworkSettings, err = swconfig.LoadSettingsFiles(swNetSettingsDir)
-	if err != nil {
-		return fmt.Errorf("error loading stakewise network settings from path [%s]: %s", swNetSettingsDir, err.Error())
-	}
-
-	csNetSettingsDir := filepath.Join(installInfo.NetworksDir, hdconfig.ModulesName, csconfig.ModuleName)
-	c.ConstellationNetworkSettings, err = csconfig.LoadSettingsFiles(csNetSettingsDir)
-	if err != nil {
-		return fmt.Errorf("error loading constellation network settings from path [%s]: %s", csNetSettingsDir, err.Error())
 	}
 	return nil
 }

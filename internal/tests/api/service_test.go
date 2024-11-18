@@ -6,8 +6,8 @@ import (
 	"time"
 
 	dtypes "github.com/docker/docker/api/types"
-	"github.com/nodeset-org/hyperdrive-daemon/shared"
-	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
+	hdtesting "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/testing"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/stretchr/testify/require"
 )
 

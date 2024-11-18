@@ -10,8 +10,8 @@ import (
 
 	"github.com/alessio/shellescape"
 	"github.com/mitchellh/go-homedir"
-	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
 )
 

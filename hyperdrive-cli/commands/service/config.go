@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	cliconfig "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/rivo/tview"
 	"github.com/urfave/cli/v2"
 )

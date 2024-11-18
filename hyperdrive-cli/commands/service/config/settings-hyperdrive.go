@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/nodeset-org/hyperdrive-daemon/shared/config/ids"
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 )
 
 // The page wrapper for the Hyperdrive config

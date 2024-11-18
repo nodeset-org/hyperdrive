@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 func createLocalMevStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWizardStep {

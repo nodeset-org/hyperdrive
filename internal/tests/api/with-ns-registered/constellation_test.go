@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
+	hdtesting "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/testing"
 	"github.com/nodeset-org/osha/keys"
 	"github.com/rocket-pool/node-manager-core/utils"
 	"github.com/stretchr/testify/require"

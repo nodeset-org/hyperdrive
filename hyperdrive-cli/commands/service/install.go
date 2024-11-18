@@ -3,10 +3,10 @@ package service
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/urfave/cli/v2"
 )
 

@@ -4,8 +4,8 @@ import (
 	"runtime/debug"
 	"testing"
 
-	"github.com/nodeset-org/hyperdrive-daemon/shared/types/api"
-	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
+	hdtesting "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/testing"
+	"github.com/nodeset-org/hyperdrive/shared/types/api"
 	"github.com/nodeset-org/osha/keys"
 	"github.com/rocket-pool/node-manager-core/wallet"
 	"github.com/stretchr/testify/require"

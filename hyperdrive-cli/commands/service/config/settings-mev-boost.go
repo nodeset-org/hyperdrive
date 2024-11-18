@@ -1,8 +1,8 @@
 package config
 
 import (
-	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 	"github.com/rocket-pool/node-manager-core/config"
 )

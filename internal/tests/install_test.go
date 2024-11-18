@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"github.com/mholt/archiver/v4"
-	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/osha"
 	"github.com/stretchr/testify/require"
 )

@@ -6,9 +6,9 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
-	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/rivo/tview"
 	"github.com/rocket-pool/node-manager-core/config"
 )

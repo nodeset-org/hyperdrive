@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive-daemon/shared"
+	"github.com/nodeset-org/hyperdrive/shared"
 )
 
 func createWelcomeStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {

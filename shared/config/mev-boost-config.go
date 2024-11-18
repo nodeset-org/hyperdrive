@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	ids "github.com/nodeset-org/hyperdrive-daemon/shared/config/ids"
+	ids "github.com/nodeset-org/hyperdrive/shared/config/ids"
 	"github.com/rocket-pool/node-manager-core/config"
 	nmc_ids "github.com/rocket-pool/node-manager-core/config/ids"
 )

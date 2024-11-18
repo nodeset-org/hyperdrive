@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	hdtesting "github.com/nodeset-org/hyperdrive-daemon/testing"
+	hdtesting "github.com/nodeset-org/hyperdrive/hyperdrive-daemon/testing"
 	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/log"
 )

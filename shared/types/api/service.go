@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/api/types"
 )
 

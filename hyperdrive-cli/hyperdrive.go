@@ -9,8 +9,6 @@ import (
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/nodeset-org/hyperdrive-daemon/shared"
-	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/constellation"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
@@ -18,6 +16,8 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
+	"github.com/nodeset-org/hyperdrive/shared"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/urfave/cli/v2"
 )
 

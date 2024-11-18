@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rocket-pool/node-manager-core/config"
 )
 

@@ -8,9 +8,9 @@ import (
 	"sort"
 
 	"github.com/alessio/shellescape"
-	"github.com/nodeset-org/hyperdrive-daemon/shared"
-	"github.com/nodeset-org/hyperdrive-daemon/shared/config/ids"
-	"github.com/nodeset-org/hyperdrive-daemon/shared/config/migration"
+	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
+	"github.com/nodeset-org/hyperdrive/shared/config/migration"
 	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/rocket-pool/node-manager-core/log"
 	"gopkg.in/yaml.v3"

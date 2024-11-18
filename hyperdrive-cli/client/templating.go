@@ -1,6 +1,6 @@
 package client
 
-import "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+import "github.com/nodeset-org/hyperdrive/shared/config"
 
 // Get the configs for all of the modules in the system that are enabled
 func (c *GlobalConfig) GetEnabledModuleConfigNames() []string {
