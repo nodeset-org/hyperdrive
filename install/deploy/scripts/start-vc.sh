@@ -1,6 +1,18 @@
 #!/bin/sh
 # This script launches validator clients for Hyperdrive's docker stack; only edit if you know what you're doing ;)
 
+# Check for the Graffiti file
+if [ ! -f "$GRAFFITI_FILE" ]; then
+    echo "Graffiti file not found, please try again when the Constellation daemon has created one."
+    exit 1
+fi
+
+# Check for the JWT auth file
+if [ ! -f "$KEYMANAGER_JWT_FILE" ]; then
+    echo "Keymanager JWT secret file not found, please try again when the Constellation daemon has created one."
+    exit 1
+fi
+
 # Lighthouse startup
 if [ "$CLIENT" = "lighthouse" ]; then
 
@@ -35,7 +47,16 @@ if [ "$CLIENT" = "lighthouse" ]; then
         CMD="$CMD --monitoring-endpoint $BITFLY_NODE_METRICS_ENDPOINT?apikey=$BITFLY_NODE_METRICS_SECRET&machine=$BITFLY_NODE_METRICS_MACHINE_NAME"
     fi
 
-    exec ${CMD} --graffiti "$GRAFFITI"
+    # Keymanager API
+    CMD="$CMD \
+        --http \
+        --http-address 0.0.0.0 \
+        --http-port ${KEYMANAGER_PORT} \
+        --http-allow-origin '*' \
+        --unencrypted-http-transport \
+        --http-store-passwords-in-secrets-dir"
+
+    exec ${CMD} --graffiti "$(cat $GRAFFITI_FILE)"
 
 fi
 

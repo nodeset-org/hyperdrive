@@ -38,7 +38,9 @@ services:
       - BITFLY_NODE_METRICS_ENDPOINT={{.Hyperdrive.Metrics.BitflyNodeMetrics.Endpoint}}
       - BITFLY_NODE_METRICS_MACHINE_NAME={{.Hyperdrive.Metrics.BitflyNodeMetrics.MachineName}}
       - ENABLE_MEV_BOOST={{.Hyperdrive.MevBoost.Enable}}
-      - GRAFFITI={{.Constellation.Graffiti}}
+      - GRAFFITI_FILE={{.Constellation.GetFullGraffitiPath $module_dir}}
+      - KEYMANAGER_JWT_FILE={{.Constellation.GetKeymanagerJwtFilePath $module_dir}}
+      - KEYMANAGER_PORT={{.Constellation.KeymanagerPort}}
     entrypoint: sh
     command: "/usr/share/hyperdrive/scripts/{{.Hyperdrive.GetVcStartScript}}"
     cap_drop:
