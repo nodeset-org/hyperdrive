@@ -1,0 +1,51 @@
+# This is the Docker Compose file for the "hello world" example's main service.
+# You can make yours as simple or as complex as you need. Hyperdrive doesn't interact with these directly, other than starting and stopping them.
+
+services:
+  {{.GetValue serviceContainerName}}:
+    image: {{.GetValue serviceContainerTag}}
+    container_name: {{.GetValue "nodeset/hyperdrive:projectName"}}_{{.GetValue serviceContainerName}} # Container names should follow the format "<project name>_<service name>" 
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:{{.GetValue apiPort}}:{{.GetValue apiPort}}/tcp" # Restricted to localhost outside of Docker
+    volumes:
+      - {{.ModuleConfigDir}}:{{.ModuleConfigDir}}:ro # The module's config directory
+      - {{.ModuleDataDir}}:{{.ModuleDataDir}} # The module's data directory
+      - {{.ModuleJwtKeyFile}}:{{.ModuleJwtKeyFile}}:ro
+      - {{.HyperdriveJwtKeyFile}}:{{.HyperdriveJwtKeyFile}}:ro
+      - {{.ModuleLogDir}}:{{.ModuleLogDir}} # The module's log directory
+    command:
+      - "--config-dir"
+      - "{{.ModuleConfigDir}}" # The module's config directory
+      - "--data-dir"
+      - "{{.ModuleDataDir}}" # The module's data directory
+      - --hyperdrive-url
+      - "{{.HyperdriveDaemonUrl}}" # HTTP URL for the Hyperdrive API
+      - --ip
+      - "0.0.0.0" # Open to all Docker traffic
+      - --port
+      - "{{.GetValue apiPort}}" # The port the module's server will listen on
+      - --api-key
+      - "{{.ModuleJwtKeyFile}}/{{.ModuleJwtKeyFile}}" # The JWT secret for the module's server
+      - --hd-api-key
+      - "{{.HyperdriveJwtKeyFile}}/{{.HyperdriveJwtKeyFile}}" # The JWT secret for the Hyperdrive client
+    networks:
+      - net
+      {{- range $network := .GetValueArray "nodeset/hyperdrive:additionalDockerNetworks" ","}}
+      - {{$network}} # Adds any additional (external) Docker networks the user specifies
+      {{- end}}
+    cap_drop:
+      - all # The container will run as root but this will drop all capabilities it doesn't need
+    cap_add:
+      - dac_override # Needed to access files owned by the user instead of root
+    security_opt:
+      - no-new-privileges
+networks:
+  net:
+    {{- if .GetValue "nodeset/hyperdrive:enableIPv6" }}
+    enable_ipv6: true
+    {{- end}}
+  {{- range $network := .GetValueArray "nodeset/hyperdrive:additionalDockerNetworks" ","}}
+  {{$network}}:
+    external: true # Needed for additional networks since Hyperdrive doesn't own them
+  {{- end}}

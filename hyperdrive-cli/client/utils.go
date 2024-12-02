@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 
 	"github.com/alessio/shellescape"
-	csconfig "github.com/nodeset-org/hyperdrive-constellation/shared/config"
-	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"gopkg.in/yaml.v3"
 )
