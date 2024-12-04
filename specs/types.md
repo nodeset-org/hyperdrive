@@ -16,6 +16,19 @@ An **Identifier** is a string that only allows a certain subset of characters:
 Identifiers can have one or more character.
 
 
+## Description
+
+Descriptions are special strings that can be used in various configuration metadata locations. Any character is allowed in them, and they support formatting to some extent.
+
+By default, all description text is white (`0xffffff`). Text color can be changed by adding `[color]` tags anywhere in the description body. Multiple tags can exist within a single description to change the color of a specific text block. For a complete list of supported color names that are available for use, please see the [W3C color keyword list for CSS](https://www.w3.org/wiki/CSS/Properties/color/keywords). Note that all of the names are lower-case.
+
+For example, the following description will have the first sentence in the default color (white), the second in `orange` (hex code `0xffa500`), and the third in `white` (hex code `0xffffff`) again:
+
+```
+This is a default white sentence. [orange]Now this sentence is orange. [white]And we're back to white!
+```
+
+
 ## Fully Qualified Module Name
 
 An **FQMN** (Fully-Qualified Module Name) is a formal name for a Hyperdrive module that can be used to disambiguate it from other modules that share the same name. They have the following format:

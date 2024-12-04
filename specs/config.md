@@ -12,6 +12,7 @@ In the context of Hyperdrive, there are two entities related to configuring your
 A configuration metadata object consists of the following two properties, each of which can have zero or more of the following entities:
 
 - `parameters` ([Metadata Parameter\[\]](#parameters), required): an array of metadata for individual settings that will ultimately be treated as key-value pair entries when the configuration is [instantiated](#instances).
+
 - `sections` ([Metadata Section\[\]](#section)): an array of groups of parameters used purely for organizational purposes. They can also have their own section children underneath them.
 
 
@@ -20,8 +21,16 @@ A configuration metadata object consists of the following two properties, each o
 A **Section** adheres to an individual section of the configuration (a grouping of parameters and subsections). It should have the following properties:
 
 - `name` ([Identifier](./types.md#identifier), required): a human-readable name for the section.
+
+- `description` ([Dynamic string](./types.md#dynamic-properties) - [Description](./types.md#description), required): the human-readable description of the section. This will correspond to the value of the description box when the individual property is being configured in Hyperdrive's interactive configurator. It can be a string with any characters.
+
 - `parameters` ([Metadata Parameter\[\]](#parameters), required): an array of metadata for individual settings that will ultimately be treated as key-value pair entries when the configuration is [instantiated](#instances).
+
 - `sections` ([Metadata Section\[\]](#section), required): an array of groups of parameters used purely for organizational purposes. They can also have their own section children underneath them.
+
+- `disabled` ([Dynamic bool](./types.md#dynamic-properties), optional): indicates whether this section should remain visible, but not interactive ("grayed out") in the configurator UI. If this is true, we suggest updating the description to indicate *why* it's disabled for the user's own knowledge.
+
+- `hidden` ([Dynamic bool](./types.md#dynamic-properties), optional): prevents the section from appearing in the configurator UI at all. This is helpful if you have parameters or internal system settings that need to be changed depending on various other configuration settings, but should not be user-accessible.
 
 
 ### Parameters
@@ -39,15 +48,7 @@ Below is a list of the common properties that all parameters share:
 
 - `name` (string, required): the human-readable name for the property. This will correspond to the label of the individual property field that will be presented to the user during interactive configuration. It can be a string with any characters, though we recommend it consists only of printable ones for legibility's sake.
 
-- `description` ([Dynamic string](./types.md#dynamic-properties), required): the human-readable description of the property. This will correspond to the value of the description box when the individual property is being configured in Hyperdrive's interactive configurator. It can be a string with any characters.
-
-    By default, all text is white (`0xffffff`). Text color can be changed by adding `[color]` tags anywhere in the description body. Multiple tags can exist within a single description to change the color of a specific text block. For a complete list of supported color names that are available for use, please see the [W3C color keyword list for CSS](https://www.w3.org/wiki/CSS/Properties/color/keywords). Note that all of the names are lower-case.
-
-    For example, the following description will have the first sentence in the default color (white), the second in `orange` (hex code `0xffa500`), and the third in `white` (hex code `0xffffff`) again:
-
-    ```
-    This is a default white sentence. [orange]Now this sentence is orange. [white]And we're back to white!
-    ```
+- `description` ([Dynamic string](./types.md#dynamic-properties) - [Description](./types.md#description), required): the human-readable description of the property. This will correspond to the value of the description box when the individual property is being configured in Hyperdrive's interactive configurator. It can be a string with any characters.
 
 - `type` (enum, required): defines how to interpret the value of the parameter, and the kind of UI element that will represent it in the configurator. This also has some bearing on how the parameter will be serialized, and thus what behavior should be taken to deserialize it. See the [Parameter Types](#parameter-types) section below for more information on the various allowed types.
 
@@ -56,6 +57,8 @@ Below is a list of the common properties that all parameters share:
 - `value` (Parameter Type, required): the current value assigned to this parameter according to the latest saved configuration. The type of the value must correspond to the Parameter Type used above.
 
 - `advanced` (bool, optional): indicates whether this parameter should be hidden from the user unless they've entered "advanced mode" during service configuration, where all options are present. If not provided, defaults to `false`.
+
+- `disabled` ([Dynamic bool](./types.md#dynamic-properties), optional): indicates whether this parameter should remain visible, but not interactive ("grayed out") in the configurator UI. If this is true, we suggest updating the description to indicate *why* it's disabled for the user's own knowledge.
 
 - `hidden` ([Dynamic bool](./types.md#dynamic-properties), optional): prevents the parameter from appearing in the configurator UI at all. This is helpful if you have parameters or internal system settings that need to be changed depending on various other configuration settings, but should not be user-accessible.
 
@@ -135,6 +138,8 @@ The following types of parameters are allowed:
 
 - `value` (`ChoiceType`, required): the value to assign to the property when this option is selected.
 
+- `disabled` ([Dynamic bool](./types.md#dynamic-properties), optional): indicates whether this option should remain visible, but not interactive ("grayed out") in the configurator UI. If this is true, we suggest updating the description to indicate *why* it's disabled for the user's own knowledge.
+  
 - `hidden` ([Dynamic bool](./types.md#dynamic-properties), optional): when `true`, the option will be hidden from the dropdown list in the configurator UI. This is helpful if you have parameters or internal system settings that need to be changed depending on various other configuration settings, but should not be user-accessible. It's also helpful if you want to conditionally hide this option based on the other configuration settings.
 
 
@@ -145,6 +150,7 @@ A **Configuration Instance** is an object that corresponds to a "filled out" ver
 A configuration instance object consists of the following properties, which must align exactly with the corresponding Metadata object:
 
 - `parameters` ([Parameter Instance\[\]](#parameter-instance), required): an array of key-value pairs, where each one's name corresponds to the ID of a [Parameter Metadata](#parameters) object and the value is the value of that corresponding parameter.
+
 - `sections` ([Instance Section\[\]](#section-1)): an array of groups of parameter instances used purely for organizational purposes. They can also have their own section children underneath them.
 
 
@@ -153,7 +159,9 @@ A configuration instance object consists of the following properties, which must
 A **Section** in an instance is hierarchically identical to a [metadata section]() 
 
 - `name` ([Identifier](./types.md#identifier), required): the name of the corresponding section in the Configuration Metadata object.
+
 - `parameters` ([Parameter Instance\[\]](#parameter-instance), required): an array of key-value pairs, where each one's name corresponds to the ID of a [Parameter Metadata](#parameters) object and the value is the value of that corresponding parameter.
+
 - `sections` ([Instance Section\[\]](#section-1)): an array of groups of parameter instances used purely for organizational purposes. They can also have their own section children underneath them.
 
 
