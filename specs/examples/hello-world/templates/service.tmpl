@@ -9,16 +9,17 @@ services:
     ports:
       - "127.0.0.1:{{.GetValue apiPort}}:{{.GetValue apiPort}}/tcp" # Restricted to localhost outside of Docker
     volumes:
-      - {{.ModuleConfigDir}}:{{.ModuleConfigDir}}:ro # The module's config directory
-      - {{.ModuleDataDir}}:{{.ModuleDataDir}} # The module's data directory
-      - {{.ModuleJwtKeyFile}}:{{.ModuleJwtKeyFile}}:ro
-      - {{.HyperdriveJwtKeyFile}}:{{.HyperdriveJwtKeyFile}}:ro
+      - {{.ModuleConfigDir}}/native.cfg:{{.ModuleConfigDir}}/native.cfg:ro # The module's config directory
       - {{.ModuleLogDir}}:{{.ModuleLogDir}} # The module's log directory
+      - {{.ModuleDataDir}}:{{.ModuleDataDir}} # The module's data directory
+      - {{.HyperdriveJwtKeyFile}}:{{.HyperdriveJwtKeyFile}}:ro
     command:
-      - "--config-dir"
-      - "{{.ModuleConfigDir}}" # The module's config directory
+      - "--config-file"
+      - "{{.ModuleConfigDir}}/native.cfg" # The module's config directory
       - "--data-dir"
       - "{{.ModuleDataDir}}" # The module's data directory
+      - "--log-dir"
+      - "{{.ModuleLogDir}}" # The module's log directory
       - --hyperdrive-url
       - "{{.HyperdriveDaemonUrl}}" # HTTP URL for the Hyperdrive API
       - --ip

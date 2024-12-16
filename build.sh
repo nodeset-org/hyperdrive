@@ -19,7 +19,8 @@ fail() {
 # Builds all of the CLI binaries
 build_cli() {
     echo -n "Building CLI binaries... "
-    docker buildx build --rm -f docker/cli.dockerfile --output build/$VERSION --target cli . || fail "Error building CLI binaries."    echo "done!"
+    docker buildx build --rm -f docker/cli.dockerfile --output build/$VERSION --target cli . || fail "Error building CLI binaries."
+    echo "done!"
 }
 
 

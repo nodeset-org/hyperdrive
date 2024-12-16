@@ -18,6 +18,11 @@ Each of these use cases has a different way of utilizing templates, which are co
 Templates can be used anywhere inside a Docker Compose file template for your adapter. The following methods are supported:
 
 
+### GetProjectName
+
+`{{.GetProjectName}}` provides the Docker Compose project name for the project your adapter belongs to. Use this in tandem with your service names to retrieve the name of any of your service containers.
+
+
 ### ModuleConfigDir
 
 `{{.ModuleConfigDir}}` retrieves the full path to the directory that your adapter should save its configuration (and any other extraneous files) into. This will also be made available to your service Docker Compose templates so it can be mounted as a volume for file retrieval.
@@ -75,6 +80,11 @@ Any dynamic property templates will be run dynamically whenever one of the follo
 Templates can be used anywhere inside a Docker Compose file template for service definitions. The following methods are supported:
 
 
+### GetProjectName
+
+`{{.GetProjectName}}` provides the Docker Compose project name for the project your adapter belongs to. Use this in tandem with your service names to specify the name of any of your service containers.
+
+
 ### GetValue
 
 `{{.GetValue <FQPN>}}` retrieves the value of the provided parameter, which is specified by its [Fully Qualified Parameter Name](./types.md#fully-qualified-parameter-name).
@@ -107,11 +117,6 @@ Whenever Hyperdrive starts its services (including the modules), the template fi
 ### HyperdriveDaemonUrl
 
 `{{.HyperdriveDaemonUrl}}` returns the full URL, including scheme and port, for the Hyperdrive daemon's API endpoint. Your service can use this to send HTTP API requests to Hyperdrive.
-
-
-### ModuleJwtKeyFile
-
-`{{.ModuleJwtKeyFile}}` returns the path of the file on-disk that should be used as the JWT authentication secret key by your service.
 
 
 ### HyperdriveJwtKeyFile

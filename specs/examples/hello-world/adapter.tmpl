@@ -2,15 +2,15 @@
 # You can make yours as simple or as complex as you need, as long as you follow the adapter specification.
 
 services:
-  {{.GetAdapterContainerName}}:
+  {{.GetProjectName}}_hw_adapter:
     image: nodeset/hd-hello-world:v1.0.0
     restart: unless-stopped
     entrypoint: /usr/bin/hd-adapter   # This is the path to the adapter binary
+    environment:
+      - HD_PROJECT_NAME={{.GetProjectName}}
     volumes:
       - {{.ModuleConfigDir}}:/hd/config
-      - {{.ModuleSecretFile}}:/hd/secrets/adapter.key
       - {{.ModuleLogDir}}:/hd/logs
-      - {{.ModuleJwtKeyFile}}:/hd/secrets/jwt.key
     cap_drop:
       - all
     cap_add:

@@ -20,6 +20,8 @@ A configuration metadata object consists of the following two properties, each o
 
 A **Section** adheres to an individual section of the configuration (a grouping of parameters and subsections). It should have the following properties:
 
+- `id` ([Identifier](./types.md#identifier), required): a unique identifier for the section. This is *not* presented to the user; it is only used internally as a way to reference the parameter.
+
 - `name` ([Identifier](./types.md#identifier), required): a human-readable name for the section.
 
 - `description` ([Dynamic string](./types.md#dynamic-properties) - [Description](./types.md#description), required): the human-readable description of the section. This will correspond to the value of the description box when the individual property is being configured in Hyperdrive's interactive configurator. It can be a string with any characters.
@@ -145,26 +147,77 @@ The following types of parameters are allowed:
 
 ## Instances
 
-A **Configuration Instance** is an object that corresponds to a "filled out" version of a Configuration Metadata object. It has an identical Section and Parameter structure, but instead of Parameters it has **Parameter Instances**. which are simply key-value pairs. These indicate the value assigned to each parameter without any of the extraneous metadata. The type of value in each Parameter Instance is the same as the type of the corresponding Parameter.
+A **Configuration Instance** is an object that corresponds to a "filled out" version of a Configuration Metadata object. Instead of discrete parameters and section objects, each one becomes a simple key-value pair property. These indicate the value assigned to each parameter without any of the extraneous metadata. The type of value in each Parameter Instance is the same as the type of the corresponding metadata parameter.
 
-A configuration instance object consists of the following properties, which must align exactly with the corresponding Metadata object:
+Each top-level metadata parameter and section from the corresponding configuration metadata will become a top-level property of the configuration instance as follows:
 
-- `parameters` ([Parameter Instance\[\]](#parameter-instance), required): an array of key-value pairs, where each one's name corresponds to the ID of a [Parameter Metadata](#parameters) object and the value is the value of that corresponding parameter.
+- For each Parameter, the property will have the Parameter's `id` as the key and the parameter's `value` as the value.
+- For each Section, the property will have the Section's `id` as the key. The value will be an object itself, which contains key-value pairs for all Parameters and Sections within that Section recursively.
 
-- `sections` ([Instance Section\[\]](#section-1)): an array of groups of parameter instances used purely for organizational purposes. They can also have their own section children underneath them.
+For example, say the Configuration Metadata looked like this:
 
+```json
+{
+    "parameters": [
+        {
+            "id": "param1",
+            "name": "Parameter 1",
+            "description": {
+                "default": "This is the first parameter",
+            },
+            "type": "bool",
+            "default": false,
+            "value": true,
+            "overwriteOnUpgrade": false,
+            "affectedContainers": []
+        },{
+            "id": "param2",
+            "name": "Parameter 2",
+            "description": {
+                "default": "This is the second parameter",
+            },
+            "type": "int",
+            "default": 100,
+            "value": 12,
+            "overwriteOnUpgrade": false,
+            "affectedContainers": []
+        }
+    ],
+    "sections": [
+        {
+            "id": "subsection",
+            "name": "Sub-section",
+            "description": {
+                "default": "This is a subsection of the main config"
+            },
+            "parameters": [
+                {
+                    "id": "param3",
+                    "name": "Parameter 3",
+                    "description": {
+                        "default": "This is the third parameter",
+                    },
+                    "type": "string",
+                    "default": "",
+                    "value": "hello world",
+                    "overwriteOnUpgrade": false,
+                    "affectedContainers": []
+                }
+            ],
+            "sections": []
+        }
+    ]
+}
+```
 
-### Section
+The corresponding Configuration Instance would then be this:
 
-A **Section** in an instance is hierarchically identical to a [metadata section]() 
-
-- `name` ([Identifier](./types.md#identifier), required): the name of the corresponding section in the Configuration Metadata object.
-
-- `parameters` ([Parameter Instance\[\]](#parameter-instance), required): an array of key-value pairs, where each one's name corresponds to the ID of a [Parameter Metadata](#parameters) object and the value is the value of that corresponding parameter.
-
-- `sections` ([Instance Section\[\]](#section-1)): an array of groups of parameter instances used purely for organizational purposes. They can also have their own section children underneath them.
-
-
-### Parameter Instance
-
-Parameter instances are simple key-value pair properties. The key corresponds to the ID of the parameter metadata it represents. The value is the value assigned to the instance of that parameter metadata. The type of the value is dictated by the parameter metadata.
+```json
+{
+    "param1": false,
+    "param2": 12,
+    "subsection": {
+        "param3": "hello world"
+    }
+}
+```
