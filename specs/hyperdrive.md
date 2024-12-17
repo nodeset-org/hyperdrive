@@ -2,7 +2,7 @@
 
 Hyperdrive is a toolkit that bridges service maintainers who want to run software in a physically decentralized capacity with [NodeSet's](https://nodeset.io) cohort: a geographically distributed network of node operators (over 400 across more than 40 countries) that are willing and able to run it. For node operators, it provides a unified configuration and execution experience which lets them run that software in a familiar and comfortable setting. For service maintainers, it provides a flexible architecture that offers the freedom to build, distribute, configure, and execute services in whatever language or paradigm they like with no changes required for conformity.
 
-Coupled with NodeSet's systems for presenting new software offerings to its node operators and providing blockchain-based operator payments, Hyperdrive is a powerful capability that enables service maintainers to rapidly bootstrap a distributed backbone.
+Coupled with NodeSet's systems for presenting new software offerings to its node operators and providing blockchain-based operator payments, Hyperdrive is a powerful capability that enables service maintainers to rapidly bootstrap distributed infrastructure.
 
 
 ## Components
