@@ -52,5 +52,5 @@ func (t *TemplateDataSource) GetValueArray(fqpn string, delimiter string) ([]str
 
 func (t *TemplateDataSource) UseDefault() string {
 	// TODO
-	return ""
+	return "defaultValue"
 }

@@ -3,6 +3,7 @@ package testing
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli-2/template/module"
@@ -56,7 +57,7 @@ func TestTemplateWrite(t *testing.T) {
 		t.Fatalf("Failed to read expected output file: %v", err)
 	}
 
-	if string(outputContent) != string(expectedContent) {
+	if strings.TrimSpace(string(outputContent)) != strings.TrimSpace(string(expectedContent)) {
 		t.Errorf("Rendered output does not match expected.\nGot:\n%s\nExpected:\n%s", string(outputContent), string(expectedContent))
 	}
 

@@ -3,3 +3,7 @@ secret_file: {{.ModuleSecretFile}}
 log_dir: {{.ModuleLogDir}}
 jwt_key_file: {{.ModuleJwtKeyFile}}
 daemon_url: {{.HyperdriveDaemonUrl}}
+
+network: {{GetValue "network"}}
+addresses: {{range $index, $val := GetValueArray "addresses" ","}}{{if $index}} {{end}}{{$val}}{{end}}
+default_value: {{UseDefault}}
