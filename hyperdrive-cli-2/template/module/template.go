@@ -22,11 +22,12 @@ func (t Template) Write(data interface{}) error {
 	defer runtimeFile.Close()
 
 	// Map dynamic getters and parse the template
-	tmpl, err := template.New("template").Funcs(template.FuncMap{
-		"GetValue":      data.(*TemplateDataSource).GetValue,
-		"GetValueArray": data.(*TemplateDataSource).GetValueArray,
-		"UseDefault":    data.(*TemplateDataSource).UseDefault,
-	}).ParseFiles(t.Src)
+	// tmpl, err := template.New("template").Funcs(template.FuncMap{
+	// 	"GetValue":      data.(*TemplateDataSource).GetValue,
+	// 	"GetValueArray": data.(*TemplateDataSource).GetValueArray,
+	// 	"UseDefault":    data.(*TemplateDataSource).UseDefault,
+	// }).ParseFiles(t.Src)
+	tmpl, err := template.ParseFiles(t.Src)
 	if err != nil {
 		return fmt.Errorf("Error reading template file %s: %w", shellescape.Quote(t.Src), err)
 	}
