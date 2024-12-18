@@ -1,0 +1,5 @@
+project_name: hd2-service
+config_dir: /path/to/config
+secret_file: /path/to/secret
+log_dir: /path/to/log
+jwt_key_file: /path/to/jwt
