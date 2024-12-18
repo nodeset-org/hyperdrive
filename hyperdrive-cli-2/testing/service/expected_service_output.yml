@@ -1,0 +1,8 @@
+project_name: hd2-service
+config_dir: /path/to/config
+data_dir: /path/to/data
+hd_daemon_url: http://localhost:1234
+hd_jwt_key_file: /path/to/jwt
+
+network: mainnet
+addresses: addr1 addr2 addr3

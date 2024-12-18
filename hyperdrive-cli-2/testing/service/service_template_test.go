@@ -6,18 +6,18 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli-2/template/module"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli-2/template/service"
 )
 
-func TestTemplateWrite(t *testing.T) {
+func TestServiceTemplateWrite(t *testing.T) {
 	// Create a temporary directory to store the template and runtime files
-	tempDir, err := os.MkdirTemp("", "template_test")
+	tempDir, err := os.MkdirTemp("", "service_template_test")
 	if err != nil {
 		t.Fatalf("Failed to create temporary directory: %v", err)
 	}
 	defer os.RemoveAll(tempDir)
 
-	templateFile, err := filepath.Abs("example_template.tmpl")
+	templateFile, err := filepath.Abs("example_service_template.tmpl")
 	if err != nil {
 		t.Fatalf("Failed to get absolute path of template file: %v", err)
 	}
@@ -28,16 +28,17 @@ func TestTemplateWrite(t *testing.T) {
 		"addresses": "addr1,addr2,addr3",
 	}
 
-	dataSource := &module.TemplateDataSource{
-		ModuleConfigDir:     "/path/to/config",
-		ModuleSecretFile:    "/path/to/secret.key",
-		ModuleLogDir:        "/path/to/logs",
-		ModuleJwtKeyFile:    "/path/to/jwt.key",
-		HyperdriveDaemonUrl: "http://localhost:1234",
-		CustomFields:        customFields,
+	dataSource := &service.ServiceDataSource{
+		GetProjectName:       "hd2-service",
+		ModuleConfigDir:      "/path/to/config",
+		ModuleDataDir:        "/path/to/data",
+		HyperdriveDaemonUrl:  "http://localhost:1234",
+		HyperdriveJwtKeyFile: "/path/to/jwt",
+
+		CustomFields: customFields,
 	}
 
-	tmpl := module.Template{
+	tmpl := service.ServiceTemplate{
 		Src: templateFile,
 		Dst: outputFile,
 	}
@@ -52,7 +53,7 @@ func TestTemplateWrite(t *testing.T) {
 		t.Fatalf("Failed to read output file: %v", err)
 	}
 
-	expectedContent, err := os.ReadFile("expected_template_output.yml")
+	expectedContent, err := os.ReadFile("expected_service_output.yml")
 	if err != nil {
 		t.Fatalf("Failed to read expected output file: %v", err)
 	}

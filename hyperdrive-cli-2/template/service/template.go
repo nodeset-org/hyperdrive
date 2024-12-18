@@ -1,4 +1,4 @@
-package module
+package service
 
 import (
 	"fmt"
@@ -9,12 +9,12 @@ import (
 	"github.com/alessio/shellescape"
 )
 
-type Template struct {
+type ServiceTemplate struct {
 	Src string
 	Dst string
 }
 
-func (t Template) Write(data interface{}) error {
+func (t ServiceTemplate) Write(data interface{}) error {
 	// Open the output file, creating it if it doesn't exist
 	runtimeFile, err := os.OpenFile(t.Dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0664)
 	if err != nil {
@@ -24,9 +24,8 @@ func (t Template) Write(data interface{}) error {
 
 	// Map dynamic getters and parse the template
 	tmpl, err := template.New(filepath.Base(t.Src)).Funcs(template.FuncMap{
-		"GetValue":      data.(*TemplateDataSource).GetValue,
-		"GetValueArray": data.(*TemplateDataSource).GetValueArray,
-		"UseDefault":    data.(*TemplateDataSource).UseDefault,
+		"GetValue":      data.(*ServiceDataSource).GetValue,
+		"GetValueArray": data.(*ServiceDataSource).GetValueArray,
 	}).ParseFiles(t.Src)
 	// tmpl, err := template.ParseFiles(t.Src)
 	if err != nil {
