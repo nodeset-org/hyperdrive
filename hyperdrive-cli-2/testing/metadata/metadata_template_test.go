@@ -10,18 +10,19 @@ import (
 )
 
 func TestMetadataTemplateWrite(t *testing.T) {
-	// Create a temporary directory to store the template and runtime files
-	tempDir, err := os.MkdirTemp("", "metadata_template_test")
-	if err != nil {
-		t.Fatalf("Failed to create temporary directory: %v", err)
-	}
-	defer os.RemoveAll(tempDir)
-
 	templateFile, err := filepath.Abs("example_metadata_template.tmpl")
 	if err != nil {
 		t.Fatalf("Failed to get absolute path of template file: %v", err)
 	}
-	outputFile := filepath.Join(tempDir, "output.yml")
+	templateContent, err := os.ReadFile(templateFile)
+	if err != nil {
+		t.Fatalf("Failed to read template file: %v", err)
+	}
+
+	expectedContent, err := os.ReadFile("expected_metadata_output.yml")
+	if err != nil {
+		t.Fatalf("Failed to read expected output file: %v", err)
+	}
 
 	customFields := map[string]string{
 		"network":   "mainnet",
@@ -33,27 +34,16 @@ func TestMetadataTemplateWrite(t *testing.T) {
 	}
 
 	tmpl := metadata.MetadataTemplate{
-		Src: templateFile,
-		Dst: outputFile,
+		Content: string(templateContent),
 	}
 
-	err = tmpl.Write(dataSource)
+	output, err := tmpl.Write(dataSource)
 	if err != nil {
 		t.Fatalf("Failed to render template: %v", err)
 	}
 
-	outputContent, err := os.ReadFile(outputFile)
-	if err != nil {
-		t.Fatalf("Failed to read output file: %v", err)
-	}
-
-	expectedContent, err := os.ReadFile("expected_metadata_output.yml")
-	if err != nil {
-		t.Fatalf("Failed to read expected output file: %v", err)
-	}
-
-	if strings.TrimSpace(string(outputContent)) != strings.TrimSpace(string(expectedContent)) {
-		t.Errorf("Rendered output does not match expected.\nGot:\n%s\nExpected:\n%s", string(outputContent), string(expectedContent))
+	if strings.TrimSpace(string(output)) != strings.TrimSpace(string(expectedContent)) {
+		t.Errorf("Rendered output does not match expected.\nGot:\n%s\nExpected:\n%s", string(output), string(expectedContent))
 	}
 
 }

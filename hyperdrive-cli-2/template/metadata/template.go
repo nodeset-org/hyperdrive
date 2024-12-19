@@ -2,47 +2,32 @@ package metadata
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/alessio/shellescape"
 )
 
 type MetadataTemplate struct {
-	Src string
-	Dst string
+	Content string
 }
 
-func (t MetadataTemplate) Write(data interface{}) error {
-	// Open the output file, creating it if it doesn't exist
-	runtimeFile, err := os.OpenFile(t.Dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0664)
-	if err != nil {
-		return fmt.Errorf("Could not open templated file %s for writing: %w", shellescape.Quote(t.Dst), err)
-	}
-	defer runtimeFile.Close()
-
+func (t MetadataTemplate) Write(data interface{}) (string, error) {
 	// Map dynamic getters and parse the template
-	tmpl, err := template.New(filepath.Base(t.Src)).Funcs(template.FuncMap{
+	tmpl, err := template.New("content").Funcs(template.FuncMap{
 		"GetValue":      data.(*MetadataDataSource).GetValue,
 		"GetValueArray": data.(*MetadataDataSource).GetValueArray,
 		"UseDefault":    data.(*MetadataDataSource).UseDefault,
-	}).ParseFiles(t.Src)
+	}).Parse(t.Content)
 	if err != nil {
-		return fmt.Errorf("Error reading template file %s: %w", shellescape.Quote(t.Src), err)
+		return "", fmt.Errorf("Error reading template file %s: %w", shellescape.Quote(t.Content), err)
 	}
 
-	// Replace template variables and write the result
-	err = tmpl.Execute(runtimeFile, data)
+	var output strings.Builder
+	err = tmpl.Execute(&output, data)
 	if err != nil {
-		return fmt.Errorf("Error writing and substituting template: %w", err)
+		return "", fmt.Errorf("error executing template: %w", err)
 	}
 
-	// If the file was newly created, 0664 may have been altered by umask, so chmod back to 0664.
-	err = os.Chmod(t.Dst, 0664)
-	if err != nil {
-		return fmt.Errorf("Could not set templated file (%s) permissions: %w", shellescape.Quote(t.Dst), err)
-	}
-
-	return nil
+	return output.String(), nil
 }
