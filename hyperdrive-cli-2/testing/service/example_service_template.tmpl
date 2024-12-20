@@ -1,8 +1,5 @@
 project_name: {{.GetProjectName}}
-config_dir: {{.ModuleConfigDir}}
-data_dir: {{.ModuleDataDir}}
-hd_daemon_url: {{.HyperdriveDaemonUrl}}
-hd_jwt_key_file: {{.HyperdriveJwtKeyFile}}
-
-network: {{GetValue "network"}}
-addresses: {{range $index, $val := GetValueArray "addresses" ","}}{{if $index}} {{end}}{{$val}}{{end}}
+config_dir: {{.GetModuleConfigDir}}
+data_dir: {{.GetModuleDataDir}}
+hd_daemon_url: {{.GetHyperdriveDaemonUrl}}
+hd_jwt_key_file: {{.GetHyperdriveJwtKeyFile}}

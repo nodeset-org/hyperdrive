@@ -24,11 +24,11 @@ func TestAdapterTemplateWrite(t *testing.T) {
 	outputFile := filepath.Join(tempDir, "output.yml")
 
 	dataSource := &adapter.AdapterDataSource{
-		GetProjectName:   "hd2-service",
-		ModuleConfigDir:  "/path/to/config",
-		ModuleSecretFile: "/path/to/secret",
-		ModuleLogDir:     "/path/to/log",
-		ModuleJwtKeyFile: "/path/to/jwt",
+		ProjectName:      func() string { return "hd2-service" },
+		ModuleConfigDir:  func() string { return "/path/to/config" },
+		ModuleSecretFile: func() string { return "/path/to/secret" },
+		ModuleLogDir:     func() string { return "/path/to/log" },
+		ModuleJwtKeyFile: func() string { return "/path/to/jwt" },
 	}
 
 	tmpl := adapter.AdapterTemplate{

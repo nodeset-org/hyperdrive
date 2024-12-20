@@ -29,11 +29,11 @@ func TestServiceTemplateWrite(t *testing.T) {
 	}
 
 	dataSource := &service.ServiceDataSource{
-		GetProjectName:       "hd2-service",
-		ModuleConfigDir:      "/path/to/config",
-		ModuleDataDir:        "/path/to/data",
-		HyperdriveDaemonUrl:  "http://localhost:1234",
-		HyperdriveJwtKeyFile: "/path/to/jwt",
+		ProjectName:          func() string { return "hd2-service" },
+		ModuleConfigDir:      func() string { return "/path/to/config" },
+		ModuleDataDir:        func() string { return "/path/to/data" },
+		HyperdriveDaemonUrl:  func() string { return "http://localhost:1234" },
+		HyperdriveJwtKeyFile: func() string { return "/path/to/jwt" },
 
 		CustomFields: customFields,
 	}
