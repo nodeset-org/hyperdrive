@@ -1,8 +1,0 @@
-key: mainnet
-defaultConfigSettings:
-stakeWiseResources:
-  deploymentName: mainnet
-  vault: 0xE2AEECC76839692AEa35a8D119181b14ebf411c9
-  feeRecipient: 0x48319f97E5Da1233c21c48b80097c0FB7a20Ff86
-  splitWarehouse: 0x8fb66F38cF86A3d5e8768f8F1754A24A6c661Fb8
-  pullSplit: 0x6Cc15f76F76326aCe299Ad7b8fdf4693a96E05C1

@@ -1,8 +1,0 @@
-Template: hyperdrive/restart
-Type: boolean
-Default: true
-Description: Do you want to restart Hyperdrive to apply the update?
-  Any running Hyperdrive services need to be restarted in order to apply this update.
-  NOTE: this may restart your Validator Clients if a new client version has been released.
-  If you have Doppelganger detection enabled, it will trigger and you will miss a few attestations.
-  This is normal.

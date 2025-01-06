@@ -1,7 +1,0 @@
-#!/bin/sh
-
-# Remove debconf DB changes when uninstalling
-if [ "$1" = "purge" -a -e /usr/share/debconf/confmodule ]; then
-    . /usr/share/debconf/confmodule
-    db_purge
-fi
