@@ -40,12 +40,35 @@ func setNumberProperty[Type NumberParameterType](id string, property *Type, valu
 		*property = typedValue
 	}
 
-	// Handle float conversion
-	paramFloat, ok := value.(float64)
-	if !ok {
+	// Handle conversion
+	switch valType := value.(type) {
+	case int:
+		*property = Type(valType)
+	case int8:
+		*property = Type(valType)
+	case int16:
+		*property = Type(valType)
+	case int32:
+		*property = Type(valType)
+	case int64:
+		*property = Type(valType)
+	case uint:
+		*property = Type(valType)
+	case uint8:
+		*property = Type(valType)
+	case uint16:
+		*property = Type(valType)
+	case uint32:
+		*property = Type(valType)
+	case uint64:
+		*property = Type(valType)
+	case float32:
+		*property = Type(valType)
+	case float64:
+		*property = Type(valType)
+	default:
 		return fmt.Errorf("invalid type for number property [%s]: %T", id, value)
 	}
-	*property = Type(paramFloat)
 	return nil
 }
 

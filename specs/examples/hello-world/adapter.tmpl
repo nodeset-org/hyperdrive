@@ -1,0 +1,19 @@
+# This is the Docker Compose file for the "hello world" example's adapter.
+# You can make yours as simple or as complex as you need, as long as you follow the adapter specification.
+
+services:
+  {{.GetProjectName}}_hw_adapter:
+    image: nodeset/hd-hello-world:v1.0.0
+    restart: unless-stopped
+    entrypoint: /usr/bin/hd-adapter   # This is the path to the adapter binary
+    environment:
+      - HD_PROJECT_NAME={{.GetProjectName}}
+    volumes:
+      - {{.ModuleConfigDir}}:/hd/config
+      - {{.ModuleLogDir}}:/hd/logs
+    cap_drop:
+      - all
+    cap_add:
+      - dac_override
+    security_opt:
+      - no-new-privileges

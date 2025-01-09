@@ -30,7 +30,7 @@ type ProcessConfigResponse struct {
 
 // Have the adapter process the module config
 func (c *AdapterClient) ProcessConfig(ctx context.Context, cfg config.IConfigurationMetadata) (ProcessConfigResponse, error) {
-	configMap := config.MarshalConfigurationMetadataToMap(cfg)
+	configMap := config.CreateInstanceFromMetadata(cfg)
 	request := &ProcessConfigRequest{
 		KeyedRequest: KeyedRequest{
 			Key: c.key,

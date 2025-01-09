@@ -21,7 +21,7 @@ type SetConfigRequest struct {
 
 // Have the adapter set the module config
 func (c *AdapterClient) SetConfig(ctx context.Context, cfg config.IConfigurationMetadata) error {
-	configMap := config.MarshalConfigurationMetadataToMap(cfg)
+	configMap := config.CreateInstanceFromMetadata(cfg)
 	request := &SetConfigRequest{
 		KeyedRequest: KeyedRequest{
 			Key: c.key,
