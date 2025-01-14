@@ -9,7 +9,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -42,14 +42,12 @@ type HyperdriveConfig struct {
 	// Logging
 	Logging *LoggingConfig
 
-	// Modules
-	ModuleConfigs []*ModuleConfig
-
 	// Internal fields
 	Version                 string
 	hyperdriveUserDirectory string
 	systemPath              string
 	moduleEnableStatus      map[string]bool
+	moduleManager           *ModuleConfigManager
 }
 
 // Creates a new Hyperdrive configuration
@@ -112,8 +110,84 @@ func NewHyperdriveConfig(hdDir string, systemPath string) *HyperdriveConfig {
 
 	// Create the subconfigs
 	cfg.Logging = NewLoggingConfig()
+
+	// Create internal fields
+	cfg.moduleManager = NewModuleConfigManager(cfg.GetModuleSystemDir(), cfg.GetAdapterKeyPath())
 	return cfg
 }
+
+// Get the config.Parameters for this config
+func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
+	return []config.IParameter{
+		&cfg.ProjectName,
+		&cfg.ApiPort,
+		&cfg.EnableIPv6,
+		&cfg.UserDataPath,
+		&cfg.AdditionalDockerNetworks,
+		&cfg.ClientTimeout,
+		&cfg.ContainerTag,
+	}
+}
+
+// Get the subconfigurations for this config
+func (cfg *HyperdriveConfig) GetSections() []config.ISection {
+	return []config.ISection{
+		cfg.Logging,
+	}
+}
+
+func (cfg *HyperdriveConfig) GetModuleSystemDir() string {
+	return filepath.Join(cfg.systemPath, "modules")
+}
+
+func (cfg *HyperdriveConfig) GetAdapterKeyPath() string {
+	return filepath.Join(cfg.hyperdriveUserDirectory, "secrets", "adapter.key")
+}
+
+// ===============
+// === Modules ===
+// ===============
+
+// Get the configurations for each module that's been loaded into the system (must call LoadModuleConfigs before this does anything useful)
+func (cfg *HyperdriveConfig) GetModuleConfigs() []*ModuleConfig {
+	return cfg.moduleManager.ModuleConfigs
+}
+
+// Load the configurations for each module - any errors for individual modules is reported in the module config container instead of returned here, so make sure to check those when interacting with them.
+func (cfg *HyperdriveConfig) LoadModuleConfigs() error {
+	err := cfg.moduleManager.LoadModuleConfigs(cfg.ProjectName.Value)
+	if err != nil {
+		return fmt.Errorf("error loading module configs: %w", err)
+	}
+	modules := cfg.moduleManager.ModuleConfigs
+
+	// Add any missing modules to the config's enable status
+	for _, module := range modules {
+		if _, exists := cfg.moduleEnableStatus[string(module.Descriptor.Name)]; !exists {
+			cfg.moduleEnableStatus[string(module.Descriptor.Name)] = false
+		}
+	}
+
+	// Set the module enable status
+	for _, module := range modules {
+		module.Enabled = cfg.moduleEnableStatus[string(module.Descriptor.Name)]
+	}
+	return nil
+}
+
+// Process the module configurations
+func (cfg *HyperdriveConfig) ProcessModuleConfigs() (map[*ModuleConfig]*ModuleConfigProcessResult, error) {
+	return cfg.moduleManager.ProcessModuleConfigs()
+}
+
+// Save the module configurations to disk
+func (cfg *HyperdriveConfig) SaveModuleConfigs() (map[*ModuleConfig]error, error) {
+	return cfg.moduleManager.SaveModuleConfigs()
+}
+
+// =====================
+// === Serialization ===
+// =====================
 
 // Load the Hyperdrive configuration from a file; the Hyperdrive user directory will be set to the directory containing the config file
 func LoadFromFile(configFilePath string, systemDir string) (*HyperdriveConfig, error) {
@@ -142,6 +216,25 @@ func LoadFromFile(configFilePath string, systemDir string) (*HyperdriveConfig, e
 		return nil, fmt.Errorf("error deserializing Hyperdrive config: %w", err)
 	}
 	return cfg, nil
+}
+
+// Save the Hyperdrive configuration to a file
+func (cfg *HyperdriveConfig) SaveToFile(configFilePath string) error {
+	// Serialize the config
+	settings := cfg.serialize()
+
+	// Marshal it to YAML
+	bytes, err := yaml.Marshal(settings)
+	if err != nil {
+		return fmt.Errorf("error serializing Hyperdrive config: %w", err)
+	}
+
+	// Write it to the file
+	err = os.WriteFile(configFilePath, bytes, 0644)
+	if err != nil {
+		return fmt.Errorf("error writing Hyperdrive settings file to %s: %w", shellescape.Quote(configFilePath), err)
+	}
+	return nil
 }
 
 // Deserialize the Hyperdrive configuration from an instance
@@ -180,63 +273,9 @@ func (cfg *HyperdriveConfig) serialize() map[string]any {
 
 	// Serialize the module enable status
 	moduleEnabledMap := map[string]any{}
-	for module, enabled := range cfg.moduleEnableStatus {
-		moduleEnabledMap[module] = enabled
+	for _, module := range cfg.moduleManager.ModuleConfigs {
+		moduleEnabledMap[string(module.Descriptor.Name)] = module.Enabled
 	}
 	instance[moduleEnabledMapName] = moduleEnabledMap
 	return instance
-}
-
-// Load the configurations for each module - any errors for individual modules is reported in the module config container instead of returned here, so make sure to check those when interacting with them.
-func (cfg *HyperdriveConfig) LoadModuleConfigs() error {
-	moduleLoader, err := NewModuleConfigLoader(cfg.ProjectName.Value, cfg.GetModuleSystemDir(), cfg.GetAdapterKeyPath())
-	if err != nil {
-		return fmt.Errorf("error creating module config loader: %w", err)
-	}
-	modules, err := moduleLoader.LoadModuleConfigs()
-	if err != nil {
-		return fmt.Errorf("error loading module configs: %w", err)
-	}
-
-	// Add any missing modules to the config's enable status
-	for _, module := range modules {
-		if _, exists := cfg.moduleEnableStatus[string(module.Descriptor.Name)]; !exists {
-			cfg.moduleEnableStatus[string(module.Descriptor.Name)] = false
-		}
-	}
-
-	// Set the module enable status
-	for _, module := range modules {
-		module.Enabled = cfg.moduleEnableStatus[string(module.Descriptor.Name)]
-	}
-	cfg.ModuleConfigs = modules
-	return nil
-}
-
-// Get the config.Parameters for this config
-func (cfg *HyperdriveConfig) GetParameters() []config.IParameter {
-	return []config.IParameter{
-		&cfg.ProjectName,
-		&cfg.ApiPort,
-		&cfg.EnableIPv6,
-		&cfg.UserDataPath,
-		&cfg.AdditionalDockerNetworks,
-		&cfg.ClientTimeout,
-		&cfg.ContainerTag,
-	}
-}
-
-// Get the subconfigurations for this config
-func (cfg *HyperdriveConfig) GetSections() []config.ISection {
-	return []config.ISection{
-		cfg.Logging,
-	}
-}
-
-func (cfg *HyperdriveConfig) GetModuleSystemDir() string {
-	return filepath.Join(cfg.systemPath, "modules")
-}
-
-func (cfg *HyperdriveConfig) GetAdapterKeyPath() string {
-	return filepath.Join(cfg.hyperdriveUserDirectory, "secrets", "adapter.key")
 }

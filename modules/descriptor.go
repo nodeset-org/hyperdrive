@@ -77,3 +77,8 @@ type CliInfo struct {
 	// Ignored for standalone binaries installed on the native system.
 	ImagePath string `json:"imagePath,omitempty" yaml:"imagePath,omitempty"`
 }
+
+// Get the fully qualified name of the module
+func (d HyperdriveModuleDescriptor) GetFullyQualifiedModuleName() string {
+	return fmt.Sprintf("%s/%s", d.Author, d.Name)
+}
