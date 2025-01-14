@@ -7,28 +7,29 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/blang/semver/v4"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/goccy/go-json"
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
+	"github.com/nodeset-org/hyperdrive/modules"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
 )
 
-const (
-	ExampleDescriptor string = `{
-    "name": "example-module",
-    "shortcut": "em",
-    "description": "Simple example of a Hyperdrive module",
-    "version": "1.0.0",
-    "author": "NodeSet",
-    "url": "https://github.com/nodeset-org/hyperdrive-example",
-    "email": "info@nodeset.io",
-    "dependencies": []
-}`
-)
-
 var (
+	exampleDescriptor modules.HyperdriveModuleDescriptor = modules.HyperdriveModuleDescriptor{
+		Name:         "example-module",
+		Shortcut:     "em",
+		Description:  "Simple example of a Hyperdrive module",
+		Version:      semver.MustParse("1.0.0"),
+		Author:       "NodeSet",
+		URL:          "https://github.com/nodeset-org/hyperdrive-example",
+		Email:        "info@nodeset.io",
+		Dependencies: []modules.Dependency{},
+	}
+
 	// Adapter client
 	ac *adapter.AdapterClient
 
@@ -94,9 +95,15 @@ func getAdapterContainerID() string {
 
 // Create the Docker container and initialize the adapter client
 func initializeArtifacts() {
+	// Serialize the descriptor
+	bytes, err := json.Marshal(exampleDescriptor)
+	if err != nil {
+		fail(fmt.Errorf("error serializing descriptor: %w", err))
+	}
+
 	// Make the dirs
-	modulePath := filepath.Join(internal_test.SystemDir, "modules", "example")
-	descriptorPath := filepath.Join(modulePath, "descriptor.json")
+	modulePath := filepath.Join(internal_test.SystemDir, config.ModulesDir, string(exampleDescriptor.Name))
+	descriptorPath := filepath.Join(modulePath, modules.DescriptorFilename)
 	if err := os.MkdirAll(internal_test.LogDir, 0755); err != nil {
 		fail(fmt.Errorf("error creating log dir: %w", err))
 	}
@@ -112,12 +119,12 @@ func initializeArtifacts() {
 	if err := os.MkdirAll(internal_test.UserDataPath, 0755); err != nil {
 		fail(fmt.Errorf("error creating data dir: %w", err))
 	}
-	if err := os.WriteFile(descriptorPath, []byte(ExampleDescriptor), 0644); err != nil {
+	if err := os.WriteFile(descriptorPath, bytes, 0644); err != nil {
 		fail(fmt.Errorf("error writing descriptor file: %w", err))
 	}
 
 	// Create the key file, or get the key if it already exists
-	err := os.WriteFile(internal_test.KeyPath, []byte(internal_test.TestKey), 0644)
+	err = os.WriteFile(internal_test.KeyPath, []byte(internal_test.TestKey), 0644)
 	if err != nil {
 		fail(fmt.Errorf("error creating key file: %w", err))
 	}

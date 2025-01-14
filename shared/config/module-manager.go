@@ -14,11 +14,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 )
 
-const (
-	// The name of the descriptor file for a module
-	DescriptorFileName string = "descriptor.json"
-)
-
 var (
 	// The module descriptor was missing
 	ErrNoDescriptor error = errors.New("descriptor file is missing")
@@ -130,7 +125,7 @@ func (m *ModuleConfigManager) LoadModuleConfigs(projectName string) error {
 		moduleConfig := &ModuleConfig{}
 		moduleConfigs = append(moduleConfigs, moduleConfig)
 		moduleDir := filepath.Join(m.modulePath, entry.Name())
-		descriptorPath := filepath.Join(moduleDir, DescriptorFileName)
+		descriptorPath := filepath.Join(moduleDir, modules.DescriptorFilename)
 		bytes, err := os.ReadFile(descriptorPath)
 		if errors.Is(err, fs.ErrNotExist) {
 			moduleConfig.LoadError = ErrNoDescriptor

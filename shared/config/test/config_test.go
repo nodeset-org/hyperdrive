@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
-	"github.com/nodeset-org/hyperdrive/modules"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/stretchr/testify/require"
 )
@@ -18,7 +17,7 @@ func TestLoadModuleConfigs(t *testing.T) {
 	require.Len(t, modCfgs, 1)
 	modCfg := modCfgs[0]
 	require.NoError(t, modCfg.LoadError)
-	require.Equal(t, modules.DescriptorString("example-module"), modCfg.Descriptor.Name)
+	require.Equal(t, exampleDescriptor.Name, modCfg.Descriptor.Name)
 	t.Log("Module config loaded successfully")
 }
 
@@ -43,7 +42,7 @@ func TestSerialization(t *testing.T) {
 	t.Log("Module config processed successfully")
 
 	// Save everything
-	cfgPath := filepath.Join(internal_test.UserDir, "user-settings.yml")
+	cfgPath := filepath.Join(internal_test.UserDir, config.ConfigFilename)
 	err = hdCfg.SaveToFile(cfgPath)
 	require.NoError(t, err)
 	t.Log("Main config saved to file")

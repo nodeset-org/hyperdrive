@@ -8,6 +8,9 @@ import (
 )
 
 const (
+	// The expected filename for a module descriptor
+	DescriptorFilename string = "descriptor.json"
+
 	// The regex pattern for a standard descriptor string
 	DescriptorStringPattern string = `^([a-zA-Z0-9-_\.])+$`
 )

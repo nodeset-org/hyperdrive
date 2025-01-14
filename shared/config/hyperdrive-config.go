@@ -137,7 +137,7 @@ func (cfg *HyperdriveConfig) GetSections() []config.ISection {
 }
 
 func (cfg *HyperdriveConfig) GetModuleSystemDir() string {
-	return filepath.Join(cfg.systemPath, "modules")
+	return filepath.Join(cfg.systemPath, ModulesDir)
 }
 
 func (cfg *HyperdriveConfig) GetAdapterKeyPath() string {
