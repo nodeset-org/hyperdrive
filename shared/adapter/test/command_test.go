@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/docker/docker/api/types/container"
+	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	adapter "github.com/nodeset-org/hyperdrive/shared/adapter/test"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
@@ -44,7 +45,7 @@ func TestGetConfigMetadata(t *testing.T) {
 	require.NoError(t, err)
 
 	// Do a spot check of the config - full test is done elsewhere
-	paramMap := make(map[string]config.IParameterMetadata)
+	paramMap := make(map[string]config.IParameter)
 	for _, param := range cfg.GetParameters() {
 		paramMap[param.GetID().String()] = param
 	}
@@ -56,13 +57,13 @@ func TestGetConfigMetadata(t *testing.T) {
 	require.NotEmpty(t, exampleFloat.GetDescription())
 	require.Equal(t, 50.0, exampleFloat.GetValueAsAny().(float64))
 	require.Equal(t, 50.0, exampleFloat.GetDefaultAsAny().(float64))
-	castedFloat := exampleFloat.(*config.FloatParameterMetadata)
+	castedFloat := exampleFloat.(*config.FloatParameter)
 	require.Equal(t, 0.0, castedFloat.MinValue)
 	require.Equal(t, 100.0, castedFloat.MaxValue)
 
 	// Make a map of sections
 	sections := cfg.GetSections()
-	sectionMap := make(map[string]config.ISectionMetadata)
+	sectionMap := make(map[string]config.ISection)
 	for _, section := range cfg.GetSections() {
 		sectionMap[section.GetID().String()] = section
 	}
@@ -139,8 +140,8 @@ func TestRunCommand(t *testing.T) {
 		// Stop the service container
 		if docker != nil {
 			timeout := 0
-			_ = docker.ContainerStop(context.Background(), serviceContainerName, container.StopOptions{Timeout: &timeout})
-			_ = docker.ContainerRemove(context.Background(), serviceContainerName, container.RemoveOptions{Force: true})
+			_ = docker.ContainerStop(context.Background(), internal_test.ServiceContainerName, container.StopOptions{Timeout: &timeout})
+			_ = docker.ContainerRemove(context.Background(), internal_test.ServiceContainerName, container.RemoveOptions{Force: true})
 		}
 	}()
 
@@ -157,7 +158,7 @@ func TestRunCommand(t *testing.T) {
 	require.NoError(t, err)
 
 	// Make sure the service is running
-	runCmd := fmt.Sprintf("docker run --rm -d -v %s:/hd/logs -v %s:/hd/config -v %s:/hd/secret --network %s_net --name %s %s -i 0.0.0.0 -p 8085", logDir, cfgDir, keyPath, projectName, serviceContainerName, serviceTag)
+	runCmd := fmt.Sprintf("docker run --rm -d -v %s:/hd/logs -v %s:/hd/config -v %s:/hd/secret --network %s_net --name %s %s -i 0.0.0.0 -p 8085", internal_test.LogDir, internal_test.CfgDir, internal_test.KeyPath, internal_test.ProjectName, internal_test.ServiceContainerName, internal_test.ServiceTag)
 	serviceRunOut, err := command.ReadOutput(runCmd)
 	require.NoError(t, err)
 	t.Logf("Service container started: %s", serviceRunOut)
@@ -176,9 +177,9 @@ func TestRunCommand(t *testing.T) {
 	t.Logf("Command ran successfully and returned %s", out)
 }
 
-func updateConfigSettings(t *testing.T, cfg config.IConfigurationMetadata) {
+func updateConfigSettings(t *testing.T, cfg config.IConfiguration) {
 	// Set some values
-	paramMap := make(map[string]config.IParameterMetadata)
+	paramMap := make(map[string]config.IParameter)
 	for _, param := range cfg.GetParameters() {
 		paramMap[param.GetID().String()] = param
 	}
@@ -190,11 +191,11 @@ func updateConfigSettings(t *testing.T, cfg config.IConfigurationMetadata) {
 	require.NoError(t, err)
 
 	// Set a subconfig value
-	sectionMap := make(map[string]config.ISectionMetadata)
+	sectionMap := make(map[string]config.ISection)
 	for _, section := range cfg.GetSections() {
 		sectionMap[section.GetID().String()] = section
 	}
-	subParamMap := make(map[string]config.IParameterMetadata)
+	subParamMap := make(map[string]config.IParameter)
 	for _, param := range sectionMap["server"].GetParameters() {
 		subParamMap[param.GetID().String()] = param
 	}
@@ -204,9 +205,9 @@ func updateConfigSettings(t *testing.T, cfg config.IConfigurationMetadata) {
 	require.NoError(t, err)
 }
 
-func checkConfigSettings(t *testing.T, cfg config.IConfigurationMetadata) {
+func checkConfigSettings(t *testing.T, cfg config.IConfiguration) {
 	// Check some values
-	paramMap := make(map[string]config.IParameterMetadata)
+	paramMap := make(map[string]config.IParameter)
 	for _, param := range cfg.GetParameters() {
 		paramMap[param.GetID().String()] = param
 	}
@@ -214,11 +215,11 @@ func checkConfigSettings(t *testing.T, cfg config.IConfigurationMetadata) {
 	require.Equal(t, "three", paramMap["exampleChoice"].GetValueAsAny().(string))
 
 	// Check a subconfig value
-	sectionMap := make(map[string]config.ISectionMetadata)
+	sectionMap := make(map[string]config.ISection)
 	for _, section := range cfg.GetSections() {
 		sectionMap[section.GetID().String()] = section
 	}
-	subParamMap := make(map[string]config.IParameterMetadata)
+	subParamMap := make(map[string]config.IParameter)
 	for _, param := range sectionMap["server"].GetParameters() {
 		subParamMap[param.GetID().String()] = param
 	}

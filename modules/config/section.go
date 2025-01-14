@@ -7,7 +7,7 @@ const (
 )
 
 // Represents the header for a section metadata object
-type ISectionMetadataHeader interface {
+type ISectionHeader interface {
 	// Unique ID for referencing the section behind-the-scenes
 	GetID() Identifier
 
@@ -25,14 +25,14 @@ type ISectionMetadataHeader interface {
 }
 
 // Represents a full section metadata object
-type ISectionMetadata interface {
-	ISectionMetadataHeader
+type ISection interface {
+	ISectionHeader
 
 	IMetadataContainer
 }
 
-// SectionMetadataHeader represents the header of a section in a configuration metadata
-type SectionMetadataHeader struct {
+// SectionHeader represents the header of a section in a configuration metadata
+type SectionHeader struct {
 	// Unique ID for referencing the section behind-the-scenes
 	ID Identifier `json:"id" yaml:"id"`
 
@@ -50,27 +50,27 @@ type SectionMetadataHeader struct {
 }
 
 // Get the unique ID for the section
-func (s SectionMetadataHeader) GetID() Identifier {
+func (s SectionHeader) GetID() Identifier {
 	return s.ID
 }
 
 // Get the name of the section
-func (s SectionMetadataHeader) GetName() string {
+func (s SectionHeader) GetName() string {
 	return s.Name
 }
 
 // Get the description for the section
-func (s SectionMetadataHeader) GetDescription() DynamicProperty[string] {
+func (s SectionHeader) GetDescription() DynamicProperty[string] {
 	return s.Description
 }
 
 // Get the disabled flag for the section
-func (s SectionMetadataHeader) GetDisabled() DynamicProperty[bool] {
+func (s SectionHeader) GetDisabled() DynamicProperty[bool] {
 	return s.Disabled
 }
 
 // Get the hidden flag for the section
-func (s SectionMetadataHeader) GetHidden() DynamicProperty[bool] {
+func (s SectionHeader) GetHidden() DynamicProperty[bool] {
 	return s.Hidden
 }
 
@@ -78,9 +78,9 @@ func (s SectionMetadataHeader) GetHidden() DynamicProperty[bool] {
 /// === Full Section ===
 /// ====================
 
-// SectionMetadata represents a full section in a configuration metadata
-type sectionMetadata struct {
-	ISectionMetadataHeader
+// Section represents a full section in a configuration metadata
+type section struct {
+	ISectionHeader
 
 	IMetadataContainer
 }
@@ -90,7 +90,7 @@ type sectionMetadata struct {
 /// =====================
 
 // Serialize the section header to a map
-func serializeSectionMetadataHeaderToMap(s ISectionMetadataHeader) map[string]any {
+func serializeSectionHeaderToMap(s ISectionHeader) map[string]any {
 	props := map[string]any{
 		IDKey:          s.GetID(),
 		NameKey:        s.GetName(),
@@ -102,16 +102,16 @@ func serializeSectionMetadataHeaderToMap(s ISectionMetadataHeader) map[string]an
 }
 
 // Serialize the section to a map
-func serializeSectionMetadataToMap(s ISectionMetadata) map[string]any {
+func serializeSectionToMap(s ISection) map[string]any {
 	// Serialize the header
-	props := serializeSectionMetadataHeaderToMap(s)
-	serializeContainerMetadataToMap(s, props)
+	props := serializeSectionHeaderToMap(s)
+	serializeContainerToMap(s, props)
 	return props
 }
 
 // Deserialize a section from a map
-func deserializeSectionMetadataFromMap(data map[string]any) (ISectionMetadata, error) {
-	header := &SectionMetadataHeader{}
+func deserializeSectionFromMap(data map[string]any) (ISection, error) {
+	header := &SectionHeader{}
 
 	// Get the ID
 	err := deserializeIdentifier(data, IDKey, &header.ID, false)
@@ -144,15 +144,15 @@ func deserializeSectionMetadataFromMap(data map[string]any) (ISectionMetadata, e
 	}
 
 	// Deserialize the parameters and sections
-	container, err := deserializeContainerMetadataFromMap(data)
+	container, err := deserializeContainerFromMap(data)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create the section
-	section := &sectionMetadata{
-		ISectionMetadataHeader: header,
-		IMetadataContainer:     container,
+	section := &section{
+		ISectionHeader:     header,
+		IMetadataContainer: container,
 	}
 	return section, nil
 }

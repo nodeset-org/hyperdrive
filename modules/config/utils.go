@@ -72,7 +72,7 @@ func setNumberProperty[Type NumberParameterType](id string, property *Type, valu
 	return nil
 }
 
-func parseChoiceParameter[ChoiceType ~string](instance map[string]any, paramID string, param *ChoiceParameterMetadata[ChoiceType]) error {
+func parseChoiceParameter[ChoiceType ~string](instance map[string]any, paramID string, param *ChoiceParameter[ChoiceType]) error {
 	paramAny, exists := instance[paramID]
 	if !exists {
 		return errors.New("missing required parameter: " + paramID)

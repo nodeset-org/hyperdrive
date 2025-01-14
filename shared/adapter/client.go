@@ -3,6 +3,7 @@ package adapter
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -18,9 +19,20 @@ const (
 	HyperdriveModuleCommand string = "hd-module"
 )
 
+var (
+	// Error when the container isn't found
+	ErrContainerNotFound error = errors.New("container not found")
+
+	// Error when the adapter container is offline
+	ErrAdapterContainerOffline error = errors.New("adapter container is offline")
+)
+
 type AdapterClient struct {
 	// The name of the container
 	containerName string
+
+	// The ID of the container, assuming it was found
+	containerID string
 
 	// Command prefix to use for running the adapter
 	entrypoint []string
@@ -33,7 +45,7 @@ type AdapterClient struct {
 }
 
 // Creates a new AdapterClient instance
-func NewAdapterClient(containerName string, entrypoint []string, key string) (*AdapterClient, error) {
+func NewAdapterClient(containerName string, key string) (*AdapterClient, error) {
 	dockerClient, err := client.NewClientWithOpts(
 		client.WithAPIVersionNegotiation(),
 	)
@@ -41,12 +53,48 @@ func NewAdapterClient(containerName string, entrypoint []string, key string) (*A
 		return nil, err
 	}
 
+	// Make sure the container exists
+	id, err := getContainerID(dockerClient, containerName)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if the adapter container is running
+	containerJson, err := dockerClient.ContainerInspect(context.Background(), id)
+	if err != nil {
+		return nil, fmt.Errorf("error checking if adapter container is running: %w", err)
+	}
+	if !containerJson.State.Running {
+		return nil, ErrAdapterContainerOffline
+	}
+
 	return &AdapterClient{
 		containerName: containerName,
-		entrypoint:    entrypoint,
+		containerID:   id,
+		entrypoint:    containerJson.Config.Entrypoint,
 		dockerClient:  dockerClient,
 		key:           key,
 	}, nil
+}
+
+// Get the ID of a container by its name
+func getContainerID(dockerClient *client.Client, containerName string) (string, error) {
+	containers, err := dockerClient.ContainerList(context.Background(), container.ListOptions{
+		All: true,
+	})
+	if err != nil {
+		return "", fmt.Errorf("error listing containers: %w", err)
+	}
+
+	for _, container := range containers {
+		for _, name := range container.Names {
+			trimmedName := strings.TrimPrefix(name, "/")
+			if trimmedName == containerName {
+				return container.ID, nil
+			}
+		}
+	}
+	return "", ErrContainerNotFound
 }
 
 // Run a docker exec command in the adapter container and get the result
@@ -60,7 +108,7 @@ func runCommand[RequestType any, ResponseType any](
 	// Start an exec command
 	cmdArray := strings.Split(command, " ")
 	cmdArray = append(c.entrypoint, cmdArray...)
-	idResponse, err := c.dockerClient.ContainerExecCreate(ctx, c.containerName, container.ExecOptions{
+	idResponse, err := c.dockerClient.ContainerExecCreate(ctx, c.containerID, container.ExecOptions{
 		AttachStdin:  true,
 		AttachStdout: true,
 		AttachStderr: true,

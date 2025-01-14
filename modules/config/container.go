@@ -6,43 +6,43 @@ import (
 )
 
 var (
-	parameterType     = reflect.TypeOf((*IParameterMetadata)(nil)).Elem()
-	sectionHeaderType = reflect.TypeOf((*ISectionMetadataHeader)(nil)).Elem()
-	sectionType       = reflect.TypeOf((*ISectionMetadata)(nil)).Elem()
+	parameterType     = reflect.TypeOf((*IParameter)(nil)).Elem()
+	sectionHeaderType = reflect.TypeOf((*ISectionHeader)(nil)).Elem()
+	sectionType       = reflect.TypeOf((*ISection)(nil)).Elem()
 )
 
 // Interface for deserialized configuration metadata and section metadata that can contain parameters or sections themselves
 type IMetadataContainer interface {
 	// Get the list of parameters listed in this container
-	GetParameters() []IParameterMetadata
+	GetParameters() []IParameter
 
 	// Get the list of sections listed in this container
-	GetSections() []ISectionMetadata
+	GetSections() []ISection
 }
 
 // Implementation of the IMetadataContainer interface
 type metadataContainer struct {
 	// List of parameters in the container
-	parameters []IParameterMetadata
+	parameters []IParameter
 
 	// List of sections in the container
-	sections []ISectionMetadata
+	sections []ISection
 }
 
 // Get the list of parameters in the container - only populated when deserializing a configuration from JSON
-func (c metadataContainer) GetParameters() []IParameterMetadata {
+func (c metadataContainer) GetParameters() []IParameter {
 	return c.parameters
 }
 
 // Get the list of sections in the container - only populated when deserializing a configuration from JSON
-func (c metadataContainer) GetSections() []ISectionMetadata {
+func (c metadataContainer) GetSections() []ISection {
 	return c.sections
 }
 
 // Get the parameters and sections within a container, either via the interface directly or indirectly via reflection
-func getContainerArtifacts(container any) ([]IParameterMetadata, []ISectionMetadata) {
-	params := []IParameterMetadata{}
-	sections := []ISectionMetadata{}
+func getContainerArtifacts(container any) ([]IParameter, []ISection) {
+	params := []IParameter{}
+	sections := []ISection{}
 
 	// Check if the data explicitly provides its parameters and sections
 	dataAsContainer, isContainer := container.(IMetadataContainer)
@@ -80,19 +80,19 @@ func getContainerArtifacts(container any) ([]IParameterMetadata, []ISectionMetad
 
 			if fieldType.Implements(parameterType) {
 				// Handle the parameter
-				param := fieldVal.Interface().(IParameterMetadata)
+				param := fieldVal.Interface().(IParameter)
 				params = append(params, param)
 			} else if fieldType.Implements(sectionType) {
 				// Handle the section
-				section := fieldVal.Interface().(ISectionMetadata)
+				section := fieldVal.Interface().(ISection)
 				sections = append(sections, section)
 			} else if fieldType.Implements(sectionHeaderType) {
 				childParams, childSections := getContainerArtifacts(fieldVal.Interface())
 				if len(childParams) == 0 && len(childSections) == 0 {
 					continue
 				}
-				section := sectionMetadata{
-					ISectionMetadataHeader: fieldVal.Interface().(ISectionMetadataHeader),
+				section := section{
+					ISectionHeader: fieldVal.Interface().(ISectionHeader),
 					IMetadataContainer: metadataContainer{
 						parameters: childParams,
 						sections:   childSections,
@@ -107,13 +107,13 @@ func getContainerArtifacts(container any) ([]IParameterMetadata, []ISectionMetad
 }
 
 // Serialize the container into an existing map
-func serializeContainerMetadataToMap(container any, existingData map[string]any) {
+func serializeContainerToMap(container any, existingData map[string]any) {
 	params, sections := getContainerArtifacts(container)
 
 	// Handle the parameters
 	paramMaps := []map[string]any{}
 	for _, param := range params {
-		paramMap := serializeParameterMetadataToMap(param)
+		paramMap := serializeParameterToMap(param)
 		paramMaps = append(paramMaps, paramMap)
 	}
 	existingData[ParametersKey] = paramMaps
@@ -121,14 +121,14 @@ func serializeContainerMetadataToMap(container any, existingData map[string]any)
 	// Handle the sections
 	sectionMaps := []map[string]any{}
 	for _, section := range sections {
-		sectionMap := serializeSectionMetadataToMap(section)
+		sectionMap := serializeSectionToMap(section)
 		sectionMaps = append(sectionMaps, sectionMap)
 	}
 	existingData[SectionsKey] = sectionMaps
 }
 
 // Serialize the container into an instance
-func serializeContainerMetadataToInstance(container any, existingData map[string]any) {
+func serializeContainerToInstance(container any, existingData map[string]any) {
 	params, sections := getContainerArtifacts(container)
 
 	// Handle the parameters
@@ -139,13 +139,13 @@ func serializeContainerMetadataToInstance(container any, existingData map[string
 	// Handle the sections
 	for _, section := range sections {
 		sectionData := map[string]any{}
-		serializeContainerMetadataToInstance(section, sectionData)
+		serializeContainerToInstance(section, sectionData)
 		existingData[section.GetID().String()] = sectionData
 	}
 }
 
 // Deserialize the container from a map
-func deserializeContainerMetadataFromMap(data map[string]any) (IMetadataContainer, error) {
+func deserializeContainerFromMap(data map[string]any) (IMetadataContainer, error) {
 	container := &metadataContainer{}
 
 	// Handle the parameters
@@ -159,7 +159,7 @@ func deserializeContainerMetadataFromMap(data map[string]any) (IMetadataContaine
 		if !ok {
 			return nil, fmt.Errorf("invalid parameter data: %T", parameterData)
 		}
-		parameter, err := deserializeMapToParameterMetadata(paramMap)
+		parameter, err := deserializeMapToParameter(paramMap)
 		if err != nil {
 			return nil, err
 		}
@@ -177,7 +177,7 @@ func deserializeContainerMetadataFromMap(data map[string]any) (IMetadataContaine
 		if !ok {
 			return nil, fmt.Errorf("invalid subsection data: %T", subsectionData)
 		}
-		subsection, err := deserializeSectionMetadataFromMap(subsectionMap)
+		subsection, err := deserializeSectionFromMap(subsectionMap)
 		if err != nil {
 			return nil, err
 		}
@@ -188,7 +188,7 @@ func deserializeContainerMetadataFromMap(data map[string]any) (IMetadataContaine
 }
 
 // Deserialize a container instance into a container metadata to assign the current values
-func deserializeContainerInstanceToMetadata(instance map[string]any, container any) error {
+func deserializeContainerInstance(instance map[string]any, container any) error {
 	params, sections := getContainerArtifacts(container)
 
 	// Handle the parameters
@@ -216,7 +216,7 @@ func deserializeContainerInstanceToMetadata(instance map[string]any, container a
 			return fmt.Errorf("invalid type for section [%s]: %T", sectionID, sectionData)
 		}
 
-		err := deserializeContainerInstanceToMetadata(sectionDataAsMap, section)
+		err := deserializeContainerInstance(sectionDataAsMap, section)
 		if err != nil {
 			return fmt.Errorf("error processing section [%s]: %w", sectionID, err)
 		}

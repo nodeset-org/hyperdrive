@@ -12,7 +12,7 @@ const (
 )
 
 // Get the module config metadata from the adapter
-func (c *AdapterClient) GetConfigMetadata(ctx context.Context) (config.IConfigurationMetadata, error) {
+func (c *AdapterClient) GetConfigMetadata(ctx context.Context) (config.IConfiguration, error) {
 	request := &KeyedRequest{
 		Key: c.key,
 	}
@@ -25,7 +25,7 @@ func (c *AdapterClient) GetConfigMetadata(ctx context.Context) (config.IConfigur
 	}
 
 	// Unmarshal the config from the map
-	response, err := config.UnmarshalConfigurationMetadataFromMap(configMap)
+	response, err := config.UnmarshalConfigurationFromMap(configMap)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshalling configuration metadata: %w", err)
 	}

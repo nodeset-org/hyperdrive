@@ -9,7 +9,7 @@ import (
 
 const (
 	// The regex pattern for a standard descriptor string
-	DescriptorStringPattern string = `^([a-zA-Z0-9-_\.]+$`
+	DescriptorStringPattern string = `^([a-zA-Z0-9-_\.])+$`
 )
 
 var (
@@ -43,7 +43,7 @@ type HyperdriveModuleDescriptor struct {
 	Shortcut DescriptorString `json:"shortcut" yaml:"shortcut"`
 
 	// A description of the module
-	Description DescriptorString `json:"description" yaml:"description"`
+	Description string `json:"description" yaml:"description"`
 
 	// The version of the module
 	Version semver.Version `json:"version,omitempty" yaml:"version,omitempty"`
