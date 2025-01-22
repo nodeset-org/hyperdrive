@@ -12,7 +12,7 @@ const (
 )
 
 // Get the module config metadata from the adapter
-func (c *AdapterClient) GetConfigMetadata(ctx context.Context) (config.IConfiguration, error) {
+func (c *AdapterClient) GetConfigMetadata(ctx context.Context) (config.IModuleConfiguration, error) {
 	request := &KeyedRequest{
 		Key: c.key,
 	}

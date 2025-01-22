@@ -20,8 +20,8 @@ type SetConfigRequest struct {
 }
 
 // Have the adapter set the module config
-func (c *AdapterClient) SetConfig(ctx context.Context, cfg config.IConfiguration) error {
-	configMap := config.CreateInstance(cfg)
+func (c *AdapterClient) SetConfig(ctx context.Context, instance *config.ModuleConfigurationInstance) error {
+	configMap := instance.SerializeToMap()
 	request := &SetConfigRequest{
 		KeyedRequest: KeyedRequest{
 			Key: c.key,

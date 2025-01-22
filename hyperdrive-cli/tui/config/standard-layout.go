@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/rivo/tview"
-	"github.com/rocket-pool/node-manager-core/config"
 )
 
 // A layout container with the standard elements and design
@@ -69,7 +69,7 @@ func (layout *standardLayout) setFooter(footer tview.Primitive, height int) {
 }
 
 // Create a standard form for this layout (for settings pages)
-func (layout *standardLayout) createForm(networkParam *config.Parameter[config.Network], title string) {
+func (layout *standardLayout) createForm(title string) {
 	layout.parameters = map[tview.FormItem]*parameterizedFormItem{}
 
 	// Create the form
@@ -84,13 +84,10 @@ func (layout *standardLayout) createForm(networkParam *config.Parameter[config.N
 		if index < form.GetFormItemCount() {
 			formItem := form.GetFormItem(index)
 			param := layout.parameters[formItem].parameter
-			defaultValue := param.GetDefaultAsAny(networkParam.Value)
-			networkDescription, exists := param.GetCommon().DescriptionsByNetwork[networkParam.Value]
-			if !exists {
-				// Use the default description if there isn't a specific one for the network
-				networkDescription = param.GetCommon().Description
-			}
-			descriptionText := fmt.Sprintf("Default: %v\n\n%s", defaultValue, networkDescription)
+			metadata := param.GetMetadata()
+			defaultValue := metadata.GetDefault()
+			description := metadata.GetDescription().Default // TEMPLATE!
+			descriptionText := fmt.Sprintf("Default: %v\n\n%s", defaultValue, description)
 			layout.descriptionBox.SetText(descriptionText)
 			layout.descriptionBox.ScrollToBeginning()
 		}
@@ -106,15 +103,16 @@ func (layout *standardLayout) refresh() {
 	for i := 0; i < layout.form.GetFormItemCount(); i++ {
 		formItem := layout.form.GetFormItem(i)
 		param := layout.parameters[formItem].parameter
+		metadata := param.GetMetadata()
 
 		// Set the form item to the current value
-		if boolParam, ok := param.(*config.Parameter[bool]); ok {
+		if _, ok := metadata.(*config.BoolParameter); ok {
 			// Bool
-			formItem.(*tview.Checkbox).SetChecked(boolParam.Value)
-		} else if len(param.GetOptions()) > 0 {
+			formItem.(*tview.Checkbox).SetChecked(param.GetValue().(bool))
+		} else if choiceParam, ok := param.(config.IChoiceParameter); ok {
 			// Choice
-			for i, option := range param.GetOptions() {
-				if option.String() == param.String() {
+			for i, option := range choiceParam.GetOptions() {
+				if option.GetValue() == param.String() {
 					formItem.(*DropDown).SetCurrentOption(i)
 				}
 			}
@@ -168,39 +166,11 @@ func (layout *standardLayout) addFormItems(params []*parameterizedFormItem) {
 	}
 }
 
-// Add a collection of "common" and "specific" form items to this layout's form, where some of the common
-// items may not be valid and should be excluded
-func (layout *standardLayout) addFormItemsWithCommonParams(commonParams []*parameterizedFormItem, specificParams []*parameterizedFormItem, unsupportedCommonParams []string) {
-	// Add the common params if they aren't in the unsupported list
-	for _, commonParam := range commonParams {
-		isSupported := true
-		if len(unsupportedCommonParams) > 0 {
-			for _, unsupportedParam := range unsupportedCommonParams {
-				if commonParam.parameter.GetCommon().ID == unsupportedParam {
-					isSupported = false
-					break
-				}
-			}
-		}
-
-		if isSupported {
-			layout.form.AddFormItem(commonParam.item)
-		}
-	}
-
-	// Add all of the specific params
-	for _, specificParam := range specificParams {
-		layout.form.AddFormItem(specificParam.item)
-	}
-}
-
 func (layout *standardLayout) mapParameterizedFormItems(params ...*parameterizedFormItem) {
 	for _, param := range params {
 		layout.parameters[param.item] = param
 	}
 }
-
-/*
 
 // Sets up a handler to return to the specified homePage when the user presses escape on the layout.
 func (layout *standardLayout) setupEscapeReturnHomeHandler(md *mainDisplay, homePage *page) {
@@ -221,5 +191,3 @@ func (layout *standardLayout) setupEscapeReturnHomeHandler(md *mainDisplay, home
 		return event
 	})
 }
-
-*/

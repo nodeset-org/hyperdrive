@@ -37,7 +37,8 @@ var (
 	docker *client.Client
 
 	// The Hyperdrive base config
-	hdCfg *config.HyperdriveConfig
+	cfgMgr      *config.ConfigurationManager
+	cfgInstance *config.HyperdriveConfigInstance
 )
 
 func TestMain(m *testing.M) {
@@ -137,16 +138,11 @@ func initializeArtifacts() {
 		fail(fmt.Errorf("error running adapter container: %w", err))
 	}
 
-	// Save the example config
-	hdCfg = createExampleConfig()
-}
-
-// Create an example Hyperdrive config for testing
-func createExampleConfig() *config.HyperdriveConfig {
-	cfg := config.NewHyperdriveConfig(internal_test.UserDir, internal_test.SystemDir)
-	cfg.ProjectName.Value = internal_test.ProjectName
-	cfg.UserDataPath.Value = internal_test.UserDataPath
-	return cfg
+	// Set up the test config
+	cfgMgr = config.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
+	cfgInstance = cfgMgr.HyperdriveConfiguration.GetDefaultInstance()
+	cfgInstance.ProjectName = internal_test.ProjectName
+	cfgInstance.UserDataPath = internal_test.UserDataPath
 }
 
 // Delete all of the config files from disk

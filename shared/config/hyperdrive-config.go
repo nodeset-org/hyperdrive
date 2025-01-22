@@ -2,14 +2,12 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
-	"al.essio.dev/pkg/shellescape"
+	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -42,21 +40,36 @@ type HyperdriveConfig struct {
 	// Logging
 	Logging *LoggingConfig
 
+	// Info about the loaded modules
+	ModuleInfo map[string]*HyperdriveModuleInfo
+
 	// Internal fields
 	Version                 string
 	hyperdriveUserDirectory string
-	systemPath              string
-	moduleEnableStatus      map[string]bool
-	moduleManager           *ModuleConfigManager
+	modulePath              string
+}
+
+// The instance of the Hyperdrive configuration
+type HyperdriveConfigInstance struct {
+	Version                  string                                   `json:"version"`
+	ProjectName              string                                   `json:"projectName"`
+	ApiPort                  uint64                                   `json:"apiPort"`
+	EnableIPv6               bool                                     `json:"enableIPv6"`
+	UserDataPath             string                                   `json:"userDataPath"`
+	AdditionalDockerNetworks string                                   `json:"additionalDockerNetworks"`
+	ClientTimeout            uint64                                   `json:"clientTimeout"`
+	ContainerTag             string                                   `json:"containerTag"`
+	Logging                  *LoggingConfigInstance                   `json:"logging"`
+	Modules                  map[string]*HyperdriveModuleInstanceInfo `json:"modules"`
 }
 
 // Creates a new Hyperdrive configuration
-func NewHyperdriveConfig(hdDir string, systemPath string) *HyperdriveConfig {
+func NewHyperdriveConfig(hdDir string, modulePath string) *HyperdriveConfig {
 	defaultUserDataPath := filepath.Join(hdDir, "data")
 	cfg := &HyperdriveConfig{
 		hyperdriveUserDirectory: hdDir,
-		systemPath:              systemPath,
-		moduleEnableStatus:      make(map[string]bool),
+		modulePath:              modulePath,
+		ModuleInfo:              map[string]*HyperdriveModuleInfo{},
 	}
 
 	// Project Name
@@ -110,9 +123,6 @@ func NewHyperdriveConfig(hdDir string, systemPath string) *HyperdriveConfig {
 
 	// Create the subconfigs
 	cfg.Logging = NewLoggingConfig()
-
-	// Create internal fields
-	cfg.moduleManager = NewModuleConfigManager(cfg.GetModuleSystemDir(), cfg.GetAdapterKeyPath())
 	return cfg
 }
 
@@ -136,146 +146,41 @@ func (cfg *HyperdriveConfig) GetSections() []config.ISection {
 	}
 }
 
-func (cfg *HyperdriveConfig) GetModuleSystemDir() string {
-	return filepath.Join(cfg.systemPath, ModulesDir)
+func (cfg *HyperdriveConfig) GetModulePath() string {
+	return cfg.modulePath
 }
 
 func (cfg *HyperdriveConfig) GetAdapterKeyPath() string {
 	return filepath.Join(cfg.hyperdriveUserDirectory, "secrets", "adapter.key")
 }
 
-// ===============
-// === Modules ===
-// ===============
-
-// Get the configurations for each module that's been loaded into the system (must call LoadModuleConfigs before this does anything useful)
-func (cfg *HyperdriveConfig) GetModuleConfigs() []*ModuleConfig {
-	return cfg.moduleManager.ModuleConfigs
+func (cfg HyperdriveConfig) GetDefaultInstance() *HyperdriveConfigInstance {
+	return &HyperdriveConfigInstance{
+		Version:                  shared.HyperdriveVersion,
+		ProjectName:              DefaultProjectName,
+		ApiPort:                  uint64(DefaultApiPort),
+		EnableIPv6:               DefaultEnableIPv6,
+		UserDataPath:             filepath.Join(cfg.hyperdriveUserDirectory, "data"),
+		AdditionalDockerNetworks: "",
+		ClientTimeout:            uint64(DefaultClientTimeout),
+		ContainerTag:             hyperdriveTag,
+		Logging:                  cfg.Logging.GetDefaultInstance(),
+		Modules:                  map[string]*HyperdriveModuleInstanceInfo{},
+	}
 }
 
-// Load the configurations for each module - any errors for individual modules is reported in the module config container instead of returned here, so make sure to check those when interacting with them.
-func (cfg *HyperdriveConfig) LoadModuleConfigs() error {
-	err := cfg.moduleManager.LoadModuleConfigs(cfg.ProjectName.Value)
+// Create a copy of the Hyperdrive configuration instance
+func (i HyperdriveConfigInstance) CreateCopy() *HyperdriveConfigInstance {
+	// Serialize the instance to JSON
+	bytes, err := json.Marshal(i)
 	if err != nil {
-		return fmt.Errorf("error loading module configs: %w", err)
-	}
-	modules := cfg.moduleManager.ModuleConfigs
-
-	// Add any missing modules to the config's enable status
-	for _, module := range modules {
-		if _, exists := cfg.moduleEnableStatus[string(module.Descriptor.Name)]; !exists {
-			cfg.moduleEnableStatus[string(module.Descriptor.Name)] = false
-		}
+		panic(fmt.Errorf("error serializing Hyperdrive config instance: %w", err))
 	}
 
-	// Set the module enable status
-	for _, module := range modules {
-		module.Enabled = cfg.moduleEnableStatus[string(module.Descriptor.Name)]
+	// Deserialize the JSON back into a new instance
+	var newInstance *HyperdriveConfigInstance
+	if err := json.Unmarshal(bytes, newInstance); err != nil {
+		panic(fmt.Errorf("error deserializing Hyperdrive config instance: %w", err))
 	}
-	return nil
-}
-
-// Process the module configurations
-func (cfg *HyperdriveConfig) ProcessModuleConfigs() (map[*ModuleConfig]*ModuleConfigProcessResult, error) {
-	return cfg.moduleManager.ProcessModuleConfigs()
-}
-
-// Save the module configurations to disk
-func (cfg *HyperdriveConfig) SaveModuleConfigs() (map[*ModuleConfig]error, error) {
-	return cfg.moduleManager.SaveModuleConfigs()
-}
-
-// =====================
-// === Serialization ===
-// =====================
-
-// Load the Hyperdrive configuration from a file; the Hyperdrive user directory will be set to the directory containing the config file
-func LoadFromFile(configFilePath string, systemDir string) (*HyperdriveConfig, error) {
-	// Return nil if the file doesn't exist
-	_, err := os.Stat(configFilePath)
-	if os.IsNotExist(err) {
-		return nil, nil
-	}
-
-	// Read the file
-	configBytes, err := os.ReadFile(configFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("could not read Hyperdrive settings file at %s: %w", shellescape.Quote(configFilePath), err)
-	}
-
-	// Attempt to parse it out into a settings map
-	var settings map[string]any
-	if err := yaml.Unmarshal(configBytes, &settings); err != nil {
-		return nil, fmt.Errorf("could not parse config file: %w", err)
-	}
-
-	// Deserialize it into a config object
-	cfg := NewHyperdriveConfig(filepath.Dir(configFilePath), systemDir)
-	err = cfg.deserialize(settings)
-	if err != nil {
-		return nil, fmt.Errorf("error deserializing Hyperdrive config: %w", err)
-	}
-	return cfg, nil
-}
-
-// Save the Hyperdrive configuration to a file
-func (cfg *HyperdriveConfig) SaveToFile(configFilePath string) error {
-	// Serialize the config
-	settings := cfg.serialize()
-
-	// Marshal it to YAML
-	bytes, err := yaml.Marshal(settings)
-	if err != nil {
-		return fmt.Errorf("error serializing Hyperdrive config: %w", err)
-	}
-
-	// Write it to the file
-	err = os.WriteFile(configFilePath, bytes, 0644)
-	if err != nil {
-		return fmt.Errorf("error writing Hyperdrive settings file to %s: %w", shellescape.Quote(configFilePath), err)
-	}
-	return nil
-}
-
-// Deserialize the Hyperdrive configuration from an instance
-func (cfg *HyperdriveConfig) deserialize(instance map[string]any) error {
-	err := config.UnmarshalConfigurationInstance(instance, cfg)
-	if err != nil {
-		return fmt.Errorf("error deserializing Hyperdrive config: %w", err)
-	}
-
-	// Deserialize the version
-	version, ok := instance[versionName].(string)
-	if !ok {
-		return fmt.Errorf("hyperdrive version is not a string, it's a %T", instance[versionName])
-	}
-	cfg.Version = version
-
-	// Deserialize the module enable status
-	moduleEnabledMap, ok := instance[moduleEnabledMapName].(map[string]any)
-	if !ok {
-		return fmt.Errorf("module enable status is not a map, it's a %T", instance[moduleEnabledMapName])
-	}
-	for module, enabled := range moduleEnabledMap {
-		enabledBool, ok := enabled.(bool)
-		if !ok {
-			return fmt.Errorf("module enable status for %s is not a bool, it's a %T", module, enabled)
-		}
-		cfg.moduleEnableStatus[module] = enabledBool
-	}
-	return nil
-}
-
-// Serialize the Hyperdrive configuration to an instance
-func (cfg *HyperdriveConfig) serialize() map[string]any {
-	instance := config.CreateInstance(cfg)
-	instance[versionName] = cfg.Version
-
-	// Serialize the module enable status
-	moduleEnabledMap := map[string]any{}
-	for _, module := range cfg.moduleManager.ModuleConfigs {
-		moduleEnabledMap[string(module.Descriptor.Name)] = module.Enabled
-	}
-	instance[moduleEnabledMapName] = moduleEnabledMap
-	return instance
+	return newInstance
 }

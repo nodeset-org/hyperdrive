@@ -156,3 +156,79 @@ func deserializeSectionFromMap(data map[string]any) (ISection, error) {
 	}
 	return section, nil
 }
+
+/// ================
+/// === Instance ===
+/// ================
+
+// A general-purpose section instance can be used to create instances of unknown configurations. Use this if you need to explore
+// configurations for other Hyperdrive modules dynamically when you don't know their type.
+type SectionInstance struct {
+	metadata ISection
+
+	// The parameters in this section
+	parameters map[Identifier]IParameterInstance
+
+	// The subsections under this section
+	sections map[Identifier]*SectionInstance
+}
+
+func (s SectionInstance) GetMetadata() ISection {
+	return s.metadata
+}
+
+func (s SectionInstance) GetParameter(id Identifier) (IParameterInstance, error) {
+	param, exists := s.parameters[id]
+	if !exists {
+		return nil, NewErrorNotFound(id, EntryType_Parameter)
+	}
+	return param, nil
+}
+
+func (s SectionInstance) GetSection(id Identifier) (*SectionInstance, error) {
+	section, exists := s.sections[id]
+	if !exists {
+		return nil, NewErrorNotFound(id, EntryType_Section)
+	}
+	return section, nil
+}
+
+// Internal method to get the parameters in this configuration instance
+func (m SectionInstance) getParameters() map[Identifier]IParameterInstance {
+	return m.parameters
+}
+
+// Internal method to get the sections in this configuration instance
+func (m SectionInstance) getSections() map[Identifier]*SectionInstance {
+	return m.sections
+}
+
+func CreateSectionInstance(section ISection) *SectionInstance {
+	instance := &SectionInstance{
+		metadata:   section,
+		parameters: map[Identifier]IParameterInstance{},
+		sections:   map[Identifier]*SectionInstance{},
+	}
+
+	// Create the parameter instances
+	for _, parameter := range section.GetParameters() {
+		instance.parameters[parameter.GetID()] = parameter.CreateInstance()
+	}
+
+	// Create the subsection instances
+	for _, subsection := range section.GetSections() {
+		instance.sections[subsection.GetID()] = CreateSectionInstance(subsection)
+	}
+
+	return instance
+}
+
+// Serialize the section instance to a map, suitable for marshalling
+func (s SectionInstance) Serialize() map[string]any {
+	return serializeContainerInstance(s)
+}
+
+// Deserialize the section instance from a map
+func (s *SectionInstance) Deserialize(instance map[string]any) error {
+	return deserializeContainerInstance(s, instance)
+}

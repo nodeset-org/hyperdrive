@@ -29,8 +29,8 @@ type ProcessConfigResponse struct {
 }
 
 // Have the adapter process the module config
-func (c *AdapterClient) ProcessConfig(ctx context.Context, cfg config.IConfiguration) (ProcessConfigResponse, error) {
-	configMap := config.CreateInstance(cfg)
+func (c *AdapterClient) ProcessConfig(ctx context.Context, instance *config.ModuleConfigurationInstance) (ProcessConfigResponse, error) {
+	configMap := instance.SerializeToMap()
 	request := &ProcessConfigRequest{
 		KeyedRequest: KeyedRequest{
 			Key: c.key,

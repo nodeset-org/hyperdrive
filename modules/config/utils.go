@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -69,18 +68,5 @@ func setNumberProperty[Type NumberParameterType](id string, property *Type, valu
 	default:
 		return fmt.Errorf("invalid type for number property [%s]: %T", id, value)
 	}
-	return nil
-}
-
-func parseChoiceParameter[ChoiceType ~string](instance map[string]any, paramID string, param *ChoiceParameter[ChoiceType]) error {
-	paramAny, exists := instance[paramID]
-	if !exists {
-		return errors.New("missing required parameter: " + paramID)
-	}
-	paramString, ok := paramAny.(string)
-	if !ok {
-		return fmt.Errorf("invalid type for parameter [%s]: %T", paramID, paramAny)
-	}
-	param.Value = ChoiceType(paramString)
 	return nil
 }

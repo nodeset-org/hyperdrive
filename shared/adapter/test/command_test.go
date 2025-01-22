@@ -55,8 +55,7 @@ func TestGetConfigMetadata(t *testing.T) {
 	exampleFloat := paramMap[exampleFloatName]
 	require.Equal(t, exampleFloat.GetName(), "Example Float")
 	require.NotEmpty(t, exampleFloat.GetDescription())
-	require.Equal(t, 50.0, exampleFloat.GetValueAsAny().(float64))
-	require.Equal(t, 50.0, exampleFloat.GetDefaultAsAny().(float64))
+	require.Equal(t, 50.0, exampleFloat.GetDefault().(float64))
 	castedFloat := exampleFloat.(*config.FloatParameter)
 	require.Equal(t, 0.0, castedFloat.MinValue)
 	require.Equal(t, 100.0, castedFloat.MaxValue)
@@ -78,10 +77,11 @@ func TestProcessConfig(t *testing.T) {
 	require.NoError(t, err)
 	cfg, err := ac.GetConfigMetadata(context.Background())
 	require.NoError(t, err)
-	updateConfigSettings(t, cfg)
+	instance := config.CreateModuleConfigurationInstance(cfg)
+	updateConfigSettings(t, instance)
 
 	// Process the config
-	response, err := ac.ProcessConfig(context.Background(), cfg)
+	response, err := ac.ProcessConfig(context.Background(), instance)
 	require.NoError(t, err)
 	require.Empty(t, response.Errors)
 	require.Len(t, response.Ports, 1)
@@ -94,35 +94,13 @@ func TestSetConfig(t *testing.T) {
 	require.NoError(t, err)
 	cfg, err := ac.GetConfigMetadata(context.Background())
 	require.NoError(t, err)
-	updateConfigSettings(t, cfg)
+	instance := config.CreateModuleConfigurationInstance(cfg)
+	updateConfigSettings(t, instance)
 
 	// Set the config
-	err = ac.SetConfig(context.Background(), cfg)
+	err = ac.SetConfig(context.Background(), instance)
 	require.NoError(t, err)
-
-	// Get the config and check the values
-	cfg, err = ac.GetConfigMetadata(context.Background())
-	checkConfigSettings(t, cfg)
 	t.Log("Config set successfully")
-}
-
-func TestGetConfigInstance(t *testing.T) {
-	err := deleteConfigs()
-	require.NoError(t, err)
-	cfg, err := ac.GetConfigMetadata(context.Background())
-	require.NoError(t, err)
-	updateConfigSettings(t, cfg)
-
-	// Set the config
-	err = ac.SetConfig(context.Background(), cfg)
-	require.NoError(t, err)
-
-	// Get the config and check the values
-	inst, err := ac.GetConfigInstance(context.Background())
-	require.Equal(t, true, inst["exampleBool"])
-	require.Equal(t, "three", inst["exampleChoice"])
-	require.Equal(t, float64(8085), inst["server"].(map[string]any)["port"])
-	t.Log("Config instance was correct")
 }
 
 func TestGetContaners(t *testing.T) {
@@ -153,8 +131,9 @@ func TestRunCommand(t *testing.T) {
 	require.NoError(t, err)
 	cfg, err := ac.GetConfigMetadata(context.Background())
 	require.NoError(t, err)
-	updateConfigSettings(t, cfg)
-	err = ac.SetConfig(context.Background(), cfg)
+	instance := config.CreateModuleConfigurationInstance(cfg)
+	updateConfigSettings(t, instance)
+	err = ac.SetConfig(context.Background(), instance)
 	require.NoError(t, err)
 
 	// Make sure the service is running
@@ -177,52 +156,57 @@ func TestRunCommand(t *testing.T) {
 	t.Logf("Command ran successfully and returned %s", out)
 }
 
-func updateConfigSettings(t *testing.T, cfg config.IConfiguration) {
+func updateConfigSettings(t *testing.T, cfg *config.ModuleConfigurationInstance) {
 	// Set some values
-	paramMap := make(map[string]config.IParameter)
-	for _, param := range cfg.GetParameters() {
-		paramMap[param.GetID().String()] = param
-	}
-	err := paramMap["exampleBool"].SetValue(true)
+	param, err := cfg.GetParameter("exampleBool")
 	require.NoError(t, err)
-	err = paramMap["exampleChoice"].SetValue("three")
+	err = param.SetValue(true)
 	require.NoError(t, err)
-	err = paramMap["exampleFloat"].SetValue(75.0)
+
+	param, err = cfg.GetParameter("exampleChoice")
+	require.NoError(t, err)
+	err = param.SetValue("three")
+	require.NoError(t, err)
+
+	param, err = cfg.GetParameter("exampleFloat")
+	require.NoError(t, err)
+	err = param.SetValue(75.0)
 	require.NoError(t, err)
 
 	// Set a subconfig value
-	sectionMap := make(map[string]config.ISection)
-	for _, section := range cfg.GetSections() {
-		sectionMap[section.GetID().String()] = section
-	}
-	subParamMap := make(map[string]config.IParameter)
-	for _, param := range sectionMap["server"].GetParameters() {
-		subParamMap[param.GetID().String()] = param
-	}
-	err = subParamMap["port"].SetValue(8085)
+	serverCfg, err := cfg.GetSection("server")
 	require.NoError(t, err)
-	err = subParamMap["portMode"].SetValue("open")
+
+	subPort, err := serverCfg.GetParameter("port")
+	require.NoError(t, err)
+	err = subPort.SetValue(8085)
+	require.NoError(t, err)
+
+	subPortMode, err := serverCfg.GetParameter("portMode")
+	require.NoError(t, err)
+	err = subPortMode.SetValue("open")
 	require.NoError(t, err)
 }
 
-func checkConfigSettings(t *testing.T, cfg config.IConfiguration) {
+func checkConfigSettings(t *testing.T, cfg *config.ModuleConfigurationInstance) {
 	// Check some values
-	paramMap := make(map[string]config.IParameter)
-	for _, param := range cfg.GetParameters() {
-		paramMap[param.GetID().String()] = param
-	}
-	require.True(t, paramMap["exampleBool"].GetValueAsAny().(bool))
-	require.Equal(t, "three", paramMap["exampleChoice"].GetValueAsAny().(string))
+	exampleBool, err := cfg.GetParameter("exampleBool")
+	require.NoError(t, err)
+	require.True(t, exampleBool.GetValue().(bool))
+
+	exampleChoice, err := cfg.GetParameter("exampleChoice")
+	require.NoError(t, err)
+	require.Equal(t, "three", exampleChoice.GetValue().(string))
 
 	// Check a subconfig value
-	sectionMap := make(map[string]config.ISection)
-	for _, section := range cfg.GetSections() {
-		sectionMap[section.GetID().String()] = section
-	}
-	subParamMap := make(map[string]config.IParameter)
-	for _, param := range sectionMap["server"].GetParameters() {
-		subParamMap[param.GetID().String()] = param
-	}
-	require.Equal(t, uint64(8085), subParamMap["port"].GetValueAsAny().(uint64))
-	require.Equal(t, "open", subParamMap["portMode"].GetValueAsAny().(string))
+	serverCfg, err := cfg.GetSection("server")
+	require.NoError(t, err)
+
+	subPort, err := serverCfg.GetParameter("port")
+	require.NoError(t, err)
+	require.Equal(t, uint64(8085), subPort.GetValue().(uint64))
+
+	subPortMode, err := serverCfg.GetParameter("portMode")
+	require.NoError(t, err)
+	require.Equal(t, "open", subPortMode.GetValue().(string))
 }

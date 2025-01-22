@@ -52,6 +52,15 @@ Your adapter will be provided with its own [secret key](./templates.md#modulejwt
 Your services will be provided with a [JWT key](./templates.md#modulejwtkeyfile-1) for authenticating any incoming requests. They can use this in whatever capacity they like, but they must authenticate those requests to prevent an attacker without access to those secrets from using your services.
 
 
+## Configuration
+
+One of the most important aspects of the Hyperdrive ecosystem is a common configuration environment across modules, so incompatibilities are detected and resolved prior to starting services. Hyperdrive maintains the main configuration for that whole ecosystem, including itself and all of its modules, as a monolithic artifact. 
+
+When a reconfiguration is performed by the user, your adapter will be provided with this complete configuration object and called upon to translate it into whatever configuration your module's services natively support. Hyperdrive will own this configuration, so your adapter must not make any changes during this process.
+
+A detailed breakdown of the configuration specification for modules is provided in the [configuration page](./config.md).
+
+
 ## Communicating with the Hyperdrive Daemon
 
 The Hyperdrive Daemon provides endpoints for several useful features, such as restarting Docker containers on the system and retrieving the configuration for the entire Hyperdrive system (including the configurations of other modules). It's made accessible to your module via its HTTP API, which can be accessed with the [Hyperdrive Daemon URL](./templates.md#hyperdrivedaemonurl) accessor. All requests must be JWT authenticated with the contents of the [Hyperdrive API Key file](./templates.md#hyperdrivejwtkeyfile).

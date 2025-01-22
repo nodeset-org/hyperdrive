@@ -10,30 +10,42 @@ import (
 )
 
 func TestLoadModuleConfigs(t *testing.T) {
-	err := hdCfg.LoadModuleConfigs()
+	results, err := cfgMgr.LoadModuleInfo(cfgInstance.ProjectName)
 	require.NoError(t, err)
 
-	modCfgs := hdCfg.GetModuleConfigs()
+	require.Len(t, results, 1)
+	require.NoError(t, results[0].LoadError)
+
+	modCfgs := cfgMgr.HyperdriveConfiguration.ModuleInfo
 	require.Len(t, modCfgs, 1)
-	modCfg := modCfgs[0]
-	require.NoError(t, modCfg.LoadError)
+	modCfg := modCfgs[exampleDescriptor.GetFullyQualifiedModuleName()]
 	require.Equal(t, exampleDescriptor.Name, modCfg.Descriptor.Name)
 	t.Log("Module config loaded successfully")
 }
 
 func TestSerialization(t *testing.T) {
 	TestLoadModuleConfigs(t)
-	hdCfg.GetModuleConfigs()[0].Enabled = true
+	var mod *config.HyperdriveModuleInstanceInfo
+	for _, m := range cfgInstance.Modules {
+		mod = m
+		break
+	}
+	mod.Enabled = true
 
 	// Do some simple tweaks
-	hdCfg.ClientTimeout.Value = 10
-	modCfg := hdCfg.GetModuleConfigs()[0]
-	err := modCfg.Config.GetParameters()[3].SetValue(80.0)
+	cfgInstance.ClientTimeout = 10
+	modCfg := mod.Configuration
+	param, err := modCfg.GetParameter("exampleFloat")
+	require.NoError(t, err)
+	err = param.SetValue(80.0)
 	require.NoError(t, err)
 	t.Log("Configs modified")
 
 	// Process the configs to make sure they're good
-	processResults, err := hdCfg.ProcessModuleConfigs()
+	modCfgs := []*config.HyperdriveModuleInstanceInfo{
+		mod,
+	}
+	processResults, err := cfgMgr.ProcessModuleConfigurations(modCfgs)
 	require.NoError(t, err)
 	for _, result := range processResults {
 		require.NoError(t, result.ProcessError)
@@ -43,33 +55,25 @@ func TestSerialization(t *testing.T) {
 
 	// Save everything
 	cfgPath := filepath.Join(internal_test.UserDir, config.ConfigFilename)
-	err = hdCfg.SaveToFile(cfgPath)
+	err = cfgMgr.SaveInstanceToFile(cfgPath, cfgInstance)
 	require.NoError(t, err)
 	t.Log("Main config saved to file")
 
-	saveErrors, err := hdCfg.SaveModuleConfigs()
-	require.NoError(t, err)
-	for _, saveErr := range saveErrors {
-		require.NoError(t, saveErr)
-	}
-	t.Log("Module configs saved to disk")
-
 	// Load the config back in
-	newCfg, err := config.LoadFromFile(cfgPath, internal_test.SystemDir)
+	newCfg, err := cfgMgr.LoadInstanceFromFile(cfgPath, internal_test.SystemDir)
 	require.NoError(t, err)
-	require.Equal(t, hdCfg.ProjectName.Value, newCfg.ProjectName.Value)
-	require.Equal(t, hdCfg.ClientTimeout.Value, newCfg.ClientTimeout.Value)
+	require.Equal(t, cfgInstance.ProjectName, newCfg.ProjectName)
+	require.Equal(t, cfgInstance.ClientTimeout, newCfg.ClientTimeout)
 	t.Log("Main config loaded from file")
 
 	// Load the module configs back in
-	err = newCfg.LoadModuleConfigs()
-	require.NoError(t, err)
-	newModCfgs := newCfg.GetModuleConfigs()
+	newModCfgs := newCfg.Modules
 	require.Len(t, newModCfgs, 1)
-	newModCfg := newModCfgs[0]
-	require.NoError(t, newModCfg.LoadError)
-	require.Equal(t, modCfg.Descriptor.Name, newModCfg.Descriptor.Name)
-	require.Equal(t, modCfg.Enabled, newModCfg.Enabled)
-	require.Equal(t, modCfg.Config.GetParameters()[3].GetValueAsAny(), newModCfg.Config.GetParameters()[3].GetValueAsAny())
+	newModCfg, exists := newModCfgs[exampleDescriptor.GetFullyQualifiedModuleName()]
+	require.True(t, exists)
+	require.Equal(t, mod.Enabled, newModCfg.Enabled)
+	newParam, err := newModCfg.Configuration.GetParameter("exampleFloat")
+	require.NoError(t, err)
+	require.Equal(t, param.GetValue(), newParam.GetValue())
 	t.Log("Module configs loaded from file")
 }

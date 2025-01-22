@@ -102,6 +102,35 @@ where:
 - If `source` is anything else, it should be treated as the name of one of the service containers (as provided in [`get-containers`](#hd-module-get-containers)) and return the log file for that service. If the name provided does not correspond to a known container, then `path` in the response should be empty.
 
 
+### `hd-module upgrade-config`
+
+This will be called when Hyperdrive detects that its configuration instance for your module was generated with an older version of the module, and the user has updated it but hasn't run through the configuration process yet. It should migrate the old [Hyperdrive Configuration Instance](./config.md#instances) to the latest version. If no changes are required, then you can simply return the old configuration with the `version` updated.
+
+This is an opportunity to modify deprecated settings, or invalidate obsolete ones that no longer apply by making them blank or using the default value for example. The user will be informed of what has changed prior to saving the configuration so they have the option to cancel the process and revert the upgrade; your module must not save this configuration until Hyperdrive calls the [set-config](#hd-module-set-config) function.
+
+
+#### Input
+
+```json
+{
+    "key": "...",
+    "config": {
+        ...
+    }
+}
+```
+
+where:
+
+- `key` must match the contents of `ModuleSecretFile`.
+- `config` is a [Hyperdrive Configuration Instance](./config.md#instances) for your module specifically.
+
+
+#### Output
+
+A serialized JSON [Hyperdrive Configuration Instance](./config.md#instances) representing the original configuration instance, with any parameters that are no longer compatible with the current instance changed to an appropriate value (such as the new default). The `version` of the returned instance must also be updated to the latest version of your module, as reported in its [descriptor](./descriptor.md) file and the [version](#hd-module-version) function.
+
+
 ### `hd-module get-config-metadata`
 
 This should return a [Hyperdrive Configuration Metadata](./config.md#metadata) object for your module as a serialized string in JSON format.
@@ -123,24 +152,6 @@ where:
 #### Output
 
 A serialized JSON [Hyperdrive Configuration Metadata](./config.md#metadata) object for your module's configuration.
-
-
-### `hd-module get-config-instance`
-
-This should return a [Hyperdrive Configuration Instance](./config.md#instances) object for your module as a serialized string in JSON format. This will require processing any existing saved configuration and returning it in Hyperdrive's configuration format.
-
-
-#### Input
-
-```json
-{
-    "key": "..."
-}
-```
-
-where:
-
-- `key` must match the contents of `ModuleSecretFile`.
 
 
 #### Output
@@ -169,7 +180,7 @@ Your module should use this to return information about the configuration and va
 where:
 
 - `key` must match the contents of `ModuleSecretFile`.
-- `config` is a [Hyperdrive Configuration Instance](./config.md#instances).
+- `config` is a [Hyperdrive Configuration Instance](./config.md#instances) of the [complete Hyperdrive installation](../config.md), including your module's configuration and the configuration for all other installed modules.
 
 
 #### Output
@@ -221,7 +232,7 @@ No response is expected from this command during a successful run. If any errors
 where:
 
 - `key` must match the contents of `ModuleSecretFile`.
-- `config` is a [Hyperdrive Configuration Instance](./config.md#instances).
+- `config` is a [Hyperdrive Configuration Instance](./config.md#instances) of the [complete Hyperdrive installation](../config.md), including your module's configuration and the configuration for all other installed modules.
 
 
 #### Output

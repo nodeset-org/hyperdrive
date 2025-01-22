@@ -18,20 +18,59 @@ const (
 
 // Common interface for all Parameter metadata structs
 type IParameter interface {
+	// Gets the unique ID for the parameter
 	GetID() Identifier
+
+	// Gets the human-readable name for the parameter
 	GetName() string
+
+	// Gets the description of the parameter
 	GetDescription() DynamicProperty[string]
+
+	// Gets the type of the parameter - this can be used for casting to a specific parameter type
 	GetType() ParameterType
-	GetDefaultAsAny() any
-	GetValueAsAny() any
-	SetValue(value any) error
+
+	// Gets the default value for the parameter as an any
+	GetDefault() any
+
+	// Gets whether the parameter is considered "advanced"
 	GetAdvanced() bool
+
+	// Gets whether the parameter is disabled
 	GetDisabled() DynamicProperty[bool]
+
+	// Gets whether the parameter is hidden
 	GetHidden() DynamicProperty[bool]
+
+	// Gets whether the parameter should be overwritten with the default on an upgrade
 	GetOverwriteOnUpgrade() bool
+
+	// Gets the list of containers affected if this parameter is changed
 	GetAffectedContainers() []string
+
+	// Serializes the parameter metadata to a map
 	Serialize() map[string]any
+
+	// Deserializes the parameter metadata from a map
 	Deserialize(data map[string]any) error
+
+	// Creates a parameter instance that's linked to this metadata
+	CreateInstance() IParameterInstance
+}
+
+// A general-purpose instance of a parameter. Useful for working with parameters of dynamic module configurations that you don't know the type of during compile time.
+type IParameterInstance interface {
+	// Get the metadata for the parameter
+	GetMetadata() IParameter
+
+	// Get the value of the parameter
+	GetValue() any
+
+	// Set the value of the parameter. If the provided value is the wrong type for the parameter, an error will be returned.
+	SetValue(value any) error
+
+	// Get the parameter's value as a string
+	String() string
 }
 
 // ===========================
@@ -67,9 +106,6 @@ type Parameter[Type any] struct {
 	// Default value for the parameter
 	Default Type `json:"default" yaml:"default"`
 
-	// Current value assigned to the parameter, if configured
-	Value Type `json:"value" yaml:"value"`
-
 	// Flag for hiding the parameter behind the "advanced mode" toggle
 	Advanced bool `json:"advanced,omitempty" yaml:"advanced,omitempty"`
 
@@ -98,12 +134,8 @@ func (p Parameter[Type]) GetDescription() DynamicProperty[string] {
 	return p.Description
 }
 
-func (p Parameter[Type]) GetDefaultAsAny() any {
+func (p Parameter[Type]) GetDefault() any {
 	return p.Default
-}
-
-func (p Parameter[Type]) GetValueAsAny() any {
-	return p.Value
 }
 
 func (p Parameter[Type]) GetAdvanced() bool {
@@ -133,7 +165,6 @@ func (p *Parameter[Type]) serializeImpl() map[string]any {
 		NameKey:               p.Name,
 		DescriptionKey:        p.Description,
 		DefaultKey:            p.Default,
-		ValueKey:              p.Value,
 		AdvancedKey:           p.Advanced,
 		DisabledKey:           p.Disabled,
 		HiddenKey:             p.Hidden,
@@ -206,6 +237,30 @@ func (p *Parameter[Type]) deserializeImpl(data map[string]any) error {
 	return nil
 }
 
+// Underlying implementation for parameter instances
+type parameterInstance[Type any] struct {
+	// The parameter metadata
+	metadata IParameter
+
+	// The current value of the parameter
+	Value Type
+}
+
+// Gets the metadata for the parameter
+func (p *parameterInstance[Type]) GetMetadata() IParameter {
+	return p.metadata
+}
+
+// Gets the value of the parameter
+func (p *parameterInstance[Type]) GetValue() any {
+	return p.Value
+}
+
+// Gets the value of the parameter as a string
+func (p *parameterInstance[Type]) String() string {
+	return fmt.Sprintf("%v", p.Value)
+}
+
 /// =======================
 /// === Bool Parameters ===
 /// =======================
@@ -234,21 +289,30 @@ func (p *BoolParameter) Deserialize(data map[string]any) error {
 	if err != nil {
 		return err
 	}
-
-	// Set the current value
-	_, err = deserializeProperty(data, ValueKey, &p.Value, false)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
-func (p *BoolParameter) SetValue(value any) error {
+func (p *BoolParameter) CreateInstance() IParameterInstance {
+	return &boolParameterInstance{
+		parameterInstance: parameterInstance[bool]{
+			metadata: p,
+		},
+		Value: p.Default,
+	}
+}
+
+// Underlying implementation for bool parameter instances
+type boolParameterInstance struct {
+	parameterInstance[bool]
+	Value bool
+}
+
+func (i *boolParameterInstance) SetValue(value any) error {
 	boolValue, ok := value.(bool)
 	if !ok {
-		return fmt.Errorf("invalid value type for bool parameter [%s]: %T", p.ID, value)
+		return fmt.Errorf("invalid value type for bool parameter [%s]: %T", i.metadata.GetID(), value)
 	}
-	p.Value = boolValue
+	i.Value = boolValue
 	return nil
 }
 
@@ -275,6 +339,12 @@ type NumberParameter[Type NumberParameterType] struct {
 
 	// Maximum value for the parameter
 	MaxValue Type `json:"maxValue,omitempty" yaml:"maxValue,omitempty"`
+}
+
+// Underlying implementation for number parameter instances
+type numberParameterInstance[Type NumberParameterType] struct {
+	parameterInstance[Type]
+	Value Type
 }
 
 func (p NumberParameter[Type]) Serialize() map[string]any {
@@ -307,17 +377,11 @@ func (p *NumberParameter[Type]) Deserialize(data map[string]any) error {
 	if err != nil {
 		return err
 	}
-
-	// Set the current value
-	err = p.setProperty(data, ValueKey, &p.Value)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
-func (p *NumberParameter[Type]) SetValue(value any) error {
-	return setNumberProperty(p.ID.String(), &p.Value, value)
+func (i *numberParameterInstance[Type]) SetValue(value any) error {
+	return setNumberProperty(i.metadata.GetID().String(), &i.Value, value)
 }
 
 func (p *NumberParameter[Type]) setProperty(data map[string]any, key string, property *Type) error {
@@ -342,6 +406,15 @@ func (p IntParameter) GetType() ParameterType {
 	return ParameterType_Int
 }
 
+func (p *IntParameter) CreateInstance() IParameterInstance {
+	return &numberParameterInstance[int64]{
+		parameterInstance: parameterInstance[int64]{
+			metadata: p,
+		},
+		Value: p.Default,
+	}
+}
+
 /// =======================
 /// === Uint Parameters ===
 /// =======================
@@ -355,6 +428,15 @@ func (p UintParameter) GetType() ParameterType {
 	return ParameterType_Uint
 }
 
+func (p *UintParameter) CreateInstance() IParameterInstance {
+	return &numberParameterInstance[uint64]{
+		parameterInstance: parameterInstance[uint64]{
+			metadata: p,
+		},
+		Value: p.Default,
+	}
+}
+
 /// ========================
 /// === Float Parameters ===
 /// ========================
@@ -366,6 +448,15 @@ type FloatParameter struct {
 
 func (p FloatParameter) GetType() ParameterType {
 	return ParameterType_Float
+}
+
+func (p *FloatParameter) CreateInstance() IParameterInstance {
+	return &numberParameterInstance[float64]{
+		parameterInstance: parameterInstance[float64]{
+			metadata: p,
+		},
+		Value: p.Default,
+	}
 }
 
 /// =========================
@@ -387,6 +478,20 @@ type StringParameter struct {
 
 	// The pattern for the regular expression the string must match
 	Regex string `json:"regex,omitempty" yaml:"regex,omitempty"`
+}
+
+func (p *StringParameter) CreateInstance() IParameterInstance {
+	return &stringParameterInstance{
+		parameterInstance: parameterInstance[string]{
+			metadata: p,
+		},
+		Value: p.Default,
+	}
+}
+
+type stringParameterInstance struct {
+	parameterInstance[string]
+	Value string
 }
 
 func (p StringParameter) GetType() ParameterType {
@@ -425,21 +530,15 @@ func (p *StringParameter) Deserialize(data map[string]any) error {
 	if err != nil {
 		return err
 	}
-
-	// Set the current value
-	_, err = deserializeProperty(data, ValueKey, &p.Value, false)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
-func (p *StringParameter) SetValue(value any) error {
+func (i *stringParameterInstance) SetValue(value any) error {
 	stringValue, ok := value.(string)
 	if !ok {
-		return fmt.Errorf("invalid value type for string parameter [%s]: %T", p.ID, value)
+		return fmt.Errorf("invalid value type for string parameter [%s]: %T", i.metadata.GetID(), value)
 	}
-	p.Value = stringValue
+	i.Value = stringValue
 	return nil
 }
 
@@ -452,6 +551,11 @@ const (
 	OptionsKey string = "options"
 )
 
+type IChoiceParameter interface {
+	IParameter
+	GetOptions() []IParameterOption
+}
+
 type ChoiceParameter[ChoiceType ~string] struct {
 	Parameter[ChoiceType]
 
@@ -459,8 +563,32 @@ type ChoiceParameter[ChoiceType ~string] struct {
 	Options []ParameterOption[ChoiceType] `json:"options" yaml:"options"`
 }
 
+func (p *ChoiceParameter[ChoiceType]) CreateInstance() IParameterInstance {
+	return &choiceParameterInstance[ChoiceType]{
+		parameterInstance: parameterInstance[ChoiceType]{
+			metadata: p,
+		},
+		Value: p.Default,
+	}
+}
+
+type choiceParameterInstance[ChoiceType ~string] struct {
+	parameterInstance[ChoiceType]
+	Value ChoiceType
+}
+
+// Gets the type of the parameter
 func (p ChoiceParameter[ChoiceType]) GetType() ParameterType {
 	return ParameterType_Choice
+}
+
+// Gets the options for the choice parameter
+func (p ChoiceParameter[ChoiceType]) GetOptions() []IParameterOption {
+	options := make([]IParameterOption, len(p.Options))
+	for i, option := range p.Options {
+		options[i] = option
+	}
+	return options
 }
 
 // Serializes the choice parameter to a map
@@ -492,17 +620,6 @@ func (p *ChoiceParameter[ChoiceType]) Deserialize(data map[string]any) error {
 		return err
 	}
 
-	// Set the current value
-	var currentVal any
-	_, err = deserializeProperty(data, ValueKey, &currentVal, false)
-	if err != nil {
-		return err
-	}
-	err = p.setProperty(&p.Value, currentVal)
-	if err != nil {
-		return err
-	}
-
 	// Get the options
 	var options []any
 	_, err = deserializeProperty(data, OptionsKey, &options, false)
@@ -526,19 +643,19 @@ func (p *ChoiceParameter[ChoiceType]) Deserialize(data map[string]any) error {
 	return nil
 }
 
-func (p *ChoiceParameter[ChoiceType]) SetValue(value any) error {
+func (i *choiceParameterInstance[ChoiceType]) SetValue(value any) error {
 	// Check for direct assignment
 	typedValue, ok := value.(ChoiceType)
 	if ok {
-		p.Value = typedValue
+		i.Value = typedValue
 	}
 
 	// Handle string conversion
 	stringValue, ok := value.(string)
 	if !ok {
-		return fmt.Errorf("invalid value type for choice parameter %s: %T", p.ID, value)
+		return fmt.Errorf("invalid value type for choice parameter %s: %T", i.metadata.GetID(), value)
 	}
-	p.Value = ChoiceType(stringValue)
+	i.Value = ChoiceType(stringValue)
 	return nil
 }
 
@@ -554,6 +671,24 @@ func (p *ChoiceParameter[ChoiceType]) setProperty(property *ChoiceType, value an
 /// =========================
 /// === Parameter Options ===
 /// =========================
+
+// Interface for a single option for a choice parameter
+type IParameterOption interface {
+	// The option's name
+	GetName() string
+
+	// The description for the option
+	GetDescription() DynamicProperty[string]
+
+	// The value for the option
+	GetValue() string
+
+	// Flag for disabling the option in the UI, graying it out
+	GetDisabled() DynamicProperty[bool]
+
+	// Flag for hiding the option from the UI
+	GetHidden() DynamicProperty[bool]
+}
 
 // A single option for a choice parameter
 type ParameterOption[ChoiceType ~string] struct {
@@ -571,6 +706,31 @@ type ParameterOption[ChoiceType ~string] struct {
 
 	// Flag for hiding the option from the UI
 	Hidden DynamicProperty[bool] `json:"hidden,omitempty" yaml:"hidden,omitempty"`
+}
+
+// Gets the name of the option
+func (o ParameterOption[ChoiceType]) GetName() string {
+	return o.Name
+}
+
+// Gets the description of the option
+func (o ParameterOption[ChoiceType]) GetDescription() DynamicProperty[string] {
+	return o.Description
+}
+
+// Gets the value of the option
+func (o ParameterOption[ChoiceType]) GetValue() string {
+	return string(o.Value)
+}
+
+// Gets the disabled flag of the option
+func (o ParameterOption[ChoiceType]) GetDisabled() DynamicProperty[bool] {
+	return o.Disabled
+}
+
+// Gets the hidden flag of the option
+func (o ParameterOption[ChoiceType]) GetHidden() DynamicProperty[bool] {
+	return o.Hidden
 }
 
 // Serializes the option to a map

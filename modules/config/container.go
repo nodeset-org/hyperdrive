@@ -39,6 +39,16 @@ func (c metadataContainer) GetSections() []ISection {
 	return c.sections
 }
 
+// Interface for a container that can contain instances of parameters and sections
+type IInstanceContainer interface {
+	// Get the parameter instance with the given ID
+	GetParameter(id Identifier) (IParameterInstance, error)
+
+	// Get the section instance with the given ID
+	GetSection(id Identifier) (*SectionInstance, error)
+}
+
+/*
 // Get the parameters and sections within a container, either via the interface directly or indirectly via reflection
 func getContainerArtifacts(container any) ([]IParameter, []ISection) {
 	params := []IParameter{}
@@ -105,10 +115,13 @@ func getContainerArtifacts(container any) ([]IParameter, []ISection) {
 
 	return params, sections
 }
+*/
 
 // Serialize the container into an existing map
-func serializeContainerToMap(container any, existingData map[string]any) {
-	params, sections := getContainerArtifacts(container)
+func serializeContainerToMap(container IMetadataContainer, existingData map[string]any) {
+	//params, sections := getContainerArtifacts(container)
+	params := container.GetParameters()
+	sections := container.GetSections()
 
 	// Handle the parameters
 	paramMaps := []map[string]any{}
@@ -125,23 +138,6 @@ func serializeContainerToMap(container any, existingData map[string]any) {
 		sectionMaps = append(sectionMaps, sectionMap)
 	}
 	existingData[SectionsKey] = sectionMaps
-}
-
-// Serialize the container into an instance
-func serializeContainerToInstance(container any, existingData map[string]any) {
-	params, sections := getContainerArtifacts(container)
-
-	// Handle the parameters
-	for _, param := range params {
-		existingData[param.GetID().String()] = param.GetValueAsAny()
-	}
-
-	// Handle the sections
-	for _, section := range sections {
-		sectionData := map[string]any{}
-		serializeContainerToInstance(section, sectionData)
-		existingData[section.GetID().String()] = sectionData
-	}
 }
 
 // Deserialize the container from a map
@@ -187,40 +183,53 @@ func deserializeContainerFromMap(data map[string]any) (IMetadataContainer, error
 	return container, nil
 }
 
-// Deserialize a container instance into a container metadata to assign the current values
-func deserializeContainerInstance(instance map[string]any, container any) error {
-	params, sections := getContainerArtifacts(container)
+// Interface for deserialized configuration metadata and section metadata that can contain parameters or sections themselves
+type iContainerInstance interface {
+	// Get the list of parameters listed in this container
+	getParameters() map[Identifier]IParameterInstance
 
-	// Handle the parameters
-	for _, param := range params {
-		paramID := param.GetID().String()
-		paramData, exists := instance[paramID]
+	// Get the list of sections listed in this container
+	getSections() map[Identifier]*SectionInstance
+}
+
+func serializeContainerInstance(container iContainerInstance) map[string]any {
+	instanceMap := map[string]any{}
+	for paramID, parameter := range container.getParameters() {
+		instanceMap[paramID.String()] = parameter.GetValue()
+	}
+	for sectionID, section := range container.getSections() {
+		instanceMap[sectionID.String()] = section.Serialize()
+	}
+	return instanceMap
+}
+
+// Deserialize the section instance from a map
+func deserializeContainerInstance(container iContainerInstance, instance map[string]any) error {
+	for _, parameter := range container.getParameters() {
+		paramID := parameter.GetMetadata().GetID()
+		paramData, exists := instance[paramID.String()]
 		if !exists {
-			return fmt.Errorf("missing parameter [%s]", paramID)
+			return NewErrorNotFound(paramID, EntryType_Parameter)
 		}
-		err := param.SetValue(paramData)
+		err := parameter.SetValue(paramData)
 		if err != nil {
 			return fmt.Errorf("error setting parameter [%s]: %w", paramID, err)
 		}
 	}
-
-	// Handle the sections
-	for _, section := range sections {
-		sectionID := section.GetID().String()
-		sectionData, exists := instance[sectionID]
+	for _, section := range container.getSections() {
+		sectionID := section.GetMetadata().GetID()
+		sectionData, exists := instance[sectionID.String()]
 		if !exists {
-			return fmt.Errorf("missing section [%s]", sectionID)
+			return NewErrorNotFound(sectionID, EntryType_Section)
 		}
 		sectionDataAsMap, ok := sectionData.(map[string]any)
 		if !ok {
 			return fmt.Errorf("invalid type for section [%s]: %T", sectionID, sectionData)
 		}
-
-		err := deserializeContainerInstance(sectionDataAsMap, section)
+		err := section.Deserialize(sectionDataAsMap)
 		if err != nil {
 			return fmt.Errorf("error processing section [%s]: %w", sectionID, err)
 		}
 	}
-
 	return nil
 }
