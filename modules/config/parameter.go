@@ -296,15 +296,14 @@ func (p *BoolParameter) CreateInstance() IParameterInstance {
 	return &boolParameterInstance{
 		parameterInstance: parameterInstance[bool]{
 			metadata: p,
+			Value:    p.Default,
 		},
-		Value: p.Default,
 	}
 }
 
 // Underlying implementation for bool parameter instances
 type boolParameterInstance struct {
 	parameterInstance[bool]
-	Value bool
 }
 
 func (i *boolParameterInstance) SetValue(value any) error {
@@ -344,7 +343,6 @@ type NumberParameter[Type NumberParameterType] struct {
 // Underlying implementation for number parameter instances
 type numberParameterInstance[Type NumberParameterType] struct {
 	parameterInstance[Type]
-	Value Type
 }
 
 func (p NumberParameter[Type]) Serialize() map[string]any {
@@ -410,8 +408,8 @@ func (p *IntParameter) CreateInstance() IParameterInstance {
 	return &numberParameterInstance[int64]{
 		parameterInstance: parameterInstance[int64]{
 			metadata: p,
+			Value:    p.Default,
 		},
-		Value: p.Default,
 	}
 }
 
@@ -432,8 +430,8 @@ func (p *UintParameter) CreateInstance() IParameterInstance {
 	return &numberParameterInstance[uint64]{
 		parameterInstance: parameterInstance[uint64]{
 			metadata: p,
+			Value:    p.Default,
 		},
-		Value: p.Default,
 	}
 }
 
@@ -454,8 +452,8 @@ func (p *FloatParameter) CreateInstance() IParameterInstance {
 	return &numberParameterInstance[float64]{
 		parameterInstance: parameterInstance[float64]{
 			metadata: p,
+			Value:    p.Default,
 		},
-		Value: p.Default,
 	}
 }
 
@@ -484,14 +482,13 @@ func (p *StringParameter) CreateInstance() IParameterInstance {
 	return &stringParameterInstance{
 		parameterInstance: parameterInstance[string]{
 			metadata: p,
+			Value:    p.Default,
 		},
-		Value: p.Default,
 	}
 }
 
 type stringParameterInstance struct {
 	parameterInstance[string]
-	Value string
 }
 
 func (p StringParameter) GetType() ParameterType {
@@ -567,14 +564,13 @@ func (p *ChoiceParameter[ChoiceType]) CreateInstance() IParameterInstance {
 	return &choiceParameterInstance[ChoiceType]{
 		parameterInstance: parameterInstance[ChoiceType]{
 			metadata: p,
+			Value:    p.Default,
 		},
-		Value: p.Default,
 	}
 }
 
 type choiceParameterInstance[ChoiceType ~string] struct {
 	parameterInstance[ChoiceType]
-	Value ChoiceType
 }
 
 // Gets the type of the parameter

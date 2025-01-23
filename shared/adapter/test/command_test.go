@@ -85,7 +85,7 @@ func TestProcessConfig(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, response.Errors)
 	require.Len(t, response.Ports, 1)
-	require.Equal(t, uint16(8085), response.Ports["server/portMode"])
+	require.Equal(t, uint16(8085), response.Ports["server/port"])
 	t.Log("Config processed successfully")
 }
 
