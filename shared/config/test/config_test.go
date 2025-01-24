@@ -28,18 +28,16 @@ func TestLoadModuleConfigs(t *testing.T) {
 
 	modCfgs := cfgMgr.HyperdriveConfiguration.Modules
 	require.Len(t, modCfgs, 1)
-	modCfg := modCfgs[exampleDescriptor.GetFullyQualifiedModuleName()]
-	require.Equal(t, exampleDescriptor.Name, modCfg.Descriptor.Name)
+	modCfg := modCfgs[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
+	require.Equal(t, internal_test.ExampleDescriptor.Name, modCfg.Descriptor.Name)
 
 	// Create a default instance of the module config
 	require.Len(t, cfgInstance.Modules, 0)
 	modInstance := &modconfig.ModuleInstance{
 		Enabled: false,
-		Name:    modCfg.Descriptor.GetFullyQualifiedModuleName(),
-		Version: modCfg.Descriptor.Version.String(),
 	}
 	modInstance.Settings.CreateSettingsFromMetadata(modCfg.Configuration)
-	cfgInstance.Modules = append(cfgInstance.Modules, modInstance)
+	cfgInstance.Modules[modCfg.Descriptor.GetFullyQualifiedModuleName()] = modInstance
 	isCfgLoaded = true
 	t.Log("Module config loaded successfully")
 }
@@ -48,7 +46,7 @@ func TestSerialization(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
 	TestLoadModuleConfigs(t)
-	mod := cfgInstance.Modules[0]
+	mod := cfgInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	mod.Enabled = true
 
 	// Do some simple tweaks
@@ -90,7 +88,7 @@ func TestSerialization(t *testing.T) {
 	// Load the module configs back in
 	newModCfgs := newCfg.Modules
 	require.Len(t, newModCfgs, 1)
-	newModCfg := newModCfgs[0]
+	newModCfg := newModCfgs[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	require.Equal(t, mod.Enabled, newModCfg.Enabled)
 	newSettings := newModCfg.Settings.GetSettings()
 	newFloat, err := newSettings.GetParameter("exampleFloat")

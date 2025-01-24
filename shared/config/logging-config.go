@@ -178,6 +178,11 @@ func (cfg *LoggingConfig) GetSections() []config.ISection {
 	return []config.ISection{}
 }
 
+// Create a new, empty instance of the config
+func NewLoggingConfigInstance() *LoggingConfigInstance {
+	return new(LoggingConfigInstance)
+}
+
 // Convert the config instance into a LoggerOptions struct
 func (cfg *LoggingConfigInstance) GetOptions() logging.LoggerOptions {
 	return logging.LoggerOptions{

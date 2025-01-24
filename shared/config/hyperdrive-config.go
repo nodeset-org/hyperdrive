@@ -54,16 +54,16 @@ type HyperdriveConfig struct {
 
 // The instance of the Hyperdrive configuration
 type HyperdriveConfigInstance struct {
-	Version                  string                   `json:"version" yaml:"version"`
-	ProjectName              string                   `json:"projectName" yaml:"projectName"`
-	ApiPort                  uint64                   `json:"apiPort" yaml:"apiPort"`
-	EnableIPv6               bool                     `json:"enableIPv6" yaml:"enableIPv6"`
-	UserDataPath             string                   `json:"userDataPath" yaml:"userDataPath"`
-	AdditionalDockerNetworks string                   `json:"additionalDockerNetworks" yaml:"additionalDockerNetworks"`
-	ClientTimeout            uint64                   `json:"clientTimeout" yaml:"clientTimeout"`
-	ContainerTag             string                   `json:"containerTag" yaml:"containerTag"`
-	Logging                  *LoggingConfigInstance   `json:"logging" yaml:"logging"`
-	Modules                  []*config.ModuleInstance `json:"modules" yaml:"modules"`
+	Version                  string                            `json:"version" yaml:"version"`
+	ProjectName              string                            `json:"projectName" yaml:"projectName"`
+	ApiPort                  uint64                            `json:"apiPort" yaml:"apiPort"`
+	EnableIPv6               bool                              `json:"enableIPv6" yaml:"enableIPv6"`
+	UserDataPath             string                            `json:"userDataPath" yaml:"userDataPath"`
+	AdditionalDockerNetworks string                            `json:"additionalDockerNetworks" yaml:"additionalDockerNetworks"`
+	ClientTimeout            uint64                            `json:"clientTimeout" yaml:"clientTimeout"`
+	ContainerTag             string                            `json:"containerTag" yaml:"containerTag"`
+	Logging                  *LoggingConfigInstance            `json:"logging" yaml:"logging"`
+	Modules                  map[string]*config.ModuleInstance `json:"modules" yaml:"modules"`
 }
 
 // Creates a new Hyperdrive configuration
@@ -161,6 +161,14 @@ func (cfg *HyperdriveConfig) GetVersion() string {
 	return shared.HyperdriveVersion
 }
 
+// Create a new, empty Hyperdrive configuration instance
+func NewHyperdriveConfigInstance() *HyperdriveConfigInstance {
+	instance := new(HyperdriveConfigInstance)
+	instance.Logging = NewLoggingConfigInstance()
+	instance.Modules = map[string]*config.ModuleInstance{}
+	return instance
+}
+
 // Create a copy of the Hyperdrive configuration instance
 func (i HyperdriveConfigInstance) CreateCopy() *HyperdriveConfigInstance {
 	// Serialize the instance to JSON
@@ -170,7 +178,7 @@ func (i HyperdriveConfigInstance) CreateCopy() *HyperdriveConfigInstance {
 	}
 
 	// Deserialize the JSON back into a new instance
-	var newInstance *HyperdriveConfigInstance
+	newInstance := NewHyperdriveConfigInstance()
 	if err := json.Unmarshal(bytes, newInstance); err != nil {
 		panic(fmt.Errorf("error deserializing Hyperdrive config instance: %w", err))
 	}
@@ -193,21 +201,21 @@ func (c *HyperdriveConfig) CreateInstanceFromFile(configFilePath string, systemD
 	}
 
 	// Attempt to parse it out into a config instance
-	var cfg HyperdriveConfigInstance
-	if err := yaml.Unmarshal(configBytes, &cfg); err != nil {
+	cfg := NewHyperdriveConfigInstance()
+	if err := yaml.Unmarshal(configBytes, cfg); err != nil {
 		return nil, fmt.Errorf("could not parse config file: %w", err)
 	}
 
 	// Link all of the modules to the module info
-	for _, module := range cfg.Modules {
-		if info, exists := c.Modules[module.Name]; exists {
+	for fqmn, module := range cfg.Modules {
+		if info, exists := c.Modules[fqmn]; exists {
 			_, err := module.Settings.CreateSettingsFromMetadata(info.Configuration)
 			if err != nil {
 				return nil, fmt.Errorf("could not create settings from metadata: %w", err)
 			}
 		}
 	}
-	return &cfg, nil
+	return cfg, nil
 }
 
 // Save an instance to a file, updating the version to be the current version of Hyperdrive

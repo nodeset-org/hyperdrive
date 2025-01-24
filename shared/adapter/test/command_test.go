@@ -77,7 +77,7 @@ func TestProcessConfig(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
 	hdInstance := createHyperdriveConfigInstance(t)
-	modInstance := hdInstance.Modules[0]
+	modInstance := hdInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	updateConfigSettings(t, modInstance.Settings.GetSettings())
 
 	// Process the config
@@ -93,7 +93,7 @@ func TestSetConfig(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
 	hdInstance := createHyperdriveConfigInstance(t)
-	modInstance := hdInstance.Modules[0]
+	modInstance := hdInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	updateConfigSettings(t, modInstance.Settings.GetSettings())
 
 	// Set the config
@@ -129,7 +129,7 @@ func TestRunCommand(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
 	hdInstance := createHyperdriveConfigInstance(t)
-	modInstance := hdInstance.Modules[0]
+	modInstance := hdInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	updateConfigSettings(t, modInstance.Settings.GetSettings())
 	err = ac.SetConfig(context.Background(), hdInstance.SerializeToMap())
 	require.NoError(t, err)
@@ -158,7 +158,7 @@ func TestRunCommand(t *testing.T) {
 func createHyperdriveConfigInstance(t *testing.T) *hdconfig.HyperdriveConfigInstance {
 	cfgMgr := hdconfig.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
 	inst := config.CreateModuleConfigurationInstance(cfgMgr.HyperdriveConfiguration)
-	cfgInstance := new(hdconfig.HyperdriveConfigInstance)
+	cfgInstance := hdconfig.NewHyperdriveConfigInstance()
 	err := inst.ConvertToKnownType(cfgInstance)
 	if err != nil {
 		fail(fmt.Errorf("error converting instance to known config type: %w", err))
@@ -170,11 +170,9 @@ func createHyperdriveConfigInstance(t *testing.T) *hdconfig.HyperdriveConfigInst
 	require.NoError(t, err)
 	modInstance := &config.ModuleInstance{
 		Enabled: true,
-		Name:    "NodeSet/example-module",
-		Version: "0.1.0",
 	}
 	modInstance.Settings.CreateSettingsFromMetadata(modCfgMeta)
-	cfgInstance.Modules = append(cfgInstance.Modules, modInstance)
+	cfgInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()] = modInstance
 	return cfgInstance
 }
 

@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/blang/semver/v4"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/goccy/go-json"
@@ -20,17 +19,6 @@ import (
 )
 
 var (
-	exampleDescriptor modules.ModuleDescriptor = modules.ModuleDescriptor{
-		Name:         "example-module",
-		Shortcut:     "em",
-		Description:  "Simple example of a Hyperdrive module",
-		Version:      semver.MustParse("0.1.0"),
-		Author:       "NodeSet",
-		URL:          "https://github.com/nodeset-org/hyperdrive-example",
-		Email:        "info@nodeset.io",
-		Dependencies: []modules.Dependency{},
-	}
-
 	// Adapter client
 	ac *adapter.AdapterClient
 
@@ -98,13 +86,13 @@ func getAdapterContainerID() string {
 // Create the Docker container and initialize the adapter client
 func initializeArtifacts() {
 	// Serialize the descriptor
-	bytes, err := json.Marshal(exampleDescriptor)
+	bytes, err := json.Marshal(internal_test.ExampleDescriptor)
 	if err != nil {
 		fail(fmt.Errorf("error serializing descriptor: %w", err))
 	}
 
 	// Make the dirs
-	modulePath := filepath.Join(internal_test.SystemDir, config.ModulesDir, string(exampleDescriptor.Name))
+	modulePath := filepath.Join(internal_test.SystemDir, config.ModulesDir, string(internal_test.ExampleDescriptor.Name))
 	descriptorPath := filepath.Join(modulePath, modules.DescriptorFilename)
 	if err := os.MkdirAll(internal_test.LogDir, 0755); err != nil {
 		fail(fmt.Errorf("error creating log dir: %w", err))
@@ -142,7 +130,7 @@ func initializeArtifacts() {
 	// Set up the test config
 	cfgMgr = config.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
 	inst := modconfig.CreateModuleConfigurationInstance(cfgMgr.HyperdriveConfiguration)
-	cfgInstance = new(config.HyperdriveConfigInstance)
+	cfgInstance = config.NewHyperdriveConfigInstance()
 	err = inst.ConvertToKnownType(cfgInstance)
 	if err != nil {
 		fail(fmt.Errorf("error converting instance to known config type: %w", err))

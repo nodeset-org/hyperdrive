@@ -132,8 +132,8 @@ func (m *ConfigurationManager) ProcessModuleConfigurations(hdConfig *HyperdriveC
 	hdConfigMap := hdConfig.SerializeToMap()
 
 	// Make sure all of the module settings have been created
-	for _, module := range hdConfig.Modules {
-		modInfo := m.HyperdriveConfiguration.Modules[module.Name]
+	for fqmn, module := range hdConfig.Modules {
+		modInfo := m.HyperdriveConfiguration.Modules[fqmn]
 		if modInfo == nil {
 			continue
 		}
@@ -177,15 +177,15 @@ func (m *ConfigurationManager) ProcessModuleConfigurations(hdConfig *HyperdriveC
 }
 
 // Set the configurations for each module. Provide a list of modules you want to set the configuration for here; any modules that are loaded but not in the map will be skipped. If the map has modules that the manager doesn't know about, they will be ignored.
-func (m *ConfigurationManager) SetModuleConfigs(configs []*config.ModuleInstance) (map[*config.ModuleInstance]error, error) {
+func (m *ConfigurationManager) SetModuleConfigs(hdConfig *HyperdriveConfigInstance) (map[*config.ModuleInstance]error, error) {
 	results := map[*config.ModuleInstance]error{}
 	err := m.loadAdapterKey()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, module := range configs {
-		modInfo := m.HyperdriveConfiguration.Modules[module.Name]
+	for fqmn, module := range hdConfig.Modules {
+		modInfo := m.HyperdriveConfiguration.Modules[fqmn]
 		if modInfo == nil {
 			continue
 		}

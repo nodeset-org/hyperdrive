@@ -8,12 +8,6 @@ import (
 
 // ModuleInstance represents an instance of a module that Hyperdrive is managing.
 type ModuleInstance struct {
-	// The module's fully qualified name
-	Name string `json:"name" yaml:"name"`
-
-	// The module's version
-	Version string `json:"version" yaml:"version"`
-
 	// Whether or not the module is currently enabled
 	Enabled bool `json:"enabled" yaml:"enabled"`
 
