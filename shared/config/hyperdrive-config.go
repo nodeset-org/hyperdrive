@@ -2,12 +2,15 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
+	"al.essio.dev/pkg/shellescape"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config/ids"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -41,7 +44,7 @@ type HyperdriveConfig struct {
 	Logging *LoggingConfig
 
 	// Info about the loaded modules
-	ModuleInfo map[string]*HyperdriveModuleInfo
+	Modules map[string]*ModuleInfo
 
 	// Internal fields
 	Version                 string
@@ -51,16 +54,16 @@ type HyperdriveConfig struct {
 
 // The instance of the Hyperdrive configuration
 type HyperdriveConfigInstance struct {
-	Version                  string                                   `json:"version"`
-	ProjectName              string                                   `json:"projectName"`
-	ApiPort                  uint64                                   `json:"apiPort"`
-	EnableIPv6               bool                                     `json:"enableIPv6"`
-	UserDataPath             string                                   `json:"userDataPath"`
-	AdditionalDockerNetworks string                                   `json:"additionalDockerNetworks"`
-	ClientTimeout            uint64                                   `json:"clientTimeout"`
-	ContainerTag             string                                   `json:"containerTag"`
-	Logging                  *LoggingConfigInstance                   `json:"logging"`
-	Modules                  map[string]*HyperdriveModuleInstanceInfo `json:"modules"`
+	Version                  string                   `json:"version" yaml:"version"`
+	ProjectName              string                   `json:"projectName" yaml:"projectName"`
+	ApiPort                  uint64                   `json:"apiPort" yaml:"apiPort"`
+	EnableIPv6               bool                     `json:"enableIPv6" yaml:"enableIPv6"`
+	UserDataPath             string                   `json:"userDataPath" yaml:"userDataPath"`
+	AdditionalDockerNetworks string                   `json:"additionalDockerNetworks" yaml:"additionalDockerNetworks"`
+	ClientTimeout            uint64                   `json:"clientTimeout" yaml:"clientTimeout"`
+	ContainerTag             string                   `json:"containerTag" yaml:"containerTag"`
+	Logging                  *LoggingConfigInstance   `json:"logging" yaml:"logging"`
+	Modules                  []*config.ModuleInstance `json:"modules" yaml:"modules"`
 }
 
 // Creates a new Hyperdrive configuration
@@ -69,7 +72,7 @@ func NewHyperdriveConfig(hdDir string, modulePath string) *HyperdriveConfig {
 	cfg := &HyperdriveConfig{
 		hyperdriveUserDirectory: hdDir,
 		modulePath:              modulePath,
-		ModuleInfo:              map[string]*HyperdriveModuleInfo{},
+		Modules:                 map[string]*ModuleInfo{},
 	}
 
 	// Project Name
@@ -154,19 +157,8 @@ func (cfg *HyperdriveConfig) GetAdapterKeyPath() string {
 	return filepath.Join(cfg.hyperdriveUserDirectory, "secrets", "adapter.key")
 }
 
-func (cfg HyperdriveConfig) GetDefaultInstance() *HyperdriveConfigInstance {
-	return &HyperdriveConfigInstance{
-		Version:                  shared.HyperdriveVersion,
-		ProjectName:              DefaultProjectName,
-		ApiPort:                  uint64(DefaultApiPort),
-		EnableIPv6:               DefaultEnableIPv6,
-		UserDataPath:             filepath.Join(cfg.hyperdriveUserDirectory, "data"),
-		AdditionalDockerNetworks: "",
-		ClientTimeout:            uint64(DefaultClientTimeout),
-		ContainerTag:             hyperdriveTag,
-		Logging:                  cfg.Logging.GetDefaultInstance(),
-		Modules:                  map[string]*HyperdriveModuleInstanceInfo{},
-	}
+func (cfg *HyperdriveConfig) GetVersion() string {
+	return shared.HyperdriveVersion
 }
 
 // Create a copy of the Hyperdrive configuration instance
@@ -183,4 +175,55 @@ func (i HyperdriveConfigInstance) CreateCopy() *HyperdriveConfigInstance {
 		panic(fmt.Errorf("error deserializing Hyperdrive config instance: %w", err))
 	}
 	return newInstance
+}
+
+// Load the Hyperdrive configuration from a file; the Hyperdrive user directory will be set to the directory containing the config file.
+// In order to process module configuration instances,
+func (c *HyperdriveConfig) CreateInstanceFromFile(configFilePath string, systemDir string) (*HyperdriveConfigInstance, error) {
+	// Return nil if the file doesn't exist
+	_, err := os.Stat(configFilePath)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+
+	// Read the file
+	configBytes, err := os.ReadFile(configFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("could not read Hyperdrive settings file at %s: %w", shellescape.Quote(configFilePath), err)
+	}
+
+	// Attempt to parse it out into a config instance
+	var cfg HyperdriveConfigInstance
+	if err := yaml.Unmarshal(configBytes, &cfg); err != nil {
+		return nil, fmt.Errorf("could not parse config file: %w", err)
+	}
+
+	// Link all of the modules to the module info
+	for _, module := range cfg.Modules {
+		if info, exists := c.Modules[module.Name]; exists {
+			_, err := module.Settings.CreateSettingsFromMetadata(info.Configuration)
+			if err != nil {
+				return nil, fmt.Errorf("could not create settings from metadata: %w", err)
+			}
+		}
+	}
+	return &cfg, nil
+}
+
+// Save an instance to a file, updating the version to be the current version of Hyperdrive
+func (m HyperdriveConfigInstance) SaveToFile(configFilePath string) error {
+	// Serialize the instance
+	m.Version = shared.HyperdriveVersion
+
+	// Serialize the instance
+	configBytes, err := yaml.Marshal(m)
+	if err != nil {
+		return fmt.Errorf("could not serialize config instance: %w", err)
+	}
+
+	// Write the file
+	if err := os.WriteFile(configFilePath, configBytes, 0644); err != nil {
+		return fmt.Errorf("could not write config file: %w", err)
+	}
+	return nil
 }

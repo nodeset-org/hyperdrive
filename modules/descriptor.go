@@ -38,7 +38,7 @@ func (d *DescriptorString) UnmarshalText(text []byte) error {
 }
 
 // Descriptor for a Hyperdrive module
-type HyperdriveModuleDescriptor struct {
+type ModuleDescriptor struct {
 	// The name of the module
 	Name DescriptorString `json:"name" yaml:"name"`
 
@@ -82,6 +82,6 @@ type CliInfo struct {
 }
 
 // Get the fully qualified name of the module
-func (d HyperdriveModuleDescriptor) GetFullyQualifiedModuleName() string {
+func (d ModuleDescriptor) GetFullyQualifiedModuleName() string {
 	return fmt.Sprintf("%s/%s", d.Author, d.Name)
 }

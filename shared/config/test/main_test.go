@@ -13,13 +13,14 @@ import (
 	"github.com/goccy/go-json"
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
 	"github.com/nodeset-org/hyperdrive/modules"
+	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
 )
 
 var (
-	exampleDescriptor modules.HyperdriveModuleDescriptor = modules.HyperdriveModuleDescriptor{
+	exampleDescriptor modules.ModuleDescriptor = modules.ModuleDescriptor{
 		Name:         "example-module",
 		Shortcut:     "em",
 		Description:  "Simple example of a Hyperdrive module",
@@ -140,7 +141,12 @@ func initializeArtifacts() {
 
 	// Set up the test config
 	cfgMgr = config.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
-	cfgInstance = cfgMgr.HyperdriveConfiguration.GetDefaultInstance()
+	inst := modconfig.CreateModuleConfigurationInstance(cfgMgr.HyperdriveConfiguration)
+	cfgInstance = new(config.HyperdriveConfigInstance)
+	err = inst.ConvertToKnownType(cfgInstance)
+	if err != nil {
+		fail(fmt.Errorf("error converting instance to known config type: %w", err))
+	}
 	cfgInstance.ProjectName = internal_test.ProjectName
 	cfgInstance.UserDataPath = internal_test.UserDataPath
 }

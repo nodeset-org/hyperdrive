@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+
+	"github.com/goccy/go-json"
 )
 
 const (
@@ -149,4 +151,48 @@ func (m *ModuleConfigurationInstance) DeserializeFromMap(instance map[string]any
 	}
 	m.version = versionString
 	return deserializeContainerInstance(m, instance)
+}
+
+// Marshal the configuration instance to JSON
+func (m ModuleConfigurationInstance) MarshalJSON() ([]byte, error) {
+	instanceMap := m.SerializeToMap()
+	return json.Marshal(instanceMap)
+}
+
+// Unmarshal the configuration instance from JSON
+func (m *ModuleConfigurationInstance) UnmarshalJSON(data []byte) error {
+	var instanceMap map[string]any
+	if err := json.Unmarshal(data, &instanceMap); err != nil {
+		return fmt.Errorf("error unmarshalling configuration instance: %w", err)
+	}
+	return m.DeserializeFromMap(instanceMap)
+}
+
+// Marshal the configuration instance to YAML
+func (m ModuleConfigurationInstance) MarshalYAML() (interface{}, error) {
+	return m.SerializeToMap(), nil
+}
+
+// Unmarshal the configuration instance from YAML
+func (m *ModuleConfigurationInstance) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var instanceMap map[string]any
+	if err := unmarshal(&instanceMap); err != nil {
+		return fmt.Errorf("error unmarshalling configuration instance: %w", err)
+	}
+	return m.DeserializeFromMap(instanceMap)
+}
+
+// Convert the generic configuration instance to a known struct type
+func (m ModuleConfigurationInstance) ConvertToKnownType(config any) error {
+	// Serialize the instance to JSON
+	bytes, err := json.Marshal(m)
+	if err != nil {
+		return fmt.Errorf("error serializing configuration instance: %w", err)
+	}
+
+	// Deserialize the JSON back into the known type
+	if err := json.Unmarshal(bytes, config); err != nil {
+		return fmt.Errorf("error deserializing configuration instance: %w", err)
+	}
+	return nil
 }

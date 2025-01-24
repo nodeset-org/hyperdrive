@@ -36,14 +36,14 @@ type LoggingConfig struct {
 }
 
 type LoggingConfigInstance struct {
-	Level      logging.LogLevel  `json:"level"`
-	Format     logging.LogFormat `json:"format"`
-	AddSource  bool              `json:"addSource"`
-	MaxSize    uint64            `json:"maxSize"`
-	MaxBackups uint64            `json:"maxBackups"`
-	MaxAge     uint64            `json:"maxAge"`
-	LocalTime  bool              `json:"localTime"`
-	Compress   bool              `json:"compress"`
+	Level      logging.LogLevel  `json:"level" yaml:"level"`
+	Format     logging.LogFormat `json:"format" yaml:"format"`
+	AddSource  bool              `json:"addSource" yaml:"addSource"`
+	MaxSize    uint64            `json:"maxSize" yaml:"maxSize"`
+	MaxBackups uint64            `json:"maxBackups" yaml:"maxBackups"`
+	MaxAge     uint64            `json:"maxAge" yaml:"maxAge"`
+	LocalTime  bool              `json:"localTime" yaml:"localTime"`
+	Compress   bool              `json:"compress" yaml:"compress"`
 }
 
 // Generates a new Logger configuration
@@ -189,18 +189,5 @@ func (cfg *LoggingConfigInstance) GetOptions() logging.LoggerOptions {
 		Format:     cfg.Format,
 		Level:      cfg.Level,
 		AddSource:  cfg.AddSource,
-	}
-}
-
-func (cfg LoggingConfig) GetDefaultInstance() *LoggingConfigInstance {
-	return &LoggingConfigInstance{
-		Level:      cfg.Level.Default,
-		Format:     cfg.Format.Default,
-		AddSource:  cfg.AddSource.Default,
-		MaxSize:    cfg.MaxSize.Default,
-		MaxBackups: cfg.MaxBackups.Default,
-		MaxAge:     cfg.MaxAge.Default,
-		LocalTime:  cfg.LocalTime.Default,
-		Compress:   cfg.Compress.Default,
 	}
 }

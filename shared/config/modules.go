@@ -56,22 +56,10 @@ type ModuleConfigProcessResult struct {
 }
 
 // The configuration for a module, along with some module metadata
-type HyperdriveModuleInfo struct {
+type ModuleInfo struct {
 	// The module's descriptor
-	Descriptor modules.HyperdriveModuleDescriptor
+	Descriptor modules.ModuleDescriptor
 
 	// The configuration metadata for the module
 	Configuration config.IModuleConfiguration
-}
-
-// Info about a module instance
-type HyperdriveModuleInstanceInfo struct {
-	// Metadata about the module
-	ModuleInfo *HyperdriveModuleInfo `json:"-" yaml:"-"`
-
-	// Whether or not the module is currently enabled
-	Enabled bool `json:"enabled" yaml:"enabled"`
-
-	// The module's configuration
-	Configuration config.ModuleConfigurationInstance `json:"config" yaml:"config"`
 }
