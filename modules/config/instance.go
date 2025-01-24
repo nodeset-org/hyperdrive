@@ -11,6 +11,9 @@ type ModuleInstance struct {
 	// Whether or not the module is currently enabled
 	Enabled bool `json:"enabled" yaml:"enabled"`
 
+	// The version of the module that was used to create this instance
+	Version string `json:"version" yaml:"version"`
+
 	// The module's settings (instance of its configuration)
 	Settings ModuleSettingsContainer `json:"settings" yaml:"settings"`
 }

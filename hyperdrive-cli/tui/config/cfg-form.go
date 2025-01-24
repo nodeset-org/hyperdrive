@@ -12,7 +12,7 @@ import (
 
 // A form item linked to a Parameter
 type parameterizedFormItem struct {
-	parameter config.IParameterInstance
+	parameter config.IParameterSetting
 	item      tview.FormItem
 }
 
@@ -33,7 +33,7 @@ func registerEnableCheckbox(param config.Parameter[bool], checkbox *tview.Checkb
 */
 
 // Create a list of form items based on a set of parameters
-func createParameterizedFormItems(params []config.IParameterInstance, descriptionBox *tview.TextView) []*parameterizedFormItem {
+func createParameterizedFormItems(params []config.IParameterSetting, descriptionBox *tview.TextView) []*parameterizedFormItem {
 	formItems := []*parameterizedFormItem{}
 	for _, param := range params {
 		item := getTypedFormItem(param, descriptionBox)
@@ -43,7 +43,7 @@ func createParameterizedFormItems(params []config.IParameterInstance, descriptio
 }
 
 // Create a form item binding for a parameter based on its type
-func getTypedFormItem(param config.IParameterInstance, descriptionBox *tview.TextView) *parameterizedFormItem {
+func getTypedFormItem(param config.IParameterSetting, descriptionBox *tview.TextView) *parameterizedFormItem {
 	metadata := param.GetMetadata()
 	switch metadata.GetType() {
 	case config.ParameterType_Choice:
@@ -64,7 +64,7 @@ func getTypedFormItem(param config.IParameterInstance, descriptionBox *tview.Tex
 }
 
 // Create a standard form checkbox
-func createParameterizedCheckbox(param config.IParameterInstance) *parameterizedFormItem {
+func createParameterizedCheckbox(param config.IParameterSetting) *parameterizedFormItem {
 	metadata := param.GetMetadata().(*config.BoolParameter)
 	item := tview.NewCheckbox().
 		SetLabel(metadata.GetName()).
@@ -93,7 +93,7 @@ func createParameterizedCheckbox(param config.IParameterInstance) *parameterized
 }
 
 // Create a standard int field
-func createParameterizedIntField(param config.IParameterInstance) *parameterizedFormItem {
+func createParameterizedIntField(param config.IParameterSetting) *parameterizedFormItem {
 	metadata := param.GetMetadata().(*config.IntParameter)
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
@@ -132,7 +132,7 @@ func createParameterizedIntField(param config.IParameterInstance) *parameterized
 }
 
 // Create a standard uint field
-func createParameterizedUintField(param config.IParameterInstance) *parameterizedFormItem {
+func createParameterizedUintField(param config.IParameterSetting) *parameterizedFormItem {
 	metadata := param.GetMetadata().(*config.UintParameter)
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
@@ -171,7 +171,7 @@ func createParameterizedUintField(param config.IParameterInstance) *parameterize
 }
 
 // Create a standard string field
-func createParameterizedStringField(param config.IParameterInstance) *parameterizedFormItem {
+func createParameterizedStringField(param config.IParameterSetting) *parameterizedFormItem {
 	metadata := param.GetMetadata().(*config.StringParameter)
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName())
@@ -212,7 +212,7 @@ func createParameterizedStringField(param config.IParameterInstance) *parameteri
 }
 
 // Create a standard float field
-func createParameterizedFloatField(param config.IParameterInstance) *parameterizedFormItem {
+func createParameterizedFloatField(param config.IParameterSetting) *parameterizedFormItem {
 	metadata := param.GetMetadata().(*config.FloatParameter)
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
@@ -251,7 +251,7 @@ func createParameterizedFloatField(param config.IParameterInstance) *parameteriz
 }
 
 // Create a standard choice field
-func createParameterizedDropDown(param config.IParameterInstance, descriptionBox *tview.TextView) *parameterizedFormItem {
+func createParameterizedDropDown(param config.IParameterSetting, descriptionBox *tview.TextView) *parameterizedFormItem {
 	metadata := param.GetMetadata().(config.IChoiceParameter)
 	// Create the list of options
 	options := []string{}

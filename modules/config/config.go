@@ -4,32 +4,19 @@ import (
 	"fmt"
 )
 
-const (
-	VersionKey string = "version"
-)
-
 // Top-level object of a module configuration
 type IModuleConfiguration interface {
 	IMetadataContainer
-
-	GetVersion() string
 }
 
 type moduleConfiguration struct {
 	IMetadataContainer
-
-	Version string
-}
-
-func (m moduleConfiguration) GetVersion() string {
-	return m.Version
 }
 
 // Marshal a configuration metadata object to a map, suitable for JSON serialization
-func MarshalConfigurationToMap(cfg IModuleConfiguration, version string) map[string]any {
+func MarshalConfigurationToMap(cfg IModuleConfiguration) map[string]any {
 	containerMap := map[string]any{}
 	serializeContainerToMap(cfg, containerMap)
-	containerMap[VersionKey] = version
 	return containerMap
 }
 
@@ -39,17 +26,8 @@ func UnmarshalConfigurationFromMap(cfgMap map[string]any) (IModuleConfiguration,
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing configuration: %w", err)
 	}
-	version, exists := cfgMap[VersionKey]
-	if !exists {
-		return nil, fmt.Errorf("missing version key")
-	}
-	versionString, ok := version.(string)
-	if !ok {
-		return nil, fmt.Errorf("version is not a string, it's a %T", version)
-	}
 	moduleConfiguration := moduleConfiguration{
 		IMetadataContainer: container,
-		Version:            versionString,
 	}
 	return moduleConfiguration, nil
 }
@@ -58,19 +36,18 @@ func UnmarshalConfigurationFromMap(cfgMap map[string]any) (IModuleConfiguration,
 func CreateModuleConfigurationInstance(metadata IModuleConfiguration) *ModuleSettings {
 	instance := &ModuleSettings{
 		metadata:   metadata,
-		version:    metadata.GetVersion(),
-		parameters: map[Identifier]IParameterInstance{},
-		sections:   map[Identifier]*SectionInstance{},
+		parameters: map[Identifier]IParameterSetting{},
+		sections:   map[Identifier]*SettingsSection{},
 	}
 
 	// Create the parameter instances
 	for _, parameter := range metadata.GetParameters() {
-		instance.parameters[parameter.GetID()] = parameter.CreateInstance()
+		instance.parameters[parameter.GetID()] = parameter.CreateSetting()
 	}
 
 	// Create the subsection instances
 	for _, subsection := range metadata.GetSections() {
-		instance.sections[subsection.GetID()] = CreateSectionInstance(subsection)
+		instance.sections[subsection.GetID()] = CreateSettingsSection(subsection)
 	}
 
 	return instance

@@ -35,6 +35,7 @@ func TestLoadModuleConfigs(t *testing.T) {
 	require.Len(t, cfgInstance.Modules, 0)
 	modInstance := &modconfig.ModuleInstance{
 		Enabled: false,
+		Version: internal_test.ExampleDescriptor.Version.String(),
 	}
 	modInstance.Settings.CreateSettingsFromMetadata(modCfg.Configuration)
 	cfgInstance.Modules[modCfg.Descriptor.GetFullyQualifiedModuleName()] = modInstance

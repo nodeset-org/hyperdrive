@@ -54,23 +54,8 @@ type IParameter interface {
 	// Deserializes the parameter metadata from a map
 	Deserialize(data map[string]any) error
 
-	// Creates a parameter instance that's linked to this metadata
-	CreateInstance() IParameterInstance
-}
-
-// A general-purpose instance of a parameter. Useful for working with parameters of dynamic module configurations that you don't know the type of during compile time.
-type IParameterInstance interface {
-	// Get the metadata for the parameter
-	GetMetadata() IParameter
-
-	// Get the value of the parameter
-	GetValue() any
-
-	// Set the value of the parameter. If the provided value is the wrong type for the parameter, an error will be returned.
-	SetValue(value any) error
-
-	// Get the parameter's value as a string
-	String() string
+	// Creates a parameter setting that's linked to this metadata
+	CreateSetting() IParameterSetting
 }
 
 // ===========================
@@ -237,30 +222,6 @@ func (p *Parameter[Type]) deserializeImpl(data map[string]any) error {
 	return nil
 }
 
-// Underlying implementation for parameter instances
-type parameterInstance[Type any] struct {
-	// The parameter metadata
-	metadata IParameter
-
-	// The current value of the parameter
-	Value Type
-}
-
-// Gets the metadata for the parameter
-func (p *parameterInstance[Type]) GetMetadata() IParameter {
-	return p.metadata
-}
-
-// Gets the value of the parameter
-func (p *parameterInstance[Type]) GetValue() any {
-	return p.Value
-}
-
-// Gets the value of the parameter as a string
-func (p *parameterInstance[Type]) String() string {
-	return fmt.Sprintf("%v", p.Value)
-}
-
 /// =======================
 /// === Bool Parameters ===
 /// =======================
@@ -292,27 +253,13 @@ func (p *BoolParameter) Deserialize(data map[string]any) error {
 	return nil
 }
 
-func (p *BoolParameter) CreateInstance() IParameterInstance {
-	return &boolParameterInstance{
-		parameterInstance: parameterInstance[bool]{
+func (p *BoolParameter) CreateSetting() IParameterSetting {
+	return &boolParameterSetting{
+		parameterSetting: parameterSetting[bool]{
 			metadata: p,
 			Value:    p.Default,
 		},
 	}
-}
-
-// Underlying implementation for bool parameter instances
-type boolParameterInstance struct {
-	parameterInstance[bool]
-}
-
-func (i *boolParameterInstance) SetValue(value any) error {
-	boolValue, ok := value.(bool)
-	if !ok {
-		return fmt.Errorf("invalid value type for bool parameter [%s]: %T", i.metadata.GetID(), value)
-	}
-	i.Value = boolValue
-	return nil
 }
 
 /// =======================================
@@ -338,11 +285,6 @@ type NumberParameter[Type NumberParameterType] struct {
 
 	// Maximum value for the parameter
 	MaxValue Type `json:"maxValue,omitempty" yaml:"maxValue,omitempty"`
-}
-
-// Underlying implementation for number parameter instances
-type numberParameterInstance[Type NumberParameterType] struct {
-	parameterInstance[Type]
 }
 
 func (p NumberParameter[Type]) Serialize() map[string]any {
@@ -378,10 +320,6 @@ func (p *NumberParameter[Type]) Deserialize(data map[string]any) error {
 	return nil
 }
 
-func (i *numberParameterInstance[Type]) SetValue(value any) error {
-	return setNumberProperty(i.metadata.GetID().String(), &i.Value, value)
-}
-
 func (p *NumberParameter[Type]) setProperty(data map[string]any, key string, property *Type) error {
 	var valueAny any
 	_, err := deserializeProperty(data, key, &valueAny, true)
@@ -404,9 +342,9 @@ func (p IntParameter) GetType() ParameterType {
 	return ParameterType_Int
 }
 
-func (p *IntParameter) CreateInstance() IParameterInstance {
-	return &numberParameterInstance[int64]{
-		parameterInstance: parameterInstance[int64]{
+func (p *IntParameter) CreateSetting() IParameterSetting {
+	return &numberParameterSetting[int64]{
+		parameterSetting: parameterSetting[int64]{
 			metadata: p,
 			Value:    p.Default,
 		},
@@ -426,9 +364,9 @@ func (p UintParameter) GetType() ParameterType {
 	return ParameterType_Uint
 }
 
-func (p *UintParameter) CreateInstance() IParameterInstance {
-	return &numberParameterInstance[uint64]{
-		parameterInstance: parameterInstance[uint64]{
+func (p *UintParameter) CreateSetting() IParameterSetting {
+	return &numberParameterSetting[uint64]{
+		parameterSetting: parameterSetting[uint64]{
 			metadata: p,
 			Value:    p.Default,
 		},
@@ -448,9 +386,9 @@ func (p FloatParameter) GetType() ParameterType {
 	return ParameterType_Float
 }
 
-func (p *FloatParameter) CreateInstance() IParameterInstance {
-	return &numberParameterInstance[float64]{
-		parameterInstance: parameterInstance[float64]{
+func (p *FloatParameter) CreateSetting() IParameterSetting {
+	return &numberParameterSetting[float64]{
+		parameterSetting: parameterSetting[float64]{
 			metadata: p,
 			Value:    p.Default,
 		},
@@ -478,17 +416,13 @@ type StringParameter struct {
 	Regex string `json:"regex,omitempty" yaml:"regex,omitempty"`
 }
 
-func (p *StringParameter) CreateInstance() IParameterInstance {
-	return &stringParameterInstance{
-		parameterInstance: parameterInstance[string]{
+func (p *StringParameter) CreateSetting() IParameterSetting {
+	return &stringParameterSetting{
+		parameterSetting: parameterSetting[string]{
 			metadata: p,
 			Value:    p.Default,
 		},
 	}
-}
-
-type stringParameterInstance struct {
-	parameterInstance[string]
 }
 
 func (p StringParameter) GetType() ParameterType {
@@ -530,15 +464,6 @@ func (p *StringParameter) Deserialize(data map[string]any) error {
 	return nil
 }
 
-func (i *stringParameterInstance) SetValue(value any) error {
-	stringValue, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("invalid value type for string parameter [%s]: %T", i.metadata.GetID(), value)
-	}
-	i.Value = stringValue
-	return nil
-}
-
 /// =========================
 /// === Choice Parameters ===
 /// =========================
@@ -560,17 +485,13 @@ type ChoiceParameter[ChoiceType ~string] struct {
 	Options []ParameterOption[ChoiceType] `json:"options" yaml:"options"`
 }
 
-func (p *ChoiceParameter[ChoiceType]) CreateInstance() IParameterInstance {
-	return &choiceParameterInstance[ChoiceType]{
-		parameterInstance: parameterInstance[ChoiceType]{
+func (p *ChoiceParameter[ChoiceType]) CreateSetting() IParameterSetting {
+	return &choiceParameterSetting[ChoiceType]{
+		parameterSetting: parameterSetting[ChoiceType]{
 			metadata: p,
 			Value:    p.Default,
 		},
 	}
-}
-
-type choiceParameterInstance[ChoiceType ~string] struct {
-	parameterInstance[ChoiceType]
 }
 
 // Gets the type of the parameter
@@ -636,22 +557,6 @@ func (p *ChoiceParameter[ChoiceType]) Deserialize(data map[string]any) error {
 		}
 		p.Options = append(p.Options, option)
 	}
-	return nil
-}
-
-func (i *choiceParameterInstance[ChoiceType]) SetValue(value any) error {
-	// Check for direct assignment
-	typedValue, ok := value.(ChoiceType)
-	if ok {
-		i.Value = typedValue
-	}
-
-	// Handle string conversion
-	stringValue, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("invalid value type for choice parameter %s: %T", i.metadata.GetID(), value)
-	}
-	i.Value = ChoiceType(stringValue)
 	return nil
 }
 

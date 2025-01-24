@@ -42,10 +42,10 @@ func (c metadataContainer) GetSections() []ISection {
 // Interface for a container that can contain instances of parameters and sections
 type IInstanceContainer interface {
 	// Get the parameter instance with the given ID
-	GetParameter(id Identifier) (IParameterInstance, error)
+	GetParameter(id Identifier) (IParameterSetting, error)
 
 	// Get the section instance with the given ID
-	GetSection(id Identifier) (*SectionInstance, error)
+	GetSection(id Identifier) (*SettingsSection, error)
 }
 
 /*
@@ -186,10 +186,10 @@ func deserializeContainerFromMap(data map[string]any) (IMetadataContainer, error
 // Interface for deserialized configuration metadata and section metadata that can contain parameters or sections themselves
 type iContainerInstance interface {
 	// Get the list of parameters listed in this container
-	getParameters() map[Identifier]IParameterInstance
+	getParameters() map[Identifier]IParameterSetting
 
 	// Get the list of sections listed in this container
-	getSections() map[Identifier]*SectionInstance
+	getSections() map[Identifier]*SettingsSection
 }
 
 func serializeContainerInstance(container iContainerInstance) map[string]any {

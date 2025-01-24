@@ -170,6 +170,7 @@ func createHyperdriveConfigInstance(t *testing.T) *hdconfig.HyperdriveConfigInst
 	require.NoError(t, err)
 	modInstance := &config.ModuleInstance{
 		Enabled: true,
+		Version: internal_test.ExampleDescriptor.Version.String(),
 	}
 	modInstance.Settings.CreateSettingsFromMetadata(modCfgMeta)
 	cfgInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()] = modInstance
