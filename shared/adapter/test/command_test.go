@@ -78,7 +78,7 @@ func TestProcessConfig(t *testing.T) {
 	require.NoError(t, err)
 	hdInstance := createHyperdriveConfigInstance(t)
 	modInstance := hdInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	updateConfigSettings(t, modInstance.Settings.GetSettings())
+	updateConfigSettings(t, modInstance.GetSettings())
 
 	// Process the config
 	response, err := ac.ProcessConfig(context.Background(), hdInstance.SerializeToMap())
@@ -94,7 +94,7 @@ func TestSetConfig(t *testing.T) {
 	require.NoError(t, err)
 	hdInstance := createHyperdriveConfigInstance(t)
 	modInstance := hdInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	updateConfigSettings(t, modInstance.Settings.GetSettings())
+	updateConfigSettings(t, modInstance.GetSettings())
 
 	// Set the config
 	err = ac.SetConfig(context.Background(), hdInstance.SerializeToMap())
@@ -130,7 +130,7 @@ func TestRunCommand(t *testing.T) {
 	require.NoError(t, err)
 	hdInstance := createHyperdriveConfigInstance(t)
 	modInstance := hdInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	updateConfigSettings(t, modInstance.Settings.GetSettings())
+	updateConfigSettings(t, modInstance.GetSettings())
 	err = ac.SetConfig(context.Background(), hdInstance.SerializeToMap())
 	require.NoError(t, err)
 
@@ -176,7 +176,7 @@ func createHyperdriveConfigInstance(t *testing.T) *hdconfig.HyperdriveConfigInst
 	return cfgInstance
 }
 
-func updateConfigSettings(t *testing.T, cfg *config.ModuleConfigurationInstance) {
+func updateConfigSettings(t *testing.T, cfg *config.ModuleSettings) {
 	// Set some values
 	param, err := cfg.GetParameter("exampleBool")
 	require.NoError(t, err)
@@ -208,7 +208,7 @@ func updateConfigSettings(t *testing.T, cfg *config.ModuleConfigurationInstance)
 	require.NoError(t, err)
 }
 
-func checkConfigSettings(t *testing.T, cfg *config.ModuleConfigurationInstance) {
+func checkConfigSettings(t *testing.T, cfg *config.ModuleSettings) {
 	// Check some values
 	exampleBool, err := cfg.GetParameter("exampleBool")
 	require.NoError(t, err)

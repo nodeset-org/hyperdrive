@@ -12,19 +12,34 @@ type ModuleInstance struct {
 	Enabled bool `json:"enabled" yaml:"enabled"`
 
 	// The module's settings (instance of its configuration)
-	Settings ModuleInstanceSettingsContainer `json:"settings" yaml:"settings"`
+	Settings ModuleSettingsContainer `json:"settings" yaml:"settings"`
 }
 
-type ModuleInstanceSettingsContainer struct {
+// Gets the raw settings as a map without any type safety or validation. This is useful for modules that don't explicitly have a struct definition for the module's configuration, but want to explore it anyway.
+func (i ModuleInstance) GetSettingsAsMap() map[string]any {
+	if i.Settings.settings != nil {
+		return i.Settings.settings.SerializeToMap()
+	}
+	return i.Settings.rawSettings
+}
+
+// Gets the settings as a strongly typed instance of the module's configuration. This is useful for modules that have a struct definition for the module's configuration.
+// If the settings haven't been loaded yet with CreateSettingsFromMetadata, this will return nil.
+func (i ModuleInstance) GetSettings() *ModuleSettings {
+	return i.Settings.settings
+}
+
+// Internal type for wrapping module settings
+type ModuleSettingsContainer struct {
 	// The raw module's settings as it appears on disk without any conversion into a formal configuration instance
 	rawSettings map[string]any
 
 	// The module's configuration
-	settings *ModuleConfigurationInstance
+	settings *ModuleSettings
 }
 
 // Marshal the module info to JSON
-func (i ModuleInstanceSettingsContainer) MarshalJSON() ([]byte, error) {
+func (i ModuleSettingsContainer) MarshalJSON() ([]byte, error) {
 	if i.settings == nil {
 		return json.Marshal(i.rawSettings)
 	}
@@ -33,14 +48,15 @@ func (i ModuleInstanceSettingsContainer) MarshalJSON() ([]byte, error) {
 }
 
 // Marshal the module info to YAML
-func (i ModuleInstanceSettingsContainer) MarshalYAML() (interface{}, error) {
+func (i ModuleSettingsContainer) MarshalYAML() (interface{}, error) {
 	if i.settings == nil {
 		return i.rawSettings, nil
 	}
 	return i.settings.SerializeToMap(), nil
 }
 
-func (i *ModuleInstanceSettingsContainer) UnmarshalJSON(data []byte) error {
+// Unmarshal the module settings from JSON
+func (i *ModuleSettingsContainer) UnmarshalJSON(data []byte) error {
 	i.rawSettings = map[string]any{}
 	err := json.Unmarshal(data, &i.rawSettings)
 	if err != nil {
@@ -53,8 +69,8 @@ func (i *ModuleInstanceSettingsContainer) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Unmarshal the module info to YAML
-func (i *ModuleInstanceSettingsContainer) UnmarshalYAML(unmarshal func(interface{}) error) error {
+// Unmarshal the module settings to YAML
+func (i *ModuleSettingsContainer) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	i.rawSettings = map[string]any{}
 	err := unmarshal(&i.rawSettings)
 	if err != nil {
@@ -68,22 +84,11 @@ func (i *ModuleInstanceSettingsContainer) UnmarshalYAML(unmarshal func(interface
 }
 
 // Loads the module's settings into a strongly-typed instance of the module's configuration based on its metadata. If the settings have already been loaded, this will overwrite it with a new instance.
-func (i *ModuleInstanceSettingsContainer) CreateSettingsFromMetadata(metadata IModuleConfiguration) (*ModuleConfigurationInstance, error) {
+func (i *ModuleSettingsContainer) CreateSettingsFromMetadata(metadata IModuleConfiguration) (*ModuleSettings, error) {
 	i.settings = CreateModuleConfigurationInstance(metadata)
 	err := i.settings.DeserializeFromMap(i.rawSettings)
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing module settings into instance: %w", err)
 	}
 	return i.settings, nil
-}
-
-// Gets the raw settings as a map without any type safety or validation. This is useful for modules that don't explicitly have a struct definition for the module's configuration, but want to explore it anyway.
-func (i ModuleInstanceSettingsContainer) GetRawSettings() map[string]any {
-	return i.rawSettings
-}
-
-// Gets the settings as a strongly typed instance of the module's configuration. This is useful for modules that have a struct definition for the module's configuration.
-// If the settings haven't been loaded yet with CreateSettingsFromMetadata, this will return nil.
-func (i ModuleInstanceSettingsContainer) GetSettings() *ModuleConfigurationInstance {
-	return i.settings
 }

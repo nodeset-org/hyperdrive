@@ -51,7 +51,7 @@ func TestSerialization(t *testing.T) {
 
 	// Do some simple tweaks
 	cfgInstance.ClientTimeout = 10
-	modCfg := mod.Settings.GetSettings()
+	modCfg := mod.GetSettings()
 	floatParam, err := modCfg.GetParameter("exampleFloat")
 	require.NoError(t, err)
 	err = floatParam.SetValue(80.0)
@@ -90,7 +90,7 @@ func TestSerialization(t *testing.T) {
 	require.Len(t, newModCfgs, 1)
 	newModCfg := newModCfgs[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	require.Equal(t, mod.Enabled, newModCfg.Enabled)
-	newSettings := newModCfg.Settings.GetSettings()
+	newSettings := newModCfg.GetSettings()
 	newFloat, err := newSettings.GetParameter("exampleFloat")
 	require.NoError(t, err)
 	require.Equal(t, floatParam.GetValue(), newFloat.GetValue())

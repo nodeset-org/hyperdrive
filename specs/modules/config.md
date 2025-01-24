@@ -145,9 +145,9 @@ The following types of parameters are allowed:
 - `hidden` ([Dynamic bool](./types.md#dynamic-properties), optional): when `true`, the option will be hidden from the dropdown list in the configurator UI. This is helpful if you have parameters or internal system settings that need to be changed depending on various other configuration settings, but should not be user-accessible. It's also helpful if you want to conditionally hide this option based on the other configuration settings.
 
 
-## Instances
+## Settings
 
-A **Configuration Instance** is an object that corresponds to a "filled out" version of a Configuration Metadata object. Instead of discrete parameters and section objects, each one becomes a simple key-value pair property. These indicate the value assigned to each parameter without any of the extraneous metadata. The type of value in each Parameter Instance is the same as the type of the corresponding metadata parameter.
+A **Configuration Settings** object is an object that corresponds to a "filled out" version of a Configuration Metadata object. Instead of discrete parameters and section objects, each one becomes a simple key-value pair property. These indicate the value assigned to each parameter without any of the extraneous metadata. The type of value in each Parameter Instance is the same as the type of the corresponding metadata parameter.
 
 Each top-level metadata parameter and section from the corresponding configuration metadata will become a top-level property of the configuration instance as follows:
 

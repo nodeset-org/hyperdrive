@@ -145,18 +145,6 @@ func (m *ConfigurationManager) ProcessModuleConfigurations(hdConfig *HyperdriveC
 		result := &ModuleConfigProcessResult{}
 		results[module] = result
 
-		// Create the config instance if it hasn't been loaded yet
-		/*
-			modInstance := module.Settings.GetSettings()
-			if modInstance == nil {
-				modInstance, err = module.Settings.CreateSettingsFromMetadata(modInfo.Configuration)
-				if err != nil {
-					result.ProcessError = fmt.Errorf("error creating settings from metadata: %w", err)
-					continue
-				}
-			}
-		*/
-
 		// Get the adapter client
 		client, err := m.getAdapterClient(descriptor)
 		if err != nil {
@@ -194,16 +182,6 @@ func (m *ConfigurationManager) SetModuleConfigs(hdConfig *HyperdriveConfigInstan
 			continue
 		}
 
-		// Create the config instance if it hasn't been loaded yet
-		hdInstance := module.Settings.GetSettings()
-		if hdInstance == nil {
-			hdInstance, err = module.Settings.CreateSettingsFromMetadata(modInfo.Configuration)
-			if err != nil {
-				results[module] = fmt.Errorf("error creating settings from metadata: %w", err)
-				continue
-			}
-		}
-
 		// Get the adapter client
 		client, err := m.getAdapterClient(descriptor)
 		if err != nil {
@@ -212,7 +190,7 @@ func (m *ConfigurationManager) SetModuleConfigs(hdConfig *HyperdriveConfigInstan
 		}
 
 		// Process the config
-		err = client.SetConfig(context.Background(), hdInstance.SerializeToMap())
+		err = client.SetConfig(context.Background(), hdConfig.SerializeToMap())
 		if err != nil {
 			results[module] = err
 			continue
