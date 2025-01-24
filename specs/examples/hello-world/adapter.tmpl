@@ -3,7 +3,7 @@
 
 services:
   {{.GetProjectName}}_hw_adapter:
-    image: nodeset/hd-hello-world:v1.0.0
+    image: nodeset/hd-hello-world:v0.1.0
     restart: unless-stopped
     entrypoint: /usr/bin/hd-adapter   # This is the path to the adapter binary
     environment:

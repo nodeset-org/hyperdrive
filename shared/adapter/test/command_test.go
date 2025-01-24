@@ -11,6 +11,7 @@ import (
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	adapter "github.com/nodeset-org/hyperdrive/shared/adapter/test"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
 	"github.com/stretchr/testify/require"
 )
@@ -75,13 +76,12 @@ func TestGetConfigMetadata(t *testing.T) {
 func TestProcessConfig(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
-	cfg, err := ac.GetConfigMetadata(context.Background())
-	require.NoError(t, err)
-	instance := config.CreateModuleConfigurationInstance(cfg)
-	updateConfigSettings(t, instance)
+	hdInstance := createHyperdriveConfigInstance(t)
+	modInstance := hdInstance.Modules[0]
+	updateConfigSettings(t, modInstance.Settings.GetSettings())
 
 	// Process the config
-	response, err := ac.ProcessConfig(context.Background(), instance)
+	response, err := ac.ProcessConfig(context.Background(), hdInstance.SerializeToMap())
 	require.NoError(t, err)
 	require.Empty(t, response.Errors)
 	require.Len(t, response.Ports, 1)
@@ -92,13 +92,12 @@ func TestProcessConfig(t *testing.T) {
 func TestSetConfig(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
-	cfg, err := ac.GetConfigMetadata(context.Background())
-	require.NoError(t, err)
-	instance := config.CreateModuleConfigurationInstance(cfg)
-	updateConfigSettings(t, instance)
+	hdInstance := createHyperdriveConfigInstance(t)
+	modInstance := hdInstance.Modules[0]
+	updateConfigSettings(t, modInstance.Settings.GetSettings())
 
 	// Set the config
-	err = ac.SetConfig(context.Background(), instance)
+	err = ac.SetConfig(context.Background(), hdInstance.SerializeToMap())
 	require.NoError(t, err)
 	t.Log("Config set successfully")
 }
@@ -129,11 +128,10 @@ func TestRunCommand(t *testing.T) {
 	// Set the config
 	err := deleteConfigs()
 	require.NoError(t, err)
-	cfg, err := ac.GetConfigMetadata(context.Background())
-	require.NoError(t, err)
-	instance := config.CreateModuleConfigurationInstance(cfg)
-	updateConfigSettings(t, instance)
-	err = ac.SetConfig(context.Background(), instance)
+	hdInstance := createHyperdriveConfigInstance(t)
+	modInstance := hdInstance.Modules[0]
+	updateConfigSettings(t, modInstance.Settings.GetSettings())
+	err = ac.SetConfig(context.Background(), hdInstance.SerializeToMap())
 	require.NoError(t, err)
 
 	// Make sure the service is running
@@ -154,6 +152,30 @@ func TestRunCommand(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 75.0, paramVal)
 	t.Logf("Command ran successfully and returned %s", out)
+}
+
+// Create a full Hyperdrive config instance for the test
+func createHyperdriveConfigInstance(t *testing.T) *hdconfig.HyperdriveConfigInstance {
+	cfgMgr := hdconfig.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
+	inst := config.CreateModuleConfigurationInstance(cfgMgr.HyperdriveConfiguration)
+	cfgInstance := new(hdconfig.HyperdriveConfigInstance)
+	err := inst.ConvertToKnownType(cfgInstance)
+	if err != nil {
+		fail(fmt.Errorf("error converting instance to known config type: %w", err))
+	}
+	cfgInstance.ProjectName = internal_test.ProjectName
+	cfgInstance.UserDataPath = internal_test.UserDataPath
+
+	modCfgMeta, err := ac.GetConfigMetadata(context.Background())
+	require.NoError(t, err)
+	modInstance := &config.ModuleInstance{
+		Enabled: true,
+		Name:    "NodeSet/example-module",
+		Version: "0.1.0",
+	}
+	modInstance.Settings.CreateSettingsFromMetadata(modCfgMeta)
+	cfgInstance.Modules = append(cfgInstance.Modules, modInstance)
+	return cfgInstance
 }
 
 func updateConfigSettings(t *testing.T, cfg *config.ModuleConfigurationInstance) {

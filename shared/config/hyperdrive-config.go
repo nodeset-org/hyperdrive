@@ -227,3 +227,19 @@ func (m HyperdriveConfigInstance) SaveToFile(configFilePath string) error {
 	}
 	return nil
 }
+
+// Serialize the instance to a map, suitable for JSON serialization
+func (m HyperdriveConfigInstance) SerializeToMap() map[string]any {
+	// Serialize the instance
+	bytes, err := json.Marshal(m)
+	if err != nil {
+		panic(fmt.Errorf("error serializing Hyperdrive config instance: %w", err))
+	}
+
+	// Deserialize the JSON to a map
+	var instanceMap map[string]any
+	if err := json.Unmarshal(bytes, &instanceMap); err != nil {
+		panic(fmt.Errorf("error deserializing Hyperdrive config instance: %w", err))
+	}
+	return instanceMap
+}

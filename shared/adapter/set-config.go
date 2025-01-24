@@ -3,8 +3,6 @@ package adapter
 import (
 	"context"
 	"fmt"
-
-	"github.com/nodeset-org/hyperdrive/modules/config"
 )
 
 const (
@@ -20,13 +18,12 @@ type SetConfigRequest struct {
 }
 
 // Have the adapter set the module config
-func (c *AdapterClient) SetConfig(ctx context.Context, instance *config.ModuleConfigurationInstance) error {
-	configMap := instance.SerializeToMap()
+func (c *AdapterClient) SetConfig(ctx context.Context, instance map[string]any) error {
 	request := &SetConfigRequest{
 		KeyedRequest: KeyedRequest{
 			Key: c.key,
 		},
-		Config: configMap,
+		Config: instance,
 	}
 	err := runCommand[SetConfigRequest, struct{}](c, ctx, SetConfigCommandString, request, nil)
 	if err != nil {

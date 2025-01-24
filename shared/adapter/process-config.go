@@ -3,8 +3,7 @@ package adapter
 import (
 	"context"
 	"fmt"
-
-	"github.com/nodeset-org/hyperdrive/modules/config"
+	//"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 const (
@@ -28,14 +27,13 @@ type ProcessConfigResponse struct {
 	Ports map[string]uint16 `json:"ports"`
 }
 
-// Have the adapter process the module config
-func (c *AdapterClient) ProcessConfig(ctx context.Context, instance *config.ModuleConfigurationInstance) (ProcessConfigResponse, error) {
-	configMap := instance.SerializeToMap()
+// Have the adapter process the module config.
+func (c *AdapterClient) ProcessConfig(ctx context.Context, instance map[string]any) (ProcessConfigResponse, error) {
 	request := &ProcessConfigRequest{
 		KeyedRequest: KeyedRequest{
 			Key: c.key,
 		},
-		Config: configMap,
+		Config: instance,
 	}
 	response := ProcessConfigResponse{}
 	err := runCommand(c, ctx, ProcessConfigCommandString, request, &response)

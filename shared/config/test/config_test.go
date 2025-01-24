@@ -10,7 +10,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	isCfgLoaded bool = false
+)
+
 func TestLoadModuleConfigs(t *testing.T) {
+	if isCfgLoaded {
+		return
+	}
+	err := deleteConfigs()
+	require.NoError(t, err)
 	results, err := cfgMgr.LoadModuleInfo(cfgInstance.ProjectName)
 	require.NoError(t, err)
 
@@ -31,16 +40,15 @@ func TestLoadModuleConfigs(t *testing.T) {
 	}
 	modInstance.Settings.CreateSettingsFromMetadata(modCfg.Configuration)
 	cfgInstance.Modules = append(cfgInstance.Modules, modInstance)
+	isCfgLoaded = true
 	t.Log("Module config loaded successfully")
 }
 
 func TestSerialization(t *testing.T) {
+	err := deleteConfigs()
+	require.NoError(t, err)
 	TestLoadModuleConfigs(t)
-	var mod *modconfig.ModuleInstance
-	for _, m := range cfgInstance.Modules {
-		mod = m
-		break
-	}
+	mod := cfgInstance.Modules[0]
 	mod.Enabled = true
 
 	// Do some simple tweaks
@@ -58,10 +66,7 @@ func TestSerialization(t *testing.T) {
 	t.Log("Configs modified")
 
 	// Process the configs to make sure they're good
-	modCfgs := []*modconfig.ModuleInstance{
-		mod,
-	}
-	processResults, err := cfgMgr.ProcessModuleConfigurations(modCfgs)
+	processResults, err := cfgMgr.ProcessModuleConfigurations(cfgInstance)
 	require.NoError(t, err)
 	for _, result := range processResults {
 		require.NoError(t, result.ProcessError)

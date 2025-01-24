@@ -123,14 +123,16 @@ func (m *ConfigurationManager) LoadModuleInfo(projectName string) ([]*ModuleInfo
 }
 
 // Process the configurations for each module without saving them. Provide a list of modules you want to set the configuration for here; any modules that are loaded but not in the map will be skipped. If the map has modules that the manager doesn't know about, they will be ignored.
-func (m *ConfigurationManager) ProcessModuleConfigurations(configs []*config.ModuleInstance) (map[*config.ModuleInstance]*ModuleConfigProcessResult, error) {
+func (m *ConfigurationManager) ProcessModuleConfigurations(hdConfig *HyperdriveConfigInstance) (map[*config.ModuleInstance]*ModuleConfigProcessResult, error) {
 	results := map[*config.ModuleInstance]*ModuleConfigProcessResult{}
 	err := m.loadAdapterKey()
 	if err != nil {
 		return nil, err
 	}
+	hdConfigMap := hdConfig.SerializeToMap()
 
-	for _, module := range configs {
+	// Make sure all of the module settings have been created
+	for _, module := range hdConfig.Modules {
 		modInfo := m.HyperdriveConfiguration.Modules[module.Name]
 		if modInfo == nil {
 			continue
@@ -144,14 +146,16 @@ func (m *ConfigurationManager) ProcessModuleConfigurations(configs []*config.Mod
 		results[module] = result
 
 		// Create the config instance if it hasn't been loaded yet
-		settings := module.Settings.GetSettings()
-		if settings == nil {
-			settings, err = module.Settings.CreateSettingsFromMetadata(modInfo.Configuration)
-			if err != nil {
-				result.ProcessError = fmt.Errorf("error creating settings from metadata: %w", err)
-				continue
+		/*
+			modInstance := module.Settings.GetSettings()
+			if modInstance == nil {
+				modInstance, err = module.Settings.CreateSettingsFromMetadata(modInfo.Configuration)
+				if err != nil {
+					result.ProcessError = fmt.Errorf("error creating settings from metadata: %w", err)
+					continue
+				}
 			}
-		}
+		*/
 
 		// Get the adapter client
 		client, err := m.getAdapterClient(descriptor)
@@ -161,7 +165,7 @@ func (m *ConfigurationManager) ProcessModuleConfigurations(configs []*config.Mod
 		}
 
 		// Process the config
-		response, err := client.ProcessConfig(context.Background(), settings)
+		response, err := client.ProcessConfig(context.Background(), hdConfigMap)
 		if err != nil {
 			result.ProcessError = err
 			continue
@@ -191,9 +195,9 @@ func (m *ConfigurationManager) SetModuleConfigs(configs []*config.ModuleInstance
 		}
 
 		// Create the config instance if it hasn't been loaded yet
-		settings := module.Settings.GetSettings()
-		if settings == nil {
-			settings, err = module.Settings.CreateSettingsFromMetadata(modInfo.Configuration)
+		hdInstance := module.Settings.GetSettings()
+		if hdInstance == nil {
+			hdInstance, err = module.Settings.CreateSettingsFromMetadata(modInfo.Configuration)
 			if err != nil {
 				results[module] = fmt.Errorf("error creating settings from metadata: %w", err)
 				continue
@@ -208,7 +212,7 @@ func (m *ConfigurationManager) SetModuleConfigs(configs []*config.ModuleInstance
 		}
 
 		// Process the config
-		err = client.SetConfig(context.Background(), settings)
+		err = client.SetConfig(context.Background(), hdInstance.SerializeToMap())
 		if err != nil {
 			results[module] = err
 			continue
