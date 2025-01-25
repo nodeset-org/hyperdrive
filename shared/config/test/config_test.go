@@ -37,7 +37,9 @@ func TestLoadModuleConfigs(t *testing.T) {
 		Enabled: false,
 		Version: internal_test.ExampleDescriptor.Version.String(),
 	}
-	modInstance.Settings.CreateSettingsFromMetadata(modCfg.Configuration)
+	modSettings, err := modInstance.CreateSettingsFromMetadata(modCfg.Configuration)
+	require.NoError(t, err)
+	modInstance.SetSettings(modSettings)
 	cfgInstance.Modules[modCfg.Descriptor.GetFullyQualifiedModuleName()] = modInstance
 	isCfgLoaded = true
 	t.Log("Module config loaded successfully")
@@ -47,16 +49,18 @@ func TestSerialization(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
 	TestLoadModuleConfigs(t)
-	mod := cfgInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	mod.Enabled = true
+	modCfg := cfgMgr.HyperdriveConfiguration.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
+	modInstance := cfgInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
+	modInstance.Enabled = true
+	modSettings, err := modInstance.CreateSettingsFromMetadata(modCfg.Configuration)
+	require.NoError(t, err)
 
 	// Do some simple tweaks
 	cfgInstance.ClientTimeout = 10
-	modCfg := mod.GetSettings()
-	floatParam, err := modCfg.GetParameter("exampleFloat")
+	floatParam, err := modSettings.GetParameter("exampleFloat")
 	require.NoError(t, err)
 	err = floatParam.SetValue(80.0)
-	serverSection, err := modCfg.GetSection("server")
+	serverSection, err := modSettings.GetSection("server")
 	require.NoError(t, err)
 	portParam, err := serverSection.GetParameter("port")
 	require.NoError(t, err)
@@ -89,13 +93,16 @@ func TestSerialization(t *testing.T) {
 	// Load the module configs back in
 	newModCfgs := newCfg.Modules
 	require.Len(t, newModCfgs, 1)
-	newModCfg := newModCfgs[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	require.Equal(t, mod.Enabled, newModCfg.Enabled)
-	newSettings := newModCfg.GetSettings()
-	newFloat, err := newSettings.GetParameter("exampleFloat")
+	newModInstance := newModCfgs[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
+	require.Equal(t, modInstance.Enabled, newModInstance.Enabled)
+	newModSettings, err := newModInstance.CreateSettingsFromMetadata(modCfg.Configuration)
+	require.NoError(t, err)
+
+	// Make sure the settings were loaded properly
+	newFloat, err := newModSettings.GetParameter("exampleFloat")
 	require.NoError(t, err)
 	require.Equal(t, floatParam.GetValue(), newFloat.GetValue())
-	newServerSection, err := newSettings.GetSection("server")
+	newServerSection, err := newModSettings.GetSection("server")
 	require.NoError(t, err)
 	newPort, err := newServerSection.GetParameter("port")
 	require.NoError(t, err)

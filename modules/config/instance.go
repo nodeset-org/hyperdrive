@@ -14,84 +14,51 @@ type ModuleInstance struct {
 	// The version of the module that was used to create this instance
 	Version string `json:"version" yaml:"version"`
 
-	// The module's settings (instance of its configuration)
-	Settings ModuleSettingsContainer `json:"settings" yaml:"settings"`
+	// The module's raw settings (instance of its configuration). Use the utility methods for ModuleInstance to convert it to a type-safe instance if needed.
+	Settings map[string]any `json:"settings" yaml:"settings"`
 }
 
-// Gets the raw settings as a map without any type safety or validation. This is useful for modules that don't explicitly have a struct definition for the module's configuration, but want to explore it anyway.
-func (i ModuleInstance) GetSettingsAsMap() map[string]any {
-	if i.Settings.settings != nil {
-		return i.Settings.settings.SerializeToMap()
-	}
-	return i.Settings.rawSettings
-}
-
-// Gets the settings as a strongly typed instance of the module's configuration. This is useful for modules that have a struct definition for the module's configuration.
-// If the settings haven't been loaded yet with CreateSettingsFromMetadata, this will return nil.
-func (i ModuleInstance) GetSettings() *ModuleSettings {
-	return i.Settings.settings
-}
-
-// Internal type for wrapping module settings
-type ModuleSettingsContainer struct {
-	// The raw module's settings as it appears on disk without any conversion into a formal configuration instance
-	rawSettings map[string]any
-
-	// The module's configuration
-	settings *ModuleSettings
-}
-
-// Marshal the module info to JSON
-func (i ModuleSettingsContainer) MarshalJSON() ([]byte, error) {
-	if i.settings == nil {
-		return json.Marshal(i.rawSettings)
-	}
-
-	return json.Marshal(i.settings.SerializeToMap())
-}
-
-// Marshal the module info to YAML
-func (i ModuleSettingsContainer) MarshalYAML() (interface{}, error) {
-	if i.settings == nil {
-		return i.rawSettings, nil
-	}
-	return i.settings.SerializeToMap(), nil
-}
-
-// Unmarshal the module settings from JSON
-func (i *ModuleSettingsContainer) UnmarshalJSON(data []byte) error {
-	i.rawSettings = map[string]any{}
-	err := json.Unmarshal(data, &i.rawSettings)
-	if err != nil {
-		return fmt.Errorf("error unmarshalling module settings: %w", err)
-	}
-
-	if i.settings != nil {
-		return i.settings.DeserializeFromMap(i.rawSettings)
-	}
-	return nil
-}
-
-// Unmarshal the module settings to YAML
-func (i *ModuleSettingsContainer) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	i.rawSettings = map[string]any{}
-	err := unmarshal(&i.rawSettings)
-	if err != nil {
-		return fmt.Errorf("error unmarshalling module settings: %w", err)
-	}
-
-	if i.settings != nil {
-		return i.settings.DeserializeFromMap(i.rawSettings)
-	}
-	return nil
-}
-
-// Loads the module's settings into a strongly-typed instance of the module's configuration based on its metadata. If the settings have already been loaded, this will overwrite it with a new instance.
-func (i *ModuleSettingsContainer) CreateSettingsFromMetadata(metadata IModuleConfiguration) (*ModuleSettings, error) {
-	i.settings = CreateModuleConfigurationInstance(metadata)
-	err := i.settings.DeserializeFromMap(i.rawSettings)
+// Creates a strongly-typed settings wrapper of the module's configuration based on its metadata, and loads the instance's settings into it.
+func (i *ModuleInstance) CreateSettingsFromMetadata(metadata IModuleConfiguration) (*ModuleSettings, error) {
+	settings := CreateModuleSettings(metadata)
+	err := settings.DeserializeFromMap(i.Settings)
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing module settings into instance: %w", err)
 	}
-	return i.settings, nil
+	return settings, nil
+}
+
+// Loads the instance's settings directly into a known type. This uses JSON serialization to convert between the two types, so the known type must have the same JSON signature as the settings.
+func (i *ModuleInstance) DeserializeSettingsIntoKnownType(knownType any) error {
+	// Serialize the settings to JSON
+	jsonBytes, err := json.Marshal(i.Settings)
+	if err != nil {
+		return fmt.Errorf("error serializing module settings to JSON: %w", err)
+	}
+
+	err = json.Unmarshal(jsonBytes, knownType)
+	if err != nil {
+		return fmt.Errorf("error deserializing module settings into known type: %w", err)
+	}
+	return nil
+}
+
+// Sets the instance's raw settings from a strongly-typed settings wrapper of the module's configuration.
+func (i *ModuleInstance) SetSettings(settings *ModuleSettings) {
+	i.Settings = settings.SerializeToMap()
+}
+
+// Sets the instance's raw settings from a known type. This uses JSON serialization to convert between the two types, so the known type must have the same JSON signature as the settings.
+func (i *ModuleInstance) SetSettingsFromKnownType(knownType any) error {
+	bytes, err := json.Marshal(knownType)
+	if err != nil {
+		return fmt.Errorf("error serializing module settings to JSON: %w", err)
+	}
+
+	var settings map[string]any
+	if err := json.Unmarshal(bytes, &settings); err != nil {
+		return fmt.Errorf("error deserializing module settings from JSON: %w", err)
+	}
+	i.Settings = settings
+	return nil
 }

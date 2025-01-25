@@ -11,6 +11,7 @@ import (
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
+	"github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
 )
@@ -21,6 +22,9 @@ var (
 
 	// Docker client
 	docker *client.Client
+
+	// Info for the example module
+	modInfo *config.ModuleInfo
 )
 
 func TestMain(m *testing.M) {
@@ -50,6 +54,16 @@ func TestMain(m *testing.M) {
 	ac, err = adapter.NewAdapterClient(internal_test.AdapterContainerName, string(internal_test.TestKey))
 	if err != nil {
 		fail(fmt.Errorf("error creating adapter client: %w", err))
+	}
+
+	// Get the module config info
+	modCfgMeta, err := ac.GetConfigMetadata(context.Background())
+	if err != nil {
+		fail(fmt.Errorf("error getting module config metadata: %w", err))
+	}
+	modInfo = &config.ModuleInfo{
+		Descriptor:    internal_test.ExampleDescriptor,
+		Configuration: modCfgMeta,
 	}
 
 	// Run the tests and clean up after

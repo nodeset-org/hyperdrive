@@ -27,7 +27,7 @@ var (
 
 	// The Hyperdrive base config
 	cfgMgr      *config.ConfigurationManager
-	cfgInstance *config.HyperdriveConfigInstance
+	cfgInstance *config.HyperdriveSettings
 )
 
 func TestMain(m *testing.M) {
@@ -129,8 +129,8 @@ func initializeArtifacts() {
 
 	// Set up the test config
 	cfgMgr = config.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
-	inst := modconfig.CreateModuleConfigurationInstance(cfgMgr.HyperdriveConfiguration)
-	cfgInstance = config.NewHyperdriveConfigInstance()
+	inst := modconfig.CreateModuleSettings(cfgMgr.HyperdriveConfiguration)
+	cfgInstance = config.NewHyperdriveSettings()
 	err = inst.ConvertToKnownType(cfgInstance)
 	if err != nil {
 		fail(fmt.Errorf("error converting instance to known config type: %w", err))

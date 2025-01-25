@@ -23,8 +23,8 @@ type mainDisplay struct {
 	previousWidth       int
 	previousHeight      int
 	Config              *config.HyperdriveConfig
-	PreviousInstance    *config.HyperdriveConfigInstance
-	Instance            *config.HyperdriveConfigInstance
+	PreviousInstance    *config.HyperdriveSettings
+	Instance            *config.HyperdriveSettings
 	ShouldSave          bool
 	ContainersToRestart []config.ContainerID
 	ChangeNetworks      bool
@@ -34,8 +34,8 @@ type mainDisplay struct {
 func NewMainDisplay(
 	app *tview.Application,
 	config *config.HyperdriveConfig,
-	previousInstance *config.HyperdriveConfigInstance,
-	instance *config.HyperdriveConfigInstance,
+	previousInstance *config.HyperdriveSettings,
+	instance *config.HyperdriveSettings,
 	isNew bool,
 	isUpdate bool,
 ) *mainDisplay {

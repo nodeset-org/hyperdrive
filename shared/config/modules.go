@@ -2,9 +2,6 @@ package config
 
 import (
 	"errors"
-
-	"github.com/nodeset-org/hyperdrive/modules"
-	"github.com/nodeset-org/hyperdrive/modules/config"
 )
 
 var (
@@ -53,13 +50,4 @@ type ModuleConfigProcessResult struct {
 
 	// A list of ports that the module will expose on the host machine
 	Ports map[string]uint16
-}
-
-// The configuration for a module, along with some module metadata
-type ModuleInfo struct {
-	// The module's descriptor
-	Descriptor modules.ModuleDescriptor
-
-	// The configuration metadata for the module
-	Configuration config.IModuleConfiguration
 }

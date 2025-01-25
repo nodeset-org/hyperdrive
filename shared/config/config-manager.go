@@ -68,7 +68,7 @@ func (m *ConfigurationManager) LoadModuleInfo(projectName string) ([]*ModuleInfo
 	}
 
 	// Go through each module
-	moduleInfos := map[string]*ModuleInfo{}
+	moduleInfos := map[string]*config.ModuleInfo{}
 	loadResults := []*ModuleInfoLoadResult{}
 	for _, entry := range entries {
 		// Skip non-directories
@@ -112,7 +112,7 @@ func (m *ConfigurationManager) LoadModuleInfo(projectName string) ([]*ModuleInfo
 			continue
 		}
 		loadResult.Name = descriptor.GetFullyQualifiedModuleName()
-		moduleInfo := &ModuleInfo{
+		moduleInfo := &config.ModuleInfo{
 			Descriptor:    descriptor,
 			Configuration: cfg,
 		}
@@ -123,7 +123,7 @@ func (m *ConfigurationManager) LoadModuleInfo(projectName string) ([]*ModuleInfo
 }
 
 // Process the configurations for each module without saving them. Provide a list of modules you want to set the configuration for here; any modules that are loaded but not in the map will be skipped. If the map has modules that the manager doesn't know about, they will be ignored.
-func (m *ConfigurationManager) ProcessModuleConfigurations(hdConfig *HyperdriveConfigInstance) (map[*config.ModuleInstance]*ModuleConfigProcessResult, error) {
+func (m *ConfigurationManager) ProcessModuleConfigurations(hdConfig *HyperdriveSettings) (map[*config.ModuleInstance]*ModuleConfigProcessResult, error) {
 	results := map[*config.ModuleInstance]*ModuleConfigProcessResult{}
 	err := m.loadAdapterKey()
 	if err != nil {
@@ -165,7 +165,7 @@ func (m *ConfigurationManager) ProcessModuleConfigurations(hdConfig *HyperdriveC
 }
 
 // Set the configurations for each module. Provide a list of modules you want to set the configuration for here; any modules that are loaded but not in the map will be skipped. If the map has modules that the manager doesn't know about, they will be ignored.
-func (m *ConfigurationManager) SetModuleConfigs(hdConfig *HyperdriveConfigInstance) (map[*config.ModuleInstance]error, error) {
+func (m *ConfigurationManager) SetModuleConfigs(hdConfig *HyperdriveSettings) (map[*config.ModuleInstance]error, error) {
 	results := map[*config.ModuleInstance]error{}
 	err := m.loadAdapterKey()
 	if err != nil {

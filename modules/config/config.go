@@ -32,8 +32,8 @@ func UnmarshalConfigurationFromMap(cfgMap map[string]any) (IModuleConfiguration,
 	return moduleConfiguration, nil
 }
 
-// Create a new instance of a module configuration
-func CreateModuleConfigurationInstance(metadata IModuleConfiguration) *ModuleSettings {
+// Create a new instance of a module configuration's settings. All of the settings will be assigned their default values based on the configuration metadata.
+func CreateModuleSettings(metadata IModuleConfiguration) *ModuleSettings {
 	instance := &ModuleSettings{
 		metadata:   metadata,
 		parameters: map[Identifier]IParameterSetting{},

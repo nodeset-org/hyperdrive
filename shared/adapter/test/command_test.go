@@ -76,12 +76,13 @@ func TestGetConfigMetadata(t *testing.T) {
 func TestProcessConfig(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
-	hdInstance := createHyperdriveConfigInstance(t)
-	modInstance := hdInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	updateConfigSettings(t, modInstance.GetSettings())
+	hdSettings := createHyperdriveConfigInstance(t)
+	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
+	modSettings := hdSettings.ModuleSettings[modInstance]
+	updateConfigSettings(t, modSettings)
 
 	// Process the config
-	response, err := ac.ProcessConfig(context.Background(), hdInstance.SerializeToMap())
+	response, err := ac.ProcessConfig(context.Background(), hdSettings.SerializeToMap())
 	require.NoError(t, err)
 	require.Empty(t, response.Errors)
 	require.Len(t, response.Ports, 1)
@@ -92,12 +93,13 @@ func TestProcessConfig(t *testing.T) {
 func TestSetConfig(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
-	hdInstance := createHyperdriveConfigInstance(t)
-	modInstance := hdInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	updateConfigSettings(t, modInstance.GetSettings())
+	hdSettings := createHyperdriveConfigInstance(t)
+	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
+	modSettings := hdSettings.ModuleSettings[modInstance]
+	updateConfigSettings(t, modSettings)
 
 	// Set the config
-	err = ac.SetConfig(context.Background(), hdInstance.SerializeToMap())
+	err = ac.SetConfig(context.Background(), hdSettings.SerializeToMap())
 	require.NoError(t, err)
 	t.Log("Config set successfully")
 }
@@ -128,10 +130,11 @@ func TestRunCommand(t *testing.T) {
 	// Set the config
 	err := deleteConfigs()
 	require.NoError(t, err)
-	hdInstance := createHyperdriveConfigInstance(t)
-	modInstance := hdInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	updateConfigSettings(t, modInstance.GetSettings())
-	err = ac.SetConfig(context.Background(), hdInstance.SerializeToMap())
+	hdSettings := createHyperdriveConfigInstance(t)
+	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
+	modSettings := hdSettings.ModuleSettings[modInstance]
+	updateConfigSettings(t, modSettings)
+	err = ac.SetConfig(context.Background(), hdSettings.SerializeToMap())
 	require.NoError(t, err)
 
 	// Make sure the service is running
@@ -155,26 +158,21 @@ func TestRunCommand(t *testing.T) {
 }
 
 // Create a full Hyperdrive config instance for the test
-func createHyperdriveConfigInstance(t *testing.T) *hdconfig.HyperdriveConfigInstance {
-	cfgMgr := hdconfig.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
-	inst := config.CreateModuleConfigurationInstance(cfgMgr.HyperdriveConfiguration)
-	cfgInstance := hdconfig.NewHyperdriveConfigInstance()
-	err := inst.ConvertToKnownType(cfgInstance)
-	if err != nil {
-		fail(fmt.Errorf("error converting instance to known config type: %w", err))
-	}
-	cfgInstance.ProjectName = internal_test.ProjectName
-	cfgInstance.UserDataPath = internal_test.UserDataPath
+func createHyperdriveConfigInstance(t *testing.T) *hdconfig.HyperdriveSettings {
+	hdSettings := hdconfig.NewHyperdriveSettings()
+	hdSettings.ProjectName = internal_test.ProjectName
+	hdSettings.UserDataPath = internal_test.UserDataPath
 
-	modCfgMeta, err := ac.GetConfigMetadata(context.Background())
-	require.NoError(t, err)
+	// Create a module instance manually
 	modInstance := &config.ModuleInstance{
-		Enabled: true,
-		Version: internal_test.ExampleDescriptor.Version.String(),
+		Enabled:  true,
+		Version:  internal_test.ExampleDescriptor.Version.String(),
+		Settings: map[string]any{},
 	}
-	modInstance.Settings.CreateSettingsFromMetadata(modCfgMeta)
-	cfgInstance.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()] = modInstance
-	return cfgInstance
+	hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()] = modInstance
+	modSettings := config.CreateModuleSettings(modInfo.Configuration)
+	hdSettings.ModuleSettings[modInstance] = modSettings
+	return hdSettings
 }
 
 func updateConfigSettings(t *testing.T, cfg *config.ModuleSettings) {
