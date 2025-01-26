@@ -10,7 +10,7 @@ var (
 		Name:         "example-module",
 		Shortcut:     "em",
 		Description:  "Simple example of a Hyperdrive module",
-		Version:      semver.MustParse("0.1.0"),
+		Version:      semver.MustParse("0.2.0"),
 		Author:       "NodeSet",
 		URL:          "https://github.com/nodeset-org/hyperdrive-example",
 		Email:        "info@nodeset.io",

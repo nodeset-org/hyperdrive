@@ -2,7 +2,7 @@
     "name": "hello-world",
     "shortcut": "hw",
     "description": "Simple example of a Hyperdrive module",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "author": "NodeSet",
     "url": "https://github.com/nodeset-org/hd-hello-world",
     "email": "info@nodeset.io",

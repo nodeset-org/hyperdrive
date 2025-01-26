@@ -22,7 +22,7 @@ func TestGetVersion(t *testing.T) {
 		t.Errorf("error getting version: %v", err)
 	}
 	t.Logf("Adapter version: %s", version)
-	require.Equal(t, "0.1.0", version)
+	require.Equal(t, "0.2.0", version)
 }
 
 func TestGetLogFile(t *testing.T) {
@@ -71,6 +71,34 @@ func TestGetConfigMetadata(t *testing.T) {
 	require.Contains(t, sectionMap, "subConfig")
 	require.Contains(t, sectionMap, "server")
 	t.Logf("Config metadata: %v", cfg)
+}
+
+func TestUpgradeConfig(t *testing.T) {
+	err := deleteConfigs()
+	require.NoError(t, err)
+	hdSettings := createHyperdriveConfigInstance(t)
+	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
+	modSettings := hdSettings.ModuleSettings[modInstance]
+	updateConfigSettings(t, modSettings)
+
+	// Manually downgrade the old config to v0.1.0
+	legacyModInstance := config.ModuleInstance{
+		Enabled: modInstance.Enabled,
+		Version: "0.1.0",
+	}
+	legacyModInstance.SetSettings(modSettings)
+	delete(legacyModInstance.Settings, "exampleUint")
+
+	// Process the config
+	instanceMap := legacyModInstance.SerializeToMap()
+	require.Equal(t, "0.1.0", instanceMap["version"])
+	require.NotContains(t, instanceMap["settings"], "exampleUint")
+	upgradedInstance, err := ac.UpgradeConfig(context.Background(), legacyModInstance.SerializeToMap())
+	require.NoError(t, err)
+	require.Equal(t, modInstance.Version, upgradedInstance.Version)
+	require.Contains(t, upgradedInstance.Settings, "exampleUint")
+	require.Equal(t, upgradedInstance.Settings["exampleUint"], float64(42))
+	t.Log("Config upgraded successfully")
 }
 
 func TestProcessConfig(t *testing.T) {
@@ -190,6 +218,11 @@ func updateConfigSettings(t *testing.T, cfg *config.ModuleSettings) {
 	param, err = cfg.GetParameter("exampleFloat")
 	require.NoError(t, err)
 	err = param.SetValue(75.0)
+	require.NoError(t, err)
+
+	param, err = cfg.GetParameter("exampleUint")
+	require.NoError(t, err)
+	err = param.SetValue(6)
 	require.NoError(t, err)
 
 	// Set a subconfig value

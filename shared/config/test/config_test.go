@@ -32,12 +32,13 @@ func TestLoadModuleConfigs(t *testing.T) {
 	require.Equal(t, internal_test.ExampleDescriptor.Name, modCfg.Descriptor.Name)
 
 	// Create a default instance of the module config
+	modSettings := modconfig.CreateModuleSettings(modCfg.Configuration)
 	require.Len(t, cfgInstance.Modules, 0)
 	modInstance := &modconfig.ModuleInstance{
-		Enabled: false,
-		Version: internal_test.ExampleDescriptor.Version.String(),
+		Enabled:  false,
+		Version:  internal_test.ExampleDescriptor.Version.String(),
+		Settings: modSettings.SerializeToMap(),
 	}
-	modSettings, err := modInstance.CreateSettingsFromMetadata(modCfg.Configuration)
 	require.NoError(t, err)
 	modInstance.SetSettings(modSettings)
 	cfgInstance.Modules[modCfg.Descriptor.GetFullyQualifiedModuleName()] = modInstance
@@ -66,6 +67,7 @@ func TestSerialization(t *testing.T) {
 	require.NoError(t, err)
 	err = portParam.SetValue(8085)
 	require.NoError(t, err)
+	modInstance.SetSettings(modSettings)
 	t.Log("Configs modified")
 
 	// Process the configs to make sure they're good

@@ -18,6 +18,16 @@ type ModuleInstance struct {
 	Settings map[string]any `json:"settings" yaml:"settings"`
 }
 
+// Converts the instance to a map, suitable for JSON serialization.
+func (i ModuleInstance) SerializeToMap() map[string]any {
+	instanceMap := map[string]any{
+		"enabled":  i.Enabled,
+		"version":  i.Version,
+		"settings": i.Settings,
+	}
+	return instanceMap
+}
+
 // Creates a strongly-typed settings wrapper of the module's configuration based on its metadata, and loads the instance's settings into it.
 func (i *ModuleInstance) CreateSettingsFromMetadata(metadata IModuleConfiguration) (*ModuleSettings, error) {
 	settings := CreateModuleSettings(metadata)
