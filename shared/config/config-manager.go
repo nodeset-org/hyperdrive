@@ -153,7 +153,7 @@ func (m *ConfigurationManager) ProcessModuleConfigurations(hdConfig *HyperdriveS
 		}
 
 		// Process the config
-		response, err := client.ProcessConfig(context.Background(), hdConfigMap)
+		response, err := client.ProcessSettings(context.Background(), hdConfigMap)
 		if err != nil {
 			result.ProcessError = err
 			continue
@@ -190,7 +190,7 @@ func (m *ConfigurationManager) SetModuleConfigs(hdConfig *HyperdriveSettings) (m
 		}
 
 		// Process the config
-		err = client.SetConfig(context.Background(), hdConfig.SerializeToMap())
+		err = client.SetSettings(context.Background(), hdConfig.SerializeToMap())
 		if err != nil {
 			results[module] = err
 			continue

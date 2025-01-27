@@ -2,12 +2,12 @@
 
 One of the most important aspects of a Hyperdrive module is its **configuration**. This refers to a series of named settings or values that the user can modify (or in some cases, are modified behind-the-scenes based on the configuration of other Hyperdrive modules, or even the hardware / software configuration of the node machine *itself*). As with all configuration systems, these settings will inform behavioral changes to your module's services during runtime.
 
-In the context of Hyperdrive, there are two entities related to configuring your module: **metadata** and **instances**.
+In the context of Hyperdrive, there are two entities related to configuring your module: **metadata** and **settings**.
 
 
 ## Metadata
 
-**Configuration Metadata** refers to information *about* the configuration. Things such as parameter names, types, and descriptions all fall under metadata. This contains everything necessary to dynamically generate a UI for configuring your module interactively. Hyperdrive will request this from your module's adapter at various stages. The metadata doesn't need to be the same every time, especially if it leverages the [templating feature](./templates.md) to allow dynamic changes during runtime (described later in this section).
+**Configuration Metadata** refers to information *about* the configuration. Things such as parameter names, types, and descriptions all fall under metadata. This contains everything necessary to dynamically generate a UI for configuring your module interactively, but doesn't contain the actual *values* of the parameters themselves. Hyperdrive will request this from your module's adapter at various stages. The metadata doesn't need to be the same every time, especially if it leverages the [templating feature](./templates.md) to allow dynamic changes during runtime (described later in this section).
 
 A configuration metadata object consists of the following properties:
 
@@ -123,7 +123,7 @@ The following types of parameters are allowed:
 
         To specify that there is no `regex`, exclude this property when serializing the configuration.
 
-- `choice` represents a parameter that's a choice between multiple fixed options, such as an enum. These parameters will be represented in the configurator UI with a dropdown selection box. Choice parameters are variably typed, with a value of type `ChoiceType`. This must be a simple type - any of the other property types above can be used as a `ChoiceType`.
+- `choice` represents a parameter that's a choice between multiple fixed options, such as an enum. These parameters will be represented in the configurator UI with a dropdown selection box. Choice parameters are variably typed, with a value of type `ChoiceType`. This must be derived from the `string` type, and convertible to/from strings.
 
     Additional properties:
 
@@ -132,7 +132,7 @@ The following types of parameters are allowed:
 
 #### Parameter Options
 
-`choice` parameters provide a set of metadata for their options, each of which corresponds to a value they are allowed to have. As a reminder, they are variably typed (using `ChoiceType`, which can be any of the other property types). All options must have values of that same type. The Option type has the following properties:
+`choice` parameters provide a set of metadata for their options, each of which corresponds to a value they are allowed to have. As a reminder, they are variably typed (using `ChoiceType`). All options must have values of that same type. The Option type has the following properties:
 
 - `name` (string, required): the human-readable name for this option. This will correspond to the value of the option that will be presented to the user within the property's dropdown list. It can be a string with any characters, though we recommend it consists only of printable ones for legibility's sake.
 
@@ -147,9 +147,9 @@ The following types of parameters are allowed:
 
 ## Settings
 
-A **Configuration Settings** object is an object that corresponds to a "filled out" version of a Configuration Metadata object. Instead of discrete parameters and section objects, each one becomes a simple key-value pair property. These indicate the value assigned to each parameter without any of the extraneous metadata. The type of value in each Parameter Instance is the same as the type of the corresponding metadata parameter.
+A **Configuration Settings** object is an object that corresponds to a "filled out" version of a Configuration Metadata object, where each parameter has been assigned a value. Instead of discrete parameters and section objects, each one becomes a simple key-value pair property. These indicate the value assigned to each parameter without any of the extraneous metadata. The type of value in each Parameter Setting is the same as the type of the corresponding metadata parameter.
 
-Each top-level metadata parameter and section from the corresponding configuration metadata will become a top-level property of the configuration instance as follows:
+Each top-level metadata parameter and section from the corresponding configuration metadata will become a top-level property of the configuration settings as follows:
 
 - The `version` property must be the same as the value your module's version in the [descriptor](./descriptor.md) file.
 - For each Parameter, the property will have the Parameter's `id` as the key and the parameter's `value` as the value.
@@ -209,7 +209,7 @@ For example, say the Configuration Metadata looked like this:
 }
 ```
 
-The corresponding Configuration Instance would then be this:
+The corresponding Configuration Settings could then be this:
 
 ```json
 {
@@ -220,3 +220,12 @@ The corresponding Configuration Instance would then be this:
     }
 }
 ```
+
+
+## Instances
+
+Hyperdrive keeps track of the configuration settings for each of its modules, along with the version of the module that set of settings was created with, and whether or not the module is currently enabled. Collectively, these fields comprise a **Module Instance**:
+
+- `enabled` (bool): True if the user has enabled the module, so it will be started with the others when a Hyperdrive service start is requested. If false, this module is disabled and none of its services will run.
+- `version` ([version](string)): The version of the module that was used to create the settings for this instance, as provided in the module's [descriptor](./descriptor.md#structure). This is useful if you want to look at the version of a dependency and explore its parameters accordingly.
+- `settings` ([Configuration Settings](#settings)): the configuration settings for the module.

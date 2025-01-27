@@ -82,7 +82,7 @@ func TestUpgradeConfig(t *testing.T) {
 	updateConfigSettings(t, modSettings)
 
 	// Manually downgrade the old config to v0.1.0
-	legacyModInstance := config.ModuleInstance{
+	legacyModInstance := &config.ModuleInstance{
 		Enabled: modInstance.Enabled,
 		Version: "0.1.0",
 	}
@@ -90,10 +90,9 @@ func TestUpgradeConfig(t *testing.T) {
 	delete(legacyModInstance.Settings, "exampleUint")
 
 	// Process the config
-	instanceMap := legacyModInstance.SerializeToMap()
-	require.Equal(t, "0.1.0", instanceMap["version"])
-	require.NotContains(t, instanceMap["settings"], "exampleUint")
-	upgradedInstance, err := ac.UpgradeConfig(context.Background(), legacyModInstance.SerializeToMap())
+	require.Equal(t, "0.1.0", legacyModInstance.Version)
+	require.NotContains(t, legacyModInstance.Settings, "exampleUint")
+	upgradedInstance, err := ac.UpgradeInstance(context.Background(), legacyModInstance)
 	require.NoError(t, err)
 	require.Equal(t, modInstance.Version, upgradedInstance.Version)
 	require.Contains(t, upgradedInstance.Settings, "exampleUint")
@@ -110,7 +109,7 @@ func TestProcessConfig(t *testing.T) {
 	updateConfigSettings(t, modSettings)
 
 	// Process the config
-	response, err := ac.ProcessConfig(context.Background(), hdSettings.SerializeToMap())
+	response, err := ac.ProcessSettings(context.Background(), hdSettings.SerializeToMap())
 	require.NoError(t, err)
 	require.Empty(t, response.Errors)
 	require.Len(t, response.Ports, 1)
@@ -127,7 +126,7 @@ func TestSetConfig(t *testing.T) {
 	updateConfigSettings(t, modSettings)
 
 	// Set the config
-	err = ac.SetConfig(context.Background(), hdSettings.SerializeToMap())
+	err = ac.SetSettings(context.Background(), hdSettings.SerializeToMap())
 	require.NoError(t, err)
 	t.Log("Config set successfully")
 }
@@ -162,7 +161,7 @@ func TestRunCommand(t *testing.T) {
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	modSettings := hdSettings.ModuleSettings[modInstance]
 	updateConfigSettings(t, modSettings)
-	err = ac.SetConfig(context.Background(), hdSettings.SerializeToMap())
+	err = ac.SetSettings(context.Background(), hdSettings.SerializeToMap())
 	require.NoError(t, err)
 
 	// Make sure the service is running

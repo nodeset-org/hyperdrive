@@ -102,11 +102,13 @@ where:
 - If `source` is anything else, it should be treated as the name of one of the service containers (as provided in [`get-containers`](#hd-module-get-containers)) and return the log file for that service. If the name provided does not correspond to a known container, then `path` in the response should be empty.
 
 
-### `hd-module upgrade-config`
+### `hd-module upgrade-instance`
 
-This will be called when Hyperdrive detects that its configuration instance for your module was generated with an older version of the module, and the user has updated it but hasn't run through the configuration process yet. It should migrate the old [Hyperdrive Configuration Instance](./config.md#instances) to the latest version. If no changes are required, then you can simply return the old configuration with the `version` updated.
+This will be called when Hyperdrive detects that its instance for your module was generated with an older version of the module, and the user has updated the module but hasn't run through the configuration process yet. It should migrate the old [Module Instance](./config.md#instances) to the latest version. If no changes are required, then you can simply return the old configuration with the `version` updated.
 
 This is an opportunity to modify deprecated settings, or invalidate obsolete ones that no longer apply by making them blank or using the default value for example. The user will be informed of what has changed prior to saving the configuration so they have the option to cancel the process and revert the upgrade; your module must not save this configuration until Hyperdrive calls the [set-config](#hd-module-set-config) function.
+
+Furthermore, this is a way for your module to enforce that the instance is set to **disabled** in the event that the user needs to loearn about some kind of breaking changes that would preclude it from working after the upgrade.
 
 
 #### Input
@@ -114,7 +116,7 @@ This is an opportunity to modify deprecated settings, or invalidate obsolete one
 ```json
 {
     "key": "...",
-    "config": {
+    "instance": {
         ...
     }
 }
@@ -123,12 +125,12 @@ This is an opportunity to modify deprecated settings, or invalidate obsolete one
 where:
 
 - `key` must match the contents of `ModuleSecretFile`.
-- `config` is a [Hyperdrive Configuration Instance](./config.md#instances) for your module specifically.
+- `instance` is a [Module Instance](./config.md#instances) for your module specifically.
 
 
 #### Output
 
-A serialized JSON [Hyperdrive Configuration Instance](./config.md#instances) representing the original configuration instance, with any parameters that are no longer compatible with the current instance changed to an appropriate value (such as the new default). The `version` of the returned instance must also be updated to the latest version of your module, as reported in its [descriptor](./descriptor.md) file and the [version](#hd-module-version) function.
+A serialized JSON [Module Instance](./config.md#instances) representing the instance after your module has upgraded it. Any parameters that are no longer compatible with the current instance changed to an appropriate value (such as the new default). The `version` of the returned instance must also be updated to the latest version of your module, as reported in its [descriptor](./descriptor.md) file and the [version](#hd-module-version) function.
 
 
 ### `hd-module get-config-metadata`
@@ -154,14 +156,10 @@ where:
 A serialized JSON [Hyperdrive Configuration Metadata](./config.md#metadata) object for your module's configuration.
 
 
-#### Output
 
-A serialized JSON [Hyperdrive Configuration Instance](./config.md#instances) object for your module's configuration.
+### `hd-module process-settings`
 
-
-### `hd-module process-config`
-
-This should process a [Hyperdrive Configuration Instance](./config.md#instances) of module's configuration, extracting important information and validating it. This will be called after the user has modified Hyperdrive's configuration (potentially including your module's configuration), but before the configuration needs to be saved.
+This should process the [Settings](./config.md#settings) of your module's configuration, extracting important information and validating it. This will be called after the user has modified Hyperdrive's configuration (potentially including your module's configuration), but before the configuration needs to be saved.
 
 Your module should use this to return information about the configuration and validate that the provided configuration meets all of your module's requirements and is valid.
 
@@ -171,7 +169,7 @@ Your module should use this to return information about the configuration and va
 ```json
 {
     "key": "...",
-    "config": {
+    "settings": {
         ...
     }
 }
@@ -180,14 +178,14 @@ Your module should use this to return information about the configuration and va
 where:
 
 - `key` must match the contents of `ModuleSecretFile`.
-- `config` is a [Hyperdrive Configuration Instance](./config.md#instances) of the [complete Hyperdrive installation](../config.md), including your module's configuration and the configuration for all other installed modules.
+- `settings` are the settings for the [complete Hyperdrive installation](TODO), including your module's configuration and the configuration for all other installed modules.
 
 
 #### Output
 
 The following serialized JSON object:
 
-- `errors` (string[], required): A list of error messages to provide to the user when the configuration fails validation. Each one should be a reason why the configuration is invalid.
+- `errors` (string[], required): A list of error messages to provide to the user when the settings fail validation. Each one should be a reason why the configuration is invalid.
 - `ports` (object, required): A mapping for externally available TCP/UDP ports that your module's services will bind when running. Each property in the object must have the FQMN of one of your module's properties as its name, and the port value as its value. This is used by Hyperdrive to ensure that your service won't bind ports that are already in use by other services. If your ports are not externally bound, and restricted to Docker's internal network, they don't need to be listed here. This list can be empty if `errors` is not empty for simplicity.
 
 For example:
@@ -206,14 +204,14 @@ For example:
 
 where:
 
-`errors` is an array of strings that indicate individual configuration issues, such as invalid parameters. They will be displayed directly to the user so they should be human-readable strings. If there are no errors and the configuration is valid, this should be an empty array.
+`errors` is an array of strings that indicate individual configuration issues, such as invalid settings. They will be displayed directly to the user so they should be human-readable strings. If there are no errors and the settings are valid, this should be an empty array.
 
 
-### `hd-module set-config`
+### `hd-module set-settings`
 
-This will be called prior to starting / restarting your module's services. It will provide the entire [Hyperdrive Configuration Instance](./config.md#instances) in serialized JSON format to `STDIN` (terminated with an empty `\n` character); your adapter must read this properly. Your CLI can then save whatever configuration it needs in a format your module services can interpret (if they do not already pull the Hyperdrive configuration from its daemon on startup).
+This will be called prior to starting / restarting your module's services. It will provide the settings for the entire [complete Hyperdrive installation](TODO) in serialized JSON format to `STDIN` (terminated with an empty `\n` character); your adapter must read this properly. Your CLI can then save whatever configuration it needs in a format your module services can interpret (if they do not already pull the Hyperdrive configuration from its daemon on startup).
 
-This configuration is guaranteed to be valid according to the `process-config` command above, as that will be called prior to this.
+This configuration is guaranteed to be valid according to the `process-settings` command above, as that will be called prior to this.
 
 No response is expected from this command during a successful run. If any errors occur while saving the config, they should be printed to `STDERR`. Hyperdrive will detect them and indicate a configuration failure to the user, then abort the startup procedure.
 
@@ -223,7 +221,7 @@ No response is expected from this command during a successful run. If any errors
 ```json
 {
     "key": "...",
-    "config": {
+    "settings": {
         ...
     }
 }
@@ -232,7 +230,7 @@ No response is expected from this command during a successful run. If any errors
 where:
 
 - `key` must match the contents of `ModuleSecretFile`.
-- `config` is a [Hyperdrive Configuration Instance](./config.md#instances) of the [complete Hyperdrive installation](../config.md), including your module's configuration and the configuration for all other installed modules.
+- `settings` are the settings for the [complete Hyperdrive installation](TODO), including your module's configuration and the configuration for all other installed modules.
 
 
 #### Output
