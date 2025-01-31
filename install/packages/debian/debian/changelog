@@ -1,4 +1,4 @@
-hyperdrive (1.1.2~dev) UNRELEASED; urgency=medium
+hyperdrive (1.1.2) stable; urgency=high
 
   * Updated Geth, Besu, Nethermind, Reth, Lighthouse, Lodestar, Nimbus, Prysm, Teku, and Prometheus.
   * Added bash autocompletion to the CLI (contributed by BenV)
