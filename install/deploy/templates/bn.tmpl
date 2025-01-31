@@ -18,6 +18,8 @@ services:
       - "{{$p2p}}:{{$p2p}}/tcp"
       {{- if eq .Hyperdrive.LocalBeaconClient.BeaconNode.String "lighthouse"}}
       - "{{.Hyperdrive.LocalBeaconClient.Lighthouse.P2pQuicPort}}:{{.Hyperdrive.LocalBeaconClient.Lighthouse.P2pQuicPort}}/udp"
+      {{- else if eq .Hyperdrive.LocalBeaconClient.BeaconNode.String "prysm"}}
+      - "{{.Hyperdrive.LocalBeaconClient.Prysm.P2pQuicPort}}:{{.Hyperdrive.LocalBeaconClient.Prysm.P2pQuicPort}}/udp"
       {{- end}}
       {{- range $entry := .Hyperdrive.GetBnOpenPorts}}
       - "{{$entry}}"
@@ -57,6 +59,7 @@ services:
       - TEKU_ARCHIVE_MODE={{.Hyperdrive.LocalBeaconClient.Teku.ArchiveMode}}
       {{- else if eq .Hyperdrive.LocalBeaconClient.BeaconNode.String "prysm"}}
       - BN_RPC_PORT={{.Hyperdrive.LocalBeaconClient.Prysm.RpcPort}}
+      - BN_P2P_QUIC_PORT={{.Hyperdrive.LocalBeaconClient.Prysm.P2pQuicPort}}
       {{- else if eq .Hyperdrive.LocalBeaconClient.BeaconNode.String "nimbus"}}
       - NIMBUS_PRUNING_MODE={{.Hyperdrive.LocalBeaconClient.Nimbus.PruningMode}}
       {{- else if eq .Hyperdrive.LocalBeaconClient.BeaconNode.String "lighthouse"}}
