@@ -243,8 +243,13 @@ func (c *GlobalConfig) Validate() []string {
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalExecutionClient.P2pPort, errors)
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.HttpPort, errors)
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.P2pPort, errors)
-		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.Lighthouse.P2pQuicPort, errors)
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.Prysm.RpcPort, errors)
+		switch c.Hyperdrive.GetSelectedBeaconNode() {
+		case config.BeaconNode_Lighthouse:
+			portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.Lighthouse.P2pQuicPort, errors)
+		case config.BeaconNode_Prysm:
+			portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.LocalBeaconClient.Prysm.P2pQuicPort, errors)
+		}
 	}
 	if c.Hyperdrive.Metrics.EnableMetrics.Value {
 		portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Metrics.EcMetricsPort, errors)

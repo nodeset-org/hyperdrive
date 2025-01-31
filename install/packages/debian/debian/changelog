@@ -1,10 +1,11 @@
-hyperdrive (1.2.0~dev) UNRELEASED; urgency=medium
+hyperdrive (1.1.2~dev) UNRELEASED; urgency=medium
 
+  * Updated Geth, Besu, Nethermind, Reth, Lighthouse, Lodestar, Nimbus, Prysm, Teku, and Prometheus.
   * Added bash autocompletion to the CLI (contributed by BenV)
   * Fixed the URL used by Prysm for downloading the initial Holesky genesis state when setting it up for the first time.
   * Removed the Holesky Staging network option from the default list.
 
- -- NodeSet Inc. <info@nodeset.io>  Wed, 30 Oct 2024 21:52:04 +0000
+ -- NodeSet Inc. <info@nodeset.io>  Fri, 31 Jan 2025 06:32:43 +0000
 
 hyperdrive (1.1.1) stable; urgency=high
 
