@@ -13,6 +13,7 @@ import (
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
 	"github.com/nodeset-org/hyperdrive/modules"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
@@ -25,9 +26,9 @@ var (
 	// Docker client
 	docker *client.Client
 
-	// The Hyperdrive base config
 	cfgMgr      *config.ConfigurationManager
 	cfgInstance *config.HyperdriveSettings
+	modMgr      *shared.ModuleManager
 )
 
 func TestMain(m *testing.M) {
@@ -54,7 +55,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// Create the adapter client
-	ac, err = adapter.NewAdapterClient(internal_test.AdapterContainerName, string(internal_test.TestKey))
+	ac, err = adapter.NewAdapterClient(internal_test.GlobalAdapterContainerName, string(internal_test.TestKey))
 	if err != nil {
 		fail(fmt.Errorf("error creating adapter client: %w", err))
 	}
@@ -75,7 +76,7 @@ func getAdapterContainerID() string {
 	}
 	for _, container := range containerList {
 		for _, name := range container.Names {
-			if name == "/"+internal_test.AdapterContainerName {
+			if name == "/"+internal_test.GlobalAdapterContainerName {
 				return container.ID
 			}
 		}
@@ -92,7 +93,7 @@ func initializeArtifacts() {
 	}
 
 	// Make the dirs
-	modulePath := filepath.Join(internal_test.SystemDir, config.ModulesDir, string(internal_test.ExampleDescriptor.Name))
+	modulePath := filepath.Join(internal_test.SystemDir, shared.ModulesDir, string(internal_test.ExampleDescriptor.Name))
 	descriptorPath := filepath.Join(modulePath, modules.DescriptorFilename)
 	if err := os.MkdirAll(internal_test.LogDir, 0755); err != nil {
 		fail(fmt.Errorf("error creating log dir: %w", err))
@@ -113,15 +114,12 @@ func initializeArtifacts() {
 		fail(fmt.Errorf("error writing descriptor file: %w", err))
 	}
 
-	// Create the key file, or get the key if it already exists
-	err = os.WriteFile(internal_test.KeyPath, []byte(internal_test.TestKey), 0644)
-	if err != nil {
-		fail(fmt.Errorf("error creating key file: %w", err))
-	}
+	// Create the descriptor file
+	err = os.WriteFile(descriptorPath, bytes, 0644)
 
 	// Create the container via the Docker CLI since it does stuff like pulling / tagging the image
 	runCmd := fmt.Sprintf(
-		"docker run --rm -d -e HD_PROJECT_NAME=%s -v %s:/hd/logs -v %s:/hd/config -v %s:/hd/secret --name %s %s", internal_test.ProjectName, internal_test.LogDir, internal_test.CfgDir, internal_test.KeyPath, internal_test.AdapterContainerName, internal_test.AdapterTag)
+		"docker run --rm -d -e HD_PROJECT_NAME=%s -v %s:/hd/logs -v %s:/hd/config -v %s:/hd/secret --name %s %s", internal_test.ProjectName, internal_test.LogDir, internal_test.CfgDir, internal_test.KeyPath, internal_test.GlobalAdapterContainerName, internal_test.AdapterTag)
 	_, err = command.ReadOutput(runCmd)
 	if err != nil {
 		fail(fmt.Errorf("error running adapter container: %w", err))
@@ -137,6 +135,12 @@ func initializeArtifacts() {
 	}
 	cfgInstance.ProjectName = internal_test.ProjectName
 	cfgInstance.UserDataPath = internal_test.UserDataPath
+
+	// Set up the mod manager
+	modMgr, err = shared.NewModuleManager(shared.GetModulesDirectoryPath(internal_test.SystemDir))
+	if err != nil {
+		fail(fmt.Errorf("error creating module manager: %w", err))
+	}
 }
 
 // Delete all of the config files from disk
@@ -159,8 +163,8 @@ func cleanup() {
 	// Stop the adapter container
 	if docker != nil {
 		timeout := 0
-		_ = docker.ContainerStop(context.Background(), internal_test.AdapterContainerName, container.StopOptions{Timeout: &timeout})
-		_ = docker.ContainerRemove(context.Background(), internal_test.AdapterContainerName, container.RemoveOptions{Force: true})
+		_ = docker.ContainerStop(context.Background(), internal_test.GlobalAdapterContainerName, container.StopOptions{Timeout: &timeout})
+		_ = docker.ContainerRemove(context.Background(), internal_test.GlobalAdapterContainerName, container.RemoveOptions{Force: true})
 	}
 
 	// Remove the temp files

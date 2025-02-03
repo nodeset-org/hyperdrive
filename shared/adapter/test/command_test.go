@@ -17,7 +17,7 @@ import (
 )
 
 func TestGetVersion(t *testing.T) {
-	version, err := ac.GetVersion(context.Background())
+	version, err := gac.GetVersion(context.Background())
 	if err != nil {
 		t.Errorf("error getting version: %v", err)
 	}
@@ -27,13 +27,13 @@ func TestGetVersion(t *testing.T) {
 
 func TestGetLogFile(t *testing.T) {
 	// Get the adapter log
-	response, err := ac.GetLogFile(context.Background(), "adapter")
+	response, err := pac.GetLogFile(context.Background(), "adapter")
 	require.NoError(t, err)
 	require.Equal(t, "adapter.log", response.Path)
 	t.Logf("Adapter log file path: %s", response.Path)
 
 	// Get the service log
-	response, err = ac.GetLogFile(context.Background(), "example")
+	response, err = pac.GetLogFile(context.Background(), "example")
 	require.NoError(t, err)
 	require.Equal(t, "service.log", response.Path)
 	t.Logf("Service log file path: %s", response.Path)
@@ -42,7 +42,7 @@ func TestGetLogFile(t *testing.T) {
 func TestGetConfigMetadata(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
-	cfg, err := ac.GetConfigMetadata(context.Background())
+	cfg, err := gac.GetConfigMetadata(context.Background())
 	require.NoError(t, err)
 
 	// Do a spot check of the config - full test is done elsewhere
@@ -73,10 +73,10 @@ func TestGetConfigMetadata(t *testing.T) {
 	t.Logf("Config metadata: %v", cfg)
 }
 
-func TestUpgradeConfig(t *testing.T) {
+func TestUpgradeInstance(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
-	hdSettings := createHyperdriveConfigInstance(t)
+	hdSettings := createHyperdriveConfigInstance()
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	modSettings := hdSettings.ModuleSettings[modInstance]
 	updateConfigSettings(t, modSettings)
@@ -92,7 +92,7 @@ func TestUpgradeConfig(t *testing.T) {
 	// Process the config
 	require.Equal(t, "0.1.0", legacyModInstance.Version)
 	require.NotContains(t, legacyModInstance.Settings, "exampleUint")
-	upgradedInstance, err := ac.UpgradeInstance(context.Background(), legacyModInstance)
+	upgradedInstance, err := gac.UpgradeInstance(context.Background(), legacyModInstance)
 	require.NoError(t, err)
 	require.Equal(t, modInstance.Version, upgradedInstance.Version)
 	require.Contains(t, upgradedInstance.Settings, "exampleUint")
@@ -100,16 +100,16 @@ func TestUpgradeConfig(t *testing.T) {
 	t.Log("Config upgraded successfully")
 }
 
-func TestProcessConfig(t *testing.T) {
+func TestProcessSettings(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
-	hdSettings := createHyperdriveConfigInstance(t)
+	hdSettings := createHyperdriveConfigInstance()
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	modSettings := hdSettings.ModuleSettings[modInstance]
 	updateConfigSettings(t, modSettings)
 
 	// Process the config
-	response, err := ac.ProcessSettings(context.Background(), hdSettings.SerializeToMap())
+	response, err := gac.ProcessSettings(context.Background(), hdSettings.SerializeToMap())
 	require.NoError(t, err)
 	require.Empty(t, response.Errors)
 	require.Len(t, response.Ports, 1)
@@ -117,22 +117,22 @@ func TestProcessConfig(t *testing.T) {
 	t.Log("Config processed successfully")
 }
 
-func TestSetConfig(t *testing.T) {
+func TestSetSettings(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
-	hdSettings := createHyperdriveConfigInstance(t)
+	hdSettings := createHyperdriveConfigInstance()
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	modSettings := hdSettings.ModuleSettings[modInstance]
 	updateConfigSettings(t, modSettings)
 
 	// Set the config
-	err = ac.SetSettings(context.Background(), hdSettings.SerializeToMap())
+	err = pac.SetSettings(context.Background(), hdSettings.SerializeToMap())
 	require.NoError(t, err)
 	t.Log("Config set successfully")
 }
 
 func TestGetContaners(t *testing.T) {
-	containers, err := ac.GetContainers(context.Background())
+	containers, err := pac.GetContainers(context.Background())
 	if err != nil {
 		t.Errorf("error getting containers: %v", err)
 	}
@@ -157,11 +157,11 @@ func TestRunCommand(t *testing.T) {
 	// Set the config
 	err := deleteConfigs()
 	require.NoError(t, err)
-	hdSettings := createHyperdriveConfigInstance(t)
+	hdSettings := createHyperdriveConfigInstance()
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	modSettings := hdSettings.ModuleSettings[modInstance]
 	updateConfigSettings(t, modSettings)
-	err = ac.SetSettings(context.Background(), hdSettings.SerializeToMap())
+	err = pac.SetSettings(context.Background(), hdSettings.SerializeToMap())
 	require.NoError(t, err)
 
 	// Make sure the service is running
@@ -172,7 +172,7 @@ func TestRunCommand(t *testing.T) {
 
 	// Run the get-param command
 	cmd := "config get-param exampleFloat"
-	stdout, stderr, err := ac.RunNoninteractive(context.Background(), logger, cmd)
+	stdout, stderr, err := pac.RunNoninteractive(context.Background(), logger, cmd)
 	require.Empty(t, stderr)
 	require.NoError(t, err)
 
@@ -185,7 +185,7 @@ func TestRunCommand(t *testing.T) {
 }
 
 // Create a full Hyperdrive config instance for the test
-func createHyperdriveConfigInstance(t *testing.T) *hdconfig.HyperdriveSettings {
+func createHyperdriveConfigInstance() *hdconfig.HyperdriveSettings {
 	hdSettings := hdconfig.NewHyperdriveSettings()
 	hdSettings.ProjectName = internal_test.ProjectName
 	hdSettings.UserDataPath = internal_test.UserDataPath

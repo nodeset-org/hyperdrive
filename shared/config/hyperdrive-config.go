@@ -49,7 +49,7 @@ type HyperdriveConfig struct {
 	// Internal fields
 	Version                 string
 	hyperdriveUserDirectory string
-	modulePath              string
+	systemDirectory         string
 }
 
 // The instance of the Hyperdrive configuration
@@ -68,11 +68,11 @@ type HyperdriveSettings struct {
 }
 
 // Creates a new Hyperdrive configuration
-func NewHyperdriveConfig(hdDir string, modulePath string) *HyperdriveConfig {
+func NewHyperdriveConfig(hdDir string, systemDir string) *HyperdriveConfig {
 	defaultUserDataPath := filepath.Join(hdDir, "data")
 	cfg := &HyperdriveConfig{
 		hyperdriveUserDirectory: hdDir,
-		modulePath:              modulePath,
+		systemDirectory:         systemDir,
 		Modules:                 map[string]*config.ModuleInfo{},
 	}
 
@@ -151,11 +151,11 @@ func (cfg *HyperdriveConfig) GetSections() []config.ISection {
 }
 
 func (cfg *HyperdriveConfig) GetModulePath() string {
-	return cfg.modulePath
+	return shared.GetModulesDirectoryPath(cfg.systemDirectory)
 }
 
 func (cfg *HyperdriveConfig) GetAdapterKeyPath() string {
-	return filepath.Join(cfg.hyperdriveUserDirectory, "secrets", "adapter.key")
+	return shared.GetAdapterKeyPath(cfg.hyperdriveUserDirectory)
 }
 
 func (cfg *HyperdriveConfig) GetVersion() string {
@@ -195,7 +195,7 @@ func (i HyperdriveSettings) CreateCopy() *HyperdriveSettings {
 
 // Load the Hyperdrive configuration from a file; the Hyperdrive user directory will be set to the directory containing the config file.
 // In order to process module configuration instances,
-func (c *HyperdriveConfig) CreateInstanceFromFile(configFilePath string, systemDir string) (*HyperdriveSettings, error) {
+func (c *HyperdriveConfig) LoadSettingsFromFile(configFilePath string) (*HyperdriveSettings, error) {
 	// Return nil if the file doesn't exist
 	_, err := os.Stat(configFilePath)
 	if os.IsNotExist(err) {

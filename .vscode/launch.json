@@ -9,12 +9,14 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}",
+            "program": "${workspaceFolder}/hyperdrive-cli",
             "args": [
-                "-u",
+                "-c",
                 "${env:HOME}/.hyperdrive",
                 "-s",
-                "/usr/share/hyperdrive/networks"
+                "/usr/share/hyperdrive",
+                "m",
+                "l"
             ]
         }
     ]

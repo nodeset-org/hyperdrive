@@ -17,8 +17,11 @@ import (
 )
 
 var (
-	// Adapter client
-	ac *adapter.AdapterClient
+	// Adapter client for global mode
+	gac *adapter.AdapterClient
+
+	// Adapter client for project mode
+	pac *adapter.AdapterClient
 
 	// Docker client
 	docker *client.Client
@@ -37,27 +40,39 @@ func TestMain(m *testing.M) {
 		fail(fmt.Errorf("error creating Docker client: %w", err))
 	}
 
-	// Check if the adapter container is already created
-	adapterID := getAdapterContainerID()
-	if adapterID != "" {
-		fail(fmt.Errorf("adapter container already exists - please remove it before running tests"))
+	// Check if the adapter containers are already created
+	globalAdapterID := getContainerID(internal_test.GlobalAdapterContainerName)
+	if globalAdapterID != "" {
+		fail(fmt.Errorf("global adapter container already exists - please remove it before running tests"))
+	}
+	projectAdapterID := getContainerID(internal_test.ProjectAdapterContainerName)
+	if projectAdapterID != "" {
+		fail(fmt.Errorf("project adapter container already exists - please remove it before running tests"))
 	}
 
 	// Initialize everything and get the adapter container info
 	initializeArtifacts()
-	adapterID = getAdapterContainerID()
-	if adapterID == "" {
-		fail(fmt.Errorf("adapter container not found"))
+	globalAdapterID = getContainerID(internal_test.GlobalAdapterContainerName)
+	if globalAdapterID == "" {
+		fail(fmt.Errorf("global adapter container not found"))
+	}
+	projectAdapterID = getContainerID(internal_test.ProjectAdapterContainerName)
+	if projectAdapterID == "" {
+		fail(fmt.Errorf("project adapter container not found"))
 	}
 
-	// Create the adapter client
-	ac, err = adapter.NewAdapterClient(internal_test.AdapterContainerName, string(internal_test.TestKey))
+	// Create the adapter clients
+	gac, err = adapter.NewAdapterClient(internal_test.GlobalAdapterContainerName, string(internal_test.TestKey))
 	if err != nil {
-		fail(fmt.Errorf("error creating adapter client: %w", err))
+		fail(fmt.Errorf("error creating global adapter client: %w", err))
+	}
+	pac, err = adapter.NewAdapterClient(internal_test.ProjectAdapterContainerName, string(internal_test.TestKey))
+	if err != nil {
+		fail(fmt.Errorf("error creating project adapter client: %w", err))
 	}
 
 	// Get the module config info
-	modCfgMeta, err := ac.GetConfigMetadata(context.Background())
+	modCfgMeta, err := gac.GetConfigMetadata(context.Background())
 	if err != nil {
 		fail(fmt.Errorf("error getting module config metadata: %w", err))
 	}
@@ -72,8 +87,8 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-// Get the ID of the adapter container
-func getAdapterContainerID() string {
+// Get the ID of the container with the given name
+func getContainerID(name string) string {
 	containerList, err := docker.ContainerList(context.Background(), container.ListOptions{
 		All: true,
 	})
@@ -81,8 +96,8 @@ func getAdapterContainerID() string {
 		fail(fmt.Errorf("error inspecting adapter container: %w", err))
 	}
 	for _, container := range containerList {
-		for _, name := range container.Names {
-			if name == "/"+internal_test.AdapterContainerName {
+		for _, containerName := range container.Names {
+			if containerName == "/"+name {
 				return container.ID
 			}
 		}
@@ -129,12 +144,35 @@ func initializeArtifacts() {
 		fmt.Printf("warning creating network: %s\n", netCreateResponse.Warning)
 	}
 
-	// Create the container via the Docker CLI since it does stuff like pulling / tagging the image
+	// Create the adapters via the Docker CLI since it does stuff like pulling / tagging the image
 	runCmd := fmt.Sprintf(
-		"docker run --rm -d -e HD_PROJECT_NAME=%s -v %s:/hd/logs -v %s:/hd/config -v %s:/hd/secret --network %s_net --name %s %s", internal_test.ProjectName, internal_test.LogDir, internal_test.CfgDir, internal_test.KeyPath, internal_test.ProjectName, internal_test.AdapterContainerName, internal_test.AdapterTag)
+		"docker run --rm -d -e HD_ADAPTER_MODE=global --name %s %s",
+		internal_test.GlobalAdapterContainerName,
+		internal_test.AdapterTag,
+	)
 	_, err = command.ReadOutput(runCmd)
 	if err != nil {
-		fail(fmt.Errorf("error running adapter container: %w", err))
+		fail(fmt.Errorf("error running global adapter container: %w", err))
+	}
+	runCmd = fmt.Sprintf(
+		"docker run --rm -d -e HD_ADAPTER_MODE=project -e HD_PROJECT_NAME=%s -e HD_CONFIG_DIR=%s -e HD_LOG_DIR=%s -e HD_KEY_FILE=%s -v %s:%s -v %s:%s -v %s:%s --network %s_net --name %s %s",
+		internal_test.ProjectName,
+		internal_test.CfgDir,
+		internal_test.LogDir,
+		internal_test.KeyPath,
+		internal_test.CfgDir,
+		internal_test.CfgDir,
+		internal_test.LogDir,
+		internal_test.LogDir,
+		internal_test.KeyPath,
+		internal_test.KeyPath,
+		internal_test.ProjectName,
+		internal_test.ProjectAdapterContainerName,
+		internal_test.AdapterTag,
+	)
+	_, err = command.ReadOutput(runCmd)
+	if err != nil {
+		fail(fmt.Errorf("error running project adapter container: %w", err))
 	}
 }
 
@@ -158,8 +196,10 @@ func cleanup() {
 	// Stop the adapter container
 	if docker != nil {
 		timeout := 0
-		_ = docker.ContainerStop(context.Background(), internal_test.AdapterContainerName, container.StopOptions{Timeout: &timeout})
-		_ = docker.ContainerRemove(context.Background(), internal_test.AdapterContainerName, container.RemoveOptions{Force: true})
+		_ = docker.ContainerStop(context.Background(), internal_test.GlobalAdapterContainerName, container.StopOptions{Timeout: &timeout})
+		_ = docker.ContainerStop(context.Background(), internal_test.ProjectAdapterContainerName, container.StopOptions{Timeout: &timeout})
+		_ = docker.ContainerRemove(context.Background(), internal_test.GlobalAdapterContainerName, container.RemoveOptions{Force: true})
+		_ = docker.ContainerRemove(context.Background(), internal_test.ProjectAdapterContainerName, container.RemoveOptions{Force: true})
 		_ = docker.NetworkRemove(context.Background(), internal_test.ProjectName+"_net")
 	}
 

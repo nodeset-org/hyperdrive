@@ -16,9 +16,26 @@ Your adapter must come in a **Docker container** with all of its prerequisites i
 Since your adapter enters a "wait" mode upon startup, the adapter binary itself will be persistently available for quick and easy access via `docker exec` during operations such as configuration changes. Because of this process, however, your adapter will run before Hyperdrive itself has been configured. Anything (including project name, data directory, API ports, etc.) can change after the fact. Therefore, **your adapter should be stateless** (or at least, not rely on the state of the Hyperdrive configuration).
 
 
+### Execution Mode
+
+Adapters are executed in one of two different modes:
+
+1. Global mode
+1. Project mode
+
+When a module is installed, Hyperdrive will create and run one instance of your adapter's Docker container in **global mode**. This container is not tied to any one Hyperdrive project; all Hyperdrive installations on the node will all interact with it to use your adapter. Global mode commands run independently from individual Hyperdrive projects and are not affected by a project's configuration. They will *not* modify the behavior of your module and thus will not interact with your module's service containers; they are effectively **read-only** commands that will only access things within the adapter itself. Examples include getting the adapter's version, validating a pending configuration, and so on. 
+
+Once the user configures a Hyperdrive project, the system will create a *second* instance of your adapter's Docker container. This one will be provided with all of the project-specific details, such as the paths for the configuration and log directories, and the path for the authentication key file (discussed later). Project mode commands should be considered **read and write**, because they can be used to interact with your module's services and modify its configuration.
+
+
+### Authentication
+
+Commands run on your adapter while in project mode all require authentication. When your adapter container is started in Project mode, it will have the `HD_KEY_FILE` environment variable set. This will hold the full path of a file that contains the string to use for authenticating requests. The request input format for each Project mode command will be in JSON, and include a field named `key` with a string value. The value of `key` should be directly compared to the contents of the `HD_KEY_FILE` file. Only requests with a matching value should be permitted; otherwise your adapter should return an error.
+
+
 ### Docker Compose File
 
-Your module package must include a top-level file named `adapter.tmpl`, which is a Docker Compose template file that is used to create and run your module's adapter container. The template will be instantiated when your module is installed, prior to running it.
+Your module package must include a top-level file named `adapter.yml`, which is a Docker Compose file that is used to create and run your module's adapter container. This should be a **complete** template; it will not be passed through Hyperdrive's [variable substitution](./templates.md) system. That being said, Hyperdrive will modify the service name of the container to prevent conflicts and will add additional volumes for Project mode instatiations.
 
 This file can have any set up required, with the following conditions:
 
@@ -28,16 +45,37 @@ This file can have any set up required, with the following conditions:
 - Many of the commands are authenticated and include a `key` property in the input. For these calls, your adapter must compare them to the contents of the file provided in the [`ModuleSecretFile`](./templates.md#module-adapter-docker-compose-template) to ensure the caller is permitted to proceed.
 
 
+### Environment Variables
+
+Hyperdrive will always start your adapter with the `HD_ADAPTER_MODE` environment variable set. This variable can have two values:
+
+- `global` indicates that it's running in Global mode.
+- `project` indicates that it's running in Project mode.
+
+When running in Project mode, these additional environment variables are set:
+
+- `HD_CONFIG_DIR` is the full path (within the container) to the directory that your module should use for storing its configuration settings during a `set-settings` command. Your module's services should load them from this path, which will be passed into their Docker compose instances as well.
+
+- `HD_LOG_DIR` is the full path (within the container) to the directory that your module should use for storing any log files. Your module's services should load them from this path, which will be passed into their Docker compose instances as well.
+
+- `HD_KEY_FILE` is the full path (within the container) to the file that contains the key to use for authenticating adapter commands while in Project mode.
+
+
 ## Adapter API Protocol
 
 Communication between Hyperdrive and the adapter will be done via `STDIN` and `STDOUT`, and delimited by newlines. Your adapter will be invoked with one of the following commands via `docker exec`; each input and output format is defined as part of the function.
 
 
-## Hyperdrive Module Command Specification
+# Hyperdrive Adapter Command Specification
 
 The following are commands that the Hyperdrive system itself will call on your module. Your module must be able to handle executing things as a one-off (standalone) mode; in other words, your adapter's Docker container will not start normally in persistent mode when these commands are called, but rather will be run with the specified commands below as the entrypoint; upon finishing the command, the container is then immediately discarded.
 
 **NOTE:** The example input / output JSON below uses newlines for readability, but the JSON input to your program will not; it will all be on one line as newlines are to be treated as "end of input" characters while reading. Your adapter's output may or may not include them as you see fit.
+
+
+## Global Mode Commands
+
+The following commands are called in **Global mode**.
 
 
 ### `hd-module version`
@@ -65,43 +103,6 @@ where:
 The version is expected to have parity with the Hyperdrive module version, as defined in [the descriptor](./descriptor.md). This is simply used for sanity checking prior to startup; mismatches between the two will indicate a module installation / upgrade failure and be reported as errors to the user during startup.
 
 
-### `hd-module get-log-file`
-
-This should return the relative path (inside of `ModuleLogDir`) to the specified log file.
-
-
-#### Input
-
-```json
-{
-    "key": "...",
-    "source": "..."
-}
-```
-
-where:
-
-- `key` must match the contents of `ModuleSecretFile`.
-- `source` can be one of the following:
-  - `adapter`
-  - `<container name>`
-
-
-#### Output
-
-This should return the following serialized JSON object:
-
-```json
-{
-    "path": "..."
-}
-```
-
-where:
-- If `source` is `adapter`, it should return the relative path to the adapter's log file (if applicable).
-- If `source` is anything else, it should be treated as the name of one of the service containers (as provided in [`get-containers`](#hd-module-get-containers)) and return the log file for that service. If the name provided does not correspond to a known container, then `path` in the response should be empty.
-
-
 ### `hd-module upgrade-instance`
 
 This will be called when Hyperdrive detects that its instance for your module was generated with an older version of the module, and the user has updated the module but hasn't run through the configuration process yet. It should migrate the old [Module Instance](./config.md#instances) to the latest version. If no changes are required, then you can simply return the old configuration with the `version` updated.
@@ -115,7 +116,6 @@ Furthermore, this is a way for your module to enforce that the instance is set t
 
 ```json
 {
-    "key": "...",
     "instance": {
         ...
     }
@@ -124,7 +124,6 @@ Furthermore, this is a way for your module to enforce that the instance is set t
 
 where:
 
-- `key` must match the contents of `ModuleSecretFile`.
 - `instance` is a [Module Instance](./config.md#instances) for your module specifically.
 
 
@@ -140,15 +139,7 @@ This should return a [Hyperdrive Configuration Metadata](./config.md#metadata) o
 
 #### Input
 
-```json
-{
-    "key": "..."
-}
-```
-
-where:
-
-- `key` must match the contents of `ModuleSecretFile`.
+(None)
 
 
 #### Output
@@ -168,7 +159,6 @@ Your module should use this to return information about the configuration and va
 
 ```json
 {
-    "key": "...",
     "settings": {
         ...
     }
@@ -177,7 +167,6 @@ Your module should use this to return information about the configuration and va
 
 where:
 
-- `key` must match the contents of `ModuleSecretFile`.
 - `settings` are the settings for the [complete Hyperdrive installation](TODO), including your module's configuration and the configuration for all other installed modules.
 
 
@@ -207,6 +196,48 @@ where:
 `errors` is an array of strings that indicate individual configuration issues, such as invalid settings. They will be displayed directly to the user so they should be human-readable strings. If there are no errors and the settings are valid, this should be an empty array.
 
 
+## Project Mode Commands
+
+The following commands will be called when your adapter runs in **Project mode**, and belongs to a specific Hyperdrive project.
+
+
+### `hd-module get-log-file`
+
+This should return the relative path (inside of `ModuleLogDir`) to the specified log file.
+
+
+#### Input
+
+```json
+{
+    "key": "...",
+    "source": "..."
+}
+```
+
+where:
+
+- `key` must match the contents of the file in `HD_KEY_FILE`.
+- `source` can be one of the following:
+  - `adapter`
+  - `<container name>`
+
+
+#### Output
+
+This should return the following serialized JSON object:
+
+```json
+{
+    "path": "..."
+}
+```
+
+where:
+- If `source` is `adapter`, it should return the relative path to the adapter's log file within the log directory provided by the `HD_LOG_DIR` environment variable (if applicable).
+- If `source` is anything else, it should be treated as the name of one of the service containers (as provided in [`get-containers`](#hd-module-get-containers)) and return the path to the log file for that service, relative to the log directory provided by the `HD_LOG_DIR` environment variable. If the name provided does not correspond to a known container, then `path` in the response should be empty.
+
+
 ### `hd-module set-settings`
 
 This will be called prior to starting / restarting your module's services. It will provide the settings for the entire [complete Hyperdrive installation](TODO) in serialized JSON format to `STDIN` (terminated with an empty `\n` character); your adapter must read this properly. Your CLI can then save whatever configuration it needs in a format your module services can interpret (if they do not already pull the Hyperdrive configuration from its daemon on startup).
@@ -229,7 +260,7 @@ No response is expected from this command during a successful run. If any errors
 
 where:
 
-- `key` must match the contents of `ModuleSecretFile`.
+- `key` must match the contents of the file in `HD_KEY_FILE`.
 - `settings` are the settings for the [complete Hyperdrive installation](TODO), including your module's configuration and the configuration for all other installed modules.
 
 
@@ -240,7 +271,7 @@ where:
 
 ### `hd-module get-containers`
 
-This will be called when Hyperdrive needs to start or restart all of its services (including any enabled modules). It will only be called *after* the module's configuration has been saved via `set-config`, so you should load the saved configuration and use it to determine this list if necessary.
+This will be called when Hyperdrive needs to start or restart all of its services (including any enabled modules). It will only be called *after* the module's configuration has been saved via `set-settings`, so you should load the saved configuration and use it to determine this list if necessary.
 
 
 #### Input
@@ -253,7 +284,7 @@ This will be called when Hyperdrive needs to start or restart all of its service
 
 where:
 
-- `key` must match the contents of `ModuleSecretFile`.
+- `key` must match the contents of the file in `HD_KEY_FILE`.
 
 
 #### Output
@@ -302,7 +333,7 @@ The third format uses the [Fully Qualified Module Name](./types.md#fully-qualifi
 
 where:
 
-- `key` must match the contents of `ModuleSecretFile`.
+- `key` must match the contents of the file in `HD_KEY_FILE`.
 - `command` is the command to run (without your adapter binary name).
 
 **NOTE:** This function will be run *interactively*, meaning it can prompt the user for input if necessary.

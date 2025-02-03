@@ -20,11 +20,14 @@ func TestLoadModuleConfigs(t *testing.T) {
 	}
 	err := deleteConfigs()
 	require.NoError(t, err)
-	results, err := cfgMgr.LoadModuleInfo(cfgInstance.ProjectName)
+	results, err := modMgr.LoadModuleInfo(false)
 	require.NoError(t, err)
-
 	require.Len(t, results, 1)
-	require.NoError(t, results[0].LoadError)
+
+	for _, result := range results {
+		require.NoError(t, result.LoadError)
+		cfgMgr.HyperdriveConfiguration.Modules[result.Info.Descriptor.GetFullyQualifiedModuleName()] = result.Info.ModuleInfo
+	}
 
 	modCfgs := cfgMgr.HyperdriveConfiguration.Modules
 	require.Len(t, modCfgs, 1)
@@ -71,7 +74,7 @@ func TestSerialization(t *testing.T) {
 	t.Log("Configs modified")
 
 	// Process the configs to make sure they're good
-	processResults, err := cfgMgr.ProcessModuleConfigurations(cfgInstance)
+	processResults, err := cfgMgr.ProcessModuleSettings(modMgr, cfgInstance)
 	require.NoError(t, err)
 	for _, result := range processResults {
 		require.NoError(t, result.ProcessError)
@@ -86,7 +89,7 @@ func TestSerialization(t *testing.T) {
 	t.Log("Main config saved to file")
 
 	// Load the config back in
-	newCfg, err := cfgMgr.HyperdriveConfiguration.CreateInstanceFromFile(cfgPath, internal_test.SystemDir)
+	newCfg, err := cfgMgr.HyperdriveConfiguration.LoadSettingsFromFile(cfgPath)
 	require.NoError(t, err)
 	require.Equal(t, cfgInstance.ProjectName, newCfg.ProjectName)
 	require.Equal(t, cfgInstance.ClientTimeout, newCfg.ClientTimeout)

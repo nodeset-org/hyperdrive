@@ -5,20 +5,29 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	//"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/module"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/context"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
 	"github.com/nodeset-org/hyperdrive/shared"
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/urfave/cli/v2"
 )
 
 const (
-	defaultConfigFolder string      = ".hyperdrive"
-	traceMode           os.FileMode = 0644
+	// Default user config folder
+	DefaultUserFolder string = ".hyperdrive"
+
+	// System dir path for Linux
+	LinuxSystemDir string = "/usr/share/hyperdrive"
+
+	// Trace file mode for HTTP tracing
+	traceMode os.FileMode = 0644
 )
 
 // Flags
@@ -34,7 +43,7 @@ var (
 	}
 	secureSessionFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name:    "secure-session",
-		Aliases: []string{"s"},
+		Aliases: []string{"ss"},
 		Usage:   "Some commands may print sensitive information to your terminal. Use this flag when nobody can see your screen to allow sensitive data to be printed without prompting",
 	}
 	apiAddressFlag *cli.StringFlag = &cli.StringFlag{
@@ -82,6 +91,7 @@ func main() {
 	app.Flags = []cli.Flag{
 		allowRootFlag,
 		utils.UserDirPathFlag,
+		utils.SystemDirPathFlag,
 		apiAddressFlag,
 		debugFlag,
 		httpTracePathFlag,
@@ -92,7 +102,8 @@ func main() {
 	setDefaultPaths()
 
 	// Register commands
-	//service.RegisterCommands(app, "service", []string{"s"})
+	module.RegisterCommands(app, "module", []string{"m"})
+	service.RegisterCommands(app, "service", []string{"s"})
 
 	var hdCtx *context.HyperdriveContext
 	app.Before = func(c *cli.Context) error {
@@ -147,20 +158,34 @@ func setDefaultPaths() {
 		os.Exit(1)
 	}
 
-	// Default config folder path
-	defaultUserDirPath := filepath.Join(homeDir, defaultConfigFolder)
+	// Default user dir path
+	defaultUserDirPath := filepath.Join(homeDir, DefaultUserFolder)
 	utils.UserDirPathFlag.Value = defaultUserDirPath
+
+	// Default system directory path
+	switch runtime.GOOS {
+	// This is where to add different paths for different OS's like macOS
+	default:
+		// By default just use the Linux path for now
+		utils.SystemDirPathFlag.Value = LinuxSystemDir
+	}
 }
 
 // Validate the global flags
 func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
-	// Make sure the config directory exists
+	// Expand the user and system paths
 	configPath := c.String(utils.UserDirPathFlag.Name)
-	path, err := homedir.Expand(strings.TrimSpace(configPath))
+	fullConfigPath, err := homedir.Expand(strings.TrimSpace(configPath))
 	if err != nil {
 		return nil, fmt.Errorf("error expanding config path [%s]: %w", configPath, err)
 	}
-	hdCtx := context.NewHyperdriveContext(path, nil)
+	systemPath := c.String(utils.SystemDirPathFlag.Name)
+	fullSystemPath, err := homedir.Expand(strings.TrimSpace(systemPath))
+	if err != nil {
+		return nil, fmt.Errorf("error expanding system path [%s]: %w", systemPath, err)
+	}
+
+	hdCtx := context.NewHyperdriveContext(fullConfigPath, fullSystemPath)
 	hdCtx.DebugEnabled = c.Bool(debugFlag.Name)
 	hdCtx.SecureSession = c.Bool(secureSessionFlag.Name)
 
