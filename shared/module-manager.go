@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -26,6 +25,9 @@ const (
 
 	// Mode for the adapter key file
 	AdapterKeyMode os.FileMode = 0600
+
+	// The name of the Docker compose project for global adapter containers
+	GlobalAdapterProjectName string = "hd"
 )
 
 // Result of loading a module's info
@@ -172,7 +174,19 @@ func (m *ModuleManager) LoadModuleInfo(ensureModuleStart bool) ([]*ModuleInfoLoa
 		}
 
 		// Run the docker compose command
-		cmd := exec.Command("docker-compose", "-f", strings.Join(adapterComposefiles, " "), "up", "-d", "--quiet-pull")
+		args := []string{
+			"compose",
+		}
+		for _, file := range adapterComposefiles {
+			args = append(args, "-f", file)
+		}
+		args = append(args,
+			"up",
+			"-d",
+			"--quiet-pull",
+		)
+		cmd := exec.Command("docker", args...)
+		cmd.Env = append(cmd.Env, "COMPOSE_PROJECT_NAME="+GlobalAdapterProjectName)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -280,12 +294,12 @@ func (m *ModuleManager) getGlobalAdapterClientFromDescriptor(descriptor modules.
 
 // TEMPORARY placeholder function that exists solely to facilitate development
 func GetGlobalAdapterContainerName(descriptor modules.ModuleDescriptor) string {
-	return "hd_" + string(descriptor.Shortcut) + "_adapter"
+	return GlobalAdapterProjectName + "-" + string(descriptor.Shortcut) + "_adapter"
 }
 
 // TEMPORARY placeholder function that exists solely to facilitate development
 func GetProjectAdapterContainerName(descriptor *modules.ModuleDescriptor, projectName string) string {
-	return "hd_" + projectName + "_" + string(descriptor.Shortcut) + "_adapter"
+	return "hd_" + projectName + "-" + string(descriptor.Shortcut) + "_adapter"
 }
 
 // Load the adapter key file if it's not already loaded

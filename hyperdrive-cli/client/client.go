@@ -74,7 +74,7 @@ func (c *HyperdriveClient) LoadMainSettingsFile() (*config.HyperdriveSettings, b
 }
 
 // Load all of the module info and settings
-func (c *HyperdriveClient) LoadModules(projectName string) ([]*shared.ModuleInfoLoadResult, error) {
+func (c *HyperdriveClient) LoadModules() ([]*shared.ModuleInfoLoadResult, error) {
 	results, err := c.modMgr.LoadModuleInfo(true)
 	if err != nil {
 		return nil, fmt.Errorf("error loading module info: %w", err)
