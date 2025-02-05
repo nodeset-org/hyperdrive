@@ -1,6 +1,15 @@
 package service
 
 import (
+	"fmt"
+	"strings"
+
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	tuiconfig "github.com/nodeset-org/hyperdrive/hyperdrive-cli/tui/config"
+	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
+	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/rivo/tview"
 	"github.com/urfave/cli/v2"
 )
 
@@ -14,39 +23,71 @@ var (
 
 // Configure the service
 func configureService(c *cli.Context) error {
-	/*
-		// Get Hyperdrive client
-		hd, err := client.NewHyperdriveClientFromCtx(c)
+	// Get Hyperdrive client
+	hd, err := client.NewHyperdriveClientFromCtx(c)
+	if err != nil {
+		return err
+	}
+
+	// Load the modules
+	modLoadResults, err := hd.LoadModules()
+	if err != nil {
+		return fmt.Errorf("error loading modules: %w", err)
+	}
+
+	// Load the config, checking to see if it's new (hasn't been installed before)
+	hdCfg := hd.GetHyperdriveConfiguration()
+	settings, isNew, err := hd.LoadMainSettingsFile()
+	if err != nil {
+		return fmt.Errorf("error loading user settings: %w", err)
+	}
+
+	// Check if this is an update
+	oldVersion := strings.TrimPrefix(settings.Version, "v")
+	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
+	isUpdate := c.Bool(configUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
+
+	// Create default settings for modules that are installed but haven't been configured yet
+	waitForOk := false
+	for _, result := range modLoadResults {
+		if result.LoadError != nil {
+			fmt.Println("Skipping module", result.Info.Descriptor.GetFullyQualifiedModuleName(), "because it failed to load: %s", result.LoadError.Error())
+			waitForOk = true
+			continue
+		}
+
+		// Check for an existing config
+		fqmn := result.Info.Descriptor.GetFullyQualifiedModuleName()
+		_, exists := settings.Modules[fqmn]
+		if exists {
+			continue
+		}
+
+		// Create a new default instance for any missing modules
+		info := hdCfg.Modules[fqmn]
+		defaultSettings := modconfig.CreateModuleSettings(info.Configuration)
+		settings.Modules[fqmn] = &modconfig.ModuleInstance{
+			Enabled:  false,
+			Version:  info.Descriptor.Version.String(),
+			Settings: defaultSettings.SerializeToMap(),
+		}
+	}
+	if waitForOk {
+		fmt.Println("The above modules will be disabled until their load errors are resolved.")
+		fmt.Println("Press any key to continue.")
+		_, _ = fmt.Scanln()
+	}
+
+	// For upgrades, move the config to the old one and create a new upgraded copy
+	var oldSettings *config.HyperdriveSettings
+	if isUpdate {
+		oldSettings = settings
+		settings = settings.CreateCopy()
+		err = hd.UpdateDefaults(settings)
 		if err != nil {
-			return err
+			return fmt.Errorf("error updating defaults: %w", err)
 		}
-
-		// Make sure the config directory exists first
-		err = os.MkdirAll(hd.Context.UserDirPath, 0700)
-		if err != nil {
-			fmt.Printf("%sYour Hyperdrive user configuration directory of [%s] could not be created:%s.%s\n", terminal.ColorYellow, hd.Context.UserDirPath, err.Error(), terminal.ColorReset)
-			return nil
-		}
-
-		// Load the config, checking to see if it's new (hasn't been installed before)
-		settings, isNew, err := hd.LoadMainConfigFile()
-		if err != nil {
-			return fmt.Errorf("error loading user settings: %w", err)
-		}
-
-		// Check if this is an update
-		oldVersion := strings.TrimPrefix(settings.Version, "v")
-		currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
-		isUpdate := c.Bool(configUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
-
-		// For upgrades, move the config to the old one and create a new upgraded copy
-		var oldSettings *config.HyperdriveSettings
-		if isUpdate {
-			oldSettings = settings
-			cfg = cfg.CreateCopy()
-			cfg.UpdateDefaults()
-		}
-	*/
+	}
 
 	// Save the config and exit in headless mode
 	/*
@@ -60,17 +101,19 @@ func configureService(c *cli.Context) error {
 				return hd.SaveConfig(cfg)
 		}
 	*/
-	/*
-		// Run the TUI
-		app := tview.NewApplication()
-		md := cliconfig.NewMainDisplay(app, oldSettings, cfg, isNew, isUpdate)
-		err = app.Run()
-		if err != nil {
-			return err
-		}
 
-		// Deal with saving the config and printing the changes
-		if md.ShouldSave {
+	// Run the TUI
+	app := tview.NewApplication()
+	cfg := hd.GetHyperdriveConfiguration()
+	md := tuiconfig.NewMainDisplay(app, cfg, oldSettings, settings, isNew, isUpdate)
+	err = app.Run()
+	if err != nil {
+		return err
+	}
+
+	// Deal with saving the config and printing the changes
+	if md.ShouldSave {
+		/*
 			// Save the config
 			err = hd.SaveConfig(md.Config)
 			if err != nil {
@@ -147,14 +190,13 @@ func configureService(c *cli.Context) error {
 				fmt.Println("Applying changes and restarting containers...")
 				return startService(c, true)
 			}
-		} else {
-			fmt.Println("Your changes have not been saved. Your Hyperdrive configuration is the same as it was before.")
-			return nil
-		}
+		*/
+	} else {
+		fmt.Println("Your changes have not been saved. Your Hyperdrive configuration is the same as it was before.")
+		return nil
+	}
 
-		return err
-	*/
-	return nil
+	return err
 }
 
 // TODO: HEADLESS MODE

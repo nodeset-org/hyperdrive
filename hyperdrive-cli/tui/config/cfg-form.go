@@ -65,7 +65,7 @@ func getTypedFormItem(param config.IParameterSetting, descriptionBox *tview.Text
 
 // Create a standard form checkbox
 func createParameterizedCheckbox(param config.IParameterSetting) *parameterizedFormItem {
-	metadata := param.GetMetadata().(*config.BoolParameter)
+	metadata := param.GetMetadata()
 	item := tview.NewCheckbox().
 		SetLabel(metadata.GetName()).
 		SetChecked(param.GetValue().(bool)).
@@ -94,7 +94,7 @@ func createParameterizedCheckbox(param config.IParameterSetting) *parameterizedF
 
 // Create a standard int field
 func createParameterizedIntField(param config.IParameterSetting) *parameterizedFormItem {
-	metadata := param.GetMetadata().(*config.IntParameter)
+	metadata := param.GetMetadata()
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
 		SetAcceptanceFunc(tview.InputFieldInteger)
@@ -133,7 +133,7 @@ func createParameterizedIntField(param config.IParameterSetting) *parameterizedF
 
 // Create a standard uint field
 func createParameterizedUintField(param config.IParameterSetting) *parameterizedFormItem {
-	metadata := param.GetMetadata().(*config.UintParameter)
+	metadata := param.GetMetadata()
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
 		SetAcceptanceFunc(tview.InputFieldInteger)

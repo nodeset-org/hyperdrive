@@ -5,7 +5,7 @@ const (
 	ProjectNameID              string = "projectName"
 	ApiPortID                  string = "apiPort"
 	EnableIPv6ID               string = "enableIPv6"
-	UserDataPathID             string = "hdUserDataDir"
+	UserDataPathID             string = "userDataPath"
 	AdditionalDockerNetworksID string = "additionalDockerNetworks"
 	ClientTimeoutID            string = "clientTimeout"
 	ContainerTagID             string = "containerTag"

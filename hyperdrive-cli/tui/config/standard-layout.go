@@ -83,7 +83,13 @@ func (layout *standardLayout) createForm(title string) {
 	form.SetChangedFunc(func(index int) {
 		if index < form.GetFormItemCount() {
 			formItem := form.GetFormItem(index)
-			param := layout.parameters[formItem].parameter
+			paramItem, exists := layout.parameters[formItem]
+			if !exists {
+				// Handle form items that were added out-of-band and aren't part of the config
+				return
+			}
+
+			param := paramItem.parameter
 			metadata := param.GetMetadata()
 			defaultValue := metadata.GetDefault()
 			description := metadata.GetDescription().Default // TEMPLATE!
@@ -102,14 +108,19 @@ func (layout *standardLayout) createForm(title string) {
 func (layout *standardLayout) refresh() {
 	for i := 0; i < layout.form.GetFormItemCount(); i++ {
 		formItem := layout.form.GetFormItem(i)
-		param := layout.parameters[formItem].parameter
+		paramItem, exists := layout.parameters[formItem]
+		if !exists {
+			// Handle form items that were added out-of-band and aren't part of the config
+			continue
+		}
+		param := paramItem.parameter
 		metadata := param.GetMetadata()
 
 		// Set the form item to the current value
-		if _, ok := metadata.(*config.BoolParameter); ok {
+		if metadata.GetType() == config.ParameterType_Bool {
 			// Bool
 			formItem.(*tview.Checkbox).SetChecked(param.GetValue().(bool))
-		} else if choiceParam, ok := param.(config.IChoiceParameter); ok {
+		} else if choiceParam, ok := metadata.(config.IChoiceParameter); ok {
 			// Choice
 			for i, option := range choiceParam.GetOptions() {
 				if option.GetValue() == param.String() {
@@ -118,7 +129,11 @@ func (layout *standardLayout) refresh() {
 			}
 		} else {
 			// Everything else
-			formItem.(*tview.InputField).SetText(param.String())
+			inputField, ok := formItem.(*tview.InputField)
+			if !ok {
+				panic(fmt.Errorf("form item [%s] is not an input field, it's a %T", metadata.GetID(), formItem))
+			}
+			inputField.SetText(param.String())
 		}
 	}
 

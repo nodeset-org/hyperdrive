@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/context"
+	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/urfave/cli/v2"
@@ -125,6 +126,56 @@ func (c HyperdriveClient) createDirectory(path string, mode os.FileMode) error {
 		return fmt.Errorf("error checking directory [%s]: %w", c.cfgDir, err)
 	} else if !stat.IsDir() {
 		return fmt.Errorf("directory [%s] is already in use but is not a directory", c.cfgDir)
+	}
+
+	return nil
+}
+
+// Update the defaults for the Hyperdrive settings after upgrading.
+// Assumes the modules have been loaded already.
+func (c *HyperdriveClient) UpdateDefaults(hdSettings *config.HyperdriveSettings) error {
+	hdCfg := c.GetHyperdriveConfiguration()
+
+	// Make an instance
+	instance := modconfig.CreateModuleSettings(hdCfg)
+	err := instance.CopySettingsFromKnownType(hdSettings)
+	if err != nil {
+		return fmt.Errorf("error creating settings instance: %w", err)
+	}
+
+	// Update the defaults
+	err = modconfig.UpdateDefaults(hdCfg, instance)
+	if err != nil {
+		return fmt.Errorf("error updating defaults: %w", err)
+	}
+
+	// Set the settings
+	err = instance.ConvertToKnownType(hdSettings)
+	if err != nil {
+		return fmt.Errorf("error converting settings to known type: %w", err)
+	}
+
+	// Update the modules
+	for fqmn, module := range hdCfg.Modules {
+		// Get the instance
+		instance, exists := hdSettings.Modules[fqmn]
+		if !exists {
+			continue
+		}
+
+		// Ignore modules that are up to date
+		if instance.Version == module.Descriptor.Version.String() {
+			continue
+		}
+
+		// Update the defaults
+		modCfg := module.Configuration
+		modSettings := modconfig.CreateModuleSettings(modCfg)
+		err := modconfig.UpdateDefaults(modCfg, modSettings)
+		if err != nil {
+			return fmt.Errorf("error updating defaults for module [%s]: %w", fqmn, err)
+		}
+		instance.Settings = modSettings.SerializeToMap()
 	}
 
 	return nil

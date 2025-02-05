@@ -1,29 +1,31 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell/v2"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
+	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
 )
 
 // Constants
-const modulesPageID string = "modules"
+const (
+	modulesPageID string = "modules"
+	modulePrefix  string = "module-"
+)
 
 // The addons page
 type ModulesPage struct {
-	home              *settingsHome
-	page              *page
-	layout            *standardLayout
-	masterConfig      *client.GlobalConfig
-	stakewisePage     *StakewiseConfigPage
-	constellationPage *ConstellationConfigPage
-	categoryList      *tview.List
-	addonSubpages     []settingsPage
+	home           *settingsHome
+	page           *page
+	layout         *standardLayout
+	masterConfig   *config.HyperdriveConfig
+	categoryList   *tview.List
+	moduleSubpages []settingsPage
 }
 
-// Create a new addons page
+// Create a new modules page
 func NewModulesPage(home *settingsHome) *ModulesPage {
-
 	modulesPage := &ModulesPage{
 		home:         home,
 		masterConfig: home.md.Config,
@@ -36,14 +38,19 @@ func NewModulesPage(home *settingsHome) *ModulesPage {
 		nil,
 	)
 
-	// Create the addon subpages
-	modulesPage.stakewisePage = NewStakewiseConfigPage(modulesPage)
-	modulesPage.constellationPage = NewConstellationConfigPage(modulesPage)
-	moduleSubpages := []settingsPage{
-		modulesPage.stakewisePage,
-		modulesPage.constellationPage,
+	// Create the subpages for each addon
+	moduleSubpages := []settingsPage{}
+	cfg := home.md.Config
+	for _, module := range cfg.Modules {
+		fqmn := module.Descriptor.GetFullyQualifiedModuleName()
+		instance, exists := home.md.NewSettings.Modules[fqmn]
+		if !exists {
+			panic(fmt.Errorf("module instance [%s] not found", fqmn))
+		}
+		modulePage := NewModulePage(modulesPage, module, instance)
+		moduleSubpages = append(moduleSubpages, modulePage)
 	}
-	modulesPage.addonSubpages = moduleSubpages
+	modulesPage.moduleSubpages = moduleSubpages
 
 	// Add the subpages to the main display
 	for _, subpage := range moduleSubpages {
@@ -63,14 +70,13 @@ func (p *ModulesPage) getPage() *page {
 
 // Creates the content for the fallback client settings page
 func (p *ModulesPage) createContent() {
-
 	p.layout = newStandardLayout()
 	p.layout.createSettingFooter()
 
 	// Create the category list
 	categoryList := tview.NewList().
 		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
-			p.layout.descriptionBox.SetText(p.addonSubpages[index].getPage().description)
+			p.layout.descriptionBox.SetText(p.moduleSubpages[index].getPage().description)
 		})
 	categoryList.SetBackgroundColor(BackgroundColor)
 	categoryList.SetBorderPadding(0, 0, 1, 1)
@@ -87,17 +93,19 @@ func (p *ModulesPage) createContent() {
 	})
 
 	// Add all of the subpages to the list
-	for _, subpage := range p.addonSubpages {
+	for _, subpage := range p.moduleSubpages {
 		categoryList.AddItem(subpage.getPage().title, "", 0, nil)
 	}
 	categoryList.SetSelectedFunc(func(i int, s1, s2 string, r rune) {
-		p.addonSubpages[i].handleLayoutChanged()
-		p.home.md.setPage(p.addonSubpages[i].getPage())
+		p.moduleSubpages[i].handleLayoutChanged()
+		p.home.md.setPage(p.moduleSubpages[i].getPage())
 	})
 
 	// Make it the content of the layout and set the default description text
 	p.layout.setContent(categoryList, categoryList.Box, "Select a Module")
-	p.layout.descriptionBox.SetText(p.addonSubpages[0].getPage().description)
+	if len(p.moduleSubpages) > 0 {
+		p.layout.descriptionBox.SetText(p.moduleSubpages[0].getPage().description)
+	}
 
 	// Make the footer
 	//footer, height := addonsPage.createFooter()

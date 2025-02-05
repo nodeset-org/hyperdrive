@@ -15,8 +15,8 @@
                 "${env:HOME}/.hyperdrive",
                 "-s",
                 "/usr/share/hyperdrive",
-                "m",
-                "l"
+                "s",
+                "c"
             ]
         }
     ]

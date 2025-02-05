@@ -1,7 +1,11 @@
 package config
 
 import (
+	"fmt"
+
+	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/config/ids"
 )
 
 // The page wrapper for the logging config
@@ -44,8 +48,30 @@ func (configPage *LoggingConfigPage) createContent() {
 	configPage.layout.createForm("Logging Settings")
 	configPage.layout.setupEscapeReturnHomeHandler(configPage.home.md, configPage.home.homePage)
 
+	// Create form items for each parameter
+	newInstance, err := configPage.home.md.newInstance.GetSection(modconfig.Identifier(ids.LoggingSectionID))
+	if err != nil {
+		panic(fmt.Errorf("error getting logging section: %w", err))
+	}
+	loggingCfg := configPage.home.md.Config.Logging
+	params := loggingCfg.GetParameters()
+	settings := []modconfig.IParameterSetting{}
+	for _, param := range params {
+		id := param.GetID()
+		setting, err := newInstance.GetParameter(id)
+		if err != nil {
+			panic(fmt.Errorf("error getting logging parameter setting [%s]: %w", id, err))
+		}
+		settings = append(settings, setting)
+	}
+
 	// Set up the form items
-	//configPage.loggingItems = createParameterizedFormItems(configPage.masterConfig.Logging.GetParameters(), configPage.layout.descriptionBox)
+	configPage.loggingItems = createParameterizedFormItems(settings, configPage.layout.descriptionBox)
+	for _, formItem := range configPage.loggingItems {
+		configPage.layout.form.AddFormItem(formItem.item)
+		configPage.layout.parameters[formItem.item] = formItem
+	}
+	configPage.layout.refresh()
 
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.loggingItems...)

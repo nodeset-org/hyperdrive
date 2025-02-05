@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gdamore/tcell/v2"
+	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/rivo/tview"
@@ -23,26 +24,33 @@ type mainDisplay struct {
 	previousWidth       int
 	previousHeight      int
 	Config              *config.HyperdriveConfig
-	PreviousInstance    *config.HyperdriveSettings
-	Instance            *config.HyperdriveSettings
+	PreviousSettings    *config.HyperdriveSettings
+	NewSettings         *config.HyperdriveSettings
 	ShouldSave          bool
 	ContainersToRestart []config.ContainerID
 	ChangeNetworks      bool
+
+	// Private fields
+	previousInstance *modconfig.ModuleSettings
+	newInstance      *modconfig.ModuleSettings
 }
 
 // Creates a new MainDisplay instance.
 func NewMainDisplay(
 	app *tview.Application,
 	config *config.HyperdriveConfig,
-	previousInstance *config.HyperdriveSettings,
-	instance *config.HyperdriveSettings,
+	previousSettings *config.HyperdriveSettings,
+	newSettings *config.HyperdriveSettings,
 	isNew bool,
 	isUpdate bool,
 ) *mainDisplay {
-	// Create a copy of the original config for comparison purposes
-	if previousInstance == nil {
-		previousInstance = instance.CreateCopy()
+	// Create a copy of the original settings for comparison purposes
+	if previousSettings == nil {
+		previousSettings = newSettings.CreateCopy()
 	}
+
+	previousInstance := modconfig.CreateModuleSettings(config)
+	newInstance := modconfig.CreateModuleSettings(config)
 
 	// Create the main grid
 	grid := tview.NewGrid().
@@ -106,8 +114,10 @@ func NewMainDisplay(
 		isNew:            isNew,
 		isUpdate:         isUpdate,
 		Config:           config,
-		PreviousInstance: previousInstance,
-		Instance:         instance,
+		PreviousSettings: previousSettings,
+		NewSettings:      newSettings,
+		previousInstance: previousInstance,
+		newInstance:      newInstance,
 	}
 
 	// Create all of the child elements

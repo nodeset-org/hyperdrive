@@ -16,12 +16,12 @@ type settingsPage interface {
 
 // This is a container for the primary settings category selection home screen.
 type settingsHome struct {
-	homePage       *page
-	saveButton     *tview.Button
-	wizardButton   *tview.Button
-	hyperdrivePage *HyperdriveConfigPage
-	loggingPage    *LoggingConfigPage
-	//modulesPage      *ModulesPage
+	homePage         *page
+	saveButton       *tview.Button
+	wizardButton     *tview.Button
+	hyperdrivePage   *HyperdriveConfigPage
+	loggingPage      *LoggingConfigPage
+	modulesPage      *ModulesPage
 	categoryList     *tview.List
 	settingsSubpages []settingsPage
 	content          tview.Primitive
@@ -42,11 +42,11 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 	// Create the settings subpages
 	home.hyperdrivePage = NewHyperdriveConfigPage(home)
 	home.loggingPage = NewLoggingConfigPage(home)
-	//home.modulesPage = NewModulesPage(home)
+	home.modulesPage = NewModulesPage(home)
 	settingsSubpages := []settingsPage{
 		home.hyperdrivePage,
 		home.loggingPage,
-		//home.modulesPage,
+		home.modulesPage,
 	}
 	home.settingsSubpages = settingsSubpages
 
@@ -201,6 +201,10 @@ func (home *settingsHome) refresh() {
 
 	if home.loggingPage != nil {
 		home.loggingPage.layout.refresh()
+	}
+
+	if home.modulesPage != nil {
+		home.modulesPage.layout.refresh()
 	}
 }
 

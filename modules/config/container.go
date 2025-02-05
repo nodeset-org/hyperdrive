@@ -117,6 +117,36 @@ func getContainerArtifacts(container any) ([]IParameter, []ISection) {
 }
 */
 
+// Crawl through a metadata container and for a corresponding settings container, update all parameters with the OverwriteOnUpgrade flag set to their default values
+func UpdateDefaults(metadata IMetadataContainer, settings IInstanceContainer) error {
+	for _, parameter := range metadata.GetParameters() {
+		id := parameter.GetID()
+		setting, err := settings.GetParameter(id)
+		if err != nil {
+			return fmt.Errorf("error getting parameter [%s]: %w", id, err)
+		}
+		if !parameter.GetOverwriteOnUpgrade() {
+			continue
+		}
+		err = setting.SetValue(parameter.GetDefault())
+		if err != nil {
+			return fmt.Errorf("error updating parameter [%s] to default value [%v]: %w", id, parameter.GetDefault(), err)
+		}
+	}
+	for _, section := range metadata.GetSections() {
+		id := section.GetID()
+		setting, err := settings.GetSection(id)
+		if err != nil {
+			return fmt.Errorf("error getting section [%s]: %w", id, err)
+		}
+		err = UpdateDefaults(section, setting)
+		if err != nil {
+			return fmt.Errorf("error updating section [%s] to default values: %w", id, err)
+		}
+	}
+	return nil
+}
+
 // Serialize the container into an existing map
 func serializeContainerToMap(container IMetadataContainer, existingData map[string]any) {
 	//params, sections := getContainerArtifacts(container)

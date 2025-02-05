@@ -92,7 +92,7 @@ func (m *ModuleSettings) UnmarshalYAML(unmarshal func(interface{}) error) error 
 }
 
 // Convert the generic configuration instance to a known struct type
-func (m ModuleSettings) ConvertToKnownType(config any) error {
+func (m ModuleSettings) ConvertToKnownType(settings any) error {
 	// Serialize the instance to JSON
 	bytes, err := json.Marshal(m)
 	if err != nil {
@@ -100,7 +100,22 @@ func (m ModuleSettings) ConvertToKnownType(config any) error {
 	}
 
 	// Deserialize the JSON back into the known type
-	if err := json.Unmarshal(bytes, config); err != nil {
+	if err := json.Unmarshal(bytes, settings); err != nil {
+		return fmt.Errorf("error deserializing configuration instance: %w", err)
+	}
+	return nil
+}
+
+// Copy the settings from a known struct type
+func (m *ModuleSettings) CopySettingsFromKnownType(settings any) error {
+	// Serialize the instance to JSON
+	bytes, err := json.Marshal(settings)
+	if err != nil {
+		return fmt.Errorf("error serializing configuration instance: %w", err)
+	}
+
+	// Deserialize the JSON back into the known type
+	if err := json.Unmarshal(bytes, m); err != nil {
 		return fmt.Errorf("error deserializing configuration instance: %w", err)
 	}
 	return nil
