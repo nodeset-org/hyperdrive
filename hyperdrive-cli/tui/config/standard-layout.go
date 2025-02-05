@@ -10,12 +10,13 @@ import (
 
 // A layout container with the standard elements and design
 type standardLayout struct {
-	grid           *tview.Grid
-	content        tview.Primitive
-	descriptionBox *tview.TextView
-	footer         tview.Primitive
-	form           *Form
-	parameters     map[tview.FormItem]*parameterizedFormItem
+	grid               *tview.Grid
+	content            tview.Primitive
+	descriptionBox     *tview.TextView
+	footer             tview.Primitive
+	form               *Form
+	parameters         map[tview.FormItem]*parameterizedFormItem
+	buttonDescriptions map[string]config.DynamicProperty[string]
 }
 
 // Creates a new StandardLayout instance, which includes the grid and description box preconstructed.
@@ -71,17 +72,21 @@ func (layout *standardLayout) setFooter(footer tview.Primitive, height int) {
 // Create a standard form for this layout (for settings pages)
 func (layout *standardLayout) createForm(title string) {
 	layout.parameters = map[tview.FormItem]*parameterizedFormItem{}
+	layout.buttonDescriptions = map[string]config.DynamicProperty[string]{}
 
 	// Create the form
 	form := NewForm().
-		SetFieldBackgroundColor(tcell.ColorBlack)
+		SetFieldBackgroundColor(tcell.ColorBlack).
+		SetHorizontal(false)
 	form.
 		SetBackgroundColor(BackgroundColor).
 		SetBorderPadding(0, 0, 0, 0)
 
 	// Set up the selected parameter change callback to update the description box
 	form.SetChangedFunc(func(index int) {
-		if index < form.GetFormItemCount() {
+		itemCount := form.GetFormItemCount()
+		buttonCount := form.GetButtonCount()
+		if index < itemCount {
 			formItem := form.GetFormItem(index)
 			paramItem, exists := layout.parameters[formItem]
 			if !exists {
@@ -96,6 +101,15 @@ func (layout *standardLayout) createForm(title string) {
 			descriptionText := fmt.Sprintf("Default: %v\n\n%s", defaultValue, description)
 			layout.descriptionBox.SetText(descriptionText)
 			layout.descriptionBox.ScrollToBeginning()
+		} else if index < itemCount+buttonCount {
+			// This is a button
+			button := form.GetButton(index - itemCount)
+			label := button.GetLabel()
+			description, exists := layout.buttonDescriptions[label]
+			if !exists {
+				return
+			}
+			layout.descriptionBox.SetText(description.Default) // TEMPLATE!
 		}
 	})
 
@@ -151,7 +165,7 @@ func (layout *standardLayout) createSettingFooter() {
 		SetWrap(false)
 	fmt.Fprint(navTextView1, navString1)
 
-	navString2 := "Esc: Go Back to Categories"
+	navString2 := "Esc: Return to Previous Page"
 	navTextView2 := tview.NewTextView().
 		SetDynamicColors(false).
 		SetRegions(false).
@@ -185,6 +199,10 @@ func (layout *standardLayout) mapParameterizedFormItems(params ...*parameterized
 	for _, param := range params {
 		layout.parameters[param.item] = param
 	}
+}
+
+func (layout *standardLayout) mapButtonDescription(label string, description config.DynamicProperty[string]) {
+	layout.buttonDescriptions[label] = description
 }
 
 // Sets up a handler to return to the specified homePage when the user presses escape on the layout.

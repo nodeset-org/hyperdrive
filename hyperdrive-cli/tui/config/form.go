@@ -454,11 +454,13 @@ func (f *Form) Draw(screen tcell.Screen) {
 	buttonsWidth--
 
 	// Where do we place them?
-	if !f.horizontal && x+buttonsWidth < rightLimit {
+	if !f.horizontal { // && x+buttonsWidth < rightLimit
 		if f.buttonsAlign == tview.AlignRight {
 			x = rightLimit - buttonsWidth
 		} else if f.buttonsAlign == tview.AlignCenter {
 			x = (x + rightLimit - buttonsWidth) / 2
+		} else {
+			x = maxLabelWidth + 4
 		}
 
 		// In vertical layouts, buttons always appear after an empty line.
@@ -469,7 +471,7 @@ func (f *Form) Draw(screen tcell.Screen) {
 
 	// Calculate positions of buttons.
 	for index, button := range f.buttons {
-		space := rightLimit - x
+		/*space := rightLimit - x
 		buttonWidth := buttonWidths[index]
 		if f.horizontal {
 			if space < buttonWidth-4 {
@@ -484,7 +486,7 @@ func (f *Form) Draw(screen tcell.Screen) {
 		}
 		if buttonWidth > space {
 			buttonWidth = space
-		}
+		}*/
 		button.SetLabelColor(f.buttonTextColor).
 			SetBackgroundColor(f.buttonBackgroundColor)
 
@@ -505,14 +507,15 @@ func (f *Form) Draw(screen tcell.Screen) {
 		buttonIndex := index + len(f.items)
 		positions[buttonIndex].x = x
 		positions[buttonIndex].y = y
-		positions[buttonIndex].width = buttonWidth
+		positions[buttonIndex].width = buttonWidths[index] //buttonWidth
 		positions[buttonIndex].height = 1
 
 		if button.HasFocus() {
 			focusedPosition = positions[buttonIndex]
 		}
 
-		x += buttonWidth + 1
+		y += 2 // Force buttons to be on their own line instead of next to each other.
+		//x += buttonWidth + 1
 	}
 
 	// Determine vertical offset based on the position of the focused item.

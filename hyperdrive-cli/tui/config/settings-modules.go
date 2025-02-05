@@ -94,7 +94,7 @@ func (p *ModulesPage) createContent() {
 
 	// Add all of the subpages to the list
 	for _, subpage := range p.moduleSubpages {
-		categoryList.AddItem(subpage.getPage().title, "", 0, nil)
+		categoryList.AddItem("  "+subpage.getPage().title+"  ", "", 0, nil)
 	}
 	categoryList.SetSelectedFunc(func(i int, s1, s2 string, r rune) {
 		p.moduleSubpages[i].handleLayoutChanged()
