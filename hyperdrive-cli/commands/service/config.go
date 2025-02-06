@@ -113,14 +113,18 @@ func configureService(c *cli.Context) error {
 
 	// Deal with saving the config and printing the changes
 	if md.ShouldSave {
-		/*
-			// Save the config
-			err = hd.SaveConfig(md.Config)
-			if err != nil {
-				return fmt.Errorf("error saving config: %w", err)
-			}
-			fmt.Println("Your changes have been saved!")
+		// Save the config
+		err = md.UpdateSettingsFromTuiSelections()
+		if err != nil {
+			return fmt.Errorf("error updating settings from TUI selections: %w", err)
+		}
+		err = hd.SavePrimarySettings(settings, true)
+		if err != nil {
+			return fmt.Errorf("error saving config settings: %w", err)
+		}
+		fmt.Println("Your changes have been saved!")
 
+		/*
 			// Handle network changes
 			prefix := fmt.Sprint(md.PreviousConfig.Hyperdrive.ProjectName.Value)
 			if md.ChangeNetworks {
@@ -144,8 +148,10 @@ func configureService(c *cli.Context) error {
 				}
 				return nil
 			}
+		*/
 
-			// Query for service start if this is a new installation
+		// Query for service start if this is a new installation
+		/*
 			if isNew {
 				if !utils.Confirm("Would you like to start the Hyperdrive services automatically now?") {
 					fmt.Println("Please run `hyperdrive service start` when you are ready to launch.")

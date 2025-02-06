@@ -83,7 +83,7 @@ func TestSerialization(t *testing.T) {
 	t.Log("Module config processed successfully")
 
 	// Save everything
-	cfgPath := filepath.Join(internal_test.UserDir, config.ConfigFilename)
+	cfgPath := filepath.Join(internal_test.UserDir, config.SettingsFilename)
 	err = cfgInstance.SaveToFile(cfgPath)
 	require.NoError(t, err)
 	t.Log("Main config saved to file")

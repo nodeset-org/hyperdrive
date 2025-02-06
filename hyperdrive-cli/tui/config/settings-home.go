@@ -25,12 +25,12 @@ type settingsHome struct {
 	categoryList     *tview.List
 	settingsSubpages []settingsPage
 	content          tview.Primitive
-	md               *mainDisplay
+	md               *MainDisplay
 	warningModal     *choiceModalLayout
 }
 
 // Creates a new SettingsHome instance and adds (and its subpages) it to the main display.
-func newSettingsHome(md *mainDisplay) *settingsHome {
+func newSettingsHome(md *MainDisplay) *settingsHome {
 	homePage := newPage(nil, settingsHomeID, "Categories", "", nil)
 
 	// Create the page and return it
@@ -210,6 +210,13 @@ func (home *settingsHome) refresh() {
 
 // Shows the review page
 func (home *settingsHome) showReviewPage() {
+	md := home.md
+	md.ShouldSave = true
+	/*md.ContainersToRestart = containersToRestart
+	if changeNetworks && !md.isNew {
+		md.ChangeNetworks = true
+	}*/
+	md.app.Stop()
 	//home.md.pages.RemovePage(reviewPageID)
 	//reviewPage := NewReviewPage(home.md, home.md.PreviousConfig, home.md.Config)
 	//home.md.pages.AddPage(reviewPage.page.id, reviewPage.page.content, true, true)

@@ -9,13 +9,13 @@ import (
 )
 
 type iSectionPage interface {
-	getMainDisplay() *mainDisplay
+	getMainDisplay() *MainDisplay
 	getPage() *page
 	handleLayoutChanged()
 }
 
 type SectionPage struct {
-	md     *mainDisplay
+	md     *MainDisplay
 	parent iSectionPage
 	page   *page
 	layout *standardLayout
@@ -26,7 +26,7 @@ type SectionPage struct {
 	subPages []iSectionPage
 }
 
-func NewSectionPage(md *mainDisplay, parent iSectionPage, section config.ISection, settings *modconfig.SettingsSection) *SectionPage {
+func NewSectionPage(md *MainDisplay, parent iSectionPage, section config.ISection, settings *modconfig.SettingsSection) *SectionPage {
 	sectionPage := &SectionPage{
 		md:       md,
 		parent:   parent,
@@ -44,6 +44,9 @@ func NewSectionPage(md *mainDisplay, parent iSectionPage, section config.ISectio
 		sectionPage.layout.grid,
 	)
 	sectionPage.setupSubpages()
+
+	// Do the initial draw
+	sectionPage.handleLayoutChanged()
 	return sectionPage
 }
 
@@ -67,9 +70,6 @@ func (p *SectionPage) createContent() {
 	}
 	p.params = createParameterizedFormItems(settings, p.layout.descriptionBox)
 	p.layout.mapParameterizedFormItems(p.params...)
-
-	// Do the initial draw
-	p.handleLayoutChanged()
 }
 
 // Set up the subpages
@@ -95,7 +95,7 @@ func (p *SectionPage) setupSubpages() {
 }
 
 // Get the main display
-func (p *SectionPage) getMainDisplay() *mainDisplay {
+func (p *SectionPage) getMainDisplay() *MainDisplay {
 	return p.md
 }
 

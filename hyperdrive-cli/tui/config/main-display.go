@@ -11,7 +11,7 @@ import (
 )
 
 // This represents the primary TUI for the configuration command
-type mainDisplay struct {
+type MainDisplay struct {
 	navHeader *tview.TextView
 	pages     *tview.Pages
 	app       *tview.Application
@@ -43,14 +43,23 @@ func NewMainDisplay(
 	newSettings *config.HyperdriveSettings,
 	isNew bool,
 	isUpdate bool,
-) *mainDisplay {
+) *MainDisplay {
 	// Create a copy of the original settings for comparison purposes
 	if previousSettings == nil {
 		previousSettings = newSettings.CreateCopy()
 	}
 
+	// Create Hyperdrive settings instances
 	previousInstance := modconfig.CreateModuleSettings(config)
+	err := previousInstance.CopySettingsFromKnownType(previousSettings)
+	if err != nil {
+		panic(fmt.Errorf("error copying previous settings to HD config instance: %w", err))
+	}
 	newInstance := modconfig.CreateModuleSettings(config)
+	err = newInstance.CopySettingsFromKnownType(newSettings)
+	if err != nil {
+		panic(fmt.Errorf("error copying new settings to HD config instance: %w", err))
+	}
 
 	// Create the main grid
 	grid := tview.NewGrid().
@@ -105,7 +114,7 @@ func NewMainDisplay(
 	resizeWarning.SetBorderPadding(0, 0, 1, 1)
 
 	// Create the main display object
-	md := &mainDisplay{
+	md := &MainDisplay{
 		navHeader:        navHeader,
 		pages:            pages,
 		app:              app,
@@ -143,17 +152,28 @@ func NewMainDisplay(
 		return false
 	})
 
-	if isNew {
-		//md.wizard.welcomeModal.show()
-	} else {
-		md.setPage(md.settingsHome.homePage)
-	}
+	md.setPage(md.settingsHome.homePage)
 	app.SetRoot(grid, true)
 	return md
 }
 
 // Sets the current page that is on display.
-func (md *mainDisplay) setPage(page *page) {
+func (md *MainDisplay) setPage(page *page) {
 	md.navHeader.SetText(page.getHeader())
 	md.pages.SwitchToPage(page.id)
+}
+
+func (md *MainDisplay) UpdateSettingsFromTuiSelections() error {
+	// Copy the base settings
+	err := md.newInstance.ConvertToKnownType(md.NewSettings)
+	if err != nil {
+		return fmt.Errorf("error converting updated base settings to known type: %w", err)
+	}
+
+	// Copy the module settings
+	for _, modulePage := range md.settingsHome.modulesPage.moduleSubpages {
+		modInstance := modulePage.instance
+		modInstance.SetSettings(modulePage.settings)
+	}
+	return nil
 }

@@ -55,6 +55,9 @@ func NewModulePage(modulesPage *ModulesPage, info *config.ModuleInfo, instance *
 		modulePage.layout.grid,
 	)
 	modulePage.setupSubpages()
+
+	// Do the initial draw
+	modulePage.handleLayoutChanged()
 	return modulePage
 }
 
@@ -96,9 +99,6 @@ func (configPage *ModulePage) createContent() {
 		configPage.instance.Enabled = checked
 		configPage.handleLayoutChanged()
 	})
-
-	// Do the initial draw
-	configPage.handleLayoutChanged()
 }
 
 func (p *ModulePage) setupSubpages() {
@@ -124,7 +124,7 @@ func (p *ModulePage) setupSubpages() {
 }
 
 // Get the main display
-func (p *ModulePage) getMainDisplay() *mainDisplay {
+func (p *ModulePage) getMainDisplay() *MainDisplay {
 	return p.modulesPage.home.md
 }
 

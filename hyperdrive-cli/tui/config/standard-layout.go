@@ -206,7 +206,7 @@ func (layout *standardLayout) mapButtonDescription(label string, description con
 }
 
 // Sets up a handler to return to the specified homePage when the user presses escape on the layout.
-func (layout *standardLayout) setupEscapeReturnHomeHandler(md *mainDisplay, homePage *page) {
+func (layout *standardLayout) setupEscapeReturnHomeHandler(md *MainDisplay, homePage *page) {
 	layout.grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		// Return to the home page
 		if event.Key() == tcell.KeyEsc {

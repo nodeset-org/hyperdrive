@@ -78,8 +78,9 @@ func TestUpgradeInstance(t *testing.T) {
 	require.NoError(t, err)
 	hdSettings := createHyperdriveConfigInstance()
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	modSettings := hdSettings.ModuleSettings[modInstance]
+	modSettings := config.CreateModuleSettings(modInfo.Configuration)
 	updateConfigSettings(t, modSettings)
+	modInstance.SetSettings(modSettings)
 
 	// Manually downgrade the old config to v0.1.0
 	legacyModInstance := &config.ModuleInstance{
@@ -105,8 +106,9 @@ func TestProcessSettings(t *testing.T) {
 	require.NoError(t, err)
 	hdSettings := createHyperdriveConfigInstance()
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	modSettings := hdSettings.ModuleSettings[modInstance]
+	modSettings := config.CreateModuleSettings(modInfo.Configuration)
 	updateConfigSettings(t, modSettings)
+	modInstance.SetSettings(modSettings)
 
 	// Process the config
 	response, err := gac.ProcessSettings(context.Background(), hdSettings.SerializeToMap())
@@ -122,8 +124,9 @@ func TestSetSettings(t *testing.T) {
 	require.NoError(t, err)
 	hdSettings := createHyperdriveConfigInstance()
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	modSettings := hdSettings.ModuleSettings[modInstance]
+	modSettings := config.CreateModuleSettings(modInfo.Configuration)
 	updateConfigSettings(t, modSettings)
+	modInstance.SetSettings(modSettings)
 
 	// Set the config
 	err = pac.SetSettings(context.Background(), hdSettings.SerializeToMap())
@@ -159,8 +162,9 @@ func TestRunCommand(t *testing.T) {
 	require.NoError(t, err)
 	hdSettings := createHyperdriveConfigInstance()
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
-	modSettings := hdSettings.ModuleSettings[modInstance]
+	modSettings := config.CreateModuleSettings(modInfo.Configuration)
 	updateConfigSettings(t, modSettings)
+	modInstance.SetSettings(modSettings)
 	err = pac.SetSettings(context.Background(), hdSettings.SerializeToMap())
 	require.NoError(t, err)
 
@@ -197,8 +201,6 @@ func createHyperdriveConfigInstance() *hdconfig.HyperdriveSettings {
 		Settings: map[string]any{},
 	}
 	hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()] = modInstance
-	modSettings := config.CreateModuleSettings(modInfo.Configuration)
-	hdSettings.ModuleSettings[modInstance] = modSettings
 	return hdSettings
 }
 

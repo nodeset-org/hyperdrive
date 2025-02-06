@@ -10,9 +10,11 @@ import (
 
 // Saves a file to disk in a safe manner by writing to a temporary file and then replacing the original file.
 // If something precludes a successful save, such as a full disk, the original file is left untouched.
+// Requires the file's parent directory must already exist.
 // Adapted from Patches's original Smart Node implementation.
-func SafeSaveFile(data []byte, directory string, filename string) error {
-	path := filepath.Join(directory, filename)
+func SafeSaveFile(data []byte, path string, mode os.FileMode) error {
+	directory := filepath.Dir(path)
+	filename := filepath.Base(path)
 
 	// Create a temporary file in the same directory
 	now := time.Now().Local()
@@ -47,7 +49,7 @@ func SafeSaveFile(data []byte, directory string, filename string) error {
 	if err != nil {
 		return fmt.Errorf("error replacing file [%s] with temporary file [%s]: %w", filename, tempFilename, err)
 	}
-	err = os.Chmod(path, 0664)
+	err = os.Chmod(path, mode)
 	if err != nil {
 		return fmt.Errorf("error setting permissions of file [%s]: %w", filename, err)
 	}

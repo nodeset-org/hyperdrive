@@ -21,7 +21,7 @@ type ModulesPage struct {
 	layout         *standardLayout
 	masterConfig   *config.HyperdriveConfig
 	categoryList   *tview.List
-	moduleSubpages []settingsPage
+	moduleSubpages []*ModulePage
 }
 
 // Create a new modules page
@@ -39,7 +39,7 @@ func NewModulesPage(home *settingsHome) *ModulesPage {
 	)
 
 	// Create the subpages for each addon
-	moduleSubpages := []settingsPage{}
+	moduleSubpages := []*ModulePage{}
 	cfg := home.md.Config
 	for _, module := range cfg.Modules {
 		fqmn := module.Descriptor.GetFullyQualifiedModuleName()

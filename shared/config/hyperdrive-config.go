@@ -166,16 +166,5 @@ func (c *HyperdriveConfig) LoadSettingsFromFile(configFilePath string) (*Hyperdr
 	if err := yaml.Unmarshal(configBytes, cfg); err != nil {
 		return nil, fmt.Errorf("could not parse config file: %w", err)
 	}
-
-	// Link all of the modules to the module info
-	for fqmn, module := range cfg.Modules {
-		if info, exists := c.Modules[fqmn]; exists {
-			settings, err := module.CreateSettingsFromMetadata(info.Configuration)
-			if err != nil {
-				return nil, fmt.Errorf("could not create settings from metadata: %w", err)
-			}
-			cfg.ModuleSettings[module] = settings
-		}
-	}
 	return cfg, nil
 }
