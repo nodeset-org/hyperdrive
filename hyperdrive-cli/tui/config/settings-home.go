@@ -194,10 +194,9 @@ func (home *settingsHome) createFooter() (tview.Primitive, int) {
 
 // Refreshes the settings on all of the config pages to match the config's values
 func (home *settingsHome) refresh() {
-	/*
-		if home.hyperdrivePage != nil {
-			home.hyperdrivePage.layout.refresh()
-		}*/
+	if home.hyperdrivePage != nil {
+		home.hyperdrivePage.layout.refresh()
+	}
 
 	if home.loggingPage != nil {
 		home.loggingPage.layout.refresh()
@@ -210,15 +209,8 @@ func (home *settingsHome) refresh() {
 
 // Shows the review page
 func (home *settingsHome) showReviewPage() {
-	md := home.md
-	md.ShouldSave = true
-	/*md.ContainersToRestart = containersToRestart
-	if changeNetworks && !md.isNew {
-		md.ChangeNetworks = true
-	}*/
-	md.app.Stop()
-	//home.md.pages.RemovePage(reviewPageID)
-	//reviewPage := NewReviewPage(home.md, home.md.PreviousConfig, home.md.Config)
-	//home.md.pages.AddPage(reviewPage.page.id, reviewPage.page.content, true, true)
-	//home.md.setPage(reviewPage.page)
+	home.md.pages.RemovePage(reviewPageID)
+	reviewPage := NewReviewPage(home.md)
+	home.md.pages.AddPage(reviewPage.page.id, reviewPage.page.content, true, true)
+	home.md.setPage(reviewPage.page)
 }

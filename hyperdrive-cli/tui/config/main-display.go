@@ -33,11 +33,13 @@ type MainDisplay struct {
 	// Private fields
 	previousInstance *modconfig.ModuleSettings
 	newInstance      *modconfig.ModuleSettings
+	moduleManager    *shared.ModuleManager
 }
 
 // Creates a new MainDisplay instance.
 func NewMainDisplay(
 	app *tview.Application,
+	moduleManager *shared.ModuleManager,
 	config *config.HyperdriveConfig,
 	previousSettings *config.HyperdriveSettings,
 	newSettings *config.HyperdriveSettings,
@@ -122,6 +124,7 @@ func NewMainDisplay(
 		mainGrid:         grid,
 		isNew:            isNew,
 		isUpdate:         isUpdate,
+		moduleManager:    moduleManager,
 		Config:           config,
 		PreviousSettings: previousSettings,
 		NewSettings:      newSettings,

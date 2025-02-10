@@ -12,8 +12,6 @@ const (
 
 // Request format for `process-settings`
 type ProcessSettingsRequest struct {
-	KeyedRequest
-
 	// The Hyperdrive config settings to process
 	Settings map[string]any `json:"settings"`
 }
@@ -30,9 +28,6 @@ type ProcessSettingsResponse struct {
 // Have the adapter process the module settings based on the full Hyperdriver configuration.
 func (c *AdapterClient) ProcessSettings(ctx context.Context, settings map[string]any) (ProcessSettingsResponse, error) {
 	request := &ProcessSettingsRequest{
-		KeyedRequest: KeyedRequest{
-			Key: c.key,
-		},
 		Settings: settings,
 	}
 	response := ProcessSettingsResponse{}

@@ -226,6 +226,10 @@ func (p *Parameter[Type]) deserializeImpl(data map[string]any) error {
 /// === Bool Parameters ===
 /// =======================
 
+type IBoolParameter interface {
+	IParameter
+}
+
 // A boolean parameter's metadata
 type BoolParameter struct {
 	Parameter[bool]
@@ -255,9 +259,9 @@ func (p *BoolParameter) Deserialize(data map[string]any) error {
 
 func (p *BoolParameter) CreateSetting() IParameterSetting {
 	return &boolParameterSetting{
-		parameterSetting: parameterSetting[bool]{
-			metadata: p,
-			Value:    p.Default,
+		parameterSetting: parameterSetting[IBoolParameter, bool]{
+			info:  p,
+			value: p.Default,
 		},
 	}
 }
@@ -276,6 +280,17 @@ type NumberParameterType interface {
 	int64 | uint64 | float64
 }
 
+// Interface for number parameters
+type INumberParameter[Type NumberParameterType] interface {
+	IParameter
+
+	// Gets the minimum value for the parameter
+	GetMinValue() Type
+
+	// Gets the maximum value for the parameter
+	GetMaxValue() Type
+}
+
 // An integer parameter's metadata
 type NumberParameter[Type NumberParameterType] struct {
 	Parameter[Type]
@@ -287,6 +302,17 @@ type NumberParameter[Type NumberParameterType] struct {
 	MaxValue Type `json:"maxValue,omitempty" yaml:"maxValue,omitempty"`
 }
 
+// Gets the minimum value for the parameter
+func (p NumberParameter[Type]) GetMinValue() Type {
+	return p.MinValue
+}
+
+// Gets the maximum value for the parameter
+func (p NumberParameter[Type]) GetMaxValue() Type {
+	return p.MaxValue
+}
+
+// Serializes the number parameter to a map
 func (p NumberParameter[Type]) Serialize() map[string]any {
 	props := p.serializeImpl()
 	props[MinValueKey] = p.MinValue
@@ -294,6 +320,7 @@ func (p NumberParameter[Type]) Serialize() map[string]any {
 	return props
 }
 
+// Unmarshal the number parameter from a map
 func (p *NumberParameter[Type]) Deserialize(data map[string]any) error {
 	err := p.Parameter.deserializeImpl(data)
 	if err != nil {
@@ -344,9 +371,9 @@ func (p IntParameter) GetType() ParameterType {
 
 func (p *IntParameter) CreateSetting() IParameterSetting {
 	return &numberParameterSetting[int64]{
-		parameterSetting: parameterSetting[int64]{
-			metadata: p,
-			Value:    p.Default,
+		parameterSetting: parameterSetting[INumberParameter[int64], int64]{
+			info:  p,
+			value: p.Default,
 		},
 	}
 }
@@ -366,9 +393,9 @@ func (p UintParameter) GetType() ParameterType {
 
 func (p *UintParameter) CreateSetting() IParameterSetting {
 	return &numberParameterSetting[uint64]{
-		parameterSetting: parameterSetting[uint64]{
-			metadata: p,
-			Value:    p.Default,
+		parameterSetting: parameterSetting[INumberParameter[uint64], uint64]{
+			info:  p,
+			value: p.Default,
 		},
 	}
 }
@@ -388,9 +415,9 @@ func (p FloatParameter) GetType() ParameterType {
 
 func (p *FloatParameter) CreateSetting() IParameterSetting {
 	return &numberParameterSetting[float64]{
-		parameterSetting: parameterSetting[float64]{
-			metadata: p,
-			Value:    p.Default,
+		parameterSetting: parameterSetting[INumberParameter[float64], float64]{
+			info:  p,
+			value: p.Default,
 		},
 	}
 }
@@ -405,6 +432,17 @@ const (
 	RegexKey     string = "regex"
 )
 
+// Interface for string parameters
+type IStringParameter interface {
+	IParameter
+
+	// Gets the max length of the string
+	GetMaxLength() uint64
+
+	// Gets the pattern for the regular expression the string must match
+	GetRegex() string
+}
+
 // A string parameter's metadata
 type StringParameter struct {
 	Parameter[string]
@@ -416,11 +454,21 @@ type StringParameter struct {
 	Regex string `json:"regex,omitempty" yaml:"regex,omitempty"`
 }
 
+// Gets the max length of the string
+func (p StringParameter) GetMaxLength() uint64 {
+	return p.MaxLength
+}
+
+// Gets the pattern for the regular expression the string must match
+func (p StringParameter) GetRegex() string {
+	return p.Regex
+}
+
 func (p *StringParameter) CreateSetting() IParameterSetting {
 	return &stringParameterSetting{
-		parameterSetting: parameterSetting[string]{
-			metadata: p,
-			Value:    p.Default,
+		parameterSetting: parameterSetting[IStringParameter, string]{
+			info:  p,
+			value: p.Default,
 		},
 	}
 }
@@ -487,9 +535,9 @@ type ChoiceParameter[ChoiceType ~string] struct {
 
 func (p *ChoiceParameter[ChoiceType]) CreateSetting() IParameterSetting {
 	return &choiceParameterSetting[ChoiceType]{
-		parameterSetting: parameterSetting[ChoiceType]{
-			metadata: p,
-			Value:    p.Default,
+		parameterSetting: parameterSetting[IChoiceParameter, ChoiceType]{
+			info:  p,
+			value: p.Default,
 		},
 	}
 }

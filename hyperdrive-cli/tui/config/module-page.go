@@ -11,13 +11,15 @@ import (
 )
 
 type ModulePage struct {
-	modulesPage *ModulesPage
-	page        *page
-	layout      *standardLayout
-	info        *config.ModuleInfo
-	instance    *modconfig.ModuleInstance
-	settings    *modconfig.ModuleSettings
-	subPages    []iSectionPage
+	modulesPage      *ModulesPage
+	page             *page
+	layout           *standardLayout
+	info             *config.ModuleInfo
+	previousInstance *modconfig.ModuleInstance
+	instance         *modconfig.ModuleInstance
+	previousSettings *modconfig.ModuleSettings
+	settings         *modconfig.ModuleSettings
+	subPages         []iSectionPage
 
 	// Fields
 	enableBox *parameterizedFormItem
@@ -25,10 +27,15 @@ type ModulePage struct {
 }
 
 // Create a new module page
-func NewModulePage(modulesPage *ModulesPage, info *config.ModuleInfo, instance *modconfig.ModuleInstance) *ModulePage {
+func NewModulePage(modulesPage *ModulesPage, info *config.ModuleInfo, previousInstance *modconfig.ModuleInstance, instance *modconfig.ModuleInstance) *ModulePage {
 	fqmn := info.Descriptor.GetFullyQualifiedModuleName()
+	previousSettings := modconfig.CreateModuleSettings(info.Configuration)
+	err := previousSettings.DeserializeFromMap(previousInstance.Settings)
+	if err != nil {
+		panic(fmt.Errorf("error deserializing previous module [%s] settings: %w", fqmn, err))
+	}
 	settings := modconfig.CreateModuleSettings(info.Configuration)
-	err := settings.DeserializeFromMap(instance.Settings)
+	err = settings.DeserializeFromMap(instance.Settings)
 	if err != nil {
 		panic(fmt.Errorf("error deserializing module [%s] settings: %w", fqmn, err))
 	}
@@ -40,10 +47,12 @@ func NewModulePage(modulesPage *ModulesPage, info *config.ModuleInfo, instance *
 	moduleDescString.WriteString("Description:\n" + string(info.Descriptor.Description))
 
 	modulePage := &ModulePage{
-		modulesPage: modulesPage,
-		info:        info,
-		instance:    instance,
-		settings:    settings,
+		modulesPage:      modulesPage,
+		info:             info,
+		previousInstance: previousInstance,
+		instance:         instance,
+		previousSettings: previousSettings,
+		settings:         settings,
 	}
 	modulePage.createContent()
 

@@ -43,11 +43,12 @@ func NewModulesPage(home *settingsHome) *ModulesPage {
 	cfg := home.md.Config
 	for _, module := range cfg.Modules {
 		fqmn := module.Descriptor.GetFullyQualifiedModuleName()
+		previousInstance := home.md.PreviousSettings.Modules[fqmn]
 		instance, exists := home.md.NewSettings.Modules[fqmn]
 		if !exists {
 			panic(fmt.Errorf("module instance [%s] not found", fqmn))
 		}
-		modulePage := NewModulePage(modulesPage, module, instance)
+		modulePage := NewModulePage(modulesPage, module, previousInstance, instance)
 		moduleSubpages = append(moduleSubpages, modulePage)
 	}
 	modulesPage.moduleSubpages = moduleSubpages

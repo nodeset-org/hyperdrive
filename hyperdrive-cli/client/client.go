@@ -58,6 +58,11 @@ func (c *HyperdriveClient) GetHyperdriveConfiguration() *config.HyperdriveConfig
 	return c.cfgMgr.HyperdriveConfiguration
 }
 
+// Get the module manager
+func (c *HyperdriveClient) GetModuleManager() *shared.ModuleManager {
+	return c.modMgr
+}
+
 // Load the config settings
 func (c *HyperdriveClient) LoadMainSettingsFile() (*config.HyperdriveSettings, bool, error) {
 	primaryConfigPath := filepath.Join(c.cfgDir, config.SettingsFilename)

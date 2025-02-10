@@ -100,3 +100,7 @@ func (e *enableParamInstance) SetValue(value any) error {
 func (e *enableParamInstance) String() string {
 	return strconv.FormatBool(e.intance.Enabled)
 }
+
+func (e *enableParamInstance) Validate() []error {
+	return nil
+}

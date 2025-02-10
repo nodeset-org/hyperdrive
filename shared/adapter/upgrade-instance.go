@@ -13,8 +13,6 @@ const (
 
 // Request format for `upgrade-instance`
 type UpgradeInstanceRequest struct {
-	KeyedRequest
-
 	// The currently saved instance to upgrade
 	Instance *config.ModuleInstance `json:"instance"`
 }
@@ -22,9 +20,6 @@ type UpgradeInstanceRequest struct {
 // Send an instance upgrade request to the adapter.
 func (c *AdapterClient) UpgradeInstance(ctx context.Context, instance *config.ModuleInstance) (*config.ModuleInstance, error) {
 	request := &UpgradeInstanceRequest{
-		KeyedRequest: KeyedRequest{
-			Key: c.key,
-		},
 		Instance: instance,
 	}
 	response := config.ModuleInstance{}

@@ -13,13 +13,10 @@ const (
 
 // Get the module config metadata from the adapter
 func (c *AdapterClient) GetConfigMetadata(ctx context.Context) (config.IModuleConfiguration, error) {
-	request := &KeyedRequest{
-		Key: c.key,
-	}
 	configMap := map[string]any{}
 
 	// Get the config from the adapter
-	err := runCommand(c, ctx, GetConfigMetadataCommandString, request, &configMap)
+	err := runCommand[struct{}](c, ctx, GetConfigMetadataCommandString, nil, &configMap)
 	if err != nil {
 		return nil, fmt.Errorf("error getting configuration metadata: %w", err)
 	}

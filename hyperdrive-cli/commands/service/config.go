@@ -105,7 +105,8 @@ func configureService(c *cli.Context) error {
 	// Run the TUI
 	app := tview.NewApplication()
 	cfg := hd.GetHyperdriveConfiguration()
-	md := tuiconfig.NewMainDisplay(app, cfg, oldSettings, settings, isNew, isUpdate)
+	modMgr := hd.GetModuleManager()
+	md := tuiconfig.NewMainDisplay(app, modMgr, cfg, oldSettings, settings, isNew, isUpdate)
 	err = app.Run()
 	if err != nil {
 		return err
