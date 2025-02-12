@@ -2,17 +2,18 @@ package adapter_test
 
 import (
 	"context"
-	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
+	"text/template"
 
 	"github.com/docker/docker/api/types/container"
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	adapter "github.com/nodeset-org/hyperdrive/shared/adapter/test"
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils/command"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,20 +24,6 @@ func TestGetVersion(t *testing.T) {
 	}
 	t.Logf("Adapter version: %s", version)
 	require.Equal(t, "0.2.0", version)
-}
-
-func TestGetLogFile(t *testing.T) {
-	// Get the adapter log
-	response, err := pac.GetLogFile(context.Background(), "adapter")
-	require.NoError(t, err)
-	require.Equal(t, "adapter.log", response.Path)
-	t.Logf("Adapter log file path: %s", response.Path)
-
-	// Get the service log
-	response, err = pac.GetLogFile(context.Background(), "example")
-	require.NoError(t, err)
-	require.Equal(t, "service.log", response.Path)
-	t.Logf("Service log file path: %s", response.Path)
 }
 
 func TestGetConfigMetadata(t *testing.T) {
@@ -104,6 +91,11 @@ func TestUpgradeInstance(t *testing.T) {
 func TestProcessSettings(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
+	oldHdSettings := createHyperdriveConfigInstance()
+	oldModInstance := oldHdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
+	oldModSettings := config.CreateModuleSettings(modInfo.Configuration)
+	oldModInstance.SetSettings(oldModSettings)
+
 	hdSettings := createHyperdriveConfigInstance()
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	modSettings := config.CreateModuleSettings(modInfo.Configuration)
@@ -111,11 +103,13 @@ func TestProcessSettings(t *testing.T) {
 	modInstance.SetSettings(modSettings)
 
 	// Process the config
-	response, err := gac.ProcessSettings(context.Background(), hdSettings.SerializeToMap())
+	response, err := gac.ProcessSettings(context.Background(), oldHdSettings, hdSettings)
 	require.NoError(t, err)
 	require.Empty(t, response.Errors)
 	require.Len(t, response.Ports, 1)
 	require.Equal(t, uint16(8085), response.Ports["server/port"])
+	require.Len(t, response.ServicesToRestart, 1)
+	require.Equal(t, "example", response.ServicesToRestart[0])
 	t.Log("Config processed successfully")
 }
 
@@ -129,50 +123,86 @@ func TestSetSettings(t *testing.T) {
 	modInstance.SetSettings(modSettings)
 
 	// Set the config
-	err = pac.SetSettings(context.Background(), hdSettings.SerializeToMap())
+	err = pac.SetSettings(context.Background(), hdSettings)
 	require.NoError(t, err)
 	t.Log("Config set successfully")
 }
 
-func TestGetContaners(t *testing.T) {
-	containers, err := pac.GetContainers(context.Background())
-	if err != nil {
-		t.Errorf("error getting containers: %v", err)
-	}
-	require.Len(t, containers, 1)
-	require.Equal(t, "example", containers[0])
-	t.Logf("Containers: %v", containers)
-}
-
-func TestRunCommand(t *testing.T) {
-	defer func() {
-		// Stop the service container
-		if docker != nil {
-			timeout := 0
-			_ = docker.ContainerStop(context.Background(), internal_test.ServiceContainerName, container.StopOptions{Timeout: &timeout})
-			_ = docker.ContainerRemove(context.Background(), internal_test.ServiceContainerName, container.RemoveOptions{Force: true})
-		}
-	}()
-
-	// Make a logger
-	logger := adapter.CreateLogger(t)
-
-	// Set the config
+func TestStartStopRun(t *testing.T) {
 	err := deleteConfigs()
 	require.NoError(t, err)
+
+	// Remove the service container
+	if docker != nil {
+		timeout := 0
+		_ = docker.ContainerStop(context.Background(), internal_test.ServiceContainerName, container.StopOptions{Timeout: &timeout})
+		_ = docker.ContainerRemove(context.Background(), internal_test.ServiceContainerName, container.RemoveOptions{Force: true})
+	}
+
+	// Set the config
 	hdSettings := createHyperdriveConfigInstance()
 	modInstance := hdSettings.Modules[internal_test.ExampleDescriptor.GetFullyQualifiedModuleName()]
 	modSettings := config.CreateModuleSettings(modInfo.Configuration)
 	updateConfigSettings(t, modSettings)
 	modInstance.SetSettings(modSettings)
-	err = pac.SetSettings(context.Background(), hdSettings.SerializeToMap())
+	err = pac.SetSettings(context.Background(), hdSettings)
 	require.NoError(t, err)
 
-	// Make sure the service is running
-	runCmd := fmt.Sprintf("docker run --rm -d -v %s:/hd/logs -v %s:/hd/config -v %s:/hd/secret --network %s_net --name %s %s -i 0.0.0.0 -p 8085", internal_test.LogDir, internal_test.CfgDir, internal_test.KeyPath, internal_test.ProjectName, internal_test.ServiceContainerName, internal_test.ServiceTag)
-	serviceRunOut, err := command.ReadOutput(runCmd)
+	// Make sure the service is not running
+	found := false
+	containers, err := docker.ContainerList(context.Background(), container.ListOptions{All: true})
 	require.NoError(t, err)
-	t.Logf("Service container started: %s", serviceRunOut)
+	for _, container := range containers {
+		for _, name := range container.Names {
+			if name == "/"+internal_test.ServiceContainerName {
+				found = true
+				break
+			}
+		}
+		if found {
+			break
+		}
+	}
+	require.False(t, found)
+
+	// Create the service compose file
+	serviceFilePath := filepath.Join(internal_test.RuntimeDir, "example.yml")
+	tmpl := template.New("service")
+	_, err = tmpl.Parse(internal_test.ServiceComposeTemplate)
+	require.NoError(t, err)
+	runtimeFile, err := os.OpenFile(serviceFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	require.NoError(t, err)
+	defer runtimeFile.Close()
+	tmplSrc := &internal_test.InternalTestTemplateSource{}
+	err = tmpl.Execute(runtimeFile, tmplSrc)
+	require.NoError(t, err)
+	runtimeFile.Close()
+
+	// Start the services
+	composeProjectName := internal_test.ProjectName + "-" + string(internal_test.ExampleDescriptor.Shortcut)
+	err = pac.Start(context.Background(), hdSettings, composeProjectName)
+	require.NoError(t, err)
+	t.Log("Services started successfully")
+
+	// Make sure the service is running now
+	found = false
+	containers, err = docker.ContainerList(context.Background(), container.ListOptions{All: false})
+	require.NoError(t, err)
+	for _, container := range containers {
+		for _, name := range container.Names {
+			if name == "/"+internal_test.ServiceContainerName {
+				found = true
+				break
+			}
+		}
+		if found {
+			break
+		}
+	}
+	require.True(t, found)
+
+	// Make a logger
+	logger := adapter.CreateLogger(t)
 
 	// Run the get-param command
 	cmd := "config get-param exampleFloat"
@@ -186,6 +216,33 @@ func TestRunCommand(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 75.0, paramVal)
 	t.Logf("Command ran successfully and returned %s", out)
+
+	// Stop the services
+	err = pac.Stop(context.Background(), composeProjectName)
+	require.NoError(t, err)
+	t.Log("Services stopped successfully")
+
+	// Make sure the service is not running
+	found = false
+	containers, err = docker.ContainerList(context.Background(), container.ListOptions{All: true})
+	require.NoError(t, err)
+	for _, container := range containers {
+		for _, name := range container.Names {
+			if name == "/"+internal_test.ServiceContainerName {
+				found = true
+				require.Equal(t, "exited", container.State)
+				break
+			}
+		}
+		if found {
+			break
+		}
+	}
+	require.True(t, found)
+
+	// Clean up
+	err = os.Remove(serviceFilePath)
+	require.NoError(t, err)
 }
 
 // Create a full Hyperdrive config instance for the test

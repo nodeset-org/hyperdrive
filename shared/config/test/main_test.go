@@ -16,6 +16,7 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
 )
 
@@ -26,9 +27,9 @@ var (
 	// Docker client
 	docker *client.Client
 
-	cfgMgr      *config.ConfigurationManager
+	cfgMgr      *utils.ConfigurationManager
 	cfgInstance *config.HyperdriveSettings
-	modMgr      *shared.ModuleManager
+	modMgr      *utils.ModuleManager
 )
 
 func TestMain(m *testing.M) {
@@ -104,7 +105,7 @@ func initializeArtifacts() {
 	if err := os.MkdirAll(modulePath, 0755); err != nil {
 		fail(fmt.Errorf("error creating module dir: %w", err))
 	}
-	if err := os.MkdirAll(filepath.Dir(internal_test.KeyPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(internal_test.AdapterKeyPath), 0755); err != nil {
 		fail(fmt.Errorf("error creating secrets dir: %w", err))
 	}
 	if err := os.MkdirAll(internal_test.UserDataPath, 0755); err != nil {
@@ -119,14 +120,14 @@ func initializeArtifacts() {
 
 	// Create the container via the Docker CLI since it does stuff like pulling / tagging the image
 	runCmd := fmt.Sprintf(
-		"docker run --rm -d -e HD_PROJECT_NAME=%s -v %s:/hd/logs -v %s:/hd/config -v %s:/hd/secret --name %s %s", internal_test.ProjectName, internal_test.LogDir, internal_test.CfgDir, internal_test.KeyPath, internal_test.GlobalAdapterContainerName, internal_test.AdapterTag)
+		"docker run --rm -d -e HD_PROJECT_NAME=%s -v %s:/hd/logs -v %s:/hd/config -v %s:/hd/secret --name %s %s", internal_test.ProjectName, internal_test.LogDir, internal_test.CfgDir, internal_test.AdapterKeyPath, internal_test.GlobalAdapterContainerName, internal_test.AdapterTag)
 	_, err = command.ReadOutput(runCmd)
 	if err != nil {
 		fail(fmt.Errorf("error running adapter container: %w", err))
 	}
 
 	// Set up the test config
-	cfgMgr = config.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
+	cfgMgr = utils.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
 	inst := modconfig.CreateModuleSettings(cfgMgr.HyperdriveConfiguration)
 	cfgInstance = config.NewHyperdriveSettings()
 	err = inst.ConvertToKnownType(cfgInstance)
@@ -137,7 +138,7 @@ func initializeArtifacts() {
 	cfgInstance.UserDataPath = internal_test.UserDataPath
 
 	// Set up the mod manager
-	modMgr, err = shared.NewModuleManager(shared.GetModulesDirectoryPath(internal_test.SystemDir))
+	modMgr, err = utils.NewModuleManager(shared.GetModulesDirectoryPath(internal_test.SystemDir))
 	if err != nil {
 		fail(fmt.Errorf("error creating module manager: %w", err))
 	}
@@ -168,7 +169,7 @@ func cleanup() {
 	}
 
 	// Remove the temp files
-	_ = os.Remove(internal_test.KeyPath)
+	_ = os.Remove(internal_test.AdapterKeyPath)
 	_ = os.RemoveAll(internal_test.UserDataPath)
 	_ = os.RemoveAll(internal_test.SystemDir)
 	_ = os.RemoveAll(internal_test.LogDir)

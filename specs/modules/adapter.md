@@ -60,6 +60,8 @@ When running in Project mode, these additional environment variables are set:
 
 - `HD_KEY_FILE` is the full path (within the container) to the file that contains the key to use for authenticating adapter commands while in Project mode.
 
+- `HD_COMPOSE_DIR` is the full path (within the container) to the directory that contains the Docker Compose files for your modules after their templates have been instantiated. The filenames will be the same as the Docker Compose templates contained within your [module package](./module.md#packages), but the extension will be `.yml` instead of `.tmpl`. Your adapter can use these files when starting or stopping your module.
+
 
 ## Adapter API Protocol
 
@@ -159,7 +161,10 @@ Your module should use this to return information about the configuration and va
 
 ```json
 {
-    "settings": {
+    "oldSettings": {
+        ...
+    },
+    "newSettings": {
         ...
     }
 }
@@ -167,17 +172,19 @@ Your module should use this to return information about the configuration and va
 
 where:
 
-- `settings` are the settings for the [complete Hyperdrive installation](TODO), including your module's configuration and the configuration for all other installed modules.
+- `currentSettings` are the current settings for the [complete Hyperdrive installation](TODO), including your module's configuration and the configuration for all other installed modules. They are provided for reference.
+- `newSettings` are the newly proposed settings for the [complete Hyperdrive installation](TODO), including your module's configuration and the configuration for all other installed modules. They are provided so your module can compare them against the current settings to determine which services need to be restarted.
 
 
 #### Output
 
 The following serialized JSON object:
 
-- `errors` (string[], required): A list of error messages to provide to the user when the settings fail validation. Each one should be a reason why the configuration is invalid.
+- `errors` (string[], required): A list of error messages to provide to the user when the settings fail validation. Each one should be a reason why the configuration is invalid. They will be displayed directly to the user so they should be human-readable strings. If there are no errors and the settings are valid, this should be an empty array.
 - `ports` (object, required): A mapping for externally available TCP/UDP ports that your module's services will bind when running. Each property in the object must have the FQMN of one of your module's properties as its name, and the port value as its value. This is used by Hyperdrive to ensure that your service won't bind ports that are already in use by other services. If your ports are not externally bound, and restricted to Docker's internal network, they don't need to be listed here. This list can be empty if `errors` is not empty for simplicity.
+- `servicesToRestart` (string[], required): A list of Docker container service IDs (as written in your module's [service templates](./module.md#packages)) that need to be restarted (if already running) for these settings to take effect. This will be displayed to the user for informational purposes, but Hyperdrive will not actually restart these containers as part of issuing this command. Your adapter doesn't need to check whether or not the service is currently running; it can simply report that a service restart is required even if the service is stopped or doesn't exist.
 
-For example:
+For example:iii
 
 ```json
 {
@@ -188,54 +195,17 @@ For example:
         "publicApiPort": 1234,
         "serverListenerPort": 5678, 
     },
+    "servicesToRestart": [
+        "my-service",
+        "my-other-service"
+    ],
 }
 ```
-
-where:
-
-`errors` is an array of strings that indicate individual configuration issues, such as invalid settings. They will be displayed directly to the user so they should be human-readable strings. If there are no errors and the settings are valid, this should be an empty array.
 
 
 ## Project Mode Commands
 
 The following commands will be called when your adapter runs in **Project mode**, and belongs to a specific Hyperdrive project.
-
-
-### `hd-module get-log-file`
-
-This should return the relative path (inside of `ModuleLogDir`) to the specified log file.
-
-
-#### Input
-
-```json
-{
-    "key": "...",
-    "source": "..."
-}
-```
-
-where:
-
-- `key` must match the contents of the file in `HD_KEY_FILE`.
-- `source` can be one of the following:
-  - `adapter`
-  - `<container name>`
-
-
-#### Output
-
-This should return the following serialized JSON object:
-
-```json
-{
-    "path": "..."
-}
-```
-
-where:
-- If `source` is `adapter`, it should return the relative path to the adapter's log file within the log directory provided by the `HD_LOG_DIR` environment variable (if applicable).
-- If `source` is anything else, it should be treated as the name of one of the service containers (as provided in [`get-containers`](#hd-module-get-containers)) and return the path to the log file for that service, relative to the log directory provided by the `HD_LOG_DIR` environment variable. If the name provided does not correspond to a known container, then `path` in the response should be empty.
 
 
 ### `hd-module set-settings`
@@ -269,9 +239,40 @@ where:
 (None)
 
 
-### `hd-module get-containers`
+### `hd-module start`
 
-This will be called when Hyperdrive needs to start or restart all of its services (including any enabled modules). It will only be called *after* the module's configuration has been saved via `set-settings`, so you should load the saved configuration and use it to determine this list if necessary.
+*NOTE: this command is currently a WIP and designed for MVP purposes only. The final form is expected to change.*  
+
+Hyperdrive calls this command after your module's configuration settings have been saved with `set-settings`. Your adapter should start (or restart) whatever Docker containers it needs to based on the current settings (which will be provided with the call). For MVP purposes your adapter should execute a `docker compose up` command with the relevant files passed in based on the provided settings. Your module's service file templates will be instantiated and placed into the `HD_COMPOSE_DIR` directory prior to this call. For the Compose project name, use the provided `composeProjectName` property.
+
+
+#### Input
+
+```json
+{
+    "key": "...",
+    "settings": {
+        ...
+    },
+    "composeProjectName": "..."
+}
+```
+
+where:
+
+- `key` must match the contents of the file in `HD_KEY_FILE`.
+- `settings` are the settings for the [complete Hyperdrive installation](TODO), including your module's configuration and the configuration for all other installed modules.
+- `composeProjectName` is the name of the Docker Compose project your module should use when running the `docker compose up` command. 
+
+
+#### Output
+
+If the operation worked successfully, your adapter should return with Exit Code 0. If it failed, you should print an error to STDERR and return a non-zero Exit Code. Hyperdrive itself doesn't consume any printed output of this command; it will simply be displayed to the user.
+
+
+### `hd-module stop`
+
+Hyperdrive calls this command when the user has requested that your module needs to stop its Docker services.
 
 
 #### Input
@@ -289,20 +290,7 @@ where:
 
 #### Output
 
-A JSON object with the following properties:
-
-- `containers` (string[], required): A list of your service's Docker container names (without the Hyperdrive project name prefix) that are applicable and should be started. Any containers that should *not* be started can be excluded from this list.
-
-For example:
-
-```json
-{
-    "containers": [
-        "hw-main-service",
-        "hw-other-service",
-    ]
-}
-```
+If the operation worked successfully, your adapter should return with Exit Code 0. If it failed, you should print an error to STDERR and return a non-zero Exit Code. Hyperdrive itself doesn't consume any printed output of this command; it will simply be displayed to the user.
 
 
 ### `hd-module run`

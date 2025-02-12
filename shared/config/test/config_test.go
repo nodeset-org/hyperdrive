@@ -59,6 +59,9 @@ func TestSerialization(t *testing.T) {
 	modSettings, err := modInstance.CreateSettingsFromMetadata(modCfg.Configuration)
 	require.NoError(t, err)
 
+	// Create a copy of the config without any modified settings
+	oldInstance := cfgInstance.CreateCopy()
+
 	// Do some simple tweaks
 	cfgInstance.ClientTimeout = 10
 	floatParam, err := modSettings.GetParameter("exampleFloat")
@@ -70,15 +73,23 @@ func TestSerialization(t *testing.T) {
 	require.NoError(t, err)
 	err = portParam.SetValue(8085)
 	require.NoError(t, err)
+	portMode, err := serverSection.GetParameter("portMode")
+	require.NoError(t, err)
+	err = portMode.SetValue("open")
+	require.NoError(t, err)
 	modInstance.SetSettings(modSettings)
 	t.Log("Configs modified")
 
 	// Process the configs to make sure they're good
-	processResults, err := cfgMgr.ProcessModuleSettings(modMgr, cfgInstance)
+	processResults, err := cfgMgr.ProcessModuleSettings(modMgr, oldInstance, cfgInstance)
 	require.NoError(t, err)
 	for _, result := range processResults {
 		require.NoError(t, result.ProcessError)
 		require.Empty(t, result.Issues)
+		require.Len(t, result.Ports, 1)
+		require.Equal(t, uint16(8085), result.Ports["server/port"])
+		require.Len(t, result.ServicesToRestart, 1)
+		require.Equal(t, "example", result.ServicesToRestart[0])
 	}
 	t.Log("Module config processed successfully")
 

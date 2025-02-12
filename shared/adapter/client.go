@@ -175,22 +175,36 @@ func runCommand[RequestType any, ResponseType any](
 		return fmt.Errorf("error inspecting exec command result for [%s]: %w", command, err)
 	}
 
-	// Check for errors
-	trimmedErr := strings.TrimSpace(string(stderr))
-	if len(trimmedErr) > 0 {
-		return fmt.Errorf("command [%s] errored with code %d: %s", command, inspectResponse.ExitCode, trimmedErr)
+	// Handle errors
+	if inspectResponse.ExitCode != 0 {
+		trimmedErr := strings.TrimSpace(string(stderr))
+		if len(trimmedErr) > 0 {
+			return fmt.Errorf("command [%s] errored with code %d: %s", command, inspectResponse.ExitCode, trimmedErr)
+		}
+		return fmt.Errorf("command [%s] errored with code %d and no error message", command, inspectResponse.ExitCode)
 	}
+
+	// Handle output if no response is expected
+	if response == nil {
+		trimmedErr := strings.TrimSpace(string(stderr))
+		if len(trimmedErr) > 0 {
+			fmt.Println(trimmedErr)
+		}
+		trimmedOut := strings.TrimSpace(string(stdout))
+		if len(trimmedOut) > 0 {
+			fmt.Println(trimmedOut)
+		}
+		return nil
+	}
+
+	// Handle output if a response is expected
 	trimmedResult := strings.TrimSpace(string(stdout))
 	if len(trimmedResult) == 0 {
-		if response != nil {
-			return fmt.Errorf("command [%s] returned an empty response with exit code %d and no error message", command, inspectResponse.ExitCode)
-		}
-	} else {
-		// Unmarshal a response if one was expected
-		err := json.Unmarshal([]byte(trimmedResult), response)
-		if err != nil {
-			return fmt.Errorf("error unmarshalling response for command [%s]: %w", command, err)
-		}
+		return fmt.Errorf("command [%s] returned an empty response with exit code %d and no error message", command, inspectResponse.ExitCode)
+	}
+	err = json.Unmarshal([]byte(trimmedResult), response)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling response for command [%s]: %w", command, err)
 	}
 	return nil
 }

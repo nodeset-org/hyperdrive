@@ -7,6 +7,7 @@ import (
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/rivo/tview"
 )
 
@@ -33,13 +34,13 @@ type MainDisplay struct {
 	// Private fields
 	previousInstance *modconfig.ModuleSettings
 	newInstance      *modconfig.ModuleSettings
-	moduleManager    *shared.ModuleManager
+	moduleManager    *utils.ModuleManager
 }
 
 // Creates a new MainDisplay instance.
 func NewMainDisplay(
 	app *tview.Application,
-	moduleManager *shared.ModuleManager,
+	moduleManager *utils.ModuleManager,
 	config *config.HyperdriveConfig,
 	previousSettings *config.HyperdriveSettings,
 	newSettings *config.HyperdriveSettings,

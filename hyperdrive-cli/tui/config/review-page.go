@@ -81,7 +81,6 @@ func NewReviewPage(md *MainDisplay) *ReviewPage {
 	modulePrettyNames := map[string]string{}
 	openPortMap := map[string]map[string]uint16{}
 	if fullErrorStringBuilder.Len() == 0 {
-		newSettingsMap := md.NewSettings.SerializeToMap()
 		for _, modulePage := range md.settingsHome.modulesPage.moduleSubpages {
 			// Check if it's enabled
 			if !modulePage.instance.Enabled {
@@ -96,7 +95,7 @@ func NewReviewPage(md *MainDisplay) *ReviewPage {
 				fullErrorStringBuilder.WriteString(fmt.Sprintf("Module %s:\nGlobal adapter client error: %s\n\n", modulePrettyNames[fqmn], err))
 				continue
 			}
-			response, err := gac.ProcessSettings(context.Background(), newSettingsMap)
+			response, err := gac.ProcessSettings(context.Background(), md.PreviousSettings, md.NewSettings)
 			if err != nil {
 				fullErrorStringBuilder.WriteString(fmt.Sprintf("Module %s:\nSettings validation error: %s\n\n", modulePrettyNames[fqmn], err))
 				continue

@@ -114,12 +114,21 @@ func initializeArtifacts() {
 	if err := os.MkdirAll(internal_test.CfgDir, 0755); err != nil {
 		fail(fmt.Errorf("error creating config dir: %w", err))
 	}
-	if err := os.MkdirAll(filepath.Dir(internal_test.KeyPath), 0755); err != nil {
+	if err := os.MkdirAll(internal_test.RuntimeDir, 0755); err != nil {
+		fail(fmt.Errorf("error creating runtime dir: %w", err))
+	}
+	if err := os.MkdirAll(internal_test.UserDir, 0755); err != nil {
+		fail(fmt.Errorf("error creating user dir: %w", err))
+	}
+	if err := os.MkdirAll(internal_test.DataDir, 0755); err != nil {
+		fail(fmt.Errorf("error creating data dir: %w", err))
+	}
+	if err := os.MkdirAll(filepath.Dir(internal_test.AdapterKeyPath), 0755); err != nil {
 		fail(fmt.Errorf("error creating secrets dir: %w", err))
 	}
 
 	// Create the key file, or get the key if it already exists
-	err := os.WriteFile(internal_test.KeyPath, []byte(internal_test.TestKey), 0644)
+	err := os.WriteFile(internal_test.AdapterKeyPath, []byte(internal_test.TestKey), 0644)
 	if err != nil {
 		fail(fmt.Errorf("error creating key file: %w", err))
 	}
@@ -154,18 +163,23 @@ func initializeArtifacts() {
 	if err != nil {
 		fail(fmt.Errorf("error running global adapter container: %w", err))
 	}
+	composeProjectName := internal_test.ProjectName + "-" + string(internal_test.ExampleDescriptor.Shortcut)
 	runCmd = fmt.Sprintf(
-		"docker run --rm -d -e HD_ADAPTER_MODE=project -e HD_PROJECT_NAME=%s -e HD_CONFIG_DIR=%s -e HD_LOG_DIR=%s -e HD_KEY_FILE=%s -v %s:%s -v %s:%s -v %s:%s --network %s_net --name %s %s",
+		"docker run --rm -d -e HD_ADAPTER_MODE=project -e HD_PROJECT_NAME=%s -e HD_CONFIG_DIR=%s -e HD_LOG_DIR=%s -e HD_KEY_FILE=%s -e HD_COMPOSE_DIR=%s -e HD_COMPOSE_PROJECT=%s -v %s:%s -v %s:%s -v %s:%s -v %s:%s -v /var/run/docker.sock:/var/run/docker.sock --network %s_net --name %s %s",
 		internal_test.ProjectName,
 		internal_test.CfgDir,
 		internal_test.LogDir,
-		internal_test.KeyPath,
+		internal_test.AdapterKeyPath,
+		internal_test.RuntimeDir,
+		composeProjectName,
 		internal_test.CfgDir,
 		internal_test.CfgDir,
 		internal_test.LogDir,
 		internal_test.LogDir,
-		internal_test.KeyPath,
-		internal_test.KeyPath,
+		internal_test.RuntimeDir,
+		internal_test.RuntimeDir,
+		internal_test.AdapterKeyPath,
+		internal_test.AdapterKeyPath,
 		internal_test.ProjectName,
 		internal_test.ProjectAdapterContainerName,
 		internal_test.AdapterTag,
@@ -204,7 +218,7 @@ func cleanup() {
 	}
 
 	// Remove the temp key file
-	_ = os.Remove(internal_test.KeyPath)
+	_ = os.Remove(internal_test.AdapterKeyPath)
 }
 
 // Clean up and exit with a failure

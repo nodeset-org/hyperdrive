@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,8 +26,8 @@ func listModules(c *cli.Context) error {
 	}
 
 	// Check each one's status
-	failedModules := []*shared.ModuleInfoLoadResult{}
-	succeededModules := []*shared.ModuleInfoLoadResult{}
+	failedModules := []*utils.ModuleInfoLoadResult{}
+	succeededModules := []*utils.ModuleInfoLoadResult{}
 	for _, result := range results {
 		if result.LoadError != nil {
 			failedModules = append(failedModules, result)

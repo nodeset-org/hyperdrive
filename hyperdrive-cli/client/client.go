@@ -12,6 +12,7 @@ import (
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -20,8 +21,8 @@ type HyperdriveClient struct {
 
 	cfgDir    string
 	systemDir string
-	modMgr    *shared.ModuleManager
-	cfgMgr    *config.ConfigurationManager
+	modMgr    *utils.ModuleManager
+	cfgMgr    *utils.ConfigurationManager
 }
 
 // Create a new Hyperdrive client from the CLI context
@@ -34,12 +35,12 @@ func NewHyperdriveClientFromCtx(c *cli.Context) (*HyperdriveClient, error) {
 	systemDir := hdCtx.SystemDirPath
 
 	// Config manager
-	cfgMgr := config.NewConfigurationManager(cfgDir, systemDir)
+	cfgMgr := utils.NewConfigurationManager(cfgDir, systemDir)
 
 	// Module manager
 	//adapterKeyPath := shared.GetAdapterKeyPath(cfgDir)
 	modulesDir := shared.GetModulesDirectoryPath(systemDir)
-	modMgr, err := shared.NewModuleManager(modulesDir)
+	modMgr, err := utils.NewModuleManager(modulesDir)
 	if err != nil {
 		return nil, fmt.Errorf("error creating module manager: %w", err)
 	}
@@ -59,7 +60,7 @@ func (c *HyperdriveClient) GetHyperdriveConfiguration() *config.HyperdriveConfig
 }
 
 // Get the module manager
-func (c *HyperdriveClient) GetModuleManager() *shared.ModuleManager {
+func (c *HyperdriveClient) GetModuleManager() *utils.ModuleManager {
 	return c.modMgr
 }
 
@@ -84,7 +85,7 @@ func (c *HyperdriveClient) LoadMainSettingsFile() (*config.HyperdriveSettings, b
 }
 
 // Load all of the module info and settings
-func (c *HyperdriveClient) LoadModules() ([]*shared.ModuleInfoLoadResult, error) {
+func (c *HyperdriveClient) LoadModules() ([]*utils.ModuleInfoLoadResult, error) {
 	results, err := c.modMgr.LoadModuleInfo(true)
 	if err != nil {
 		return nil, fmt.Errorf("error loading module info: %w", err)

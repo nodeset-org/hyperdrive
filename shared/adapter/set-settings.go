@@ -3,6 +3,8 @@ package adapter
 import (
 	"context"
 	"fmt"
+
+	"github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 const (
@@ -14,11 +16,11 @@ type SetSettingsRequest struct {
 	KeyedRequest
 
 	// The Hyperdrive config to process
-	Settings map[string]any `json:"settings"`
+	Settings *config.HyperdriveSettings `json:"settings"`
 }
 
-// Have the adapter set the module settings based on the full Hyperdriver configuration.
-func (c *AdapterClient) SetSettings(ctx context.Context, settings map[string]any) error {
+// Have the adapter set the module settings based on the full Hyperdrive configuration.
+func (c *AdapterClient) SetSettings(ctx context.Context, settings *config.HyperdriveSettings) error {
 	request := &SetSettingsRequest{
 		KeyedRequest: KeyedRequest{
 			Key: c.key,
