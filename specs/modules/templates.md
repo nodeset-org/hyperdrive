@@ -10,7 +10,7 @@ Hyperdrive uses Go templates in several locations:
 - The [configuration metadata](./config.md#metadata) returned by the module's adapter
 - Docker Compose file templates for module services
 
-Each of these use cases has a different way of utilizing templates, which are covered in the sections below.l
+Each of these use cases has a different way of utilizing templates, which are covered in the sections below.
 
 
 ## Module Adapter Docker Compose Template
@@ -18,29 +18,53 @@ Each of these use cases has a different way of utilizing templates, which are co
 Templates can be used anywhere inside a Docker Compose file template for your adapter. The following methods are supported:
 
 
-### GetProjectName
+### AdapterContainerName
 
-`{{.GetProjectName}}` provides the Docker Compose project name for the project your adapter belongs to. Use this in tandem with your service names to retrieve the name of any of your service containers.
+`{{.AdapterContainerName}}` has the name of the Docker container that the adapter should be created with. Your adapter should have a `container_name` property in its service with this value.
+
+
+### AdapterEnvironmentVariables
+
+`{{.AdapterEnvironmentVariables}}` is an array of `NAME=value` strings, each of which represents a line that can go under the `environment` property of your template.
+
+For [global adapters](./adapter.md#execution-mode), the only value in this array will be `HD_ADAPTER_MODE=global`.
+
+For [project adapters](./adapter.md#execution-mode), this will include `HD_ADAPTER_MODE=project` as well as a value for each of the [adapter project variables](./adapter.md#environment-variables). They are all provided explicitly below as well for posterity.
+
+
+### AdapterMode
+
+`{{.AdapterMode}}` is the [execution mode](./adapter.md#execution-mode) that the adapter instance will run in. This corresponds to the `HD_ADAPTER_MODE` [environment variable](./adapter.md#environment-variables).
 
 
 ### ModuleConfigDir
 
-`{{.ModuleConfigDir}}` retrieves the full path to the directory that your adapter should save its configuration (and any other extraneous files) into. This will also be made available to your service Docker Compose templates so it can be mounted as a volume for file retrieval.
-
-
-### ModuleSecretFile
-
-`{{.ModuleSecretFile}}` retrieves the full path of the file that contains the secret key used to authenticate requests to your adapter. Your adapter file can mount this as a volume so it can be read and compared against the secret provided with any incoming requests.
+`{{.ModuleConfigDir}}` is the full path of the directory that your module should use for storing its configuration settings. It corresponds to the `HD_CONFIG_DIR` [environment variable](./adapter.md#environment-variables).
 
 
 ### ModuleLogDir
 
-`{{.ModuleLogDir}}` retrieves the full path of the standard Hyperdrive logging directory that your module should write its log files to in order for the `hyperdrive service adapter-logs` command to work properly.
+`{{.ModuleLogDir}}` is the full path of the directory that your module should use for storing its log files. It corresponds to the `HD_LOG_DIR` [environment variable](./adapter.md#environment-variables).
 
 
-### ModuleJwtKeyFile
+### AdapterKeyFile
 
-`{{.ModuleJwtKeyFile}}` returns the path of the file on-disk that should be used as the JWT authentication secret key by your module's services. If your services require JWT authentication for any HTTP-based interactions, your adapter can use this to load the secret and authenticate with them.
+`{{.AdapterKeyFile}}` is the full path to the file that contains the key to use for authenticating adapter commands while in Project mode. It corresponds to the `HD_KEY_FILE` [environment variable](./adapter.md#environment-variables).
+
+
+### ModuleComposeDir
+
+`{{.ModuleComposeDir}}` is the full path of the director that will contain all of your module's [service compose templates](./adapter.md#docker-compose-file) after they've been instantiated and saved as completed YAML files, ready for Docker Compose consumption.
+
+
+### AdapterVolumes
+
+`{{.AdapterVolumes}}` is an array of `path:path` strings, each of which represents a line that can go under the `volumes` property of your template. Your adapter will need to mount each of these for the adapter to work properly in project mode.
+
+
+### ModuleNetwork
+
+`{{.ModuleNetwork}}` is the name of the Docker Compose network that will be created for your adapter, your module services, and the artifacts from any other modules while running in project mode. In global mode this will be empty. You should use this for the `networks` property of your template, both within its `services` property for your adapter and for the top-level `networks` property.
 
 
 ## Configuration Metadata
@@ -80,9 +104,14 @@ Any dynamic property templates will be run dynamically whenever one of the follo
 Templates can be used anywhere inside a Docker Compose file template for service definitions. The following methods are supported:
 
 
-### GetProjectName
+### ModuleComposeProject
 
-`{{.GetProjectName}}` provides the Docker Compose project name for the project your adapter belongs to. Use this in tandem with your service names to specify the name of any of your service containers.
+`{{.ModuleComposeProject}}` provides the Docker Compose project name for the project your service belongs to. Use this as the prefix for your service `container_name` properties to specify the name of any of your service containers for clarity.
+
+
+### ModuleNetwork
+
+`{{.ModuleNetwork}}` is the name of the Docker network that your service can use to connect to other service modules, the project adapter, the Hyperdrive daemon, and the services of any other modules.
 
 
 ### GetValue
@@ -106,7 +135,12 @@ Whenever Hyperdrive starts its services (including the modules), the template fi
 
 ### ModuleConfigDir
 
-` {{.ModuleConfigDir}}` returns the full path of the directory that stores your module's configuration, along with any other extraneous files, as saved by your module adapter.
+` {{.ModuleConfigDir}}` returns the full path of the directory that stores your service's configuration, as provided by the adapter during a `set-settings` operation.
+
+
+### ModuleLogDir
+
+` {{.ModuleLogDir}}` returns the full path of the directory that stores your module's log files.
 
 
 ### ModuleDataDir

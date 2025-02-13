@@ -22,8 +22,7 @@ services:
       - --port
       - "8085" # The port the module's server will listen on
     networks:
-      - net
-      - {{.ProjectName}}_net
+      - {{.ProjectName}}-em_net
     cap_drop:
       - all # The container will run as root but this will drop all capabilities it doesn't need
     cap_add:
@@ -31,8 +30,7 @@ services:
     security_opt:
       - no-new-privileges
 networks:
-  net:
-  {{.ProjectName}}_net:
+  {{.ProjectName}}-em_net:
     external: true
 `
 )

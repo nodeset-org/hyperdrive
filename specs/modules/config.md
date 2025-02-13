@@ -4,6 +4,8 @@ One of the most important aspects of a Hyperdrive module is its **configuration*
 
 In the context of Hyperdrive, there are two entities related to configuring your module: **metadata** and **settings**.
 
+** *NOTE: Properties with two asterisks are temporary for MVP purposes and will be removed in a future production release.*
+
 
 ## Metadata
 
@@ -66,7 +68,7 @@ Below is a list of the common properties that all parameters share:
 
 - `overwriteOnUpgrade` (bool, required): causes the parameter's current value to be replaced with the default value when Hyperdrive detects a version upgrade has been installed, but not yet applied (the services haven't been started with the new version yet). This is helpful for things that routinely change with new versions, such as Docker container tags.
 
-- `affectsContainers` (string[], optional): an array of strings, each of which is the base name of a Docker container your module owns (without the project name prefix that Hyperdrive appends) that will be affected by changing this parameter. Affected containers will be restarted after the new configuration is saved.
+- `affectsContainers`** (string[], optional): an array of strings, each of which is the base name of a Docker container your module owns (without the project name prefix that Hyperdrive appends) that will be affected by changing this parameter. Affected containers will be restarted after the new configuration is saved.
 
 
 #### Parameter Types
@@ -91,11 +93,11 @@ The following types of parameters are allowed:
 
     Additional properties:
 
-    - `minValue` (optional): a `uint` that represents the minimum value the parameter can have. If the parameter is less than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
+    - `minValue`** (optional): a `uint` that represents the minimum value the parameter can have. If the parameter is less than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
 
         To specify that there is no `minValue`, exclude this property when serializing the configuration.
 
-    - `maxValue` (optional): a `uint` that represents the maximum value the parameter can have. If the parameter is greater than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
+    - `maxValue`** (optional): a `uint` that represents the maximum value the parameter can have. If the parameter is greater than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
 
         To specify that there is no `maxValue`, exclude this property when serializing the configuration.
 
@@ -103,11 +105,11 @@ The following types of parameters are allowed:
 
     Additional properties:
 
-    - `minValue` (optional): a `float` that represents the minimum value the parameter can have. If the parameter is less than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
+    - `minValue`** (optional): a `float` that represents the minimum value the parameter can have. If the parameter is less than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
 
         To specify that there is no `minValue`, exclude this property when serializing the configuration.
 
-    - `maxValue` (optional): a `float` that represents the maximum value the parameter can have. If the parameter is greater than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
+    - `maxValue`** (optional): a `float` that represents the maximum value the parameter can have. If the parameter is greater than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
 
         To specify that there is no `maxValue`, exclude this property when serializing the configuration.
 
@@ -115,11 +117,11 @@ The following types of parameters are allowed:
 
     Additional properties:
 
-    - `maxLength` (optional): a `uint` that dictates that maximum number of characters (in UTF-8 format) the value is allowed to have. If the parameter's length is greater than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
+    - `maxLength`** (optional): a `uint` that dictates that maximum number of characters (in UTF-8 format) the value is allowed to have. If the parameter's length is greater than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
 
         To specify that there is no `maxLength`, exclude this property when serializing the configuration.
 
-    - `regex` (optional) a `string` that provides a standard regular expression to be used when validating the parameter. the maximum value the parameter can have. If the parameter is greater than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
+    - `regex`** (optional) a `string` that provides a standard regular expression to be used when validating the parameter. the maximum value the parameter can have. If the parameter is greater than this, it will fail the internal validation check (prior to calling your module adapter's validation routine).
 
         To specify that there is no `regex`, exclude this property when serializing the configuration.
 

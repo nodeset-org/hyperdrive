@@ -134,7 +134,8 @@ func initializeArtifacts() {
 	}
 
 	// Create the docker network
-	netCreateResponse, err := docker.NetworkCreate(context.Background(), internal_test.ProjectName+"_net", network.CreateOptions{
+	composeProjectName := internal_test.ProjectName + "-" + string(internal_test.ExampleDescriptor.Shortcut)
+	netCreateResponse, err := docker.NetworkCreate(context.Background(), composeProjectName+"_net", network.CreateOptions{
 		Driver: "bridge",
 		Scope:  "local",
 		IPAM: &network.IPAM{
@@ -163,9 +164,8 @@ func initializeArtifacts() {
 	if err != nil {
 		fail(fmt.Errorf("error running global adapter container: %w", err))
 	}
-	composeProjectName := internal_test.ProjectName + "-" + string(internal_test.ExampleDescriptor.Shortcut)
 	runCmd = fmt.Sprintf(
-		"docker run --rm -d -e HD_ADAPTER_MODE=project -e HD_PROJECT_NAME=%s -e HD_CONFIG_DIR=%s -e HD_LOG_DIR=%s -e HD_KEY_FILE=%s -e HD_COMPOSE_DIR=%s -e HD_COMPOSE_PROJECT=%s -v %s:%s -v %s:%s -v %s:%s -v %s:%s -v /var/run/docker.sock:/var/run/docker.sock --network %s_net --name %s %s",
+		"docker run --rm -d -e HD_ADAPTER_MODE=project -e HD_PROJECT_NAME=%s -e HD_CONFIG_DIR=%s -e HD_LOG_DIR=%s -e HD_KEY_FILE=%s -e HD_COMPOSE_DIR=%s -e HD_COMPOSE_PROJECT=%s -v %s:%s -v %s:%s -v %s:%s -v %s:%s -v /var/run/docker.sock:/var/run/docker.sock -v /usr/bin/docker:/usr/bin/docker:ro -v /usr/libexec/docker:/usr/libexec/docker:ro --network %s_net --name %s %s",
 		internal_test.ProjectName,
 		internal_test.CfgDir,
 		internal_test.LogDir,
@@ -180,7 +180,7 @@ func initializeArtifacts() {
 		internal_test.RuntimeDir,
 		internal_test.AdapterKeyPath,
 		internal_test.AdapterKeyPath,
-		internal_test.ProjectName,
+		composeProjectName,
 		internal_test.ProjectAdapterContainerName,
 		internal_test.AdapterTag,
 	)
@@ -209,12 +209,13 @@ func deleteConfigs() error {
 func cleanup() {
 	// Stop the adapter container
 	if docker != nil {
+		composeProjectName := internal_test.ProjectName + "-" + string(internal_test.ExampleDescriptor.Shortcut)
 		timeout := 0
 		_ = docker.ContainerStop(context.Background(), internal_test.GlobalAdapterContainerName, container.StopOptions{Timeout: &timeout})
 		_ = docker.ContainerStop(context.Background(), internal_test.ProjectAdapterContainerName, container.StopOptions{Timeout: &timeout})
 		_ = docker.ContainerRemove(context.Background(), internal_test.GlobalAdapterContainerName, container.RemoveOptions{Force: true})
 		_ = docker.ContainerRemove(context.Background(), internal_test.ProjectAdapterContainerName, container.RemoveOptions{Force: true})
-		_ = docker.NetworkRemove(context.Background(), internal_test.ProjectName+"_net")
+		_ = docker.NetworkRemove(context.Background(), composeProjectName+"_net")
 	}
 
 	// Remove the temp key file

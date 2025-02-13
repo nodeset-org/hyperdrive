@@ -35,14 +35,16 @@ Commands run on your adapter while in project mode all require authentication. W
 
 ### Docker Compose File
 
-Your module package must include a top-level file named `adapter.yml`, which is a Docker Compose file that is used to create and run your module's adapter container. This should be a **complete** template; it will not be passed through Hyperdrive's [variable substitution](./templates.md) system. That being said, Hyperdrive will modify the service name of the container to prevent conflicts and will add additional volumes for Project mode instatiations.
+Your module package must include a top-level file named `adapter.tmml`, which is the template for a Docker Compose file that is used to create and run your module's adapter container. This  will be passed through Hyperdrive's [variable substitution](./templates.md) system prior to instantiation.
 
 This file can have any set up required, with the following conditions:
 
 - The `entrypoint` must be the path to your adapter binary, along with any flags required for it to run. This will be used by Hyperdrive as a command prefix when running one of the commands below.
 - The `command` arguments must launch your adapter in a mode where it simply **sleeps and idles indefinitely** until Docker tells the container to stop (`SIGTERM` by default), at which point it should exit gracefully to allow the container to stop. It should not take any other behavior or consume any resources beyond what is needed to make the process sleep until it receives the stop signal.
 - Logs must be written to the directory provided by the [`ModuleLogDir`](./templates.md#module-adapter-docker-compose-template) template function.
-- Many of the commands are authenticated and include a `key` property in the input. For these calls, your adapter must compare them to the contents of the file provided in the [`ModuleSecretFile`](./templates.md#module-adapter-docker-compose-template) to ensure the caller is permitted to proceed.
+- Many of the commands are authenticated and include a `key` property in the input. For these calls, your adapter must compare them to the contents of the file provided in the [`AdapterKeyFile`](./templates.md#adapterkeyfile) to ensure the caller is permitted to proceed.
+- The `container_name` should be set to the [`AdapterContainerName`](./templates.md#adaptercontainername) variable.
+- If [`ModuleNetwork`](./templates.md#modulenetwork) is present, your adapter should have it in the `networks` section of its service definition and an entry for it in the top-level `networks` section.
 
 
 ### Environment Variables
