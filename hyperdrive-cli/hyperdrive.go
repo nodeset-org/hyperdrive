@@ -32,11 +32,6 @@ const (
 
 // Flags
 var (
-	allowRootFlag *cli.BoolFlag = &cli.BoolFlag{
-		Name:    "allow-root",
-		Aliases: []string{"r"},
-		Usage:   "Allow hyperdrive to be run as the root user",
-	}
 	debugFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name:  "debug",
 		Usage: "Enable debug printing of API commands",
@@ -89,7 +84,7 @@ func main() {
 
 	// Set application flags
 	app.Flags = []cli.Flag{
-		allowRootFlag,
+		utils.AllowRootFlag,
 		utils.UserDirPathFlag,
 		utils.SystemDirPathFlag,
 		apiAddressFlag,
@@ -108,9 +103,9 @@ func main() {
 	var hdCtx *context.HyperdriveContext
 	app.Before = func(c *cli.Context) error {
 		// Check user ID
-		if os.Getuid() == 0 && !c.Bool(allowRootFlag.Name) {
+		if os.Getuid() == 0 && !c.Bool(utils.AllowRootFlag.Name) {
 			fmt.Fprintln(os.Stderr, "hyperdrive should not be run as root. Please try again without 'sudo'.")
-			fmt.Fprintf(os.Stderr, "If you want to run hyperdrive as root anyway, use the '--%s' option to override this warning.\n", allowRootFlag.Name)
+			fmt.Fprintf(os.Stderr, "If you want to run hyperdrive as root anyway, use the '--%s' option to override this warning.\n", utils.AllowRootFlag.Name)
 			os.Exit(1)
 		}
 

@@ -116,6 +116,11 @@ func NewModuleManager(modulesDir string, globalAdapterDir string, userDir string
 	return loader, nil
 }
 
+// The system directory for module installation
+func (m *ModuleManager) GetModuleSystemDir() string {
+	return m.modulePath
+}
+
 // Load the module descriptors to determine what's installed
 func (m *ModuleManager) LoadModuleInfo(ensureModuleStart bool) ([]*ModuleInfoLoadResult, error) {
 	// Enumerate the installed modules

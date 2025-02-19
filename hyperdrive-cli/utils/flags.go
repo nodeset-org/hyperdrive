@@ -30,4 +30,9 @@ var (
 		Aliases: []string{"s"},
 		Usage:   "Directory where Hyperdrive's system files are installed on the system. If blank, this will use the same default as Hyperdrive's installation package for your Operating System.",
 	}
+	AllowRootFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "allow-root",
+		Aliases: []string{"r"},
+		Usage:   "Allow hyperdrive to be run as the root user",
+	}
 )
