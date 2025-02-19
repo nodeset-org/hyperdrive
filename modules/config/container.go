@@ -239,7 +239,8 @@ func deserializeContainerInstance(container iContainerInstance, instance map[str
 		paramID := parameter.GetMetadata().GetID()
 		paramData, exists := instance[paramID.String()]
 		if !exists {
-			return NewErrorNotFound(paramID, EntryType_Parameter)
+			// If the instance doesn't have the parameter, skip it
+			continue
 		}
 		err := parameter.SetValue(paramData)
 		if err != nil {
@@ -250,7 +251,8 @@ func deserializeContainerInstance(container iContainerInstance, instance map[str
 		sectionID := section.GetMetadata().GetID()
 		sectionData, exists := instance[sectionID.String()]
 		if !exists {
-			return NewErrorNotFound(sectionID, EntryType_Section)
+			// If the instance doesn't have the section, skip it
+			continue
 		}
 		sectionDataAsMap, ok := sectionData.(map[string]any)
 		if !ok {

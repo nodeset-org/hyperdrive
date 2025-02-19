@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/fs"
+	"os"
 )
 
 const (
@@ -29,4 +30,19 @@ func GenerateAuthKey(keyLengthInBytes int) (string, error) {
 	}
 
 	return hex.EncodeToString(buffer), nil
+}
+
+// Writes the given key to the specified file path.
+func CreateKeyFile(keyPath string, keyLengthInBytes int) error {
+	key, err := GenerateAuthKey(keyLengthInBytes)
+	if err != nil {
+		return fmt.Errorf("error generating key: %w", err)
+	}
+
+	err = os.WriteFile(keyPath, []byte(key), KeyPermissions)
+	if err != nil {
+		return fmt.Errorf("error writing key file [%s]: %w", keyPath, err)
+	}
+
+	return nil
 }

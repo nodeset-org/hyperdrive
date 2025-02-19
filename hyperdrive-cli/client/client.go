@@ -40,7 +40,8 @@ func NewHyperdriveClientFromCtx(c *cli.Context) (*HyperdriveClient, error) {
 	// Module manager
 	//adapterKeyPath := shared.GetAdapterKeyPath(cfgDir)
 	modulesDir := shared.GetModulesDirectoryPath(systemDir)
-	modMgr, err := utils.NewModuleManager(modulesDir)
+	gacDir := shared.GetGlobalAdapterDirectoryPath(systemDir)
+	modMgr, err := utils.NewModuleManager(modulesDir, gacDir, cfgDir)
 	if err != nil {
 		return nil, fmt.Errorf("error creating module manager: %w", err)
 	}

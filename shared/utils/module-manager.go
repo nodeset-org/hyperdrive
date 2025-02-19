@@ -1,22 +1,29 @@
 package utils
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
+	"text/template"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/goccy/go-json"
+	"github.com/klauspost/compress/zip"
 	"github.com/nodeset-org/hyperdrive/modules"
-	"github.com/nodeset-org/hyperdrive/modules/config"
+	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 	"github.com/nodeset-org/hyperdrive/shared/auth"
+	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/shared/templates"
 )
 
 const (
@@ -26,8 +33,11 @@ const (
 	// Mode for the adapter key file
 	AdapterKeyMode os.FileMode = 0600
 
-	// The name of the Docker compose project for global adapter containers
-	GlobalAdapterProjectName string = "hd"
+	// Mode for module directories
+	ModuleDirMode os.FileMode = 0755
+
+	// Mode for module files
+	ModuleFileMode os.FileMode = 0644
 )
 
 // Result of loading a module's info
@@ -55,19 +65,28 @@ type ModuleManager struct {
 	// The path to the directory containing the installed modules
 	modulePath string
 
+	// The path to the directory for global adapter compose files
+	globalAdapterDir string
+
+	// The path to the user's project directory
+	userDir string
+
 	// Docker client for interacting with the Docker API
 	docker client.APIClient
 
-	// A cache of adapter clients for each module
-	adapterClients map[string]*adapter.AdapterClient
+	// A cache of global adapter clients for each module
+	globalAdapterClients map[string]*adapter.AdapterClient
+
+	// A cache of adapter clients for each project
+	projectAdapterClients map[string]map[string]*adapter.AdapterClient
 
 	// A cache of loaded module info
-	moduleInfos map[string]*config.ModuleInfo
+	moduleInfos map[string]*modconfig.ModuleInfo
 }
 
 // Info about the module, including its installation
 type ModuleInstallationInfo struct {
-	*config.ModuleInfo
+	*modconfig.ModuleInfo
 
 	// The full path of the directory the module is installed in
 	DirectoryPath string
@@ -77,7 +96,7 @@ type ModuleInstallationInfo struct {
 }
 
 // Create a new module manager
-func NewModuleManager(modulesDir string) (*ModuleManager, error) {
+func NewModuleManager(modulesDir string, globalAdapterDir string, userDir string) (*ModuleManager, error) {
 	docker, err := client.NewClientWithOpts(
 		client.WithAPIVersionNegotiation(),
 	)
@@ -86,10 +105,13 @@ func NewModuleManager(modulesDir string) (*ModuleManager, error) {
 	}
 
 	loader := &ModuleManager{
-		modulePath:     modulesDir,
-		docker:         docker,
-		adapterClients: map[string]*adapter.AdapterClient{},
-		moduleInfos:    map[string]*config.ModuleInfo{},
+		modulePath:            modulesDir,
+		globalAdapterDir:      globalAdapterDir,
+		userDir:               userDir,
+		docker:                docker,
+		globalAdapterClients:  map[string]*adapter.AdapterClient{},
+		projectAdapterClients: map[string]map[string]*adapter.AdapterClient{},
+		moduleInfos:           map[string]*modconfig.ModuleInfo{},
 	}
 	return loader, nil
 }
@@ -113,7 +135,7 @@ func (m *ModuleManager) LoadModuleInfo(ensureModuleStart bool) ([]*ModuleInfoLoa
 		moduleDir := filepath.Join(m.modulePath, entry.Name())
 		info := &ModuleInstallationInfo{
 			DirectoryPath: moduleDir,
-			ModuleInfo:    &config.ModuleInfo{},
+			ModuleInfo:    &modconfig.ModuleInfo{},
 		}
 		loadResult := &ModuleInfoLoadResult{
 			Info: info,
@@ -149,7 +171,7 @@ func (m *ModuleManager) LoadModuleInfo(ensureModuleStart bool) ([]*ModuleInfoLoa
 			if result.LoadError != nil {
 				continue
 			}
-			adapterFile := filepath.Join(result.Info.DirectoryPath, modules.AdapterComposeFilename)
+			adapterFile := filepath.Join(m.globalAdapterDir, string(result.Info.Descriptor.Name), modules.AdapterComposeFilename)
 
 			// Check if the file exists
 			stat, err := os.Stat(adapterFile)
@@ -186,7 +208,7 @@ func (m *ModuleManager) LoadModuleInfo(ensureModuleStart bool) ([]*ModuleInfoLoa
 			"--quiet-pull",
 		)
 		cmd := exec.Command("docker", args...)
-		cmd.Env = append(cmd.Env, "COMPOSE_PROJECT_NAME="+GlobalAdapterProjectName)
+		cmd.Env = append(cmd.Env, "COMPOSE_PROJECT_NAME="+shared.GlobalAdapterProjectName)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -261,7 +283,7 @@ func (m *ModuleManager) LoadModuleInfo(ensureModuleStart bool) ([]*ModuleInfoLoa
 
 // Get an adapter client for the global adapter container of a module
 func (m *ModuleManager) GetGlobalAdapterClient(fqmn string) (*adapter.AdapterClient, error) {
-	if client, exists := m.adapterClients[fqmn]; exists {
+	if client, exists := m.globalAdapterClients[fqmn]; exists {
 		return client, nil
 	}
 	modInfo, exists := m.moduleInfos[fqmn]
@@ -273,14 +295,48 @@ func (m *ModuleManager) GetGlobalAdapterClient(fqmn string) (*adapter.AdapterCli
 	if err != nil {
 		return nil, err
 	}
-	m.adapterClients[fqmn] = client
+	m.globalAdapterClients[fqmn] = client
+	return client, nil
+}
+
+// Get and adapter client for the project adapter container of a module
+func (m *ModuleManager) GetProjectAdapterClient(projectName string, fqmn string) (*adapter.AdapterClient, error) {
+	// Check if the cache exists
+	adapterClients, exists := m.projectAdapterClients[projectName]
+	if !exists {
+		adapterClients = map[string]*adapter.AdapterClient{}
+	}
+	if client, exists := adapterClients[fqmn]; exists {
+		return client, nil
+	}
+	modInfo, exists := m.moduleInfos[fqmn]
+	if !exists {
+		return nil, fmt.Errorf("module info not found for %s", fqmn)
+	}
+
+	// Load the adapter key
+	moduleDir := filepath.Join(m.userDir, shared.ModulesDir, string(modInfo.Descriptor.Name))
+	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
+	bytes, err := os.ReadFile(adapterKeyPath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading adapter key file [%s]: %w", adapterKeyPath, err)
+	}
+
+	// Create the adapter client
+	containerName := GetProjectAdapterContainerName(&modInfo.Descriptor, projectName)
+	client, err := adapter.NewAdapterClient(containerName, string(bytes))
+	if err != nil {
+		return nil, err
+	}
+	adapterClients[fqmn] = client
+	m.projectAdapterClients[projectName] = adapterClients
 	return client, nil
 }
 
 // Get an adapter client for the global adapter container of a module
 func (m *ModuleManager) getGlobalAdapterClientFromDescriptor(descriptor modules.ModuleDescriptor) (*adapter.AdapterClient, error) {
 	fqmn := descriptor.GetFullyQualifiedModuleName()
-	if client, exists := m.adapterClients[fqmn]; exists {
+	if client, exists := m.globalAdapterClients[fqmn]; exists {
 		return client, nil
 	}
 	containerName := GetGlobalAdapterContainerName(descriptor)
@@ -288,18 +344,18 @@ func (m *ModuleManager) getGlobalAdapterClientFromDescriptor(descriptor modules.
 	if err != nil {
 		return nil, err
 	}
-	m.adapterClients[fqmn] = client
+	m.globalAdapterClients[fqmn] = client
 	return client, nil
 }
 
 // TEMPORARY placeholder function that exists solely to facilitate development
 func GetGlobalAdapterContainerName(descriptor modules.ModuleDescriptor) string {
-	return GlobalAdapterProjectName + "-" + string(descriptor.Shortcut) + "_adapter"
+	return shared.GlobalAdapterProjectName + "-" + string(descriptor.Shortcut) + "_adapter"
 }
 
 // TEMPORARY placeholder function that exists solely to facilitate development
 func GetProjectAdapterContainerName(descriptor *modules.ModuleDescriptor, projectName string) string {
-	return "hd_" + projectName + "-" + string(descriptor.Shortcut) + "_adapter"
+	return projectName + "-" + string(descriptor.Shortcut) + "_adapter"
 }
 
 // Load the adapter key file if it's not already loaded
@@ -350,6 +406,202 @@ func (m *ModuleManager) getContainerID(name string, containers []types.Container
 		}
 	}
 	return ""
+}
+
+// Installs a module to the system directory
+func (m *ModuleManager) InstallModule(
+	moduleFile string,
+) error {
+	// Unpack the module
+	pkgReader, err := zip.OpenReader(moduleFile)
+	if err != nil {
+		return fmt.Errorf("error opening module package [%s]: %w", moduleFile, err)
+	}
+	defer pkgReader.Close()
+
+	// Get the descriptor
+	descriptorBuffer := new(bytes.Buffer)
+	descriptorFile, err := pkgReader.Open(modules.DescriptorFilename)
+	if err != nil {
+		return fmt.Errorf("error opening descriptor file in module package [%s]: %w", moduleFile, err)
+	}
+	defer descriptorFile.Close()
+	_, err = descriptorBuffer.ReadFrom(descriptorFile)
+	if err != nil {
+		return fmt.Errorf("error reading descriptor file in module package [%s]: %w", moduleFile, err)
+	}
+	var descriptor modules.ModuleDescriptor
+	err = json.Unmarshal(descriptorBuffer.Bytes(), &descriptor)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling descriptor file in module package [%s]: %w", moduleFile, err)
+	}
+
+	// Create the module dir
+	moduleDir := filepath.Join(m.modulePath, string(descriptor.Name))
+	err = os.MkdirAll(moduleDir, ModuleDirMode)
+	if err != nil {
+		return fmt.Errorf("error creating module directory [%s]: %w", moduleDir, err)
+	}
+
+	// Extract the files
+	descriptorPath := filepath.Join(moduleDir, modules.DescriptorFilename)
+	err = os.WriteFile(descriptorPath, descriptorBuffer.Bytes(), ModuleFileMode)
+	if err != nil {
+		return fmt.Errorf("error writing descriptor file [%s]: %w", descriptorPath, err)
+	}
+	for _, file := range pkgReader.File {
+		// Skip the descriptor since we already wrote it
+		if file.Name == modules.DescriptorFilename {
+			continue
+		}
+
+		// Handle directories
+		if file.FileInfo().IsDir() {
+			fileDir := filepath.Join(moduleDir, file.Name)
+			err = os.MkdirAll(fileDir, ModuleDirMode)
+			if err != nil {
+				return fmt.Errorf("error creating directory [%s]: %w", fileDir, err)
+			}
+			continue
+		}
+
+		// Open the file
+		fileReader, err := file.Open()
+		if err != nil {
+			return fmt.Errorf("error opening file [%s] in module package [%s]: %w", file.Name, moduleFile, err)
+		}
+		defer fileReader.Close()
+
+		// Write the file
+		filePath := filepath.Join(moduleDir, file.Name)
+		buffer := new(bytes.Buffer)
+		_, err = buffer.ReadFrom(fileReader)
+		if err != nil {
+			return fmt.Errorf("error reading file [%s] in module package [%s]: %w", file.Name, moduleFile, err)
+		}
+		err = os.WriteFile(filePath, buffer.Bytes(), ModuleFileMode)
+		if err != nil {
+			return fmt.Errorf("error writing file [%s]: %w", filePath, err)
+		}
+
+		// Instantiate the adapter template in global mode
+		if file.Name == modules.AdapterComposeTemplateFilename {
+			globalAdapterDir := filepath.Join(m.globalAdapterDir, string(descriptor.Name))
+			globalAdapterPath := filepath.Join(globalAdapterDir, modules.AdapterComposeFilename)
+			err := os.MkdirAll(globalAdapterDir, ModuleDirMode)
+			if err != nil {
+				return fmt.Errorf("error creating global adapter directory [%s]: %w", globalAdapterDir, err)
+			}
+
+			adapterTemplate, err := template.New("adapter").Parse(buffer.String())
+			if err != nil {
+				return fmt.Errorf("error parsing adapter template [%s]: %w", filePath, err)
+			}
+			adapterFile, err := os.OpenFile(globalAdapterPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, ModuleFileMode)
+			if err != nil {
+				return fmt.Errorf("error creating adapter compose file [%s]: %w", globalAdapterPath, err)
+			}
+			adapterSrc := templates.NewGlobalAdapterDataSource(&descriptor)
+			err = adapterTemplate.Execute(adapterFile, adapterSrc)
+			if err != nil {
+				return fmt.Errorf("error executing adapter template: %w", err)
+			}
+		}
+	}
+
+	return nil
+}
+
+// Deploy a module to the user's directory
+func (m *ModuleManager) DeployModule(
+	moduleInstallDir string,
+	hdSettings *hdconfig.HyperdriveSettings,
+	moduleSettingsMap map[string]*modconfig.ModuleSettings,
+	info *modconfig.ModuleInfo,
+) error {
+	hdProjectName := hdSettings.ProjectName
+
+	// Create the adapter data source for project mode
+	adapterSrc := templates.NewProjectAdapterDataSource(m.userDir, hdProjectName, &info.Descriptor)
+
+	// Build the module directory structure
+	err := errors.Join(
+		os.MkdirAll(adapterSrc.ModuleConfigDir, ModuleDirMode),
+		os.MkdirAll(adapterSrc.ModuleLogDir, ModuleDirMode),
+		os.MkdirAll(adapterSrc.ModuleComposeDir, ModuleDirMode),
+		os.MkdirAll(adapterSrc.ModuleOverrideDir, ModuleDirMode),
+		os.MkdirAll(adapterSrc.ModuleMetricsDir, ModuleDirMode),
+		os.MkdirAll(filepath.Dir(adapterSrc.AdapterKeyFile), auth.KeyDirPermissions),
+	)
+	if err != nil {
+		return fmt.Errorf("error creating module directories: %w", err)
+	}
+
+	// Build the module data dir
+	moduleDataDir := filepath.Join(hdSettings.UserDataPath, shared.ModulesDir, string(info.Descriptor.Name))
+	err = os.MkdirAll(moduleDataDir, ModuleDirMode)
+	if err != nil {
+		return fmt.Errorf("error creating module data directory [%s]: %w", moduleDataDir, err)
+	}
+
+	// Create the adapter key
+	adapterKeyPath := filepath.Join(adapterSrc.ModuleDir, shared.SecretsDir, shared.AdapterKeyFile)
+	err = auth.CreateKeyFile(adapterKeyPath, AdapterKeySizeBytes)
+	if err != nil {
+		return fmt.Errorf("error creating adapter key file [%s]: %w", adapterKeyPath, err)
+	}
+
+	// Instantiate the adapter template
+	adapterTemplatePath := filepath.Join(moduleInstallDir, string(info.Descriptor.Name), "adapter.tmpl")
+	adapterTemplate, err := template.ParseFiles(adapterTemplatePath)
+	if err != nil {
+		return fmt.Errorf("error parsing adapter template [%s]: %w", adapterTemplatePath, err)
+	}
+	adapterRuntimePath := filepath.Join(adapterSrc.ModuleComposeDir, "adapter.yml")
+	adapterFile, err := os.OpenFile(adapterRuntimePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, ModuleFileMode)
+	if err != nil {
+		return fmt.Errorf("error creating adapter compose file [%s]: %w", adapterRuntimePath, err)
+	}
+	err = adapterTemplate.Execute(adapterFile, adapterSrc)
+	if err != nil {
+		return fmt.Errorf("error executing adapter template: %w", err)
+	}
+
+	// Instantiate the service templates
+	serviceSrc := templates.NewServiceDataSource(hdSettings, moduleSettingsMap, info, adapterSrc)
+	serviceTemplatePath := filepath.Join(moduleInstallDir, string(info.Descriptor.Name), shared.TemplatesDir)
+	entries, err := os.ReadDir(serviceTemplatePath)
+	if err != nil {
+		return fmt.Errorf("error reading service template directory [%s]: %w", serviceTemplatePath, err)
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		entryName := entry.Name()
+		templateSuffix := ".tmpl"
+		if filepath.Ext(entryName) != templateSuffix {
+			// Skip non-template files
+			continue
+		}
+		templatePath := filepath.Join(serviceTemplatePath, entryName)
+		template, err := template.ParseFiles(templatePath)
+		if err != nil {
+			return fmt.Errorf("error parsing service template [%s]: %w", templatePath, err)
+		}
+		serviceName := strings.TrimSuffix(filepath.Base(entryName), templateSuffix)
+		serviceName += ".yml"
+		serviceRuntimePath := filepath.Join(adapterSrc.ModuleComposeDir, serviceName)
+		serviceFile, err := os.OpenFile(serviceRuntimePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, ModuleFileMode)
+		if err != nil {
+			return fmt.Errorf("error creating service compose file [%s]: %w", serviceRuntimePath, err)
+		}
+		err = template.Execute(serviceFile, serviceSrc)
+		if err != nil {
+			return fmt.Errorf("error executing service template: %w", err)
+		}
+	}
+	return nil
 }
 
 // ==============

@@ -27,6 +27,18 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					// Run command
 					return listModules(c)
 				},
+			}, {
+				Name:    "install",
+				Aliases: []string{"i"},
+				Usage:   "Install a module from a package file",
+				Flags:   []cli.Flag{},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 1)
+
+					// Run command
+					return installModule(c, c.Args().Get(0))
+				},
 			},
 		},
 	})

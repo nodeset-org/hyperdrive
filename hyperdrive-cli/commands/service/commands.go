@@ -112,6 +112,27 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					return configureService(c)
 				},
 			},
+			{
+				Name:    "start",
+				Aliases: []string{"s"},
+				Usage:   "Start the Hyperdrive service",
+				Flags: []cli.Flag{
+					/*
+						ignoreSlashTimerFlag,
+						nodeset.RegisterEmailFlag,
+						wallet.PasswordFlag,
+						wallet.SavePasswordFlag,
+					*/
+					utils.YesFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run command
+					return startService(c)
+				},
+			},
 
 			/*
 				{
@@ -126,25 +147,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 						return serviceStatus(c)
 					},
 				},
-					{
-						Name:    "start",
-						Aliases: []string{"s"},
-						Usage:   "Start the Hyperdrive service",
-						Flags: []cli.Flag{
-							ignoreSlashTimerFlag,
-							nodeset.RegisterEmailFlag,
-							wallet.PasswordFlag,
-							wallet.SavePasswordFlag,
-							utils.YesFlag,
-						},
-						Action: func(c *cli.Context) error {
-							// Validate args
-							utils.ValidateArgCount(c, 0)
-
-							// Run command
-							return startService(c, false)
-						},
-					},
 
 					{
 						Name:    "stop",

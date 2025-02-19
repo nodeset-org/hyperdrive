@@ -138,7 +138,7 @@ func initializeArtifacts() {
 	cfgInstance.UserDataPath = internal_test.UserDataPath
 
 	// Set up the mod manager
-	modMgr, err = utils.NewModuleManager(shared.GetModulesDirectoryPath(internal_test.SystemDir))
+	modMgr, err = utils.NewModuleManager(shared.GetModulesDirectoryPath(internal_test.SystemDir), "", internal_test.CfgDir)
 	if err != nil {
 		fail(fmt.Errorf("error creating module manager: %w", err))
 	}

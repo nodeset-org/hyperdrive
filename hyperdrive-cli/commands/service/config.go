@@ -1,11 +1,13 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	tuiconfig "github.com/nodeset-org/hyperdrive/hyperdrive-cli/tui/config"
+	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/config"
@@ -51,7 +53,7 @@ func configureService(c *cli.Context) error {
 	waitForOk := false
 	for _, result := range modLoadResults {
 		if result.LoadError != nil {
-			fmt.Println("Skipping module", result.Info.Descriptor.GetFullyQualifiedModuleName(), "because it failed to load: %s", result.LoadError.Error())
+			fmt.Printf("Skipping module %s because it failed to load: %s\n", result.Info.Descriptor.GetFullyQualifiedModuleName(), result.LoadError.Error())
 			waitForOk = true
 			continue
 		}
@@ -111,97 +113,135 @@ func configureService(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-
-	// Deal with saving the config and printing the changes
-	if md.ShouldSave {
-		// Save the config
-		err = md.UpdateSettingsFromTuiSelections()
-		if err != nil {
-			return fmt.Errorf("error updating settings from TUI selections: %w", err)
-		}
-		err = hd.SavePrimarySettings(settings, true)
-		if err != nil {
-			return fmt.Errorf("error saving config settings: %w", err)
-		}
-		fmt.Println("Your changes have been saved!")
-
-		/*
-			// Handle network changes
-			prefix := fmt.Sprint(md.PreviousConfig.Hyperdrive.ProjectName.Value)
-			if md.ChangeNetworks {
-				// Remove the checkpoint sync provider
-				md.Config.Hyperdrive.LocalBeaconClient.CheckpointSyncProvider.Value = ""
-				err = hd.SaveConfig(md.Config)
-				if err != nil {
-					return fmt.Errorf("error saving config: %w", err)
-				}
-
-				fmt.Printf("%sWARNING: You have requested to change networks.\n\nAll of your existing chain data, your node wallet, and your validator keys will be removed. If you had a Checkpoint Sync URL provided for your Beacon Node, it will be removed and you will need to specify a different one that supports the new network.\n\nPlease confirm you have backed up everything you want to keep, because it will be deleted if you answer `y` to the prompt below.\n\n%s", terminal.ColorYellow, terminal.ColorReset)
-
-				if !utils.Confirm("Would you like Hyperdrive to automatically switch networks for you? This will destroy and rebuild your `data` folder and all of Hyperdrive's Docker containers.") {
-					fmt.Println("Please clean up the data folder manually before proceeding.")
-					return nil
-				}
-
-				err = changeNetworks(c)
-				if err != nil {
-					fmt.Printf("%s%s%s\nHyperdrive could not automatically change networks for you, so you will have to remove your old data folder manually.\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
-				}
-				return nil
-			}
-		*/
-
-		// Query for service start if this is a new installation
-		/*
-			if isNew {
-				if !utils.Confirm("Would you like to start the Hyperdrive services automatically now?") {
-					fmt.Println("Please run `hyperdrive service start` when you are ready to launch.")
-					return nil
-				}
-				return startService(c, true)
-			}
-
-			// Query for service start if this is old and there are containers to change
-			if len(md.ContainersToRestart) > 0 {
-				fmt.Println("The following containers must be restarted for the changes to take effect:")
-				for _, container := range md.ContainersToRestart {
-					fmt.Printf("\t%s_%s\n", prefix, container)
-				}
-				if !utils.Confirm("Would you like to restart them automatically now?") {
-					fmt.Println("Please run `hyperdrive service start` when you are ready to apply the changes.")
-					return nil
-				}
-
-				runningContainers, err := hd.GetRunningContainers(prefix)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Warning: couldn't check running containers: %s\n", err.Error())
-					runningContainers = map[string]bool{}
-				}
-				for _, container := range md.ContainersToRestart {
-					fullName := fmt.Sprintf("%s_%s", prefix, container)
-					if !runningContainers[fullName] {
-						fmt.Printf("%s is not currently running.\n", fullName)
-					} else {
-						fmt.Printf("Stopping %s... ", fullName)
-						err := hd.StopContainer(fullName)
-						if err != nil {
-							fmt.Println("error!")
-							fmt.Fprintf(os.Stderr, "Error stopping container %s: %s\n", fullName, err.Error())
-							continue
-						}
-						fmt.Println("done!")
-					}
-				}
-
-				fmt.Println()
-				fmt.Println("Applying changes and restarting containers...")
-				return startService(c, true)
-			}
-		*/
-	} else {
+	if !md.ShouldSave {
 		fmt.Println("Your changes have not been saved. Your Hyperdrive configuration is the same as it was before.")
 		return nil
 	}
+
+	// Save the config
+	err = md.UpdateSettingsFromTuiSelections()
+	if err != nil {
+		return fmt.Errorf("error updating settings from TUI selections: %w", err)
+	}
+	err = hd.SavePrimarySettings(settings, true)
+	if err != nil {
+		return fmt.Errorf("error saving config settings: %w", err)
+	}
+	fmt.Println("Settings saved successfully. Starting project adapters...")
+
+	// Start all of the project module adapters
+	modInfos, moduleSettingsMap, err := createModuleSettingsArtifacts(hdCfg, settings)
+	if err != nil {
+		return fmt.Errorf("error creating module settings: %w", err)
+	}
+	err = deployModules(modMgr, hd.Context.ModulesDir(), settings, moduleSettingsMap, modInfos)
+	if err != nil {
+		return fmt.Errorf("error deploying modules: %w", err)
+	}
+	err = startProjectAdapters(hd.Context.UserDirPath, settings.ProjectName, modInfos)
+	if err != nil {
+		return fmt.Errorf("error starting project adapters: %w", err)
+	}
+
+	// Set the settings for each module
+	fmt.Println("Saving settings for each module...")
+	for _, info := range modInfos {
+		pac, err := modMgr.GetProjectAdapterClient(settings.ProjectName, info.Descriptor.GetFullyQualifiedModuleName())
+		if err != nil {
+			return fmt.Errorf("error getting project adapter client for module [%s]: %w", info.Descriptor.Name, err)
+		}
+		err = pac.SetSettings(context.Background(), settings)
+		if err != nil {
+			return fmt.Errorf("error saving settings for module [%s]: %w", info.Descriptor.Name, err)
+		}
+	}
+	fmt.Println("Module settings saved successfully.")
+
+	// Start the modules
+	// TODO: ignore this if there are no changes
+	if !utils.Confirm("Would you like to restart the services automatically now to apply the changes?") {
+		fmt.Println("Please run `hyperdrive service start` when you are ready to apply the changes.")
+		return nil
+	}
+	err = startModules(modMgr, settings, modInfos)
+	if err != nil {
+		return fmt.Errorf("error starting modules: %w", err)
+	}
+	return err
+
+	/*
+		// Handle network changes
+		prefix := fmt.Sprint(md.PreviousConfig.Hyperdrive.ProjectName.Value)
+		if md.ChangeNetworks {
+			// Remove the checkpoint sync provider
+			md.Config.Hyperdrive.LocalBeaconClient.CheckpointSyncProvider.Value = ""
+			err = hd.SaveConfig(md.Config)
+			if err != nil {
+				return fmt.Errorf("error saving config: %w", err)
+			}
+
+			fmt.Printf("%sWARNING: You have requested to change networks.\n\nAll of your existing chain data, your node wallet, and your validator keys will be removed. If you had a Checkpoint Sync URL provided for your Beacon Node, it will be removed and you will need to specify a different one that supports the new network.\n\nPlease confirm you have backed up everything you want to keep, because it will be deleted if you answer `y` to the prompt below.\n\n%s", terminal.ColorYellow, terminal.ColorReset)
+
+			if !utils.Confirm("Would you like Hyperdrive to automatically switch networks for you? This will destroy and rebuild your `data` folder and all of Hyperdrive's Docker containers.") {
+				fmt.Println("Please clean up the data folder manually before proceeding.")
+				return nil
+			}
+
+			err = changeNetworks(c)
+			if err != nil {
+				fmt.Printf("%s%s%s\nHyperdrive could not automatically change networks for you, so you will have to remove your old data folder manually.\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+			}
+			return nil
+		}
+	*/
+
+	// Query for service start if this is a new installation
+	/*
+		if isNew {
+			if !utils.Confirm("Would you like to start the Hyperdrive services automatically now?") {
+				fmt.Println("Please run `hyperdrive service start` when you are ready to launch.")
+				return nil
+			}
+			return startService(c, true)
+		}
+
+		// Query for service start if this is old and there are containers to change
+		if len(md.ContainersToRestart) > 0 {
+			fmt.Println("The following containers must be restarted for the changes to take effect:")
+			for _, container := range md.ContainersToRestart {
+				fmt.Printf("\t%s_%s\n", prefix, container)
+			}
+			if !utils.Confirm("Would you like to restart them automatically now?") {
+				fmt.Println("Please run `hyperdrive service start` when you are ready to apply the changes.")
+				return nil
+			}
+
+			runningContainers, err := hd.GetRunningContainers(prefix)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: couldn't check running containers: %s\n", err.Error())
+				runningContainers = map[string]bool{}
+			}
+			for _, container := range md.ContainersToRestart {
+				fullName := fmt.Sprintf("%s_%s", prefix, container)
+				if !runningContainers[fullName] {
+					fmt.Printf("%s is not currently running.\n", fullName)
+				} else {
+					fmt.Printf("Stopping %s... ", fullName)
+					err := hd.StopContainer(fullName)
+					if err != nil {
+						fmt.Println("error!")
+						fmt.Fprintf(os.Stderr, "Error stopping container %s: %s\n", fullName, err.Error())
+						continue
+					}
+					fmt.Println("done!")
+				}
+			}
+
+			fmt.Println()
+			fmt.Println("Applying changes and restarting containers...")
+			return startService(c, true)
+		}
+	*/
 
 	return err
 }
