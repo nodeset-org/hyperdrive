@@ -1,3 +1,10 @@
+hyperdrive (1.1.3~dev) UNRELEASED; urgency=medium
+
+  * Updated Geth, Besu, Nethermind, Reth, Lodestar, Nimbus, Prysm, Teku to prepare for Pectra on Holesky.
+  * Holesky only: updated Lighthouse and MEV-Boost to pre-release versions.
+
+ -- NodeSet Inc. <info@nodeset.io>  Thu, 20 Feb 2025 21:28:16 +0000
+
 hyperdrive (1.1.2) stable; urgency=high
 
   * Updated Geth, Besu, Nethermind, Reth, Lighthouse, Lodestar, Nimbus, Prysm, Teku, and Prometheus.
