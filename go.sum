@@ -448,8 +448,8 @@ github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8m
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
 github.com/nodeset-org/hyperdrive-constellation v1.0.1 h1:UWJAHR7fLS/40X7D+1lo2q9eqZ/S6eG7HsxXdsYuCHo=
 github.com/nodeset-org/hyperdrive-constellation v1.0.1/go.mod h1:48noDjJIS5agKoZKVQ4fJC+N9pVcum+WJEp5UuM8tHc=
-github.com/nodeset-org/hyperdrive-daemon v1.1.3-0.20250221001839-52772a476675 h1:mheizdS04aQbFaN7jJarSbu+YNB/V6ZM1uH/tqKRL5Y=
-github.com/nodeset-org/hyperdrive-daemon v1.1.3-0.20250221001839-52772a476675/go.mod h1:r2TzhOTd6pGtmGzu8d4nMpVo6yaGidt6uJj/DunNxNY=
+github.com/nodeset-org/hyperdrive-daemon v1.1.3-0.20250221185452-a2d738d303de h1:jg0jpyRF8YmEhkqfsw5Gw0zY5SCln9sVYp0rIFRIXI4=
+github.com/nodeset-org/hyperdrive-daemon v1.1.3-0.20250221185452-a2d738d303de/go.mod h1:r2TzhOTd6pGtmGzu8d4nMpVo6yaGidt6uJj/DunNxNY=
 github.com/nodeset-org/hyperdrive-stakewise v1.1.0 h1:JiquGP1ewiAcqJmas8Vz6x298rAA8n/0qIiqb8RmcyM=
 github.com/nodeset-org/hyperdrive-stakewise v1.1.0/go.mod h1:SqPlbylTPdKKq9gdm3JWHis/DOkFD9DOubHDC/MfQ6o=
 github.com/nodeset-org/nodeset-client-go v1.2.2 h1:mjJnH5uw/CF5TWdRxdU5+Cw/ERRLz4hl9VsRFVO0Wdo=
