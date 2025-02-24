@@ -129,16 +129,20 @@ func configureService(c *cli.Context) error {
 	}
 	fmt.Println("Settings saved successfully. Starting project adapters...")
 
-	// Start all of the project module adapters
+	// Start all of the base services and project module adapters
 	modInfos, moduleSettingsMap, err := createModuleSettingsArtifacts(hdCfg, settings)
 	if err != nil {
 		return fmt.Errorf("error creating module settings: %w", err)
+	}
+	composeFiles, err := deployTemplates(hd.Context.SystemDirPath, hd.Context.UserDirPath, settings)
+	if err != nil {
+		return fmt.Errorf("error deploying templates: %w", err)
 	}
 	err = deployModules(modMgr, hd.Context.ModulesDir(), settings, moduleSettingsMap, modInfos)
 	if err != nil {
 		return fmt.Errorf("error deploying modules: %w", err)
 	}
-	err = startProjectAdapters(hd.Context.UserDirPath, settings.ProjectName, modInfos)
+	err = startComposeFiles(hd.Context.UserDirPath, settings.ProjectName, modInfos, composeFiles)
 	if err != nil {
 		return fmt.Errorf("error starting project adapters: %w", err)
 	}

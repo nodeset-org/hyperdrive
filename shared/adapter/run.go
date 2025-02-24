@@ -49,11 +49,13 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 	if err != nil {
 		return "", "", fmt.Errorf("error creating exec command [%s]: %w", command, err)
 	}
-	logger.Debug(
-		"Exec command created",
-		"cmd", strings.Join(cmdArray, " "),
-		"id", idResponse.ID,
-	)
+	if logger != nil {
+		logger.Debug(
+			"Exec command created",
+			"cmd", strings.Join(cmdArray, " "),
+			"id", idResponse.ID,
+		)
+	}
 
 	// Attach reader/writer to the exec command
 	execResponse, err := c.dockerClient.ContainerExecAttach(ctx, idResponse.ID, container.ExecAttachOptions{
@@ -63,7 +65,9 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 		return "", "", fmt.Errorf("error attaching to exec command [%s]: %w", command, err)
 	}
 	defer execResponse.Close()
-	logger.Debug("Attached to exec command")
+	if logger != nil {
+		logger.Debug("Attached to exec command")
+	}
 
 	// Send the request down via stdin
 	err = json.NewEncoder(execResponse.Conn).Encode(request)
@@ -99,7 +103,9 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 		if exitErr != nil {
 			return "", "", fmt.Errorf("error reading command [%s] response: %w", command, exitErr)
 		}
-		logger.Debug("Exec command exited")
+		if logger != nil {
+			logger.Debug("Exec command exited")
+		}
 		break
 		/*
 			case inErr := <-inStopped:
@@ -129,10 +135,10 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 	}
 
 	// Print the output
-	if len(stdout) > 0 {
+	if len(stdout) > 0 && logger != nil {
 		logger.Info("Command output", "stdout", string(stdout))
 	}
-	if len(stderr) > 0 {
+	if len(stderr) > 0 && logger != nil {
 		logger.Error("Command error", "stderr", string(stderr))
 	}
 	if inspectResponse.ExitCode != 0 {

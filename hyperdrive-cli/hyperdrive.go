@@ -13,9 +13,10 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/module"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/service"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/context"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
+	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/shared"
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
+	hdutils "github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -84,9 +85,9 @@ func main() {
 
 	// Set application flags
 	app.Flags = []cli.Flag{
-		utils.AllowRootFlag,
-		utils.UserDirPathFlag,
-		utils.SystemDirPathFlag,
+		cliutils.AllowRootFlag,
+		cliutils.UserDirPathFlag,
+		cliutils.SystemDirPathFlag,
 		apiAddressFlag,
 		debugFlag,
 		httpTracePathFlag,
@@ -96,16 +97,61 @@ func main() {
 	// Set default paths for flags before parsing the provided values
 	setDefaultPaths()
 
-	// Register commands
+	// Try to load the installed modules
+	var systemDir string
+	for i, flag := range os.Args {
+		if flag == "--"+cliutils.SystemDirPathFlag.Name || flag == "-"+cliutils.SystemDirPathFlag.Aliases[0] {
+			if i+1 >= len(os.Args) {
+				fmt.Println("System directory flag was provided without a value")
+				os.Exit(1)
+			}
+			systemDir = os.Args[i+1]
+			break
+		}
+	}
+	if systemDir == "" {
+		systemDir = cliutils.SystemDirPathFlag.Value
+	}
+	descriptors, err := hdutils.GetInstalledDescriptors(filepath.Join(systemDir, shared.ModulesDir))
+	if err != nil {
+		fmt.Println("WARNING: Installed modules could not be loaded:", err)
+		fmt.Println("Module commands will be disabled until this is resolved.")
+	}
+	if len(descriptors) > 0 {
+		builder := strings.Builder{}
+		for _, desc := range descriptors {
+			builder.WriteString("   " + string(desc.Name) + ", " + string(desc.Shortcut) + " - " + "Interact with the " + string(desc.Name) + " module\n")
+		}
+		cli.AppHelpTemplate = fmt.Sprintf(AppHelpTemplate, builder.String())
+	}
+
+	// Register base commands
 	module.RegisterCommands(app, "module", []string{"m"})
 	service.RegisterCommands(app, "service", []string{"s"})
+
+	// Register module commands
+	app.CommandNotFound = HandleCommandNotFound
+	/*
+		for _, desc := range descriptors {
+			app.Commands = append(app.Commands, &cli.Command{
+				Name:    string(desc.Name),
+				Aliases: []string{string(desc.Shortcut)},
+				Usage:   "Interact with the " + string(desc.Name) + " module",
+				Flags:   []cli.Flag{},
+				Action: func(c *cli.Context) error {
+					fmt.Println("Module command not implemented yet")
+					return nil
+				},
+			})
+		}
+	*/
 
 	var hdCtx *context.HyperdriveContext
 	app.Before = func(c *cli.Context) error {
 		// Check user ID
-		if os.Getuid() == 0 && !c.Bool(utils.AllowRootFlag.Name) {
+		if os.Getuid() == 0 && !c.Bool(cliutils.AllowRootFlag.Name) {
 			fmt.Fprintln(os.Stderr, "hyperdrive should not be run as root. Please try again without 'sudo'.")
-			fmt.Fprintf(os.Stderr, "If you want to run hyperdrive as root anyway, use the '--%s' option to override this warning.\n", utils.AllowRootFlag.Name)
+			fmt.Fprintf(os.Stderr, "If you want to run hyperdrive as root anyway, use the '--%s' option to override this warning.\n", cliutils.AllowRootFlag.Name)
 			os.Exit(1)
 		}
 
@@ -155,26 +201,26 @@ func setDefaultPaths() {
 
 	// Default user dir path
 	defaultUserDirPath := filepath.Join(homeDir, DefaultUserFolder)
-	utils.UserDirPathFlag.Value = defaultUserDirPath
+	cliutils.UserDirPathFlag.Value = defaultUserDirPath
 
 	// Default system directory path
 	switch runtime.GOOS {
 	// This is where to add different paths for different OS's like macOS
 	default:
 		// By default just use the Linux path for now
-		utils.SystemDirPathFlag.Value = LinuxSystemDir
+		cliutils.SystemDirPathFlag.Value = LinuxSystemDir
 	}
 }
 
 // Validate the global flags
 func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
 	// Expand the user and system paths
-	configPath := c.String(utils.UserDirPathFlag.Name)
+	configPath := c.String(cliutils.UserDirPathFlag.Name)
 	fullConfigPath, err := homedir.Expand(strings.TrimSpace(configPath))
 	if err != nil {
 		return nil, fmt.Errorf("error expanding config path [%s]: %w", configPath, err)
 	}
-	systemPath := c.String(utils.SystemDirPathFlag.Name)
+	systemPath := c.String(cliutils.SystemDirPathFlag.Name)
 	fullSystemPath, err := homedir.Expand(strings.TrimSpace(systemPath))
 	if err != nil {
 		return nil, fmt.Errorf("error expanding system path [%s]: %w", systemPath, err)

@@ -121,6 +121,11 @@ func (m *ModuleManager) GetModuleSystemDir() string {
 	return m.modulePath
 }
 
+// Get the descriptors for all installed modules
+func (m *ModuleManager) GetInstalledDescriptors() ([]*modules.ModuleDescriptor, error) {
+	return GetInstalledDescriptors(m.modulePath)
+}
+
 // Load the module descriptors to determine what's installed
 func (m *ModuleManager) LoadModuleInfo(ensureModuleStart bool) ([]*ModuleInfoLoadResult, error) {
 	// Enumerate the installed modules

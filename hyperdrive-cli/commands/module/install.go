@@ -38,6 +38,7 @@ func installModule(c *cli.Context, moduleFile string) error {
 			if err != nil {
 				return fmt.Errorf("escalated privileges are required to install this module but error getting executable path: %w", err)
 			}
+			fmt.Println("Privilege escalation is required to install modules to the system directory.")
 			args := []string{
 				escalationCmd,
 				appPath,

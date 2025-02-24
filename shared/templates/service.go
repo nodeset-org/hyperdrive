@@ -8,7 +8,7 @@ import (
 	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 )
 
-// ServiceDataSource is a data source for service templates
+// The data source for module service templates
 type ServiceDataSource struct {
 	// Public parameters
 	ModuleComposeProject string
