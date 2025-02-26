@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 	"text/template"
+	"time"
 
 	"github.com/docker/docker/api/types/container"
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
@@ -223,18 +224,31 @@ func TestStartStopRun(t *testing.T) {
 	t.Log("Services stopped successfully")
 
 	// Make sure the service is not running
-	found = false
-	containers, err = docker.ContainerList(context.Background(), container.ListOptions{All: true})
-	require.NoError(t, err)
-	for _, container := range containers {
-		for _, name := range container.Names {
-			if name == "/"+internal_test.ServiceContainerName {
-				found = true
-				require.Equal(t, "exited", container.State)
+	exited := false
+	attempts := 5
+	for i := range attempts {
+		found = false
+		containers, err = docker.ContainerList(context.Background(), container.ListOptions{All: true})
+		require.NoError(t, err)
+		for _, container := range containers {
+			for _, name := range container.Names {
+				if name == "/"+internal_test.ServiceContainerName {
+					found = true
+					if container.State != "exited" {
+						time.Sleep(1 * time.Second)
+						continue
+					} else if i == attempts-1 {
+						require.Equal(t, "exited", container.State)
+					}
+
+					break
+				}
+			}
+			if found {
 				break
 			}
 		}
-		if found {
+		if exited {
 			break
 		}
 	}

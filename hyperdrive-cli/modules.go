@@ -33,7 +33,7 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 	}
 
 	// Get the list of modules
-	fmt.Println("Loading modules...")
+	//fmt.Println("Loading modules...")
 	results, err := hd.LoadModules()
 	if err != nil {
 		fmt.Printf("WARNING: Modules could not be loaded: %v\n", err)

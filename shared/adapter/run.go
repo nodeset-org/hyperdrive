@@ -203,27 +203,28 @@ func (c *AdapterClient) Run(ctx context.Context, logger *slog.Logger, command st
 	if err != nil {
 		return fmt.Errorf("error encoding request for command [%s]: %w", command, err)
 	}
-	bufferSize := buffer.Len()
+	requestString := strings.TrimSpace(buffer.String())
+	bufferSize := len(requestString)
 	_, err = io.Copy(execResponse.Conn, buffer)
 	if err != nil {
 		return fmt.Errorf("error sending request for command [%s]: %w", command, err)
 	}
-	readBuffer := make([]byte, bufferSize)
-	totalBytesRead := 0
 
 	// NOTE: for some reason the request we just sent is going to get echoed back to us
 	// so we need to read it first to clear the hijacked connection before attaching the streams.
 	// That way it doesn't get printed to the user's terminal.
-	for totalBytesRead < bufferSize {
-		bytesRead, err := execResponse.Conn.Read(readBuffer)
+	readBuffer := make([]byte, bufferSize+2) // Docker adds a \r\n to the end of the response
+	totalBytesRead := 0
+	for totalBytesRead <= bufferSize {
+		bytesRead, err := execResponse.Conn.Read(readBuffer[totalBytesRead:])
 		if err != nil {
 			return fmt.Errorf("error reading response for command [%s]: %w", command, err)
 		}
-		readBuffer = readBuffer[bytesRead:]
 		totalBytesRead += bytesRead
 	}
-	if totalBytesRead != bufferSize {
-		return fmt.Errorf("error reading response for command [%s]: expected %d bytes, got %d", command, bufferSize, totalBytesRead)
+	readString := strings.TrimSpace(string(readBuffer))
+	if readString != requestString {
+		return fmt.Errorf("error reading response for command [%s]: expected %s, got %s", command, requestString, readString)
 	}
 
 	// Attach streams to the container
