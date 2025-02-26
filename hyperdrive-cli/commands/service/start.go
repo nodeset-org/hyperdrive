@@ -200,7 +200,7 @@ func deployTemplates(systemDir string, userDir string, settings *config.Hyperdri
 
 	// These containers always run
 	toDeploy := []string{
-		string(config.ContainerID_Daemon),
+		//string(config.ContainerID_Daemon),
 	}
 
 	// Deploy main containers

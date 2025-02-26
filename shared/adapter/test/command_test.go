@@ -205,7 +205,7 @@ func TestStartStopRun(t *testing.T) {
 	logger := adapter.CreateLogger(t)
 
 	// Run the get-param command
-	cmd := "config get-param exampleFloat"
+	cmd := "config get-param --param exampleFloat"
 	stdout, stderr, err := pac.RunNoninteractive(context.Background(), logger, cmd)
 	require.Empty(t, stderr)
 	require.NoError(t, err)

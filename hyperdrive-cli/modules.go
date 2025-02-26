@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -140,12 +141,10 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 			break
 		}
 	}
-	//logger := slog.Default()
-	stdout, stderr, err := pac.RunNoninteractive(context.Background(), nil, strings.Join(args, " "))
+	logger := slog.Default()
+	err = pac.Run(context.Background(), logger, strings.Join(args, " "), true)
 	if err != nil {
 		fmt.Printf("Error running command: %v\n", err)
 		return
 	}
-	fmt.Println(stdout)
-	fmt.Println(stderr)
 }

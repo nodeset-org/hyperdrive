@@ -15,8 +15,11 @@
                 "${env:HOME}/.hyperdrive",
                 "-s",
                 "/usr/share/hyperdrive",
-                "em3",
-                "whatever"
+                "em",
+                "config",
+                "get-param",
+                "--param",
+                "exampleFloat"
             ]
         },
         {
