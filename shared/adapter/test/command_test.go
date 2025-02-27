@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types/container"
+	hdconfig "github.com/nodeset-org/hyperdrive/config"
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	adapter "github.com/nodeset-org/hyperdrive/shared/adapter/test"
-	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/stretchr/testify/require"
 )
 
@@ -219,7 +219,7 @@ func TestStartStopRun(t *testing.T) {
 	t.Logf("Command ran successfully and returned %s", out)
 
 	// Stop the services
-	err = pac.Stop(context.Background(), composeProjectName)
+	err = pac.Stop(context.Background(), composeProjectName, []string{})
 	require.NoError(t, err)
 	t.Log("Services stopped successfully")
 

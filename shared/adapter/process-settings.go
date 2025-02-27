@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/config"
 )
 
 const (

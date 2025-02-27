@@ -3,7 +3,7 @@ package adapter
 import (
 	"context"
 
-	"github.com/nodeset-org/hyperdrive/shared/config"
+	"github.com/nodeset-org/hyperdrive/config"
 )
 
 const (

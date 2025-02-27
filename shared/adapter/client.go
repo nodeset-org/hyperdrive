@@ -77,6 +77,23 @@ func NewAdapterClient(containerName string, key string) (*AdapterClient, error) 
 	}, nil
 }
 
+// Check if the adapter container for this client still exists; returns true if it doesn't and the client must be regenerated
+func (c *AdapterClient) CheckIfStale() (bool, error) {
+	containers, err := c.dockerClient.ContainerList(context.Background(), container.ListOptions{
+		All: true,
+	})
+	if err != nil {
+		return false, fmt.Errorf("error listing containers: %w", err)
+	}
+
+	for _, container := range containers {
+		if container.ID == c.containerID {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
 // Get the ID of a container by its name
 func getContainerID(dockerClient *client.Client, containerName string) (string, error) {
 	containers, err := dockerClient.ContainerList(context.Background(), container.ListOptions{

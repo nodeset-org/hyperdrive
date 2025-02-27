@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
+	hdconfig "github.com/nodeset-org/hyperdrive/config"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
-	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 const (

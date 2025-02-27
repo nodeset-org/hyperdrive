@@ -64,6 +64,8 @@ When running in Project mode, these additional environment variables are set:
 
 - `HD_COMPOSE_DIR` is the full path (within the container) to the directory that contains the Docker Compose files for your modules after their templates have been instantiated. The filenames will be the same as the Docker Compose templates contained within your [module package](./module.md#packages), but the extension will be `.yml` instead of `.tmpl`. Your adapter can use these files when starting or stopping your module.
 
+- `HD_COMPOSE_PROJECT` is the name of the project to use as the Docker Compose project name when running Docker Compose commands. 
+
 
 ## Adapter API Protocol
 
@@ -245,7 +247,7 @@ where:
 
 *NOTE: this command is currently a WIP and designed for MVP purposes only. The final form is expected to change.*  
 
-Hyperdrive calls this command after your module's configuration settings have been saved with `set-settings`. Your adapter should start (or restart) whatever Docker containers it needs to based on the current settings (which will be provided with the call). For MVP purposes your adapter should execute a `docker compose up` command with the relevant files passed in based on the provided settings. Your module's service file templates will be instantiated and placed into the `HD_COMPOSE_DIR` directory prior to this call. For the Compose project name, use the provided `composeProjectName` property.
+Hyperdrive calls this command after your module's configuration settings have been saved with `set-settings`. Your adapter should start (or restart) whatever Docker containers it needs to based on the current settings (which will be provided with the call). For MVP purposes your adapter should execute a `docker compose up` command with the relevant files passed in based on the provided settings. Your module's service file templates will be instantiated and placed into the `HD_COMPOSE_DIR` directory prior to this call. It should use Docker Compose to start the services; for the Compose project name, use the `HD_COMPOSE_PROJECT` property.
 
 
 #### Input
@@ -256,7 +258,6 @@ Hyperdrive calls this command after your module's configuration settings have be
     "settings": {
         ...
     },
-    "composeProjectName": "..."
 }
 ```
 
@@ -264,7 +265,6 @@ where:
 
 - `key` must match the contents of the file in `HD_KEY_FILE`.
 - `settings` are the settings for the [complete Hyperdrive installation](TODO), including your module's configuration and the configuration for all other installed modules.
-- `composeProjectName` is the name of the Docker Compose project your module should use when running the `docker compose up` command. 
 
 
 #### Output
@@ -274,20 +274,27 @@ If the operation worked successfully, your adapter should return with Exit Code 
 
 ### `hd-module stop`
 
-Hyperdrive calls this command when the user has requested that your module needs to stop its Docker services.
+Hyperdrive calls this command when the user has requested that your module needs to stop its Docker services. In some cases it should stop all services for the project, and in others it will be provided with a list of service names to stop. Either way, it should use Docker Compose to stop the services; for the Compose project name, use the `HD_COMPOSE_PROJECT` property.
 
 
 #### Input
 
 ```json
 {
-    "key": "..."
+    "key": "...",
+    "services": [
+        ...
+    ]
 }
 ```
 
 where:
 
 - `key` must match the contents of the file in `HD_KEY_FILE`.
+- `services` is an optional array of Docker container service IDs that must be stopped. Typically this will come from the global adapter's `process-settings` command.
+  - If this list is missing or an empty array, your adapter should stop all of the service containers.
+  - If this list has one or more entries, your adapter should *only* stop the services in the list.
+  - If there is a service in the list that your adapter does not recognize, it should be ignored without returning an error.
 
 
 #### Output

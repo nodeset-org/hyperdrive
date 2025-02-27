@@ -3,6 +3,7 @@ package auth
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -33,16 +34,38 @@ func GenerateAuthKey(keyLengthInBytes int) (string, error) {
 }
 
 // Writes the given key to the specified file path.
-func CreateKeyFile(keyPath string, keyLengthInBytes int) error {
+func CreateOrLoadKeyFile(keyPath string, keyLengthInBytes int) (string, error) {
+	// Check if the file exists
+	exists := true
+	_, err := os.Stat(keyPath)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			exists = false
+		} else {
+			return "", fmt.Errorf("error checking if key [%s] exists: %w", keyPath, err)
+		}
+	}
+
+	// Read the file if it already exists
+	if exists {
+		key, err := os.ReadFile(keyPath)
+		if err != nil {
+			return "", fmt.Errorf("error reading key file [%s]: %w", keyPath, err)
+		}
+		return string(key), nil
+	}
+
+	// Generate a new key if it doesn't exist
 	key, err := GenerateAuthKey(keyLengthInBytes)
 	if err != nil {
-		return fmt.Errorf("error generating key: %w", err)
+		return "", fmt.Errorf("error generating key: %w", err)
 	}
 
+	// Write the new key
 	err = os.WriteFile(keyPath, []byte(key), KeyPermissions)
 	if err != nil {
-		return fmt.Errorf("error writing key file [%s]: %w", keyPath, err)
+		return "", fmt.Errorf("error writing key file [%s]: %w", keyPath, err)
 	}
 
-	return nil
+	return key, nil
 }

@@ -9,17 +9,14 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/hyperdrive-cli",
+            "program": "${workspaceFolder}/cli",
             "args": [
                 "-c",
                 "${env:HOME}/.hyperdrive",
                 "-s",
                 "/usr/share/hyperdrive",
-                "em",
-                "config",
-                "get-param",
-                "--param",
-                "exampleFloat"
+                "s",
+                "c"
             ]
         },
         {

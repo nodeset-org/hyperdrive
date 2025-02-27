@@ -13,15 +13,19 @@ type StopRequest struct {
 
 	// The compose project name
 	ComposeProjectName string `json:"composeProjectName"`
+
+	// The services to stop. If empty, all services will be stopped.
+	Services []string `json:"services"`
 }
 
 // Have the adapter stop the module.
-func (c *AdapterClient) Stop(ctx context.Context, composeProjectName string) error {
+func (c *AdapterClient) Stop(ctx context.Context, composeProjectName string, services []string) error {
 	request := &StopRequest{
 		KeyedRequest: KeyedRequest{
 			Key: c.key,
 		},
 		ComposeProjectName: composeProjectName,
+		Services:           services,
 	}
 	err := runCommand[StopRequest, struct{}](c, ctx, StopCommandString, request, nil)
 	if err != nil {

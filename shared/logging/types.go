@@ -1,5 +1,10 @@
 package logging
 
+import (
+	"fmt"
+	"log/slog"
+)
+
 // Log levels
 type LogLevel string
 
@@ -49,4 +54,23 @@ type LoggerOptions struct {
 
 	// True to include the source code position of the log statement in log messages
 	AddSource bool
+}
+
+// Type for
+type HdContextKey string
+
+// Convert the LogLevel to a slog Level
+func (l LogLevel) Level() slog.Level {
+	switch l {
+	case LogLevel_Debug:
+		return slog.LevelDebug
+	case LogLevel_Info:
+		return slog.LevelInfo
+	case LogLevel_Warn:
+		return slog.LevelWarn
+	case LogLevel_Error:
+		return slog.LevelError
+	default:
+		panic(fmt.Sprintf("log level [%s] cannot be converted to a slog Level", l))
+	}
 }

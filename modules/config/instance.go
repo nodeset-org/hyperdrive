@@ -14,6 +14,9 @@ type ModuleInstance struct {
 	// The version of the module that was used to create this instance
 	Version string `json:"version" yaml:"version"`
 
+	// Services that require a restart after applying these settings (used for applying pending settings only)
+	Restart []string `json:"restart,omitempty" yaml:"restart,omitempty"`
+
 	// The module's raw settings (instance of its configuration). Use the utility methods for ModuleInstance to convert it to a type-safe instance if needed.
 	Settings map[string]any `json:"settings" yaml:"settings"`
 }
@@ -24,6 +27,9 @@ func (i ModuleInstance) SerializeToMap() map[string]any {
 		"enabled":  i.Enabled,
 		"version":  i.Version,
 		"settings": i.Settings,
+	}
+	if len(i.Restart) > 0 {
+		instanceMap["restart"] = i.Restart
 	}
 	return instanceMap
 }

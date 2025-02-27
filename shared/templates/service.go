@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	hdconfig "github.com/nodeset-org/hyperdrive/config"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
-	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 )
 
 // The data source for module service templates

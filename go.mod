@@ -7,7 +7,7 @@ toolchain go1.22.7
 require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/docker/docker v28.0.0+incompatible
-	github.com/fatih/color v1.17.0 // indirect
+	github.com/fatih/color v1.17.0
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/goccy/go-json v0.10.3
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
@@ -19,13 +19,14 @@ require (
 require (
 	al.essio.dev/pkg/shellescape v1.5.1
 	github.com/docker/cli v28.0.0+incompatible
+	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/klauspost/compress v1.17.11
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/sys/signal v0.7.1
 	github.com/moby/term v0.5.0
-	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -73,6 +74,7 @@ require (
 	github.com/prometheus/procfs v0.13.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/cobra v1.9.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/theupdateframework/notary v0.7.0 // indirect
@@ -97,7 +99,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
 	google.golang.org/grpc v1.69.4 // indirect
 	google.golang.org/protobuf v1.36.3 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
 
 replace github.com/rocket-pool/smartnode/v2 => github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20241002073413-7c50008efc66

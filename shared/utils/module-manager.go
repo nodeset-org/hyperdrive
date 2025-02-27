@@ -17,12 +17,12 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/goccy/go-json"
 	"github.com/klauspost/compress/zip"
+	hdconfig "github.com/nodeset-org/hyperdrive/config"
 	"github.com/nodeset-org/hyperdrive/modules"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 	"github.com/nodeset-org/hyperdrive/shared/auth"
-	hdconfig "github.com/nodeset-org/hyperdrive/shared/config"
 	"github.com/nodeset-org/hyperdrive/shared/templates"
 )
 
@@ -294,7 +294,15 @@ func (m *ModuleManager) LoadModuleInfo(ensureModuleStart bool) ([]*ModuleInfoLoa
 // Get an adapter client for the global adapter container of a module
 func (m *ModuleManager) GetGlobalAdapterClient(fqmn string) (*adapter.AdapterClient, error) {
 	if client, exists := m.globalAdapterClients[fqmn]; exists {
-		return client, nil
+		isStale, err := client.CheckIfStale()
+		if err != nil {
+			return nil, fmt.Errorf("error checking if adapter client is stale: %w", err)
+		}
+		if !isStale {
+			return client, nil
+		}
+		// If it's stale, delete the old one and regenerate
+		delete(m.globalAdapterClients, fqmn)
 	}
 	modInfo, exists := m.moduleInfos[fqmn]
 	if !exists {
@@ -317,7 +325,15 @@ func (m *ModuleManager) GetProjectAdapterClient(projectName string, fqmn string)
 		adapterClients = map[string]*adapter.AdapterClient{}
 	}
 	if client, exists := adapterClients[fqmn]; exists {
-		return client, nil
+		isStale, err := client.CheckIfStale()
+		if err != nil {
+			return nil, fmt.Errorf("error checking if adapter client is stale: %w", err)
+		}
+		if !isStale {
+			return client, nil
+		}
+		// If it's stale, delete the old one and regenerate
+		delete(m.projectAdapterClients, projectName)
 	}
 	modInfo, exists := m.moduleInfos[fqmn]
 	if !exists {
@@ -556,7 +572,7 @@ func (m *ModuleManager) DeployModule(
 
 	// Create the adapter key
 	adapterKeyPath := filepath.Join(adapterSrc.ModuleDir, shared.SecretsDir, shared.AdapterKeyFile)
-	err = auth.CreateKeyFile(adapterKeyPath, AdapterKeySizeBytes)
+	_, err = auth.CreateOrLoadKeyFile(adapterKeyPath, AdapterKeySizeBytes)
 	if err != nil {
 		return fmt.Errorf("error creating adapter key file [%s]: %w", adapterKeyPath, err)
 	}
