@@ -20,6 +20,9 @@ type StopRequest struct {
 
 // Have the adapter stop the module.
 func (c *AdapterClient) Stop(ctx context.Context, composeProjectName string, services []string) error {
+	if services == nil {
+		services = []string{}
+	}
 	request := &StopRequest{
 		KeyedRequest: KeyedRequest{
 			Key: c.key,

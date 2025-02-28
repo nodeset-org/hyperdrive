@@ -133,6 +133,21 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					return startService(c)
 				},
 			},
+			{
+				Name:    "stop",
+				Aliases: []string{"pause", "p"},
+				Usage:   "Pause the Hyperdrive service",
+				Flags: []cli.Flag{
+					utils.YesFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run command
+					return stopService(c)
+				},
+			},
 
 			/*
 				{
@@ -147,22 +162,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 						return serviceStatus(c)
 					},
 				},
-
-					{
-						Name:    "stop",
-						Aliases: []string{"pause", "p"},
-						Usage:   "Pause the Hyperdrive service",
-						Flags: []cli.Flag{
-							utils.YesFlag,
-						},
-						Action: func(c *cli.Context) error {
-							// Validate args
-							utils.ValidateArgCount(c, 0)
-
-							// Run command
-							return stopService(c)
-						},
-					},
 
 					{
 						Name:    "down",

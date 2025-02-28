@@ -29,6 +29,7 @@ type MainDisplay struct {
 	NewSettings      *config.HyperdriveSettings
 	ShouldSave       bool
 	ChangeNetworks   bool
+	HasChanges       bool
 
 	// Private fields
 	previousInstance *modconfig.ModuleSettings

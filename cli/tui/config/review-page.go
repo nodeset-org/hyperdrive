@@ -35,6 +35,7 @@ type ReviewPage struct {
 func NewReviewPage(md *MainDisplay) *ReviewPage {
 	//var changes []*changedSection
 	//var totalAffectedContainers map[config.ContainerID]bool
+	md.HasChanges = false
 	var containersToRestart []string
 	var message string
 
@@ -141,15 +142,18 @@ func NewReviewPage(md *MainDisplay) *ReviewPage {
 					continue
 				}
 				if modulePage.previousInstance.Enabled {
+					md.HasChanges = true
 					fullChangesBuilder.WriteString(fmt.Sprintf("Module %s: Enabled -> Disabled\n", modulePage.info.Descriptor.Name))
 					continue
 				}
 			} else {
 				if modulePage.previousSettings == nil {
+					md.HasChanges = true
 					fullChangesBuilder.WriteString(fmt.Sprintf("Module %s: New module\n", modulePage.info.Descriptor.Name))
 					continue
 				}
 				if !modulePage.previousInstance.Enabled {
+					md.HasChanges = true
 					fullChangesBuilder.WriteString(fmt.Sprintf("Module %s: Disabled -> Enabled\n", modulePage.info.Descriptor.Name))
 					continue
 				}
@@ -157,6 +161,7 @@ func NewReviewPage(md *MainDisplay) *ReviewPage {
 			modDiff := modconfig.CompareSettings(modulePage.info.Configuration, modulePage.previousSettings, modulePage.settings)
 			moduleDiffString := processModuleDifferences(modulePage.info, modDiff)
 			if moduleDiffString != "" {
+				md.HasChanges = true
 				fullChangesBuilder.WriteString(moduleDiffString)
 			}
 		}

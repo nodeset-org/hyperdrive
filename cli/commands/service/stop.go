@@ -1,14 +1,10 @@
 package service
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/nodeset-org/hyperdrive/cli/client"
 	cliutils "github.com/nodeset-org/hyperdrive/cli/utils"
-	hdconfig "github.com/nodeset-org/hyperdrive/config"
-	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/urfave/cli/v2"
 )
 
@@ -40,32 +36,34 @@ func stopService(c *cli.Context) error {
 		}
 	}
 
-	return nil
-}
+	// No pending settings, so load the main settings
+	settings, isNew, err := hd.LoadMainSettingsFile()
+	if err != nil {
+		return fmt.Errorf("error loading user settings: %w", err)
+	}
 
-// For each project, have the project adapter stop the services that are marked for a restart in the provided settings.
-func stopServicesMarkedForRestart(
-	modMgr *utils.ModuleManager,
-	hdSettings *hdconfig.HyperdriveSettings,
-	infos map[string]*modconfig.ModuleInfo,
-) error {
-	for _, info := range infos {
-		// Get the list of services to stop
-		fqmn := info.Descriptor.GetFullyQualifiedModuleName()
-		services := hdSettings.Modules[fqmn].Restart
-		if len(services) == 0 {
+	// Check if the config is new (hasn't been installed before)
+	if isNew {
+		fmt.Println("Hyperdrive has not been configured yet. Please run 'hyperdrive service configure' first.")
+		return nil
+	}
+
+	// Disable modules that failed to load
+	for _, result := range modLoadResults {
+		if result.LoadError == nil {
 			continue
 		}
+		modInstance, exists := settings.Modules[result.Info.Descriptor.GetFullyQualifiedModuleName()]
+		if !exists {
+			continue
+		}
+		modInstance.Enabled = false
+	}
 
-		// Stop the services
-		pac, err := modMgr.GetProjectAdapterClient(hdSettings.ProjectName, fqmn)
-		if err != nil {
-			return fmt.Errorf("error getting project adapter client for module [%s]: %w", info.Descriptor.Name, err)
-		}
-		err = pac.Stop(context.Background(), hdSettings.ProjectName+"-"+string(info.Descriptor.Shortcut), services)
-		if err != nil {
-			return fmt.Errorf("error stopping module [%s]: %w", info.Descriptor.Name, err)
-		}
+	// Stop the service
+	err = hd.StopService(settings)
+	if err != nil {
+		return fmt.Errorf("error stopping service: %w", err)
 	}
 	return nil
 }
