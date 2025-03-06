@@ -76,11 +76,20 @@ Templates can be used in configuration metadata to control [dynamic properties](
 
 `{{.GetValue <FQPN>}}` retrieves the value of the provided parameter, which is specified by its [Fully Qualified Parameter Name](./types.md#fully-qualified-parameter-name).
 
-For example, say you want to retrieve the currently selected network (the `network` Parameter) from the standard Ethereum Node module (`nodeset/ethereumNode`) along with a custom address in your own module's config (`me/my-module:some-address`). You could template this in your module's artifacts with the following rules (using a Docker Compose YAML template excerpt in this example):
+For example, say you want to hide a parameter using the [Hidden](./config.md#common-properties) property based on whether or not Hyperdrive had IPv6 support enabled (`hyperdrive:enableIPv6`). You could template this in your module's configuration metadata with the following:
 
-```
-NETWORK: {{.GetValue nodeset/ethereumNode:network}}
-FEE_RECIPIENT: {{.GetValue some-address}}
+```json
+{
+    ...
+    "parameters": [{
+        "id": "myParameter",
+        ...
+        "hidden": {
+            "default": false,
+            "template": "{{if eq .GetValue(\"hyperdrive:enableIPv6\") true}}false{{else}}true{{end}}"
+        }
+    }]
+}
 ```
 
 Any dynamic property templates will be run dynamically whenever one of the following events occur:
@@ -94,9 +103,11 @@ Any dynamic property templates will be run dynamically whenever one of the follo
 `{{.GetValueArray <FQPN> <delimiter>}}` takes the value of the provided parameter, which is specified by its [Fully Qualified Parameter Name](), splits it according to the `delimiter` string, and returns the resulting array. This is useful to take parameters that represent multiple values separated by a comma, semicolon, or other delimiter, and split them into an explicit array so they can be iterated on in a template via the `for` keyword.
 
 
-### UseDefault
+### UseDefault (For Parameters Only)
 
 `{{.UseDefault}}` indicates that your template for a property does not apply, or the conditions for it are not met, and Hyperdrive should use the default property value instead.
+
+This method is not available for dynamic properties of Metadata Sections; it is only available for dynamic properties of Metadata Parameters.  
 
 
 ## Service Docker Compose Templates

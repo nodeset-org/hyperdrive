@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	hdclient "github.com/nodeset-org/hyperdrive/cli/client"
 	tuiconfig "github.com/nodeset-org/hyperdrive/cli/tui/config"
 	"github.com/nodeset-org/hyperdrive/cli/utils"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
@@ -23,8 +22,7 @@ var (
 
 // Configure the service
 func configureService(c *cli.Context) error {
-	// Get Hyperdrive client
-	hd, err := hdclient.NewHyperdriveClientFromCtx(c)
+	hd, err := utils.NewHyperdriveManagerFromCtx(c)
 	if err != nil {
 		return err
 	}

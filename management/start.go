@@ -1,4 +1,4 @@
-package client
+package management
 
 import (
 	"bytes"
@@ -8,41 +8,54 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/nodeset-org/hyperdrive/cli/client/template"
 	hdconfig "github.com/nodeset-org/hyperdrive/config"
+	"github.com/nodeset-org/hyperdrive/management/template"
+	"github.com/nodeset-org/hyperdrive/modules"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
 )
 
-func (c *HyperdriveClient) StartService(currentSettings *hdconfig.HyperdriveSettings, pendingSettings *hdconfig.HyperdriveSettings) error {
-	hdCfg := c.GetHyperdriveConfiguration()
-	modMgr := c.GetModuleManager()
+func (m *HyperdriveManager) StartService(currentSettings *hdconfig.HyperdriveSettings, pendingSettings *hdconfig.HyperdriveSettings) error {
+	hdCfg := m.GetHyperdriveConfiguration()
+	modMgr := m.GetModuleManager()
 
 	// If there are pending settings, stop the services that need to be restarted first
 	if pendingSettings != nil {
-		// Make sure the project adapters are all running
-		modInfos, moduleSettingsMap, err := createModuleSettingsArtifacts(hdCfg, currentSettings)
-		if err != nil {
-			return fmt.Errorf("error creating module settings: %w", err)
-		}
-		err = c.StartProjectAdapters(currentSettings, modInfos, moduleSettingsMap)
-		if err != nil {
-			return fmt.Errorf("error starting project adapters: %w", err)
-		}
-
-		// Stop the services that need to be restarted
-		services := map[string][]string{}
-		for fqmn := range modInfos {
-			pendingModSettings, exists := pendingSettings.Modules[fqmn]
-			if !exists {
-				continue
+		// See if this had a project name change, which requires taking down the old project
+		if currentSettings.ProjectName != pendingSettings.ProjectName {
+			err := m.DownService(currentSettings, false)
+			if err != nil {
+				return fmt.Errorf("error taking down old project: %w", err)
 			}
-			services[fqmn] = pendingModSettings.Restart
-		}
-		err = stopModuleServices(modMgr, currentSettings.ProjectName, services, modInfos)
-		if err != nil {
-			return fmt.Errorf("error stopping modules: %w", err)
+		} else {
+			// Make sure the project adapters are all running
+			modInfos, moduleSettingsMap, err := createModuleSettingsArtifacts(hdCfg, currentSettings)
+			if err != nil {
+				return fmt.Errorf("error creating module settings: %w", err)
+			}
+			err = m.StartProjectAdapters(currentSettings, modInfos, moduleSettingsMap)
+			if err != nil {
+				return fmt.Errorf("error starting project adapters: %w", err)
+			}
+
+			// Stop the services that need to be restarted
+			services := map[string][]string{}
+			for fqmn := range modInfos {
+				pendingModSettings, exists := pendingSettings.Modules[fqmn]
+				if !exists {
+					continue
+				}
+				services[fqmn] = pendingModSettings.Restart
+			}
+			descriptors := []modules.ModuleDescriptor{}
+			for _, info := range modInfos {
+				descriptors = append(descriptors, info.Descriptor)
+			}
+			err = stopModuleServices(currentSettings.ProjectName, services, descriptors)
+			if err != nil {
+				return fmt.Errorf("error stopping modules: %w", err)
+			}
 		}
 
 		// Use the pending settings for the rest of the process
@@ -56,15 +69,7 @@ func (c *HyperdriveClient) StartService(currentSettings *hdconfig.HyperdriveSett
 	}
 
 	// Start all of the base services and project module adapters
-	composeFiles, err := deployTemplates(c.Context.SystemDirPath, c.Context.UserDirPath, currentSettings)
-	if err != nil {
-		return fmt.Errorf("error deploying templates: %w", err)
-	}
-	err = deployModules(modMgr, c.Context.ModulesDir(), currentSettings, moduleSettingsMap, modInfos)
-	if err != nil {
-		return fmt.Errorf("error deploying modules: %w", err)
-	}
-	err = startComposeFiles(c.Context.UserDirPath, currentSettings.ProjectName, modInfos, composeFiles)
+	err = m.StartProjectAdapters(currentSettings, modInfos, moduleSettingsMap)
 	if err != nil {
 		return fmt.Errorf("error starting project adapters: %w", err)
 	}
@@ -75,11 +80,11 @@ func (c *HyperdriveClient) StartService(currentSettings *hdconfig.HyperdriveSett
 		for _, mod := range pendingSettings.Modules {
 			mod.Restart = nil
 		}
-		err = c.SavePendingSettings(pendingSettings)
+		err = m.SavePendingSettings(pendingSettings)
 		if err != nil {
 			return fmt.Errorf("error updating pending settings: %w", err)
 		}
-		err = c.CommitPendingSettings(true)
+		err = m.CommitPendingSettings(true)
 		if err != nil {
 			return fmt.Errorf("error committing pending settings: %w", err)
 		}
@@ -105,7 +110,25 @@ func (c *HyperdriveClient) StartService(currentSettings *hdconfig.HyperdriveSett
 	return nil
 }
 
+func (m *HyperdriveManager) StartProjectAdapters(settings *hdconfig.HyperdriveSettings, modInfos map[string]*modconfig.ModuleInfo, moduleSettingsMap map[string]*modconfig.ModuleSettings) error {
+	// Start all of the base services and project module adapters
+	composeFiles, err := deployTemplates(m.Context.SystemDirPath, m.Context.UserDirPath, settings)
+	if err != nil {
+		return fmt.Errorf("error deploying templates: %w", err)
+	}
+	err = deployModules(m.modMgr, m.Context.ModulesDir(), settings, moduleSettingsMap, modInfos)
+	if err != nil {
+		return fmt.Errorf("error deploying modules: %w", err)
+	}
+	err = startComposeFiles(m.Context.UserDirPath, settings.ProjectName, modInfos, composeFiles)
+	if err != nil {
+		return fmt.Errorf("error starting project adapters: %w", err)
+	}
+	return nil
+}
+
 // Get the info and dynamic settings for all enabled modules (TEMP)
+// Assumes the modules are already loaded (LoadModules)
 func createModuleSettingsArtifacts(
 	hdCfg *hdconfig.HyperdriveConfig,
 	settings *hdconfig.HyperdriveSettings,
@@ -261,7 +284,7 @@ func startModules(
 		if err != nil {
 			return fmt.Errorf("error getting project adapter client for module [%s]: %w", info.Descriptor.Name, err)
 		}
-		err = pac.Start(context.Background(), hdSettings, hdSettings.ProjectName+"-"+string(info.Descriptor.Shortcut))
+		err = pac.Start(context.Background(), hdSettings)
 		if err != nil {
 			return fmt.Errorf("error starting module [%s]: %w", info.Descriptor.Name, err)
 		}

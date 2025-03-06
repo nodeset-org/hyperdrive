@@ -1,7 +1,10 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/nodeset-org/hyperdrive/cli/utils"
+	"github.com/nodeset-org/hyperdrive/cli/utils/terminal"
 	"github.com/urfave/cli/v2"
 )
 
@@ -149,6 +152,39 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 				},
 			},
 
+			{
+				Name:    "down",
+				Aliases: []string{"d"},
+				Usage:   "Stop and delete the Hyperdrive service Docker containers and network. This will leave the private data for any modules intact so it can be explored or reused later.",
+				Flags: []cli.Flag{
+					utils.YesFlag,
+					downIncludeVolumesFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run command
+					return downService(c)
+				},
+			},
+
+			{
+				Name:    "terminate",
+				Aliases: []string{"t"},
+				Usage:   fmt.Sprintf("%sDeletes all of the Hyperdrive Docker containers and volumes, including your Execution Client and Beacon Node chain data and your Prometheus database (if metrics are enabled). Also removes your entire `.hyperdrive` configuration folder, including your wallet, password, and validator keys. Only use this if you are cleaning up Hyperdrive and want to start over!%s", terminal.ColorRed, terminal.ColorReset),
+				Flags: []cli.Flag{
+					utils.YesFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run command
+					return nil //terminateService(c)
+				},
+			},
+
 			/*
 				{
 					Name:    "status",
@@ -162,23 +198,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 						return serviceStatus(c)
 					},
 				},
-
-					{
-						Name:    "down",
-						Aliases: []string{"d"},
-						Usage:   "Stop and delete the Hyperdrive service Docker containers and network. This will leave your private data (such as wallet, config, and validator keys) intact.",
-						Flags: []cli.Flag{
-							utils.YesFlag,
-							includeVolumesFlag,
-						},
-						Action: func(c *cli.Context) error {
-							// Validate args
-							utils.ValidateArgCount(c, 0)
-
-							// Run command
-							return downService(c)
-						},
-					},
 
 					{
 						Name:      "logs",
@@ -247,22 +266,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 
 						// Run command
 						return getConfigYaml(c)
-					},
-				},
-
-				{
-					Name:    "terminate",
-					Aliases: []string{"t"},
-					Usage:   fmt.Sprintf("%sDeletes all of the Hyperdrive Docker containers and volumes, including your Execution Client and Beacon Node chain data and your Prometheus database (if metrics are enabled). Also removes your entire `.hyperdrive` configuration folder, including your wallet, password, and validator keys. Only use this if you are cleaning up Hyperdrive and want to start over!%s", terminal.ColorRed, terminal.ColorReset),
-					Flags: []cli.Flag{
-						utils.YesFlag,
-					},
-					Action: func(c *cli.Context) error {
-						// Validate args
-						utils.ValidateArgCount(c, 0)
-
-						// Run command
-						return terminateService(c)
 					},
 				},
 

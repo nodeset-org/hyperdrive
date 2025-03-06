@@ -2,14 +2,18 @@ package config
 
 import (
 	"fmt"
+	"strings"
+	"text/template"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive/modules"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/rivo/tview"
 )
 
 // A layout container with the standard elements and design
 type standardLayout struct {
+	md                 *MainDisplay
 	grid               *tview.Grid
 	content            tview.Primitive
 	descriptionBox     *tview.TextView
@@ -20,7 +24,7 @@ type standardLayout struct {
 }
 
 // Creates a new StandardLayout instance, which includes the grid and description box preconstructed.
-func newStandardLayout() *standardLayout {
+func newStandardLayout(md *MainDisplay) *standardLayout {
 	// Create the main display grid
 	grid := tview.NewGrid().
 		SetColumns(-5, 2, -3).
@@ -39,6 +43,7 @@ func newStandardLayout() *standardLayout {
 	grid.AddItem(descriptionBox, 0, 2, 1, 1, 0, 0, false)
 
 	return &standardLayout{
+		md:             md,
 		grid:           grid,
 		descriptionBox: descriptionBox,
 	}
@@ -97,8 +102,38 @@ func (layout *standardLayout) createForm(title string) {
 			param := paramItem.parameter
 			metadata := param.GetMetadata()
 			defaultValue := metadata.GetDefault()
-			description := metadata.GetDescription().Default // TEMPLATE!
-			descriptionText := fmt.Sprintf("Default: %v\n\n%s", defaultValue, description)
+
+			description := metadata.GetDescription() // TEMPLATE!
+			var descriptionText string
+			if description.Template == "" {
+				descriptionText = description.Default
+			} else {
+				// Generate a template source for the parameter
+				templateSource := parameterTemplateSource{
+					configurationTemplateSource: configurationTemplateSource{
+						fqmn:              modules.HyperdriveFqmn,
+						hdSettings:        layout.md.newInstance,
+						moduleSettingsMap: layout.md.moduleSettingsMap,
+					},
+					parameter: metadata,
+				}
+
+				// Execute the description template
+				template, err := template.New(string(metadata.GetID())).Parse(description.Template)
+				if err != nil {
+					fqmn := modules.HyperdriveFqmn
+					panic(fmt.Errorf("error parsing description template for parameter [%s:%s]: %w", fqmn, metadata.GetID(), err))
+				}
+				result := &strings.Builder{}
+				err = template.Execute(result, templateSource)
+				if err != nil {
+					fqmn := modules.HyperdriveFqmn
+					panic(fmt.Errorf("error executing description template for parameter [%s:%s]: %w", fqmn, metadata.GetID(), err))
+				}
+				descriptionText = result.String()
+			}
+
+			descriptionText = fmt.Sprintf("Default: %v\n\n%s", defaultValue, descriptionText)
 			layout.descriptionBox.SetText(descriptionText)
 			layout.descriptionBox.ScrollToBeginning()
 		} else if index < itemCount+buttonCount {
@@ -109,7 +144,32 @@ func (layout *standardLayout) createForm(title string) {
 			if !exists {
 				return
 			}
-			layout.descriptionBox.SetText(description.Default) // TEMPLATE!
+			var descriptionText string
+			if description.Template == "" {
+				descriptionText = description.Default
+			} else {
+				// Generate a template source for the parameter
+				templateSource := configurationTemplateSource{
+					fqmn:              modules.HyperdriveFqmn,
+					hdSettings:        layout.md.newInstance,
+					moduleSettingsMap: layout.md.moduleSettingsMap,
+				}
+
+				// Execute the description template
+				template, err := template.New(label).Parse(description.Template)
+				if err != nil {
+					fqmn := modules.HyperdriveFqmn
+					panic(fmt.Errorf("error parsing description template for section [%s:%s]: %w", fqmn, label, err))
+				}
+				result := &strings.Builder{}
+				err = template.Execute(result, templateSource)
+				if err != nil {
+					fqmn := modules.HyperdriveFqmn
+					panic(fmt.Errorf("error executing description template for section [%s:%s]: %w", fqmn, label, err))
+				}
+				descriptionText = result.String()
+			}
+			layout.descriptionBox.SetText(descriptionText)
 		}
 	})
 

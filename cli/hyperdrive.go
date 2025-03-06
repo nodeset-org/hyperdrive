@@ -9,12 +9,11 @@ import (
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
-	//"github.com/nodeset-org/hyperdrive/cli/commands/service"
 	"github.com/nodeset-org/hyperdrive/cli/commands/module"
 	"github.com/nodeset-org/hyperdrive/cli/commands/service"
-	"github.com/nodeset-org/hyperdrive/cli/context"
 	cliutils "github.com/nodeset-org/hyperdrive/cli/utils"
 	hdconfig "github.com/nodeset-org/hyperdrive/config"
+	"github.com/nodeset-org/hyperdrive/management"
 	"github.com/nodeset-org/hyperdrive/shared"
 	hdutils "github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/urfave/cli/v2"
@@ -146,7 +145,7 @@ func main() {
 		}
 	*/
 
-	var hdCtx *context.HyperdriveContext
+	var hdCtx *management.HyperdriveContext
 	app.Before = func(c *cli.Context) error {
 		// Check user ID
 		if os.Getuid() == 0 && !c.Bool(cliutils.AllowRootFlag.Name) {
@@ -213,7 +212,7 @@ func setDefaultPaths() {
 }
 
 // Validate the global flags
-func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
+func validateFlags(c *cli.Context) (*management.HyperdriveContext, error) {
 	// Expand the user and system paths
 	configPath := c.String(cliutils.UserDirPathFlag.Name)
 	fullConfigPath, err := homedir.Expand(strings.TrimSpace(configPath))
@@ -226,7 +225,7 @@ func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
 		return nil, fmt.Errorf("error expanding system path [%s]: %w", systemPath, err)
 	}
 
-	hdCtx := context.NewHyperdriveContext(fullConfigPath, fullSystemPath)
+	hdCtx := management.NewHyperdriveContext(fullConfigPath, fullSystemPath)
 	hdCtx.DebugEnabled = c.Bool(debugFlag.Name)
 	hdCtx.SecureSession = c.Bool(secureSessionFlag.Name)
 
@@ -250,6 +249,6 @@ func validateFlags(c *cli.Context) (*context.HyperdriveContext, error) {
 	}
 
 	// TODO: more here
-	context.SetHyperdriveContext(c, hdCtx)
+	management.SetHyperdriveContext(c, hdCtx)
 	return hdCtx, nil
 }

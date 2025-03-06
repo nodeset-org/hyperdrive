@@ -13,8 +13,10 @@ import (
 	"github.com/docker/docker/api/types/container"
 	hdconfig "github.com/nodeset-org/hyperdrive/config"
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
+	"github.com/nodeset-org/hyperdrive/management"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	adapter "github.com/nodeset-org/hyperdrive/shared/adapter/test"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -180,8 +182,7 @@ func TestStartStopRun(t *testing.T) {
 	runtimeFile.Close()
 
 	// Start the services
-	composeProjectName := internal_test.ProjectName + "-" + string(internal_test.ExampleDescriptor.Shortcut)
-	err = pac.Start(context.Background(), hdSettings, composeProjectName)
+	err = pac.Start(context.Background(), hdSettings)
 	require.NoError(t, err)
 	t.Log("Services started successfully")
 
@@ -219,7 +220,8 @@ func TestStartStopRun(t *testing.T) {
 	t.Logf("Command ran successfully and returned %s", out)
 
 	// Stop the services
-	err = pac.Stop(context.Background(), composeProjectName, []string{})
+	composeProjectName := utils.GetModuleComposeProjectName(internal_test.ProjectName, internal_test.ExampleDescriptor)
+	err = management.StopProject(composeProjectName, nil)
 	require.NoError(t, err)
 	t.Log("Services stopped successfully")
 

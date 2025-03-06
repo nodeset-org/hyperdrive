@@ -13,6 +13,7 @@ import (
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
 )
 
@@ -134,7 +135,7 @@ func initializeArtifacts() {
 	}
 
 	// Create the docker network
-	composeProjectName := internal_test.ProjectName + "-" + string(internal_test.ExampleDescriptor.Shortcut)
+	composeProjectName := utils.GetModuleComposeProjectName(internal_test.ProjectName, internal_test.ExampleDescriptor)
 	netCreateResponse, err := docker.NetworkCreate(context.Background(), composeProjectName+"_net", network.CreateOptions{
 		Driver: "bridge",
 		Scope:  "local",
@@ -209,7 +210,7 @@ func deleteConfigs() error {
 func cleanup() {
 	// Stop the adapter container
 	if docker != nil {
-		composeProjectName := internal_test.ProjectName + "-" + string(internal_test.ExampleDescriptor.Shortcut)
+		composeProjectName := utils.GetModuleComposeProjectName(internal_test.ProjectName, internal_test.ExampleDescriptor)
 		timeout := 0
 		_ = docker.ContainerStop(context.Background(), internal_test.GlobalAdapterContainerName, container.StopOptions{Timeout: &timeout})
 		_ = docker.ContainerStop(context.Background(), internal_test.ProjectAdapterContainerName, container.StopOptions{Timeout: &timeout})

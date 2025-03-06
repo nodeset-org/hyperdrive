@@ -32,9 +32,10 @@ type MainDisplay struct {
 	HasChanges       bool
 
 	// Private fields
-	previousInstance *modconfig.ModuleSettings
-	newInstance      *modconfig.ModuleSettings
-	moduleManager    *utils.ModuleManager
+	previousInstance  *modconfig.ModuleSettings            // The previous instance of the Hyperdrive settings (the currently running one)
+	newInstance       *modconfig.ModuleSettings            // The new instance of the Hyperdrive settings (the one being configured)
+	moduleSettingsMap map[string]*modconfig.ModuleSettings // The map of module FQMNs to their new (being configured) settings
+	moduleManager     *utils.ModuleManager
 }
 
 // Creates a new MainDisplay instance.
@@ -133,9 +134,23 @@ func NewMainDisplay(
 		newInstance:      newInstance,
 	}
 
+	// Create settings for the modules
+	md.moduleSettingsMap = map[string]*modconfig.ModuleSettings{}
+	for fqmn, module := range config.Modules {
+		instance, exists := newSettings.Modules[fqmn]
+		if !exists {
+			panic(fmt.Errorf("module instance [%s] not found", fqmn))
+		}
+		settings := modconfig.CreateModuleSettings(module.Configuration)
+		err := settings.DeserializeFromMap(instance.Settings)
+		if err != nil {
+			panic(fmt.Errorf("error deserializing module [%s] settings: %w", fqmn, err))
+		}
+		md.moduleSettingsMap[fqmn] = settings
+	}
+
 	// Create all of the child elements
 	md.settingsHome = newSettingsHome(md)
-	//md.wizard = newWizard(md)
 
 	// Set up the resize warning
 	md.app.SetBeforeDrawFunc(func(screen tcell.Screen) bool {

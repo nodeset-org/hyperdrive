@@ -1,4 +1,4 @@
-package client
+package management
 
 import (
 	"errors"
@@ -8,16 +8,14 @@ import (
 	"path/filepath"
 	"time"
 
-	hdcontext "github.com/nodeset-org/hyperdrive/cli/context"
 	hdconfig "github.com/nodeset-org/hyperdrive/config"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/utils"
-	"github.com/urfave/cli/v2"
 )
 
-type HyperdriveClient struct {
-	Context *hdcontext.HyperdriveContext
+type HyperdriveManager struct {
+	Context *HyperdriveContext
 
 	cfgDir    string
 	systemDir string
@@ -26,11 +24,7 @@ type HyperdriveClient struct {
 }
 
 // Create a new Hyperdrive client from the CLI context
-func NewHyperdriveClientFromCtx(c *cli.Context) (*HyperdriveClient, error) {
-	hdCtx := hdcontext.GetHyperdriveContext(c)
-	if hdCtx == nil {
-		return nil, fmt.Errorf("Hyperdrive CLI context has not been created")
-	}
+func NewHyperdriveManager(hdCtx *HyperdriveContext) (*HyperdriveManager, error) {
 	cfgDir := hdCtx.UserDirPath
 	systemDir := hdCtx.SystemDirPath
 
@@ -46,7 +40,7 @@ func NewHyperdriveClientFromCtx(c *cli.Context) (*HyperdriveClient, error) {
 		return nil, fmt.Errorf("error creating module manager: %w", err)
 	}
 
-	return &HyperdriveClient{
+	return &HyperdriveManager{
 		cfgDir:    cfgDir,
 		systemDir: systemDir,
 		modMgr:    modMgr,
@@ -56,36 +50,36 @@ func NewHyperdriveClientFromCtx(c *cli.Context) (*HyperdriveClient, error) {
 }
 
 // Get the current Hyperdrive configuration
-func (c *HyperdriveClient) GetHyperdriveConfiguration() *hdconfig.HyperdriveConfig {
-	return c.cfgMgr.HyperdriveConfiguration
+func (m *HyperdriveManager) GetHyperdriveConfiguration() *hdconfig.HyperdriveConfig {
+	return m.cfgMgr.HyperdriveConfiguration
 }
 
 // Get the module manager
-func (c *HyperdriveClient) GetModuleManager() *utils.ModuleManager {
-	return c.modMgr
+func (m *HyperdriveManager) GetModuleManager() *utils.ModuleManager {
+	return m.modMgr
 }
 
 // Load the main (currently applied) settings
-func (c *HyperdriveClient) LoadMainSettingsFile() (*hdconfig.HyperdriveSettings, bool, error) {
-	primaryConfigPath := filepath.Join(c.cfgDir, hdconfig.SettingsFilename)
-	return c.LoadSettingsFile(primaryConfigPath)
+func (m *HyperdriveManager) LoadMainSettingsFile() (*hdconfig.HyperdriveSettings, bool, error) {
+	primaryConfigPath := filepath.Join(m.cfgDir, hdconfig.SettingsFilename)
+	return m.LoadSettingsFile(primaryConfigPath)
 }
 
 // Load the pending (not yet applied) settings
-func (c *HyperdriveClient) LoadPendingSettingsFile() (*hdconfig.HyperdriveSettings, bool, error) {
-	pendingConfigPath := filepath.Join(c.cfgDir, hdconfig.PendingSettingsFilename)
-	return c.LoadSettingsFile(pendingConfigPath)
+func (m *HyperdriveManager) LoadPendingSettingsFile() (*hdconfig.HyperdriveSettings, bool, error) {
+	pendingConfigPath := filepath.Join(m.cfgDir, hdconfig.PendingSettingsFilename)
+	return m.LoadSettingsFile(pendingConfigPath)
 }
 
 // Load the config settings
-func (c *HyperdriveClient) LoadSettingsFile(path string) (*hdconfig.HyperdriveSettings, bool, error) {
-	cfg, err := c.cfgMgr.HyperdriveConfiguration.LoadSettingsFromFile(path)
+func (m *HyperdriveManager) LoadSettingsFile(path string) (*hdconfig.HyperdriveSettings, bool, error) {
+	cfg, err := m.cfgMgr.HyperdriveConfiguration.LoadSettingsFromFile(path)
 	if err != nil {
 		return nil, false, fmt.Errorf("error loading config settings file [%s]: %w", path, err)
 	}
 
 	if cfg == nil {
-		defaults := modconfig.CreateModuleSettings(c.cfgMgr.HyperdriveConfiguration)
+		defaults := modconfig.CreateModuleSettings(m.cfgMgr.HyperdriveConfiguration)
 		cfg = hdconfig.NewHyperdriveSettings()
 		err = defaults.ConvertToKnownType(cfg)
 		if err != nil {
@@ -97,24 +91,24 @@ func (c *HyperdriveClient) LoadSettingsFile(path string) (*hdconfig.HyperdriveSe
 }
 
 // Load all of the module info and settings
-func (c *HyperdriveClient) LoadModules() ([]*utils.ModuleInfoLoadResult, error) {
-	results, err := c.modMgr.LoadModuleInfo(true)
+func (m *HyperdriveManager) LoadModules() ([]*utils.ModuleInfoLoadResult, error) {
+	results, err := m.modMgr.LoadModuleInfo(true)
 	if err != nil {
 		return nil, fmt.Errorf("error loading module info: %w", err)
 	}
 	for _, result := range results {
 		if result.LoadError == nil {
 			name := result.Info.Descriptor.GetFullyQualifiedModuleName()
-			c.cfgMgr.HyperdriveConfiguration.Modules[name] = result.Info.ModuleInfo
+			m.cfgMgr.HyperdriveConfiguration.Modules[name] = result.Info.ModuleInfo
 		}
 	}
 	return results, nil
 }
 
 // Initializes a new installation of hyperdrive
-func (c *HyperdriveClient) InitializeNewInstallation() error {
+func (m *HyperdriveManager) InitializeNewInstallation() error {
 	// Make sure the config directory exists
-	err := c.createDirectory(c.cfgDir, 0755)
+	err := m.createDirectory(m.cfgDir, 0755)
 	if err != nil {
 		return err
 	}
@@ -129,7 +123,7 @@ func (c *HyperdriveClient) InitializeNewInstallation() error {
 		shared.MetricsDir,
 	}
 	for _, subdir := range subdirs {
-		err = c.createDirectory(filepath.Join(c.cfgDir, subdir), 0755)
+		err = m.createDirectory(filepath.Join(m.cfgDir, subdir), 0755)
 		if err != nil {
 			return err
 		}
@@ -138,17 +132,17 @@ func (c *HyperdriveClient) InitializeNewInstallation() error {
 }
 
 // Create a directory if it doesn't already exist
-func (c HyperdriveClient) createDirectory(path string, mode os.FileMode) error {
+func (m HyperdriveManager) createDirectory(path string, mode os.FileMode) error {
 	stat, err := os.Stat(path)
 	if errors.Is(err, fs.ErrNotExist) {
 		err = os.MkdirAll(path, mode)
 		if err != nil {
-			return fmt.Errorf("error creating directory [%s]: %w", c.cfgDir, err)
+			return fmt.Errorf("error creating directory [%s]: %w", m.cfgDir, err)
 		}
 	} else if err != nil {
-		return fmt.Errorf("error checking directory [%s]: %w", c.cfgDir, err)
+		return fmt.Errorf("error checking directory [%s]: %w", m.cfgDir, err)
 	} else if !stat.IsDir() {
-		return fmt.Errorf("directory [%s] is already in use but is not a directory", c.cfgDir)
+		return fmt.Errorf("directory [%s] is already in use but is not a directory", m.cfgDir)
 	}
 
 	return nil
@@ -156,8 +150,8 @@ func (c HyperdriveClient) createDirectory(path string, mode os.FileMode) error {
 
 // Update the defaults for the Hyperdrive settings after upgrading.
 // Assumes the modules have been loaded already.
-func (c *HyperdriveClient) UpdateDefaults(hdSettings *hdconfig.HyperdriveSettings) error {
-	hdCfg := c.GetHyperdriveConfiguration()
+func (m *HyperdriveManager) UpdateDefaults(hdSettings *hdconfig.HyperdriveSettings) error {
+	hdCfg := m.GetHyperdriveConfiguration()
 
 	// Make an instance
 	instance := modconfig.CreateModuleSettings(hdCfg)
@@ -205,14 +199,14 @@ func (c *HyperdriveClient) UpdateDefaults(hdSettings *hdconfig.HyperdriveSetting
 }
 
 // Save the settings to a file, optionally saving the current config as a backup
-func (c *HyperdriveClient) SavePendingSettings(settings *hdconfig.HyperdriveSettings) error {
-	err := c.InitializeNewInstallation()
+func (m *HyperdriveManager) SavePendingSettings(settings *hdconfig.HyperdriveSettings) error {
+	err := m.InitializeNewInstallation()
 	if err != nil {
-		return fmt.Errorf("error initializing hyperdrive user directory [%s]: %w", c.cfgDir, err)
+		return fmt.Errorf("error initializing hyperdrive user directory [%s]: %w", m.cfgDir, err)
 	}
 
 	// Save the settings
-	settingsPath := filepath.Join(c.cfgDir, hdconfig.PendingSettingsFilename)
+	settingsPath := filepath.Join(m.cfgDir, hdconfig.PendingSettingsFilename)
 	err = settings.SaveToFile(settingsPath)
 	if err != nil {
 		return fmt.Errorf("error writing Hyperdrive pending settings file [%s]: %w", settingsPath, err)
@@ -223,9 +217,9 @@ func (c *HyperdriveClient) SavePendingSettings(settings *hdconfig.HyperdriveSett
 
 // Commit the pending settings to the primary settings file.
 // If there is no pending settings file, this will do nothing.
-func (c *HyperdriveClient) CommitPendingSettings(backupOldSettings bool) error {
+func (m *HyperdriveManager) CommitPendingSettings(backupOldSettings bool) error {
 	// Check if the pending settings file exists
-	pendingSettingsPath := filepath.Join(c.cfgDir, hdconfig.PendingSettingsFilename)
+	pendingSettingsPath := filepath.Join(m.cfgDir, hdconfig.PendingSettingsFilename)
 	_, err := os.Stat(pendingSettingsPath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -236,14 +230,14 @@ func (c *HyperdriveClient) CommitPendingSettings(backupOldSettings bool) error {
 
 	// Backup the old settings if requested
 	if backupOldSettings {
-		err = c.backupPrimarySettings()
+		err = m.backupPrimarySettings()
 		if err != nil {
 			return fmt.Errorf("error backing up Hyperdrive settings file: %w", err)
 		}
 	}
 
 	// Save the settings
-	primaryConfigPath := filepath.Join(c.cfgDir, hdconfig.SettingsFilename)
+	primaryConfigPath := filepath.Join(m.cfgDir, hdconfig.SettingsFilename)
 	err = os.Rename(pendingSettingsPath, primaryConfigPath)
 	if err != nil {
 		return fmt.Errorf("error committing Hyperdrive settings file: %w", err)
@@ -253,9 +247,9 @@ func (c *HyperdriveClient) CommitPendingSettings(backupOldSettings bool) error {
 }
 
 // Backup the primary settings file
-func (c *HyperdriveClient) backupPrimarySettings() error {
+func (m *HyperdriveManager) backupPrimarySettings() error {
 	// Check if the old settings file exists
-	primarySettingsPath := filepath.Join(c.cfgDir, hdconfig.SettingsFilename)
+	primarySettingsPath := filepath.Join(m.cfgDir, hdconfig.SettingsFilename)
 	_, err := os.Stat(primarySettingsPath)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -267,7 +261,7 @@ func (c *HyperdriveClient) backupPrimarySettings() error {
 	// Backup the old settings file
 	now := time.Now().Local()
 	backupFilename := fmt.Sprintf(hdconfig.BackupConfigFilenamePattern, now.Format("2006-01-02_15-04-05"))
-	backupSettingsPath := filepath.Join(c.cfgDir, hdconfig.BackupConfigFolder, backupFilename)
+	backupSettingsPath := filepath.Join(m.cfgDir, hdconfig.BackupConfigFolder, backupFilename)
 	err = os.Rename(primarySettingsPath, backupSettingsPath)
 	if err != nil {
 		return fmt.Errorf("error backing up Hyperdrive settings file go [%s]: %w", backupSettingsPath, err)

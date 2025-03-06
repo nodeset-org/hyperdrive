@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	hdconfig "github.com/nodeset-org/hyperdrive/config"
+	"github.com/nodeset-org/hyperdrive/modules"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 )
 
@@ -20,14 +20,14 @@ type ServiceDataSource struct {
 	HyperdriveJwtKeyFile string
 
 	// Internal fields
-	hyperdriveSettings *hdconfig.HyperdriveSettings
+	hyperdriveSettings *modconfig.ModuleSettings
 	moduleSettingsMap  map[string]*modconfig.ModuleSettings
 	moduleInfo         *modconfig.ModuleInfo
 }
 
 // Create a new service data source
 func NewServiceDataSource(
-	hdSettings *hdconfig.HyperdriveSettings,
+	hdSettings *modconfig.ModuleSettings,
 	moduleSettingsMap map[string]*modconfig.ModuleSettings,
 	moduleInfo *modconfig.ModuleInfo,
 	adapterSource *AdapterDataSource,
@@ -63,24 +63,31 @@ func (t *ServiceDataSource) GetValueArray(fqpn string, delimiter string) ([]stri
 
 // Get the value of a property from its fully qualified path name
 func (t *ServiceDataSource) getPropertyValue(fqpn string) (string, error) {
-	// Get the module name if present
+	fqmn := ""
+	propertyPath := ""
 	elements := strings.Split(fqpn, ":")
 	if len(elements) == 1 {
-		// This is a local property
-		fqmn := t.moduleInfo.Descriptor.GetFullyQualifiedModuleName()
-		settings, exists := t.moduleSettingsMap[fqmn]
-		if !exists {
-			return "", fmt.Errorf("module settings not found for module [%s] in path [%s]", fqmn, fqpn)
-		}
-		return getModulePropertyValue(settings, elements[0])
+		// This is a local property so use the module's fully qualified module name
+		fqmn = t.moduleInfo.Descriptor.GetFullyQualifiedModuleName()
+		propertyPath = fqpn
+	} else {
+		// TODO: Error out if there are more than 2 elements?
+		fqmn = elements[0]
+		propertyPath = elements[1]
 	}
 
 	// Get the module settings
-	settings, exists := t.moduleSettingsMap[elements[0]]
-	if !exists {
-		return "", fmt.Errorf("module settings not found for module [%s] in path [%s]", elements[0], fqpn)
+	var settings *modconfig.ModuleSettings
+	if fqmn == modules.HyperdriveFqmn {
+		settings = t.hyperdriveSettings
+	} else {
+		var exists bool
+		settings, exists = t.moduleSettingsMap[fqmn]
+		if !exists {
+			return "", fmt.Errorf("module settings not found for module [%s] in path [%s]", fqmn, propertyPath)
+		}
 	}
-	return getModulePropertyValue(settings, elements[1])
+	return getModulePropertyValue(settings, propertyPath)
 }
 
 // Get the value of a module settings property from its path

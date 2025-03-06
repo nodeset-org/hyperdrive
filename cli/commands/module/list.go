@@ -3,14 +3,13 @@ package module
 import (
 	"fmt"
 
-	"github.com/nodeset-org/hyperdrive/cli/client"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
+	cliutils "github.com/nodeset-org/hyperdrive/cli/utils"
+	hdutils "github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/urfave/cli/v2"
 )
 
 func listModules(c *cli.Context) error {
-	// Get Hyperdrive client
-	hd, err := client.NewHyperdriveClientFromCtx(c)
+	hd, err := cliutils.NewHyperdriveManagerFromCtx(c)
 	if err != nil {
 		return err
 	}
@@ -26,8 +25,8 @@ func listModules(c *cli.Context) error {
 	}
 
 	// Check each one's status
-	failedModules := []*utils.ModuleInfoLoadResult{}
-	succeededModules := []*utils.ModuleInfoLoadResult{}
+	failedModules := []*hdutils.ModuleInfoLoadResult{}
+	succeededModules := []*hdutils.ModuleInfoLoadResult{}
 	for _, result := range results {
 		if result.LoadError != nil {
 			failedModules = append(failedModules, result)

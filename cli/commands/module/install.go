@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nodeset-org/hyperdrive/cli/client"
+	"github.com/nodeset-org/hyperdrive/cli/utils"
 	cliutils "github.com/nodeset-org/hyperdrive/cli/utils"
 	hdutils "github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
@@ -16,8 +16,7 @@ import (
 
 // Install a module
 func installModule(c *cli.Context, moduleFile string) error {
-	// Get Hyperdrive client
-	hd, err := client.NewHyperdriveClientFromCtx(c)
+	hd, err := utils.NewHyperdriveManagerFromCtx(c)
 	if err != nil {
 		return err
 	}

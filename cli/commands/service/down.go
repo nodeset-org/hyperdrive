@@ -8,8 +8,17 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// Start the Hyperdrive service, starting the Docker containers for all modules
-func startService(c *cli.Context) error {
+var (
+	downIncludeVolumesFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:    "include-volumes",
+		Aliases: []string{"v"},
+		Usage:   "Include volumes in the down command, so all volumes (including module volumes) will be deleted as well",
+		Value:   false,
+	}
+)
+
+// Delete the Hyperdrive service, stopping and deleting the Docker containers for all modules
+func downService(c *cli.Context) error {
 	hd, err := utils.NewHyperdriveManagerFromCtx(c)
 	if err != nil {
 		return err
@@ -28,28 +37,21 @@ func startService(c *cli.Context) error {
 		}
 	}
 	if failures {
-		fmt.Println("The above modules will be disabled if you proceed until their problems are resolved.")
+		fmt.Println("The above modules cannot be deleted (if they are running) until their problems are resolved.")
 		if !(c.Bool(cliutils.YesFlag.Name) || cliutils.Confirm("Are you sure you want to continue?")) {
 			fmt.Println("Cancelled.")
 			return nil
 		}
 	}
 
-	// Load the settings from disk
-	pendingSettings, noPendingSettings, err := hd.LoadPendingSettingsFile()
-	if err != nil {
-		return fmt.Errorf("error loading pending settings: %w", err)
-	}
-	if noPendingSettings {
-		pendingSettings = nil
-	}
-	currentSettings, noCurrentSettings, err := hd.LoadMainSettingsFile()
+	// No pending settings, so load the main settings
+	settings, isNew, err := hd.LoadMainSettingsFile()
 	if err != nil {
 		return fmt.Errorf("error loading user settings: %w", err)
 	}
 
 	// Check if the config is new (hasn't been installed before)
-	if noCurrentSettings {
+	if isNew {
 		fmt.Println("Hyperdrive has not been configured yet. Please run 'hyperdrive service configure' first.")
 		return nil
 	}
@@ -59,26 +61,17 @@ func startService(c *cli.Context) error {
 		if result.LoadError == nil {
 			continue
 		}
-		modInstance, exists := currentSettings.Modules[result.Info.Descriptor.GetFullyQualifiedModuleName()]
-		if !exists {
-			continue
-		}
-		modInstance.Enabled = false
-
-		if pendingSettings == nil {
-			continue
-		}
-		modInstance, exists = pendingSettings.Modules[result.Info.Descriptor.GetFullyQualifiedModuleName()]
+		modInstance, exists := settings.Modules[result.Info.Descriptor.GetFullyQualifiedModuleName()]
 		if !exists {
 			continue
 		}
 		modInstance.Enabled = false
 	}
 
-	// Start the service
-	err = hd.StartService(currentSettings, pendingSettings)
+	// Stop the service
+	err = hd.DownService(settings, c.Bool(downIncludeVolumesFlag.Name))
 	if err != nil {
-		return fmt.Errorf("error starting service: %w", err)
+		return fmt.Errorf("error deleting service: %w", err)
 	}
 	return nil
 }

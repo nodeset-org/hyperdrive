@@ -33,47 +33,51 @@ func registerEnableCheckbox(param config.Parameter[bool], checkbox *tview.Checkb
 */
 
 // Create a list of form items based on a set of parameters
-func createParameterizedFormItems(params []config.IParameterSetting, descriptionBox *tview.TextView) []*parameterizedFormItem {
+func createParameterizedFormItems(params []config.IParameterSetting, descriptionBox *tview.TextView, redrawLayout func()) []*parameterizedFormItem {
 	formItems := []*parameterizedFormItem{}
 	for _, param := range params {
-		item := getTypedFormItem(param, descriptionBox)
+		item := getTypedFormItem(param, descriptionBox, redrawLayout)
 		formItems = append(formItems, item)
 	}
 	return formItems
 }
 
 // Create a form item binding for a parameter based on its type
-func getTypedFormItem(param config.IParameterSetting, descriptionBox *tview.TextView) *parameterizedFormItem {
+func getTypedFormItem(param config.IParameterSetting, descriptionBox *tview.TextView, redrawLayout func()) *parameterizedFormItem {
 	metadata := param.GetMetadata()
 	switch metadata.GetType() {
 	case config.ParameterType_Choice:
-		return createParameterizedDropDown(param, descriptionBox)
+		return createParameterizedDropDown(param, descriptionBox, redrawLayout)
 	case config.ParameterType_Bool:
-		return createParameterizedCheckbox(param)
+		return createParameterizedCheckbox(param, redrawLayout)
 	case config.ParameterType_Int:
-		return createParameterizedIntField(param)
+		return createParameterizedIntField(param, redrawLayout)
 	case config.ParameterType_Uint:
-		return createParameterizedUintField(param)
+		return createParameterizedUintField(param, redrawLayout)
 	case config.ParameterType_Float:
-		return createParameterizedFloatField(param)
+		return createParameterizedFloatField(param, redrawLayout)
 	case config.ParameterType_String:
-		return createParameterizedStringField(param)
+		return createParameterizedStringField(param, redrawLayout)
 	default:
 		panic(fmt.Sprintf("param [%s] is not a supported type for form item binding", metadata.GetName()))
 	}
 }
 
 // Create a standard form checkbox
-func createParameterizedCheckbox(param config.IParameterSetting) *parameterizedFormItem {
+func createParameterizedCheckbox(param config.IParameterSetting, redrawLayout func()) *parameterizedFormItem {
 	metadata := param.GetMetadata()
 	item := tview.NewCheckbox().
 		SetLabel(metadata.GetName()).
 		SetChecked(param.GetValue().(bool)).
 		SetChangedFunc(func(checked bool) {
+			if checked == param.GetValue() {
+				return
+			}
 			err := param.SetValue(checked)
 			if err != nil {
 				panic(fmt.Sprintf("error setting checkbox value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 			}
+			redrawLayout()
 		})
 	item.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
@@ -93,7 +97,7 @@ func createParameterizedCheckbox(param config.IParameterSetting) *parameterizedF
 }
 
 // Create a standard int field
-func createParameterizedIntField(param config.IParameterSetting) *parameterizedFormItem {
+func createParameterizedIntField(param config.IParameterSetting, redrawLayout func()) *parameterizedFormItem {
 	metadata := param.GetMetadata()
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
@@ -106,11 +110,12 @@ func createParameterizedIntField(param config.IParameterSetting) *parameterizedF
 			if err != nil {
 				// TODO: show error modal?
 				item.SetText("")
-			} else {
+			} else if value != param.GetValue() {
 				err := param.SetValue(value)
 				if err != nil {
 					panic(fmt.Sprintf("error setting int value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 				}
+				redrawLayout()
 			}
 		}
 	})
@@ -132,7 +137,7 @@ func createParameterizedIntField(param config.IParameterSetting) *parameterizedF
 }
 
 // Create a standard uint field
-func createParameterizedUintField(param config.IParameterSetting) *parameterizedFormItem {
+func createParameterizedUintField(param config.IParameterSetting, redrawLayout func()) *parameterizedFormItem {
 	metadata := param.GetMetadata()
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
@@ -145,11 +150,12 @@ func createParameterizedUintField(param config.IParameterSetting) *parameterized
 			if err != nil {
 				// TODO: show error modal?
 				item.SetText("")
-			} else {
+			} else if value != param.GetValue() {
 				err := param.SetValue(value)
 				if err != nil {
 					panic(fmt.Sprintf("error setting uint value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 				}
+				redrawLayout()
 			}
 		}
 	})
@@ -171,18 +177,20 @@ func createParameterizedUintField(param config.IParameterSetting) *parameterized
 }
 
 // Create a standard string field
-func createParameterizedStringField(param config.IParameterSetting) *parameterizedFormItem {
+func createParameterizedStringField(param config.IParameterSetting, redrawLayout func()) *parameterizedFormItem {
 	metadata := param.GetMetadata().(*config.StringParameter)
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName())
 	item.SetDoneFunc(func(key tcell.Key) {
+		value := strings.TrimSpace(item.GetText())
 		if key == tcell.KeyEscape {
 			item.SetText("")
-		} else {
-			err := param.SetValue(strings.TrimSpace(item.GetText()))
+		} else if value != param.GetValue() {
+			err := param.SetValue(value)
 			if err != nil {
 				panic(fmt.Sprintf("error setting string value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 			}
+			redrawLayout()
 		}
 	})
 	item.SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
@@ -212,7 +220,7 @@ func createParameterizedStringField(param config.IParameterSetting) *parameteriz
 }
 
 // Create a standard float field
-func createParameterizedFloatField(param config.IParameterSetting) *parameterizedFormItem {
+func createParameterizedFloatField(param config.IParameterSetting, redrawLayout func()) *parameterizedFormItem {
 	metadata := param.GetMetadata().(*config.FloatParameter)
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
@@ -225,11 +233,12 @@ func createParameterizedFloatField(param config.IParameterSetting) *parameterize
 			if err != nil {
 				// TODO: show error modal?
 				item.SetText("")
-			} else {
+			} else if value != param.GetValue() {
 				err := param.SetValue(value)
 				if err != nil {
 					panic(fmt.Sprintf("error setting float value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 				}
+				redrawLayout()
 			}
 		}
 	})
@@ -251,7 +260,7 @@ func createParameterizedFloatField(param config.IParameterSetting) *parameterize
 }
 
 // Create a standard choice field
-func createParameterizedDropDown(param config.IParameterSetting, descriptionBox *tview.TextView) *parameterizedFormItem {
+func createParameterizedDropDown(param config.IParameterSetting, descriptionBox *tview.TextView, redrawLayout func()) *parameterizedFormItem {
 	metadata := param.GetMetadata().(config.IChoiceParameter)
 	// Create the list of options
 	options := []string{}
@@ -265,10 +274,15 @@ func createParameterizedDropDown(param config.IParameterSetting, descriptionBox 
 	item := NewDropDown().
 		SetLabel(metadata.GetName()).
 		SetOptions(options, func(text string, index int) {
+			value := values[index]
+			if value == param.GetValue() {
+				return
+			}
 			err := param.SetValue(values[index])
 			if err != nil {
 				panic(fmt.Sprintf("error setting choice value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 			}
+			redrawLayout()
 		}).
 		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
 			descriptionBox.SetText(descriptions[index])

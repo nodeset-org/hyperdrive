@@ -2,8 +2,10 @@ package config
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"text/template"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 )
@@ -19,19 +21,22 @@ type SectionPage struct {
 	parent iSectionPage
 	page   *page
 	layout *standardLayout
+	fqmn   string
 
-	section  config.ISection
-	settings *modconfig.SettingsSection
-	params   []*parameterizedFormItem
-	subPages []iSectionPage
+	section   config.ISection
+	settings  *modconfig.SettingsSection
+	params    []*parameterizedFormItem
+	subPages  []iSectionPage
+	redrawing bool
 }
 
-func NewSectionPage(md *MainDisplay, parent iSectionPage, section config.ISection, settings *modconfig.SettingsSection) *SectionPage {
+func NewSectionPage(md *MainDisplay, parent iSectionPage, section config.ISection, settings *modconfig.SettingsSection, fqmn string) *SectionPage {
 	sectionPage := &SectionPage{
 		md:       md,
 		parent:   parent,
 		section:  section,
 		settings: settings,
+		fqmn:     fqmn,
 	}
 	sectionPage.createContent()
 
@@ -40,7 +45,7 @@ func NewSectionPage(md *MainDisplay, parent iSectionPage, section config.ISectio
 		parent.getPage(),
 		parent.getPage().id+"/"+string(section.GetID()),
 		string(section.GetName()),
-		string(section.GetDescription().Default), // TEMPLATE
+		"", // string(section.GetDescription().Default), // TEMPLATE
 		sectionPage.layout.grid,
 	)
 	sectionPage.setupSubpages()
@@ -52,7 +57,7 @@ func NewSectionPage(md *MainDisplay, parent iSectionPage, section config.ISectio
 
 func (p *SectionPage) createContent() {
 	// Create the layout
-	p.layout = newStandardLayout()
+	p.layout = newStandardLayout(p.getMainDisplay())
 	p.layout.createForm(string(p.section.GetName()))
 	p.layout.setupEscapeReturnHomeHandler(p.md, p.parent.getPage())
 
@@ -68,7 +73,7 @@ func (p *SectionPage) createContent() {
 		}
 		settings = append(settings, setting)
 	}
-	p.params = createParameterizedFormItems(settings, p.layout.descriptionBox)
+	p.params = createParameterizedFormItems(settings, p.layout.descriptionBox, p.handleLayoutChanged)
 	p.layout.mapParameterizedFormItems(p.params...)
 }
 
@@ -82,7 +87,7 @@ func (p *SectionPage) setupSubpages() {
 		if err != nil {
 			panic(fmt.Errorf("error getting [%s] section setting [%s]: %w", p.section.GetName(), id, err)) // TODO: better logging, like FQMN
 		}
-		subPage := NewSectionPage(p.md, p, section, setting)
+		subPage := NewSectionPage(p.md, p, section, setting, p.fqmn)
 		p.subPages = append(p.subPages, subPage)
 
 		// Map the description to the section label for button shifting later
@@ -106,28 +111,106 @@ func (p *SectionPage) getPage() *page {
 
 // Handle a bulk redraw request
 func (p *SectionPage) handleLayoutChanged() {
-	p.layout.form.Clear(true)
-	p.layout.form.ClearButtons()
+	if p.redrawing {
+		return
+	}
+	p.redrawing = true
+	defer func() {
+		p.redrawing = false
+	}()
 
-	p.layout.addFormItems(p.params)
+	p.layout.form.Clear(true)
+
+	params := []*parameterizedFormItem{}
+	md := p.getMainDisplay()
+	for _, param := range p.params {
+		metadata := param.parameter.GetMetadata()
+		hidden := metadata.GetHidden()
+
+		// Handle parameters that don't have a hidden template
+		if hidden.Template == "" {
+			if !hidden.Default {
+				params = append(params, param)
+			}
+			continue
+		}
+
+		// Generate a template source for the parameter
+		templateSource := parameterTemplateSource{
+			configurationTemplateSource: configurationTemplateSource{
+				fqmn:              p.fqmn,
+				hdSettings:        md.newInstance,
+				moduleSettingsMap: md.moduleSettingsMap,
+			},
+			parameter: param.parameter.GetMetadata(),
+		}
+
+		// Update the hidden status
+		template, err := template.New(string(metadata.GetID())).Parse(hidden.Template)
+		if err != nil {
+			fqmn := p.fqmn
+			panic(fmt.Errorf("error parsing hidden template for parameter [%s:%s]: %w", fqmn, metadata.GetID(), err))
+		}
+		result := &strings.Builder{}
+		err = template.Execute(result, templateSource)
+		if err != nil {
+			fqmn := p.fqmn
+			panic(fmt.Errorf("error executing hidden template for parameter [%s:%s]: %w", fqmn, metadata.GetID(), err))
+		}
+
+		hiddenResult, err := strconv.ParseBool(result.String())
+		if err != nil {
+			fqmn := p.fqmn
+			panic(fmt.Errorf("error parsing hidden template result for parameter [%s:%s]: %w", fqmn, metadata.GetID(), err))
+		}
+		if !hiddenResult {
+			params = append(params, param)
+		}
+	}
+	p.layout.addFormItems(params)
+
 	subsections := p.section.GetSections()
 	for i, section := range subsections {
 		subPage := p.subPages[i]
-		p.layout.form.AddButton(section.GetName(), func() {
-			subPage.handleLayoutChanged()
-			p.md.setPage(subPage.getPage())
-		})
-		button := p.layout.form.GetButton(i)
-		button.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-			switch event.Key() {
-			case tcell.KeyDown, tcell.KeyTab:
-				return tcell.NewEventKey(tcell.KeyTab, 0, 0)
-			case tcell.KeyUp, tcell.KeyBacktab:
-				return tcell.NewEventKey(tcell.KeyBacktab, 0, 0)
-			default:
-				return event
+
+		hidden := section.GetHidden()
+
+		// Handle sections that don't have a hidden template
+		if hidden.Template == "" {
+			if !hidden.Default {
+				addSubsectionButton(section, subPage, md, p.layout.form)
 			}
-		})
+			continue
+		}
+
+		// Generate a template source for the section
+		templateSource := configurationTemplateSource{
+			fqmn:              p.fqmn,
+			hdSettings:        md.newInstance,
+			moduleSettingsMap: md.moduleSettingsMap,
+		}
+
+		// Update the hidden status
+		template, err := template.New(string(section.GetID())).Parse(hidden.Template)
+		if err != nil {
+			fqmn := p.fqmn
+			panic(fmt.Errorf("error parsing hidden template for section [%s:%s]: %w", fqmn, section.GetID(), err))
+		}
+		result := &strings.Builder{}
+		err = template.Execute(result, templateSource)
+		if err != nil {
+			fqmn := p.fqmn
+			panic(fmt.Errorf("error executing hidden template for section [%s:%s]: %w", fqmn, section.GetID(), err))
+		}
+
+		hiddenResult, err := strconv.ParseBool(result.String())
+		if err != nil {
+			fqmn := p.fqmn
+			panic(fmt.Errorf("error parsing hidden template result for section [%s:%s]: %w", fqmn, section.GetID(), err))
+		}
+		if !hiddenResult {
+			addSubsectionButton(section, subPage, md, p.layout.form)
+		}
 	}
 
 	p.layout.refresh()

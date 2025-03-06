@@ -114,3 +114,11 @@ func (m HyperdriveSettings) SerializeToMap() map[string]any {
 	}
 	return instanceMap
 }
+
+// Create a module settings container with the base parameter values copied over
+func (m *HyperdriveSettings) CreateModuleSettings() *config.ModuleSettings {
+	cfg := NewHyperdriveConfig("", "")
+	settings := config.CreateModuleSettings(cfg)
+	settings.CopySettingsFromKnownType(m)
+	return settings
+}

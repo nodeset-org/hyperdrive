@@ -9,13 +9,13 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	dockerClient "github.com/docker/docker/client"
-	"github.com/nodeset-org/hyperdrive/cli/client"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
+	cliutils "github.com/nodeset-org/hyperdrive/cli/utils"
+	hdutils "github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/urfave/cli/v2"
 )
 
 func HandleCommandNotFound(c *cli.Context, command string) {
-	hd, err := client.NewHyperdriveClientFromCtx(c)
+	hd, err := cliutils.NewHyperdriveManagerFromCtx(c)
 	if err != nil {
 		fmt.Printf("Error creating Hyperdrive client: %v\n", err)
 		return
@@ -49,8 +49,8 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 	}
 
 	// Organize modules by load status
-	failedModules := map[string]*utils.ModuleInfoLoadResult{}
-	succeededModules := map[string]*utils.ModuleInfoLoadResult{}
+	failedModules := map[string]*hdutils.ModuleInfoLoadResult{}
+	succeededModules := map[string]*hdutils.ModuleInfoLoadResult{}
 	for _, result := range results {
 		if result.LoadError != nil {
 			failedModules[string(result.Info.Descriptor.Shortcut)] = result
@@ -87,7 +87,7 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 
 	// Make sure the container exists before running the command
 	// TODO: break this into a single utility function to dedup
-	projectAdapterName := utils.GetProjectAdapterContainerName(&mod.Info.Descriptor, cfg.ProjectName)
+	projectAdapterName := hdutils.GetProjectAdapterContainerName(&mod.Info.Descriptor, cfg.ProjectName)
 	docker, err := dockerClient.NewClientWithOpts(
 		dockerClient.WithAPIVersionNegotiation(),
 	)

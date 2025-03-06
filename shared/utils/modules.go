@@ -11,8 +11,19 @@ import (
 	"github.com/nodeset-org/hyperdrive/modules"
 )
 
+// Get the compose project name for a module
+func GetModuleComposeProjectName(hdProjectName string, descriptor modules.ModuleDescriptor) string {
+	return fmt.Sprintf("%s-%s", hdProjectName, descriptor.Shortcut)
+}
+
+// Get the container name for a service
+func GetServiceContainerName(hdProjectName string, descriptor modules.ModuleDescriptor, serviceName string) string {
+	modProject := GetModuleComposeProjectName(hdProjectName, descriptor)
+	return fmt.Sprintf("%s_%s", modProject, serviceName)
+}
+
 // Get the descriptors for all installed modules
-func GetInstalledDescriptors(modulePath string) ([]*modules.ModuleDescriptor, error) {
+func GetInstalledDescriptors(modulePath string) ([]modules.ModuleDescriptor, error) {
 	// Enumerate the installed modules
 	entries, err := os.ReadDir(modulePath)
 	if err != nil {
@@ -20,7 +31,7 @@ func GetInstalledDescriptors(modulePath string) ([]*modules.ModuleDescriptor, er
 	}
 
 	// Find the modules
-	descriptors := []*modules.ModuleDescriptor{}
+	descriptors := []modules.ModuleDescriptor{}
 	for _, entry := range entries {
 		// Skip non-directories
 		if !entry.IsDir() {
@@ -45,7 +56,7 @@ func GetInstalledDescriptors(modulePath string) ([]*modules.ModuleDescriptor, er
 		if err != nil {
 			return nil, fmt.Errorf("error unmarshalling descriptor: %w", err)
 		}
-		descriptors = append(descriptors, &descriptor)
+		descriptors = append(descriptors, descriptor)
 	}
 	return descriptors, nil
 }

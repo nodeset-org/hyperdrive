@@ -122,7 +122,7 @@ func (m *ModuleManager) GetModuleSystemDir() string {
 }
 
 // Get the descriptors for all installed modules
-func (m *ModuleManager) GetInstalledDescriptors() ([]*modules.ModuleDescriptor, error) {
+func (m *ModuleManager) GetInstalledDescriptors() ([]modules.ModuleDescriptor, error) {
 	return GetInstalledDescriptors(m.modulePath)
 }
 
@@ -594,7 +594,8 @@ func (m *ModuleManager) DeployModule(
 	}
 
 	// Instantiate the service templates
-	serviceSrc := templates.NewServiceDataSource(hdSettings, moduleSettingsMap, info, adapterSrc)
+	hdDynamicSettings := hdSettings.CreateModuleSettings()
+	serviceSrc := templates.NewServiceDataSource(hdDynamicSettings, moduleSettingsMap, info, adapterSrc)
 	serviceTemplatePath := filepath.Join(moduleInstallDir, string(info.Descriptor.Name), shared.TemplatesDir)
 	entries, err := os.ReadDir(serviceTemplatePath)
 	if err != nil {

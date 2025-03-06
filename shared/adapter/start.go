@@ -15,19 +15,15 @@ type StartRequest struct {
 
 	// The Hyperdrive config to process
 	Settings *config.HyperdriveSettings `json:"settings"`
-
-	// The compose project name
-	ComposeProjectName string `json:"composeProjectName"`
 }
 
 // Have the adapter start the module based on the full Hyperdrive configuration.
-func (c *AdapterClient) Start(ctx context.Context, settings *config.HyperdriveSettings, composeProjectName string) error {
+func (c *AdapterClient) Start(ctx context.Context, settings *config.HyperdriveSettings) error {
 	request := &StartRequest{
 		KeyedRequest: KeyedRequest{
 			Key: c.key,
 		},
-		Settings:           settings,
-		ComposeProjectName: composeProjectName,
+		Settings: settings,
 	}
 	err := runCommand[StartRequest, struct{}](c, ctx, StartCommandString, request, nil)
 	if err != nil {

@@ -60,11 +60,13 @@ When running in Project mode, these additional environment variables are set:
 
 - `HD_LOG_DIR` is the full path (within the container) to the directory that your module should use for storing any log files. Your module's services should load them from this path, which will be passed into their Docker compose instances as well.
 
+- `HD_DATA_DIR` is the full path (within the container) to the directory that your module should use for storing sensitive data that should be kept secret. The user will specify a root directory for all sensitive data to preside in, which may be a separate encrypted drive for example; your module must honor this setting to prevent accidentally leaking that data.
+
 - `HD_KEY_FILE` is the full path (within the container) to the file that contains the key to use for authenticating adapter commands while in Project mode.
 
 - `HD_COMPOSE_DIR` is the full path (within the container) to the directory that contains the Docker Compose files for your modules after their templates have been instantiated. The filenames will be the same as the Docker Compose templates contained within your [module package](./module.md#packages), but the extension will be `.yml` instead of `.tmpl`. Your adapter can use these files when starting or stopping your module.
 
-- `HD_COMPOSE_PROJECT` is the name of the project to use as the Docker Compose project name when running Docker Compose commands. 
+- `HD_COMPOSE_PROJECT` is the name of the project to use as the Docker Compose project name when running Docker Compose commands.
 
 
 ## Adapter API Protocol
@@ -265,36 +267,6 @@ where:
 
 - `key` must match the contents of the file in `HD_KEY_FILE`.
 - `settings` are the settings for the [complete Hyperdrive installation](TODO), including your module's configuration and the configuration for all other installed modules.
-
-
-#### Output
-
-If the operation worked successfully, your adapter should return with Exit Code 0. If it failed, you should print an error to STDERR and return a non-zero Exit Code. Hyperdrive itself doesn't consume any printed output of this command; it will simply be displayed to the user.
-
-
-### `hd-module stop`
-
-Hyperdrive calls this command when the user has requested that your module needs to stop its Docker services. In some cases it should stop all services for the project, and in others it will be provided with a list of service names to stop. Either way, it should use Docker Compose to stop the services; for the Compose project name, use the `HD_COMPOSE_PROJECT` property.
-
-
-#### Input
-
-```json
-{
-    "key": "...",
-    "services": [
-        ...
-    ]
-}
-```
-
-where:
-
-- `key` must match the contents of the file in `HD_KEY_FILE`.
-- `services` is an optional array of Docker container service IDs that must be stopped. Typically this will come from the global adapter's `process-settings` command.
-  - If this list is missing or an empty array, your adapter should stop all of the service containers.
-  - If this list has one or more entries, your adapter should *only* stop the services in the list.
-  - If there is a service in the list that your adapter does not recognize, it should be ignored without returning an error.
 
 
 #### Output
