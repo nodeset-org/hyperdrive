@@ -163,6 +163,7 @@ func (i *choiceParameterSetting[ChoiceType]) SetValue(value any) error {
 	typedValue, ok := value.(ChoiceType)
 	if ok {
 		i.value = typedValue
+		return nil
 	}
 
 	// Handle string conversion

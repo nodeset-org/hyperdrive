@@ -71,7 +71,7 @@ func (p *ModulesPage) getPage() *page {
 
 // Creates the content for the fallback client settings page
 func (p *ModulesPage) createContent() {
-	p.layout = newStandardLayout(p.home.md)
+	p.layout = newStandardLayout(p.home.md, "")
 	p.layout.createSettingFooter()
 
 	// Create the category list

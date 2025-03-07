@@ -45,7 +45,7 @@ func (p *LoggingConfigPage) getPage() *page {
 func (p *LoggingConfigPage) createContent() {
 	// Create the layout
 	md := p.home.md
-	p.layout = newStandardLayout(md)
+	p.layout = newStandardLayout(md, modules.HyperdriveFqmn)
 	p.layout.createForm("Logging Settings")
 	p.layout.setupEscapeReturnHomeHandler(md, p.home.homePage)
 
@@ -64,7 +64,7 @@ func (p *LoggingConfigPage) createContent() {
 		}
 
 		// Create the form item for the parameter
-		pfi := createParameterizedFormItem(paramSetting, p.layout.descriptionBox, p.handleLayoutChanged)
+		pfi := createParameterizedFormItem(paramSetting, p.layout, p.handleLayoutChanged)
 		p.layout.registerFormItems(pfi)
 		p.formItems = append(p.formItems, pfi)
 	}
@@ -72,5 +72,5 @@ func (p *LoggingConfigPage) createContent() {
 
 // Handle a bulk redraw request
 func (p *LoggingConfigPage) handleLayoutChanged() {
-	p.layout.redrawForm(modules.HyperdriveFqmn, p.formItems, nil, nil)
+	p.layout.redrawForm(p.formItems, nil, nil)
 }

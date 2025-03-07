@@ -2,12 +2,8 @@ package config
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
-	"text/template"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/nodeset-org/hyperdrive/modules"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/rivo/tview"
 )
@@ -15,6 +11,7 @@ import (
 // A layout container with the standard elements and design
 type standardLayout struct {
 	md             *MainDisplay
+	fqmn           string
 	grid           *tview.Grid
 	content        tview.Primitive
 	descriptionBox *tview.TextView
@@ -26,7 +23,7 @@ type standardLayout struct {
 }
 
 // Creates a new StandardLayout instance, which includes the grid and description box preconstructed.
-func newStandardLayout(md *MainDisplay) *standardLayout {
+func newStandardLayout(md *MainDisplay, fqmn string) *standardLayout {
 	// Create the main display grid
 	grid := tview.NewGrid().
 		SetColumns(-5, 2, -3).
@@ -46,6 +43,7 @@ func newStandardLayout(md *MainDisplay) *standardLayout {
 
 	return &standardLayout{
 		md:             md,
+		fqmn:           fqmn,
 		grid:           grid,
 		descriptionBox: descriptionBox,
 	}
@@ -93,6 +91,8 @@ func (layout *standardLayout) createForm(title string) {
 
 	// Set up the selected parameter change callback to update the description box
 	form.SetChangedFunc(func(index int) {
+		var descriptionText string
+		var err error
 		itemCount := form.GetFormItemCount()
 		buttonCount := form.GetButtonCount()
 		if index < itemCount {
@@ -103,43 +103,14 @@ func (layout *standardLayout) createForm(title string) {
 				return
 			}
 
-			param := paramItem.parameter
-			metadata := param.GetMetadata()
-			defaultValue := metadata.GetDefault()
-
-			description := metadata.GetDescription() // TEMPLATE!
-			var descriptionText string
-			if description.Template == "" {
-				descriptionText = description.Default
-			} else {
-				// Generate a template source for the parameter
-				templateSource := parameterTemplateSource{
-					configurationTemplateSource: configurationTemplateSource{
-						fqmn:              modules.HyperdriveFqmn,
-						hdSettings:        layout.md.newInstance,
-						moduleSettingsMap: layout.md.moduleSettingsMap,
-					},
-					parameter: metadata,
-				}
-
-				// Execute the description template
-				template, err := template.New(string(metadata.GetID())).Parse(description.Template)
-				if err != nil {
-					fqmn := modules.HyperdriveFqmn
-					panic(fmt.Errorf("error parsing description template for parameter [%s:%s]: %w", fqmn, metadata.GetID(), err))
-				}
-				result := &strings.Builder{}
-				err = template.Execute(result, templateSource)
-				if err != nil {
-					fqmn := modules.HyperdriveFqmn
-					panic(fmt.Errorf("error executing description template for parameter [%s:%s]: %w", fqmn, metadata.GetID(), err))
-				}
-				descriptionText = result.String()
+			// Get the description text
+			param := paramItem.parameter.GetMetadata()
+			descriptionText, err = layout.md.templateProcessor.GetEntityDescription(layout.fqmn, param)
+			if err != nil {
+				panic(err)
 			}
-
+			defaultValue := param.GetDefault()
 			descriptionText = fmt.Sprintf("Default: %v\n\n%s", defaultValue, descriptionText)
-			layout.descriptionBox.SetText(descriptionText)
-			layout.descriptionBox.ScrollToBeginning()
 		} else if index < itemCount+buttonCount {
 			// This is a button
 			button := form.GetButton(index - itemCount)
@@ -149,78 +120,22 @@ func (layout *standardLayout) createForm(title string) {
 				return
 			}
 
+			// Get the description text
 			section := metadataButton.section
-			description := section.GetDescription()
-			var descriptionText string
-			if description.Template == "" {
-				descriptionText = description.Default
-			} else {
-				// Generate a template source for the parameter
-				templateSource := configurationTemplateSource{
-					fqmn:              modules.HyperdriveFqmn,
-					hdSettings:        layout.md.newInstance,
-					moduleSettingsMap: layout.md.moduleSettingsMap,
-				}
-
-				// Execute the description template
-				id := string(section.GetID())
-				template, err := template.New(id).Parse(description.Template)
-				if err != nil {
-					fqmn := modules.HyperdriveFqmn
-					panic(fmt.Errorf("error parsing description template for section [%s:%s]: %w", fqmn, id, err))
-				}
-				result := &strings.Builder{}
-				err = template.Execute(result, templateSource)
-				if err != nil {
-					fqmn := modules.HyperdriveFqmn
-					panic(fmt.Errorf("error executing description template for section [%s:%s]: %w", fqmn, id, err))
-				}
-				descriptionText = result.String()
+			descriptionText, err = layout.md.templateProcessor.GetEntityDescription(layout.fqmn, section)
+			if err != nil {
+				panic(err)
 			}
-			layout.descriptionBox.SetText(descriptionText)
+		} else {
+			return
 		}
+		layout.descriptionBox.SetText(descriptionText)
+		layout.descriptionBox.ScrollToBeginning()
 	})
 
 	layout.form = form
 	layout.setContent(form, form.Box, title)
 	layout.createSettingFooter()
-}
-
-// Refreshes all of the form items to show the current configured values
-func (layout *standardLayout) refresh() {
-	for i := 0; i < layout.form.GetFormItemCount(); i++ {
-		formItem := layout.form.GetFormItem(i)
-		paramItem, exists := layout.formItemMap[formItem]
-		if !exists {
-			// Handle form items that were added out-of-band and aren't part of the config
-			continue
-		}
-		param := paramItem.parameter
-		metadata := param.GetMetadata()
-
-		// Set the form item to the current value
-		if metadata.GetType() == config.ParameterType_Bool {
-			// Bool
-			formItem.(*tview.Checkbox).SetChecked(param.GetValue().(bool))
-		} else if choiceParam, ok := metadata.(config.IChoiceParameter); ok {
-			// Choice
-			for i, option := range choiceParam.GetOptions() {
-				if option.GetValue() == param.String() {
-					formItem.(*DropDown).SetCurrentOption(i)
-				}
-			}
-		} else {
-			// Everything else
-			inputField, ok := formItem.(*tview.InputField)
-			if !ok {
-				panic(fmt.Errorf("form item [%s] is not an input field, it's a %T", metadata.GetID(), formItem))
-			}
-			inputField.SetText(param.String())
-		}
-	}
-
-	// Focus the first element
-	layout.form.SetFocus(0)
 }
 
 // Create the footer, including the nav bar
@@ -290,10 +205,9 @@ func (layout *standardLayout) setupEscapeReturnHomeHandler(md *MainDisplay, home
 	})
 }
 
-// Redraw the layout's form
+// Redraw the layout's form, adding all of the provided form items and buttons back in.
 // formInit: A callback that runs after the form has been cleared, before the items are added back in. Return false if the redraw should end after this step.
 func (layout *standardLayout) redrawForm(
-	fqmn string,
 	formItems []*parameterizedFormItem,
 	buttons []*metadataButton,
 	formInit func() bool,
@@ -342,48 +256,15 @@ func (layout *standardLayout) redrawForm(
 		}
 	}
 
-	// Add the parameter form items back in
+	// Add the parameter form items back in, skipping any that are hidden
 	md := layout.md
 	visibleParams := []*parameterizedFormItem{}
 	for _, pfi := range formItems {
-		metadata := pfi.parameter.GetMetadata()
-		hidden := metadata.GetHidden()
-
-		// Handle parameters that don't have a hidden template
-		if hidden.Template == "" {
-			if !hidden.Default {
-				visibleParams = append(visibleParams, pfi)
-			}
-			continue
-		}
-
-		// Generate a template source for the parameter
-		templateSource := parameterTemplateSource{
-			configurationTemplateSource: configurationTemplateSource{
-				fqmn:              fqmn,
-				hdSettings:        md.newInstance,
-				moduleSettingsMap: md.moduleSettingsMap,
-			},
-			parameter: metadata,
-		}
-
-		// Execute the hidden template
-		id := string(metadata.GetID())
-		template, err := template.New(id).Parse(hidden.Template)
+		isHidden, err := md.templateProcessor.IsEntityHidden(layout.fqmn, pfi.parameter.GetMetadata())
 		if err != nil {
-			panic(fmt.Errorf("error parsing hidden template for parameter [%s:%s]: %w", fqmn, id, err))
+			panic(err)
 		}
-		result := &strings.Builder{}
-		err = template.Execute(result, templateSource)
-		if err != nil {
-			panic(fmt.Errorf("error executing hidden template for parameter [%s:%s]: %w", fqmn, id, err))
-		}
-
-		hiddenResult, err := strconv.ParseBool(result.String())
-		if err != nil {
-			panic(fmt.Errorf("error parsing hidden template result for parameter [%s:%s]: %w", fqmn, id, err))
-		}
-		if !hiddenResult {
+		if !isHidden {
 			visibleParams = append(visibleParams, pfi)
 		}
 	}
@@ -391,41 +272,12 @@ func (layout *standardLayout) redrawForm(
 		layout.form.AddFormItem(pfi.item)
 	}
 
-	// Add the subsection buttons back in
+	// Add the subsection buttons back in, skipping any that are hidden
 	visibleButtons := []*metadataButton{}
 	for _, button := range buttons {
-		section := button.section
-		hidden := section.GetHidden()
-
-		// Handle sections that don't have a hidden template
-		if hidden.Template == "" {
-			if !hidden.Default {
-				visibleButtons = append(visibleButtons, button)
-			}
-			continue
-		}
-
-		// Generate a template source for the section
-		templateSource := configurationTemplateSource{
-			fqmn:              fqmn,
-			hdSettings:        md.newInstance,
-			moduleSettingsMap: md.moduleSettingsMap,
-		}
-
-		// Update the hidden status
-		template, err := template.New(string(section.GetID())).Parse(hidden.Template)
+		hiddenResult, err := md.templateProcessor.IsEntityHidden(layout.fqmn, button.section)
 		if err != nil {
-			panic(fmt.Errorf("error parsing hidden template for section [%s:%s]: %w", fqmn, section.GetID(), err))
-		}
-		result := &strings.Builder{}
-		err = template.Execute(result, templateSource)
-		if err != nil {
-			panic(fmt.Errorf("error executing hidden template for section [%s:%s]: %w", fqmn, section.GetID(), err))
-		}
-
-		hiddenResult, err := strconv.ParseBool(result.String())
-		if err != nil {
-			panic(fmt.Errorf("error parsing hidden template result for section [%s:%s]: %w", fqmn, section.GetID(), err))
+			panic(err)
 		}
 		if !hiddenResult {
 			visibleButtons = append(visibleButtons, button)
@@ -435,10 +287,10 @@ func (layout *standardLayout) redrawForm(
 		layout.form.AddButton(button.button)
 	}
 
-	// Redraw the layout
+	// Refresh the values of the items to match the settings
 	layout.refresh()
 
-	// Reselect the item that was previously selected if possible, otherwise focus the enable button
+	// Reselect the item that was previously selected if possible
 	if itemToFocus != nil {
 		for _, param := range visibleParams {
 			if param.item != itemToFocus {
@@ -465,7 +317,65 @@ func (layout *standardLayout) redrawForm(
 			}
 			break
 		}
-	} else {
-		layout.form.SetFocus(0)
 	}
+}
+
+// Refreshes all of the form items to show the current configured values
+func (layout *standardLayout) refresh() {
+	for i := 0; i < layout.form.GetFormItemCount(); i++ {
+		formItem := layout.form.GetFormItem(i)
+		pfi, exists := layout.formItemMap[formItem]
+		if !exists {
+			// Handle form items that were added out-of-band and aren't part of the config
+			continue
+		}
+		paramSetting := pfi.parameter
+		paramMetadata := paramSetting.GetMetadata()
+
+		// Set the form item to the current value
+		switch paramMetadata.GetType() {
+		case config.ParameterType_Bool:
+			checkbox := formItem.(*tview.Checkbox)
+			value := paramSetting.GetValue().(bool)
+			checkbox.SetChecked(value)
+
+		case config.ParameterType_Choice:
+			// Update the dropdown options
+			choiceParam := paramMetadata.(config.IChoiceParameter)
+			dropdown := formItem.(*DropDown)
+			visibleValues := dropdown.ReloadDynamicOptions(paramSetting, layout)
+
+			// Set the selected index to the current param setting
+			for i, option := range visibleValues {
+				if option == paramSetting.GetValue() {
+					dropdown.SetCurrentOption(i)
+					return
+				}
+			}
+
+			// If the current value isn't in the visible options, set it to the default
+			defaultValue := choiceParam.GetDefault()
+			err := paramSetting.SetValue(defaultValue)
+			if err != nil {
+				panic(fmt.Errorf("error setting default value for [%s:%s]: %w", layout.fqmn, paramMetadata.GetID(), err))
+			}
+			for i, option := range visibleValues {
+				if option == defaultValue {
+					dropdown.SetCurrentOption(i)
+					return
+				}
+			}
+
+		default:
+			// Everything else
+			inputField, ok := formItem.(*tview.InputField)
+			if !ok {
+				panic(fmt.Errorf("form item [%s] is not an input field, it's a %T", paramMetadata.GetID(), formItem))
+			}
+			inputField.SetText(paramSetting.String())
+		}
+	}
+
+	// Focus the first element
+	layout.form.SetFocus(0)
 }

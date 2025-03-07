@@ -598,7 +598,9 @@ func (p *ChoiceParameter[ChoiceType]) Deserialize(data map[string]any) error {
 		if !ok {
 			return fmt.Errorf("invalid option data: %T", optionData)
 		}
-		option := ParameterOption[ChoiceType]{}
+		option := ParameterOption[ChoiceType]{
+			Owner: p,
+		}
 		err = option.Deserialize(optionDataMap)
 		if err != nil {
 			return err
@@ -637,6 +639,9 @@ type IParameterOption interface {
 
 	// Flag for hiding the option from the UI
 	GetHidden() DynamicProperty[bool]
+
+	// The parameter that this choice belongs to
+	GetOwner() IChoiceParameter
 }
 
 // A single option for a choice parameter
@@ -655,6 +660,9 @@ type ParameterOption[ChoiceType ~string] struct {
 
 	// Flag for hiding the option from the UI
 	Hidden DynamicProperty[bool] `json:"hidden,omitempty" yaml:"hidden,omitempty"`
+
+	// The parameter that this choice belongs to
+	Owner *ChoiceParameter[ChoiceType] `json:"-" yaml:"-"`
 }
 
 // Gets the name of the option
@@ -680,6 +688,11 @@ func (o ParameterOption[ChoiceType]) GetDisabled() DynamicProperty[bool] {
 // Gets the hidden flag of the option
 func (o ParameterOption[ChoiceType]) GetHidden() DynamicProperty[bool] {
 	return o.Hidden
+}
+
+// Gets the owner of the option
+func (o ParameterOption[ChoiceType]) GetOwner() IChoiceParameter {
+	return o.Owner
 }
 
 // Serializes the option to a map

@@ -60,39 +60,29 @@ func createMetadataButton(section config.ISection, subPage iSectionPage, md *Mai
 	}
 }
 
-// Create a list of form items based on a set of parameters
-func createParameterizedFormItems(params []config.IParameterSetting, descriptionBox *tview.TextView, redrawLayout func()) []*parameterizedFormItem {
-	formItems := []*parameterizedFormItem{}
-	for _, param := range params {
-		item := createParameterizedFormItem(param, descriptionBox, redrawLayout)
-		formItems = append(formItems, item)
-	}
-	return formItems
-}
-
 // Create a form item binding for a parameter based on its type
-func createParameterizedFormItem(param config.IParameterSetting, descriptionBox *tview.TextView, redrawLayout func()) *parameterizedFormItem {
+func createParameterizedFormItem(param config.IParameterSetting, layout *standardLayout, redrawContainer func()) *parameterizedFormItem {
 	metadata := param.GetMetadata()
 	switch metadata.GetType() {
 	case config.ParameterType_Choice:
-		return createParameterizedDropDown(param, descriptionBox, redrawLayout)
+		return createParameterizedDropDown(param, layout, redrawContainer)
 	case config.ParameterType_Bool:
-		return createParameterizedCheckbox(param, redrawLayout)
+		return createParameterizedCheckbox(param, redrawContainer)
 	case config.ParameterType_Int:
-		return createParameterizedIntField(param, redrawLayout)
+		return createParameterizedIntField(param, redrawContainer)
 	case config.ParameterType_Uint:
-		return createParameterizedUintField(param, redrawLayout)
+		return createParameterizedUintField(param, redrawContainer)
 	case config.ParameterType_Float:
-		return createParameterizedFloatField(param, redrawLayout)
+		return createParameterizedFloatField(param, redrawContainer)
 	case config.ParameterType_String:
-		return createParameterizedStringField(param, redrawLayout)
+		return createParameterizedStringField(param, redrawContainer)
 	default:
 		panic(fmt.Sprintf("param [%s] is not a supported type for form item binding", metadata.GetName()))
 	}
 }
 
 // Create a standard form checkbox
-func createParameterizedCheckbox(param config.IParameterSetting, redrawLayout func()) *parameterizedFormItem {
+func createParameterizedCheckbox(param config.IParameterSetting, redrawContainer func()) *parameterizedFormItem {
 	metadata := param.GetMetadata()
 	item := tview.NewCheckbox().
 		SetLabel(metadata.GetName()).
@@ -105,7 +95,7 @@ func createParameterizedCheckbox(param config.IParameterSetting, redrawLayout fu
 			if err != nil {
 				panic(fmt.Sprintf("error setting checkbox value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 			}
-			redrawLayout()
+			redrawContainer()
 		})
 	item.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
@@ -125,7 +115,7 @@ func createParameterizedCheckbox(param config.IParameterSetting, redrawLayout fu
 }
 
 // Create a standard int field
-func createParameterizedIntField(param config.IParameterSetting, redrawLayout func()) *parameterizedFormItem {
+func createParameterizedIntField(param config.IParameterSetting, redrawContainer func()) *parameterizedFormItem {
 	metadata := param.GetMetadata()
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
@@ -143,7 +133,7 @@ func createParameterizedIntField(param config.IParameterSetting, redrawLayout fu
 				if err != nil {
 					panic(fmt.Sprintf("error setting int value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 				}
-				redrawLayout()
+				redrawContainer()
 			}
 		}
 	})
@@ -165,7 +155,7 @@ func createParameterizedIntField(param config.IParameterSetting, redrawLayout fu
 }
 
 // Create a standard uint field
-func createParameterizedUintField(param config.IParameterSetting, redrawLayout func()) *parameterizedFormItem {
+func createParameterizedUintField(param config.IParameterSetting, redrawContainer func()) *parameterizedFormItem {
 	metadata := param.GetMetadata()
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
@@ -183,7 +173,7 @@ func createParameterizedUintField(param config.IParameterSetting, redrawLayout f
 				if err != nil {
 					panic(fmt.Sprintf("error setting uint value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 				}
-				redrawLayout()
+				redrawContainer()
 			}
 		}
 	})
@@ -205,7 +195,7 @@ func createParameterizedUintField(param config.IParameterSetting, redrawLayout f
 }
 
 // Create a standard string field
-func createParameterizedStringField(param config.IParameterSetting, redrawLayout func()) *parameterizedFormItem {
+func createParameterizedStringField(param config.IParameterSetting, redrawContainer func()) *parameterizedFormItem {
 	metadata := param.GetMetadata().(*config.StringParameter)
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName())
@@ -218,7 +208,7 @@ func createParameterizedStringField(param config.IParameterSetting, redrawLayout
 			if err != nil {
 				panic(fmt.Sprintf("error setting string value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 			}
-			redrawLayout()
+			redrawContainer()
 		}
 	})
 	item.SetAcceptanceFunc(func(textToCheck string, lastChar rune) bool {
@@ -248,7 +238,7 @@ func createParameterizedStringField(param config.IParameterSetting, redrawLayout
 }
 
 // Create a standard float field
-func createParameterizedFloatField(param config.IParameterSetting, redrawLayout func()) *parameterizedFormItem {
+func createParameterizedFloatField(param config.IParameterSetting, redrawContainer func()) *parameterizedFormItem {
 	metadata := param.GetMetadata().(*config.FloatParameter)
 	item := tview.NewInputField().
 		SetLabel(metadata.GetName()).
@@ -266,7 +256,7 @@ func createParameterizedFloatField(param config.IParameterSetting, redrawLayout 
 				if err != nil {
 					panic(fmt.Sprintf("error setting float value for parameter [%s]: %s", metadata.GetID(), err.Error()))
 				}
-				redrawLayout()
+				redrawContainer()
 			}
 		}
 	})
@@ -288,34 +278,13 @@ func createParameterizedFloatField(param config.IParameterSetting, redrawLayout 
 }
 
 // Create a standard choice field
-func createParameterizedDropDown(param config.IParameterSetting, descriptionBox *tview.TextView, redrawLayout func()) *parameterizedFormItem {
+func createParameterizedDropDown(param config.IParameterSetting, layout *standardLayout, redrawContainer func()) *parameterizedFormItem {
 	metadata := param.GetMetadata().(config.IChoiceParameter)
-	// Create the list of options
-	options := []string{}
-	descriptions := []string{}
-	values := []any{}
-	for _, option := range metadata.GetOptions() {
-		options = append(options, option.GetName())
-		descriptions = append(descriptions, option.GetDescription().Default) // TEMPLATE!
-		values = append(values, option.GetValue())
-	}
 	item := NewDropDown().
 		SetLabel(metadata.GetName()).
-		SetOptions(options, func(text string, index int) {
-			value := values[index]
-			if value == param.GetValue() {
-				return
-			}
-			err := param.SetValue(values[index])
-			if err != nil {
-				panic(fmt.Sprintf("error setting choice value for parameter [%s]: %s", metadata.GetID(), err.Error()))
-			}
-			redrawLayout()
-		}).
-		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
-			descriptionBox.SetText(descriptions[index])
-		})
-	item.SetTextOptions(" ", " ", "", "", "")
+		SetRedraw(redrawContainer).
+		SetTextOptions(" ", " ", "", "", "")
+	item.ReloadDynamicOptions(param, layout)
 	item.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyDown, tcell.KeyTab:

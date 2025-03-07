@@ -62,7 +62,7 @@ func newSettingsHome(md *MainDisplay) *settingsHome {
 
 // Create the content for this page
 func (home *settingsHome) createContent() {
-	layout := newStandardLayout(home.md)
+	layout := newStandardLayout(home.md, "")
 
 	// Create the category list
 	categoryList := tview.NewList().

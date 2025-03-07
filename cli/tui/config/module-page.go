@@ -58,7 +58,7 @@ func NewModulePage(modulesPage *ModulesPage, info *config.ModuleInfo, previousIn
 func (p *ModulePage) createContent() {
 	// Create the layout
 	md := p.modulesPage.home.md
-	p.layout = newStandardLayout(md)
+	p.layout = newStandardLayout(md, p.fqmn)
 	p.layout.createForm(string(p.info.Descriptor.Name) + " Settings")
 	p.layout.setupEscapeReturnHomeHandler(p.modulesPage.home.md, p.modulesPage.page)
 
@@ -99,7 +99,7 @@ func (p *ModulePage) createContent() {
 		}
 
 		// Create the form item for the parameter
-		pfi := createParameterizedFormItem(paramSetting, p.layout.descriptionBox, p.handleLayoutChanged)
+		pfi := createParameterizedFormItem(paramSetting, p.layout, p.handleLayoutChanged)
 		p.layout.registerFormItems(pfi)
 		p.formItems = append(p.formItems, pfi)
 	}
@@ -132,7 +132,7 @@ func (p *ModulePage) getPage() *page {
 
 // Handle a bulk redraw request
 func (p *ModulePage) handleLayoutChanged() {
-	p.layout.redrawForm(p.fqmn, p.formItems, p.buttons, func() bool {
+	p.layout.redrawForm(p.formItems, p.buttons, func() bool {
 		p.layout.form.AddFormItem(p.enableBox.item)
 		return !p.instance.Enabled
 	})

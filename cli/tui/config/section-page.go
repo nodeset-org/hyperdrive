@@ -43,7 +43,7 @@ func NewSectionPage(md *MainDisplay, parent iSectionPage, section config.ISectio
 func (p *SectionPage) createContent() {
 	// Create the layout
 	md := p.md
-	p.layout = newStandardLayout(md)
+	p.layout = newStandardLayout(md, p.fqmn)
 	p.layout.createForm(string(p.section.GetName()))
 	p.layout.setupEscapeReturnHomeHandler(p.md, p.parent.getPage())
 
@@ -67,7 +67,7 @@ func (p *SectionPage) createContent() {
 		}
 
 		// Create the form item for the parameter
-		pfi := createParameterizedFormItem(paramSetting, p.layout.descriptionBox, p.handleLayoutChanged)
+		pfi := createParameterizedFormItem(paramSetting, p.layout, p.handleLayoutChanged)
 		p.layout.registerFormItems(pfi)
 		p.formItems = append(p.formItems, pfi)
 	}
@@ -100,5 +100,5 @@ func (p *SectionPage) getPage() *page {
 
 // Handle a bulk redraw request
 func (p *SectionPage) handleLayoutChanged() {
-	p.layout.redrawForm(p.fqmn, p.formItems, p.buttons, nil)
+	p.layout.redrawForm(p.formItems, p.buttons, nil)
 }

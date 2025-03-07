@@ -42,7 +42,7 @@ func (p *HyperdriveConfigPage) getPage() *page {
 // Creates the content for the Hyperdrive settings page
 func (p *HyperdriveConfigPage) createContent() {
 	// Create the layout
-	p.layout = newStandardLayout(p.home.md)
+	p.layout = newStandardLayout(p.home.md, modules.HyperdriveFqmn)
 	p.layout.createForm("Hyperdrive Settings")
 	p.layout.setupEscapeReturnHomeHandler(p.home.md, p.home.homePage)
 
@@ -56,7 +56,7 @@ func (p *HyperdriveConfigPage) createContent() {
 		}
 
 		// Create the form item for the parameter
-		pfi := createParameterizedFormItem(paramSetting, p.layout.descriptionBox, p.handleLayoutChanged)
+		pfi := createParameterizedFormItem(paramSetting, p.layout, p.handleLayoutChanged)
 		p.layout.registerFormItems(pfi)
 		p.formItems = append(p.formItems, pfi)
 	}
@@ -64,5 +64,5 @@ func (p *HyperdriveConfigPage) createContent() {
 
 // Handle a bulk redraw request
 func (p *HyperdriveConfigPage) handleLayoutChanged() {
-	p.layout.redrawForm(modules.HyperdriveFqmn, p.formItems, nil, nil)
+	p.layout.redrawForm(p.formItems, nil, nil)
 }

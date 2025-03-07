@@ -1,9 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/rivo/tview"
 )
 
@@ -85,6 +87,9 @@ type DropDown struct {
 	selected func(text string, index int)
 
 	dragging bool // Set to true when mouse dragging is in progress.
+
+	// A callback function which is called to redraw the control owning the dropdown
+	redraw func()
 }
 
 // NewDropDown returns a new drop-down.
@@ -599,4 +604,58 @@ func (d *DropDown) MouseHandler() func(action tview.MouseAction, event *tcell.Ev
 
 		return
 	})
+}
+
+// Set the function to redraw the control owning the dropdown
+func (d *DropDown) SetRedraw(redraw func()) *DropDown {
+	d.redraw = redraw
+	return d
+}
+
+// Reload the options and option descriptions based on the dynamic properties of the dropdown's metadata
+func (d *DropDown) ReloadDynamicOptions(param config.IParameterSetting, layout *standardLayout) []any {
+	metadata := param.GetMetadata().(config.IChoiceParameter)
+	templateProcessor := layout.md.templateProcessor
+	fqmn := layout.fqmn
+	descriptionBox := layout.descriptionBox
+
+	// Create the list of options
+	options := []string{}
+	descriptions := []string{}
+	values := []any{}
+	for _, option := range metadata.GetOptions() {
+		// Check if the option is hidden
+		isHidden, err := templateProcessor.IsEntityHidden(fqmn, option)
+		if err != nil {
+			panic(err)
+		}
+		if isHidden {
+			continue
+		}
+
+		// Get the description
+		description, err := templateProcessor.GetEntityDescription(fqmn, option)
+		if err != nil {
+			panic(err)
+		}
+
+		options = append(options, option.GetName())
+		descriptions = append(descriptions, description)
+		values = append(values, option.GetValue())
+	}
+	d.SetOptions(options, func(text string, index int) {
+		value := values[index]
+		if value == param.GetValue() {
+			return
+		}
+		err := param.SetValue(values[index])
+		if err != nil {
+			panic(fmt.Sprintf("error setting choice value for parameter [%s]: %s", metadata.GetID(), err.Error()))
+		}
+		d.redraw()
+	})
+	d.SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
+		descriptionBox.SetText(descriptions[index])
+	})
+	return values
 }

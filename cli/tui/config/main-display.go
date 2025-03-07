@@ -36,6 +36,7 @@ type MainDisplay struct {
 	newInstance       *modconfig.ModuleSettings            // The new instance of the Hyperdrive settings (the one being configured)
 	moduleSettingsMap map[string]*modconfig.ModuleSettings // The map of module FQMNs to their new (being configured) settings
 	moduleManager     *utils.ModuleManager
+	templateProcessor *modconfig.TemplateProcessor
 }
 
 // Creates a new MainDisplay instance.
@@ -148,6 +149,7 @@ func NewMainDisplay(
 		}
 		md.moduleSettingsMap[fqmn] = settings
 	}
+	md.templateProcessor = modconfig.NewTemplateProcessor(md.newInstance, md.moduleSettingsMap)
 
 	// Create all of the child elements
 	md.settingsHome = newSettingsHome(md)
