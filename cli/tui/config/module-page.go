@@ -7,7 +7,6 @@ import (
 
 	"text/template"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/rivo/tview"
@@ -28,25 +27,21 @@ type ModulePage struct {
 
 	// Fields
 	enableBox *parameterizedFormItem
-	params    []*parameterizedFormItem
+	formItems []*parameterizedFormItem
+	buttons   []*metadataButton
 }
 
 // Create a new module page
 func NewModulePage(modulesPage *ModulesPage, info *config.ModuleInfo, previousInstance *modconfig.ModuleInstance, instance *modconfig.ModuleInstance) *ModulePage {
 	fqmn := info.Descriptor.GetFullyQualifiedModuleName()
+	settings := modulesPage.home.md.moduleSettingsMap[fqmn]
 	previousSettings := modconfig.CreateModuleSettings(info.Configuration)
 	err := previousSettings.DeserializeFromMap(previousInstance.Settings)
 	if err != nil {
 		panic(fmt.Errorf("error deserializing previous module [%s] settings: %w", fqmn, err))
 	}
-	settings := modulesPage.home.md.moduleSettingsMap[fqmn]
 
-	moduleDescString := strings.Builder{}
-	moduleDescString.WriteString("Name:\n" + string(info.Descriptor.Name) + "\n\n")
-	moduleDescString.WriteString("Author:\n" + string(info.Descriptor.Author) + "\n\n")
-	moduleDescString.WriteString("Version:\n" + info.Descriptor.Version.String() + "\n\n")
-	moduleDescString.WriteString("Description:\n" + string(info.Descriptor.Description))
-
+	// Create the page
 	modulePage := &ModulePage{
 		modulesPage:      modulesPage,
 		info:             info,
@@ -58,51 +53,37 @@ func NewModulePage(modulesPage *ModulesPage, info *config.ModuleInfo, previousIn
 	}
 	modulePage.createContent()
 
-	modulePage.page = newPage(
-		modulesPage.page,
-		modulePrefix+fqmn,
-		string(info.Descriptor.Name),
-		moduleDescString.String(),
-		modulePage.layout.grid,
-	)
-	modulePage.setupSubpages()
-
 	// Do the initial draw
 	modulePage.handleLayoutChanged()
 	return modulePage
 }
 
-// Creates the content for the Constellation settings page
+// Create the content for the module page
 func (p *ModulePage) createContent() {
 	// Create the layout
-	p.layout = newStandardLayout(p.getMainDisplay())
+	md := p.getMainDisplay()
+	p.layout = newStandardLayout(md)
 	p.layout.createForm(string(p.info.Descriptor.Name) + " Settings")
 	p.layout.setupEscapeReturnHomeHandler(p.modulesPage.home.md, p.modulesPage.page)
 	p.layout.form.SetButtonBackgroundColor(p.layout.form.fieldBackgroundColor)
 
+	// Create the underlying TUI page
+	moduleDescString := strings.Builder{}
+	moduleDescString.WriteString("Name:\n" + string(p.info.Descriptor.Name) + "\n\n")
+	moduleDescString.WriteString("Author:\n" + string(p.info.Descriptor.Author) + "\n\n")
+	moduleDescString.WriteString("Version:\n" + p.info.Descriptor.Version.String() + "\n\n")
+	moduleDescString.WriteString("Description:\n" + string(p.info.Descriptor.Description))
+	p.page = newPage(
+		p.modulesPage.page,
+		modulePrefix+p.fqmn,
+		string(p.info.Descriptor.Name),
+		moduleDescString.String(),
+		p.layout.grid,
+	)
+
 	// Set up the enable box
 	enableParam := NewEnableParamInstance(p.info, p.instance)
 	p.enableBox = createParameterizedCheckbox(enableParam, p.handleLayoutChanged)
-
-	// Set up the form items
-	moduleCfg := p.info.Configuration
-	params := moduleCfg.GetParameters()
-	settings := []modconfig.IParameterSetting{}
-	for _, param := range params {
-		id := param.GetID()
-		setting, err := p.settings.GetParameter(id)
-		if err != nil {
-			panic(fmt.Errorf("error getting logging parameter setting [%s]: %w", id, err))
-		}
-		settings = append(settings, setting)
-	}
-	p.params = createParameterizedFormItems(settings, p.layout.descriptionBox, p.handleLayoutChanged)
-
-	// Map the parameters to the form items in the layout
-	p.layout.mapParameterizedFormItems(p.enableBox)
-	p.layout.mapParameterizedFormItems(p.params...)
-
-	// Set up the setting callbacks
 	p.enableBox.item.(*tview.Checkbox).SetChangedFunc(func(checked bool) {
 		if p.instance.Enabled == checked {
 			return
@@ -110,26 +91,42 @@ func (p *ModulePage) createContent() {
 		p.instance.Enabled = checked
 		p.handleLayoutChanged()
 	})
-}
+	p.layout.mapParameterizedFormItems(p.enableBox)
 
-func (p *ModulePage) setupSubpages() {
+	// Set up the form items
 	moduleCfg := p.info.Configuration
+	params := moduleCfg.GetParameters()
+	for _, param := range params {
+		id := param.GetID()
+		paramSetting, err := p.settings.GetParameter(id)
+		if err != nil {
+			panic(fmt.Errorf("error getting parameter setting [%s]: %w", id, err))
+		}
+
+		// Create the form item for the parameter
+		pfi := createParameterizedFormItem(paramSetting, p.layout.descriptionBox, p.handleLayoutChanged)
+		p.layout.mapParameterizedFormItems(pfi)
+		p.formItems = append(p.formItems, pfi)
+	}
+
+	// Set up the section subpages
 	subsections := moduleCfg.GetSections()
 	for _, section := range subsections {
 		id := section.GetID()
-		setting, err := p.settings.GetSection(id)
+		settingsSection, err := p.settings.GetSection(id)
 		if err != nil {
 			panic(fmt.Errorf("error getting [%s] section setting [%s]: %w", p.fqmn, id, err))
 		}
-		subPage := NewSectionPage(p.getMainDisplay(), p, section, setting, p.fqmn)
-		p.subPages = append(p.subPages, subPage)
 
-		// Map the description to the section label for button shifting later
-		label := section.GetName()
-		p.layout.mapButtonDescription(label, section.GetDescription())
-	}
-	for _, subpage := range p.subPages {
-		p.getMainDisplay().pages.AddPage(subpage.getPage().id, subpage.getPage().content, true, false)
+		// Create the subpage
+		subPage := NewSectionPage(md, p, section, settingsSection, p.fqmn)
+		p.subPages = append(p.subPages, subPage)
+		md.pages.AddPage(subPage.getPage().id, subPage.getPage().content, true, false)
+
+		// Create the metadata button for the section
+		button := createMetadataButton(section, subPage, md)
+		p.layout.mapMetadataButton(button)
+		p.buttons = append(p.buttons, button)
 	}
 }
 
@@ -145,6 +142,7 @@ func (p *ModulePage) getPage() *page {
 
 // Handle a bulk redraw request
 func (p *ModulePage) handleLayoutChanged() {
+	// Prevent re-entry if we're already redrawing
 	if p.redrawing {
 		return
 	}
@@ -153,6 +151,32 @@ func (p *ModulePage) handleLayoutChanged() {
 		p.redrawing = false
 	}()
 
+	// Get the item that's currently selected, if there is one
+	var itemToFocus tview.FormItem = nil
+	focusedItemIndex, focusedButtonIndex := p.layout.form.GetFocusedItemIndex()
+	if focusedItemIndex != -1 {
+		focusedItem := p.layout.form.GetFormItem(focusedItemIndex)
+		for _, pfi := range p.formItems {
+			if pfi.item == focusedItem {
+				itemToFocus = focusedItem
+				break
+			}
+		}
+	}
+
+	// Get the button that's currently selected, if there is one
+	var buttonToFocus *tview.Button = nil
+	if focusedButtonIndex != -1 {
+		item := p.layout.form.GetButton(focusedButtonIndex)
+		for _, button := range p.buttons {
+			if button.button == item {
+				buttonToFocus = item
+				break
+			}
+		}
+	}
+
+	// Clear the form, but keep the enable box since that's always here
 	p.layout.form.Clear(true)
 	p.layout.form.AddFormItem(p.enableBox.item)
 
@@ -162,16 +186,17 @@ func (p *ModulePage) handleLayoutChanged() {
 		return
 	}
 
-	params := []*parameterizedFormItem{}
+	// Add the parameter form items back in
 	md := p.getMainDisplay()
-	for _, param := range p.params {
-		metadata := param.parameter.GetMetadata()
+	params := []*parameterizedFormItem{}
+	for _, pfi := range p.formItems {
+		metadata := pfi.parameter.GetMetadata()
 		hidden := metadata.GetHidden()
 
 		// Handle parameters that don't have a hidden template
 		if hidden.Template == "" {
 			if !hidden.Default {
-				params = append(params, param)
+				params = append(params, pfi)
 			}
 			continue
 		}
@@ -183,7 +208,7 @@ func (p *ModulePage) handleLayoutChanged() {
 				hdSettings:        md.newInstance,
 				moduleSettingsMap: md.moduleSettingsMap,
 			},
-			parameter: param.parameter.GetMetadata(),
+			parameter: pfi.parameter.GetMetadata(),
 		}
 
 		// Update the hidden status
@@ -205,21 +230,21 @@ func (p *ModulePage) handleLayoutChanged() {
 			panic(fmt.Errorf("error parsing hidden template result for parameter [%s:%s]: %w", fqmn, metadata.GetID(), err))
 		}
 		if !hiddenResult {
-			params = append(params, param)
+			params = append(params, pfi)
 		}
 	}
 	p.layout.addFormItems(params)
 
-	subsections := p.info.Configuration.GetSections()
-	for i, section := range subsections {
-		subPage := p.subPages[i]
-
+	// Add the subsection buttons back in
+	buttons := []*metadataButton{}
+	for _, button := range p.buttons {
+		section := button.section
 		hidden := section.GetHidden()
 
 		// Handle sections that don't have a hidden template
 		if hidden.Template == "" {
 			if !hidden.Default {
-				addSubsectionButton(section, subPage, md, p.layout.form)
+				buttons = append(buttons, button)
 			}
 			continue
 		}
@@ -250,27 +275,90 @@ func (p *ModulePage) handleLayoutChanged() {
 			panic(fmt.Errorf("error parsing hidden template result for section [%s:%s]: %w", fqmn, section.GetID(), err))
 		}
 		if !hiddenResult {
-			addSubsectionButton(section, subPage, md, p.layout.form)
+			buttons = append(buttons, button)
 		}
 	}
+	p.layout.addButtons(buttons)
 
+	// Redraw the layout
 	p.layout.refresh()
+
+	// Reselect the item that was previously selected if possible, otherwise focus the enable button
+	if itemToFocus != nil {
+		for _, param := range params {
+			if param.item != itemToFocus {
+				continue
+			}
+
+			label := param.parameter.GetMetadata().GetName()
+			index := p.layout.form.GetFormItemIndex(label)
+			if index != -1 {
+				p.layout.form.SetFocus(index)
+			}
+			break
+		}
+	} else if buttonToFocus != nil {
+		for _, button := range buttons {
+			if button.button != buttonToFocus {
+				continue
+			}
+
+			label := button.section.GetName()
+			index := p.layout.form.GetButtonIndex(label)
+			if index != -1 {
+				p.layout.form.SetFocus(len(params) + index)
+			}
+			break
+		}
+	} else {
+		p.layout.form.SetFocus(0)
+	}
 }
 
-func addSubsectionButton(section modconfig.ISection, subPage iSectionPage, md *MainDisplay, form *Form) {
-	form.AddButton(section.GetName(), func() {
-		subPage.handleLayoutChanged()
-		md.setPage(subPage.getPage())
-	})
-	button := form.GetButton(form.GetButtonCount() - 1)
-	button.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		switch event.Key() {
-		case tcell.KeyDown, tcell.KeyTab:
-			return tcell.NewEventKey(tcell.KeyTab, 0, 0)
-		case tcell.KeyUp, tcell.KeyBacktab:
-			return tcell.NewEventKey(tcell.KeyBacktab, 0, 0)
-		default:
-			return event
+/*
+// Generate the TX mode dropdown box, filtering out the options that don't have URLs on the provided network
+// The TUI wasn't really designed to handle dropdows with dynamic options, so we have to do some manual work here
+func (configPage *HyperdriveConfigPage) generateTxModeBox(network config.Network) {
+	res := configPage.masterConfig.AllNetworkSettings.Hyperdrive[network].NetworkResources
+
+	// Filter out the options that don't have URLs on the provided network
+	origOptions := configPage.masterConfig.Hyperdrive.TxEndpointMode.Options
+	options := []*config.ParameterOption[hdconfig.TxEndpointMode]{}
+	for _, option := range origOptions {
+		switch option.Value {
+		case hdconfig.TxEndpointMode_FlashbotsProtect:
+			if res.FlashbotsProtectUrl == "" {
+				continue
+			}
+		case hdconfig.TxEndpointMode_MevBlocker:
+			if res.MevBlockerUrl == "" {
+				continue
+			}
 		}
+		options = append(options, option)
+	}
+
+	// Make a clone of the param with the new options
+	paramCopy := config.Parameter[hdconfig.TxEndpointMode]{
+		ParameterCommon: configPage.masterConfig.Hyperdrive.TxEndpointMode.GetCommon(),
+		Value:           configPage.masterConfig.Hyperdrive.TxEndpointMode.Value,
+		Default:         configPage.masterConfig.Hyperdrive.TxEndpointMode.Default,
+		Options:         options,
+	}
+
+	// Create the dropdown box using the cloned parameter with the filtered options
+	box := createParameterizedDropDown(&paramCopy, configPage.layout.descriptionBox)
+	box.item.(*DropDown).SetSelectedFunc(func(text string, index int) {
+		selection := options[index].GetValueAsAny().(hdconfig.TxEndpointMode)
+		if configPage.masterConfig.Hyperdrive.TxEndpointMode.Value == selection {
+			return
+		}
+		// Update both the real parameter and the copy so it displays correctly
+		configPage.masterConfig.Hyperdrive.TxEndpointMode.Value = selection
+		paramCopy.Value = selection
+		configPage.handleModeChanged()
 	})
+	configPage.layout.mapParameterizedFormItems(box)
+	configPage.txModeBox = box
 }
+*/

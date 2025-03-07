@@ -16,6 +16,12 @@ type parameterizedFormItem struct {
 	item      tview.FormItem
 }
 
+// A button linked to a Section
+type metadataButton struct {
+	section config.ISection
+	button  *tview.Button
+}
+
 /*
 func registerEnableCheckbox(param config.Parameter[bool], checkbox *tview.Checkbox, form *Form, items []*parameterizedFormItem) {
 	checkbox.SetChangedFunc(func(checked bool) {
@@ -32,18 +38,40 @@ func registerEnableCheckbox(param config.Parameter[bool], checkbox *tview.Checkb
 }
 */
 
+// Create a button mapped to a section
+func createMetadataButton(section config.ISection, subPage iSectionPage, md *MainDisplay) *metadataButton {
+	button := tview.NewButton(section.GetName()).SetSelectedFunc(func() {
+		subPage.handleLayoutChanged()
+		md.setPage(subPage.getPage())
+	})
+	button.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyDown, tcell.KeyTab:
+			return tcell.NewEventKey(tcell.KeyTab, 0, 0)
+		case tcell.KeyUp, tcell.KeyBacktab:
+			return tcell.NewEventKey(tcell.KeyBacktab, 0, 0)
+		default:
+			return event
+		}
+	})
+	return &metadataButton{
+		section: section,
+		button:  button,
+	}
+}
+
 // Create a list of form items based on a set of parameters
 func createParameterizedFormItems(params []config.IParameterSetting, descriptionBox *tview.TextView, redrawLayout func()) []*parameterizedFormItem {
 	formItems := []*parameterizedFormItem{}
 	for _, param := range params {
-		item := getTypedFormItem(param, descriptionBox, redrawLayout)
+		item := createParameterizedFormItem(param, descriptionBox, redrawLayout)
 		formItems = append(formItems, item)
 	}
 	return formItems
 }
 
 // Create a form item binding for a parameter based on its type
-func getTypedFormItem(param config.IParameterSetting, descriptionBox *tview.TextView, redrawLayout func()) *parameterizedFormItem {
+func createParameterizedFormItem(param config.IParameterSetting, descriptionBox *tview.TextView, redrawLayout func()) *parameterizedFormItem {
 	metadata := param.GetMetadata()
 	switch metadata.GetType() {
 	case config.ParameterType_Choice:

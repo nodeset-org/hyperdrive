@@ -222,8 +222,8 @@ func (f *Form) AddCheckbox(label string, checked bool, changed func(checked bool
 
 // AddButton adds a new button to the form. The "selected" function is called
 // when the user selects this button. It may be nil.
-func (f *Form) AddButton(label string, selected func()) *Form {
-	f.buttons = append(f.buttons, tview.NewButton(label).SetSelectedFunc(selected))
+func (f *Form) AddButton(button *tview.Button) *Form {
+	f.buttons = append(f.buttons, button)
 	return f
 }
 

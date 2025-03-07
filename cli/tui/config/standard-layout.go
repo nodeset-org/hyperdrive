@@ -13,14 +13,14 @@ import (
 
 // A layout container with the standard elements and design
 type standardLayout struct {
-	md                 *MainDisplay
-	grid               *tview.Grid
-	content            tview.Primitive
-	descriptionBox     *tview.TextView
-	footer             tview.Primitive
-	form               *Form
-	parameters         map[tview.FormItem]*parameterizedFormItem
-	buttonDescriptions map[string]config.DynamicProperty[string]
+	md             *MainDisplay
+	grid           *tview.Grid
+	content        tview.Primitive
+	descriptionBox *tview.TextView
+	footer         tview.Primitive
+	form           *Form
+	parameters     map[tview.FormItem]*parameterizedFormItem
+	buttons        map[*tview.Button]*metadataButton
 }
 
 // Creates a new StandardLayout instance, which includes the grid and description box preconstructed.
@@ -77,7 +77,7 @@ func (layout *standardLayout) setFooter(footer tview.Primitive, height int) {
 // Create a standard form for this layout (for settings pages)
 func (layout *standardLayout) createForm(title string) {
 	layout.parameters = map[tview.FormItem]*parameterizedFormItem{}
-	layout.buttonDescriptions = map[string]config.DynamicProperty[string]{}
+	layout.buttons = map[*tview.Button]*metadataButton{}
 
 	// Create the form
 	form := NewForm().
@@ -139,11 +139,14 @@ func (layout *standardLayout) createForm(title string) {
 		} else if index < itemCount+buttonCount {
 			// This is a button
 			button := form.GetButton(index - itemCount)
-			label := button.GetLabel()
-			description, exists := layout.buttonDescriptions[label]
+			metadataButton, exists := layout.buttons[button]
 			if !exists {
+				// Handle buttons that were added out-of-band and aren't part of the config
 				return
 			}
+
+			section := metadataButton.section
+			description := section.GetDescription()
 			var descriptionText string
 			if description.Template == "" {
 				descriptionText = description.Default
@@ -156,16 +159,17 @@ func (layout *standardLayout) createForm(title string) {
 				}
 
 				// Execute the description template
-				template, err := template.New(label).Parse(description.Template)
+				id := string(section.GetID())
+				template, err := template.New(id).Parse(description.Template)
 				if err != nil {
 					fqmn := modules.HyperdriveFqmn
-					panic(fmt.Errorf("error parsing description template for section [%s:%s]: %w", fqmn, label, err))
+					panic(fmt.Errorf("error parsing description template for section [%s:%s]: %w", fqmn, id, err))
 				}
 				result := &strings.Builder{}
 				err = template.Execute(result, templateSource)
 				if err != nil {
 					fqmn := modules.HyperdriveFqmn
-					panic(fmt.Errorf("error executing description template for section [%s:%s]: %w", fqmn, label, err))
+					panic(fmt.Errorf("error executing description template for section [%s:%s]: %w", fqmn, id, err))
 				}
 				descriptionText = result.String()
 			}
@@ -255,14 +259,23 @@ func (layout *standardLayout) addFormItems(params []*parameterizedFormItem) {
 	}
 }
 
+// Add a collection of buttons to this layout's form
+func (layout *standardLayout) addButtons(buttons []*metadataButton) {
+	for _, button := range buttons {
+		layout.form.AddButton(button.button)
+	}
+}
+
 func (layout *standardLayout) mapParameterizedFormItems(params ...*parameterizedFormItem) {
 	for _, param := range params {
 		layout.parameters[param.item] = param
 	}
 }
 
-func (layout *standardLayout) mapButtonDescription(label string, description config.DynamicProperty[string]) {
-	layout.buttonDescriptions[label] = description
+func (layout *standardLayout) mapMetadataButton(buttons ...*metadataButton) {
+	for _, button := range buttons {
+		layout.buttons[button.button] = button
+	}
 }
 
 // Sets up a handler to return to the specified homePage when the user presses escape on the layout.

@@ -166,26 +166,24 @@ func (layout *choiceModalLayout) createButtonGrid(buttonLabels []string, buttonD
 
 		// Create the buttons and add listeners
 		for index, label := range buttonLabels {
-			func(i int, l string) {
-				form.AddButton(label, func() {
-					if layout.done != nil {
-						layout.done(i, l)
-					}
-				})
-				button := form.GetButton(form.GetButtonCount() - 1)
-				button.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-					switch event.Key() {
-					case tcell.KeyDown, tcell.KeyRight:
-						return tcell.NewEventKey(tcell.KeyTab, 0, tcell.ModNone)
-					case tcell.KeyUp, tcell.KeyLeft:
-						return tcell.NewEventKey(tcell.KeyBacktab, 0, tcell.ModNone)
-					}
-					return event
-				})
+			button := tview.NewButton(label).SetSelectedFunc(func() {
+				if layout.done != nil {
+					layout.done(index, label)
+				}
+			})
+			form.AddButton(button)
+			button.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+				switch event.Key() {
+				case tcell.KeyDown, tcell.KeyRight:
+					return tcell.NewEventKey(tcell.KeyTab, 0, tcell.ModNone)
+				case tcell.KeyUp, tcell.KeyLeft:
+					return tcell.NewEventKey(tcell.KeyBacktab, 0, tcell.ModNone)
+				}
+				return event
+			})
 
-				// Add the width of this button (including borders)
-				buttonsWidth += tview.TaggedStringWidth(label) + 4 + 2
-			}(index, label)
+			// Add the width of this button (including borders)
+			buttonsWidth += tview.TaggedStringWidth(label) + 4 + 2
 		}
 
 		// Create the columns, including the left and right spacers
@@ -216,63 +214,60 @@ func (layout *choiceModalLayout) createButtonGrid(buttonLabels []string, buttonD
 		buttonsWidth := tview.TaggedStringWidth(sizedButtonLabels[0]) + 4 + 2
 
 		for index, label := range sizedButtonLabels {
-			func(i int, l string) {
+			// Create a new form for this button
+			form := NewForm().
+				SetButtonsAlign(tview.AlignCenter).
+				SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
+				SetButtonTextColor(ButtonUnfocusedTextColor).
+				SetButtonBackgroundActivatedColor(ButtonFocusedBackgroundColor).
+				SetButtonTextActivatedColor(ButtonFocusedTextColor)
+			form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
+			button := tview.NewButton(label).SetSelectedFunc(func() {
+				if layout.done != nil {
+					layout.done(index, label)
+				}
+			})
+			form.AddButton(button)
 
-				// Create a new form for this button
-				form := NewForm().
-					SetButtonsAlign(tview.AlignCenter).
-					SetButtonBackgroundColor(ButtonUnfocusedBackgroundColor).
-					SetButtonTextColor(ButtonUnfocusedTextColor).
-					SetButtonBackgroundActivatedColor(ButtonFocusedBackgroundColor).
-					SetButtonTextActivatedColor(ButtonFocusedTextColor)
-				form.SetBackgroundColor(BackgroundColor).SetBorderPadding(0, 0, 0, 0)
-				form.AddButton(label, func() {
-					if layout.done != nil {
-						layout.done(i, l)
+			// Set the listeners for the button
+			button.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+				switch event.Key() {
+				case tcell.KeyDown, tcell.KeyRight, tcell.KeyTab:
+					var nextSelection int
+					if layout.selected == len(layout.forms)-1 {
+						nextSelection = 0
+					} else {
+						nextSelection = index + 1
 					}
-				})
-
-				// Set the listeners for the button
-				button := form.GetButton(form.GetButtonCount() - 1)
-				button.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-					switch event.Key() {
-					case tcell.KeyDown, tcell.KeyRight, tcell.KeyTab:
-						var nextSelection int
-						if layout.selected == len(layout.forms)-1 {
-							nextSelection = 0
-						} else {
-							nextSelection = i + 1
-						}
-						if layout.descriptionBox != nil {
-							layout.descriptionBox.SetText(buttonDescriptions[nextSelection])
-						}
-						layout.app.SetFocus(layout.forms[nextSelection])
-						layout.selected = nextSelection
-						return tcell.NewEventKey(tcell.KeyDown, 0, 0)
-					case tcell.KeyUp, tcell.KeyLeft, tcell.KeyBacktab:
-						var nextSelection int
-						if layout.selected == 0 {
-							nextSelection = len(layout.forms) - 1
-						} else {
-							nextSelection = i - 1
-						}
-						if layout.descriptionBox != nil {
-							layout.descriptionBox.SetText(buttonDescriptions[nextSelection])
-						}
-						layout.app.SetFocus(layout.forms[nextSelection])
-						layout.selected = nextSelection
-						return tcell.NewEventKey(tcell.KeyUp, 0, 0)
-					default:
-						return event
+					if layout.descriptionBox != nil {
+						layout.descriptionBox.SetText(buttonDescriptions[nextSelection])
 					}
-				})
+					layout.app.SetFocus(layout.forms[nextSelection])
+					layout.selected = nextSelection
+					return tcell.NewEventKey(tcell.KeyDown, 0, 0)
+				case tcell.KeyUp, tcell.KeyLeft, tcell.KeyBacktab:
+					var nextSelection int
+					if layout.selected == 0 {
+						nextSelection = len(layout.forms) - 1
+					} else {
+						nextSelection = index - 1
+					}
+					if layout.descriptionBox != nil {
+						layout.descriptionBox.SetText(buttonDescriptions[nextSelection])
+					}
+					layout.app.SetFocus(layout.forms[nextSelection])
+					layout.selected = nextSelection
+					return tcell.NewEventKey(tcell.KeyUp, 0, 0)
+				default:
+					return event
+				}
+			})
 
-				// Add the form to the layout's list of forms
-				layout.forms = append(layout.forms, form)
-				formsFlex.AddItem(form, 1, 1, true)
-				spacer := tview.NewBox().SetBackgroundColor(BackgroundColor)
-				formsFlex.AddItem(spacer, 1, 1, false)
-			}(index, label)
+			// Add the form to the layout's list of forms
+			layout.forms = append(layout.forms, form)
+			formsFlex.AddItem(form, 1, 1, true)
+			spacer := tview.NewBox().SetBackgroundColor(BackgroundColor)
+			formsFlex.AddItem(spacer, 1, 1, false)
 		}
 
 		bottomFormSpacer := tview.NewBox().SetBackgroundColor(BackgroundColor)

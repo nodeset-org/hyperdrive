@@ -8,6 +8,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/modules/config"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
+	"github.com/rivo/tview"
 )
 
 type iSectionPage interface {
@@ -17,17 +18,18 @@ type iSectionPage interface {
 }
 
 type SectionPage struct {
-	md     *MainDisplay
-	parent iSectionPage
-	page   *page
-	layout *standardLayout
-	fqmn   string
+	md        *MainDisplay
+	parent    iSectionPage
+	page      *page
+	layout    *standardLayout
+	fqmn      string
+	subPages  []iSectionPage
+	redrawing bool
 
 	section   config.ISection
 	settings  *modconfig.SettingsSection
-	params    []*parameterizedFormItem
-	subPages  []iSectionPage
-	redrawing bool
+	formItems []*parameterizedFormItem
+	buttons   []*metadataButton
 }
 
 func NewSectionPage(md *MainDisplay, parent iSectionPage, section config.ISection, settings *modconfig.SettingsSection, fqmn string) *SectionPage {
@@ -40,16 +42,6 @@ func NewSectionPage(md *MainDisplay, parent iSectionPage, section config.ISectio
 	}
 	sectionPage.createContent()
 
-	// Create the section page
-	sectionPage.page = newPage(
-		parent.getPage(),
-		parent.getPage().id+"/"+string(section.GetID()),
-		string(section.GetName()),
-		"", // string(section.GetDescription().Default), // TEMPLATE
-		sectionPage.layout.grid,
-	)
-	sectionPage.setupSubpages()
-
 	// Do the initial draw
 	sectionPage.handleLayoutChanged()
 	return sectionPage
@@ -57,45 +49,54 @@ func NewSectionPage(md *MainDisplay, parent iSectionPage, section config.ISectio
 
 func (p *SectionPage) createContent() {
 	// Create the layout
+	md := p.getMainDisplay()
 	p.layout = newStandardLayout(p.getMainDisplay())
 	p.layout.createForm(string(p.section.GetName()))
 	p.layout.setupEscapeReturnHomeHandler(p.md, p.parent.getPage())
 
-	// Set up the params
+	// Create the section page
+	p.page = newPage(
+		p.parent.getPage(),
+		p.parent.getPage().id+"/"+string(p.section.GetID()),
+		string(p.section.GetName()),
+		"", // string(section.GetDescription().Default), // TEMPLATE
+		p.layout.grid,
+	)
+
+	// Set up the form items
 	sectionCfg := p.section
 	params := sectionCfg.GetParameters()
-	settings := []modconfig.IParameterSetting{}
 	for _, param := range params {
 		id := param.GetID()
-		setting, err := p.settings.GetParameter(id)
+		paramSetting, err := p.settings.GetParameter(id)
 		if err != nil {
 			panic(fmt.Errorf("error getting [%s] parameter setting [%s]: %w", p.section.GetName(), id, err)) // TODO: better logging, like FQMN
 		}
-		settings = append(settings, setting)
-	}
-	p.params = createParameterizedFormItems(settings, p.layout.descriptionBox, p.handleLayoutChanged)
-	p.layout.mapParameterizedFormItems(p.params...)
-}
 
-// Set up the subpages
-func (p *SectionPage) setupSubpages() {
-	sectionCfg := p.section
+		// Create the form item for the parameter
+		pfi := createParameterizedFormItem(paramSetting, p.layout.descriptionBox, p.handleLayoutChanged)
+		p.layout.mapParameterizedFormItems(pfi)
+		p.formItems = append(p.formItems, pfi)
+	}
+
+	// Set up the section subpages
 	subsections := sectionCfg.GetSections()
 	for _, section := range subsections {
 		id := section.GetID()
-		setting, err := p.settings.GetSection(id)
+		settingsSection, err := p.settings.GetSection(id)
 		if err != nil {
 			panic(fmt.Errorf("error getting [%s] section setting [%s]: %w", p.section.GetName(), id, err)) // TODO: better logging, like FQMN
 		}
-		subPage := NewSectionPage(p.md, p, section, setting, p.fqmn)
-		p.subPages = append(p.subPages, subPage)
 
-		// Map the description to the section label for button shifting later
-		label := section.GetName()
-		p.layout.mapButtonDescription(label, section.GetDescription())
-	}
-	for _, subpage := range p.subPages {
-		p.md.pages.AddPage(subpage.getPage().id, subpage.getPage().content, true, false)
+		// Create the subpage
+		subPage := NewSectionPage(p.md, p, section, settingsSection, p.fqmn)
+		p.subPages = append(p.subPages, subPage)
+		md.pages.AddPage(subPage.getPage().id, subPage.getPage().content, true, false)
+
+		// Create the metadata button for the section
+		button := createMetadataButton(section, subPage, md)
+		p.layout.mapMetadataButton(button)
+		p.buttons = append(p.buttons, button)
 	}
 }
 
@@ -111,6 +112,7 @@ func (p *SectionPage) getPage() *page {
 
 // Handle a bulk redraw request
 func (p *SectionPage) handleLayoutChanged() {
+	// Prevent re-entry if we're already redrawing
 	if p.redrawing {
 		return
 	}
@@ -119,18 +121,45 @@ func (p *SectionPage) handleLayoutChanged() {
 		p.redrawing = false
 	}()
 
+	// Get the item that's currently selected, if there is one
+	var itemToFocus tview.FormItem = nil
+	focusedItemIndex, focusedButtonIndex := p.layout.form.GetFocusedItemIndex()
+	if focusedItemIndex != -1 {
+		focusedItem := p.layout.form.GetFormItem(focusedItemIndex)
+		for _, pfi := range p.formItems {
+			if pfi.item == focusedItem {
+				itemToFocus = focusedItem
+				break
+			}
+		}
+	}
+
+	// Get the button that's currently selected, if there is one
+	var buttonToFocus *tview.Button = nil
+	if focusedButtonIndex != -1 {
+		item := p.layout.form.GetButton(focusedButtonIndex)
+		for _, button := range p.buttons {
+			if button.button == item {
+				buttonToFocus = item
+				break
+			}
+		}
+	}
+
+	// Clear the form
 	p.layout.form.Clear(true)
 
-	params := []*parameterizedFormItem{}
+	// Add the parameter form items back in
 	md := p.getMainDisplay()
-	for _, param := range p.params {
-		metadata := param.parameter.GetMetadata()
+	params := []*parameterizedFormItem{}
+	for _, pfi := range p.formItems {
+		metadata := pfi.parameter.GetMetadata()
 		hidden := metadata.GetHidden()
 
 		// Handle parameters that don't have a hidden template
 		if hidden.Template == "" {
 			if !hidden.Default {
-				params = append(params, param)
+				params = append(params, pfi)
 			}
 			continue
 		}
@@ -142,7 +171,7 @@ func (p *SectionPage) handleLayoutChanged() {
 				hdSettings:        md.newInstance,
 				moduleSettingsMap: md.moduleSettingsMap,
 			},
-			parameter: param.parameter.GetMetadata(),
+			parameter: pfi.parameter.GetMetadata(),
 		}
 
 		// Update the hidden status
@@ -164,21 +193,21 @@ func (p *SectionPage) handleLayoutChanged() {
 			panic(fmt.Errorf("error parsing hidden template result for parameter [%s:%s]: %w", fqmn, metadata.GetID(), err))
 		}
 		if !hiddenResult {
-			params = append(params, param)
+			params = append(params, pfi)
 		}
 	}
 	p.layout.addFormItems(params)
 
-	subsections := p.section.GetSections()
-	for i, section := range subsections {
-		subPage := p.subPages[i]
-
+	// Add the subsection buttons back in
+	buttons := []*metadataButton{}
+	for _, button := range p.buttons {
+		section := button.section
 		hidden := section.GetHidden()
 
 		// Handle sections that don't have a hidden template
 		if hidden.Template == "" {
 			if !hidden.Default {
-				addSubsectionButton(section, subPage, md, p.layout.form)
+				buttons = append(buttons, button)
 			}
 			continue
 		}
@@ -209,9 +238,42 @@ func (p *SectionPage) handleLayoutChanged() {
 			panic(fmt.Errorf("error parsing hidden template result for section [%s:%s]: %w", fqmn, section.GetID(), err))
 		}
 		if !hiddenResult {
-			addSubsectionButton(section, subPage, md, p.layout.form)
+			buttons = append(buttons, button)
 		}
 	}
+	p.layout.addButtons(buttons)
 
+	// Redraw the layout
 	p.layout.refresh()
+
+	// Reselect the item that was previously selected if possible, otherwise focus the enable button
+	if itemToFocus != nil {
+		for _, param := range params {
+			if param.item != itemToFocus {
+				continue
+			}
+
+			label := param.parameter.GetMetadata().GetName()
+			index := p.layout.form.GetFormItemIndex(label)
+			if index != -1 {
+				p.layout.form.SetFocus(index)
+			}
+			break
+		}
+	} else if buttonToFocus != nil {
+		for _, button := range buttons {
+			if button.button != buttonToFocus {
+				continue
+			}
+
+			label := button.section.GetName()
+			index := p.layout.form.GetButtonIndex(label)
+			if index != -1 {
+				p.layout.form.SetFocus(len(params) + index)
+			}
+			break
+		}
+	} else {
+		p.layout.form.SetFocus(0)
+	}
 }
