@@ -103,11 +103,9 @@ Any dynamic property templates will be run dynamically whenever one of the follo
 `{{.GetValueArray <FQPN> <delimiter>}}` takes the value of the provided parameter, which is specified by its [Fully Qualified Parameter Name](), splits it according to the `delimiter` string, and returns the resulting array. This is useful to take parameters that represent multiple values separated by a comma, semicolon, or other delimiter, and split them into an explicit array so they can be iterated on in a template via the `for` keyword.
 
 
-### UseDefault (For Parameters Only)
+### UseDefault
 
-`{{.UseDefault}}` indicates that your template for a property does not apply, or the conditions for it are not met, and Hyperdrive should use the default property value instead.
-
-This method is not available for dynamic properties of Metadata Sections; it is only available for dynamic properties of Metadata Parameters.  
+`{{.UseDefault}}` can be used within the `template` of a dynamic property to indicate that Hyperdrive should use its `default` value. This is helpful to reduce duplication if your default value ever changes, so you don't have to set it multiple times. 
 
 
 ## Service Docker Compose Templates

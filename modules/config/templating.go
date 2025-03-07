@@ -26,70 +26,13 @@ func NewTemplateProcessor(hdSettings *ModuleSettings, moduleSettingsMap map[stri
 	}
 }
 
-// Execute a template owned by a parameter (such as the default or hidden properties).
-func (p *TemplateProcessor) ExecuteTemplate(
-	fqmn string,
-	entity any,
-	templateBody string,
-) (string, error) {
-	// Generate a template source for the entity
-	var templateSource any
-	switch entity.(type) {
-	case IParameter:
-		parameter := entity.(IParameter)
-		templateSource = parameterTemplateSource{
-			settingsTemplateSource: settingsTemplateSource{
-				fqmn:              fqmn,
-				hdSettings:        p.hdSettings,
-				moduleSettingsMap: p.moduleSettingsMap,
-			},
-			parameter: parameter,
-		}
-
-	case IParameterOption:
-		parameterOption := entity.(IParameterOption)
-		parameter := parameterOption.GetOwner()
-		templateSource = parameterTemplateSource{
-			settingsTemplateSource: settingsTemplateSource{
-				fqmn:              fqmn,
-				hdSettings:        p.hdSettings,
-				moduleSettingsMap: p.moduleSettingsMap,
-			},
-			parameter: parameter,
-		}
-
-	default:
-		templateSource = settingsTemplateSource{
-			fqmn:              fqmn,
-			hdSettings:        p.hdSettings,
-			moduleSettingsMap: p.moduleSettingsMap,
-		}
-	}
-
-	// Execute the template
-	template, err := template.New("").Parse(templateBody)
-	if err != nil {
-		return "", fmt.Errorf("error parsing template: %w", err)
-	}
-	result := &strings.Builder{}
-	err = template.Execute(result, templateSource)
-	if err != nil {
-		return "", fmt.Errorf("error executing template: %w", err)
-	}
-
-	return result.String(), nil
-}
-
 // Get the description of an entity, executing the template if provided or falling back to the default if not
 func (p *TemplateProcessor) GetEntityDescription(
 	fqmn string,
 	entity IDescribable,
 ) (string, error) {
 	description := entity.GetDescription()
-	if description.Template == "" {
-		return description.Default, nil
-	}
-	return p.ExecuteTemplate(fqmn, entity, description.Template)
+	return processDynamicProperty(&description, fqmn, p.hdSettings, p.moduleSettingsMap)
 }
 
 // Get the hidden flag of an entity, executing the template if provided or falling back to the default if not
@@ -98,18 +41,7 @@ func (p *TemplateProcessor) IsEntityHidden(
 	entity IHideable,
 ) (bool, error) {
 	hidden := entity.GetHidden()
-	if hidden.Template == "" {
-		return hidden.Default, nil
-	}
-	result, err := p.ExecuteTemplate(fqmn, entity, hidden.Template)
-	if err != nil {
-		return false, err
-	}
-	isHidden, err := strconv.ParseBool(result)
-	if err != nil {
-		return false, fmt.Errorf("hidden template evaluated to [%s] which is not a boolean: %w", result, err)
-	}
-	return isHidden, nil
+	return processDynamicProperty(&hidden, fqmn, p.hdSettings, p.moduleSettingsMap)
 }
 
 // Get the disabled flag of an entity, executing the template if provided or falling back to the default if not
@@ -118,26 +50,14 @@ func (p *TemplateProcessor) IsEntityDisabled(
 	entity IDisableable,
 ) (bool, error) {
 	disabled := entity.GetDisabled()
-	if disabled.Template == "" {
-		return disabled.Default, nil
-	}
-	result, err := p.ExecuteTemplate(fqmn, entity, disabled.Template)
-	if err != nil {
-		return false, err
-	}
-	isDisabled, err := strconv.ParseBool(result)
-	if err != nil {
-		return false, fmt.Errorf("disabled template evaluated to [%s] which is not a boolean: %w", result, err)
-	}
-	return isDisabled, nil
+	return processDynamicProperty(&disabled, fqmn, p.hdSettings, p.moduleSettingsMap)
 }
 
-// ==============================
-// === settingsTemplateSource ===
-// ==============================
-
 // The base struct to use as the data source for property templates
-type settingsTemplateSource struct {
+type dynamicPropertyTemplateSource[Type any] struct {
+	// The property that owns the template
+	property *DynamicProperty[Type]
+
 	// The fully-qualified module name for the module that owns this parameter
 	fqmn string
 
@@ -149,7 +69,7 @@ type settingsTemplateSource struct {
 }
 
 // Get the value of a parameter setting from its fully-qualified path
-func (s settingsTemplateSource) GetValue(fqpn string) (any, error) {
+func (s *dynamicPropertyTemplateSource[Type]) GetValue(fqpn string) (any, error) {
 	fqmn := ""
 	propertyPath := ""
 	elements := strings.Split(fqpn, ":")
@@ -179,7 +99,7 @@ func (s settingsTemplateSource) GetValue(fqpn string) (any, error) {
 }
 
 // Get the value of a parameter setting from its fully-qualified path, splitting it into an array using the delimiter
-func (s settingsTemplateSource) GetValueArray(fqpn string, delimiter string) ([]string, error) {
+func (s *dynamicPropertyTemplateSource[Type]) GetValueArray(fqpn string, delimiter string) ([]string, error) {
 	val, err := s.GetValue(fqpn)
 	if err != nil {
 		return nil, fmt.Errorf("error getting value for path [%s]: %w", fqpn, err)
@@ -191,21 +111,102 @@ func (s settingsTemplateSource) GetValueArray(fqpn string, delimiter string) ([]
 	return strings.Split(valString, delimiter), nil
 }
 
-// ===============================
-// === parameterTemplateSource ===
-// ===============================
-
-// The data source for dynamic property templates for parameters
-type parameterTemplateSource struct {
-	settingsTemplateSource
-
-	// The parameter that owns the template
-	parameter IParameter
+// Get the default value of the property
+func (s *dynamicPropertyTemplateSource[Type]) UseDefault() Type {
+	return s.property.Default
 }
 
-// Use the default value of the parameter setting
-func (s parameterTemplateSource) UseDefault() any {
-	return s.parameter.GetDefault()
+// Execute a template owned by a parameter (such as the default or hidden properties).
+func processDynamicProperty[Type any](
+	property *DynamicProperty[Type],
+	fqmn string,
+	hdSettings *ModuleSettings,
+	moduleSettingsMap map[string]*ModuleSettings,
+) (Type, error) {
+	if property.Template == "" {
+		return property.Default, nil
+	}
+	templateSource := createDynamicPropertyTemplateSource(property, fqmn, hdSettings, moduleSettingsMap)
+
+	// Execute the template
+	var result Type
+	template, err := template.New("").Parse(property.Template)
+	if err != nil {
+		return result, fmt.Errorf("error parsing template: %w", err)
+	}
+	resultBuilder := &strings.Builder{}
+	err = template.Execute(resultBuilder, templateSource)
+	if err != nil {
+		return result, fmt.Errorf("error executing template: %w", err)
+	}
+
+	// Convert the result to the right type
+	// TODO: probably use a formal marshaller for this instead of manually handling types
+	err = nil
+	switch resultPtr := any(&result).(type) {
+	case *bool:
+		*resultPtr, err = strconv.ParseBool(resultBuilder.String())
+	case *string:
+		*resultPtr = resultBuilder.String()
+	case *int:
+		*resultPtr, err = strconv.Atoi(resultBuilder.String())
+	case *int8:
+		var resultTyped int64
+		resultTyped, err = strconv.ParseInt(resultBuilder.String(), 10, 8)
+		*resultPtr = int8(resultTyped)
+	case *int16:
+		var resultTyped int64
+		resultTyped, err = strconv.ParseInt(resultBuilder.String(), 10, 16)
+		*resultPtr = int16(resultTyped)
+	case *int32:
+		var resultTyped int64
+		resultTyped, err = strconv.ParseInt(resultBuilder.String(), 10, 32)
+		*resultPtr = int32(resultTyped)
+	case *int64:
+		*resultPtr, err = strconv.ParseInt(resultBuilder.String(), 10, 64)
+	case *uint:
+		var resultTyped uint64
+		resultTyped, err = strconv.ParseUint(resultBuilder.String(), 10, 0)
+		*resultPtr = uint(resultTyped)
+	case *uint8:
+		var resultTyped uint64
+		resultTyped, err = strconv.ParseUint(resultBuilder.String(), 10, 8)
+		*resultPtr = uint8(resultTyped)
+	case *uint16:
+		var resultTyped uint64
+		resultTyped, err = strconv.ParseUint(resultBuilder.String(), 10, 16)
+		*resultPtr = uint16(resultTyped)
+	case *uint32:
+		var resultTyped uint64
+		resultTyped, err = strconv.ParseUint(resultBuilder.String(), 10, 32)
+		*resultPtr = uint32(resultTyped)
+	case *uint64:
+		*resultPtr, err = strconv.ParseUint(resultBuilder.String(), 10, 64)
+	case *float32:
+		var resultTyped float64
+		resultTyped, err = strconv.ParseFloat(resultBuilder.String(), 32)
+		*resultPtr = float32(resultTyped)
+	case *float64:
+		*resultPtr, err = strconv.ParseFloat(resultBuilder.String(), 64)
+	default:
+		err = fmt.Errorf("invalid type for dynamic property: %T", result)
+	}
+	return result, err
+}
+
+// Create a template source for a dynamic property (used for type inference)
+func createDynamicPropertyTemplateSource[Type any](
+	property *DynamicProperty[Type],
+	fqmn string,
+	hdSettings *ModuleSettings,
+	moduleSettingsMap map[string]*ModuleSettings,
+) *dynamicPropertyTemplateSource[Type] {
+	return &dynamicPropertyTemplateSource[Type]{
+		property:          property,
+		fqmn:              fqmn,
+		hdSettings:        hdSettings,
+		moduleSettingsMap: moduleSettingsMap,
+	}
 }
 
 // =============
