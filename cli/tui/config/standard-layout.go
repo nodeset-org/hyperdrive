@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -19,8 +20,9 @@ type standardLayout struct {
 	descriptionBox *tview.TextView
 	footer         tview.Primitive
 	form           *Form
-	parameters     map[tview.FormItem]*parameterizedFormItem
-	buttons        map[*tview.Button]*metadataButton
+	formItemMap    map[tview.FormItem]*parameterizedFormItem
+	buttonMap      map[*tview.Button]*metadataButton
+	redrawing      bool
 }
 
 // Creates a new StandardLayout instance, which includes the grid and description box preconstructed.
@@ -76,14 +78,16 @@ func (layout *standardLayout) setFooter(footer tview.Primitive, height int) {
 
 // Create a standard form for this layout (for settings pages)
 func (layout *standardLayout) createForm(title string) {
-	layout.parameters = map[tview.FormItem]*parameterizedFormItem{}
-	layout.buttons = map[*tview.Button]*metadataButton{}
+	// Initialize the form item and button slices and maps
+	layout.formItemMap = map[tview.FormItem]*parameterizedFormItem{}
+	layout.buttonMap = map[*tview.Button]*metadataButton{}
 
 	// Create the form
 	form := NewForm().
 		SetFieldBackgroundColor(tcell.ColorBlack).
 		SetHorizontal(false)
 	form.
+		SetButtonBackgroundColor(form.fieldBackgroundColor).
 		SetBackgroundColor(BackgroundColor).
 		SetBorderPadding(0, 0, 0, 0)
 
@@ -93,7 +97,7 @@ func (layout *standardLayout) createForm(title string) {
 		buttonCount := form.GetButtonCount()
 		if index < itemCount {
 			formItem := form.GetFormItem(index)
-			paramItem, exists := layout.parameters[formItem]
+			paramItem, exists := layout.formItemMap[formItem]
 			if !exists {
 				// Handle form items that were added out-of-band and aren't part of the config
 				return
@@ -139,7 +143,7 @@ func (layout *standardLayout) createForm(title string) {
 		} else if index < itemCount+buttonCount {
 			// This is a button
 			button := form.GetButton(index - itemCount)
-			metadataButton, exists := layout.buttons[button]
+			metadataButton, exists := layout.buttonMap[button]
 			if !exists {
 				// Handle buttons that were added out-of-band and aren't part of the config
 				return
@@ -186,7 +190,7 @@ func (layout *standardLayout) createForm(title string) {
 func (layout *standardLayout) refresh() {
 	for i := 0; i < layout.form.GetFormItemCount(); i++ {
 		formItem := layout.form.GetFormItem(i)
-		paramItem, exists := layout.parameters[formItem]
+		paramItem, exists := layout.formItemMap[formItem]
 		if !exists {
 			// Handle form items that were added out-of-band and aren't part of the config
 			continue
@@ -252,29 +256,17 @@ func (layout *standardLayout) createSettingFooter() {
 	layout.setFooter(navBar, 2)
 }
 
-// Add a collection of form items to this layout's form
-func (layout *standardLayout) addFormItems(params []*parameterizedFormItem) {
+// Register a collection of form items with this layout
+func (layout *standardLayout) registerFormItems(params ...*parameterizedFormItem) {
 	for _, param := range params {
-		layout.form.AddFormItem(param.item)
+		layout.formItemMap[param.item] = param
 	}
 }
 
-// Add a collection of buttons to this layout's form
-func (layout *standardLayout) addButtons(buttons []*metadataButton) {
+// Register a collection of buttons with this layout
+func (layout *standardLayout) registerButtons(buttons ...*metadataButton) {
 	for _, button := range buttons {
-		layout.form.AddButton(button.button)
-	}
-}
-
-func (layout *standardLayout) mapParameterizedFormItems(params ...*parameterizedFormItem) {
-	for _, param := range params {
-		layout.parameters[param.item] = param
-	}
-}
-
-func (layout *standardLayout) mapMetadataButton(buttons ...*metadataButton) {
-	for _, button := range buttons {
-		layout.buttons[button.button] = button
+		layout.buttonMap[button.button] = button
 	}
 }
 
@@ -284,7 +276,7 @@ func (layout *standardLayout) setupEscapeReturnHomeHandler(md *MainDisplay, home
 		// Return to the home page
 		if event.Key() == tcell.KeyEsc {
 			// Close all dropdowns and break if one was open
-			for _, param := range layout.parameters {
+			for _, param := range layout.formItemMap {
 				dropDown, ok := param.item.(*DropDown)
 				if ok && dropDown.open {
 					dropDown.CloseList(md.app)
@@ -296,4 +288,184 @@ func (layout *standardLayout) setupEscapeReturnHomeHandler(md *MainDisplay, home
 		}
 		return event
 	})
+}
+
+// Redraw the layout's form
+// formInit: A callback that runs after the form has been cleared, before the items are added back in. Return false if the redraw should end after this step.
+func (layout *standardLayout) redrawForm(
+	fqmn string,
+	formItems []*parameterizedFormItem,
+	buttons []*metadataButton,
+	formInit func() bool,
+) {
+	// Prevent re-entry if we're already redrawing
+	if layout.redrawing {
+		return
+	}
+	layout.redrawing = true
+	defer func() {
+		layout.redrawing = false
+	}()
+
+	// Get the item that's currently selected, if there is one
+	var itemToFocus tview.FormItem = nil
+	focusedItemIndex, focusedButtonIndex := layout.form.GetFocusedItemIndex()
+	if focusedItemIndex != -1 {
+		focusedItem := layout.form.GetFormItem(focusedItemIndex)
+		for _, pfi := range formItems {
+			if pfi.item == focusedItem {
+				itemToFocus = focusedItem
+				break
+			}
+		}
+	}
+
+	// Get the button that's currently selected, if there is one
+	var buttonToFocus *tview.Button = nil
+	if focusedButtonIndex != -1 {
+		item := layout.form.GetButton(focusedButtonIndex)
+		for _, button := range buttons {
+			if button.button == item {
+				buttonToFocus = item
+				break
+			}
+		}
+	}
+
+	// Clear the form and run the initializer callback
+	layout.form.Clear(true)
+	if formInit != nil {
+		shouldStop := formInit()
+		if shouldStop {
+			layout.refresh()
+			return
+		}
+	}
+
+	// Add the parameter form items back in
+	md := layout.md
+	visibleParams := []*parameterizedFormItem{}
+	for _, pfi := range formItems {
+		metadata := pfi.parameter.GetMetadata()
+		hidden := metadata.GetHidden()
+
+		// Handle parameters that don't have a hidden template
+		if hidden.Template == "" {
+			if !hidden.Default {
+				visibleParams = append(visibleParams, pfi)
+			}
+			continue
+		}
+
+		// Generate a template source for the parameter
+		templateSource := parameterTemplateSource{
+			configurationTemplateSource: configurationTemplateSource{
+				fqmn:              fqmn,
+				hdSettings:        md.newInstance,
+				moduleSettingsMap: md.moduleSettingsMap,
+			},
+			parameter: metadata,
+		}
+
+		// Execute the hidden template
+		id := string(metadata.GetID())
+		template, err := template.New(id).Parse(hidden.Template)
+		if err != nil {
+			panic(fmt.Errorf("error parsing hidden template for parameter [%s:%s]: %w", fqmn, id, err))
+		}
+		result := &strings.Builder{}
+		err = template.Execute(result, templateSource)
+		if err != nil {
+			panic(fmt.Errorf("error executing hidden template for parameter [%s:%s]: %w", fqmn, id, err))
+		}
+
+		hiddenResult, err := strconv.ParseBool(result.String())
+		if err != nil {
+			panic(fmt.Errorf("error parsing hidden template result for parameter [%s:%s]: %w", fqmn, id, err))
+		}
+		if !hiddenResult {
+			visibleParams = append(visibleParams, pfi)
+		}
+	}
+	for _, pfi := range visibleParams {
+		layout.form.AddFormItem(pfi.item)
+	}
+
+	// Add the subsection buttons back in
+	visibleButtons := []*metadataButton{}
+	for _, button := range buttons {
+		section := button.section
+		hidden := section.GetHidden()
+
+		// Handle sections that don't have a hidden template
+		if hidden.Template == "" {
+			if !hidden.Default {
+				visibleButtons = append(visibleButtons, button)
+			}
+			continue
+		}
+
+		// Generate a template source for the section
+		templateSource := configurationTemplateSource{
+			fqmn:              fqmn,
+			hdSettings:        md.newInstance,
+			moduleSettingsMap: md.moduleSettingsMap,
+		}
+
+		// Update the hidden status
+		template, err := template.New(string(section.GetID())).Parse(hidden.Template)
+		if err != nil {
+			panic(fmt.Errorf("error parsing hidden template for section [%s:%s]: %w", fqmn, section.GetID(), err))
+		}
+		result := &strings.Builder{}
+		err = template.Execute(result, templateSource)
+		if err != nil {
+			panic(fmt.Errorf("error executing hidden template for section [%s:%s]: %w", fqmn, section.GetID(), err))
+		}
+
+		hiddenResult, err := strconv.ParseBool(result.String())
+		if err != nil {
+			panic(fmt.Errorf("error parsing hidden template result for section [%s:%s]: %w", fqmn, section.GetID(), err))
+		}
+		if !hiddenResult {
+			visibleButtons = append(visibleButtons, button)
+		}
+	}
+	for _, button := range visibleButtons {
+		layout.form.AddButton(button.button)
+	}
+
+	// Redraw the layout
+	layout.refresh()
+
+	// Reselect the item that was previously selected if possible, otherwise focus the enable button
+	if itemToFocus != nil {
+		for _, param := range visibleParams {
+			if param.item != itemToFocus {
+				continue
+			}
+
+			label := param.parameter.GetMetadata().GetName()
+			index := layout.form.GetFormItemIndex(label)
+			if index != -1 {
+				layout.form.SetFocus(index)
+			}
+			break
+		}
+	} else if buttonToFocus != nil {
+		for _, button := range visibleButtons {
+			if button.button != buttonToFocus {
+				continue
+			}
+
+			label := button.section.GetName()
+			index := layout.form.GetButtonIndex(label)
+			if index != -1 {
+				layout.form.SetFocus(len(visibleParams) + index)
+			}
+			break
+		}
+	} else {
+		layout.form.SetFocus(0)
+	}
 }
