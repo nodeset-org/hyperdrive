@@ -9,7 +9,7 @@ import (
 
 	"github.com/nodeset-org/hyperdrive/cli/utils"
 	cliutils "github.com/nodeset-org/hyperdrive/cli/utils"
-	hdutils "github.com/nodeset-org/hyperdrive/shared/utils"
+	"github.com/nodeset-org/hyperdrive/management"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
 	"github.com/urfave/cli/v2"
 )
@@ -25,7 +25,7 @@ func installModule(c *cli.Context, moduleFile string) error {
 	mgr := hd.GetModuleManager()
 	modDir := mgr.GetModuleSystemDir()
 	testFile := filepath.Join(modDir, "test")
-	_, err = os.OpenFile(testFile, os.O_CREATE|os.O_WRONLY, hdutils.ModuleFileMode)
+	_, err = os.OpenFile(testFile, os.O_CREATE|os.O_WRONLY, management.ModuleFileMode)
 	if err != nil {
 		if errors.Is(err, os.ErrPermission) {
 			// We need privileges to install modules so try to escalate and re-run
@@ -68,13 +68,28 @@ func installModule(c *cli.Context, moduleFile string) error {
 	fmt.Println("Module installed successfully.")
 
 	// Start the global adapters
-	results, err := mgr.LoadModuleInfo(true)
+	err = hd.LoadModules()
 	if err != nil {
 		return fmt.Errorf("error loading module info: %w", err)
 	}
-	for _, result := range results {
-		if result.LoadError != nil {
-			fmt.Printf("WARNING: Module %s failed to load: %s\n", result.Info.Descriptor.Name, result.LoadError.Error())
+	for _, result := range hd.BrokenModules {
+		if result.ConfigurationLoadError != nil {
+			fmt.Printf("Skipping module %s because it failed to load: %s\n", result.Descriptor.GetFullyQualifiedModuleName(), result.ConfigurationLoadError)
+		} else if result.GlobalAdapterContainerStatus != management.ContainerStatus_Running {
+			fmt.Printf("Skipping module %s because its global adapter container could not start\n", result.Descriptor.GetFullyQualifiedModuleName())
+		} else if result.GlobalAdapterRuntimeFileError != nil {
+			fmt.Printf("Skipping module %s because its global adapter container file could not be instantiated: %s\n", result.Descriptor.GetFullyQualifiedModuleName(), result.GlobalAdapterRuntimeFileError)
+		} else if result.DescriptorLoadError != nil {
+			fmt.Printf("Skipping module %s because its descriptor could not be loaded: %s\n", result.Descriptor.GetFullyQualifiedModuleName(), result.DescriptorLoadError)
+		} else {
+			fmt.Printf("Skipping module %s because it could not be loaded for an unknown reason\n", result.Descriptor.GetFullyQualifiedModuleName())
+		}
+	}
+	if len(hd.BrokenModules) > 0 {
+		fmt.Println("The above modules will be disabled until their load errors are resolved.")
+		if !c.Bool(utils.YesFlag.Name) {
+			fmt.Println("Press any key to continue.")
+			_, _ = fmt.Scanln()
 		}
 	}
 	return nil

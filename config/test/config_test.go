@@ -20,13 +20,19 @@ func TestLoadModuleConfigs(t *testing.T) {
 	}
 	err := deleteConfigs()
 	require.NoError(t, err)
-	results, err := modMgr.LoadModuleInfo(false)
+	err = modMgr.LoadModules()
 	require.NoError(t, err)
-	require.Len(t, results, 1)
+	require.Len(t, modMgr.InstalledModules, 1)
+	cfgMgr.LoadModuleConfiguration(modMgr, modMgr.InstalledModules[0])
 
-	for _, result := range results {
-		require.NoError(t, result.LoadError)
-		cfgMgr.HyperdriveConfiguration.Modules[result.Info.Descriptor.GetFullyQualifiedModuleName()] = result.Info.ModuleInfo
+	for _, result := range modMgr.InstalledModules {
+		require.NoError(t, result.DescriptorLoadError)
+		require.NoError(t, result.GlobalAdapterRuntimeFileError)
+		require.NoError(t, result.ConfigurationLoadError)
+		cfgMgr.HyperdriveConfiguration.Modules[result.Descriptor.GetFullyQualifiedModuleName()] = &modconfig.ModuleInfo{
+			Descriptor:    result.Descriptor,
+			Configuration: result.Configuration,
+		}
 	}
 
 	modCfgs := cfgMgr.HyperdriveConfiguration.Modules

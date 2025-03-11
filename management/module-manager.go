@@ -1,4 +1,4 @@
-package utils
+package management
 
 import (
 	"bytes"
@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -23,7 +23,9 @@ import (
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 	"github.com/nodeset-org/hyperdrive/shared/auth"
+	"github.com/nodeset-org/hyperdrive/shared/logging"
 	"github.com/nodeset-org/hyperdrive/shared/templates"
+	"github.com/nodeset-org/hyperdrive/shared/utils"
 )
 
 const (
@@ -46,7 +48,7 @@ type ModuleInfoLoadResult struct {
 	LoadError error
 
 	// The module's info
-	Info *ModuleInstallationInfo
+	Info *ModuleInstallation
 }
 
 type ProjectInfo struct {
@@ -62,6 +64,14 @@ type ProjectInfo struct {
 
 // A manager for loading and interacting with Hyperdrive's modules, including their adapters
 type ModuleManager struct {
+	// Information about the modules that have been installed on the system. Run LoadModuleInfo() to populate this.
+	InstalledModules []*ModuleInstallation
+
+	// === Internal fields ===
+
+	// Logger for recording messages
+	logger *slog.Logger
+
 	// The path to the directory containing the installed modules
 	modulePath string
 
@@ -79,20 +89,6 @@ type ModuleManager struct {
 
 	// A cache of adapter clients for each project
 	projectAdapterClients map[string]map[string]*adapter.AdapterClient
-
-	// A cache of loaded module info
-	moduleInfos map[string]*modconfig.ModuleInfo
-}
-
-// Info about the module, including its installation
-type ModuleInstallationInfo struct {
-	*modconfig.ModuleInfo
-
-	// The full path of the directory the module is installed in
-	DirectoryPath string
-
-	// The name of the global adapter container
-	GlobalAdapterContainerName string
 }
 
 // Create a new module manager
@@ -111,7 +107,6 @@ func NewModuleManager(modulesDir string, globalAdapterDir string, userDir string
 		docker:                docker,
 		globalAdapterClients:  map[string]*adapter.AdapterClient{},
 		projectAdapterClients: map[string]map[string]*adapter.AdapterClient{},
-		moduleInfos:           map[string]*modconfig.ModuleInfo{},
 	}
 	return loader, nil
 }
@@ -121,174 +116,178 @@ func (m *ModuleManager) GetModuleSystemDir() string {
 	return m.modulePath
 }
 
-// Get the descriptors for all installed modules
-func (m *ModuleManager) GetInstalledDescriptors() ([]modules.ModuleDescriptor, error) {
-	return GetInstalledDescriptors(m.modulePath)
-}
-
-// Load the module descriptors to determine what's installed
-func (m *ModuleManager) LoadModuleInfo(ensureModuleStart bool) ([]*ModuleInfoLoadResult, error) {
+// Load information about all of the modules installed on the system.
+func (m *ModuleManager) LoadModules() error {
 	// Enumerate the installed modules
 	entries, err := os.ReadDir(m.modulePath)
 	if err != nil {
-		return nil, fmt.Errorf("error reading module directory: %w", err)
+		return fmt.Errorf("error reading module directory [%s]: %w", m.modulePath, err)
 	}
 
-	// Find the modules
-	loadResults := []*ModuleInfoLoadResult{}
+	// Go through the entries in the module directory
+	installationInfos := []*ModuleInstallation{}
 	for _, entry := range entries {
+		logging.SafeDebug(m.logger, "Found candidate in module directory", "dir", entry.Name())
 		// Skip non-directories
 		if !entry.IsDir() {
+			logging.SafeDebug(m.logger, "Entry is not a directory, skipping")
 			continue
 		}
-
 		moduleDir := filepath.Join(m.modulePath, entry.Name())
-		info := &ModuleInstallationInfo{
-			DirectoryPath: moduleDir,
-			ModuleInfo:    &modconfig.ModuleInfo{},
-		}
-		loadResult := &ModuleInfoLoadResult{
-			Info: info,
-		}
-		loadResults = append(loadResults, loadResult)
-
-		// Check if the descriptor exists - this is the key for modules
-		var descriptor modules.ModuleDescriptor
-		descriptorPath := filepath.Join(moduleDir, modules.DescriptorFilename)
-		bytes, err := os.ReadFile(descriptorPath)
-		if errors.Is(err, fs.ErrNotExist) {
-			continue
-		}
+		info, err := m.beginLoadModule(moduleDir)
 		if err != nil {
-			loadResult.LoadError = fmt.Errorf("error reading descriptor file [%s]: %w", descriptorPath, err)
-			continue
+			return fmt.Errorf("error loading module [%s]: %w", moduleDir, err)
 		}
-
-		// Load the descriptor
-		err = json.Unmarshal(bytes, &descriptor)
-		if err != nil {
-			loadResult.LoadError = fmt.Errorf("error unmarshalling descriptor: %w", err)
-			continue
-		}
-		info.Descriptor = descriptor
-		info.GlobalAdapterContainerName = GetGlobalAdapterContainerName(descriptor)
-	}
-
-	if ensureModuleStart {
-		// Start all of the adapters for modules with descriptors
-		adapterComposefiles := []string{}
-		for _, result := range loadResults {
-			if result.LoadError != nil {
-				continue
-			}
-			adapterFile := filepath.Join(m.globalAdapterDir, string(result.Info.Descriptor.Name), modules.AdapterComposeFilename)
-
-			// Check if the file exists
-			stat, err := os.Stat(adapterFile)
-			if errors.Is(err, fs.ErrNotExist) {
-				result.LoadError = ErrNoAdapterComposeFile
-				continue
-			}
-			if err != nil {
-				result.LoadError = fmt.Errorf("error checking adapter compose file [%s]: %w", adapterFile, err)
-				continue
-			}
-			if stat.IsDir() {
-				result.LoadError = fmt.Errorf("adapter compose file [%s] is a directory, not a file", adapterFile)
-				continue
-			}
-
-			// Add the file to the list
-			adapterComposefiles = append(adapterComposefiles, adapterFile)
-		}
-		if len(adapterComposefiles) == 0 {
-			return loadResults, nil
-		}
-
-		// Run the docker compose command
-		args := []string{
-			"compose",
-		}
-		for _, file := range adapterComposefiles {
-			args = append(args, "-f", file)
-		}
-		args = append(args,
-			"up",
-			"-d",
-			"--quiet-pull",
-		)
-		cmd := exec.Command("docker", args...)
-		cmd.Env = append(cmd.Env, "COMPOSE_PROJECT_NAME="+shared.GlobalAdapterProjectName)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err = cmd.Run()
-		if err != nil {
-			return nil, fmt.Errorf("error starting global adapters: %w", err)
+		if info != nil {
+			installationInfos = append(installationInfos, info)
 		}
 	}
 
-	// Check to see if any adapters aren't started yet
+	// Check the global adapter status for each module
 	containers, err := m.docker.ContainerList(context.Background(), container.ListOptions{
 		All: true,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error listing containers: %w", err)
+		return fmt.Errorf("error listing docker containers: %w", err)
 	}
-	for _, result := range loadResults {
-		if result.LoadError != nil {
-			continue
-		}
-
-		// Check if the container exists
-		id := m.getContainerID(result.Info.GlobalAdapterContainerName, containers)
+	for _, installInfo := range installationInfos {
+		containerName := installInfo.GlobalAdapterContainerName
+		id := m.getContainerID(containerName, containers)
 		if id == "" {
-			result.LoadError = ErrNoAdapterContainer
+			logging.SafeDebug(m.logger, "Global adapter container not found", "name", containerName)
+			installInfo.GlobalAdapterContainerStatus = ContainerStatus_Missing
+		} else {
+			containerInfo, err := m.docker.ContainerInspect(context.Background(), id)
+			if err != nil {
+				return fmt.Errorf("error inspecting container [%s]: %w", containerName, err)
+			}
+			if containerInfo.State.Running {
+				logging.SafeDebug(m.logger, "Global adapter container is running", "name", containerName)
+				installInfo.GlobalAdapterContainerStatus = ContainerStatus_Running
+			} else {
+				logging.SafeDebug(m.logger, "Global adapter container is stopped", "name", containerName, "status", containerInfo.State.Status)
+				installInfo.GlobalAdapterContainerStatus = ContainerStatus_Stopped
+			}
 		}
+	}
 
-		// Get the container info
-		containerInfo, err := m.docker.ContainerInspect(context.Background(), id)
-		if err != nil {
-			result.LoadError = fmt.Errorf("error inspecting global adapter container [%s]: %w", result.Info.GlobalAdapterContainerName, err)
-			continue
+	m.InstalledModules = installationInfos
+	return nil
+}
+
+// Starts the process of loading single module that's been installed to the provided path.
+// This checks the descriptor and runtime global adapter compose file.
+func (m *ModuleManager) beginLoadModule(moduleDir string) (*ModuleInstallation, error) {
+	installInfo := &ModuleInstallation{
+		InstallationPath: moduleDir,
+	}
+
+	// Check if the descriptor exists - this is the key for modules
+	descriptorPath := filepath.Join(moduleDir, modules.DescriptorFilename)
+	installInfo.DescriptorPath = descriptorPath
+	var descriptor modules.ModuleDescriptor
+	bytes, err := os.ReadFile(descriptorPath)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			logging.SafeDebug(m.logger, "Descriptor file not found, skipping")
+			return nil, nil
 		}
+		logging.SafeDebug(m.logger, "Error reading descriptor file", "path", descriptorPath, "error", err)
+		installInfo.DescriptorLoadError = fmt.Errorf("error reading descriptor file [%s]: %w", descriptorPath, err)
+		return installInfo, nil
+	}
 
-		// Check if it's started
-		if !containerInfo.State.Running {
-			result.LoadError = ErrAdapterContainerOffline
-			continue
+	// Load the descriptor
+	err = json.Unmarshal(bytes, &descriptor)
+	if err != nil {
+		logging.SafeDebug(m.logger, "Error unmarshalling descriptor", "path", descriptorPath, "error", err)
+		installInfo.DescriptorLoadError = fmt.Errorf("error unmarshalling descriptor: %w", err)
+		return installInfo, nil
+	}
+	installInfo.Descriptor = &descriptor
+
+	// Check if the global adapter compose file exists
+	globalAdapterPath := m.GetGlobalAdapterComposeFilePath(&descriptor)
+	installInfo.GlobalAdapterRuntimeFilePath = globalAdapterPath
+	fileInfo, err := os.Stat(globalAdapterPath)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			logging.SafeDebug(m.logger, "Global adapter file not found", "path", globalAdapterPath)
+			installInfo.GlobalAdapterRuntimeFileError = fs.ErrNotExist
+		} else {
+			logging.SafeDebug(m.logger, "Error checking global adapter file", "path", globalAdapterPath, "error", err)
+			installInfo.GlobalAdapterRuntimeFileError = err
 		}
 	}
 
-	// Get the configs from each adapter
-	for _, result := range loadResults {
-		if result.LoadError != nil {
-			continue
-		}
-
-		// Get the adapter client
-		client, err := m.getGlobalAdapterClientFromDescriptor(result.Info.Descriptor)
-		if err != nil {
-			result.LoadError = fmt.Errorf("error creating adapter client: %w", err)
-			continue
-		}
-
-		// Get the config
-		cfg, err := client.GetConfigMetadata(context.Background())
-		if err != nil {
-			result.LoadError = NewModuleInfoLoadError(err)
-			continue
-		}
-		result.Info.Configuration = cfg
-	}
-
-	// Set the module info in the cache for loaded modules
-	for _, result := range loadResults {
-		if result.LoadError == nil {
-			m.moduleInfos[result.Info.Descriptor.GetFullyQualifiedModuleName()] = result.Info.ModuleInfo
+	// Check if the compose file is a regular file
+	if installInfo.GlobalAdapterRuntimeFileError == nil {
+		if fileInfo.IsDir() {
+			logging.SafeDebug(m.logger, "Global adapter file is a directory", "path", globalAdapterPath)
+			installInfo.GlobalAdapterRuntimeFileError = fmt.Errorf("global adapter file [%s] is a directory, not a file", globalAdapterPath)
+		} else if !fileInfo.Mode().IsRegular() {
+			logging.SafeDebug(m.logger, "Global adapter file is not a regular file", "path", globalAdapterPath)
+			installInfo.GlobalAdapterRuntimeFileError = fmt.Errorf("global adapter file [%s] is not a regular file", globalAdapterPath)
 		}
 	}
-	return loadResults, nil
+
+	// Try to parse the compose file
+	if installInfo.GlobalAdapterRuntimeFileError == nil {
+		_, err = ParseComposeFile(shared.GlobalAdapterProjectName, globalAdapterPath)
+		if err != nil {
+			logging.SafeDebug(m.logger, "Error parsing global adapter file", "path", globalAdapterPath, "error", err)
+			installInfo.GlobalAdapterRuntimeFileError = fmt.Errorf("error parsing global adapter file [%s]: %w", globalAdapterPath, err)
+		}
+	}
+
+	// Get the global adapter container name
+	containerName := utils.GetGlobalAdapterContainerName(&descriptor)
+	installInfo.GlobalAdapterContainerName = containerName
+	return installInfo, nil
+}
+
+// Start all of the global adapters that can be started for the loaded modules.
+func (m *ModuleManager) StartGlobalAdapters() error {
+	gacFiles := []string{}
+	for _, info := range m.InstalledModules {
+		if info.DescriptorLoadError != nil {
+			m.logger.Debug("Can't start global adapter for module because the descriptor wasn't loaded", "path", filepath.Base(info.InstallationPath))
+			continue
+		}
+		if info.GlobalAdapterRuntimeFileError != nil {
+			m.logger.Debug("Can't start global adapter for module because the global adapter file encountered errors", "module", info.Descriptor.GetFullyQualifiedModuleName())
+			continue
+		}
+		gacFiles = append(gacFiles, info.GlobalAdapterRuntimeFilePath)
+	}
+
+	if len(gacFiles) == 0 {
+		m.logger.Debug("No global adapters to start")
+		return nil
+	}
+	err := StartProject(shared.GlobalAdapterProjectName, gacFiles)
+	if err != nil {
+		return fmt.Errorf("error starting global adapters: %w", err)
+	}
+	return nil
+}
+
+// Stop all of the global adapters
+func (m *ModuleManager) StopGlobalAdapters() error {
+	err := StopProject(shared.GlobalAdapterProjectName, nil)
+	if err != nil {
+		return fmt.Errorf("error stopping global adapters: %w", err)
+	}
+	return nil
+}
+
+// Stop and remove all of the global adapters
+func (m *ModuleManager) DownGlobalAdapters() error {
+	err := DownProject(shared.GlobalAdapterProjectName, true)
+	if err != nil {
+		return fmt.Errorf("error removing global adapters: %w", err)
+	}
+	return nil
 }
 
 // Get an adapter client for the global adapter container of a module
@@ -304,11 +303,17 @@ func (m *ModuleManager) GetGlobalAdapterClient(fqmn string) (*adapter.AdapterCli
 		// If it's stale, delete the old one and regenerate
 		delete(m.globalAdapterClients, fqmn)
 	}
-	modInfo, exists := m.moduleInfos[fqmn]
-	if !exists {
+	var installInfo *ModuleInstallation
+	for _, modInfo := range m.InstalledModules {
+		if modInfo.Descriptor.GetFullyQualifiedModuleName() == fqmn {
+			installInfo = modInfo
+			break
+		}
+	}
+	if installInfo == nil {
 		return nil, fmt.Errorf("module info not found for %s", fqmn)
 	}
-	containerName := GetGlobalAdapterContainerName(modInfo.Descriptor)
+	containerName := utils.GetGlobalAdapterContainerName(installInfo.Descriptor)
 	client, err := adapter.NewAdapterClient(containerName, "")
 	if err != nil {
 		return nil, err
@@ -335,13 +340,19 @@ func (m *ModuleManager) GetProjectAdapterClient(projectName string, fqmn string)
 		// If it's stale, delete the old one and regenerate
 		delete(m.projectAdapterClients, projectName)
 	}
-	modInfo, exists := m.moduleInfos[fqmn]
-	if !exists {
+	var installInfo *ModuleInstallation
+	for _, modInfo := range m.InstalledModules {
+		if modInfo.Descriptor.GetFullyQualifiedModuleName() == fqmn {
+			installInfo = modInfo
+			break
+		}
+	}
+	if installInfo == nil {
 		return nil, fmt.Errorf("module info not found for %s", fqmn)
 	}
 
 	// Load the adapter key
-	moduleDir := filepath.Join(m.userDir, shared.ModulesDir, string(modInfo.Descriptor.Name))
+	moduleDir := filepath.Join(m.userDir, shared.ModulesDir, string(installInfo.Descriptor.Name))
 	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
 	bytes, err := os.ReadFile(adapterKeyPath)
 	if err != nil {
@@ -349,7 +360,7 @@ func (m *ModuleManager) GetProjectAdapterClient(projectName string, fqmn string)
 	}
 
 	// Create the adapter client
-	containerName := GetProjectAdapterContainerName(&modInfo.Descriptor, projectName)
+	containerName := utils.GetProjectAdapterContainerName(projectName, installInfo.Descriptor)
 	client, err := adapter.NewAdapterClient(containerName, string(bytes))
 	if err != nil {
 		return nil, err
@@ -357,81 +368,6 @@ func (m *ModuleManager) GetProjectAdapterClient(projectName string, fqmn string)
 	adapterClients[fqmn] = client
 	m.projectAdapterClients[projectName] = adapterClients
 	return client, nil
-}
-
-// Get an adapter client for the global adapter container of a module
-func (m *ModuleManager) getGlobalAdapterClientFromDescriptor(descriptor modules.ModuleDescriptor) (*adapter.AdapterClient, error) {
-	fqmn := descriptor.GetFullyQualifiedModuleName()
-	if client, exists := m.globalAdapterClients[fqmn]; exists {
-		return client, nil
-	}
-	containerName := GetGlobalAdapterContainerName(descriptor)
-	client, err := adapter.NewAdapterClient(containerName, "")
-	if err != nil {
-		return nil, err
-	}
-	m.globalAdapterClients[fqmn] = client
-	return client, nil
-}
-
-// TEMPORARY placeholder function that exists solely to facilitate development
-func GetGlobalAdapterContainerName(descriptor modules.ModuleDescriptor) string {
-	return shared.GlobalAdapterProjectName + "-" + string(descriptor.Shortcut) + "_adapter"
-}
-
-// TEMPORARY placeholder function that exists solely to facilitate development
-func GetProjectAdapterContainerName(descriptor *modules.ModuleDescriptor, projectName string) string {
-	return projectName + "-" + string(descriptor.Shortcut) + "_adapter"
-}
-
-// Load the adapter key file if it's not already loaded
-func (m *ModuleManager) loadAdapterKey(project *ProjectInfo) error {
-	if project.adapterKey != "" {
-		return nil
-	}
-	key, err := os.ReadFile(project.adapterKeyPath)
-	if errors.Is(err, fs.ErrNotExist) {
-		return project.createAdapterKey()
-	}
-	if err != nil {
-		return fmt.Errorf("error reading adapter key file: %w", err)
-	}
-	project.adapterKey = string(key)
-	return nil
-}
-
-// Creates a new secret adapter key and saves it to the module's adapter key file path if one doesn't already exist
-func (p *ProjectInfo) createAdapterKey() error {
-	// Check if the key file already exists
-	if _, err := os.Stat(p.adapterKeyPath); !errors.Is(err, fs.ErrNotExist) {
-		return nil
-	}
-
-	// Generate a random key
-	key, err := auth.GenerateAuthKey(AdapterKeySizeBytes)
-	if err != nil {
-		return fmt.Errorf("error generating adapter key: %w", err)
-	}
-
-	// Save the key to the file
-	err = os.WriteFile(p.adapterKeyPath, []byte(key), AdapterKeyMode)
-	if err != nil {
-		return fmt.Errorf("error saving adapter key to [%s]: %w", p.adapterKeyPath, err)
-	}
-	p.adapterKey = key
-	return nil
-}
-
-// Gets the ID of the container with the given name
-func (m *ModuleManager) getContainerID(name string, containers []types.Container) string {
-	for _, container := range containers {
-		for _, containerName := range container.Names {
-			if containerName == "/"+name {
-				return container.ID
-			}
-		}
-	}
-	return ""
 }
 
 // Installs a module to the system directory
@@ -512,8 +448,8 @@ func (m *ModuleManager) InstallModule(
 
 		// Instantiate the adapter template in global mode
 		if file.Name == modules.AdapterComposeTemplateFilename {
-			globalAdapterDir := filepath.Join(m.globalAdapterDir, string(descriptor.Name))
-			globalAdapterPath := filepath.Join(globalAdapterDir, modules.AdapterComposeFilename)
+			globalAdapterPath := m.GetGlobalAdapterComposeFilePath(&descriptor)
+			globalAdapterDir := filepath.Dir(globalAdapterPath)
 			err := os.MkdirAll(globalAdapterDir, ModuleDirMode)
 			if err != nil {
 				return fmt.Errorf("error creating global adapter directory [%s]: %w", globalAdapterDir, err)
@@ -548,7 +484,7 @@ func (m *ModuleManager) DeployModule(
 	hdProjectName := hdSettings.ProjectName
 
 	// Create the adapter data source for project mode
-	adapterSrc := templates.NewProjectAdapterDataSource(m.userDir, hdProjectName, &info.Descriptor)
+	adapterSrc := templates.NewProjectAdapterDataSource(m.userDir, hdProjectName, info.Descriptor)
 
 	// Build the module directory structure
 	err := errors.Join(
@@ -578,12 +514,12 @@ func (m *ModuleManager) DeployModule(
 	}
 
 	// Instantiate the adapter template
-	adapterTemplatePath := filepath.Join(moduleInstallDir, string(info.Descriptor.Name), "adapter.tmpl")
+	adapterTemplatePath := filepath.Join(moduleInstallDir, string(info.Descriptor.Name), modules.AdapterComposeTemplateFilename)
 	adapterTemplate, err := template.ParseFiles(adapterTemplatePath)
 	if err != nil {
 		return fmt.Errorf("error parsing adapter template [%s]: %w", adapterTemplatePath, err)
 	}
-	adapterRuntimePath := filepath.Join(adapterSrc.ModuleComposeDir, "adapter.yml")
+	adapterRuntimePath := filepath.Join(adapterSrc.ModuleComposeDir, modules.AdapterComposeFilename)
 	adapterFile, err := os.OpenFile(adapterRuntimePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, ModuleFileMode)
 	if err != nil {
 		return fmt.Errorf("error creating adapter compose file [%s]: %w", adapterRuntimePath, err)
@@ -629,6 +565,24 @@ func (m *ModuleManager) DeployModule(
 		}
 	}
 	return nil
+}
+
+// Get the path to the instantiated global adapter compose file for a module
+func (m *ModuleManager) GetGlobalAdapterComposeFilePath(descriptor *modules.ModuleDescriptor) string {
+	return filepath.Join(m.globalAdapterDir, string(descriptor.Name), modules.AdapterComposeFilename)
+}
+
+// Gets the ID of the container with the given name.
+// Returns an empty string if the container doesn't exist.
+func (m *ModuleManager) getContainerID(name string, containers []types.Container) string {
+	for _, container := range containers {
+		for _, containerName := range container.Names {
+			if containerName == "/"+name {
+				return container.ID
+			}
+		}
+	}
+	return ""
 }
 
 // ==============

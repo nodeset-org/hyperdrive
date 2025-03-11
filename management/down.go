@@ -32,6 +32,13 @@ func (m *HyperdriveManager) DownService(settings *hdconfig.HyperdriveSettings, i
 	if err != nil {
 		return fmt.Errorf("error deleting project adapters: %w", err)
 	}
+
+	// Delete the global adapters
+	err = downGlobalAdapters(includeVolumes)
+	if err != nil {
+		return fmt.Errorf("error deleting global adapters: %w", err)
+	}
+
 	return nil
 }
 
@@ -39,7 +46,7 @@ func (m *HyperdriveManager) DownService(settings *hdconfig.HyperdriveSettings, i
 func downHdServices(
 	userDir string,
 	projectName string,
-	descriptors []modules.ModuleDescriptor,
+	descriptors []*modules.ModuleDescriptor,
 	composeFiles []string,
 	includeVolumes bool,
 ) error {
@@ -76,7 +83,7 @@ func downHdServices(
 // For each project, have the project adapter stop and delete all services.
 func downModules(
 	hdSettings *hdconfig.HyperdriveSettings,
-	descriptors []modules.ModuleDescriptor,
+	descriptors []*modules.ModuleDescriptor,
 	includeVolumes bool,
 ) error {
 	for _, descriptor := range descriptors {
@@ -87,4 +94,9 @@ func downModules(
 		}
 	}
 	return nil
+}
+
+// Delete the global adapters
+func downGlobalAdapters(includeVolumes bool) error {
+	return DownProject(shared.GlobalAdapterProjectName, includeVolumes)
 }

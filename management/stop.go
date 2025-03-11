@@ -32,6 +32,13 @@ func (m *HyperdriveManager) StopService(settings *hdconfig.HyperdriveSettings) e
 	if err != nil {
 		return fmt.Errorf("error stopping project adapters: %w", err)
 	}
+
+	// Stop the global adapters
+	err = stopGlobalAdapters()
+	if err != nil {
+		return fmt.Errorf("error stopping global adapters: %w", err)
+	}
+
 	return nil
 }
 
@@ -39,7 +46,7 @@ func (m *HyperdriveManager) StopService(settings *hdconfig.HyperdriveSettings) e
 func stopHdServices(
 	userDir string,
 	projectName string,
-	descriptors []modules.ModuleDescriptor,
+	descriptors []*modules.ModuleDescriptor,
 	composeFiles []string,
 ) error {
 	// Add the project adapters to the compose files
@@ -72,7 +79,7 @@ func stopHdServices(
 // For each project, have the project adapter stop all services.
 func stopModules(
 	hdSettings *hdconfig.HyperdriveSettings,
-	descriptors []modules.ModuleDescriptor,
+	descriptors []*modules.ModuleDescriptor,
 ) error {
 	for _, descriptor := range descriptors {
 		modProject := utils.GetModuleComposeProjectName(hdSettings.ProjectName, descriptor)
@@ -89,7 +96,7 @@ func stopModules(
 func stopModuleServices(
 	projectName string,
 	services map[string][]string,
-	descriptors []modules.ModuleDescriptor,
+	descriptors []*modules.ModuleDescriptor,
 ) error {
 	for _, descriptor := range descriptors {
 		// Get the list of services to stop
@@ -107,4 +114,9 @@ func stopModuleServices(
 		}
 	}
 	return nil
+}
+
+// Stop the global adapters for each module
+func stopGlobalAdapters() error {
+	return StopProject(shared.GlobalAdapterProjectName, nil)
 }

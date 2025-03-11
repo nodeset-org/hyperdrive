@@ -139,7 +139,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			{
 				Name:    "stop",
 				Aliases: []string{"pause", "p"},
-				Usage:   "Pause the Hyperdrive service",
+				Usage:   "Stop the Hyperdrive service, shutting down the services but leaving the Docker artifacts intact so they can be restarted later",
 				Flags: []cli.Flag{
 					utils.YesFlag,
 				},

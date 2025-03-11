@@ -11,16 +11,18 @@ import (
 	hdconfig "github.com/nodeset-org/hyperdrive/config"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
 )
 
 type HyperdriveManager struct {
-	Context *HyperdriveContext
+	Context        *HyperdriveContext
+	BrokenModules  []*ModuleInstallation
+	HealthyModules []*ModuleInstallation
 
-	cfgDir    string
-	systemDir string
-	modMgr    *utils.ModuleManager
-	cfgMgr    *utils.ConfigurationManager
+	cfgDir        string
+	systemDir     string
+	modMgr        *ModuleManager
+	cfgMgr        *ConfigurationManager
+	modulesLoaded bool
 }
 
 // Create a new Hyperdrive client from the CLI context
@@ -29,13 +31,13 @@ func NewHyperdriveManager(hdCtx *HyperdriveContext) (*HyperdriveManager, error) 
 	systemDir := hdCtx.SystemDirPath
 
 	// Config manager
-	cfgMgr := utils.NewConfigurationManager(cfgDir, systemDir)
+	cfgMgr := NewConfigurationManager(cfgDir, systemDir)
 
 	// Module manager
 	//adapterKeyPath := shared.GetAdapterKeyPath(cfgDir)
 	modulesDir := shared.GetModulesDirectoryPath(systemDir)
 	gacDir := shared.GetGlobalAdapterDirectoryPath(systemDir)
-	modMgr, err := utils.NewModuleManager(modulesDir, gacDir, cfgDir)
+	modMgr, err := NewModuleManager(modulesDir, gacDir, cfgDir)
 	if err != nil {
 		return nil, fmt.Errorf("error creating module manager: %w", err)
 	}
@@ -55,8 +57,132 @@ func (m *HyperdriveManager) GetHyperdriveConfiguration() *hdconfig.HyperdriveCon
 }
 
 // Get the module manager
-func (m *HyperdriveManager) GetModuleManager() *utils.ModuleManager {
+func (m *HyperdriveManager) GetModuleManager() *ModuleManager {
 	return m.modMgr
+}
+
+// Load the modules installed on the system, sorting them by status
+func (m *HyperdriveManager) LoadModules() error {
+	brokenModules, eligibleToStartModules, healthyModules, err := m.reloadModuleInstallations()
+	if err != nil {
+		return err
+	}
+
+	// Try to start the modules that are eligible to start but not broken (include the healthy ones too so Docker Compose has a complete picture)
+	if len(eligibleToStartModules) > 0 {
+		globalAdapterNames := []string{}
+		modulesToStart := map[string]*ModuleInstallation{}
+		filesToStart := []string{}
+		for _, module := range append(eligibleToStartModules, healthyModules...) {
+			globalAdapterNames = append(globalAdapterNames, module.GlobalAdapterContainerName)
+			modulesToStart[module.GlobalAdapterContainerName] = module
+			filesToStart = append(filesToStart, module.GlobalAdapterRuntimeFilePath)
+		}
+		err = StartProject(shared.GlobalAdapterProjectName, filesToStart)
+		if err != nil {
+			return fmt.Errorf("error starting global adapters: %w", err)
+		}
+
+		// Reload the modules after starting them
+		brokenModules, eligibleToStartModules, healthyModules, err = m.reloadModuleInstallations()
+		if err != nil {
+			return fmt.Errorf("error reloading modules after starting global adapters: %w", err)
+		}
+	}
+
+	// Any eligible modules that remain need to be considered broken
+	for _, module := range eligibleToStartModules {
+		brokenModules = append(brokenModules, module)
+	}
+
+	// Load the module configs
+	m.cfgMgr.HyperdriveConfiguration.Modules = map[string]*modconfig.ModuleInfo{}
+	for _, module := range healthyModules {
+		m.cfgMgr.LoadModuleConfiguration(m.modMgr, module)
+
+		// Check the config
+		if module.ConfigurationLoadError != nil {
+			// Modules that couldn't load their config probably need to be reinstalled
+			brokenModules = append(brokenModules, module)
+			continue
+		}
+		if module.Configuration == nil {
+			// This should never happen
+			brokenModules = append(brokenModules, module)
+			module.ConfigurationLoadError = fmt.Errorf("module [%s] has a nil configuration", module.Descriptor.GetFullyQualifiedModuleName())
+			continue
+		}
+	}
+
+	// Remove the healthy modules with broken configs
+	newHealthyModules := []*ModuleInstallation{}
+	for _, module := range healthyModules {
+		if module.ConfigurationLoadError != nil {
+			continue
+		}
+		newHealthyModules = append(newHealthyModules, module)
+	}
+
+	// Update the module lists
+	m.BrokenModules = brokenModules
+	m.HealthyModules = healthyModules
+	m.modulesLoaded = true
+	return nil
+}
+
+// Reload the installed modules, sorting them by status
+func (m *HyperdriveManager) reloadModuleInstallations() (
+	brokenModules []*ModuleInstallation,
+	eligibleToStartModules []*ModuleInstallation,
+	healthyModules []*ModuleInstallation,
+	err error,
+) {
+	// Load the installed modules and check on their status
+	err = m.modMgr.LoadModules()
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("error loading modules: %w", err)
+	}
+
+	// Sort the modules by their status
+	brokenModules = []*ModuleInstallation{}
+	eligibleToStartModules = []*ModuleInstallation{}
+	healthyModules = []*ModuleInstallation{}
+	for _, module := range m.modMgr.InstalledModules {
+		if module.DescriptorLoadError != nil {
+			// Modules that couldn't load their descriptor probably need to be reinstalled
+			brokenModules = append(brokenModules, module)
+			continue
+		}
+
+		if module.GlobalAdapterRuntimeFileError != nil {
+			// Modules missing a deployed global adapter file definitely need to be reinstalled
+			brokenModules = append(brokenModules, module)
+			continue
+		}
+
+		switch module.GlobalAdapterContainerStatus {
+		case ContainerStatus_Running:
+			// Candidate for checking the config, nothing to do
+			break
+
+		case ContainerStatus_Stopped:
+			// The adapter isn't running but it exists, so it just needs to be started
+			eligibleToStartModules = append(eligibleToStartModules, module)
+			continue
+
+		case ContainerStatus_Missing:
+			// The adapter doesn't exist, which is weird, but since the runtime file exists we can try to just start it
+			eligibleToStartModules = append(eligibleToStartModules, module)
+			continue
+		default:
+			// This should never happen
+			return nil, nil, nil, fmt.Errorf("module [%s] has an unknown global adapter container status: %s", module.Descriptor.GetFullyQualifiedModuleName(), module.GlobalAdapterContainerStatus)
+		}
+
+		// Everything checks out
+		healthyModules = append(healthyModules, module)
+	}
+	return brokenModules, eligibleToStartModules, healthyModules, nil
 }
 
 // Load the main (currently applied) settings
@@ -88,21 +214,6 @@ func (m *HyperdriveManager) LoadSettingsFile(path string) (*hdconfig.HyperdriveS
 		return cfg, true, nil
 	}
 	return cfg, false, nil
-}
-
-// Load all of the module info and settings
-func (m *HyperdriveManager) LoadModules() ([]*utils.ModuleInfoLoadResult, error) {
-	results, err := m.modMgr.LoadModuleInfo(true)
-	if err != nil {
-		return nil, fmt.Errorf("error loading module info: %w", err)
-	}
-	for _, result := range results {
-		if result.LoadError == nil {
-			name := result.Info.Descriptor.GetFullyQualifiedModuleName()
-			m.cfgMgr.HyperdriveConfiguration.Modules[name] = result.Info.ModuleInfo
-		}
-	}
-	return results, nil
 }
 
 // Initializes a new installation of hyperdrive

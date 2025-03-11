@@ -10,6 +10,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	dockerClient "github.com/docker/docker/client"
 	cliutils "github.com/nodeset-org/hyperdrive/cli/utils"
+	"github.com/nodeset-org/hyperdrive/management"
 	hdutils "github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/urfave/cli/v2"
 )
@@ -33,8 +34,7 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 	}
 
 	// Get the list of modules
-	//fmt.Println("Loading modules...")
-	results, err := hd.LoadModules()
+	err = hd.LoadModules()
 	if err != nil {
 		fmt.Printf("WARNING: Modules could not be loaded: %v\n", err)
 		fmt.Println("Module commands will not be available until this is resolved.")
@@ -42,26 +42,35 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 		fmt.Println(cli.ShowCommandHelp(c, command))
 		return
 	}
-	if len(results) == 0 {
+	if len(hd.HealthyModules) == 0 {
 		c.App.CommandNotFound = nil
 		fmt.Println(cli.ShowCommandHelp(c, command))
 		return
 	}
 
 	// Organize modules by load status
-	failedModules := map[string]*hdutils.ModuleInfoLoadResult{}
-	succeededModules := map[string]*hdutils.ModuleInfoLoadResult{}
-	for _, result := range results {
-		if result.LoadError != nil {
-			failedModules[string(result.Info.Descriptor.Shortcut)] = result
-			continue
-		}
-		succeededModules[string(result.Info.Descriptor.Shortcut)] = result
+	failedModules := map[string]*management.ModuleInstallation{}
+	succeededModules := map[string]*management.ModuleInstallation{}
+	for _, result := range hd.BrokenModules {
+		failedModules[string(result.Descriptor.Shortcut)] = result
+	}
+	for _, result := range hd.HealthyModules {
+		succeededModules[string(result.Descriptor.Shortcut)] = result
 	}
 
 	// Check if the command belongs to a failed module
 	if mod, exists := failedModules[command]; exists {
-		fmt.Printf("Module %s failed to load: %s\n", mod.Info.Descriptor.Name, mod.LoadError)
+		if mod.ConfigurationLoadError != nil {
+			fmt.Printf("Module %s failed to load: %s\n", mod.Descriptor.Name, mod.ConfigurationLoadError)
+		} else if mod.GlobalAdapterContainerStatus != management.ContainerStatus_Running {
+			fmt.Printf("Module %s failed to load: the global adapter container could not start\n", mod.Descriptor.Name)
+		} else if mod.GlobalAdapterRuntimeFileError != nil {
+			fmt.Printf("Module %s failed to load: %s\n", mod.Descriptor.Name, mod.GlobalAdapterRuntimeFileError)
+		} else if mod.DescriptorLoadError != nil {
+			fmt.Printf("Module %s failed to load: %s\n", mod.Descriptor.Name, mod.DescriptorLoadError)
+		} else {
+			fmt.Printf("Module %s failed to load for an unexpected reason\n", mod.Descriptor.Name)
+		}
 		fmt.Printf("The [%s] command is not available until this is resolved.\n", command)
 		return
 	}
@@ -75,19 +84,19 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 	}
 
 	// Make sure it's configured and enabled
-	instance, exists := cfg.Modules[mod.Info.Descriptor.GetFullyQualifiedModuleName()]
+	instance, exists := cfg.Modules[mod.Descriptor.GetFullyQualifiedModuleName()]
 	if !exists {
-		fmt.Printf("Module %s has not been configured. Please run 'hyperdrive service configure' first.\n", mod.Info.Descriptor.Name)
+		fmt.Printf("Module %s has not been configured. Please run 'hyperdrive service configure' first.\n", mod.Descriptor.Name)
 		return
 	}
 	if !instance.Enabled {
-		fmt.Printf("Module %s is disabled. Please enable it in your service configuration first.\n", mod.Info.Descriptor.Name)
+		fmt.Printf("Module %s is disabled. Please enable it in your service configuration first.\n", mod.Descriptor.Name)
 		return
 	}
 
 	// Make sure the container exists before running the command
 	// TODO: break this into a single utility function to dedup
-	projectAdapterName := hdutils.GetProjectAdapterContainerName(&mod.Info.Descriptor, cfg.ProjectName)
+	projectAdapterName := hdutils.GetProjectAdapterContainerName(cfg.ProjectName, mod.Descriptor)
 	docker, err := dockerClient.NewClientWithOpts(
 		dockerClient.WithAPIVersionNegotiation(),
 	)
@@ -111,7 +120,7 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 		}
 	}
 	if id == "" {
-		fmt.Printf("Module %s does not have a project adapter container yet. Please run 'hyperdrive service start' first.\n", mod.Info.Descriptor.Name)
+		fmt.Printf("Module %s does not have a project adapter container yet. Please run 'hyperdrive service start' first.\n", mod.Descriptor.Name)
 		return
 	}
 
@@ -122,12 +131,12 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 		return
 	}
 	if !containerInfo.State.Running {
-		fmt.Printf("The project adapter for module %s is not running yet. Please run 'hyperdrive service start' first.\n", mod.Info.Descriptor.Name)
+		fmt.Printf("The project adapter for module %s is not running yet. Please run 'hyperdrive service start' first.\n", mod.Descriptor.Name)
 		return
 	}
 
 	// Get the adapter client
-	pac, err := hd.GetModuleManager().GetProjectAdapterClient(cfg.ProjectName, mod.Info.Descriptor.GetFullyQualifiedModuleName())
+	pac, err := hd.GetModuleManager().GetProjectAdapterClient(cfg.ProjectName, mod.Descriptor.GetFullyQualifiedModuleName())
 	if err != nil {
 		fmt.Printf("Error getting project adapter client: %v\n", err)
 		return

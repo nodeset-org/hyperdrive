@@ -12,11 +12,11 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/config"
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
+	"github.com/nodeset-org/hyperdrive/management"
 	"github.com/nodeset-org/hyperdrive/modules"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
 )
 
@@ -27,9 +27,9 @@ var (
 	// Docker client
 	docker *client.Client
 
-	cfgMgr      *utils.ConfigurationManager
+	cfgMgr      *management.ConfigurationManager
 	cfgInstance *config.HyperdriveSettings
-	modMgr      *utils.ModuleManager
+	modMgr      *management.ModuleManager
 )
 
 func TestMain(m *testing.M) {
@@ -127,7 +127,7 @@ func initializeArtifacts() {
 	}
 
 	// Set up the test config
-	cfgMgr = utils.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
+	cfgMgr = management.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
 	inst := modconfig.CreateModuleSettings(cfgMgr.HyperdriveConfiguration)
 	cfgInstance = config.NewHyperdriveSettings()
 	err = inst.ConvertToKnownType(cfgInstance)
@@ -138,7 +138,7 @@ func initializeArtifacts() {
 	cfgInstance.UserDataPath = internal_test.UserDataPath
 
 	// Set up the mod manager
-	modMgr, err = utils.NewModuleManager(shared.GetModulesDirectoryPath(internal_test.SystemDir), "", internal_test.CfgDir)
+	modMgr, err = management.NewModuleManager(shared.GetModulesDirectoryPath(internal_test.SystemDir), "", internal_test.CfgDir)
 	if err != nil {
 		fail(fmt.Errorf("error creating module manager: %w", err))
 	}

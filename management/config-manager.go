@@ -1,7 +1,8 @@
-package utils
+package management
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -47,6 +48,29 @@ func NewConfigurationManager(hyperdriveDir string, systemDir string) *Configurat
 		HyperdriveConfiguration: cfg,
 	}
 	return loader
+}
+
+// Load the configuration for a module installation, noting any failures in the installation's config load error
+func (m *ConfigurationManager) LoadModuleConfiguration(modMgr *ModuleManager, installInfo *ModuleInstallation) {
+	if installInfo.GlobalAdapterContainerStatus != ContainerStatus_Running {
+		return
+	}
+	client, err := modMgr.GetGlobalAdapterClient(installInfo.Descriptor.GetFullyQualifiedModuleName())
+	if err != nil {
+		installInfo.ConfigurationLoadError = fmt.Errorf("error creating adapter client: %w", err)
+		return
+	}
+	cfg, err := client.GetConfigMetadata(context.Background())
+	if err != nil {
+		installInfo.ConfigurationLoadError = fmt.Errorf("error getting config metadata: %w", err)
+		return
+	}
+	installInfo.Configuration = cfg
+	fqmn := installInfo.Descriptor.GetFullyQualifiedModuleName()
+	m.HyperdriveConfiguration.Modules[fqmn] = &modconfig.ModuleInfo{
+		Descriptor:    installInfo.Descriptor,
+		Configuration: cfg,
+	}
 }
 
 // Process the configuration settings for each module without saving them. This will validate them and collect any extra information about how they will impact the system.

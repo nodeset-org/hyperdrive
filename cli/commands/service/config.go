@@ -6,6 +6,7 @@ import (
 
 	tuiconfig "github.com/nodeset-org/hyperdrive/cli/tui/config"
 	"github.com/nodeset-org/hyperdrive/cli/utils"
+	"github.com/nodeset-org/hyperdrive/management"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/rivo/tview"
@@ -28,7 +29,7 @@ func configureService(c *cli.Context) error {
 	}
 
 	// Load the modules
-	modLoadResults, err := hd.LoadModules()
+	err = hd.LoadModules()
 	if err != nil {
 		return fmt.Errorf("error loading modules: %w", err)
 	}
@@ -52,17 +53,32 @@ func configureService(c *cli.Context) error {
 	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
 	isUpdate := c.Bool(configUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
 
-	// Create default settings for modules that are installed but haven't been configured yet
-	waitForOk := false
-	for _, result := range modLoadResults {
-		if result.LoadError != nil {
-			fmt.Printf("Skipping module %s because it failed to load: %s\n", result.Info.Descriptor.GetFullyQualifiedModuleName(), result.LoadError.Error())
-			waitForOk = true
-			continue
+	// Warn about broken modules
+	for _, result := range hd.BrokenModules {
+		if result.ConfigurationLoadError != nil {
+			fmt.Printf("Skipping module %s because it failed to load: %s\n", result.Descriptor.GetFullyQualifiedModuleName(), result.ConfigurationLoadError)
+		} else if result.GlobalAdapterContainerStatus != management.ContainerStatus_Running {
+			fmt.Printf("Skipping module %s because its global adapter container could not start\n", result.Descriptor.GetFullyQualifiedModuleName())
+		} else if result.GlobalAdapterRuntimeFileError != nil {
+			fmt.Printf("Skipping module %s because its global adapter container file could not be instantiated: %s\n", result.Descriptor.GetFullyQualifiedModuleName(), result.GlobalAdapterRuntimeFileError)
+		} else if result.DescriptorLoadError != nil {
+			fmt.Printf("Skipping module %s because its descriptor could not be loaded: %s\n", result.Descriptor.GetFullyQualifiedModuleName(), result.DescriptorLoadError)
+		} else {
+			fmt.Printf("Skipping module %s because it could not be loaded for an unknown reason\n", result.Descriptor.GetFullyQualifiedModuleName())
 		}
+	}
+	if len(hd.BrokenModules) > 0 {
+		fmt.Println("The above modules will be disabled until their load errors are resolved.")
+		if !c.Bool(utils.YesFlag.Name) {
+			fmt.Println("Press any key to continue.")
+			_, _ = fmt.Scanln()
+		}
+	}
 
+	// Create default settings for modules that are installed but haven't been configured yet
+	for _, result := range hd.HealthyModules {
 		// Check for an existing config
-		fqmn := result.Info.Descriptor.GetFullyQualifiedModuleName()
+		fqmn := result.Descriptor.GetFullyQualifiedModuleName()
 		_, exists := pendingSettings.Modules[fqmn]
 		if exists {
 			continue
@@ -76,11 +92,6 @@ func configureService(c *cli.Context) error {
 			Version:  info.Descriptor.Version.String(),
 			Settings: defaultSettings.SerializeToMap(),
 		}
-	}
-	if waitForOk {
-		fmt.Println("The above modules will be disabled until their load errors are resolved.")
-		fmt.Println("Press any key to continue.")
-		_, _ = fmt.Scanln()
 	}
 
 	// For upgrades, move the config to the old one and create a new upgraded copy

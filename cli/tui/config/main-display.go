@@ -5,9 +5,9 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/config"
+	"github.com/nodeset-org/hyperdrive/management"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
 	"github.com/rivo/tview"
 )
 
@@ -35,14 +35,14 @@ type MainDisplay struct {
 	previousInstance  *modconfig.ModuleSettings            // The previous instance of the Hyperdrive settings (the currently running one)
 	newInstance       *modconfig.ModuleSettings            // The new instance of the Hyperdrive settings (the one being configured)
 	moduleSettingsMap map[string]*modconfig.ModuleSettings // The map of module FQMNs to their new (being configured) settings
-	moduleManager     *utils.ModuleManager
+	moduleManager     *management.ModuleManager
 	templateProcessor *modconfig.TemplateProcessor
 }
 
 // Creates a new MainDisplay instance.
 func NewMainDisplay(
 	app *tview.Application,
-	moduleManager *utils.ModuleManager,
+	moduleManager *management.ModuleManager,
 	config *config.HyperdriveConfig,
 	previousSettings *config.HyperdriveSettings,
 	newSettings *config.HyperdriveSettings,

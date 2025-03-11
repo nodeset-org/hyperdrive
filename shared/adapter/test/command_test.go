@@ -220,7 +220,7 @@ func TestStartStopRun(t *testing.T) {
 	t.Logf("Command ran successfully and returned %s", out)
 
 	// Stop the services
-	composeProjectName := utils.GetModuleComposeProjectName(internal_test.ProjectName, internal_test.ExampleDescriptor)
+	composeProjectName := utils.GetModuleComposeProjectName(internal_test.ProjectName, &internal_test.ExampleDescriptor)
 	err = management.StopProject(composeProjectName, nil)
 	require.NoError(t, err)
 	t.Log("Services stopped successfully")

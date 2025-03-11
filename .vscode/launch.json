@@ -16,7 +16,7 @@
                 "-s",
                 "/usr/share/hyperdrive",
                 "s",
-                "c"
+                "s"
             ]
         },
         {

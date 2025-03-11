@@ -13,10 +13,12 @@ import (
 	"github.com/nodeset-org/hyperdrive/modules"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
-	"github.com/nodeset-org/hyperdrive/shared/utils"
 )
 
 func (m *HyperdriveManager) StartService(currentSettings *hdconfig.HyperdriveSettings, pendingSettings *hdconfig.HyperdriveSettings) error {
+	if !m.modulesLoaded {
+		return fmt.Errorf("modules have not been loaded yet")
+	}
 	hdCfg := m.GetHyperdriveConfiguration()
 	modMgr := m.GetModuleManager()
 
@@ -48,7 +50,7 @@ func (m *HyperdriveManager) StartService(currentSettings *hdconfig.HyperdriveSet
 				}
 				services[fqmn] = pendingModSettings.Restart
 			}
-			descriptors := []modules.ModuleDescriptor{}
+			descriptors := []*modules.ModuleDescriptor{}
 			for _, info := range modInfos {
 				descriptors = append(descriptors, info.Descriptor)
 			}
@@ -111,16 +113,29 @@ func (m *HyperdriveManager) StartService(currentSettings *hdconfig.HyperdriveSet
 }
 
 func (m *HyperdriveManager) StartProjectAdapters(settings *hdconfig.HyperdriveSettings, modInfos map[string]*modconfig.ModuleInfo, moduleSettingsMap map[string]*modconfig.ModuleSettings) error {
-	// Start all of the base services and project module adapters
+	// Deploy the base HD templates
 	composeFiles, err := deployTemplates(m.Context.SystemDirPath, m.Context.UserDirPath, settings)
 	if err != nil {
 		return fmt.Errorf("error deploying templates: %w", err)
 	}
-	err = deployModules(m.modMgr, m.Context.ModulesDir(), settings, moduleSettingsMap, modInfos)
+
+	// Remove modules that are not enabled / missing from the info map
+	enabledModules := map[string]*modconfig.ModuleInfo{}
+	for fqmn, info := range modInfos {
+		_, exists := moduleSettingsMap[fqmn]
+		if exists {
+			enabledModules[fqmn] = info
+		}
+	}
+
+	// Deploy the modules
+	err = deployModules(m.modMgr, m.Context.ModulesDir(), settings, moduleSettingsMap, enabledModules)
 	if err != nil {
 		return fmt.Errorf("error deploying modules: %w", err)
 	}
-	err = startComposeFiles(m.Context.UserDirPath, settings.ProjectName, modInfos, composeFiles)
+
+	// Start the project
+	err = startComposeFiles(m.Context.UserDirPath, settings.ProjectName, enabledModules, composeFiles)
 	if err != nil {
 		return fmt.Errorf("error starting project adapters: %w", err)
 	}
@@ -224,16 +239,17 @@ func deployTemplates(systemDir string, userDir string, settings *hdconfig.Hyperd
 
 // Deploy the modules for the project, instantiating templates and scaffolding their folder structure
 func deployModules(
-	modMgr *utils.ModuleManager,
+	modMgr *ModuleManager,
 	moduleInstallDir string,
 	hdSettings *hdconfig.HyperdriveSettings,
 	moduleSettingsMap map[string]*modconfig.ModuleSettings,
 	infos map[string]*modconfig.ModuleInfo,
 ) error {
-	for _, info := range infos {
+	for _, module := range infos {
+		info := infos[module.Descriptor.GetFullyQualifiedModuleName()]
 		err := modMgr.DeployModule(moduleInstallDir, hdSettings, moduleSettingsMap, info)
 		if err != nil {
-			return fmt.Errorf("error deploying module [%s]: %w", info.Descriptor.GetFullyQualifiedModuleName(), err)
+			return fmt.Errorf("error deploying module [%s]: %w", module.Descriptor.GetFullyQualifiedModuleName(), err)
 		}
 	}
 	return nil
@@ -262,6 +278,12 @@ func startComposeFiles(
 	for _, composeFile := range composeFiles {
 		args = append(args, "-f", composeFile)
 	}
+	if len(composeFiles) == 0 {
+		// If there are no compose files at all, nothing to do
+		return nil
+	}
+
+	// Start the project
 	args = append(args, "up", "-d", "--remove-orphans", "--quiet-pull")
 	cmd := exec.Command("docker", args...)
 	cmd.Stdout = os.Stdout
@@ -275,7 +297,7 @@ func startComposeFiles(
 
 // For each project, have the project adapter start the module
 func startModules(
-	modMgr *utils.ModuleManager,
+	modMgr *ModuleManager,
 	hdSettings *hdconfig.HyperdriveSettings,
 	infos map[string]*modconfig.ModuleInfo,
 ) error {
