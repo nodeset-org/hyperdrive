@@ -86,19 +86,19 @@ func (d *Dependency) UnmarshalText(text []byte) error {
 			case "author":
 				err := dependency.Author.UnmarshalText([]byte(captureGroup))
 				if err != nil {
-					return fmt.Errorf("error parsing dependency author [%s] for [%s]: %w", captureGroup, string(text), err)
+					return fmt.Errorf("error parsing dependency author \"%s\" for \"%s\": %w", captureGroup, string(text), err)
 				}
 			case "name":
 				err := dependency.Name.UnmarshalText([]byte(captureGroup))
 				if err != nil {
-					return fmt.Errorf("error parsing dependency name [%s] for [%s]: %w", captureGroup, string(text), err)
+					return fmt.Errorf("error parsing dependency name \"%s\" for \"%s\": %w", captureGroup, string(text), err)
 				}
 			case "version_op":
 				dependency.VersionOp = VersionOperator(captureGroup)
 			case "version":
 				version, err := semver.Parse(captureGroup)
 				if err != nil {
-					return fmt.Errorf("error parsing dependency version [%s] for [%s]: %w", captureGroup, string(text), err)
+					return fmt.Errorf("error parsing dependency version \"%s\" for \"%s\": %w", captureGroup, string(text), err)
 				}
 				dependency.Version = version
 				versionSet = true
@@ -108,20 +108,20 @@ func (d *Dependency) UnmarshalText(text []byte) error {
 
 	// Make sure the author and name are set
 	if dependency.Author == "" {
-		return fmt.Errorf("no author was provided for dependency [%s]", string(text))
+		return fmt.Errorf("no author was provided for dependency \"%s\"", string(text))
 	}
 	if dependency.Name == "" {
-		return fmt.Errorf("no name was provided for dependency [%s]", string(text))
+		return fmt.Errorf("no name was provided for dependency \"%s\"", string(text))
 	}
 
 	// If a version was set, ensure an operator was also set
 	if versionSet && dependency.VersionOp == VersionOperator_Unknown {
-		return fmt.Errorf("a version was set for dependency [%s], but no comparison operator was provided", string(text))
+		return fmt.Errorf("a version was set for dependency \"%s\", but no comparison operator was provided", string(text))
 	}
 
 	// Make sure there's a version if there's an operator
 	if !versionSet && dependency.VersionOp != VersionOperator_Unknown {
-		return fmt.Errorf("a comparison operator was set for dependency [%s], but no version was provided", string(text))
+		return fmt.Errorf("a comparison operator was set for dependency \"%s\", but no version was provided", string(text))
 	}
 
 	*d = dependency

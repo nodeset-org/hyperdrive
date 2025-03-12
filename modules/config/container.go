@@ -123,25 +123,25 @@ func UpdateDefaults(metadata IMetadataContainer, settings IInstanceContainer) er
 		id := parameter.GetID()
 		setting, err := settings.GetParameter(id)
 		if err != nil {
-			return fmt.Errorf("error getting parameter [%s]: %w", id, err)
+			return fmt.Errorf("error getting parameter \"%s\": %w", id, err)
 		}
 		if !parameter.GetOverwriteOnUpgrade() {
 			continue
 		}
 		err = setting.SetValue(parameter.GetDefault())
 		if err != nil {
-			return fmt.Errorf("error updating parameter [%s] to default value [%v]: %w", id, parameter.GetDefault(), err)
+			return fmt.Errorf("error updating parameter \"%s\" to default value [%v]: %w", id, parameter.GetDefault(), err)
 		}
 	}
 	for _, section := range metadata.GetSections() {
 		id := section.GetID()
 		setting, err := settings.GetSection(id)
 		if err != nil {
-			return fmt.Errorf("error getting section [%s]: %w", id, err)
+			return fmt.Errorf("error getting section \"%s\": %w", id, err)
 		}
 		err = UpdateDefaults(section, setting)
 		if err != nil {
-			return fmt.Errorf("error updating section [%s] to default values: %w", id, err)
+			return fmt.Errorf("error updating section \"%s\" to default values: %w", id, err)
 		}
 	}
 	return nil
@@ -244,7 +244,7 @@ func deserializeContainerInstance(container iContainerInstance, instance map[str
 		}
 		err := parameter.SetValue(paramData)
 		if err != nil {
-			return fmt.Errorf("error setting parameter [%s]: %w", paramID, err)
+			return fmt.Errorf("error setting parameter \"%s\": %w", paramID, err)
 		}
 	}
 	for _, section := range container.getSections() {
@@ -256,11 +256,11 @@ func deserializeContainerInstance(container iContainerInstance, instance map[str
 		}
 		sectionDataAsMap, ok := sectionData.(map[string]any)
 		if !ok {
-			return fmt.Errorf("invalid type for section [%s]: %T", sectionID, sectionData)
+			return fmt.Errorf("invalid type for section \"%s\": %T", sectionID, sectionData)
 		}
 		err := section.Deserialize(sectionDataAsMap)
 		if err != nil {
-			return fmt.Errorf("error processing section [%s]: %w", sectionID, err)
+			return fmt.Errorf("error processing section \"%s\": %w", sectionID, err)
 		}
 	}
 	return nil

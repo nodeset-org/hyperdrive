@@ -31,5 +31,5 @@ func NewErrorNotFound(id Identifier, entryType EntryType) ErrorNotFound {
 
 // Get the error message for a parameter not found
 func (e ErrorNotFound) Error() string {
-	return fmt.Sprintf("%s [%s] not found", string(e.EntryType), string(e.ID))
+	return fmt.Sprintf("%s \"%s\" not found", string(e.EntryType), string(e.ID))
 }

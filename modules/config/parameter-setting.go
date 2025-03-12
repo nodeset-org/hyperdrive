@@ -60,7 +60,7 @@ type boolParameterSetting struct {
 func (i *boolParameterSetting) SetValue(value any) error {
 	boolValue, ok := value.(bool)
 	if !ok {
-		return fmt.Errorf("invalid value type for bool parameter [%s]: %T", i.info.GetID(), value)
+		return fmt.Errorf("invalid value type for bool parameter \"%s\": %T", i.info.GetID(), value)
 	}
 	i.value = boolValue
 	return nil
@@ -115,7 +115,7 @@ type stringParameterSetting struct {
 func (i *stringParameterSetting) SetValue(value any) error {
 	stringValue, ok := value.(string)
 	if !ok {
-		return fmt.Errorf("invalid value type for string parameter [%s]: %T", i.info.GetID(), value)
+		return fmt.Errorf("invalid value type for string parameter \"%s\": %T", i.info.GetID(), value)
 	}
 	i.value = stringValue
 	return nil
@@ -138,10 +138,10 @@ func (i *stringParameterSetting) Validate() []error {
 	if regexPattern != "" {
 		regex, err := regexp.Compile(regexPattern)
 		if err != nil {
-			errors = append(errors, fmt.Errorf("invalid regex pattern [%s]: %w", regexPattern, err))
+			errors = append(errors, fmt.Errorf("invalid regex pattern \"%s\": %w", regexPattern, err))
 		}
 		if !regex.MatchString(val) {
-			errors = append(errors, fmt.Errorf("string [%s] does not match regex pattern [%s]", val, regexPattern))
+			errors = append(errors, fmt.Errorf("string \"%s\" does not match regex pattern \"%s\"", val, regexPattern))
 		}
 	}
 
@@ -190,7 +190,7 @@ func (i *choiceParameterSetting[ChoiceType]) Validate() []error {
 		}
 	}
 	if !optionFound {
-		errors = append(errors, fmt.Errorf("value [%s] is not a valid choice", val))
+		errors = append(errors, fmt.Errorf("value \"%s\" is not a valid choice", val))
 	}
 
 	return errors

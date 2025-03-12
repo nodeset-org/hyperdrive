@@ -200,7 +200,7 @@ func deleteConfigs() error {
 	for _, entry := range info {
 		err = os.Remove(filepath.Join(internal_test.CfgDir, entry.Name()))
 		if err != nil {
-			return fmt.Errorf("error removing config file [%s]: %w", entry.Name(), err)
+			return fmt.Errorf("error removing config file \"%s\": %w", entry.Name(), err)
 		}
 	}
 	return nil

@@ -88,7 +88,7 @@ func writeToTraceFile(file *os.File, data string) error {
 	// Write the data
 	_, err := file.WriteString(data + "\n")
 	if err != nil {
-		return fmt.Errorf("error writing to HTTP trace file [%s]: %w", file.Name(), err)
+		return fmt.Errorf("error writing to HTTP trace file \"%s\": %w", file.Name(), err)
 	}
 	return nil
 }

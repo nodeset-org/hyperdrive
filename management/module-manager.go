@@ -121,7 +121,7 @@ func (m *ModuleManager) LoadModules() error {
 	// Enumerate the installed modules
 	entries, err := os.ReadDir(m.modulePath)
 	if err != nil {
-		return fmt.Errorf("error reading module directory [%s]: %w", m.modulePath, err)
+		return fmt.Errorf("error reading module directory \"%s\": %w", m.modulePath, err)
 	}
 
 	// Go through the entries in the module directory
@@ -136,7 +136,7 @@ func (m *ModuleManager) LoadModules() error {
 		moduleDir := filepath.Join(m.modulePath, entry.Name())
 		info, err := m.beginLoadModule(moduleDir)
 		if err != nil {
-			return fmt.Errorf("error loading module [%s]: %w", moduleDir, err)
+			return fmt.Errorf("error loading module \"%s\": %w", moduleDir, err)
 		}
 		if info != nil {
 			installationInfos = append(installationInfos, info)
@@ -159,7 +159,7 @@ func (m *ModuleManager) LoadModules() error {
 		} else {
 			containerInfo, err := m.docker.ContainerInspect(context.Background(), id)
 			if err != nil {
-				return fmt.Errorf("error inspecting container [%s]: %w", containerName, err)
+				return fmt.Errorf("error inspecting container \"%s\": %w", containerName, err)
 			}
 			if containerInfo.State.Running {
 				logging.SafeDebug(m.logger, "Global adapter container is running", "name", containerName)
@@ -193,7 +193,7 @@ func (m *ModuleManager) beginLoadModule(moduleDir string) (*ModuleInstallation, 
 			return nil, nil
 		}
 		logging.SafeDebug(m.logger, "Error reading descriptor file", "path", descriptorPath, "error", err)
-		installInfo.DescriptorLoadError = fmt.Errorf("error reading descriptor file [%s]: %w", descriptorPath, err)
+		installInfo.DescriptorLoadError = fmt.Errorf("error reading descriptor file \"%s\": %w", descriptorPath, err)
 		return installInfo, nil
 	}
 
@@ -224,10 +224,10 @@ func (m *ModuleManager) beginLoadModule(moduleDir string) (*ModuleInstallation, 
 	if installInfo.GlobalAdapterRuntimeFileError == nil {
 		if fileInfo.IsDir() {
 			logging.SafeDebug(m.logger, "Global adapter file is a directory", "path", globalAdapterPath)
-			installInfo.GlobalAdapterRuntimeFileError = fmt.Errorf("global adapter file [%s] is a directory, not a file", globalAdapterPath)
+			installInfo.GlobalAdapterRuntimeFileError = fmt.Errorf("global adapter file \"%s\" is a directory, not a file", globalAdapterPath)
 		} else if !fileInfo.Mode().IsRegular() {
 			logging.SafeDebug(m.logger, "Global adapter file is not a regular file", "path", globalAdapterPath)
-			installInfo.GlobalAdapterRuntimeFileError = fmt.Errorf("global adapter file [%s] is not a regular file", globalAdapterPath)
+			installInfo.GlobalAdapterRuntimeFileError = fmt.Errorf("global adapter file \"%s\" is not a regular file", globalAdapterPath)
 		}
 	}
 
@@ -236,7 +236,7 @@ func (m *ModuleManager) beginLoadModule(moduleDir string) (*ModuleInstallation, 
 		_, err = ParseComposeFile(shared.GlobalAdapterProjectName, globalAdapterPath)
 		if err != nil {
 			logging.SafeDebug(m.logger, "Error parsing global adapter file", "path", globalAdapterPath, "error", err)
-			installInfo.GlobalAdapterRuntimeFileError = fmt.Errorf("error parsing global adapter file [%s]: %w", globalAdapterPath, err)
+			installInfo.GlobalAdapterRuntimeFileError = fmt.Errorf("error parsing global adapter file \"%s\": %w", globalAdapterPath, err)
 		}
 	}
 
@@ -356,7 +356,7 @@ func (m *ModuleManager) GetProjectAdapterClient(projectName string, fqmn string)
 	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
 	bytes, err := os.ReadFile(adapterKeyPath)
 	if err != nil {
-		return nil, fmt.Errorf("error reading adapter key file [%s]: %w", adapterKeyPath, err)
+		return nil, fmt.Errorf("error reading adapter key file \"%s\": %w", adapterKeyPath, err)
 	}
 
 	// Create the adapter client
@@ -377,7 +377,7 @@ func (m *ModuleManager) InstallModule(
 	// Unpack the module
 	pkgReader, err := zip.OpenReader(moduleFile)
 	if err != nil {
-		return fmt.Errorf("error opening module package [%s]: %w", moduleFile, err)
+		return fmt.Errorf("error opening module package \"%s\": %w", moduleFile, err)
 	}
 	defer pkgReader.Close()
 
@@ -385,31 +385,31 @@ func (m *ModuleManager) InstallModule(
 	descriptorBuffer := new(bytes.Buffer)
 	descriptorFile, err := pkgReader.Open(modules.DescriptorFilename)
 	if err != nil {
-		return fmt.Errorf("error opening descriptor file in module package [%s]: %w", moduleFile, err)
+		return fmt.Errorf("error opening descriptor file in module package \"%s\": %w", moduleFile, err)
 	}
 	defer descriptorFile.Close()
 	_, err = descriptorBuffer.ReadFrom(descriptorFile)
 	if err != nil {
-		return fmt.Errorf("error reading descriptor file in module package [%s]: %w", moduleFile, err)
+		return fmt.Errorf("error reading descriptor file in module package \"%s\": %w", moduleFile, err)
 	}
 	var descriptor modules.ModuleDescriptor
 	err = json.Unmarshal(descriptorBuffer.Bytes(), &descriptor)
 	if err != nil {
-		return fmt.Errorf("error unmarshalling descriptor file in module package [%s]: %w", moduleFile, err)
+		return fmt.Errorf("error unmarshalling descriptor file in module package \"%s\": %w", moduleFile, err)
 	}
 
 	// Create the module dir
 	moduleDir := filepath.Join(m.modulePath, string(descriptor.Name))
 	err = os.MkdirAll(moduleDir, ModuleDirMode)
 	if err != nil {
-		return fmt.Errorf("error creating module directory [%s]: %w", moduleDir, err)
+		return fmt.Errorf("error creating module directory \"%s\": %w", moduleDir, err)
 	}
 
 	// Extract the files
 	descriptorPath := filepath.Join(moduleDir, modules.DescriptorFilename)
 	err = os.WriteFile(descriptorPath, descriptorBuffer.Bytes(), ModuleFileMode)
 	if err != nil {
-		return fmt.Errorf("error writing descriptor file [%s]: %w", descriptorPath, err)
+		return fmt.Errorf("error writing descriptor file \"%s\": %w", descriptorPath, err)
 	}
 	for _, file := range pkgReader.File {
 		// Skip the descriptor since we already wrote it
@@ -422,7 +422,7 @@ func (m *ModuleManager) InstallModule(
 			fileDir := filepath.Join(moduleDir, file.Name)
 			err = os.MkdirAll(fileDir, ModuleDirMode)
 			if err != nil {
-				return fmt.Errorf("error creating directory [%s]: %w", fileDir, err)
+				return fmt.Errorf("error creating directory \"%s\": %w", fileDir, err)
 			}
 			continue
 		}
@@ -430,7 +430,7 @@ func (m *ModuleManager) InstallModule(
 		// Open the file
 		fileReader, err := file.Open()
 		if err != nil {
-			return fmt.Errorf("error opening file [%s] in module package [%s]: %w", file.Name, moduleFile, err)
+			return fmt.Errorf("error opening file \"%s\" in module package \"%s\": %w", file.Name, moduleFile, err)
 		}
 		defer fileReader.Close()
 
@@ -439,11 +439,11 @@ func (m *ModuleManager) InstallModule(
 		buffer := new(bytes.Buffer)
 		_, err = buffer.ReadFrom(fileReader)
 		if err != nil {
-			return fmt.Errorf("error reading file [%s] in module package [%s]: %w", file.Name, moduleFile, err)
+			return fmt.Errorf("error reading file \"%s\" in module package \"%s\": %w", file.Name, moduleFile, err)
 		}
 		err = os.WriteFile(filePath, buffer.Bytes(), ModuleFileMode)
 		if err != nil {
-			return fmt.Errorf("error writing file [%s]: %w", filePath, err)
+			return fmt.Errorf("error writing file \"%s\": %w", filePath, err)
 		}
 
 		// Instantiate the adapter template in global mode
@@ -452,16 +452,16 @@ func (m *ModuleManager) InstallModule(
 			globalAdapterDir := filepath.Dir(globalAdapterPath)
 			err := os.MkdirAll(globalAdapterDir, ModuleDirMode)
 			if err != nil {
-				return fmt.Errorf("error creating global adapter directory [%s]: %w", globalAdapterDir, err)
+				return fmt.Errorf("error creating global adapter directory \"%s\": %w", globalAdapterDir, err)
 			}
 
 			adapterTemplate, err := template.New("adapter").Parse(buffer.String())
 			if err != nil {
-				return fmt.Errorf("error parsing adapter template [%s]: %w", filePath, err)
+				return fmt.Errorf("error parsing adapter template \"%s\": %w", filePath, err)
 			}
 			adapterFile, err := os.OpenFile(globalAdapterPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, ModuleFileMode)
 			if err != nil {
-				return fmt.Errorf("error creating adapter compose file [%s]: %w", globalAdapterPath, err)
+				return fmt.Errorf("error creating adapter compose file \"%s\": %w", globalAdapterPath, err)
 			}
 			adapterSrc := templates.NewGlobalAdapterDataSource(&descriptor)
 			err = adapterTemplate.Execute(adapterFile, adapterSrc)
@@ -503,26 +503,26 @@ func (m *ModuleManager) DeployModule(
 	moduleDataDir := filepath.Join(hdSettings.UserDataPath, shared.ModulesDir, string(info.Descriptor.Name))
 	err = os.MkdirAll(moduleDataDir, ModuleDirMode)
 	if err != nil {
-		return fmt.Errorf("error creating module data directory [%s]: %w", moduleDataDir, err)
+		return fmt.Errorf("error creating module data directory \"%s\": %w", moduleDataDir, err)
 	}
 
 	// Create the adapter key
 	adapterKeyPath := filepath.Join(adapterSrc.ModuleDir, shared.SecretsDir, shared.AdapterKeyFile)
 	_, err = auth.CreateOrLoadKeyFile(adapterKeyPath, AdapterKeySizeBytes)
 	if err != nil {
-		return fmt.Errorf("error creating adapter key file [%s]: %w", adapterKeyPath, err)
+		return fmt.Errorf("error creating adapter key file \"%s\": %w", adapterKeyPath, err)
 	}
 
 	// Instantiate the adapter template
 	adapterTemplatePath := filepath.Join(moduleInstallDir, string(info.Descriptor.Name), modules.AdapterComposeTemplateFilename)
 	adapterTemplate, err := template.ParseFiles(adapterTemplatePath)
 	if err != nil {
-		return fmt.Errorf("error parsing adapter template [%s]: %w", adapterTemplatePath, err)
+		return fmt.Errorf("error parsing adapter template \"%s\": %w", adapterTemplatePath, err)
 	}
 	adapterRuntimePath := filepath.Join(adapterSrc.ModuleComposeDir, modules.AdapterComposeFilename)
 	adapterFile, err := os.OpenFile(adapterRuntimePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, ModuleFileMode)
 	if err != nil {
-		return fmt.Errorf("error creating adapter compose file [%s]: %w", adapterRuntimePath, err)
+		return fmt.Errorf("error creating adapter compose file \"%s\": %w", adapterRuntimePath, err)
 	}
 	err = adapterTemplate.Execute(adapterFile, adapterSrc)
 	if err != nil {
@@ -535,7 +535,7 @@ func (m *ModuleManager) DeployModule(
 	serviceTemplatePath := filepath.Join(moduleInstallDir, string(info.Descriptor.Name), shared.TemplatesDir)
 	entries, err := os.ReadDir(serviceTemplatePath)
 	if err != nil {
-		return fmt.Errorf("error reading service template directory [%s]: %w", serviceTemplatePath, err)
+		return fmt.Errorf("error reading service template directory \"%s\": %w", serviceTemplatePath, err)
 	}
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -550,14 +550,14 @@ func (m *ModuleManager) DeployModule(
 		templatePath := filepath.Join(serviceTemplatePath, entryName)
 		template, err := template.ParseFiles(templatePath)
 		if err != nil {
-			return fmt.Errorf("error parsing service template [%s]: %w", templatePath, err)
+			return fmt.Errorf("error parsing service template \"%s\": %w", templatePath, err)
 		}
 		serviceName := strings.TrimSuffix(filepath.Base(entryName), templateSuffix)
 		serviceName += ".yml"
 		serviceRuntimePath := filepath.Join(adapterSrc.ModuleComposeDir, serviceName)
 		serviceFile, err := os.OpenFile(serviceRuntimePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, ModuleFileMode)
 		if err != nil {
-			return fmt.Errorf("error creating service compose file [%s]: %w", serviceRuntimePath, err)
+			return fmt.Errorf("error creating service compose file \"%s\": %w", serviceRuntimePath, err)
 		}
 		err = template.Execute(serviceFile, serviceSrc)
 		if err != nil {

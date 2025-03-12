@@ -46,7 +46,7 @@ func NewModulesPage(home *settingsHome) *ModulesPage {
 		previousInstance := home.md.PreviousSettings.Modules[fqmn]
 		instance, exists := home.md.NewSettings.Modules[fqmn]
 		if !exists {
-			panic(fmt.Errorf("module instance [%s] not found", fqmn))
+			panic(fmt.Errorf("module instance \"%s\" not found", fqmn))
 		}
 		modulePage := NewModulePage(modulesPage, module, previousInstance, instance)
 		moduleSubpages = append(moduleSubpages, modulePage)

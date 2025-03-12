@@ -60,7 +60,7 @@ func (p *LoggingConfigPage) createContent() {
 		id := param.GetID()
 		paramSetting, err := newInstance.GetParameter(id)
 		if err != nil {
-			panic(fmt.Errorf("error getting logging parameter setting [%s]: %w", id, err))
+			panic(fmt.Errorf("error getting logging parameter setting \"%s\": %w", id, err))
 		}
 
 		// Create the form item for the parameter

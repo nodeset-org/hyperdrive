@@ -370,7 +370,7 @@ func (layout *standardLayout) refresh() {
 			// Everything else
 			inputField, ok := formItem.(*tview.InputField)
 			if !ok {
-				panic(fmt.Errorf("form item [%s] is not an input field, it's a %T", paramMetadata.GetID(), formItem))
+				panic(fmt.Errorf("form item \"%s\" is not an input field, it's a %T", paramMetadata.GetID(), formItem))
 			}
 			inputField.SetText(paramSetting.String())
 		}

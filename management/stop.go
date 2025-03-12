@@ -85,7 +85,7 @@ func stopModules(
 		modProject := utils.GetModuleComposeProjectName(hdSettings.ProjectName, descriptor)
 		err := StopProject(modProject, nil)
 		if err != nil {
-			return fmt.Errorf("error stopping module [%s]: %w", descriptor.Name, err)
+			return fmt.Errorf("error stopping module \"%s\": %w", descriptor.Name, err)
 		}
 	}
 	return nil
@@ -110,7 +110,7 @@ func stopModuleServices(
 		modProject := utils.GetModuleComposeProjectName(projectName, descriptor)
 		err := StopProject(modProject, modServices)
 		if err != nil {
-			return fmt.Errorf("error stopping module [%s]: %w", descriptor.Name, err)
+			return fmt.Errorf("error stopping module \"%s\": %w", descriptor.Name, err)
 		}
 	}
 	return nil

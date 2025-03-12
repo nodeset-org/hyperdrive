@@ -62,7 +62,7 @@ func (m *AuthorizationManager) LoadAuthKey() error {
 	// Read the file
 	keyData, err := os.ReadFile(m.keyPath)
 	if err != nil {
-		return fmt.Errorf("error reading API key [%s] from disk: %w", m.keyPath, err)
+		return fmt.Errorf("error reading API key \"%s\" from disk: %w", m.keyPath, err)
 	}
 	m.key = keyData
 	return nil

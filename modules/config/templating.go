@@ -81,7 +81,7 @@ func (s *dynamicPropertyTemplateSource[Type]) GetValue(fqpn string) (any, error)
 		fqmn = elements[0]
 		propertyPath = elements[1]
 	} else {
-		return "", fmt.Errorf("invalid fully-qualified property name [%s]", fqpn)
+		return "", fmt.Errorf("invalid fully-qualified property name \"%s\"", fqpn)
 	}
 
 	// Get the module settings
@@ -92,7 +92,7 @@ func (s *dynamicPropertyTemplateSource[Type]) GetValue(fqpn string) (any, error)
 		var exists bool
 		settings, exists = s.moduleSettingsMap[fqmn]
 		if !exists {
-			return "", fmt.Errorf("module settings not found for module [%s] in path [%s]", fqmn, propertyPath)
+			return "", fmt.Errorf("module settings not found for module \"%s\" in path \"%s\"", fqmn, propertyPath)
 		}
 	}
 	return getModulePropertyValue(settings, propertyPath)
@@ -102,11 +102,11 @@ func (s *dynamicPropertyTemplateSource[Type]) GetValue(fqpn string) (any, error)
 func (s *dynamicPropertyTemplateSource[Type]) GetValueArray(fqpn string, delimiter string) ([]string, error) {
 	val, err := s.GetValue(fqpn)
 	if err != nil {
-		return nil, fmt.Errorf("error getting value for path [%s]: %w", fqpn, err)
+		return nil, fmt.Errorf("error getting value for path \"%s\": %w", fqpn, err)
 	}
 	valString, isString := val.(string)
 	if !isString {
-		return nil, fmt.Errorf("value for path [%s] is not a string", fqpn)
+		return nil, fmt.Errorf("value for path \"%s\" is not a string", fqpn)
 	}
 	return strings.Split(valString, delimiter), nil
 }
@@ -227,11 +227,11 @@ func getModulePropertyValue(settings *ModuleSettings, propertyPath string) (any,
 		var id Identifier
 		err := id.UnmarshalText([]byte(elementString))
 		if err != nil {
-			return "", fmt.Errorf("error converting section [%s] in path [%s] to identifier: %w", elementString, propertyPath, err)
+			return "", fmt.Errorf("error converting section \"%s\" in path \"%s\" to identifier: %w", elementString, propertyPath, err)
 		}
 		container, err = container.GetSection(id)
 		if err != nil {
-			return "", fmt.Errorf("error getting section [%s] in path [%s]: %w", elementString, propertyPath, err)
+			return "", fmt.Errorf("error getting section \"%s\" in path \"%s\": %w", elementString, propertyPath, err)
 		}
 		level++
 	}
@@ -241,11 +241,11 @@ func getModulePropertyValue(settings *ModuleSettings, propertyPath string) (any,
 	var id Identifier
 	err := id.UnmarshalText([]byte(elementString))
 	if err != nil {
-		return "", fmt.Errorf("error converting parameter [%s] in path [%s] to identifier: %w", elementString, propertyPath, err)
+		return "", fmt.Errorf("error converting parameter \"%s\" in path \"%s\" to identifier: %w", elementString, propertyPath, err)
 	}
 	param, err := container.GetParameter(id)
 	if err != nil {
-		return "", fmt.Errorf("error getting parameter [%s] in path [%s]: %w", elementString, propertyPath, err)
+		return "", fmt.Errorf("error getting parameter \"%s\" in path \"%s\": %w", elementString, propertyPath, err)
 	}
 	return param.GetValue(), nil
 }

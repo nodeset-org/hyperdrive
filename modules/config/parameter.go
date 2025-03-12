@@ -613,7 +613,7 @@ func (p *ChoiceParameter[ChoiceType]) Deserialize(data map[string]any) error {
 func (p *ChoiceParameter[ChoiceType]) setProperty(property *ChoiceType, value any) error {
 	paramString, ok := value.(string)
 	if !ok {
-		return fmt.Errorf("invalid type for choice parameter [%s]: %T", p.ID, value)
+		return fmt.Errorf("invalid type for choice parameter \"%s\": %T", p.ID, value)
 	}
 	*property = ChoiceType(paramString)
 	return nil

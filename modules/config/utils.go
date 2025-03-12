@@ -66,7 +66,7 @@ func setNumberProperty[Type NumberParameterType](id string, property *Type, valu
 	case float64:
 		*property = Type(valType)
 	default:
-		return fmt.Errorf("invalid type for number property [%s]: %T", id, value)
+		return fmt.Errorf("invalid type for number property \"%s\": %T", id, value)
 	}
 	return nil
 }

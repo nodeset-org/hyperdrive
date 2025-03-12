@@ -133,7 +133,7 @@ func runCommand[RequestType any, ResponseType any](
 		Cmd:          cmdArray,
 	})
 	if err != nil {
-		return fmt.Errorf("error creating exec command [%s]: %w", command, err)
+		return fmt.Errorf("error creating exec command \"%s\": %w", command, err)
 	}
 
 	// Attach reader/writer to the exec command
@@ -141,7 +141,7 @@ func runCommand[RequestType any, ResponseType any](
 		Tty: false,
 	})
 	if err != nil {
-		return fmt.Errorf("error attaching to exec command [%s]: %w", command, err)
+		return fmt.Errorf("error attaching to exec command \"%s\": %w", command, err)
 	}
 	defer execResponse.Close()
 
@@ -149,7 +149,7 @@ func runCommand[RequestType any, ResponseType any](
 	if request != nil {
 		err = json.NewEncoder(execResponse.Conn).Encode(request)
 		if err != nil {
-			return fmt.Errorf("error sending request for command [%s]: %w", command, err)
+			return fmt.Errorf("error sending request for command \"%s\": %w", command, err)
 		}
 	}
 
@@ -171,7 +171,7 @@ func runCommand[RequestType any, ResponseType any](
 	case exitErr := <-exited:
 		// The command exited first
 		if exitErr != nil {
-			return fmt.Errorf("error reading command [%s] response: %w", command, exitErr)
+			return fmt.Errorf("error reading command \"%s\" response: %w", command, exitErr)
 		}
 		break
 	}
@@ -179,26 +179,26 @@ func runCommand[RequestType any, ResponseType any](
 	// Read the stdout and stderr
 	stdout, err := io.ReadAll(&outBuf)
 	if err != nil {
-		return fmt.Errorf("error reading stdout for command [%s]: %w", command, err)
+		return fmt.Errorf("error reading stdout for command \"%s\": %w", command, err)
 	}
 	stderr, err := io.ReadAll(&errBuf)
 	if err != nil {
-		return fmt.Errorf("error reading stderr for command [%s]: %w", command, err)
+		return fmt.Errorf("error reading stderr for command \"%s\": %w", command, err)
 	}
 
 	// Get the exit code
 	inspectResponse, err := c.dockerClient.ContainerExecInspect(ctx, idResponse.ID)
 	if err != nil {
-		return fmt.Errorf("error inspecting exec command result for [%s]: %w", command, err)
+		return fmt.Errorf("error inspecting exec command result for \"%s\": %w", command, err)
 	}
 
 	// Handle errors
 	if inspectResponse.ExitCode != 0 {
 		trimmedErr := strings.TrimSpace(string(stderr))
 		if len(trimmedErr) > 0 {
-			return fmt.Errorf("command [%s] errored with code %d: %s", command, inspectResponse.ExitCode, trimmedErr)
+			return fmt.Errorf("command \"%s\" errored with code %d: %s", command, inspectResponse.ExitCode, trimmedErr)
 		}
-		return fmt.Errorf("command [%s] errored with code %d and no error message", command, inspectResponse.ExitCode)
+		return fmt.Errorf("command \"%s\" errored with code %d and no error message", command, inspectResponse.ExitCode)
 	}
 
 	// Handle output if no response is expected
@@ -217,11 +217,11 @@ func runCommand[RequestType any, ResponseType any](
 	// Handle output if a response is expected
 	trimmedResult := strings.TrimSpace(string(stdout))
 	if len(trimmedResult) == 0 {
-		return fmt.Errorf("command [%s] returned an empty response with exit code %d and no error message", command, inspectResponse.ExitCode)
+		return fmt.Errorf("command \"%s\" returned an empty response with exit code %d and no error message", command, inspectResponse.ExitCode)
 	}
 	err = json.Unmarshal([]byte(trimmedResult), response)
 	if err != nil {
-		return fmt.Errorf("error unmarshalling response for command [%s]: %w", command, err)
+		return fmt.Errorf("error unmarshalling response for command \"%s\": %w", command, err)
 	}
 	return nil
 }

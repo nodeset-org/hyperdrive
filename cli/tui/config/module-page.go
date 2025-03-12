@@ -34,7 +34,7 @@ func NewModulePage(modulesPage *ModulesPage, info *config.ModuleInfo, previousIn
 	previousSettings := modconfig.CreateModuleSettings(info.Configuration)
 	err := previousSettings.DeserializeFromMap(previousInstance.Settings)
 	if err != nil {
-		panic(fmt.Errorf("error deserializing previous module [%s] settings: %w", fqmn, err))
+		panic(fmt.Errorf("error deserializing previous module \"%s\" settings: %w", fqmn, err))
 	}
 
 	// Create the page
@@ -95,7 +95,7 @@ func (p *ModulePage) createContent() {
 		id := param.GetID()
 		paramSetting, err := p.settings.GetParameter(id)
 		if err != nil {
-			panic(fmt.Errorf("error getting parameter setting [%s]: %w", id, err))
+			panic(fmt.Errorf("error getting parameter setting \"%s\": %w", id, err))
 		}
 
 		// Create the form item for the parameter
@@ -110,7 +110,7 @@ func (p *ModulePage) createContent() {
 		id := section.GetID()
 		settingsSection, err := p.settings.GetSection(id)
 		if err != nil {
-			panic(fmt.Errorf("error getting [%s] section setting [%s]: %w", p.fqmn, id, err))
+			panic(fmt.Errorf("error getting \"%s\" section setting \"%s\": %w", p.fqmn, id, err))
 		}
 
 		// Create the subpage

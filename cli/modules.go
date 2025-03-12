@@ -25,7 +25,7 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 	// Make sure Hyperdrive has been configured already
 	cfg, isNew, err := hd.LoadMainSettingsFile()
 	if err != nil {
-		fmt.Printf("Cannot run command [%s]: error loading main settings file: %v\n", command, err)
+		fmt.Printf("Cannot run command \"%s\": error loading main settings file: %v\n", command, err)
 		return
 	}
 	if isNew {
@@ -71,7 +71,7 @@ func HandleCommandNotFound(c *cli.Context, command string) {
 		} else {
 			fmt.Printf("Module %s failed to load for an unexpected reason\n", mod.Descriptor.Name)
 		}
-		fmt.Printf("The [%s] command is not available until this is resolved.\n", command)
+		fmt.Printf("The \"%s\" command is not available until this is resolved.\n", command)
 		return
 	}
 

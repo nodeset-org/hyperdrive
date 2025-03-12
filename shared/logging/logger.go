@@ -22,7 +22,7 @@ func NewLogger(logFilePath string, options LoggerOptions) (*Logger, error) {
 	// Make the file
 	err := os.MkdirAll(filepath.Dir(logFilePath), logDirMode)
 	if err != nil {
-		return nil, fmt.Errorf("error creating API log directory for [%s]: %w", logFilePath, err)
+		return nil, fmt.Errorf("error creating API log directory for \"%s\": %w", logFilePath, err)
 	}
 	handle, _ := os.OpenFile(logFilePath, os.O_CREATE|os.O_RDWR, logFileMode)
 	handle.Close()

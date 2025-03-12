@@ -650,7 +650,7 @@ func (d *DropDown) ReloadDynamicOptions(param config.IParameterSetting, layout *
 		}
 		err := param.SetValue(values[index])
 		if err != nil {
-			panic(fmt.Sprintf("error setting choice value for parameter [%s]: %s", metadata.GetID(), err.Error()))
+			panic(fmt.Sprintf("error setting choice value for parameter \"%s\": %s", metadata.GetID(), err.Error()))
 		}
 		d.redraw()
 	})

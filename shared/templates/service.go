@@ -84,7 +84,7 @@ func (t *ServiceDataSource) getPropertyValue(fqpn string) (string, error) {
 		var exists bool
 		settings, exists = t.moduleSettingsMap[fqmn]
 		if !exists {
-			return "", fmt.Errorf("module settings not found for module [%s] in path [%s]", fqmn, propertyPath)
+			return "", fmt.Errorf("module settings not found for module \"%s\" in path \"%s\"", fqmn, propertyPath)
 		}
 	}
 	return getModulePropertyValue(settings, propertyPath)
@@ -103,11 +103,11 @@ func getModulePropertyValue(settings *modconfig.ModuleSettings, paramPath string
 		var id modconfig.Identifier
 		err := id.UnmarshalText([]byte(elementString))
 		if err != nil {
-			return "", fmt.Errorf("error converting section [%s] in path [%s] to identifier: %w", elementString, paramPath, err)
+			return "", fmt.Errorf("error converting section \"%s\" in path \"%s\" to identifier: %w", elementString, paramPath, err)
 		}
 		container, err = container.GetSection(id)
 		if err != nil {
-			return "", fmt.Errorf("error getting section [%s] in path [%s]: %w", elementString, paramPath, err)
+			return "", fmt.Errorf("error getting section \"%s\" in path \"%s\": %w", elementString, paramPath, err)
 		}
 		level++
 	}
@@ -117,11 +117,11 @@ func getModulePropertyValue(settings *modconfig.ModuleSettings, paramPath string
 	var id modconfig.Identifier
 	err := id.UnmarshalText([]byte(elementString))
 	if err != nil {
-		return "", fmt.Errorf("error converting parameter [%s] in path [%s] to identifier: %w", elementString, paramPath, err)
+		return "", fmt.Errorf("error converting parameter \"%s\" in path \"%s\" to identifier: %w", elementString, paramPath, err)
 	}
 	param, err := container.GetParameter(id)
 	if err != nil {
-		return "", fmt.Errorf("error getting parameter [%s] in path [%s]: %w", elementString, paramPath, err)
+		return "", fmt.Errorf("error getting parameter \"%s\" in path \"%s\": %w", elementString, paramPath, err)
 	}
 	return param.String(), nil
 }

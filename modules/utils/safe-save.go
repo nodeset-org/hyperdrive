@@ -23,7 +23,7 @@ func SafeSaveFile(data []byte, path string, mode os.FileMode) error {
 	tempFilename := fmt.Sprintf("%s_%s_%s.tmp", filename, date, timestamp)
 	tempFile, err := os.CreateTemp(directory, tempFilename)
 	if err != nil {
-		return fmt.Errorf("error creating temporary file [%s]: %w", tempFilename, err)
+		return fmt.Errorf("error creating temporary file \"%s\": %w", tempFilename, err)
 	}
 
 	defer func() {
@@ -37,21 +37,21 @@ func SafeSaveFile(data []byte, path string, mode os.FileMode) error {
 	// Write the data to the temporary file
 	_, err = tempFile.Write(data)
 	if err != nil {
-		return fmt.Errorf("error writing data to temporary file [%s]: %w", tempFilename, err)
+		return fmt.Errorf("error writing data to temporary file \"%s\": %w", tempFilename, err)
 	}
 	err = tempFile.Close()
 	if err != nil {
-		return fmt.Errorf("error closing temporary file [%s]: %w", tempFilename, err)
+		return fmt.Errorf("error closing temporary file \"%s\": %w", tempFilename, err)
 	}
 
 	// Replace the original file with the temporary file
 	err = os.Rename(tempFile.Name(), path)
 	if err != nil {
-		return fmt.Errorf("error replacing file [%s] with temporary file [%s]: %w", filename, tempFilename, err)
+		return fmt.Errorf("error replacing file \"%s\" with temporary file \"%s\": %w", filename, tempFilename, err)
 	}
 	err = os.Chmod(path, mode)
 	if err != nil {
-		return fmt.Errorf("error setting permissions of file [%s]: %w", filename, err)
+		return fmt.Errorf("error setting permissions of file \"%s\": %w", filename, err)
 	}
 	return nil
 }

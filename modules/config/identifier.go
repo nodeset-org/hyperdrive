@@ -54,7 +54,7 @@ func deserializeIdentifier(data map[string]any, propertyName string, property *I
 	// Make sure the string is valid
 	err = property.UnmarshalText([]byte(value))
 	if err != nil {
-		return fmt.Errorf("invalid %s [%s]", propertyName, value)
+		return fmt.Errorf("invalid %s \"%s\"", propertyName, value)
 	}
 	return nil
 }

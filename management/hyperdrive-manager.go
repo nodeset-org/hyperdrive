@@ -109,7 +109,7 @@ func (m *HyperdriveManager) LoadModules() error {
 		if module.Configuration == nil {
 			// This should never happen
 			brokenModules = append(brokenModules, module)
-			module.ConfigurationLoadError = fmt.Errorf("module [%s] has a nil configuration", module.Descriptor.GetFullyQualifiedModuleName())
+			module.ConfigurationLoadError = fmt.Errorf("module \"%s\" has a nil configuration", module.Descriptor.GetFullyQualifiedModuleName())
 			continue
 		}
 	}
@@ -176,7 +176,7 @@ func (m *HyperdriveManager) reloadModuleInstallations() (
 			continue
 		default:
 			// This should never happen
-			return nil, nil, nil, fmt.Errorf("module [%s] has an unknown global adapter container status: %s", module.Descriptor.GetFullyQualifiedModuleName(), module.GlobalAdapterContainerStatus)
+			return nil, nil, nil, fmt.Errorf("module \"%s\" has an unknown global adapter container status: %s", module.Descriptor.GetFullyQualifiedModuleName(), module.GlobalAdapterContainerStatus)
 		}
 
 		// Everything checks out
@@ -201,7 +201,7 @@ func (m *HyperdriveManager) LoadPendingSettingsFile() (*hdconfig.HyperdriveSetti
 func (m *HyperdriveManager) LoadSettingsFile(path string) (*hdconfig.HyperdriveSettings, bool, error) {
 	cfg, err := m.cfgMgr.HyperdriveConfiguration.LoadSettingsFromFile(path)
 	if err != nil {
-		return nil, false, fmt.Errorf("error loading config settings file [%s]: %w", path, err)
+		return nil, false, fmt.Errorf("error loading config settings file \"%s\": %w", path, err)
 	}
 
 	if cfg == nil {
@@ -246,12 +246,12 @@ func (m HyperdriveManager) createDirectory(path string, mode os.FileMode) error 
 	if errors.Is(err, fs.ErrNotExist) {
 		err = os.MkdirAll(path, mode)
 		if err != nil {
-			return fmt.Errorf("error creating directory [%s]: %w", m.cfgDir, err)
+			return fmt.Errorf("error creating directory \"%s\": %w", m.cfgDir, err)
 		}
 	} else if err != nil {
-		return fmt.Errorf("error checking directory [%s]: %w", m.cfgDir, err)
+		return fmt.Errorf("error checking directory \"%s\": %w", m.cfgDir, err)
 	} else if !stat.IsDir() {
-		return fmt.Errorf("directory [%s] is already in use but is not a directory", m.cfgDir)
+		return fmt.Errorf("directory \"%s\" is already in use but is not a directory", m.cfgDir)
 	}
 
 	return nil
@@ -299,7 +299,7 @@ func (m *HyperdriveManager) UpdateDefaults(hdSettings *hdconfig.HyperdriveSettin
 		modSettings := modconfig.CreateModuleSettings(modCfg)
 		err := modconfig.UpdateDefaults(modCfg, modSettings)
 		if err != nil {
-			return fmt.Errorf("error updating defaults for module [%s]: %w", fqmn, err)
+			return fmt.Errorf("error updating defaults for module \"%s\": %w", fqmn, err)
 		}
 		instance.Settings = modSettings.SerializeToMap()
 	}
@@ -311,14 +311,14 @@ func (m *HyperdriveManager) UpdateDefaults(hdSettings *hdconfig.HyperdriveSettin
 func (m *HyperdriveManager) SavePendingSettings(settings *hdconfig.HyperdriveSettings) error {
 	err := m.InitializeNewInstallation()
 	if err != nil {
-		return fmt.Errorf("error initializing hyperdrive user directory [%s]: %w", m.cfgDir, err)
+		return fmt.Errorf("error initializing hyperdrive user directory \"%s\": %w", m.cfgDir, err)
 	}
 
 	// Save the settings
 	settingsPath := filepath.Join(m.cfgDir, hdconfig.PendingSettingsFilename)
 	err = settings.SaveToFile(settingsPath)
 	if err != nil {
-		return fmt.Errorf("error writing Hyperdrive pending settings file [%s]: %w", settingsPath, err)
+		return fmt.Errorf("error writing Hyperdrive pending settings file \"%s\": %w", settingsPath, err)
 	}
 
 	return nil
@@ -334,7 +334,7 @@ func (m *HyperdriveManager) CommitPendingSettings(backupOldSettings bool) error 
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil
 		}
-		return fmt.Errorf("error checking for Hyperdrive pending settings file [%s]: %w", pendingSettingsPath, err)
+		return fmt.Errorf("error checking for Hyperdrive pending settings file \"%s\": %w", pendingSettingsPath, err)
 	}
 
 	// Backup the old settings if requested
@@ -364,7 +364,7 @@ func (m *HyperdriveManager) backupPrimarySettings() error {
 		if errors.Is(err, fs.ErrNotExist) {
 			return nil
 		}
-		return fmt.Errorf("error checking for Hyperdrive settings file [%s]: %w", primarySettingsPath, err)
+		return fmt.Errorf("error checking for Hyperdrive settings file \"%s\": %w", primarySettingsPath, err)
 	}
 
 	// Backup the old settings file
@@ -373,7 +373,7 @@ func (m *HyperdriveManager) backupPrimarySettings() error {
 	backupSettingsPath := filepath.Join(m.cfgDir, hdconfig.BackupConfigFolder, backupFilename)
 	err = os.Rename(primarySettingsPath, backupSettingsPath)
 	if err != nil {
-		return fmt.Errorf("error backing up Hyperdrive settings file go [%s]: %w", backupSettingsPath, err)
+		return fmt.Errorf("error backing up Hyperdrive settings file go \"%s\": %w", backupSettingsPath, err)
 	}
 	return nil
 }
@@ -384,7 +384,7 @@ func (m *HyperdriveManager) backupPrimarySettings() error {
 func (m *HyperdriveManager) PurgeData(settings *hdconfig.HyperdriveSettings) error {
 	err := os.RemoveAll(settings.UserDataPath)
 	if err != nil {
-		return fmt.Errorf("error deleting data directory [%s]: %w", settings.UserDataPath, err)
+		return fmt.Errorf("error deleting data directory \"%s\": %w", settings.UserDataPath, err)
 	}
 
 	return nil

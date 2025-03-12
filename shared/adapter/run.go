@@ -49,7 +49,7 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 		Cmd:          cmdArray,
 	})
 	if err != nil {
-		return "", "", fmt.Errorf("error creating exec command [%s]: %w", command, err)
+		return "", "", fmt.Errorf("error creating exec command \"%s\": %w", command, err)
 	}
 	if logger != nil {
 		logger.Debug(
@@ -64,7 +64,7 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 		Tty: false,
 	})
 	if err != nil {
-		return "", "", fmt.Errorf("error attaching to exec command [%s]: %w", command, err)
+		return "", "", fmt.Errorf("error attaching to exec command \"%s\": %w", command, err)
 	}
 	defer execResponse.Close()
 	if logger != nil {
@@ -74,7 +74,7 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 	// Send the request down via stdin
 	err = json.NewEncoder(execResponse.Conn).Encode(request)
 	if err != nil {
-		return "", "", fmt.Errorf("error sending request for command [%s]: %w", command, err)
+		return "", "", fmt.Errorf("error sending request for command \"%s\": %w", command, err)
 	}
 
 	// Start the output reader
@@ -103,7 +103,7 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 	case exitErr := <-exited:
 		// The command exited first
 		if exitErr != nil {
-			return "", "", fmt.Errorf("error reading command [%s] response: %w", command, exitErr)
+			return "", "", fmt.Errorf("error reading command \"%s\" response: %w", command, exitErr)
 		}
 		if logger != nil {
 			logger.Debug("Exec command exited")
@@ -113,7 +113,7 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 			case inErr := <-inStopped:
 				// The input stopped first
 				if inErr != nil {
-					return fmt.Errorf("error sending input for command [%s]: %w", command, inErr)
+					return fmt.Errorf("error sending input for command \"%s\": %w", command, inErr)
 				}
 				logger.Debug("Input stopped")
 				break
@@ -123,17 +123,17 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 	// Read the stdout and stderr
 	stdout, err := io.ReadAll(&outBuf)
 	if err != nil {
-		return "", "", fmt.Errorf("error reading stdout for command [%s]: %w", command, err)
+		return "", "", fmt.Errorf("error reading stdout for command \"%s\": %w", command, err)
 	}
 	stderr, err := io.ReadAll(&errBuf)
 	if err != nil {
-		return "", "", fmt.Errorf("error reading stderr for command [%s]: %w", command, err)
+		return "", "", fmt.Errorf("error reading stderr for command \"%s\": %w", command, err)
 	}
 
 	// Get the exit code
 	inspectResponse, err := c.dockerClient.ContainerExecInspect(ctx, idResponse.ID)
 	if err != nil {
-		return "", "", fmt.Errorf("error inspecting exec command result for [%s]: %w", command, err)
+		return "", "", fmt.Errorf("error inspecting exec command result for \"%s\": %w", command, err)
 	}
 
 	// Print the output
@@ -144,7 +144,7 @@ func (c *AdapterClient) RunNoninteractive(ctx context.Context, logger *slog.Logg
 		logger.Error("Command error", "stderr", string(stderr))
 	}
 	if inspectResponse.ExitCode != 0 {
-		return "", "", fmt.Errorf("command [%s] errored with code %d", command, inspectResponse.ExitCode)
+		return "", "", fmt.Errorf("command \"%s\" errored with code %d", command, inspectResponse.ExitCode)
 	}
 	return string(stdout), string(stderr), nil
 }
@@ -168,7 +168,7 @@ func (c *AdapterClient) Run(ctx context.Context, logger *slog.Logger, command st
 		Cmd:          cmdArray,
 	})
 	if err != nil {
-		return fmt.Errorf("error creating exec command [%s]: %w", command, err)
+		return fmt.Errorf("error creating exec command \"%s\": %w", command, err)
 	}
 	if logger != nil {
 		logger.Debug(
@@ -190,7 +190,7 @@ func (c *AdapterClient) Run(ctx context.Context, logger *slog.Logger, command st
 		ConsoleSize: consoleSize,
 	})
 	if err != nil {
-		return fmt.Errorf("error attaching to exec command [%s]: %w", command, err)
+		return fmt.Errorf("error attaching to exec command \"%s\": %w", command, err)
 	}
 	defer execResponse.Close()
 	if logger != nil {
@@ -201,13 +201,13 @@ func (c *AdapterClient) Run(ctx context.Context, logger *slog.Logger, command st
 	buffer := new(bytes.Buffer)
 	err = json.NewEncoder(buffer).Encode(request)
 	if err != nil {
-		return fmt.Errorf("error encoding request for command [%s]: %w", command, err)
+		return fmt.Errorf("error encoding request for command \"%s\": %w", command, err)
 	}
 	requestString := strings.TrimSpace(buffer.String())
 	bufferSize := len(requestString)
 	_, err = io.Copy(execResponse.Conn, buffer)
 	if err != nil {
-		return fmt.Errorf("error sending request for command [%s]: %w", command, err)
+		return fmt.Errorf("error sending request for command \"%s\": %w", command, err)
 	}
 
 	// NOTE: for some reason the request we just sent is going to get echoed back to us
@@ -218,13 +218,13 @@ func (c *AdapterClient) Run(ctx context.Context, logger *slog.Logger, command st
 	for totalBytesRead <= bufferSize {
 		bytesRead, err := execResponse.Conn.Read(readBuffer[totalBytesRead:])
 		if err != nil {
-			return fmt.Errorf("error reading response for command [%s]: %w", command, err)
+			return fmt.Errorf("error reading response for command \"%s\": %w", command, err)
 		}
 		totalBytesRead += bytesRead
 	}
 	readString := strings.TrimSpace(string(readBuffer))
 	if readString != requestString {
-		return fmt.Errorf("error reading response for command [%s]: expected %s, got %s", command, requestString, readString)
+		return fmt.Errorf("error reading response for command \"%s\": expected %s, got %s", command, requestString, readString)
 	}
 
 	// Attach streams to the container
@@ -286,7 +286,7 @@ func (c *AdapterClient) Run2(ctx context.Context, cmd string, interactive bool) 
 	buf := new(bytes.Buffer)
 	err := json.NewEncoder(buf).Encode(request)
 	if err != nil {
-		return fmt.Errorf("error sending request for command [%s]: %w", cmdString, err)
+		return fmt.Errorf("error sending request for command \"%s\": %w", cmdString, err)
 	}
 	buf.Write([]byte("\n"))
 	fullCmd.SetStdin(buf)
@@ -312,7 +312,7 @@ func (c *AdapterClient) Run2(ctx context.Context, cmd string, interactive bool) 
 		fmt.Println(errbuf.String())
 	}
 	if err != nil {
-		return fmt.Errorf("error running command [%s]: %w", cmdString, err)
+		return fmt.Errorf("error running command \"%s\": %w", cmdString, err)
 	}
 	return nil
 }

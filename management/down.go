@@ -90,7 +90,7 @@ func downModules(
 		modProject := utils.GetModuleComposeProjectName(hdSettings.ProjectName, descriptor)
 		err := DownProject(modProject, includeVolumes)
 		if err != nil {
-			return fmt.Errorf("error deleting module [%s]: %w", descriptor.Name, err)
+			return fmt.Errorf("error deleting module \"%s\": %w", descriptor.Name, err)
 		}
 	}
 	return nil

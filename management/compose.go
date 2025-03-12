@@ -68,7 +68,7 @@ func StartProject(project string, files []string) error {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("error starting project [%s]: %w", project, err)
+		return fmt.Errorf("error starting project \"%s\": %w", project, err)
 	}
 	return nil
 }
@@ -87,7 +87,7 @@ func StopProject(project string, services []string) error {
 	if len(services) > 0 {
 		files, err := GetFilesForProject(project)
 		if err != nil {
-			return fmt.Errorf("error stopping project [%s]: %w", project, err)
+			return fmt.Errorf("error stopping project \"%s\": %w", project, err)
 		}
 		foundServices := make(map[string]bool)
 		for _, service := range services {
@@ -95,7 +95,7 @@ func StopProject(project string, services []string) error {
 			for _, file := range files {
 				config, err := ParseComposeFile(project, file)
 				if err != nil {
-					return fmt.Errorf("error stopping project [%s]: %w", project, err)
+					return fmt.Errorf("error stopping project \"%s\": %w", project, err)
 				}
 				if config.Name == service {
 					foundServices[service] = true
@@ -106,7 +106,7 @@ func StopProject(project string, services []string) error {
 		}
 		for service, found := range foundServices {
 			if !found {
-				return fmt.Errorf("service [%s] not found in project [%s]", service, project)
+				return fmt.Errorf("service \"%s\" not found in project \"%s\"", service, project)
 			}
 		}
 	}
@@ -117,7 +117,7 @@ func StopProject(project string, services []string) error {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("error stopping project [%s]: %w", project, err)
+		return fmt.Errorf("error stopping project \"%s\": %w", project, err)
 	}
 	return nil
 }
@@ -138,7 +138,7 @@ func DownProject(project string, includeVolumes bool) error {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("error deleting project [%s]: %w", project, err)
+		return fmt.Errorf("error deleting project \"%s\": %w", project, err)
 	}
 	return nil
 }
@@ -150,20 +150,20 @@ func ParseComposeFile(projectName string, file string) (*types.ServiceConfig, er
 		o.SetProjectName(projectName, true)
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error loading Docker Compose file [%s]: %w", file, err)
+		return nil, fmt.Errorf("error loading Docker Compose file \"%s\": %w", file, err)
 	}
 	project, err := loader.LoadWithContext(context.Background(), *details, func(o *loader.Options) {
 		o.SetProjectName(projectName, true)
 	})
 	if err != nil {
-		return nil, fmt.Errorf("error parsing Docker Compose file [%s]: %w", file, err)
+		return nil, fmt.Errorf("error parsing Docker Compose file \"%s\": %w", file, err)
 	}
 	if len(project.Services) > 1 {
-		return nil, fmt.Errorf("multiple services found in Docker Compose file [%s]", file)
+		return nil, fmt.Errorf("multiple services found in Docker Compose file \"%s\"", file)
 	}
 	for _, service := range project.Services {
 		// Return the first service found since it should be the only one
 		return &service, nil
 	}
-	return nil, fmt.Errorf("no services found in Docker Compose file [%s]", file)
+	return nil, fmt.Errorf("no services found in Docker Compose file \"%s\"", file)
 }

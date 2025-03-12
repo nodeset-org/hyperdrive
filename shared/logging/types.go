@@ -71,6 +71,6 @@ func (l LogLevel) Level() slog.Level {
 	case LogLevel_Error:
 		return slog.LevelError
 	default:
-		panic(fmt.Sprintf("log level [%s] cannot be converted to a slog Level", l))
+		panic(fmt.Sprintf("log level \"%s\" cannot be converted to a slog Level", l))
 	}
 }

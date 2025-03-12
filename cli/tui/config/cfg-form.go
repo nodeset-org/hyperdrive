@@ -77,7 +77,7 @@ func createParameterizedFormItem(param config.IParameterSetting, layout *standar
 	case config.ParameterType_String:
 		return createParameterizedStringField(param, redrawContainer)
 	default:
-		panic(fmt.Sprintf("param [%s] is not a supported type for form item binding", metadata.GetName()))
+		panic(fmt.Sprintf("param \"%s\" is not a supported type for form item binding", metadata.GetName()))
 	}
 }
 
@@ -93,7 +93,7 @@ func createParameterizedCheckbox(param config.IParameterSetting, redrawContainer
 			}
 			err := param.SetValue(checked)
 			if err != nil {
-				panic(fmt.Sprintf("error setting checkbox value for parameter [%s]: %s", metadata.GetID(), err.Error()))
+				panic(fmt.Sprintf("error setting checkbox value for parameter \"%s\": %s", metadata.GetID(), err.Error()))
 			}
 			redrawContainer()
 		})
@@ -131,7 +131,7 @@ func createParameterizedIntField(param config.IParameterSetting, redrawContainer
 			} else if value != param.GetValue() {
 				err := param.SetValue(value)
 				if err != nil {
-					panic(fmt.Sprintf("error setting int value for parameter [%s]: %s", metadata.GetID(), err.Error()))
+					panic(fmt.Sprintf("error setting int value for parameter \"%s\": %s", metadata.GetID(), err.Error()))
 				}
 				redrawContainer()
 			}
@@ -171,7 +171,7 @@ func createParameterizedUintField(param config.IParameterSetting, redrawContaine
 			} else if value != param.GetValue() {
 				err := param.SetValue(value)
 				if err != nil {
-					panic(fmt.Sprintf("error setting uint value for parameter [%s]: %s", metadata.GetID(), err.Error()))
+					panic(fmt.Sprintf("error setting uint value for parameter \"%s\": %s", metadata.GetID(), err.Error()))
 				}
 				redrawContainer()
 			}
@@ -206,7 +206,7 @@ func createParameterizedStringField(param config.IParameterSetting, redrawContai
 		} else if value != param.GetValue() {
 			err := param.SetValue(value)
 			if err != nil {
-				panic(fmt.Sprintf("error setting string value for parameter [%s]: %s", metadata.GetID(), err.Error()))
+				panic(fmt.Sprintf("error setting string value for parameter \"%s\": %s", metadata.GetID(), err.Error()))
 			}
 			redrawContainer()
 		}
@@ -254,7 +254,7 @@ func createParameterizedFloatField(param config.IParameterSetting, redrawContain
 			} else if value != param.GetValue() {
 				err := param.SetValue(value)
 				if err != nil {
-					panic(fmt.Sprintf("error setting float value for parameter [%s]: %s", metadata.GetID(), err.Error()))
+					panic(fmt.Sprintf("error setting float value for parameter \"%s\": %s", metadata.GetID(), err.Error()))
 				}
 				redrawContainer()
 			}

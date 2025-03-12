@@ -91,7 +91,7 @@ func (e *enableParamInstance) GetValue() any {
 func (e *enableParamInstance) SetValue(value any) error {
 	val, ok := value.(bool)
 	if !ok {
-		return fmt.Errorf("invalid value type for module [%s] enable flag: %T", e.info.Descriptor.GetFullyQualifiedModuleName(), value)
+		return fmt.Errorf("invalid value type for module \"%s\" enable flag: %T", e.info.Descriptor.GetFullyQualifiedModuleName(), value)
 	}
 	e.intance.Enabled = val
 	return nil

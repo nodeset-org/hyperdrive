@@ -96,11 +96,11 @@ func (m *HyperdriveManager) StartService(currentSettings *hdconfig.HyperdriveSet
 	for _, info := range modInfos {
 		pac, err := modMgr.GetProjectAdapterClient(currentSettings.ProjectName, info.Descriptor.GetFullyQualifiedModuleName())
 		if err != nil {
-			return fmt.Errorf("error getting project adapter client for module [%s]: %w", info.Descriptor.Name, err)
+			return fmt.Errorf("error getting project adapter client for module \"%s\": %w", info.Descriptor.Name, err)
 		}
 		err = pac.SetSettings(context.Background(), currentSettings)
 		if err != nil {
-			return fmt.Errorf("error saving settings for module [%s]: %w", info.Descriptor.Name, err)
+			return fmt.Errorf("error saving settings for module \"%s\": %w", info.Descriptor.Name, err)
 		}
 	}
 
@@ -165,7 +165,7 @@ func createModuleSettingsArtifacts(
 		moduleSettings := modconfig.CreateModuleSettings(modInfo.Configuration)
 		err := moduleSettings.CopySettingsFromKnownType(settings.Settings)
 		if err != nil {
-			return nil, nil, fmt.Errorf("error loading settings for module [%s]: %w", fqmn, err)
+			return nil, nil, fmt.Errorf("error loading settings for module \"%s\": %w", fqmn, err)
 		}
 		moduleSettingsMap[fqmn] = moduleSettings
 		modInfos[fqmn] = modInfo
@@ -196,11 +196,11 @@ func deployTemplates(systemDir string, userDir string, settings *hdconfig.Hyperd
 	// Clear out the runtime folder and remake it
 	err = os.RemoveAll(runtimeDir)
 	if err != nil {
-		return nil, fmt.Errorf("error deleting runtime folder [%s]: %w", runtimeDir, err)
+		return nil, fmt.Errorf("error deleting runtime folder \"%s\": %w", runtimeDir, err)
 	}
 	err = os.Mkdir(runtimeDir, 0775)
 	if err != nil {
-		return nil, fmt.Errorf("error creating runtime folder [%s]: %w", runtimeDir, err)
+		return nil, fmt.Errorf("error creating runtime folder \"%s\": %w", runtimeDir, err)
 	}
 
 	// Make the extra scrape jobs folder
@@ -249,7 +249,7 @@ func deployModules(
 		info := infos[module.Descriptor.GetFullyQualifiedModuleName()]
 		err := modMgr.DeployModule(moduleInstallDir, hdSettings, moduleSettingsMap, info)
 		if err != nil {
-			return fmt.Errorf("error deploying module [%s]: %w", module.Descriptor.GetFullyQualifiedModuleName(), err)
+			return fmt.Errorf("error deploying module \"%s\": %w", module.Descriptor.GetFullyQualifiedModuleName(), err)
 		}
 	}
 	return nil
@@ -304,11 +304,11 @@ func startModules(
 	for _, info := range infos {
 		pac, err := modMgr.GetProjectAdapterClient(hdSettings.ProjectName, info.Descriptor.GetFullyQualifiedModuleName())
 		if err != nil {
-			return fmt.Errorf("error getting project adapter client for module [%s]: %w", info.Descriptor.Name, err)
+			return fmt.Errorf("error getting project adapter client for module \"%s\": %w", info.Descriptor.Name, err)
 		}
 		err = pac.Start(context.Background(), hdSettings)
 		if err != nil {
-			return fmt.Errorf("error starting module [%s]: %w", info.Descriptor.Name, err)
+			return fmt.Errorf("error starting module \"%s\": %w", info.Descriptor.Name, err)
 		}
 	}
 	return nil
@@ -349,13 +349,13 @@ func copyOverrideFiles(sourceDir string, targetDir string) error {
 		srcPath := filepath.Join(sourceDir, filename)
 		contents, err := os.ReadFile(srcPath)
 		if err != nil {
-			return fmt.Errorf("error reading override file [%s]: %w", srcPath, err)
+			return fmt.Errorf("error reading override file \"%s\": %w", srcPath, err)
 		}
 
 		// Write a copy to the user dir
 		err = os.WriteFile(targetPath, contents, 0644)
 		if err != nil {
-			return fmt.Errorf("error writing local override file [%s]: %w", targetPath, err)
+			return fmt.Errorf("error writing local override file \"%s\": %w", targetPath, err)
 		}
 	}
 	return nil
@@ -365,7 +365,7 @@ func copyOverrideFiles(sourceDir string, targetDir string) error {
 func removeComposeVersion(targetDir string) error {
 	files, err := os.ReadDir(targetDir)
 	if err != nil {
-		return fmt.Errorf("error enumerating folder [%s]: %w", targetDir, err)
+		return fmt.Errorf("error enumerating folder \"%s\": %w", targetDir, err)
 	}
 
 	// Copy any override files that don't exist in the local user directory
@@ -389,7 +389,7 @@ func removeComposeVersion(targetDir string) error {
 		// Read the source
 		contents, err := os.ReadFile(targetPath)
 		if err != nil {
-			return fmt.Errorf("error reading file [%s]: %w", targetPath, err)
+			return fmt.Errorf("error reading file \"%s\": %w", targetPath, err)
 		}
 
 		// Remove the version field, accounting for both Windows and Unix line endings
@@ -400,7 +400,7 @@ func removeComposeVersion(targetDir string) error {
 		if len(newContents) != len(contents) {
 			err = os.WriteFile(targetPath, newContents, 0644)
 			if err != nil {
-				return fmt.Errorf("error updating file [%s]: %w", targetPath, err)
+				return fmt.Errorf("error updating file \"%s\": %w", targetPath, err)
 			}
 		}
 	}

@@ -63,7 +63,7 @@ func (p *SectionPage) createContent() {
 		id := param.GetID()
 		paramSetting, err := p.settings.GetParameter(id)
 		if err != nil {
-			panic(fmt.Errorf("error getting [%s] parameter setting [%s]: %w", p.section.GetName(), id, err)) // TODO: better logging, like FQMN
+			panic(fmt.Errorf("error getting \"%s\" parameter setting \"%s\": %w", p.section.GetName(), id, err)) // TODO: better logging, like FQMN
 		}
 
 		// Create the form item for the parameter
@@ -78,7 +78,7 @@ func (p *SectionPage) createContent() {
 		id := section.GetID()
 		settingsSection, err := p.settings.GetSection(id)
 		if err != nil {
-			panic(fmt.Errorf("error getting [%s] section setting [%s]: %w", p.section.GetName(), id, err)) // TODO: better logging, like FQMN
+			panic(fmt.Errorf("error getting \"%s\" section setting \"%s\": %w", p.section.GetName(), id, err)) // TODO: better logging, like FQMN
 		}
 
 		// Create the subpage

@@ -42,7 +42,7 @@ func CreateOrLoadKeyFile(keyPath string, keyLengthInBytes int) (string, error) {
 		if errors.Is(err, fs.ErrNotExist) {
 			exists = false
 		} else {
-			return "", fmt.Errorf("error checking if key [%s] exists: %w", keyPath, err)
+			return "", fmt.Errorf("error checking if key \"%s\" exists: %w", keyPath, err)
 		}
 	}
 
@@ -50,7 +50,7 @@ func CreateOrLoadKeyFile(keyPath string, keyLengthInBytes int) (string, error) {
 	if exists {
 		key, err := os.ReadFile(keyPath)
 		if err != nil {
-			return "", fmt.Errorf("error reading key file [%s]: %w", keyPath, err)
+			return "", fmt.Errorf("error reading key file \"%s\": %w", keyPath, err)
 		}
 		return string(key), nil
 	}
@@ -64,7 +64,7 @@ func CreateOrLoadKeyFile(keyPath string, keyLengthInBytes int) (string, error) {
 	// Write the new key
 	err = os.WriteFile(keyPath, []byte(key), KeyPermissions)
 	if err != nil {
-		return "", fmt.Errorf("error writing key file [%s]: %w", keyPath, err)
+		return "", fmt.Errorf("error writing key file \"%s\": %w", keyPath, err)
 	}
 
 	return key, nil

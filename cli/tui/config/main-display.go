@@ -140,12 +140,12 @@ func NewMainDisplay(
 	for fqmn, module := range config.Modules {
 		instance, exists := newSettings.Modules[fqmn]
 		if !exists {
-			panic(fmt.Errorf("module instance [%s] not found", fqmn))
+			panic(fmt.Errorf("module instance \"%s\" not found", fqmn))
 		}
 		settings := modconfig.CreateModuleSettings(module.Configuration)
 		err := settings.DeserializeFromMap(instance.Settings)
 		if err != nil {
-			panic(fmt.Errorf("error deserializing module [%s] settings: %w", fqmn, err))
+			panic(fmt.Errorf("error deserializing module \"%s\" settings: %w", fqmn, err))
 		}
 		md.moduleSettingsMap[fqmn] = settings
 	}

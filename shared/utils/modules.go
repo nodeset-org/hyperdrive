@@ -37,8 +37,6 @@ func GetProjectAdapterContainerName(projectName string, descriptor *modules.Modu
 	return GetModuleComposeProjectName(projectName, descriptor) + "_" + AdapterContainerName
 }
 
-
-
 // Get the descriptors for all installed modules
 func GetInstalledDescriptors(modulePath string) ([]*modules.ModuleDescriptor, error) {
 	// Enumerate the installed modules
@@ -65,7 +63,7 @@ func GetInstalledDescriptors(modulePath string) ([]*modules.ModuleDescriptor, er
 			continue
 		}
 		if err != nil {
-			return nil, fmt.Errorf("error reading descriptor file [%s]: %w", descriptorPath, err)
+			return nil, fmt.Errorf("error reading descriptor file \"%s\": %w", descriptorPath, err)
 		}
 
 		// Load the descriptor

@@ -217,12 +217,12 @@ func validateFlags(c *cli.Context) (*management.HyperdriveContext, error) {
 	configPath := c.String(cliutils.UserDirPathFlag.Name)
 	fullConfigPath, err := homedir.Expand(strings.TrimSpace(configPath))
 	if err != nil {
-		return nil, fmt.Errorf("error expanding config path [%s]: %w", configPath, err)
+		return nil, fmt.Errorf("error expanding config path \"%s\": %w", configPath, err)
 	}
 	systemPath := c.String(cliutils.SystemDirPathFlag.Name)
 	fullSystemPath, err := homedir.Expand(strings.TrimSpace(systemPath))
 	if err != nil {
-		return nil, fmt.Errorf("error expanding system path [%s]: %w", systemPath, err)
+		return nil, fmt.Errorf("error expanding system path \"%s\": %w", systemPath, err)
 	}
 
 	hdCtx := management.NewHyperdriveContext(fullConfigPath, fullSystemPath)
@@ -234,7 +234,7 @@ func validateFlags(c *cli.Context) (*management.HyperdriveContext, error) {
 	if address != "" {
 		baseUrl, err := url.Parse(address)
 		if err != nil {
-			return nil, fmt.Errorf("error parsing API address [%s]: %w", hdCtx.ApiUrl, err)
+			return nil, fmt.Errorf("error parsing API address \"%s\": %w", hdCtx.ApiUrl, err)
 		}
 		hdCtx.ApiUrl = baseUrl.JoinPath(hdconfig.HyperdriveApiClientRoute)
 	}
@@ -244,7 +244,7 @@ func validateFlags(c *cli.Context) (*management.HyperdriveContext, error) {
 	if httpTracePath != "" {
 		hdCtx.HttpTraceFile, err = os.OpenFile(httpTracePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, traceMode)
 		if err != nil {
-			return nil, fmt.Errorf("error opening HTTP trace file [%s]: %w", httpTracePath, err)
+			return nil, fmt.Errorf("error opening HTTP trace file \"%s\": %w", httpTracePath, err)
 		}
 	}
 

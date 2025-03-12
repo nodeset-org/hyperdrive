@@ -46,7 +46,7 @@ func deserializeDynamicProperty[Type any](data map[string]any, propertyName stri
 	// Unmarshal the property
 	err = property.Unmarshal(value)
 	if err != nil {
-		return true, fmt.Errorf("invalid %s [%s]", propertyName, value)
+		return true, fmt.Errorf("invalid %s \"%s\"", propertyName, value)
 	}
 	return true, nil
 }

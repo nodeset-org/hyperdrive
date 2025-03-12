@@ -29,7 +29,7 @@ func LoadResources(sourceDir string) ([]*HyperdriveResources, error) {
 	// Make sure the folder exists
 	_, err := os.Stat(sourceDir)
 	if errors.Is(err, fs.ErrNotExist) {
-		return nil, fmt.Errorf("network settings folder [%s] does not exist", sourceDir)
+		return nil, fmt.Errorf("network settings folder \"%s\" does not exist", sourceDir)
 	}
 
 	// Enumerate the dir
@@ -55,14 +55,14 @@ func LoadResources(sourceDir string) ([]*HyperdriveResources, error) {
 		settingsFilePath := filepath.Join(sourceDir, filename)
 		bytes, err := os.ReadFile(settingsFilePath)
 		if err != nil {
-			return nil, fmt.Errorf("error reading network settings file [%s]: %w", settingsFilePath, err)
+			return nil, fmt.Errorf("error reading network settings file \"%s\": %w", settingsFilePath, err)
 		}
 
 		// Unmarshal the settings
 		settings := new(HyperdriveResources)
 		err = yaml.Unmarshal(bytes, settings)
 		if err != nil {
-			return nil, fmt.Errorf("error unmarshalling network settings file [%s]: %w", settingsFilePath, err)
+			return nil, fmt.Errorf("error unmarshalling network settings file \"%s\": %w", settingsFilePath, err)
 		}
 		settingsList = append(settingsList, settings)
 	}

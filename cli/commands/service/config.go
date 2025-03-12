@@ -243,7 +243,7 @@ func updateConfigParamFromCliArg(c *cli.Context, sectionName string, param confi
 		case cfgconfig.ParameterType_String:
 			setting := c.String(paramName)
 			if param.MaxLength > 0 && len(setting) > param.MaxLength {
-				return fmt.Errorf("error setting value for %s: [%s] is too long (max length %d)", paramName, setting, param.MaxLength)
+				return fmt.Errorf("error setting value for %s: \"%s\" is too long (max length %d)", paramName, setting, param.MaxLength)
 			}
 			param.Value = c.String(paramName)
 		case cfgconfig.ParameterType_Uint:
@@ -261,7 +261,7 @@ func updateConfigParamFromCliArg(c *cli.Context, sectionName string, param confi
 				}
 			}
 			if !found {
-				return fmt.Errorf("error setting value for %s: [%s] is not one of the valid options", paramName, selection)
+				return fmt.Errorf("error setting value for %s: \"%s\" is not one of the valid options", paramName, selection)
 			}
 		}
 	}
