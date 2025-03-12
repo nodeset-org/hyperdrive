@@ -14,7 +14,7 @@ func stopService(c *cli.Context) error {
 		return err
 	}
 
-	// No pending settings, so load the main settings
+	// Load the current settings
 	settings, isNew, err := hd.LoadMainSettingsFile()
 	if err != nil {
 		return fmt.Errorf("error loading user settings: %w", err)

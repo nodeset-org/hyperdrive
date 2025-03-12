@@ -205,11 +205,9 @@ func (m *HyperdriveManager) LoadSettingsFile(path string) (*hdconfig.HyperdriveS
 	}
 
 	if cfg == nil {
-		defaults := modconfig.CreateModuleSettings(m.cfgMgr.HyperdriveConfiguration)
-		cfg = hdconfig.NewHyperdriveSettings()
-		err = defaults.ConvertToKnownType(cfg)
+		cfg, err = hdconfig.CreateDefaultHyperdriveSettingsFromConfiguration(m.cfgMgr.HyperdriveConfiguration)
 		if err != nil {
-			return nil, false, fmt.Errorf("error creating default hyperdrive settings: %w", err)
+			return nil, false, fmt.Errorf("error creating default settings: %w", err)
 		}
 		return cfg, true, nil
 	}
@@ -376,6 +374,29 @@ func (m *HyperdriveManager) backupPrimarySettings() error {
 	err = os.Rename(primarySettingsPath, backupSettingsPath)
 	if err != nil {
 		return fmt.Errorf("error backing up Hyperdrive settings file go [%s]: %w", backupSettingsPath, err)
+	}
+	return nil
+}
+
+// Purge all data associated with the Hyperdrive installation, including data saved by modules.
+// Services should probably be stopped before this unless you have a good reason to do a "live purge".
+// Note this will require root privileges, as that's what the module containers run as when saving files.
+func (m *HyperdriveManager) PurgeData(settings *hdconfig.HyperdriveSettings) error {
+	err := os.RemoveAll(settings.UserDataPath)
+	if err != nil {
+		return fmt.Errorf("error deleting data directory [%s]: %w", settings.UserDataPath, err)
+	}
+
+	return nil
+}
+
+// Delete the user configuration directory.
+// This should only be done when the user is uninstalling Hyperdrive.
+// Note this *may* require root privileges to run.
+func (m *HyperdriveManager) DeleteUserFolder(ctx *HyperdriveContext) error {
+	err := os.RemoveAll(ctx.UserDirPath)
+	if err != nil {
+		return fmt.Errorf("error purging data: %w", err)
 	}
 	return nil
 }

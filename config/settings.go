@@ -47,18 +47,18 @@ type HyperdriveSettings struct {
 	Modules                  map[string]*config.ModuleInstance `json:"modules" yaml:"modules"`
 }
 
-// Create a new Hyperdrive configuration instance with all of its settings set to the default values
-func NewHyperdriveSettings() *HyperdriveSettings {
-	cfg := NewHyperdriveConfig("", "")
+// Create a new Hyperdrive settings instance
+func CreateDefaultHyperdriveSettingsFromConfiguration(cfg *HyperdriveConfig) (*HyperdriveSettings, error) {
 	settings := config.CreateModuleSettings(cfg)
 
-	var typedSettings HyperdriveSettings
-	err := settings.ConvertToKnownType(&typedSettings)
+	typedSettings := new(HyperdriveSettings)
+	err := settings.ConvertToKnownType(typedSettings)
 	if err != nil {
-		panic(fmt.Errorf("error converting Hyperdrive config to known type: %w", err))
+		return nil, fmt.Errorf("error converting Hyperdrive config to known type: %w", err)
 	}
 	typedSettings.Modules = map[string]*config.ModuleInstance{}
-	return &typedSettings
+	typedSettings.Version = cfg.Version
+	return typedSettings, nil
 }
 
 // Create a copy of the Hyperdrive configuration instance
@@ -70,7 +70,7 @@ func (i HyperdriveSettings) CreateCopy() *HyperdriveSettings {
 	}
 
 	// Deserialize the JSON back into a new instance
-	newInstance := NewHyperdriveSettings()
+	newInstance := new(HyperdriveSettings)
 	if err := json.Unmarshal(bytes, newInstance); err != nil {
 		panic(fmt.Errorf("error deserializing Hyperdrive config instance: %w", err))
 	}

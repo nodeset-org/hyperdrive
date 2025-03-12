@@ -139,7 +139,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			{
 				Name:    "stop",
 				Aliases: []string{"pause", "p"},
-				Usage:   "Stop the Hyperdrive service, shutting down the services but leaving the Docker artifacts intact so they can be restarted later",
+				Usage:   "Stop the Hyperdrive service, shutting down the services (including modules) but leaving the Docker artifacts intact so they can be restarted later",
 				Flags: []cli.Flag{
 					utils.YesFlag,
 				},
@@ -170,9 +170,24 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 			},
 
 			{
-				Name:    "terminate",
-				Aliases: []string{"t"},
-				Usage:   fmt.Sprintf("%sDeletes all of the Hyperdrive Docker containers and volumes, including your Execution Client and Beacon Node chain data and your Prometheus database (if metrics are enabled). Also removes your entire `.hyperdrive` configuration folder, including your wallet, password, and validator keys. Only use this if you are cleaning up Hyperdrive and want to start over!%s", terminal.ColorRed, terminal.ColorReset),
+				Name:  "purge-data",
+				Usage: fmt.Sprintf("%sStop the Hyperdrive services (includoing modules), and delete all of the data created by the modules. This will effectively cause each module to enter a fresh state as though it had just been installed.%s", terminal.ColorRed, terminal.ColorReset),
+				Flags: []cli.Flag{
+					utils.YesFlag,
+					noRestartFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run command
+					return purgeData(c)
+				},
+			},
+
+			{
+				Name:  "terminate",
+				Usage: fmt.Sprintf("%sDeletes all of the Hyperdrive Docker containers and volumes, including your Execution Client and Beacon Node chain data and your Prometheus database (if metrics are enabled). Also removes your entire `.hyperdrive` configuration folder, including your wallet, password, and validator keys. Only use this if you are cleaning up Hyperdrive and want to start over!%s", terminal.ColorRed, terminal.ColorReset),
 				Flags: []cli.Flag{
 					utils.YesFlag,
 				},
@@ -181,7 +196,33 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					utils.ValidateArgCount(c, 0)
 
 					// Run command
-					return nil //terminateService(c)
+					return terminateService(c)
+				},
+			},
+
+			{
+				Name:   "purge-data-exclusive",
+				Usage:  "Delete all of the data created by the modules. This will effectively cause each module to enter a fresh state as though it had just been installed. This should only be used by Hyperdrive itself when privilege escalation is required; for normal use, run 'hyperdrive service purge-data' instead.",
+				Hidden: true,
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run command
+					return purgeDataExclusive(c)
+				},
+			},
+
+			{
+				Name:   "delete-user-folder",
+				Usage:  "Delete the user settings and deployment folder. This should only be used by Hyperdrive itself when privilege escalation is required; for normal use, run 'hyperdrive service terminate' instead.",
+				Hidden: true,
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run command
+					return deleteUserFolder(c)
 				},
 			},
 

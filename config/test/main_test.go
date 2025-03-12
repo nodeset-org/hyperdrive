@@ -14,7 +14,6 @@ import (
 	internal_test "github.com/nodeset-org/hyperdrive/internal/test"
 	"github.com/nodeset-org/hyperdrive/management"
 	"github.com/nodeset-org/hyperdrive/modules"
-	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 	"github.com/nodeset-org/hyperdrive/shared/utils/command"
@@ -128,9 +127,7 @@ func initializeArtifacts() {
 
 	// Set up the test config
 	cfgMgr = management.NewConfigurationManager(internal_test.UserDir, internal_test.SystemDir)
-	inst := modconfig.CreateModuleSettings(cfgMgr.HyperdriveConfiguration)
-	cfgInstance = config.NewHyperdriveSettings()
-	err = inst.ConvertToKnownType(cfgInstance)
+	cfgInstance, err := config.CreateDefaultHyperdriveSettingsFromConfiguration(cfgMgr.HyperdriveConfiguration)
 	if err != nil {
 		fail(fmt.Errorf("error converting instance to known config type: %w", err))
 	}

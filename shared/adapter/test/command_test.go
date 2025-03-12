@@ -263,7 +263,11 @@ func TestStartStopRun(t *testing.T) {
 
 // Create a full Hyperdrive config instance for the test
 func createHyperdriveConfigInstance() *hdconfig.HyperdriveSettings {
-	hdSettings := hdconfig.NewHyperdriveSettings()
+	cfg := hdconfig.NewHyperdriveConfig("", "")
+	hdSettings, err := hdconfig.CreateDefaultHyperdriveSettingsFromConfiguration(cfg)
+	if err != nil {
+		panic(err)
+	}
 	hdSettings.ProjectName = internal_test.ProjectName
 	hdSettings.UserDataPath = internal_test.UserDataPath
 

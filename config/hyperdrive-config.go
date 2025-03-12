@@ -58,6 +58,7 @@ func NewHyperdriveConfig(hdDir string, systemDir string) *HyperdriveConfig {
 		hyperdriveUserDirectory: hdDir,
 		systemDirectory:         systemDir,
 		Modules:                 map[string]*config.ModuleInfo{},
+		Version:                 shared.HyperdriveVersion,
 	}
 
 	// Project Name
@@ -162,7 +163,7 @@ func (c *HyperdriveConfig) LoadSettingsFromFile(configFilePath string) (*Hyperdr
 	}
 
 	// Attempt to parse it out into a config instance
-	cfg := NewHyperdriveSettings()
+	cfg := new(HyperdriveSettings)
 	if err := yaml.Unmarshal(configBytes, cfg); err != nil {
 		return nil, fmt.Errorf("could not parse config file: %w", err)
 	}

@@ -6,6 +6,7 @@ import (
 
 	tuiconfig "github.com/nodeset-org/hyperdrive/cli/tui/config"
 	"github.com/nodeset-org/hyperdrive/cli/utils"
+	hdconfig "github.com/nodeset-org/hyperdrive/config"
 	"github.com/nodeset-org/hyperdrive/management"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 	"github.com/nodeset-org/hyperdrive/shared"
@@ -34,25 +35,6 @@ func configureService(c *cli.Context) error {
 		return fmt.Errorf("error loading modules: %w", err)
 	}
 
-	// Load the config, checking to see if it's new (hasn't been installed before)
-	hdCfg := hd.GetHyperdriveConfiguration()
-	currentSettings, isNew, err := hd.LoadMainSettingsFile()
-	if err != nil {
-		return fmt.Errorf("error loading user settings: %w", err)
-	}
-	pendingSettings, noPendingSettings, err := hd.LoadPendingSettingsFile()
-	if err != nil {
-		return fmt.Errorf("error loading pending settings: %w", err)
-	}
-	if noPendingSettings {
-		pendingSettings = currentSettings.CreateCopy()
-	}
-
-	// Check if this is an update
-	oldVersion := strings.TrimPrefix(pendingSettings.Version, "v")
-	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
-	isUpdate := c.Bool(configUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
-
 	// Warn about broken modules
 	for _, result := range hd.BrokenModules {
 		if result.ConfigurationLoadError != nil {
@@ -75,30 +57,73 @@ func configureService(c *cli.Context) error {
 		}
 	}
 
-	// Create default settings for modules that are installed but haven't been configured yet
-	for _, result := range hd.HealthyModules {
-		// Check for an existing config
-		fqmn := result.Descriptor.GetFullyQualifiedModuleName()
-		_, exists := pendingSettings.Modules[fqmn]
-		if exists {
-			continue
-		}
-
-		// Create a new default instance for any missing modules
-		info := hdCfg.Modules[fqmn]
-		defaultSettings := modconfig.CreateModuleSettings(info.Configuration)
-		pendingSettings.Modules[fqmn] = &modconfig.ModuleInstance{
-			Enabled:  false,
-			Version:  info.Descriptor.Version.String(),
-			Settings: defaultSettings.SerializeToMap(),
-		}
+	// Load the config, checking to see if it's new (hasn't been installed before)
+	hdCfg := hd.GetHyperdriveConfiguration()
+	currentSettings, isNew, err := hd.LoadMainSettingsFile()
+	if err != nil {
+		return fmt.Errorf("error loading user settings: %w", err)
 	}
+	var pendingSettings *hdconfig.HyperdriveSettings
+	isUpdate := false
+	if isNew {
+		// Create default settings for modules that are installed but haven't been configured yet
+		for _, result := range hd.HealthyModules {
+			// Check for an existing config
+			fqmn := result.Descriptor.GetFullyQualifiedModuleName()
+			_, exists := currentSettings.Modules[fqmn]
+			if exists {
+				continue
+			}
 
-	// For upgrades, move the config to the old one and create a new upgraded copy
-	if isUpdate {
-		err = hd.UpdateDefaults(pendingSettings)
+			// Create a new default instance for any missing modules
+			info := hdCfg.Modules[fqmn]
+			defaultSettings := modconfig.CreateModuleSettings(info.Configuration)
+			currentSettings.Modules[fqmn] = &modconfig.ModuleInstance{
+				Enabled:  false,
+				Version:  info.Descriptor.Version.String(),
+				Settings: defaultSettings.SerializeToMap(),
+			}
+		}
+		pendingSettings = currentSettings.CreateCopy()
+	} else {
+		pendingSettings, noPendingSettings, err := hd.LoadPendingSettingsFile()
 		if err != nil {
-			return fmt.Errorf("error updating defaults: %w", err)
+			return fmt.Errorf("error loading pending settings: %w", err)
+		}
+		if noPendingSettings {
+			pendingSettings = currentSettings.CreateCopy()
+		}
+
+		// Check if this is an update
+		oldVersion := strings.TrimPrefix(pendingSettings.Version, "v")
+		currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
+		isUpdate = c.Bool(configUpdateDefaultsFlag.Name) || (oldVersion != currentVersion)
+
+		// Create default settings for modules that are installed but haven't been configured yet
+		for _, result := range hd.HealthyModules {
+			// Check for an existing config
+			fqmn := result.Descriptor.GetFullyQualifiedModuleName()
+			_, exists := pendingSettings.Modules[fqmn]
+			if exists {
+				continue
+			}
+
+			// Create a new default instance for any missing modules
+			info := hdCfg.Modules[fqmn]
+			defaultSettings := modconfig.CreateModuleSettings(info.Configuration)
+			pendingSettings.Modules[fqmn] = &modconfig.ModuleInstance{
+				Enabled:  false,
+				Version:  info.Descriptor.Version.String(),
+				Settings: defaultSettings.SerializeToMap(),
+			}
+		}
+
+		// For upgrades, move the config to the old one and create a new upgraded copy
+		if isUpdate {
+			err = hd.UpdateDefaults(pendingSettings)
+			if err != nil {
+				return fmt.Errorf("error updating defaults: %w", err)
+			}
 		}
 	}
 
@@ -124,13 +149,15 @@ func configureService(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	if !md.ShouldSave {
-		fmt.Println("Your changes have not been saved. Your Hyperdrive configuration is the same as it was before.")
-		return nil
-	}
-	if !md.HasChanges {
-		fmt.Println("No changes were made to the configuration.")
-		return nil
+	if !isNew {
+		if !md.ShouldSave {
+			fmt.Println("Your changes have not been saved. Your Hyperdrive configuration is the same as it was before.")
+			return nil
+		}
+		if !md.HasChanges {
+			fmt.Println("No changes were made to the configuration.")
+			return nil
+		}
 	}
 
 	// Save the config
@@ -154,8 +181,6 @@ func configureService(c *cli.Context) error {
 		fmt.Println("Please run `hyperdrive service start` when you are ready to apply the changes.")
 		return nil
 	}
-
-	// TODO: handle project name changes explicitly by shutting everything down and rebuilding
 
 	// Start the service, stopping any module services that need to be restarted
 	return hd.StartService(currentSettings, pendingSettings)
