@@ -86,7 +86,8 @@ func configureService(c *cli.Context) error {
 		}
 		pendingSettings = currentSettings.CreateCopy()
 	} else {
-		pendingSettings, noPendingSettings, err := hd.LoadPendingSettingsFile()
+		var noPendingSettings bool
+		pendingSettings, noPendingSettings, err = hd.LoadPendingSettingsFile()
 		if err != nil {
 			return fmt.Errorf("error loading pending settings: %w", err)
 		}
