@@ -5,29 +5,27 @@ go 1.22.0
 toolchain go1.22.7
 
 require (
+	al.essio.dev/pkg/shellescape v1.5.1
 	github.com/blang/semver/v4 v4.0.0
+	github.com/compose-spec/compose-go/v2 v2.4.8
+	github.com/docker/cli v28.0.0+incompatible
 	github.com/docker/docker v28.0.0+incompatible
 	github.com/fatih/color v1.17.0
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/goccy/go-json v0.10.3
-	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20241029172412-6cb22253be3f
-	golang.org/x/term v0.28.0
-	gopkg.in/yaml.v3 v3.0.1
-)
-
-require (
-	al.essio.dev/pkg/shellescape v1.5.1
-	github.com/docker/cli v28.0.0+incompatible
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/klauspost/compress v1.17.11
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/sys/signal v0.7.1
 	github.com/moby/term v0.5.0
+	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
+	github.com/rocket-pool/node-manager-core v0.5.2-0.20241029172412-6cb22253be3f
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
+	golang.org/x/term v0.28.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -36,7 +34,6 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/compose-spec/compose-go/v2 v2.4.8 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -109,4 +106,4 @@ require (
 	google.golang.org/protobuf v1.36.3 // indirect
 )
 
-replace github.com/rocket-pool/smartnode/v2 => github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20241002073413-7c50008efc66
+replace github.com/rocket-pool/smartnode/v2 => github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20250130225832-4768ad9c2c82
