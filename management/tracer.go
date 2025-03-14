@@ -6,7 +6,7 @@ import (
 	"net/http/httptrace"
 	"os"
 
-	"github.com/rocket-pool/node-manager-core/log"
+	"github.com/nodeset-org/hyperdrive/shared/logging"
 )
 
 func createTracer(file *os.File, logger *slog.Logger) (*httptrace.ClientTrace, error) {
@@ -15,22 +15,22 @@ func createTracer(file *os.File, logger *slog.Logger) (*httptrace.ClientTrace, e
 		logger.Debug("HTTP Connect Done",
 			slog.String("network", network),
 			slog.String("addr", addr),
-			log.Err(err),
+			logging.Err(err),
 		)
 		err = writeToTraceFile(file, fmt.Sprintf("ConnectDone: network=%s, addr=%s, err=%v", network, addr, err))
 		if err != nil {
-			logger.Debug("<error writing to HTTP trace file>", log.Err(err))
+			logger.Debug("<error writing to HTTP trace file>", logging.Err(err))
 		}
 	}
 	tracer.DNSDone = func(dnsInfo httptrace.DNSDoneInfo) {
 		logger.Debug("HTTP DNS Done",
 			slog.String("addrs", fmt.Sprint(dnsInfo.Addrs)),
 			slog.Bool("coalesced", dnsInfo.Coalesced),
-			log.Err(dnsInfo.Err),
+			logging.Err(dnsInfo.Err),
 		)
 		err := writeToTraceFile(file, fmt.Sprintf("DNSDone: addrs=%v, coalesced=%t, err=%v", dnsInfo.Addrs, dnsInfo.Coalesced, dnsInfo.Err))
 		if err != nil {
-			logger.Debug("<error writing to HTTP trace file>", log.Err(err))
+			logger.Debug("<error writing to HTTP trace file>", logging.Err(err))
 		}
 	}
 	tracer.DNSStart = func(dnsInfo httptrace.DNSStartInfo) {
@@ -39,7 +39,7 @@ func createTracer(file *os.File, logger *slog.Logger) (*httptrace.ClientTrace, e
 		)
 		err := writeToTraceFile(file, fmt.Sprintf("DNSStart: host=%s", dnsInfo.Host))
 		if err != nil {
-			logger.Debug("<error writing to HTTP trace file>", log.Err(err))
+			logger.Debug("<error writing to HTTP trace file>", logging.Err(err))
 		}
 	}
 	tracer.GotConn = func(connInfo httptrace.GotConnInfo) {
@@ -52,32 +52,32 @@ func createTracer(file *os.File, logger *slog.Logger) (*httptrace.ClientTrace, e
 		)
 		err := writeToTraceFile(file, fmt.Sprintf("GotConn: reused=%t, wasIdle=%t, idleTime=%s, localAddr=%s, remoteAddr=%s", connInfo.Reused, connInfo.WasIdle, connInfo.IdleTime, connInfo.Conn.LocalAddr().String(), connInfo.Conn.RemoteAddr().String()))
 		if err != nil {
-			logger.Debug("<error writing to HTTP trace file>", log.Err(err))
+			logger.Debug("<error writing to HTTP trace file>", logging.Err(err))
 		}
 	}
 	tracer.GotFirstResponseByte = func() {
 		logger.Debug("HTTP Got First Response Byte")
 		err := writeToTraceFile(file, "GotFirstResponseByte")
 		if err != nil {
-			logger.Debug("<error writing to HTTP trace file>", log.Err(err))
+			logger.Debug("<error writing to HTTP trace file>", logging.Err(err))
 		}
 	}
 	tracer.PutIdleConn = func(err error) {
 		logger.Debug("HTTP Put Idle Connection",
-			log.Err(err),
+			logging.Err(err),
 		)
 		err = writeToTraceFile(file, fmt.Sprintf("PutIdleConn: err=%v", err))
 		if err != nil {
-			logger.Debug("<error writing to HTTP trace file>", log.Err(err))
+			logger.Debug("<error writing to HTTP trace file>", logging.Err(err))
 		}
 	}
 	tracer.WroteRequest = func(wroteInfo httptrace.WroteRequestInfo) {
 		logger.Debug("HTTP Wrote Request",
-			log.Err(wroteInfo.Err),
+			logging.Err(wroteInfo.Err),
 		)
 		err := writeToTraceFile(file, fmt.Sprintf("WroteRequest: err=%v", wroteInfo.Err))
 		if err != nil {
-			logger.Debug("<error writing to HTTP trace file>", log.Err(err))
+			logger.Debug("<error writing to HTTP trace file>", logging.Err(err))
 		}
 	}
 

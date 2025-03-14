@@ -1,5 +1,15 @@
 # Hyperdrive Module Specification
 
+---
+
+## Disclaimer
+
+The following is a **preliminary** specification and is actively under development. The functions, types, or behaviors described here are subject to change as Hyperdrive matures, and as formal SDKs for different languages are built.
+
+If you are interested in building a module for Hyperdrive, please contact NodeSet (info@nodeset.org) or join our Discord Server (https://discord.gg/dNshadxVkg) to engage with our development team.
+
+---
+
 Hyperdrive is a software system that allows its users (Hyperdrive node operators) to quickly install, configure, execute, monitor, and otherwise participate in applications or services (called "modules") in a common, familiar environment. Many of these applications are tied to [NodeSet](https://nodeset.io), though Hyperdrive suppoirts modules that do not require it as well.
 
 Module authors are responsible for assembling new or existing applications or services into the Hyperdrive module format. This guide covers (at a high level) the components, structure, and packaging required to meet that format. It is intended for developers that would like to become module authors, and has been written with that audience in mind.

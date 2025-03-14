@@ -1,5 +1,15 @@
 # Template Support
 
+---
+
+## Disclaimer
+
+The following is a **preliminary** specification and is actively under development. The functions, types, or behaviors described here are subject to change as Hyperdrive matures, and as formal SDKs for different languages are built.
+
+If you are interested in building a module for Hyperdrive, please contact NodeSet (info@nodeset.org) or join our Discord Server (https://discord.gg/dNshadxVkg) to engage with our development team.
+
+---
+
 One of the most important parts of the Hyperdrive ecosystem is its unified, modular configuration. The configuration is a single entity that encompasses the configuration for the entire Hyperdrive instance, including for all modules. This is passed between portions at various stages of operation, so modules can determine what behavior to take when starting - even if their behavior is predicated on settings housed in another module.
 
 To provide maximum flexibility, Hyperdrive supports the standard [Go `text/template` system](https://pkg.go.dev/text/template). This is a highly customizable data-driven substitution and logic invocation system that can support anything from simply retrieving a configuration parameter to returning a custom value based on some arithmetic calculated on the fly.

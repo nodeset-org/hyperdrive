@@ -1,5 +1,15 @@
 # Hyperdrive Module Configuration Specification
 
+---
+
+## Disclaimer
+
+The following is a **preliminary** specification and is actively under development. The functions, types, or behaviors described here are subject to change as Hyperdrive matures, and as formal SDKs for different languages are built.
+
+If you are interested in building a module for Hyperdrive, please contact NodeSet (info@nodeset.org) or join our Discord Server (https://discord.gg/dNshadxVkg) to engage with our development team.
+
+---
+
 One of the most important aspects of a Hyperdrive module is its **configuration**. This refers to a series of named settings or values that the user can modify (or in some cases, are modified behind-the-scenes based on the configuration of other Hyperdrive modules, or even the hardware / software configuration of the node machine *itself*). As with all configuration systems, these settings will inform behavioral changes to your module's services during runtime.
 
 In the context of Hyperdrive, there are two entities related to configuring your module: **metadata** and **settings**.

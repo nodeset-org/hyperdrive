@@ -1,5 +1,15 @@
 # Hyperdrive Module Adapter Specification
 
+---
+
+## Disclaimer
+
+The following is a **preliminary** specification and is actively under development. The functions, types, or behaviors described here are subject to change as Hyperdrive matures, and as formal SDKs for different languages are built.
+
+If you are interested in building a module for Hyperdrive, please contact NodeSet (info@nodeset.org) or join our Discord Server (https://discord.gg/dNshadxVkg) to engage with our development team.
+
+---
+
 Every Hyperdrive module is required to come with an **adapter** - a binary executable that serves two purposes:
 - It can perform certain functions *without* the main module service running (i.e., it can run in standalone mode).
 - It can handle interactive execution performed by the user, which *may* or *may not* be executed without the main module service running.

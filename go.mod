@@ -19,7 +19,6 @@ require (
 	github.com/moby/sys/signal v0.7.1
 	github.com/moby/term v0.5.0
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20241029172412-6cb22253be3f
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/term v0.28.0

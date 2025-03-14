@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/nodeset-org/hyperdrive/cli/utils/terminal"
-	"github.com/rocket-pool/node-manager-core/cli/input"
+	"github.com/nodeset-org/hyperdrive/utils/input"
 	"github.com/urfave/cli/v2"
 )
 

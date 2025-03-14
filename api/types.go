@@ -5,5 +5,4 @@ type ApiResponse[Data any] struct {
 	Error string `json:"error,omitempty"`
 }
 
-type SuccessData struct {
-}
+type SuccessData struct{}
