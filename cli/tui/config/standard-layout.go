@@ -322,7 +322,7 @@ func (layout *standardLayout) redrawForm(
 
 // Refreshes all of the form items to show the current configured values
 func (layout *standardLayout) refresh() {
-	for i := 0; i < layout.form.GetFormItemCount(); i++ {
+	for i := range layout.form.GetFormItemCount() {
 		formItem := layout.form.GetFormItem(i)
 		pfi, exists := layout.formItemMap[formItem]
 		if !exists {
@@ -346,11 +346,16 @@ func (layout *standardLayout) refresh() {
 			visibleValues := dropdown.ReloadDynamicOptions(paramSetting, layout)
 
 			// Set the selected index to the current param setting
+			found := false
 			for i, option := range visibleValues {
 				if option == paramSetting.GetValue() {
 					dropdown.SetCurrentOption(i)
-					return
+					found = true
+					break
 				}
+			}
+			if found {
+				continue
 			}
 
 			// If the current value isn't in the visible options, set it to the default
@@ -362,7 +367,7 @@ func (layout *standardLayout) refresh() {
 			for i, option := range visibleValues {
 				if option == defaultValue {
 					dropdown.SetCurrentOption(i)
-					return
+					break
 				}
 			}
 
