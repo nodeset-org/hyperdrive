@@ -5,6 +5,7 @@
 # See https://docs.docker.com/compose/extends/#adding-and-overriding-configuration
 # for more information on overriding specific parameters of docker-compose files.
 
+{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .StakeWise.GetModuleName)}}
 services:
   {{.StakeWise.DaemonContainerName}}:
     image: {{.StakeWise.GetDaemonContainerTag}}
@@ -13,7 +14,7 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:{{.StakeWise.ApiPort}}:{{.StakeWise.ApiPort}}/tcp" # Restricted to localhost outside of Docker
-{{$module_dir := (printf "%s/%s/%s" .Hyperdrive.UserDataPath.Value .ModulesDirectory .StakeWise.GetModuleName)}}
+      - "127.0.0.1:{{.StakeWise.RelayPort}}:{{.StakeWise.RelayPort}}/tcp" # Restricted to localhost outside of Docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - {{.Hyperdrive.GetUserDirectory}}:{{.Hyperdrive.GetUserDirectory}}
@@ -28,8 +29,10 @@ services:
       - "http://{{.Hyperdrive.DaemonContainerName}}:{{.Hyperdrive.ApiPort}}/"
       - --ip
       - "0.0.0.0" # Open to all Docker traffic
-      - --port
+      - --api-port
       - "{{.StakeWise.ApiPort}}"
+      - --relay-port
+      - "{{.StakeWise.RelayPort}}"
       - --api-key
       - "{{.Hyperdrive.GetUserDirectory}}/{{.StakeWiseApiKeyPath}}"
       - --hd-api-key

@@ -6,10 +6,10 @@ import (
 
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	swcmdutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
+	"github.com/rocket-pool/node-manager-core/beacon"
 	"github.com/rocket-pool/node-manager-core/utils/input"
 	"github.com/urfave/cli/v2"
 )
@@ -22,7 +22,7 @@ var (
 	}
 	generateKeysNoRestartFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name:  "no-restart",
-		Usage: fmt.Sprintf("Don't automatically restart the Stakewise Operator or Validator Client containers after generating keys. %sOnly use this if you know what you're doing and can restart them manually.%s", terminal.ColorRed, terminal.ColorReset),
+		Usage: fmt.Sprintf("Don't automatically restart the Validator Client containers after generating keys. %sOnly use this if you know what you're doing and can restart it manually.%s", terminal.ColorRed, terminal.ColorReset),
 	}
 )
 
@@ -71,6 +71,7 @@ func generateKeys(c *cli.Context) error {
 	// Generate the new keys
 	startTime := time.Now()
 	latestTime := startTime
+	newPubkeys := make([]beacon.ValidatorPubkey, count)
 	for i := uint64(0); i < count; i++ {
 		response, err := sw.Api.Wallet.GenerateKeys(1, false)
 		if err != nil {
@@ -83,12 +84,61 @@ func generateKeys(c *cli.Context) error {
 		elapsed := time.Since(latestTime)
 		latestTime = time.Now()
 		pubkey := response.Data.Pubkeys[0]
+		newPubkeys[i] = pubkey
 		fmt.Printf("Generated %s (%d/%d) in %s\n", pubkey.HexWithPrefix(), (i + 1), count, elapsed)
 	}
 	fmt.Printf("Completed in %s.\n", time.Since(startTime))
 	fmt.Println()
 
+	// Get the list of available keys
+	response, err := sw.Api.Wallet.GetAvailableKeys()
+	if err != nil {
+		return fmt.Errorf("error getting available keys: %w", err)
+	}
+	data := response.Data
+	availableKeyMap := map[beacon.ValidatorPubkey]struct{}{}
+	for _, key := range data.AvailablePubkeys {
+		availableKeyMap[key] = struct{}{}
+	}
+
+	// Sort into new and already used keys
+	newKeys := []beacon.ValidatorPubkey{}
+	usedKeys := []beacon.ValidatorPubkey{}
+	for _, key := range newPubkeys {
+		if _, exists := availableKeyMap[key]; exists {
+			newKeys = append(newKeys, key)
+		} else {
+			usedKeys = append(usedKeys, key)
+		}
+	}
+
+	// Print warnings about used keys
+	if len(usedKeys) > 0 {
+		fmt.Printf("%sNOTE: %d of the new keys belong to existing validators and cannot be used:%s\n", terminal.ColorYellow, len(usedKeys), terminal.ColorReset)
+		for _, key := range usedKeys {
+			fmt.Println("\t" + key.HexWithPrefix())
+		}
+		fmt.Println()
+	}
+	if len(newKeys) == 0 {
+		fmt.Println("None of the keys can be used for new deposits. Please run this command again to generate more keys.")
+		return nil
+	}
+
+	fmt.Printf("You now have %s%d%s validator keys ready for deposits:\n", terminal.ColorGreen, len(newKeys), terminal.ColorReset)
+	for _, key := range data.AvailablePubkeys {
+		fmt.Println("\t" + key.HexWithPrefix())
+	}
+	if !data.SufficientBalance {
+		fmt.Println()
+		fmt.Printf("%sWARNING: your wallet has less ETH than StakeWise recommends (%.2f ETH per key).%s\n", terminal.ColorYellow, data.EthPerKey, terminal.ColorReset)
+		fmt.Printf("Current wallet balance: %s%f%s\n", terminal.ColorGreen, data.Balance, terminal.ColorReset)
+		fmt.Printf("You need %s%f%s more ETH to use all of these keys.\n", terminal.ColorGreen, data.RemainingEthRequired, terminal.ColorReset)
+		fmt.Println()
+	}
+
 	// Restart the Stakewise Operator
+	/* TODO: possibly not needed with SW v2 now
 	if noRestart {
 		fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Stakewise Operator container at your earliest convenience in order to deposit your new keys once it's your turn. Failure to do so will prevent your validators from ever being activated.%s\n", terminal.ColorYellow, terminal.ColorReset)
 	} else {
@@ -103,12 +153,13 @@ func generateKeys(c *cli.Context) error {
 		}
 	}
 	fmt.Println()
+	*/
 
 	// Restart the VC
 	if noRestart {
 		fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Validator Client at your earliest convenience in order to attest with your new keys. Failure to do so will result in any new validators being offline and *losing ETH* until you restart it.%s\n", terminal.ColorYellow, terminal.ColorReset)
 	} else {
-		fmt.Print("Restarting Validator Client... ")
+		fmt.Print("Restarting Validator Client to load the new keys... ")
 		_, err = hd.Api.Service.RestartContainer(string(swconfig.ContainerID_StakewiseValidator))
 		if err != nil {
 			fmt.Println("error")
@@ -116,24 +167,10 @@ func generateKeys(c *cli.Context) error {
 			fmt.Println("Please restart your Validator Client in order to attest with your new keys!")
 		} else {
 			fmt.Println("done!")
+			fmt.Println("Your new keys are now loaded.")
+			fmt.Println("Your node will deposit with them automatically once the vault has been funded.")
+			fmt.Println("It will start attesting for those validators automatically once they have been activated.")
 		}
 	}
-	fmt.Println()
-
-	// Upload to the server
-	newKeysUploaded, err := swcmdutils.UploadDepositData(c, hd, sw)
-	if err != nil {
-		return err
-	}
-
-	if newKeysUploaded {
-		if !noRestart {
-			fmt.Println()
-			fmt.Println("Your new keys are now ready for use. When one of them is selected for activation, your system will deposit it and begin attesting automatically.")
-		} else {
-			fmt.Println("Your new keys are uploaded, but you *must* restart your Validator Client at your earliest convenience to begin attesting once they are selected for depositing.")
-		}
-	}
-
 	return nil
 }

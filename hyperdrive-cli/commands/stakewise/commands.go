@@ -1,7 +1,6 @@
 package stakewise
 
 import (
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/nodeset"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/status"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/validator"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/stakewise/wallet"
@@ -17,7 +16,6 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 		Aliases: aliases,
 		Usage:   "Manage the Stakewise module",
 	}
-	nodeset.RegisterCommands(cmd, "nodeset", []string{"ns"})
 	wallet.RegisterCommands(cmd, "wallet", []string{"w"})
 	status.RegisterCommands(cmd, "status", []string{"s"})
 	validator.RegisterCommands(cmd, "validator", []string{"v"})
