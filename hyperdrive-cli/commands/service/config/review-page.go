@@ -65,7 +65,7 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 		for container := range totalAffectedContainers {
 			if container == config.ContainerID_Daemon {
 				if newConfig.StakeWise.Enabled.Value {
-					totalAffectedContainers[swconfig.ContainerID_StakewiseDaemon] = true
+					totalAffectedContainers[swconfig.ContainerID_StakeWiseDaemon] = true
 				}
 				if newConfig.Constellation.Enabled.Value {
 					totalAffectedContainers[csconfig.ContainerID_ConstellationDaemon] = true
