@@ -10,8 +10,8 @@ networkResources:
   txWatchUrl: https://holesky.etherscan.io/tx
   flashbotsProtectUrl: https://rpc-holesky.flashbots.net/
   mevBlockerUrl: ""
+  depositContractAddress: 0x4242424242424242424242424242424242424242
 defaultConfigSettings:
 hyperdriveResources:
   nodeSetApiUrl: https://nodeset.io/api
   encryptionPubkey: age1hs87f8pl369tel4xpprtmaxwhg2e3gynvz8q45h48hed4m4h4d0s6t8caa
-  depositContractAddress: 0x4242424242424242424242424242424242424242
