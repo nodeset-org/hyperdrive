@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	mevWarning string = "[orange]NOTE: You have externally-managed client mode selected and MEV-Boost enabled. You must have MEV-Boost enabled in your externally-managed Beacon Node's configuration for this to function properly - otherwise you may not be able to publish blocks and will miss significant rewards!"
+	mevWarning  string = "[orange]NOTE: You have externally-managed client mode selected and MEV-Boost enabled. You must have MEV-Boost enabled in your externally-managed Beacon Node's configuration for this to function properly - otherwise you may not be able to publish blocks and will miss significant rewards!"
+	mevDisabled string = "MEV-Boost is not available on this network yet, so it will be disabled. Check back at a later date once they've added support for it."
 )
 
 // The page wrapper for the MEV-boost config

@@ -1,6 +1,6 @@
 key: holesky
 name: Holesky Testnet
-description: This is the Holešky (Holešovice) test network, which is the next generation of long-lived testnets for Ethereum. It uses free fake ETH to make fake validators.\nUse this if you want to practice running Hyperdrive in a free, safe environment before moving to Mainnet.
+description: This is the Holešky (Holešovice) test network, the previous generation of long-lived testnets for Ethereum. It uses free fake ETH to make fake validators.\nHolesky is no longer recommended for general testing; we recommend using Hoodi instead.
 networkResources:
   ethNetworkName: holesky
   chainID: 17000

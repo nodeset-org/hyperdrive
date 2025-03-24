@@ -1,3 +1,11 @@
+hyperdrive (1.2.0~dev) UNRELEASED; urgency=medium
+
+  * Updated Geth, Besu, Nethermind, Reth, Lodestar, Nimbus, Prysm, Teku, Prometheus, and the Node Exporter.
+  * Updated Lighthouse for test networks only.
+  * Added support for the new Hoodi testnet.
+
+ -- NodeSet Inc. <info@nodeset.io>  Mon, 24 Mar 2025 03:42:11 +0000
+
 hyperdrive (1.1.3) stable; urgency=medium
 
   * Updated Geth, Besu, Nethermind, Reth, Lodestar, Nimbus, Prysm, Teku to prepare for Pectra on Holesky.

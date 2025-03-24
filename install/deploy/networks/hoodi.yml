@@ -1,0 +1,16 @@
+key: hoodi
+name: Hoodi Testnet
+description: This is the Hoodi test network, the latest long-lived testnet for Ethereum. It uses free fake ETH to make fake validators.\nUse this if you want to practice running Hyperdrive in a free, safe environment before moving to Mainnet.
+networkResources:
+  ethNetworkName: hoodi
+  chainID: 560048
+  genesisForkVersion: 0x10000910
+  multicallAddress: 0xc5fA61aA6Ec012d1A2Ea38f31ADAf4D06c8725E7
+  balanceBatcherAddress: 0xB80b500CF68a956b6f149F1C48E8F07EEF4486Ce
+  txWatchUrl: https://hoodi.cloud.blockscout.com/tx
+  flashbotsProtectUrl: ""
+  mevBlockerUrl: ""
+defaultConfigSettings:
+hyperdriveResources:
+  nodeSetApiUrl: https://nodeset.io/api
+  encryptionPubkey: age1hs87f8pl369tel4xpprtmaxwhg2e3gynvz8q45h48hed4m4h4d0s6t8caa

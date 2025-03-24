@@ -1,5 +1,7 @@
 package config
 
+import "github.com/rocket-pool/node-manager-core/config"
+
 func createFallbackNormalStep(wiz *wizard, currentStep int, totalSteps int) *textBoxWizardStep {
 	// Create the labels
 	ecHttpLabel := wiz.md.Config.Hyperdrive.Fallback.EcHttpUrl.Name
@@ -22,7 +24,13 @@ func createFallbackNormalStep(wiz *wizard, currentStep int, totalSteps int) *tex
 	done := func(text map[string]string) {
 		wiz.md.Config.Hyperdrive.Fallback.EcHttpUrl.Value = text[ecHttpLabel]
 		wiz.md.Config.Hyperdrive.Fallback.BnHttpUrl.Value = text[ccHttpLabel]
-		wiz.modulesModal.show()
+
+		// Disabled network support
+		if wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+			wiz.modulesDisabledModal.show()
+		} else {
+			wiz.modulesModal.show()
+		}
 	}
 
 	back := func() {
