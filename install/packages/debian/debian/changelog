@@ -1,6 +1,6 @@
-hyperdrive (1.2.0~dev) UNRELEASED; urgency=medium
+hyperdrive (1.1.4~dev) UNRELEASED; urgency=medium
 
-  * Updated Geth, Besu, Nethermind, Reth, Lodestar, Nimbus, Prysm, Teku, Prometheus, and the Node Exporter.
+  * Updated Geth, Besu, Nethermind, Reth, Lodestar, Nimbus, Prysm, Teku, and the Node Exporter.
   * Updated Lighthouse for test networks only.
   * Added support for the new Hoodi testnet.
 

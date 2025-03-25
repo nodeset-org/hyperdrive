@@ -81,48 +81,61 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		return nil
 	}
 
-	if !c.Bool(ignoreSlashTimerFlag.Name) {
-		// Do the client swap check
-		firstRun, err := checkForValidatorChange(hd, cfg)
-		if err != nil {
-			fmt.Printf("%sWARNING: couldn't verify that the Validator Client containers can be safely restarted:\n\t%s\n", terminal.ColorYellow, err.Error())
-			fmt.Println("If you are changing to a different client, it may resubmit an attestation you have already submitted.")
-			fmt.Println("This will slash your validator!")
-			fmt.Println("To prevent slashing, you must wait 15 minutes from the time you stopped the clients before starting them again.")
-			fmt.Println()
-			fmt.Println("**If you did NOT change clients, you can safely ignore this warning.**")
-			fmt.Println()
-			if c.Bool(utils.YesFlag.Name) {
-				fmt.Println("Aborting auto-start sequence due to non-interactive mode.")
-				return nil
-			}
-			if !cliutils.Confirm(fmt.Sprintf("Press y when you understand the above warning, have waited, and are ready to start Hyperdrive:%s", terminal.ColorReset)) {
-				fmt.Println("Cancelled.")
-				return nil
-			}
-		} else if firstRun {
-			if c.Bool(utils.YesFlag.Name) {
-				fmt.Println("It looks like this is your first time starting a Validator Client, but auto-start is being aborted for safety due to non-interactive mode. Please run `hyperdrive service start` manually when you can.")
-				return nil
-			}
-			fmt.Println("It looks like this is your first time starting a Validator Client.")
-			existingNode := cliutils.Confirm("Just to be sure, do you have any existing, active validators attesting on the Beacon Chain that were created with your Hyperdrive node wallet (if you have one)?")
-			if !existingNode {
-				fmt.Println("Okay, great! You're safe to start. Have fun!")
-			} else {
-				fmt.Printf("%sSince your node didn't have any Validator Clients before, Hyperdrive can't determine if you attested in the last 15 minutes.\n", terminal.ColorYellow)
-				fmt.Println("If you did, it may resubmit an attestation you have already submitted.")
+	// Check if the user has any modules enabled
+	enabledModules := 0
+	if cfg.StakeWise.Enabled.Value {
+		enabledModules++
+	}
+	if cfg.Constellation.Enabled.Value {
+		enabledModules++
+	}
+
+	if enabledModules > 0 {
+		if !c.Bool(ignoreSlashTimerFlag.Name) {
+			// Do the client swap check
+			firstRun, err := checkForValidatorChange(hd, cfg)
+			if err != nil {
+				fmt.Printf("%sWARNING: couldn't verify that the Validator Client containers can be safely restarted:\n\t%s\n", terminal.ColorYellow, err.Error())
+				fmt.Println("If you are changing to a different client, it may resubmit an attestation you have already submitted.")
 				fmt.Println("This will slash your validator!")
 				fmt.Println("To prevent slashing, you must wait 15 minutes from the time you stopped the clients before starting them again.")
 				fmt.Println()
+				fmt.Println("**If you did NOT change clients, you can safely ignore this warning.**")
+				fmt.Println()
+				if c.Bool(utils.YesFlag.Name) {
+					fmt.Println("Aborting auto-start sequence due to non-interactive mode.")
+					return nil
+				}
 				if !cliutils.Confirm(fmt.Sprintf("Press y when you understand the above warning, have waited, and are ready to start Hyperdrive:%s", terminal.ColorReset)) {
 					fmt.Println("Cancelled.")
 					return nil
 				}
+			} else if firstRun {
+				if c.Bool(utils.YesFlag.Name) {
+					fmt.Println("It looks like this is your first time starting a Validator Client, but auto-start is being aborted for safety due to non-interactive mode. Please run `hyperdrive service start` manually when you can.")
+					return nil
+				}
+				fmt.Println("It looks like this is your first time starting a Validator Client.")
+				existingNode := cliutils.Confirm("Just to be sure, do you have any existing, active validators attesting on the Beacon Chain that were created with your Hyperdrive node wallet (if you have one)?")
+				if !existingNode {
+					fmt.Println("Okay, great! You're safe to start. Have fun!")
+				} else {
+					fmt.Printf("%sSince your node didn't have any Validator Clients before, Hyperdrive can't determine if you attested in the last 15 minutes.\n", terminal.ColorYellow)
+					fmt.Println("If you did, it may resubmit an attestation you have already submitted.")
+					fmt.Println("This will slash your validator!")
+					fmt.Println("To prevent slashing, you must wait 15 minutes from the time you stopped the clients before starting them again.")
+					fmt.Println()
+					if !cliutils.Confirm(fmt.Sprintf("Press y when you understand the above warning, have waited, and are ready to start Hyperdrive:%s", terminal.ColorReset)) {
+						fmt.Println("Cancelled.")
+						return nil
+					}
+				}
 			}
+		} else {
+			fmt.Printf("%sIgnoring anti-slashing safety delay.%s\n", terminal.ColorYellow, terminal.ColorReset)
 		}
 	} else {
-		fmt.Printf("%sIgnoring anti-slashing safety delay.%s\n", terminal.ColorYellow, terminal.ColorReset)
+		fmt.Println("No modules are enabled, so the anti-slashing safety delay will be ignored.")
 	}
 
 	// Write a note on doppelganger protection
@@ -187,8 +200,8 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 		}
 	}
 
-	// Check if StakeWise or Constellation is enabled
-	if !cfg.StakeWise.Enabled.Value && !cfg.Constellation.Enabled.Value {
+	// Break if no modules are enabled
+	if enabledModules == 0 {
 		return nil
 	}
 
