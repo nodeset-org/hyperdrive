@@ -28,7 +28,13 @@ func createUseFallbackStep(wiz *wizard, currentStep int, totalSteps int) *choice
 			}
 		} else {
 			wiz.md.Config.Hyperdrive.Fallback.UseFallbackClients.Value = false
-			wiz.modulesModal.show()
+
+			// Disabled network support
+			if wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+				wiz.modulesDisabledModal.show()
+			} else {
+				wiz.modulesModal.show()
+			}
 		}
 	}
 

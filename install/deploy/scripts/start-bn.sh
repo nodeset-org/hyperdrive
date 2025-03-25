@@ -185,6 +185,15 @@ if [ "$CLIENT" = "prysm" ]; then
         else
             echo "Genesis state already downloaded, continuing."
         fi
+    elif [ "$ETH_NETWORK" = "hoodi" ]; then
+        echo "Prysm is configured to use Hoodi, genesis state required."
+        if [ ! -f "/ethclient/hoodi-genesis.ssz" ]; then
+            echo "Downloading from Github..."
+            wget -q https://github.com/eth-clients/hoodi/raw/refs/heads/main/metadata/genesis.ssz -O /ethclient/hoodi-genesis.ssz
+            echo "Download complete."
+        else
+            echo "Genesis state already downloaded, continuing."
+        fi
     fi
 
     CMD="$PERF_PREFIX /app/cmd/beacon-chain/beacon-chain \
@@ -220,6 +229,8 @@ if [ "$CLIENT" = "prysm" ]; then
 
     if [ "$ETH_NETWORK" = "holesky" ]; then
         CMD="$CMD --genesis-state /ethclient/holesky-genesis.ssz"
+    elif [ "$ETH_NETWORK" = "hoodi" ]; then
+        CMD="$CMD --genesis-state /ethclient/hoodi-genesis.ssz"
     fi
 
     if [ ! -z "$CHECKPOINT_SYNC_URL" ]; then

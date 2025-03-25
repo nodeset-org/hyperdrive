@@ -82,6 +82,22 @@ func (home *settingsHome) createContent() {
 	// Create the category list
 	categoryList := tview.NewList().
 		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
+			// Disable MEV-Boost
+			if mainText == home.mevBoostPage.page.title {
+				if home.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+					layout.descriptionBox.SetText("MEV-Boost is not available on the Hoodi network.")
+					return
+				}
+			}
+
+			// Disable Modules
+			if mainText == home.modulesPage.page.title {
+				if home.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+					layout.descriptionBox.SetText("Modules are not currently available on the Hoodi network.")
+					return
+				}
+			}
+
 			layout.descriptionBox.SetText(home.settingsSubpages[index].getPage().description)
 		})
 	categoryList.SetBackgroundColor(BackgroundColor)
@@ -103,6 +119,20 @@ func (home *settingsHome) createContent() {
 		categoryList.AddItem(subpage.getPage().title, "", 0, nil)
 	}
 	categoryList.SetSelectedFunc(func(i int, s1, s2 string, r rune) {
+		// Disable MEV-Boost
+		if home.settingsSubpages[i].getPage().title == home.mevBoostPage.page.title {
+			if home.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+				return
+			}
+		}
+
+		// Disable Modules
+		if home.settingsSubpages[i].getPage().title == home.modulesPage.page.title {
+			if home.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+				return
+			}
+		}
+
 		home.settingsSubpages[i].handleLayoutChanged()
 		home.md.setPage(home.settingsSubpages[i].getPage())
 	})
