@@ -3,7 +3,7 @@ package status
 import (
 	"fmt"
 
-	swtypes "github.com/nodeset-org/hyperdrive-stakewise/shared/types"
+	swapi "github.com/nodeset-org/hyperdrive-stakewise/shared/api"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 	"github.com/rocket-pool/node-manager-core/beacon"
@@ -62,7 +62,7 @@ func getNodeStatus(c *cli.Context) error {
 		}
 
 		// Print NodeSet status
-		fmt.Printf("\tNodeSet State: %s\n", getNodeSetStateLabel(state.NodesetStatus))
+		fmt.Printf("\tNodeSet State: %s\n", getNodeSetStateLabel(state))
 		fmt.Println()
 	}
 
@@ -94,17 +94,12 @@ func getBeaconStatusLabel(state beacon.ValidatorState) string {
 	}
 }
 
-func getNodeSetStateLabel(state swtypes.NodesetStatus) string {
-	switch state {
-	case swtypes.NodesetStatus_Generated:
-		return "Generated (Not Yet Uploaded)"
-	case swtypes.NodesetStatus_RegisteredToStakewise:
-		return "Registered with Stakewise"
-	case swtypes.NodesetStatus_UploadedStakewise:
-		return "Uploaded to Stakewise"
-	case swtypes.NodesetStatus_UploadedToNodeset:
-		return "Uploaded to NodeSet"
-	default:
-		return fmt.Sprintf("<Unknown NodeSet Status: %s>", state)
+func getNodeSetStateLabel(state swapi.ValidatorStateInfo) string {
+	if state.NodeSet.Registered {
+		if state.NodeSet.ExitMessageUploaded {
+			return "Registered (Exit Message Uploaded)"
+		}
+		return "Registered (Missing Exit Message)"
 	}
+	return "Not Registered Yet"
 }
