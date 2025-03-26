@@ -189,6 +189,32 @@ func (c *GlobalConfig) Validate() []string {
 	}
 	*/
 
+	// TODO: Revisit once Shadon has confirmed whether or not this is necessary
+	/*
+		// Fix the Prysm RPC URL to remove the scheme
+		if c.Hyperdrive.GetSelectedBeaconNode() == config.BeaconNode_Prysm {
+			// External URL
+			if c.Hyperdrive.ClientMode.Value == config.ClientMode_External {
+				rpcUrl, err := url.Parse(c.Hyperdrive.ExternalBeaconClient.PrysmRpcUrl.Value)
+				if err != nil {
+					errors = append(errors, "Invalid External Prysm RPC URL.")
+				} else {
+					c.Hyperdrive.ExternalBeaconClient.PrysmRpcUrl.Value = rpcUrl.Host
+				}
+			}
+
+			// Fallback URL
+			if c.Hyperdrive.Fallback.UseFallbackClients.Value {
+				rpcUrl, err := url.Parse(c.Hyperdrive.Fallback.PrysmRpcUrl.Value)
+				if err != nil {
+					errors = append(errors, "Invalid Fallback Prysm RPC URL.")
+				} else {
+					c.Hyperdrive.Fallback.PrysmRpcUrl.Value = rpcUrl.Host
+				}
+			}
+		}
+	*/
+
 	// Ensure the fee settings are ok
 	autoTxMaxFee := c.Hyperdrive.AutoTxMaxFee.Value
 	prioFee := c.Hyperdrive.MaxPriorityFee.Value
@@ -214,21 +240,32 @@ func (c *GlobalConfig) Validate() []string {
 
 	// Ensure there's a MEV-boost URL
 	if c.Hyperdrive.MevBoost.Enable.Value {
-		switch c.Hyperdrive.MevBoost.Mode.Value {
-		case config.ClientMode_Local:
-			// In local MEV-boost mode, the user has to have at least one relay
-			relays := c.Hyperdrive.MevBoost.GetEnabledMevRelays()
-			if len(relays) == 0 && c.Hyperdrive.MevBoost.CustomRelays.Value == "" {
-				errors = append(errors, "You have MEV-boost enabled in local mode but don't have any profiles or relays enabled, and don't have any custom relays entered. Please select at least one profile or relay, or enter at least one custom relay, to use MEV-boost.")
+		if c.Hyperdrive.Network.Value == config.Network_Hoodi {
+			// Disable MEV-Boost on Hoodi
+			c.Hyperdrive.MevBoost.Enable.Value = false
+		} else {
+			switch c.Hyperdrive.MevBoost.Mode.Value {
+			case config.ClientMode_Local:
+				// In local MEV-boost mode, the user has to have at least one relay
+				relays := c.Hyperdrive.MevBoost.GetEnabledMevRelays()
+				if len(relays) == 0 && c.Hyperdrive.MevBoost.CustomRelays.Value == "" {
+					errors = append(errors, "You have MEV-boost enabled in local mode but don't have any profiles or relays enabled, and don't have any custom relays entered. Please select at least one profile or relay, or enter at least one custom relay, to use MEV-boost.")
+				}
+			case config.ClientMode_External:
+				// In external MEV-boost mode, the user has to have an external URL if they're running Docker mode
+				if c.Hyperdrive.IsLocalMode() && c.Hyperdrive.MevBoost.ExternalUrl.Value == "" {
+					errors = append(errors, "You have MEV-boost enabled in external mode but don't have a URL set. Please enter the external MEV-boost server URL to use it.")
+				}
+			default:
+				errors = append(errors, "You do not have a MEV-Boost mode configured. You must either select a mode in the `hyperdrive service config` UI, or disable MEV-Boost.")
 			}
-		case config.ClientMode_External:
-			// In external MEV-boost mode, the user has to have an external URL if they're running Docker mode
-			if c.Hyperdrive.IsLocalMode() && c.Hyperdrive.MevBoost.ExternalUrl.Value == "" {
-				errors = append(errors, "You have MEV-boost enabled in external mode but don't have a URL set. Please enter the external MEV-boost server URL to use it.")
-			}
-		default:
-			errors = append(errors, "You do not have a MEV-Boost mode configured. You must either select a mode in the `hyperdrive service config` UI, or disable MEV-Boost.")
 		}
+	}
+
+	// Disable modules on Hoodi
+	if c.Hyperdrive.Network.Value == config.Network_Hoodi {
+		c.StakeWise.Enabled.Value = false
+		c.Constellation.Enabled.Value = false
 	}
 
 	// Ensure the selected port numbers are unique. Keeps track of all the errors

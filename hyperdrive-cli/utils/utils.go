@@ -196,6 +196,8 @@ func PrintNetwork(currentNetwork config.Network, isNew bool) error {
 		fmt.Printf("Hyperdrive is currently using the %sHolesky Development Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
 	case config.Network_Holesky:
 		fmt.Printf("Hyperdrive is currently using the %sHolesky Test Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
+	case config.Network_Hoodi:
+		fmt.Printf("Hyperdrive is currently using the %sHoodi Test Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
 	default:
 		fmt.Printf("%sYou are on an unexpected network [%v].%s\n\n", terminal.ColorYellow, currentNetwork, terminal.ColorReset)
 	}

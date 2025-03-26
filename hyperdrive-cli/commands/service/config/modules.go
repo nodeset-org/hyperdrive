@@ -7,7 +7,10 @@ import (
 )
 
 // Constants
-const modulesPageID string = "modules"
+const (
+	modulesPageID   string = "modules"
+	modulesDisabled string = "Hyperdrive Modules are not available on this network yet, so they will be disabled. Check back at a later date once they are supported."
+)
 
 // The addons page
 type ModulesPage struct {

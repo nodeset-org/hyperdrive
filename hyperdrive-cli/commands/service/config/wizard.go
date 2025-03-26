@@ -37,7 +37,8 @@ type wizard struct {
 	fallbackPrysmModal  *textBoxWizardStep
 
 	// Step 7 - Modules
-	modulesModal *checkBoxWizardStep
+	modulesModal         *checkBoxWizardStep
+	modulesDisabledModal *choiceWizardStep
 
 	// Step 8 - Metrics
 	metricsModal *choiceWizardStep
@@ -47,6 +48,7 @@ type wizard struct {
 	localMevModal    *checkBoxWizardStep
 	externalMevModal *textBoxWizardStep
 	mevWarningModal  *choiceWizardStep
+	mevDisabledModal *choiceWizardStep
 
 	// Done
 	finishedModal *choiceWizardStep
@@ -99,6 +101,7 @@ func newWizard(md *mainDisplay) *wizard {
 
 	// Step 7 - Modules
 	wiz.modulesModal = createModulesStep(wiz, stepCount, totalSteps)
+	wiz.modulesDisabledModal = createModulesDisabledStep(wiz, stepCount, totalSteps)
 	stepCount++
 
 	// Step 8 - Metrics
@@ -110,6 +113,7 @@ func newWizard(md *mainDisplay) *wizard {
 	wiz.localMevModal = createLocalMevStep(wiz, stepCount, totalSteps)
 	wiz.externalMevModal = createExternalMevStep(wiz, stepCount, totalSteps)
 	wiz.mevWarningModal = createMevWarningStep(wiz, stepCount, totalSteps)
+	wiz.mevDisabledModal = createMevDisabledStep(wiz, stepCount, totalSteps)
 	stepCount++
 
 	// Done

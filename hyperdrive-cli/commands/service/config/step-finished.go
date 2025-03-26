@@ -33,7 +33,12 @@ func createFinishedStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiz
 	}
 
 	back := func() {
-		wiz.mevModeModal.show()
+		// Disabled network support
+		if wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+			wiz.mevDisabledModal.show()
+		} else {
+			wiz.mevModeModal.show()
+		}
 	}
 
 	return newChoiceStep(

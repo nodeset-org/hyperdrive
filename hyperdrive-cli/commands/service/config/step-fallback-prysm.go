@@ -1,5 +1,7 @@
 package config
 
+import "github.com/rocket-pool/node-manager-core/config"
+
 func createFallbackPrysmStep(wiz *wizard, currentStep int, totalSteps int) *textBoxWizardStep {
 	// Create the labels
 	ecHttpLabel := wiz.md.Config.Hyperdrive.Fallback.EcHttpUrl.Name
@@ -24,7 +26,13 @@ func createFallbackPrysmStep(wiz *wizard, currentStep int, totalSteps int) *text
 		wiz.md.Config.Hyperdrive.Fallback.EcHttpUrl.Value = text[ecHttpLabel]
 		wiz.md.Config.Hyperdrive.Fallback.BnHttpUrl.Value = text[bnHttpLabel]
 		wiz.md.Config.Hyperdrive.Fallback.PrysmRpcUrl.Value = text[jsonRpcLabel]
-		wiz.modulesModal.show()
+
+		// Disabled network support
+		if wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+			wiz.modulesDisabledModal.show()
+		} else {
+			wiz.modulesModal.show()
+		}
 	}
 
 	back := func() {
