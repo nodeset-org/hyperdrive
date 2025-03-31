@@ -61,6 +61,10 @@ func (t *ServiceDataSource) GetValueArray(fqpn string, delimiter string) ([]stri
 	return strings.Split(val, delimiter), nil
 }
 
+// TODO: Implement
+// func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) {
+// }
+
 // Get the value of a property from its fully qualified path name
 func (t *ServiceDataSource) getPropertyValue(fqpn string) (string, error) {
 	fqmn := ""
