@@ -153,7 +153,7 @@ Whenever Hyperdrive starts its services (including the modules), the template fi
 
 ### CallConfigFunction
 
-`{{.CallConfigFunction <functionName>}}` allows you to invoke a custom function implemented in the module adapter, using the current configuration as input. This enables powerful, reusable logic like arithmetic or dynamic derivation of values that are too complex for regular templating expressions.
+`{{.CallConfigFunction <functionName>}}` allows you to invoke a custom function implemented in the module adapter. This enables powerful, reusable logic like arithmetic or dynamic derivation of values that are too complex for regular templating expressions.
 
 
 ### ModuleConfigDir
