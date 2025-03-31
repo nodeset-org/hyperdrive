@@ -115,7 +115,7 @@ func getContainerID(dockerClient *client.Client, containerName string) (string, 
 }
 
 // Run a docker exec command in the adapter container and get the result
-func runCommand[RequestType any, ResponseType any](
+func RunCommand[RequestType any, ResponseType any](
 	c *AdapterClient,
 	ctx context.Context,
 	command string,

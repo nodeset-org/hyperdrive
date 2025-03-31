@@ -39,7 +39,7 @@ func (c *AdapterClient) ProcessSettings(ctx context.Context, oldSettings *config
 		NewSettings:     newSettings,
 	}
 	response := ProcessSettingsResponse{}
-	err := runCommand(c, ctx, ProcessSettingsCommandString, request, &response)
+	err := RunCommand(c, ctx, ProcessSettingsCommandString, request, &response)
 	if err != nil {
 		return response, fmt.Errorf("error processing module settings: %w", err)
 	}

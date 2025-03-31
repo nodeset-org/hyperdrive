@@ -1,11 +1,18 @@
 package templates
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
+	"github.com/nodeset-org/hyperdrive/shared/adapter"
+
 	"github.com/nodeset-org/hyperdrive/modules"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
+)
+
+const (
+	CallConfigFunctionCommandString string = adapter.HyperdriveModuleCommand + " call-config-function"
 )
 
 // The data source for module service templates
@@ -61,9 +68,31 @@ func (t *ServiceDataSource) GetValueArray(fqpn string, delimiter string) ([]stri
 	return strings.Split(val, delimiter), nil
 }
 
-// TODO: Implement
-// func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) {
-// }
+func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) {
+	fqmn := t.moduleInfo.Descriptor.GetFullyQualifiedModuleName()
+	settings, ok := t.moduleSettingsMap[fqmn]
+	if !ok {
+		return "", fmt.Errorf("could not find settings for module: %s", fqmn)
+	}
+	containerName := ""
+	key := ""
+	c, err := adapter.NewAdapterClient(containerName, key)
+	if err != nil {
+		return "", fmt.Errorf("error creating adapter client: %w", err)
+	}
+
+	req := map[string]any{
+		"funcName": funcName,
+		"settings": settings,
+	}
+	response := ""
+	err = adapter.RunCommand[map[string]any, string](c, context.Background(), CallConfigFunctionCommandString, &req, &response)
+	if err != nil {
+		return "", fmt.Errorf("error calling config function \"%s\": %w", funcName, err)
+	}
+	return response, nil
+
+}
 
 // Get the value of a property from its fully qualified path name
 func (t *ServiceDataSource) getPropertyValue(fqpn string) (string, error) {
