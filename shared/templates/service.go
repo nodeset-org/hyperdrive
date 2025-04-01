@@ -3,8 +3,11 @@ package templates
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/nodeset-org/hyperdrive/shared"
 	"github.com/nodeset-org/hyperdrive/shared/adapter"
 
 	"github.com/nodeset-org/hyperdrive/modules"
@@ -74,9 +77,11 @@ func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) 
 	if !ok {
 		return "", fmt.Errorf("could not find settings for module: %s", fqmn)
 	}
-	containerName := ""
-	key := ""
-	c, err := adapter.NewAdapterClient(containerName, key)
+	moduleDir := t.ModuleConfigDir
+	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
+	bytes, err := os.ReadFile(adapterKeyPath)
+	containerName := t.moduleInfo.Descriptor.Name
+	c, err := adapter.NewAdapterClient(string(containerName), string(bytes))
 	if err != nil {
 		return "", fmt.Errorf("error creating adapter client: %w", err)
 	}
@@ -91,7 +96,6 @@ func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) 
 		return "", fmt.Errorf("error calling config function \"%s\": %w", funcName, err)
 	}
 	return response, nil
-
 }
 
 // Get the value of a property from its fully qualified path name
