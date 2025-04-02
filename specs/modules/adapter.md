@@ -323,18 +323,6 @@ where:
 This should output whatever output your command has; it will be viewed directly by the user so it doesn't need to be in JSON format. Any errors that occur should be printed to `STDERR`.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 ### `hd-module call-config-function`
 
 This is called when the user wants to run a command on your adapter to dynamically compute values for configuration/template substitutions.
