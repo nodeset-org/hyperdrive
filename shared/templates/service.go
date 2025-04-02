@@ -18,6 +18,10 @@ const (
 	CallConfigFunctionCommandString string = adapter.HyperdriveModuleCommand + " call-config-function"
 )
 
+type CallConfigFunctionResponse struct {
+	Result string `json:"result"`
+}
+
 // The data source for module service templates
 type ServiceDataSource struct {
 	// Public parameters
@@ -72,11 +76,6 @@ func (t *ServiceDataSource) GetValueArray(fqpn string, delimiter string) ([]stri
 }
 
 func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) {
-	fqmn := t.moduleInfo.Descriptor.GetFullyQualifiedModuleName()
-	settings, ok := t.moduleSettingsMap[fqmn]
-	if !ok {
-		return "", fmt.Errorf("could not find settings for module: %s", fqmn)
-	}
 	moduleDir := t.ModuleConfigDir
 	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
 	bytes, err := os.ReadFile(adapterKeyPath)
@@ -88,14 +87,14 @@ func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) 
 
 	req := map[string]any{
 		"funcName": funcName,
-		"settings": settings,
 	}
-	response := ""
-	err = adapter.RunCommand[map[string]any, string](c, context.Background(), CallConfigFunctionCommandString, &req, &response)
+	var response CallConfigFunctionResponse
+	err = adapter.RunCommand[map[string]any, CallConfigFunctionResponse](
+		c, context.Background(), CallConfigFunctionCommandString, &req, &response)
 	if err != nil {
 		return "", fmt.Errorf("error calling config function \"%s\": %w", funcName, err)
 	}
-	return response, nil
+	return response.Result, nil
 }
 
 // Get the value of a property from its fully qualified path name

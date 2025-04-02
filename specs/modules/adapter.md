@@ -33,7 +33,7 @@ Adapters are executed in one of two different modes:
 1. Global mode
 1. Project mode
 
-When a module is installed, Hyperdrive will create and run one instance of your adapter's Docker container in **global mode**. This container is not tied to any one Hyperdrive project; all Hyperdrive installations on the node will all interact with it to use your adapter. Global mode commands run independently from individual Hyperdrive projects and are not affected by a project's configuration. They will *not* modify the behavior of your module and thus will not interact with your module's service containers; they are effectively **read-only** commands that will only access things within the adapter itself. Examples include getting the adapter's version, validating a pending configuration, and so on. 
+When a module is installed, Hyperdrive will create and run one instance of your adapter's Docker container in **global mode**. This container is not tied to any one Hyperdrive project; all Hyperdrive installations on the node will all interact with it to use your adapter. Global mode commands run independently from individual Hyperdrive projects and are not affected by a project's configuration. They will *not* modify the behavior of your module and thus will not interact with your module's service containers; they are effectively **read-only** commands that will only access things within the adapter itself. Examples include getting the adapter's version, validating a pending configuration, and so on.
 
 Once the user configures a Hyperdrive project, the system will create a *second* instance of your adapter's Docker container. This one will be provided with all of the project-specific details, such as the paths for the configuration and log directories, and the path for the authentication key file (discussed later). Project mode commands should be considered **read and write**, because they can be used to interact with your module's services and modify its configuration.
 
@@ -200,7 +200,7 @@ The following serialized JSON object:
 - `ports` (object, required): A mapping for externally available TCP/UDP ports that your module's services will bind when running. Each property in the object must have the FQMN of one of your module's properties as its name, and the port value as its value. This is used by Hyperdrive to ensure that your service won't bind ports that are already in use by other services. If your ports are not externally bound, and restricted to Docker's internal network, they don't need to be listed here. This list can be empty if `errors` is not empty for simplicity.
 - `servicesToRestart` (string[], required): A list of Docker container service IDs (as written in your module's [service templates](./module.md#packages)) that need to be restarted (if already running) for these settings to take effect. This will be displayed to the user for informational purposes, but Hyperdrive will not actually restart these containers as part of issuing this command. Your adapter doesn't need to check whether or not the service is currently running; it can simply report that a service restart is required even if the service is stopped or doesn't exist.
 
-For example:iii
+For example:
 
 ```json
 {
@@ -209,7 +209,7 @@ For example:iii
     ],
     "ports": {
         "publicApiPort": 1234,
-        "serverListenerPort": 5678, 
+        "serverListenerPort": 5678,
     },
     "servicesToRestart": [
         "my-service",
@@ -257,7 +257,7 @@ where:
 
 ### `hd-module start`
 
-*NOTE: this command is currently a WIP and designed for MVP purposes only. The final form is expected to change.*  
+*NOTE: this command is currently a WIP and designed for MVP purposes only. The final form is expected to change.*
 
 Hyperdrive calls this command after your module's configuration settings have been saved with `set-settings`. Your adapter should start (or restart) whatever Docker containers it needs to based on the current settings (which will be provided with the call). For MVP purposes your adapter should execute a `docker compose up` command with the relevant files passed in based on the provided settings. Your module's service file templates will be instantiated and placed into the `HD_COMPOSE_DIR` directory prior to this call. It should use Docker Compose to start the services; for the Compose project name, use the `HD_COMPOSE_PROJECT` property.
 
@@ -321,3 +321,47 @@ where:
 #### Output
 
 This should output whatever output your command has; it will be viewed directly by the user so it doesn't need to be in JSON format. Any errors that occur should be printed to `STDERR`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### `hd-module call-config-function`
+
+This is called when the user wants to run a command on your adapter to dynamically compute values for configuration/template substitutions.
+
+
+#### Input
+
+```json
+{
+    "funcName": "...",
+}
+```
+
+where:
+
+ - `funcName` is the name of the adapter-defined function to invoke.
+
+
+
+#### Output
+
+```json
+{
+    "result": "...",
+}
+```
+
+where:
+
+ - `result` is the string containing the returned computed value.
