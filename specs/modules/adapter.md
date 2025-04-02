@@ -333,14 +333,14 @@ This is called when the user wants to run a command on your adapter to dynamical
 ```json
 {
     "funcName": "...",
+    "settings": "...",
 }
 ```
 
 where:
 
  - `funcName` is the name of the adapter-defined function to invoke.
-
-
+ - `settings` is the full Hyperdrive Settings object, passed to the global adapter so it can read any relevant module values.
 
 #### Output
 
