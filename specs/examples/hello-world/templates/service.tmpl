@@ -31,7 +31,7 @@ services:
       - --hd-api-key
       - "{{.HyperdriveJwtKeyFile}}/{{.HyperdriveJwtKeyFile}}" # The JWT secret for the Hyperdrive client
       - --custom-derived-value
-      - "{{.CallConfigFunction getCustomDerivedValue}}" # A custom value derived from the module's config
+      - "{{.CallConfigFunction GetDerivedValue}}" # A custom value derived from the module's config
     networks:
       - net
       {{- range $network := .GetValueArray "nodeset/hyperdrive:additionalDockerNetworks" ","}}
