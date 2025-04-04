@@ -262,9 +262,8 @@ func (c *GlobalConfig) Validate() []string {
 		}
 	}
 
-	// Disable modules on Hoodi
+	// Disable Constellation on Hoodi
 	if c.Hyperdrive.Network.Value == config.Network_Hoodi {
-		c.StakeWise.Enabled.Value = false
 		c.Constellation.Enabled.Value = false
 	}
 

@@ -2,7 +2,7 @@ key: hoodi
 defaultConfigSettings:
 stakeWiseResources:
   deploymentName: hoodi
-  vault: 0x646F5285D195e08E309cF9A5aDFDF68D6Fcc51C4
-  feeRecipient: 0xc98F25BcAA6B812a07460f18da77AF8385be7b56
-  splitWarehouse: 0x8fb66F38cF86A3d5e8768f8F1754A24A6c661Fb8
-  pullSplit: 0xAefad0Baa37e1BAF14404bcc2c5E91e4B41c929B
+  vault: 0xb163b6d4e1b317f3b4bace8770d74c1c21c4a131
+  feeRecipient: 0x51FD45BAEfB12f54766B5C4d639b360Ea50063bd
+  keeper: 0xA7D1Ac9D6F32B404C75626874BA56f7654c1dC0f
+  keeperGenesisBlock: 94074

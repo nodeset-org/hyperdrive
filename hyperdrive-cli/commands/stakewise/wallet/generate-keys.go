@@ -125,10 +125,11 @@ func generateKeys(c *cli.Context) error {
 		return nil
 	}
 
-	fmt.Printf("You now have %s%d%s validator keys ready for deposits:\n", terminal.ColorGreen, len(newKeys), terminal.ColorReset)
+	fmt.Printf("You now have %s%d%s validator keys ready for deposits:\n", terminal.ColorGreen, len(data.AvailablePubkeys), terminal.ColorReset)
 	for _, key := range data.AvailablePubkeys {
 		fmt.Println("\t" + key.HexWithPrefix())
 	}
+	fmt.Println()
 	if !data.SufficientBalance {
 		fmt.Println()
 		fmt.Printf("%sWARNING: your wallet has less ETH than StakeWise recommends (%.2f ETH per key).%s\n", terminal.ColorYellow, data.EthPerKey, terminal.ColorReset)

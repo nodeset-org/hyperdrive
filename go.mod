@@ -17,7 +17,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nodeset-org/hyperdrive-constellation v1.0.1
 	github.com/nodeset-org/hyperdrive-daemon v1.1.5-0.20250326194734-a29a4c1b5c1c
-	github.com/nodeset-org/hyperdrive-stakewise v1.1.1-0.20250326200626-26564589a4cd
+	github.com/nodeset-org/hyperdrive-stakewise v1.1.1-0.20250404174853-4c788853b2fa
 	github.com/nodeset-org/osha v0.3.1
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE

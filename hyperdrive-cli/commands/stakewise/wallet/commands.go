@@ -41,16 +41,6 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 					return generateKeys(c)
 				},
 			},
-			{
-				Name:    "claim-rewards",
-				Aliases: []string{"cr"},
-				Usage:   "Claim rewards",
-				Flags:   []cli.Flag{},
-				Action: func(c *cli.Context) error {
-					// Run
-					return claimRewards(c)
-				},
-			},
 		},
 	})
 }
