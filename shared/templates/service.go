@@ -25,13 +25,14 @@ type CallConfigFunctionResponse struct {
 // The data source for module service templates
 type ServiceDataSource struct {
 	// Public parameters
-	ModuleComposeProject string
-	ModuleNetwork        string
-	ModuleConfigDir      string
-	ModuleLogDir         string
-	ModuleDataDir        string
-	HyperdriveDaemonUrl  string
-	HyperdriveJwtKeyFile string
+	GlobalAdapterContainerName string
+	ModuleComposeProject       string
+	ModuleNetwork              string
+	ModuleConfigDir            string
+	ModuleLogDir               string
+	ModuleDataDir              string
+	HyperdriveDaemonUrl        string
+	HyperdriveJwtKeyFile       string
 
 	// Internal fields
 	hyperdriveSettings *modconfig.ModuleSettings
@@ -47,10 +48,11 @@ func NewServiceDataSource(
 	adapterSource *AdapterDataSource,
 ) *ServiceDataSource {
 	return &ServiceDataSource{
-		ModuleComposeProject: adapterSource.ModuleComposeProject,
-		ModuleNetwork:        adapterSource.ModuleNetwork,
-		ModuleConfigDir:      adapterSource.ModuleConfigDir,
-		ModuleLogDir:         adapterSource.ModuleLogDir,
+		ModuleComposeProject:       adapterSource.ModuleComposeProject,
+		ModuleNetwork:              adapterSource.ModuleNetwork,
+		ModuleConfigDir:            adapterSource.ModuleConfigDir,
+		ModuleLogDir:               adapterSource.ModuleLogDir,
+		GlobalAdapterContainerName: adapterSource.AdapterContainerName,
 		//ModuleDataDir:        adapterSource.ModuleDataDir, TODO!
 		//HyperdriveDaemonUrl:  hdSettings.DaemonUrl,
 		//HyperdriveJwtKeyFile: hdSettings.JwtKeyFile,
@@ -81,7 +83,7 @@ func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) 
 	moduleDir := t.ModuleConfigDir
 	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
 	bytes, err := os.ReadFile(adapterKeyPath)
-	containerName := t.moduleInfo.Descriptor.Name
+	containerName := "hd-em_adapter" //t.moduleInfo.Descriptor.Name
 	c, err := adapter.NewAdapterClient(string(containerName), string(bytes))
 	if err != nil {
 		return "", fmt.Errorf("error creating adapter client: %w", err)
