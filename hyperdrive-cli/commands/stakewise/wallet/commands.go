@@ -44,7 +44,7 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				Flags: []cli.Flag{
 					utils.YesFlag,
 					generateKeysCountFlag,
-					generateKeysNoRestartFlag,
+					noRestartFlag,
 				},
 				Action: func(c *cli.Context) error {
 					// Validate args
@@ -52,6 +52,24 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 
 					// Run
 					return generateKeys(c)
+				},
+			},
+			{
+				Name:    "recover-keys",
+				Aliases: []string{"r"},
+				Usage:   "Recover all of the registered validator keys derived from your node wallet.",
+				Flags: []cli.Flag{
+					utils.YesFlag,
+					startIndexFlag,
+					searchLimitFlag,
+					noRestartFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run
+					return recoverKeys(c)
 				},
 			},
 		},

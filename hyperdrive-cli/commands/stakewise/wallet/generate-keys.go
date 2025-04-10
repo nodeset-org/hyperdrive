@@ -20,9 +20,9 @@ var (
 		Aliases: []string{"c"},
 		Usage:   "The number of keys to generate",
 	}
-	generateKeysNoRestartFlag *cli.BoolFlag = &cli.BoolFlag{
+	noRestartFlag *cli.BoolFlag = &cli.BoolFlag{
 		Name:  "no-restart",
-		Usage: fmt.Sprintf("Don't automatically restart the Validator Client containers after generating keys. %sOnly use this if you know what you're doing and can restart it manually.%s", terminal.ColorRed, terminal.ColorReset),
+		Usage: fmt.Sprintf("Don't automatically restart the Validator Client after the operation. %sOnly use this if you know what you're doing and can restart it manually.%s", terminal.ColorRed, terminal.ColorReset),
 	}
 )
 
@@ -44,7 +44,6 @@ func generateKeys(c *cli.Context) error {
 		fmt.Println("The StakeWise module is not enabled in your Hyperdrive configuration.")
 		return nil
 	}
-	noRestart := c.Bool(generateKeysNoRestartFlag.Name)
 
 	// Check wallet status
 	_, ready, err := utils.CheckIfWalletReady(hd)
@@ -157,7 +156,7 @@ func generateKeys(c *cli.Context) error {
 	*/
 
 	// Restart the VC
-	if noRestart {
+	if c.Bool(noRestartFlag.Name) {
 		fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Validator Client at your earliest convenience in order to attest with your new keys. Failure to do so will result in any new validators being offline and *losing ETH* until you restart it.%s\n", terminal.ColorYellow, terminal.ColorReset)
 	} else {
 		fmt.Print("Restarting Validator Client to load the new keys... ")
