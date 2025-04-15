@@ -78,15 +78,27 @@ func (t *ServiceDataSource) GetValueArray(fqpn string, delimiter string) ([]stri
 }
 
 func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) {
-	settings := t.hyperdriveSettings.SerializeToMap()
 
 	moduleDir := t.ModuleConfigDir
 	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
 	bytes, err := os.ReadFile(adapterKeyPath)
-	containerName := "hd-em_adapter" //t.moduleInfo.Descriptor.Name
+	containerName := "hd-he_adapter" //t.moduleInfo.Descriptor.Name
 	c, err := adapter.NewAdapterClient(string(containerName), string(bytes))
 	if err != nil {
 		return "", fmt.Errorf("error creating adapter client: %w", err)
+	}
+
+	modules := map[string]any{}
+	for fqmn, modSettings := range t.moduleSettingsMap {
+		modules[fqmn] = map[string]any{
+			"enabled":  true,
+			"version":  "0.1.0",
+			"settings": modSettings.SerializeToMap(),
+		}
+	}
+
+	settings := map[string]any{
+		"modules": modules,
 	}
 
 	req := map[string]any{
