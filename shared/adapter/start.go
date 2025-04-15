@@ -25,7 +25,7 @@ func (c *AdapterClient) Start(ctx context.Context, settings *config.HyperdriveSe
 		},
 		Settings: settings,
 	}
-	err := runCommand[StartRequest, struct{}](c, ctx, StartCommandString, request, nil)
+	err := RunCommand[StartRequest, struct{}](c, ctx, StartCommandString, request, nil)
 	if err != nil {
 		return err
 	}

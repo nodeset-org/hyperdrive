@@ -115,7 +115,7 @@ Any dynamic property templates will be run dynamically whenever one of the follo
 
 ### UseDefault
 
-`{{.UseDefault}}` can be used within the `template` of a dynamic property to indicate that Hyperdrive should use its `default` value. This is helpful to reduce duplication if your default value ever changes, so you don't have to set it multiple times. 
+`{{.UseDefault}}` can be used within the `template` of a dynamic property to indicate that Hyperdrive should use its `default` value. This is helpful to reduce duplication if your default value ever changes, so you don't have to set it multiple times.
 
 
 ## Service Docker Compose Templates
@@ -151,15 +151,19 @@ Whenever Hyperdrive starts its services (including the modules), the template fi
 
 `{{.GetValueArray <FQPN> <delimiter>}}` takes the value of the provided parameter, which is specified by its [Fully Qualified Parameter Name](), splits it according to the `delimiter` string, and returns the resulting array. This is useful to take parameters that represent multiple values separated by a comma, semicolon, or other delimiter, and split them into an explicit array so they can be iterated on in a template via the `for` keyword.
 
+### CallConfigFunction
+
+`{{.CallConfigFunction <functionName>}}` allows you to invoke a custom function implemented in the module adapter. This enables powerful, reusable logic like arithmetic or dynamic derivation of values that are too complex for regular templating expressions.
+
 
 ### ModuleConfigDir
 
-` {{.ModuleConfigDir}}` returns the full path of the directory that stores your service's configuration, as provided by the adapter during a `set-settings` operation.
+`{{.ModuleConfigDir}}` returns the full path of the directory that stores your service's configuration, as provided by the adapter during a `set-settings` operation.
 
 
 ### ModuleLogDir
 
-` {{.ModuleLogDir}}` returns the full path of the directory that stores your module's log files.
+`{{.ModuleLogDir}}` returns the full path of the directory that stores your module's log files.
 
 
 ### ModuleDataDir

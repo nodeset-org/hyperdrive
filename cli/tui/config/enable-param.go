@@ -8,14 +8,14 @@ import (
 )
 
 type enableParamInstance struct {
-	info    *config.ModuleInfo
-	intance *config.ModuleInstance
+	info     *config.ModuleInfo
+	instance *config.ModuleInstance
 }
 
 func NewEnableParamInstance(info *config.ModuleInfo, instance *config.ModuleInstance) *enableParamInstance {
 	return &enableParamInstance{
-		info:    info,
-		intance: instance,
+		info:     info,
+		instance: instance,
 	}
 }
 
@@ -85,7 +85,7 @@ func (e *enableParamInstance) GetMetadata() config.IParameter {
 }
 
 func (e *enableParamInstance) GetValue() any {
-	return e.intance.Enabled
+	return e.instance.Enabled
 }
 
 func (e *enableParamInstance) SetValue(value any) error {
@@ -93,12 +93,12 @@ func (e *enableParamInstance) SetValue(value any) error {
 	if !ok {
 		return fmt.Errorf("invalid value type for module \"%s\" enable flag: %T", e.info.Descriptor.GetFullyQualifiedModuleName(), value)
 	}
-	e.intance.Enabled = val
+	e.instance.Enabled = val
 	return nil
 }
 
 func (e *enableParamInstance) String() string {
-	return strconv.FormatBool(e.intance.Enabled)
+	return strconv.FormatBool(e.instance.Enabled)
 }
 
 func (e *enableParamInstance) Validate() []error {

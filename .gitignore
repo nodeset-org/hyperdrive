@@ -52,3 +52,5 @@ pkg
 
 # NPM artifacts
 internal/hardhat/node_modules/
+
+.DS_Store

@@ -23,7 +23,7 @@ func (c *AdapterClient) UpgradeInstance(ctx context.Context, instance *config.Mo
 		Instance: instance,
 	}
 	response := config.ModuleInstance{}
-	err := runCommand(c, ctx, UpgradeInstanceCommandString, request, &response)
+	err := RunCommand(c, ctx, UpgradeInstanceCommandString, request, &response)
 	if err != nil {
 		return &response, fmt.Errorf("error upgrading settings: %w", err)
 	}

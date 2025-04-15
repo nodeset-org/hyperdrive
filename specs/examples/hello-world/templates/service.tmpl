@@ -4,7 +4,7 @@
 services:
   {{.GetValue serviceContainerName}}:
     image: {{.GetValue serviceContainerTag}}
-    container_name: {{.GetValue "nodeset/hyperdrive:projectName"}}_{{.GetValue serviceContainerName}} # Container names should follow the format "<project name>_<service name>" 
+    container_name: {{.GetValue "nodeset/hyperdrive:projectName"}}_{{.GetValue serviceContainerName}} # Container names should follow the format "<project name>_<service name>"
     restart: unless-stopped
     ports:
       - "127.0.0.1:{{.GetValue apiPort}}:{{.GetValue apiPort}}/tcp" # Restricted to localhost outside of Docker
@@ -30,6 +30,8 @@ services:
       - "{{.ModuleJwtKeyFile}}/{{.ModuleJwtKeyFile}}" # The JWT secret for the module's server
       - --hd-api-key
       - "{{.HyperdriveJwtKeyFile}}/{{.HyperdriveJwtKeyFile}}" # The JWT secret for the Hyperdrive client
+      - --custom-derived-value
+      - "{{.CallConfigFunction GetDerivedValue}}" # A custom value derived from the module's config
     networks:
       - net
       {{- range $network := .GetValueArray "nodeset/hyperdrive:additionalDockerNetworks" ","}}

@@ -1,23 +1,38 @@
 package templates
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive/shared/adapter"
 
 	"github.com/nodeset-org/hyperdrive/modules"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 )
 
+const (
+	CallConfigFunctionCommandString string = adapter.HyperdriveModuleCommand + " call-config-function"
+)
+
+type CallConfigFunctionResponse struct {
+	Result string `json:"result"`
+}
+
 // The data source for module service templates
 type ServiceDataSource struct {
 	// Public parameters
-	ModuleComposeProject string
-	ModuleNetwork        string
-	ModuleConfigDir      string
-	ModuleLogDir         string
-	ModuleDataDir        string
-	HyperdriveDaemonUrl  string
-	HyperdriveJwtKeyFile string
+	GlobalAdapterContainerName string
+	ModuleComposeProject       string
+	ModuleNetwork              string
+	ModuleConfigDir            string
+	ModuleLogDir               string
+	ModuleDataDir              string
+	HyperdriveDaemonUrl        string
+	HyperdriveJwtKeyFile       string
 
 	// Internal fields
 	hyperdriveSettings *modconfig.ModuleSettings
@@ -33,10 +48,11 @@ func NewServiceDataSource(
 	adapterSource *AdapterDataSource,
 ) *ServiceDataSource {
 	return &ServiceDataSource{
-		ModuleComposeProject: adapterSource.ModuleComposeProject,
-		ModuleNetwork:        adapterSource.ModuleNetwork,
-		ModuleConfigDir:      adapterSource.ModuleConfigDir,
-		ModuleLogDir:         adapterSource.ModuleLogDir,
+		ModuleComposeProject:       adapterSource.ModuleComposeProject,
+		ModuleNetwork:              adapterSource.ModuleNetwork,
+		ModuleConfigDir:            adapterSource.ModuleConfigDir,
+		ModuleLogDir:               adapterSource.ModuleLogDir,
+		GlobalAdapterContainerName: adapterSource.AdapterContainerName,
 		//ModuleDataDir:        adapterSource.ModuleDataDir, TODO!
 		//HyperdriveDaemonUrl:  hdSettings.DaemonUrl,
 		//HyperdriveJwtKeyFile: hdSettings.JwtKeyFile,
@@ -59,6 +75,43 @@ func (t *ServiceDataSource) GetValueArray(fqpn string, delimiter string) ([]stri
 		return nil, err
 	}
 	return strings.Split(val, delimiter), nil
+}
+
+func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) {
+
+	moduleDir := t.ModuleConfigDir
+	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
+	bytes, err := os.ReadFile(adapterKeyPath)
+	containerName := "hd-he_adapter" //t.moduleInfo.Descriptor.Name
+	c, err := adapter.NewAdapterClient(string(containerName), string(bytes))
+	if err != nil {
+		return "", fmt.Errorf("error creating adapter client: %w", err)
+	}
+
+	modules := map[string]any{}
+	for fqmn, modSettings := range t.moduleSettingsMap {
+		modules[fqmn] = map[string]any{
+			"enabled":  true,
+			"version":  "0.1.0",
+			"settings": modSettings.SerializeToMap(),
+		}
+	}
+
+	settings := map[string]any{
+		"modules": modules,
+	}
+
+	req := map[string]any{
+		"funcName": funcName,
+		"settings": settings,
+	}
+	var response CallConfigFunctionResponse
+	err = adapter.RunCommand[map[string]any, CallConfigFunctionResponse](
+		c, context.Background(), CallConfigFunctionCommandString, &req, &response)
+	if err != nil {
+		return "", fmt.Errorf("error calling config function \"%s\": %w", funcName, err)
+	}
+	return response.Result, nil
 }
 
 // Get the value of a property from its fully qualified path name
