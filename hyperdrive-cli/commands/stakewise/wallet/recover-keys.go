@@ -60,7 +60,7 @@ func recoverKeys(c *cli.Context) error {
 	}
 
 	// Print status info
-	response, err := sw.Api.Wallet.GetRegisteredKeys()
+	response, err := sw.Api.Validator.Status(nil)
 	if err != nil {
 		return fmt.Errorf("error getting registered keys: %w", err)
 	}
@@ -101,9 +101,9 @@ func recoverKeys(c *cli.Context) error {
 			continue
 		}
 		fmt.Printf("%s (%s%s%s):\n", vault.Name, terminal.ColorGreen, vault.Address.Hex(), terminal.ColorReset)
-		for _, key := range vault.Validators {
-			fmt.Printf("\t%s\n", key.HexWithPrefix())
-			keysToRecover = append(keysToRecover, key)
+		for _, validator := range vault.Validators {
+			fmt.Printf("\t%s\n", validator.Pubkey.HexWithPrefix())
+			keysToRecover = append(keysToRecover, validator.Pubkey)
 		}
 		fmt.Println()
 	}

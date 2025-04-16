@@ -59,14 +59,16 @@ func exit(c *cli.Context) error {
 	}
 
 	// Get all active validators
-	activeValidatorResponse, err := sw.Api.Status.GetValidatorStatuses()
+	statusResponse, err := sw.Api.Validator.Status(nil)
 	if err != nil {
-		return fmt.Errorf("error while getting active validators: %w", err)
+		return fmt.Errorf("error while getting validator status: %w", err)
 	}
 	var activeValidators []beacon.ValidatorPubkey
-	for _, state := range activeValidatorResponse.Data.States {
-		if state.BeaconStatus == beacon.ValidatorState_ActiveOngoing {
-			activeValidators = append(activeValidators, state.Pubkey)
+	for _, vault := range statusResponse.Data.Vaults {
+		for _, validator := range vault.Validators {
+			if validator.State == beacon.ValidatorState_ActiveOngoing {
+				activeValidators = append(activeValidators, validator.Pubkey)
+			}
 		}
 	}
 	if len(activeValidators) == 0 {
