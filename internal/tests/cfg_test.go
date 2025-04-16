@@ -18,7 +18,6 @@ import (
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	hdclient "github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/context"
-	"github.com/nodeset-org/osha"
 	"github.com/rocket-pool/node-manager-core/config"
 	"github.com/stretchr/testify/require"
 )
@@ -28,12 +27,11 @@ const (
 )
 
 func TestNewConfig_Holesky(t *testing.T) {
-	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_Filesystem)
+	err := testMgr.RevertToBaseline()
 	if err != nil {
-		fail("Error creating custom snapshot: %v", err)
+		fail("Error reverting to baseline snapshot: %v", err)
 	}
-	defer basicTestCleanup(snapshotName)
+	defer handle_panics()
 
 	cfgPath := testMgr.GetTestDir()
 

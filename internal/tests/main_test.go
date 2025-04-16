@@ -53,19 +53,11 @@ func mainCleanup() {
 	testMgr = nil
 }
 
-func basicTestCleanup(snapshotName string) {
+func handle_panics() {
 	// Handle panics
 	r := recover()
 	if r != nil {
 		debug.PrintStack()
 		fail("Recovered from panic: %v", r)
-	}
-
-	// Revert to the snapshot taken at the start of the test
-	if snapshotName != "" {
-		err := testMgr.RevertToCustomSnapshot(snapshotName)
-		if err != nil {
-			fail("Error reverting to custom snapshot: %v", err)
-		}
 	}
 }

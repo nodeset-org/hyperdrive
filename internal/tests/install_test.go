@@ -12,7 +12,6 @@ import (
 	"github.com/mholt/archiver/v4"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/osha"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,12 +21,11 @@ const (
 )
 
 func TestManualInstall(t *testing.T) {
-	// Take a snapshot, revert at the end
-	snapshotName, err := testMgr.CreateCustomSnapshot(osha.Service_Filesystem)
+	err := testMgr.RevertToBaseline()
 	if err != nil {
-		fail("Error creating custom snapshot: %v", err)
+		fail("Error reverting to baseline snapshot: %v", err)
 	}
-	defer basicTestCleanup(snapshotName)
+	defer handle_panics()
 
 	// Make sure the install package file doesn't exist yet
 	oshaDir := testMgr.GetTestDir()

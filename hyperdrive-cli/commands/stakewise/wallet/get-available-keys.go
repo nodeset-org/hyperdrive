@@ -9,6 +9,14 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var (
+	lookbackFlag *cli.BoolFlag = &cli.BoolFlag{
+		Name:  "lookback",
+		Usage: "Perform a complete lookback scan to check for deposit events over the last seven days, and any pending deposits on the Beacon chain, when assessing key availability.",
+		Value: false,
+	}
+)
+
 func getAvailableKeys(c *cli.Context) error {
 	// Get the client
 	hd, err := client.NewHyperdriveClientFromCtx(c)
@@ -38,7 +46,8 @@ func getAvailableKeys(c *cli.Context) error {
 	}
 
 	// Get the list of available keys
-	response, err := sw.Api.Wallet.GetAvailableKeys()
+	lookback := c.Bool(lookbackFlag.Name)
+	response, err := sw.Api.Wallet.GetAvailableKeys(lookback)
 	if err != nil {
 		return fmt.Errorf("error getting available keys: %w", err)
 	}

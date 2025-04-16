@@ -90,7 +90,7 @@ func generateKeys(c *cli.Context) error {
 	fmt.Println()
 
 	// Get the list of available keys
-	response, err := sw.Api.Wallet.GetAvailableKeys()
+	response, err := sw.Api.Wallet.GetAvailableKeys(false)
 	if err != nil {
 		return fmt.Errorf("error getting available keys: %w", err)
 	}

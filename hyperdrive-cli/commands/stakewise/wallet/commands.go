@@ -25,6 +25,21 @@ func RegisterCommands(cmd *cli.Command, name string, aliases []string) {
 				},
 			},
 			{
+				Name:    "get-available-keys",
+				Aliases: []string{"a"},
+				Usage:   "Retrieve the list of validator pubkeys that have been created locally and available for new deposits on this network.",
+				Flags: []cli.Flag{
+					lookbackFlag,
+				},
+				Action: func(c *cli.Context) error {
+					// Validate args
+					utils.ValidateArgCount(c, 0)
+
+					// Run
+					return getAvailableKeys(c)
+				},
+			},
+			{
 				Name:    "get-registered-keys",
 				Aliases: []string{"grk"},
 				Usage:   "Retrieve the list of validator pubkeys that have been registered with NodeSet for every StakeWise vault on this network.",
