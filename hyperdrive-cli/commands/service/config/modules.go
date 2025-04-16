@@ -4,6 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/rivo/tview"
+	"github.com/rocket-pool/node-manager-core/config"
 )
 
 // Constants
@@ -73,7 +74,26 @@ func (p *ModulesPage) createContent() {
 	// Create the category list
 	categoryList := tview.NewList().
 		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
-			p.layout.descriptionBox.SetText(p.addonSubpages[index].getPage().description)
+			set := false
+			switch p.masterConfig.Hyperdrive.Network.Value {
+			case config.Network_Mainnet:
+				// Disable StakeWise on Mainnet
+				switch mainText {
+				case p.stakewisePage.getPage().title:
+					p.layout.descriptionBox.SetText("The StakeWise module is not currently available on Mainnet.")
+					set = true
+				}
+			case config.Network_Hoodi:
+				// Disable Constellation on Hoodi
+				switch mainText {
+				case p.constellationPage.getPage().title:
+					p.layout.descriptionBox.SetText("The Constellation module is not currently available on Hoodi.")
+					set = true
+				}
+			}
+			if !set {
+				p.layout.descriptionBox.SetText(p.addonSubpages[index].getPage().description)
+			}
 		})
 	categoryList.SetBackgroundColor(BackgroundColor)
 	categoryList.SetBorderPadding(0, 0, 1, 1)
@@ -94,6 +114,20 @@ func (p *ModulesPage) createContent() {
 		categoryList.AddItem(subpage.getPage().title, "", 0, nil)
 	}
 	categoryList.SetSelectedFunc(func(i int, s1, s2 string, r rune) {
+		switch p.masterConfig.Hyperdrive.Network.Value {
+		case config.Network_Mainnet:
+			// Disable StakeWise on Mainnet
+			switch s1 {
+			case p.stakewisePage.getPage().title:
+				return
+			}
+		case config.Network_Hoodi:
+			// Disable Constellation on Hoodi
+			switch s1 {
+			case p.constellationPage.getPage().title:
+				return
+			}
+		}
 		p.addonSubpages[i].handleLayoutChanged()
 		p.home.md.setPage(p.addonSubpages[i].getPage())
 	})

@@ -1,5 +1,7 @@
 package config
 
+import "github.com/rocket-pool/node-manager-core/config"
+
 func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWizardStep {
 	// Create the labels
 	stakewiseCfg := wiz.md.Config.StakeWise
@@ -10,11 +12,29 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 	helperText := "Select the NodeSet modules you would like to enable below."
 
 	show := func(modal *checkBoxModalLayout) {
-		modal.generateCheckboxes(
-			[]string{stakewiseLabel, constellationLabel},
-			[]string{stakewiseCfg.Enabled.Description, constellationCfg.Enabled.Description},
-			[]bool{stakewiseCfg.Enabled.Value, constellationCfg.Enabled.Value},
-		)
+		// Control which modules appear based on the network
+		switch wiz.md.Config.Hyperdrive.Network.Value {
+		case config.Network_Mainnet:
+			modal.generateCheckboxes(
+				[]string{constellationLabel},
+				[]string{constellationCfg.Enabled.Description},
+				[]bool{constellationCfg.Enabled.Value},
+			)
+
+		case config.Network_Hoodi:
+			modal.generateCheckboxes(
+				[]string{stakewiseLabel},
+				[]string{stakewiseCfg.Enabled.Description},
+				[]bool{stakewiseCfg.Enabled.Value},
+			)
+
+		default:
+			modal.generateCheckboxes(
+				[]string{stakewiseLabel, constellationLabel},
+				[]string{stakewiseCfg.Enabled.Description, constellationCfg.Enabled.Description},
+				[]bool{stakewiseCfg.Enabled.Value, constellationCfg.Enabled.Value},
+			)
+		}
 
 		wiz.md.setPage(modal.page)
 		modal.focus()

@@ -215,6 +215,15 @@ func (c *GlobalConfig) Validate() []string {
 		}
 	*/
 
+	// Disable StakeWise on mainnet
+	if c.Hyperdrive.Network.Value == config.Network_Mainnet {
+		c.StakeWise.Enabled.Value = false
+	}
+	// Disable Constellation on Hoodi
+	if c.Hyperdrive.Network.Value == config.Network_Hoodi {
+		c.Constellation.Enabled.Value = false
+	}
+
 	// Ensure the fee settings are ok
 	autoTxMaxFee := c.Hyperdrive.AutoTxMaxFee.Value
 	prioFee := c.Hyperdrive.MaxPriorityFee.Value
