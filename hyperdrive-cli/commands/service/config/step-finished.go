@@ -34,7 +34,9 @@ func createFinishedStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiz
 
 	back := func() {
 		// Disabled network support
-		if wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+		mevBoostDisabled := false
+		mevBoostDisabled = (wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi)
+		if mevBoostDisabled {
 			wiz.mevDisabledModal.show()
 		} else {
 			wiz.mevModeModal.show()
@@ -99,7 +101,7 @@ func processConfigAfterQuit(md *mainDisplay) {
 		// TEMP: Restart all of the module daemons if the HD daemon is being restarted
 		for container := range totalAffectedContainers {
 			if container == config.ContainerID_Daemon {
-				totalAffectedContainers[swconfig.ContainerID_StakewiseDaemon] = true
+				totalAffectedContainers[swconfig.ContainerID_StakeWiseDaemon] = true
 			}
 		}
 		for container := range totalAffectedContainers {

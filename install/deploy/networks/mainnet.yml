@@ -10,6 +10,9 @@ networkResources:
   txWatchUrl: https://etherscan.io/tx
   flashbotsProtectUrl: https://rpc.flashbots.net/fast
   mevBlockerUrl: https://rpc.mevblocker.io/noreverts
+  depositContractAddress: 0x00000000219ab540356cBB839Cbe05303d7705Fa
+  capellaForkVersion: 0x03000000
+  capellaForkEpoch: 194048
 defaultConfigSettings:
 hyperdriveResources:
   nodeSetApiUrl: https://nodeset.io/api

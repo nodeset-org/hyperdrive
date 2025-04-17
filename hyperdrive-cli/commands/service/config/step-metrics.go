@@ -22,7 +22,9 @@ func createMetricsStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 		}
 
 		// Disabled network support
-		if wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+		mevBoostDisabled := false
+		mevBoostDisabled = (wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi)
+		if mevBoostDisabled {
 			wiz.mevDisabledModal.show()
 		} else {
 			wiz.mevModeModal.show()
@@ -31,7 +33,9 @@ func createMetricsStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 
 	back := func() {
 		// Disabled network support
-		if wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi {
+		modulesDisabled := false
+		//modulesDisabled = (wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi)
+		if modulesDisabled {
 			wiz.modulesDisabledModal.show()
 		} else {
 			wiz.modulesModal.show()

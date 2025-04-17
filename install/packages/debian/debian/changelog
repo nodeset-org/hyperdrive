@@ -1,3 +1,9 @@
+hyperdrive (1.2.0~b1) UNRELEASED; urgency=medium
+
+  * Introduced support for StakeWise v3 vaults
+
+ -- NodeSet Inc. <info@nodeset.io>  Fri, 21 Mar 2025 16:04:11 +0000
+ 
 hyperdrive (1.1.4) stable; urgency=medium
 
   * Updated Geth, Besu, Nethermind, Reth, Lodestar, Nimbus, Prysm, Teku, and the Node Exporter.

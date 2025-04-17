@@ -215,6 +215,15 @@ func (c *GlobalConfig) Validate() []string {
 		}
 	*/
 
+	// Disable StakeWise on mainnet
+	if c.Hyperdrive.Network.Value == config.Network_Mainnet {
+		c.StakeWise.Enabled.Value = false
+	}
+	// Disable Constellation on Hoodi
+	if c.Hyperdrive.Network.Value == config.Network_Hoodi {
+		c.Constellation.Enabled.Value = false
+	}
+
 	// Ensure the fee settings are ok
 	autoTxMaxFee := c.Hyperdrive.AutoTxMaxFee.Value
 	prioFee := c.Hyperdrive.MaxPriorityFee.Value
@@ -260,12 +269,6 @@ func (c *GlobalConfig) Validate() []string {
 				errors = append(errors, "You do not have a MEV-Boost mode configured. You must either select a mode in the `hyperdrive service config` UI, or disable MEV-Boost.")
 			}
 		}
-	}
-
-	// Disable modules on Hoodi
-	if c.Hyperdrive.Network.Value == config.Network_Hoodi {
-		c.StakeWise.Enabled.Value = false
-		c.Constellation.Enabled.Value = false
 	}
 
 	// Ensure the selected port numbers are unique. Keeps track of all the errors
