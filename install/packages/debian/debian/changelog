@@ -1,6 +1,6 @@
-hyperdrive (1.2.0~dev) UNRELEASED; urgency=medium
+hyperdrive (1.2.0~b1) UNRELEASED; urgency=medium
 
-  * Introduced support for StakeWise v2 vaults
+  * Introduced support for StakeWise v3 vaults
 
  -- NodeSet Inc. <info@nodeset.io>  Fri, 21 Mar 2025 16:04:11 +0000
  

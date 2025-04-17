@@ -214,7 +214,7 @@ if [ "$CLIENT" = "besu" ]; then
     # Check for the prune flag and run that first if requested
     if [ -f "/ethclient/prune.lock" ]; then
         $PERF_PREFIX /opt/besu/bin/besu --network=$ETH_NETWORK --data-path=/ethclient/besu storage trie-log prune ; rm /ethclient/prune.lock
-    
+
     # Run Besu normally
     else
         CMD="$PERF_PREFIX /opt/besu/bin/besu \
@@ -240,7 +240,7 @@ if [ "$CLIENT" = "besu" ]; then
 
         if [ "$BESU_ARCHIVE_MODE" = "true" ]; then
             CMD="$CMD --sync-mode=FULL --data-storage-format=FOREST"
-        else 
+        else
             CMD="$CMD --sync-mode=SNAP --data-storage-format=BONSAI"
         fi
 
@@ -277,6 +277,7 @@ if [ "$CLIENT" = "reth" ]; then
     fi
 
     CMD="$PERF_PREFIX /usr/local/bin/reth node \
+        --full \
         --chain $ETH_NETWORK \
         --datadir /ethclient/reth \
         --http \

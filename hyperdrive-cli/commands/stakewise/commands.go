@@ -16,7 +16,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 		Aliases: aliases,
 		Usage:   "Manage the Stakewise module",
 	}
-	network.RegisterCommands(cmd, "network", []string{"n"})
+	network.RegisterCommands(cmd, "network", []string{"e"})
 	validator.RegisterCommands(cmd, "validator", []string{"v"})
 	wallet.RegisterCommands(cmd, "wallet", []string{"w"})
 
