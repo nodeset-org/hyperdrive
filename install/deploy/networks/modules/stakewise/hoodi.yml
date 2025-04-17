@@ -1,5 +1,7 @@
 key: hoodi
 defaultConfigSettings:
+  teku:
+    containerTag: "consensys/teku:25.4.1"
 stakeWiseResources:
   deploymentName: hoodi
   vault: 0x2b3eb77e5cbde5deb70c928e1e2814f8a6f143e0

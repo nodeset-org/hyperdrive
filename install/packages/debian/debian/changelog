@@ -1,9 +1,14 @@
-hyperdrive (1.2.0~b1) UNRELEASED; urgency=medium
+hyperdrive (1.2.0~b1) unstable; urgency=medium
 
-  * Introduced support for StakeWise v3 vaults
+  * Updated Geth, Besu, Reth, and the Node Exporter.
+  * Added `--full` to Reth so it retains deposit event logs, which is required for StakeWise.
+  * Updated Lighthouse for test networks only.
+  * Redesigned the StakeWise module to support StakeWise v3 vaults. It will no longer function with legacy StakeWise v1 vaults, but those have been deprecated from nodeset.io anyway.
+  * Disabled the StakeWise module on Mainnet, and enabled it on Hoodi.
+  * Added validator key recovery to the StakeWise commands.
 
- -- NodeSet Inc. <info@nodeset.io>  Fri, 21 Mar 2025 16:04:11 +0000
- 
+ -- NodeSet Inc. <info@nodeset.io>  Thu, 17 Apr 2025 19:35:09 +0000
+
 hyperdrive (1.1.4) stable; urgency=medium
 
   * Updated Geth, Besu, Nethermind, Reth, Lodestar, Nimbus, Prysm, Teku, and the Node Exporter.
