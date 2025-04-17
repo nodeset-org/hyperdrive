@@ -1,5 +1,7 @@
 key: holesky
 defaultConfigSettings:
+  teku:
+    containerTag: "consensys/teku:25.4.1"
 stakeWiseResources:
   deploymentName: holesky
   vault: 0x646F5285D195e08E309cF9A5aDFDF68D6Fcc51C4

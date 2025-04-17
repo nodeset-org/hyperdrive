@@ -14,6 +14,9 @@ networkResources:
   capellaForkVersion: 0x03000000
   capellaForkEpoch: 194048
 defaultConfigSettings:
+  localBeacon:
+    teku:
+      containerTag: "consensys/teku:25.4.1"
 hyperdriveResources:
   nodeSetApiUrl: https://nodeset.io/api
   encryptionPubkey: age1hs87f8pl369tel4xpprtmaxwhg2e3gynvz8q45h48hed4m4h4d0s6t8caa

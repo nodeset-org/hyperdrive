@@ -1,5 +1,7 @@
 key: mainnet
 defaultConfigSettings:
+  teku:
+    containerTag: "consensys/teku:25.4.1"
 stakeWiseResources:
   deploymentName: mainnet
   vault: 0xE2AEECC76839692AEa35a8D119181b14ebf411c9
