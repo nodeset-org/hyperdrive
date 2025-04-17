@@ -227,6 +227,7 @@ if [ "$CLIENT" = "besu" ]; then
         --rpc-ws-enabled \
         --rpc-ws-host=0.0.0.0 \
         --rpc-ws-port=${EC_WS_PORT:-8546} \
+        --rpc-max-logs-range=8000 \
         --host-allowlist=* \
         --rpc-http-max-active-connections=1024 \
         --nat-method=docker \
