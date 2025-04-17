@@ -271,11 +271,6 @@ func (c *GlobalConfig) Validate() []string {
 		}
 	}
 
-	// Disable Constellation on Hoodi
-	if c.Hyperdrive.Network.Value == config.Network_Hoodi {
-		c.Constellation.Enabled.Value = false
-	}
-
 	// Ensure the selected port numbers are unique. Keeps track of all the errors
 	portMap := make(map[uint16]bool)
 	portMap, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.ApiPort, errors)

@@ -87,6 +87,10 @@ func getStatus(c *cli.Context) error {
 			totalInfo = append(totalInfo, validator)
 		}
 	}
+	if len(totalInfo) == 0 {
+		fmt.Println("You don't have any validators registered with StakeWise yet.")
+		return nil
+	}
 
 	for _, validator := range totalInfo {
 		vault := vaultMap[validator.Pubkey]
