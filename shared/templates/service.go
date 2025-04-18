@@ -82,7 +82,7 @@ func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) 
 	moduleDir := t.ModuleConfigDir
 	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
 	bytes, err := os.ReadFile(adapterKeyPath)
-	containerName := "hd-he_adapter" //t.moduleInfo.Descriptor.Name
+	containerName := "hd-he_adapter" // TODO: Dynamic container name t.moduleInfo.Descriptor.Name
 	c, err := adapter.NewAdapterClient(string(containerName), string(bytes))
 	if err != nil {
 		return "", fmt.Errorf("error creating adapter client: %w", err)
@@ -92,7 +92,7 @@ func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) 
 	for fqmn, modSettings := range t.moduleSettingsMap {
 		modules[fqmn] = map[string]any{
 			"enabled":  true,
-			"version":  "0.1.0",
+			"version":  "0.1.0", // TODO: Get the version from the module settings
 			"settings": modSettings.SerializeToMap(),
 		}
 	}
