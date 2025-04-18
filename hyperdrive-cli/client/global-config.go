@@ -249,8 +249,8 @@ func (c *GlobalConfig) Validate() []string {
 
 	// Ensure there's a MEV-boost URL
 	if c.Hyperdrive.MevBoost.Enable.Value {
-		if c.Hyperdrive.Network.Value == config.Network_Hoodi {
-			// Disable MEV-Boost on Hoodi
+		// Disable MEV-boost on networks with no relays
+		if !c.Hyperdrive.MevBoost.HasRelays() {
 			c.Hyperdrive.MevBoost.Enable.Value = false
 		} else {
 			switch c.Hyperdrive.MevBoost.Mode.Value {

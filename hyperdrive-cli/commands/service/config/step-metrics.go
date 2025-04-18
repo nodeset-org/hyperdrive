@@ -1,7 +1,5 @@
 package config
 
-import "github.com/rocket-pool/node-manager-core/config"
-
 func createMetricsStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
 	helperText := "Would you like to enable Hyperdrive's metrics monitoring system? This will monitor things such as hardware stats (CPU usage, RAM usage, free disk space), your validator stats, stats about your node such as total ETH rewards, and much more. It also enables the Grafana dashboard to quickly and easily view these metrics.\n\nNone of this information will be sent to any remote servers for collection an analysis; this is purely for your own usage on your node."
 
@@ -22,12 +20,10 @@ func createMetricsStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 		}
 
 		// Disabled network support
-		mevBoostDisabled := false
-		mevBoostDisabled = (wiz.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi)
-		if mevBoostDisabled {
-			wiz.mevDisabledModal.show()
-		} else {
+		if wiz.md.Config.Hyperdrive.MevBoost.HasRelays() {
 			wiz.mevModeModal.show()
+		} else {
+			wiz.mevDisabledModal.show()
 		}
 	}
 
