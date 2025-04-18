@@ -16,7 +16,6 @@ type wizard struct {
 	// Step 4 - EC settings
 	localEcModal            *choiceWizardStep
 	localEcRandomModal      *choiceWizardStep
-	localRethWarning        *choiceWizardStep
 	externalEcSelectModal   *choiceWizardStep
 	externalRethWarning     *choiceWizardStep
 	externalEcSettingsModal *textBoxWizardStep
@@ -77,7 +76,6 @@ func newWizard(md *mainDisplay) *wizard {
 
 	// Step 4 - EC settings
 	wiz.localEcModal = createLocalEcStep(wiz, stepCount, totalSteps)
-	wiz.localRethWarning = createLocalRethWarningStep(wiz, stepCount, totalSteps)
 	wiz.externalEcSelectModal = createExternalEcSelectStep(wiz, stepCount, totalSteps)
 	wiz.externalRethWarning = createExternalRethWarningStep(wiz, stepCount, totalSteps)
 	wiz.externalEcSettingsModal = createExternalEcSettingsStep(wiz, stepCount, totalSteps)

@@ -41,7 +41,7 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 	clientDescriptions := []string{randomDesc.String()}
 	for _, client := range clients {
 		clientNames = append(clientNames, client.Name)
-		clientDescriptions = append(clientDescriptions, getAugmentedLocalEcDescription(client.Value, client.Description))
+		clientDescriptions = append(clientDescriptions, client.Description)
 	}
 
 	helperText := "Please select the Execution Client you would like to use.\n\nHighlight each one to see a brief description of it, or go to https://clientdiversity.org/ to learn more about them."
@@ -86,12 +86,7 @@ func createLocalEcStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiza
 			}
 
 			wiz.md.Config.Hyperdrive.LocalExecutionClient.ExecutionClient.Value = selectedClient
-			if selectedClient == config.ExecutionClient_Reth {
-				// Show the Reth warning
-				wiz.localRethWarning.show()
-			} else {
-				wiz.localBnModal.show()
-			}
+			wiz.localBnModal.show()
 		}
 	}
 

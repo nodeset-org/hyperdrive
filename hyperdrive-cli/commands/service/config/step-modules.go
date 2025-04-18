@@ -14,13 +14,6 @@ func createModulesStep(wiz *wizard, currentStep int, totalSteps int) *checkBoxWi
 	show := func(modal *checkBoxModalLayout) {
 		// Control which modules appear based on the network
 		switch wiz.md.Config.Hyperdrive.Network.Value {
-		case config.Network_Mainnet:
-			modal.generateCheckboxes(
-				[]string{constellationLabel},
-				[]string{constellationCfg.Enabled.Description},
-				[]bool{constellationCfg.Enabled.Value},
-			)
-
 		case config.Network_Hoodi:
 			modal.generateCheckboxes(
 				[]string{stakewiseLabel},
