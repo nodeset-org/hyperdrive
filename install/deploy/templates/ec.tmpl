@@ -24,6 +24,7 @@ services:
       - {{$network}}
       {{- end}}
     environment:
+      - DEPOSIT_CONTRACT_BLOCK={{.HyperdriveResources.DepositContractBlock}}
       - ETH_NETWORK={{.HyperdriveResources.EthNetworkName}}
       - CLIENT={{.Hyperdrive.LocalExecutionClient.ExecutionClient}}
       - EC_MAX_PEERS={{.Hyperdrive.GetEcMaxPeers}}
@@ -53,6 +54,7 @@ services:
       {{- else if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "reth"}}
       - RETH_INBOUND_MAX_PEERS={{.Hyperdrive.LocalExecutionClient.Reth.MaxInboundPeers}}
       - RETH_OUTBOUND_MAX_PEERS={{.Hyperdrive.LocalExecutionClient.Reth.MaxOutboundPeers}}
+      - RETH_STATE_PRUNE_DISTANCE={{.Hyperdrive.LocalExecutionClient.Reth.StatePruneDistance}}
       {{- end}}
     entrypoint: sh
     command: "/usr/share/hyperdrive/scripts/{{.Hyperdrive.GetEcStartScript}}"

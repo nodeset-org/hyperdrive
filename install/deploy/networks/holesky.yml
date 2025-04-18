@@ -11,6 +11,7 @@ networkResources:
   flashbotsProtectUrl: https://rpc-holesky.flashbots.net/
   mevBlockerUrl: ""
   depositContractAddress: 0x4242424242424242424242424242424242424242
+  depositContractBlock: 0
   capellaForkVersion: 0x04017000
   capellaForkEpoch: 256
 defaultConfigSettings:

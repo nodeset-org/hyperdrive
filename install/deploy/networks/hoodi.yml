@@ -11,6 +11,7 @@ networkResources:
   flashbotsProtectUrl: ""
   mevBlockerUrl: ""
   depositContractAddress: 0x00000000219ab540356cBB839Cbe05303d7705Fa
+  depositContractBlock: 0
   capellaForkVersion: 0x40000910
   capellaForkEpoch: 0
 defaultConfigSettings:

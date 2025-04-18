@@ -278,7 +278,11 @@ if [ "$CLIENT" = "reth" ]; then
     fi
 
     CMD="$PERF_PREFIX /usr/local/bin/reth node \
-        --full \
+        --prune.receipts.before ${DEPOSIT_CONTRACT_BLOCK:-0} \
+        --prune.transactionlookup.before ${DEPOSIT_CONTRACT_BLOCK:-0} \
+        --prune.accounthistory.distance ${RETH_STATE_PRUNE_DISTANCE:-10064} \
+        --prune.storagehistory.distance ${RETH_STATE_PRUNE_DISTANCE:-10064} \
+        --prune.senderrecovery.full \
         --chain $ETH_NETWORK \
         --datadir /ethclient/reth \
         --http \

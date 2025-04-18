@@ -2,6 +2,8 @@ hyperdrive (1.2.0~dev2) UNRELEASED; urgency=medium
 
   * Updated Nethermind, Reth, and Teku.
   * Added MEV-Boost support for Hoodi.
+  * Reth now preserves all contract event logs (starting at the deposit contract's deployment block) and all transaction lookup info.
+  * Added a config parameter to adjust the length of Reth's historical state pruning window.  
 
  -- NodeSet Inc. <info@nodeset.io>  Fri, 18 Apr 2025 00:55:53 +0000
 
