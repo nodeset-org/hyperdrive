@@ -11,6 +11,7 @@ networkResources:
   flashbotsProtectUrl: https://rpc.flashbots.net/fast
   mevBlockerUrl: https://rpc.mevblocker.io/noreverts
   depositContractAddress: 0x00000000219ab540356cBB839Cbe05303d7705Fa
+  depositContractBlock: 11052984
   capellaForkVersion: 0x03000000
   capellaForkEpoch: 194048
 defaultConfigSettings:
