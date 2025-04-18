@@ -82,17 +82,15 @@ func (home *settingsHome) createContent() {
 	// Create the category list
 	categoryList := tview.NewList().
 		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
-			// Disable MEV-Boost
-			mevBoostDisabled := false
-			mevBoostDisabled = (home.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi)
+			// Disable MEV-Boost on unsupported networks
 			if mainText == home.mevBoostPage.page.title {
-				if mevBoostDisabled {
-					layout.descriptionBox.SetText("MEV-Boost is not available on the Hoodi network.")
+				if !home.md.Config.Hyperdrive.MevBoost.HasRelays() {
+					layout.descriptionBox.SetText("MEV-Boost is not available on this network.")
 					return
 				}
 			}
 
-			// Disable Modules
+			// Disable Modules on unsupported networks
 			modulesDisabled := false
 			// modulesDisabled = (home.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi)
 			if mainText == home.modulesPage.page.title {
@@ -123,16 +121,14 @@ func (home *settingsHome) createContent() {
 		categoryList.AddItem(subpage.getPage().title, "", 0, nil)
 	}
 	categoryList.SetSelectedFunc(func(i int, s1, s2 string, r rune) {
-		// Disable MEV-Boost
-		mevBoostDisabled := false
-		mevBoostDisabled = (home.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi)
+		// Disable MEV-Boost on unsupported networks
 		if home.settingsSubpages[i].getPage().title == home.mevBoostPage.page.title {
-			if mevBoostDisabled {
+			if !home.md.Config.Hyperdrive.MevBoost.HasRelays() {
 				return
 			}
 		}
 
-		// Disable Modules
+		// Disable Modules on unsupported networks
 		modulesDisabled := false
 		// modulesDisabled = (home.md.Config.Hyperdrive.Network.Value == config.Network_Hoodi)
 		if home.settingsSubpages[i].getPage().title == home.modulesPage.page.title {

@@ -1,3 +1,10 @@
+hyperdrive (1.2.0~dev2) UNRELEASED; urgency=medium
+
+  * Updated Nethermind, Reth, and Teku.
+  * Added MEV-Boost support for Hoodi.
+
+ -- NodeSet Inc. <info@nodeset.io>  Fri, 18 Apr 2025 00:55:53 +0000
+
 hyperdrive (1.2.0~b1) unstable; urgency=medium
 
   * Updated Geth, Besu, Reth, and the Node Exporter.
