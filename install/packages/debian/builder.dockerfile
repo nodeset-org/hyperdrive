@@ -1,7 +1,7 @@
 # Image for building Hyperdrive debian packages
 FROM debian:bookworm-slim
 
-# Add backports and the unstable repo
+# Add the testing (trixie) repo because as of right now bookworm doesn't have Go 1.24 yet
 RUN cat <<'EOF' > /etc/apt/sources.list
 deb http://deb.debian.org/debian testing main contrib non-free-firmware
 deb-src http://deb.debian.org/debian testing main contrib non-free-firmware
