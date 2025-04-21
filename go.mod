@@ -16,12 +16,12 @@ require (
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nodeset-org/hyperdrive-constellation v1.0.1
-	github.com/nodeset-org/hyperdrive-daemon v1.2.0-b1.0.20250419072002-a4609f4f7493
-	github.com/nodeset-org/hyperdrive-stakewise v1.2.0-b1.0.20250419072131-4e58ea490317
+	github.com/nodeset-org/hyperdrive-daemon v1.2.0-b1.0.20250421175054-fc10e2b02172
+	github.com/nodeset-org/hyperdrive-stakewise v1.2.0-b1.0.20250421175204-de04821971ac
 	github.com/nodeset-org/osha v0.4.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20250420045703-d8b6efb25c5e
+	github.com/rocket-pool/node-manager-core v0.5.2-0.20250421174946-6e2a934bf75c
 	github.com/rocket-pool/rocketpool-go/v2 v2.0.0-b2.0.20240709170030-c27aeb5fb99b
 	github.com/rocket-pool/smartnode/v2 v2.0.0-olddev.0.20240710181452-edcbd6208bdd
 	github.com/stretchr/testify v1.10.0

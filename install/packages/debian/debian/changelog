@@ -1,6 +1,6 @@
 hyperdrive (1.2.0~dev2) UNRELEASED; urgency=medium
 
-  * Updated Nethermind, Reth, and Teku.
+  * Updated Geth, Nethermind, Reth, Lodestar, and Teku.
   * Added MEV-Boost support for Hoodi.
   * Enabled the StakeWise module on Mainnet.
   * Reth now preserves all contract event logs (starting at the deposit contract's deployment block) and all transaction lookup info.
