@@ -352,11 +352,7 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 	}
 
 	// Check if the network has changed
-	changeNetworks := false
-	if oldConfig.Hyperdrive.Network.Value != c.Hyperdrive.Network.Value {
-		changeNetworks = true
-	}
-
+	changeNetworks := (oldConfig.Hyperdrive.Network.Value != c.Hyperdrive.Network.Value)
 	return sectionList, changedContainers, changeNetworks
 }
 

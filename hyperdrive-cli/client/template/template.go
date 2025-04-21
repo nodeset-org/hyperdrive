@@ -23,7 +23,9 @@ func (t Template) Write(data interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Could not open templated file %s for writing: %w", shellescape.Quote(t.Dst), err)
 	}
-	defer runtimeFile.Close()
+	defer func() {
+		_ = runtimeFile.Close()
+	}()
 
 	// Parse the template
 	tmpl, err := template.ParseFiles(t.Src)

@@ -29,7 +29,7 @@ jobs:
       
       - name: Run Hardhat  
         working-directory: ./osha/hardhat
-        run: npx hardhat node --port 8545 &
+        run: npx hardhat node --port 9545 &
 
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -38,6 +38,6 @@ jobs:
           
       - name: Run tests
         env: 
-           HARDHAT_URL: "http://localhost:8545"
+           HARDHAT_URL: "http://localhost:9545"
            CI: true
         run: go test -p 1 ./...

@@ -241,9 +241,9 @@ func addChangesToDescription(section *config.ChangedSection, titlePrefix string,
 
 	// Handle the parameters
 	if len(section.Settings) > 0 {
-		description.WriteString(fmt.Sprintf("{%s}\n", sectionName))
+		fmt.Fprintf(description, "{%s}\n", sectionName)
 		for _, setting := range section.Settings {
-			description.WriteString(fmt.Sprintf("\t%s: %s => %s\n", setting.Name, setting.OldValue, setting.NewValue))
+			fmt.Fprintf(description, "\t%s: %s => %s\n", setting.Name, setting.OldValue, setting.NewValue)
 		}
 		description.WriteString("\n")
 	}

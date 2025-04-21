@@ -114,7 +114,7 @@ func checkIfCommandExists(command string) (bool, error) {
 
 	if err != nil {
 		exitErr, isExitErr := err.(*exec.ExitError)
-		if isExitErr && exitErr.ProcessState.ExitCode() == 127 {
+		if isExitErr && exitErr.ExitCode() == 127 {
 			// Command not found
 			return false, nil
 		} else {

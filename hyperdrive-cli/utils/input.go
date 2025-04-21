@@ -55,7 +55,7 @@ func ValidateTokenType(name, value string) (string, error) {
 
 	// Not a token address, check against the well-known names
 	val := strings.ToLower(value)
-	if !(val == "eth") {
+	if val != "eth" {
 		return "", fmt.Errorf("Invalid %s '%s' - valid token names are 'ETH'", name, value)
 	}
 	return val, nil
