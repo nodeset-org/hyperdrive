@@ -18,8 +18,21 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+type StartMode int
+
+const (
+	// Start normally, with an update prompt if relevant
+	StartMode_Normal StartMode = iota
+
+	// Start without performing an update
+	StartMode_NoUpdate
+
+	// Start with forcing an automatic update if relevant
+	StartMode_ForceUpdate
+)
+
 // Start the Hyperdrive service
-func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
+func startService(c *cli.Context, startMode StartMode) error {
 	// Get Hyperdrive client
 	hd, err := client.NewHyperdriveClientFromCtx(c)
 	if err != nil {
@@ -40,18 +53,32 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 	oldVersion := strings.TrimPrefix(cfg.Hyperdrive.Version, "v")
 	currentVersion := strings.TrimPrefix(shared.HyperdriveVersion, "v")
 	isUpdate := oldVersion != currentVersion
-	if isUpdate && !ignoreConfigSuggestion {
-		if c.Bool(cliutils.YesFlag.Name) || cliutils.Confirm("Hyperdrive upgrade detected - starting will overwrite certain settings with the latest defaults (such as container versions).\nYou may want to run `hyperdrive service config` first to see what's changed.\n\nWould you like to continue starting the service?") {
-			cfg.UpdateDefaults()
-			err := hd.SaveConfig(cfg)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%sError saving settings: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+	doUpdate := false
+	if isUpdate {
+		switch startMode {
+		case StartMode_Normal:
+			if c.Bool(cliutils.YesFlag.Name) || cliutils.Confirm("Hyperdrive upgrade detected - starting will overwrite certain settings with the latest defaults (such as container versions).\nYou may want to run `hyperdrive service config` first to see what's changed.\n\nWould you like to continue starting the service?") {
+				doUpdate = true
 			} else {
-				fmt.Printf("%sUpdated settings successfully.%s\n", terminal.ColorGreen, terminal.ColorReset)
+				fmt.Println("Cancelled.")
+				return nil
 			}
+
+		case StartMode_NoUpdate:
+			// Do nothing in this case, start normally
+			break
+
+		case StartMode_ForceUpdate:
+			doUpdate = true
+		}
+	}
+	if doUpdate {
+		cfg.UpdateDefaults()
+		err := hd.SaveConfig(cfg)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%sError saving settings: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
 		} else {
-			fmt.Println("Cancelled.")
-			return nil
+			fmt.Printf("%sUpdated settings successfully.%s\n", terminal.ColorGreen, terminal.ColorReset)
 		}
 	}
 
