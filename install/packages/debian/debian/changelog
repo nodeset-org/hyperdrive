@@ -1,11 +1,12 @@
 hyperdrive (1.2.0) stable; urgency=medium
 
-  * Updated Geth, Nethermind, Besu, Reth, Lighthouse, Lodestar, Nimbus, Prysm, and Teku.
+  * Updated Geth, Nethermind, Besu, Reth, Lighthouse, Lodestar, Nimbus, Prysm, Teku, and MEV-Boost.
   * Added MEV-Boost support for Hoodi.
   * Enabled the StakeWise module on Mainnet.
   * Reth now preserves all contract event logs (starting at the deposit contract's deployment block) and all transaction lookup info.
   * Added a config parameter to adjust the length of Reth's historical state pruning window.
   * Removed the supermajority warning from Geth.
+  * Manual installation via the install script now updates the service containers again (unless the `--no-restart` flag is specified).
   * Updated Go to v1.24.
 
  -- NodeSet Inc. <info@nodeset.io>  Tue, 22 Apr 2025 06:45:30 +0000
