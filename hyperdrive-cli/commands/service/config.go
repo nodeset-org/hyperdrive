@@ -116,7 +116,7 @@ func configureService(c *cli.Context) error {
 				fmt.Println("Please run `hyperdrive service start` when you are ready to launch.")
 				return nil
 			}
-			return startService(c, true)
+			return startService(c, StartMode_NoUpdate)
 		}
 
 		// Query for service start if this is old and there are containers to change
@@ -153,7 +153,7 @@ func configureService(c *cli.Context) error {
 
 			fmt.Println()
 			fmt.Println("Applying changes and restarting containers...")
-			return startService(c, true)
+			return startService(c, StartMode_NoUpdate)
 		}
 	} else {
 		fmt.Println("Your changes have not been saved. Your Hyperdrive configuration is the same as it was before.")

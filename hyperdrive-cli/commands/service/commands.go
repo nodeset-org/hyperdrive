@@ -164,7 +164,7 @@ func RegisterCommands(app *cli.App, name string, aliases []string) {
 					utils.ValidateArgCount(c, 0)
 
 					// Run command
-					return startService(c, false)
+					return startService(c, StartMode_Normal)
 				},
 			},
 

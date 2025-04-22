@@ -110,7 +110,7 @@ func installService(c *cli.Context) error {
 	} else if !c.Bool(installNoRestartFlag.Name) {
 		// Restart services
 		fmt.Println("Restarting Hyperdrive services...")
-		err = startService(c, true)
+		err = startService(c, StartMode_ForceUpdate)
 		if err != nil {
 			return fmt.Errorf("error restarting services: %w", err)
 		}
