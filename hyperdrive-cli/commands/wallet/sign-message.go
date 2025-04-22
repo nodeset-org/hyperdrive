@@ -6,7 +6,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/goccy/go-json"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	nutils "github.com/rocket-pool/node-manager-core/utils"
 	"github.com/urfave/cli/v2"
@@ -39,7 +38,7 @@ func signMessage(c *cli.Context) error {
 	}
 
 	// Check wallet status
-	status, ready, err := utils.CheckIfWalletReady(hd)
+	status, ready, err := cliutils.CheckIfWalletReady(hd)
 	if err != nil {
 		return err
 	}

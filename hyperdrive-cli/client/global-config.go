@@ -215,10 +215,6 @@ func (c *GlobalConfig) Validate() []string {
 		}
 	*/
 
-	// Disable StakeWise on mainnet
-	if c.Hyperdrive.Network.Value == config.Network_Mainnet {
-		c.StakeWise.Enabled.Value = false
-	}
 	// Disable Constellation on Hoodi
 	if c.Hyperdrive.Network.Value == config.Network_Hoodi {
 		c.Constellation.Enabled.Value = false
@@ -356,11 +352,7 @@ func (c *GlobalConfig) GetChanges(oldConfig *GlobalConfig) ([]*config.ChangedSec
 	}
 
 	// Check if the network has changed
-	changeNetworks := false
-	if oldConfig.Hyperdrive.Network.Value != c.Hyperdrive.Network.Value {
-		changeNetworks = true
-	}
-
+	changeNetworks := (oldConfig.Hyperdrive.Network.Value != c.Hyperdrive.Network.Value)
 	return sectionList, changedContainers, changeNetworks
 }
 

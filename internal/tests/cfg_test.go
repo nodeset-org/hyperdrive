@@ -120,6 +120,6 @@ func TestNewConfig_Holesky(t *testing.T) {
 	t.Logf("StakeWise vault address was correct: %s", swRes.Vault.Hex())
 
 	expectedForkVersion := config.HoleskyResourcesReference.GenesisForkVersion
-	require.Equal(t, expectedForkVersion, swRes.MergedResources.GenesisForkVersion)
-	t.Logf("Genesis fork version was correct: %x", swRes.MergedResources.GenesisForkVersion)
+	require.Equal(t, expectedForkVersion, swRes.GenesisForkVersion)
+	t.Logf("Genesis fork version was correct: %x", swRes.GenesisForkVersion)
 }

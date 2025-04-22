@@ -55,9 +55,6 @@ func (configPage *ExecutionConfigPage) createContent() {
 	configPage.layout.setupEscapeReturnHomeHandler(configPage.home.md, configPage.home.homePage)
 
 	// Update the Reth descriptions
-	for _, option := range configPage.masterConfig.Hyperdrive.LocalExecutionClient.ExecutionClient.Options {
-		option.Description = getAugmentedLocalEcDescription(option.Value, option.Description)
-	}
 	for _, option := range configPage.masterConfig.Hyperdrive.ExternalExecutionClient.ExecutionClient.Options {
 		option.Description = getAugmentedExternalEcDescription(option.Value, option.Description)
 	}

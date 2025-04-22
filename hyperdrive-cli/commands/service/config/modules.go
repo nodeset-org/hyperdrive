@@ -76,13 +76,6 @@ func (p *ModulesPage) createContent() {
 		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
 			set := false
 			switch p.masterConfig.Hyperdrive.Network.Value {
-			case config.Network_Mainnet:
-				// Disable StakeWise on Mainnet
-				switch mainText {
-				case p.stakewisePage.getPage().title:
-					p.layout.descriptionBox.SetText("The StakeWise module is not currently available on Mainnet.")
-					set = true
-				}
 			case config.Network_Hoodi:
 				// Disable Constellation on Hoodi
 				switch mainText {
@@ -115,12 +108,6 @@ func (p *ModulesPage) createContent() {
 	}
 	categoryList.SetSelectedFunc(func(i int, s1, s2 string, r rune) {
 		switch p.masterConfig.Hyperdrive.Network.Value {
-		case config.Network_Mainnet:
-			// Disable StakeWise on Mainnet
-			switch s1 {
-			case p.stakewisePage.getPage().title:
-				return
-			}
 		case config.Network_Hoodi:
 			// Disable Constellation on Hoodi
 			switch s1 {

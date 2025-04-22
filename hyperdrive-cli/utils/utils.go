@@ -151,7 +151,7 @@ func GetDateTimeString(dateTime uint64) string {
 // Convert a Unix datetime to a string, or `---` if it's zero
 func GetDateTimeStringOfTime(dateTime time.Time) string {
 	timeString := dateTime.Format(time.RFC822)
-	if dateTime == time.Unix(0, 0) {
+	if dateTime.Equal(time.Unix(0, 0)) {
 		timeString = "---"
 	}
 	return timeString

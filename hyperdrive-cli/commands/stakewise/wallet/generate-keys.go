@@ -6,7 +6,6 @@ import (
 
 	swconfig "github.com/nodeset-org/hyperdrive-stakewise/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/rocket-pool/node-manager-core/beacon"
@@ -46,7 +45,7 @@ func generateKeys(c *cli.Context) error {
 	}
 
 	// Check wallet status
-	_, ready, err := utils.CheckIfWalletReady(hd)
+	_, ready, err := cliutils.CheckIfWalletReady(hd)
 	if err != nil {
 		return err
 	}

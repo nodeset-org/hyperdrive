@@ -11,7 +11,6 @@ import (
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
 	cliwallet "github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/wallet"
-	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	cliutils "github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/rocket-pool/node-manager-core/utils/input"
@@ -102,7 +101,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 				fmt.Println()
 				fmt.Println("**If you did NOT change clients, you can safely ignore this warning.**")
 				fmt.Println()
-				if c.Bool(utils.YesFlag.Name) {
+				if c.Bool(cliutils.YesFlag.Name) {
 					fmt.Println("Aborting auto-start sequence due to non-interactive mode.")
 					return nil
 				}
@@ -111,7 +110,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 					return nil
 				}
 			} else if firstRun {
-				if c.Bool(utils.YesFlag.Name) {
+				if c.Bool(cliutils.YesFlag.Name) {
 					fmt.Println("It looks like this is your first time starting a Validator Client, but auto-start is being aborted for safety due to non-interactive mode. Please run `hyperdrive service start` manually when you can.")
 					return nil
 				}
@@ -231,7 +230,7 @@ func startService(c *cli.Context, ignoreConfigSuggestion bool) error {
 // Prompt for the wallet password upon startup if it isn't available, but a wallet is on disk
 func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) (bool, error) {
 	fmt.Println("Your node wallet is saved, but the password is not stored on disk so it cannot be loaded automatically.")
-	if c.Bool(utils.YesFlag.Name) {
+	if c.Bool(cliutils.YesFlag.Name) {
 		return false, nil
 	}
 
@@ -355,7 +354,7 @@ func checkValidatorClient(hd *client.HyperdriveClient, vcName string, newTagMap 
 		if err != nil {
 			return 0, fmt.Errorf("error getting VC [%s] status: %w", vcName, err)
 		}
-		if validatorFinishTime == zeroTime || status == "running" {
+		if validatorFinishTime.Equal(zeroTime) || status == "running" {
 			fmt.Printf("%sValidator Client [%s] is currently running, stopping it...%s\n", terminal.ColorYellow, vcName, terminal.ColorReset)
 			err := hd.StopContainer(vcName)
 			if err != nil {
