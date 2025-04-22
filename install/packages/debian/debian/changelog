@@ -1,6 +1,6 @@
-hyperdrive (1.2.0~dev2) UNRELEASED; urgency=medium
+hyperdrive (1.2.0) stable; urgency=medium
 
-  * Updated Geth, Nethermind, Reth, Lighthouse, Lodestar, Nimbus, Prysm, and Teku.
+  * Updated Geth, Nethermind, Besu, Reth, Lighthouse, Lodestar, Nimbus, Prysm, and Teku.
   * Added MEV-Boost support for Hoodi.
   * Enabled the StakeWise module on Mainnet.
   * Reth now preserves all contract event logs (starting at the deposit contract's deployment block) and all transaction lookup info.
@@ -8,7 +8,7 @@ hyperdrive (1.2.0~dev2) UNRELEASED; urgency=medium
   * Removed the supermajority warning from Geth.
   * Updated Go to v1.24.
 
- -- NodeSet Inc. <info@nodeset.io>  Fri, 18 Apr 2025 00:55:53 +0000
+ -- NodeSet Inc. <info@nodeset.io>  Tue, 22 Apr 2025 06:45:30 +0000
 
 hyperdrive (1.2.0~b1) unstable; urgency=medium
 

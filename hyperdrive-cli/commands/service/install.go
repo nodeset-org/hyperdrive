@@ -129,11 +129,19 @@ func printPatchNotes() {
 	fmt.Printf("%s=== Hyperdrive v%s ===%s\n\n", terminal.ColorGreen, shared.HyperdriveVersion, terminal.ColorReset)
 	fmt.Printf("Changes you should be aware of before starting:\n\n")
 
-	fmt.Printf("%s=== Constellation Support ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("This version of Hyperdrive supports the long-awaited Constellation module. You can now register as a Constellation operator and create Rocket Pool minipools without needing to bond your own ETH or RPL (aside from a small 12-hour lockup for security). For more info, visit https://docs.nodeset.io/constellation/introduction.")
+	fmt.Printf("%s=== New StakeWise Module ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("The StakeWise module has been upgraded to support StakeWise's new v3 vaults, which dramatically improve the node operator experience. Deposits now happen automatically; all you need to do is generate keys in advance, and let it do the rest! Take a look at our documentation to get started: https://docs.nodeset.io/stakewise-integration/node-operator-guide-wip")
 	fmt.Println()
 
-	fmt.Printf("%s=== File-Based Networks ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("Hyperdrive now supports creating your own custom network definitions in the networks directory (default for Linux: /usr/share/hyperdrive/networks). Add your own files, and they'll become selectable choices in the TUI!")
+	fmt.Printf("%s=== Reth Changes ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("Reth will now preserve event logs and transaction receipts by default, which are required for the new StakeWise module. If you previously used Reth without this configuration manually enabled, you will need to resync your node to regenerate the pruned events. If you are using an external Reth client, please ensure that it is configured to preserve event logs from all contracts, not just the deposit contract logs. Also, there is a new configuration parameter called 'State Prune Distance' that lets you fine-tune how many blocks Reth keeps state in its cache for.")
+	fmt.Println()
+
+	fmt.Printf("%s=== Pectra on Mainnet ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("The Pectra network upgrade is schedule for Mainnet on epoch 364032 (May 7 2025 - 10:05:11 AM UTC). This version includes clients that support it, except for Nethermind.")
+	fmt.Println()
+
+	fmt.Printf("%s=== Holesky Deprecation ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("The Holesky testnet is being deprecated. If you are using it, please migrate to the new Hoodi testnet. You can do this by running `hyperdrive service config` and selecting Hoodi as your network.")
 	fmt.Println()
 }
