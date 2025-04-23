@@ -142,6 +142,6 @@ func printPatchNotes() {
 	fmt.Println()
 
 	fmt.Printf("%s=== Holesky Deprecation ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("The Holesky testnet is being deprecated. If you are using it, please migrate to the new Hoodi testnet. You can do this by running `hyperdrive service config` and selecting Hoodi as your network.")
+	fmt.Println("The Holesky testnet is no longer supported deprecated. If you were using it, please run `hyperdrive wallet purge` to remove all of your wallet and validator keys, then run`hyperdrive service config` and select Hoodi as your network.")
 	fmt.Println()
 }
