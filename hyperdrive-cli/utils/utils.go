@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils/terminal"
 	"github.com/rocket-pool/node-manager-core/config"
@@ -192,10 +191,6 @@ func PrintNetwork(currentNetwork config.Network, isNew bool) error {
 	switch currentNetwork {
 	case config.Network_Mainnet:
 		fmt.Printf("Hyperdrive is currently using the %sEthereum Mainnet.%s\n\n", terminal.ColorGreen, terminal.ColorReset)
-	case hdconfig.Network_HoleskyDev:
-		fmt.Printf("Hyperdrive is currently using the %sHolesky Development Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
-	case config.Network_Holesky:
-		fmt.Printf("Hyperdrive is currently using the %sHolesky Test Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
 	case config.Network_Hoodi:
 		fmt.Printf("Hyperdrive is currently using the %sHoodi Test Network.%s\n\n", terminal.ColorYellow, terminal.ColorReset)
 	default:

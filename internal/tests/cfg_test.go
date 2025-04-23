@@ -26,7 +26,7 @@ const (
 	hdTestApiKey string = "hd-api-key"
 )
 
-func TestNewConfig_Holesky(t *testing.T) {
+func TestNewConfig_Hoodi(t *testing.T) {
 	err := testMgr.RevertToBaseline()
 	if err != nil {
 		fail("Error reverting to baseline snapshot: %v", err)
@@ -65,21 +65,21 @@ func TestNewConfig_Holesky(t *testing.T) {
 	// Check the list of networks
 	networkOptions := cfg.Hyperdrive.Network.Options
 	foundMainnet := false
-	foundHolesky := false
+	foundHoodi := false
 	for _, network := range networkOptions {
 		switch network.Value {
 		case config.Network_Mainnet:
 			foundMainnet = true
-		case config.Network_Holesky:
-			foundHolesky = true
+		case config.Network_Hoodi:
+			foundHoodi = true
 		}
 	}
 	require.True(t, foundMainnet)
-	require.True(t, foundHolesky)
+	require.True(t, foundHoodi)
 	t.Log("Network options loaded successfully")
 
-	// Set the network to Holesky and save the config
-	cfg.ChangeNetwork(config.Network_Holesky)
+	// Set the network to Hoodi and save the config
+	cfg.ChangeNetwork(config.Network_Hoodi)
 	err = hdClient.SaveConfig(cfg)
 	require.NoError(t, err)
 	t.Log("Config saved successfully")
@@ -114,12 +114,12 @@ func TestNewConfig_Holesky(t *testing.T) {
 	require.NoError(t, err)
 	t.Log("StakeWise service provider created")
 
-	expectedVaultAddress := swconfig.HoleskyResourcesReference.Vault
+	expectedVaultAddress := swconfig.HoodiResourcesReference.Vault
 	swRes := swSp.GetResources()
 	require.Equal(t, expectedVaultAddress, swRes.Vault)
 	t.Logf("StakeWise vault address was correct: %s", swRes.Vault.Hex())
 
-	expectedForkVersion := config.HoleskyResourcesReference.GenesisForkVersion
+	expectedForkVersion := config.HoodiResourcesReference.GenesisForkVersion
 	require.Equal(t, expectedForkVersion, swRes.GenesisForkVersion)
 	t.Logf("Genesis fork version was correct: %x", swRes.GenesisForkVersion)
 }

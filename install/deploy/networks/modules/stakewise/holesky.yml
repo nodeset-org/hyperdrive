@@ -1,8 +1,0 @@
-key: holesky
-defaultConfigSettings:
-stakeWiseResources:
-  deploymentName: holesky
-  vault: 0x646F5285D195e08E309cF9A5aDFDF68D6Fcc51C4
-  feeRecipient: 0xc98F25BcAA6B812a07460f18da77AF8385be7b56
-  keeper: 0xB580799Bf7d62721D1a523f0FDF2f5Ed7BA4e259
-  keeperGenesisBlock: 215379

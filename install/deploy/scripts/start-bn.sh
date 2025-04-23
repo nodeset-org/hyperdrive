@@ -175,17 +175,8 @@ fi
 # Prysm startup
 if [ "$CLIENT" = "prysm" ]; then
 
-    # Grab the Holesky genesis state if needed
-    if [ "$ETH_NETWORK" = "holesky" ]; then
-        echo "Prysm is configured to use Holesky, genesis state required."
-        if [ ! -f "/ethclient/holesky-genesis.ssz" ]; then
-            echo "Downloading from Github..."
-            wget -q https://github.com/eth-clients/holesky/raw/refs/heads/main/metadata/genesis.ssz -O /ethclient/holesky-genesis.ssz
-            echo "Download complete."
-        else
-            echo "Genesis state already downloaded, continuing."
-        fi
-    elif [ "$ETH_NETWORK" = "hoodi" ]; then
+    # Grab the Hoodi genesis state if needed
+    if [ "$ETH_NETWORK" = "hoodi" ]; then
         echo "Prysm is configured to use Hoodi, genesis state required."
         if [ ! -f "/ethclient/hoodi-genesis.ssz" ]; then
             echo "Downloading from Github..."
@@ -227,9 +218,7 @@ if [ "$CLIENT" = "prysm" ]; then
         CMD="$CMD --disable-monitoring"
     fi
 
-    if [ "$ETH_NETWORK" = "holesky" ]; then
-        CMD="$CMD --genesis-state /ethclient/holesky-genesis.ssz"
-    elif [ "$ETH_NETWORK" = "hoodi" ]; then
+    if [ "$ETH_NETWORK" = "hoodi" ]; then
         CMD="$CMD --genesis-state /ethclient/hoodi-genesis.ssz"
     fi
 
