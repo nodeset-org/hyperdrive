@@ -82,7 +82,9 @@ func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) 
 	moduleDir := t.ModuleConfigDir
 	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
 	bytes, err := os.ReadFile(adapterKeyPath)
-	containerName := "hd-he_adapter" // TODO: Dynamic container name t.moduleInfo.Descriptor.Name
+	containerName := fmt.Sprintf("%s_%s_adapter", t.ModuleComposeProject, t.moduleInfo.Descriptor.Shortcut)
+
+	// containerName := "hd-he_adapter" GlobalAdapterProjectName // TODO: Dynamic container name t.moduleInfo.Descriptor.Name
 	c, err := adapter.NewAdapterClient(string(containerName), string(bytes))
 	if err != nil {
 		return "", fmt.Errorf("error creating adapter client: %w", err)
