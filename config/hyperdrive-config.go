@@ -16,10 +16,6 @@ const (
 	// Tags
 	hyperdriveTag string = "nodeset/hyperdrive:v" + shared.HyperdriveVersion
 
-	// Private parameter names
-	versionName          string = "version"
-	moduleEnabledMapName string = "modules"
-
 	// Defaults
 	DefaultProjectName   string = "hyperdrive"
 	DefaultApiPort       uint16 = 8080

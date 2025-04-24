@@ -51,17 +51,6 @@ type ModuleInfoLoadResult struct {
 	Info *ModuleInstallation
 }
 
-type ProjectInfo struct {
-	// The name of the Hyperdrive project
-	projectName string
-
-	// The module adapter key file
-	adapterKeyPath string
-
-	// The module adapter key
-	adapterKey string
-}
-
 // A manager for loading and interacting with Hyperdrive's modules, including their adapters
 type ModuleManager struct {
 	// Information about the modules that have been installed on the system. Run LoadModuleInfo() to populate this.

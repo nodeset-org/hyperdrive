@@ -2,13 +2,6 @@ package config
 
 import (
 	"fmt"
-	"reflect"
-)
-
-var (
-	parameterType     = reflect.TypeOf((*IParameter)(nil)).Elem()
-	sectionHeaderType = reflect.TypeOf((*ISectionHeader)(nil)).Elem()
-	sectionType       = reflect.TypeOf((*ISection)(nil)).Elem()
 )
 
 // Interface for deserialized configuration metadata and section metadata that can contain parameters or sections themselves

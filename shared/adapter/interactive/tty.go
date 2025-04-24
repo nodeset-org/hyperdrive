@@ -110,7 +110,10 @@ func MonitorTtySize(
 				h, w := streams.Out().GetTtySize()
 
 				if prevW != w || prevH != h {
-					resizeTty(ctx, logger, docker, streams, id, isExec)
+					err := resizeTty(ctx, logger, docker, streams, id, isExec)
+					if err != nil {
+						fmt.Fprintln(streams.Err(), "failed to resize tty, using default size")
+					}
 				}
 				prevH = h
 				prevW = w
@@ -121,7 +124,10 @@ func MonitorTtySize(
 		gosignal.Notify(sigchan, signal.SIGWINCH)
 		go func() {
 			for range sigchan {
-				resizeTty(ctx, logger, docker, streams, id, isExec)
+				err := resizeTty(ctx, logger, docker, streams, id, isExec)
+				if err != nil {
+					fmt.Fprintln(streams.Err(), "failed to resize tty, using default size")
+				}
 			}
 		}()
 	}

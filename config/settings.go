@@ -119,6 +119,9 @@ func (m HyperdriveSettings) SerializeToMap() map[string]any {
 func (m *HyperdriveSettings) CreateModuleSettings() *config.ModuleSettings {
 	cfg := NewHyperdriveConfig("", "")
 	settings := config.CreateModuleSettings(cfg)
-	settings.CopySettingsFromKnownType(m)
+	err := settings.CopySettingsFromKnownType(m)
+	if err != nil {
+		panic(fmt.Errorf("error copying Hyperdrive config to module settings: %w", err))
+	}
 	return settings
 }

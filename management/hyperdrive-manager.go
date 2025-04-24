@@ -74,7 +74,7 @@ func (m *HyperdriveManager) LoadModules() error {
 		modulesToStart := map[string]*ModuleInstallation{}
 		filesToStart := []string{}
 		for _, module := range append(eligibleToStartModules, healthyModules...) {
-			globalAdapterNames = append(globalAdapterNames, module.GlobalAdapterContainerName)
+			_ = append(globalAdapterNames, module.GlobalAdapterContainerName)
 			modulesToStart[module.GlobalAdapterContainerName] = module
 			filesToStart = append(filesToStart, module.GlobalAdapterRuntimeFilePath)
 		}
@@ -125,7 +125,7 @@ func (m *HyperdriveManager) LoadModules() error {
 
 	// Update the module lists
 	m.BrokenModules = brokenModules
-	m.HealthyModules = healthyModules
+	m.HealthyModules = newHealthyModules
 	m.modulesLoaded = true
 	return nil
 }

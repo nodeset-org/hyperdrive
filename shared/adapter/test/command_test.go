@@ -317,26 +317,3 @@ func updateConfigSettings(t *testing.T, cfg *config.ModuleSettings) {
 	err = subPortMode.SetValue("open")
 	require.NoError(t, err)
 }
-
-func checkConfigSettings(t *testing.T, cfg *config.ModuleSettings) {
-	// Check some values
-	exampleBool, err := cfg.GetParameter("exampleBool")
-	require.NoError(t, err)
-	require.True(t, exampleBool.GetValue().(bool))
-
-	exampleChoice, err := cfg.GetParameter("exampleChoice")
-	require.NoError(t, err)
-	require.Equal(t, "three", exampleChoice.GetValue().(string))
-
-	// Check a subconfig value
-	serverCfg, err := cfg.GetSection("server")
-	require.NoError(t, err)
-
-	subPort, err := serverCfg.GetParameter("port")
-	require.NoError(t, err)
-	require.Equal(t, uint64(8085), subPort.GetValue().(uint64))
-
-	subPortMode, err := serverCfg.GetParameter("portMode")
-	require.NoError(t, err)
-	require.Equal(t, "open", subPortMode.GetValue().(string))
-}

@@ -35,9 +35,6 @@ type ModuleProcessSettingsResult struct {
 type ConfigurationManager struct {
 	// The configuration metadata for the module
 	HyperdriveConfiguration *hdconfig.HyperdriveConfig
-
-	// The name of the Hyperdrive project
-	projectName string
 }
 
 // Create a new configuration manager

@@ -231,7 +231,7 @@ func deployTemplates(systemDir string, userDir string, settings *hdconfig.Hyperd
 		if err != nil {
 			return nil, fmt.Errorf("could not create %s container definition: %w", containerName, err)
 		}
-		deployedContainers = append(deployedContainers, containers...)
+		_ = append(deployedContainers, containers...)
 	}
 
 	return toDeploy, nil

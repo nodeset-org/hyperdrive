@@ -497,7 +497,9 @@ func (p *StringParameter) Deserialize(data map[string]any) error {
 		return err
 	}
 	err = setNumberProperty(p.ID.String()+"."+MaxLengthKey, &p.MaxLength, maxLength)
-
+	if err != nil {
+		return err
+	}
 	// Set the regex pattern
 	_, err = deserializeProperty(data, RegexKey, &p.Regex, true)
 	if err != nil {
