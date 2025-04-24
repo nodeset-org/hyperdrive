@@ -76,13 +76,11 @@ func (t *ServiceDataSource) GetValueArray(fqpn string, delimiter string) ([]stri
 }
 
 func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) {
-
 	moduleDir := t.ModuleConfigDir
 	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
 	bytes, err := os.ReadFile(adapterKeyPath)
-	containerName := fmt.Sprintf("%s_%s_adapter", t.ModuleComposeProject, t.moduleInfo.Descriptor.Shortcut)
 
-	// containerName := "hd-he_adapter" GlobalAdapterProjectName // TODO: Dynamic container name t.moduleInfo.Descriptor.Name
+	containerName := fmt.Sprintf("%s_%s_adapter", t.ModuleComposeProject, t.moduleInfo.Descriptor.Shortcut)
 	c, err := adapter.NewAdapterClient(string(containerName), string(bytes))
 	if err != nil {
 		return "", fmt.Errorf("error creating adapter client: %w", err)
@@ -91,8 +89,6 @@ func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) 
 	modules := map[string]any{}
 	for fqmn, modSettings := range t.moduleSettingsMap {
 		modules[fqmn] = map[string]any{
-			"enabled":  true,
-			"version":  "0.1.0", // TODO: Get the version from the module settings
 			"settings": modSettings.SerializeToMap(),
 		}
 	}
@@ -106,7 +102,7 @@ func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) 
 		"settings": settings,
 	}
 	var response CallConfigFunctionResponse
-	err = adapter.RunCommand[map[string]any, CallConfigFunctionResponse](
+	err = adapter.RunCommand(
 		c, context.Background(), CallConfigFunctionCommandString, &req, &response)
 	if err != nil {
 		return "", fmt.Errorf("error calling config function \"%s\": %w", funcName, err)
