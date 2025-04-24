@@ -1,12 +1,26 @@
 package templates
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/nodeset-org/hyperdrive/shared"
+	"github.com/nodeset-org/hyperdrive/shared/adapter"
 
 	"github.com/nodeset-org/hyperdrive/modules"
 	modconfig "github.com/nodeset-org/hyperdrive/modules/config"
 )
+
+const (
+	CallConfigFunctionCommandString string = adapter.HyperdriveModuleCommand + " call-config-function"
+)
+
+type CallConfigFunctionResponse struct {
+	Result string `json:"result"`
+}
 
 // The data source for module service templates
 type ServiceDataSource struct {
@@ -59,6 +73,41 @@ func (t *ServiceDataSource) GetValueArray(fqpn string, delimiter string) ([]stri
 		return nil, err
 	}
 	return strings.Split(val, delimiter), nil
+}
+
+func (t *ServiceDataSource) CallConfigFunction(funcName string) (string, error) {
+	moduleDir := t.ModuleConfigDir
+	adapterKeyPath := filepath.Join(moduleDir, shared.SecretsDir, shared.AdapterKeyFile)
+	bytes, err := os.ReadFile(adapterKeyPath)
+
+	containerName := fmt.Sprintf("%s_%s_adapter", t.ModuleComposeProject, t.moduleInfo.Descriptor.Shortcut)
+	c, err := adapter.NewAdapterClient(string(containerName), string(bytes))
+	if err != nil {
+		return "", fmt.Errorf("error creating adapter client: %w", err)
+	}
+
+	modules := map[string]any{}
+	for fqmn, modSettings := range t.moduleSettingsMap {
+		modules[fqmn] = map[string]any{
+			"settings": modSettings.SerializeToMap(),
+		}
+	}
+
+	settings := map[string]any{
+		"modules": modules,
+	}
+
+	req := map[string]any{
+		"funcName": funcName,
+		"settings": settings,
+	}
+	var response CallConfigFunctionResponse
+	err = adapter.RunCommand(
+		c, context.Background(), CallConfigFunctionCommandString, &req, &response)
+	if err != nil {
+		return "", fmt.Errorf("error calling config function \"%s\": %w", funcName, err)
+	}
+	return response.Result, nil
 }
 
 // Get the value of a property from its fully qualified path name

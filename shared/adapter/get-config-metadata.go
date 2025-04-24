@@ -16,7 +16,7 @@ func (c *AdapterClient) GetConfigMetadata(ctx context.Context) (config.IModuleCo
 	configMap := map[string]any{}
 
 	// Get the config from the adapter
-	err := runCommand[struct{}](c, ctx, GetConfigMetadataCommandString, nil, &configMap)
+	err := RunCommand[struct{}](c, ctx, GetConfigMetadataCommandString, nil, &configMap)
 	if err != nil {
 		return nil, fmt.Errorf("error getting configuration metadata: %w", err)
 	}

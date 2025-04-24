@@ -27,7 +27,7 @@ func (c *AdapterClient) SetSettings(ctx context.Context, settings *config.Hyperd
 		},
 		Settings: settings,
 	}
-	err := runCommand[SetSettingsRequest, struct{}](c, ctx, SetSettingsCommandString, request, nil)
+	err := RunCommand[SetSettingsRequest, struct{}](c, ctx, SetSettingsCommandString, request, nil)
 	if err != nil {
 		return fmt.Errorf("error setting module settings: %w", err)
 	}

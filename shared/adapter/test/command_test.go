@@ -40,7 +40,7 @@ func TestGetConfigMetadata(t *testing.T) {
 	for _, param := range cfg.GetParameters() {
 		paramMap[param.GetID().String()] = param
 	}
-	require.Len(t, paramMap, 6)
+	require.Len(t, paramMap, 7)
 	exampleFloatName := "exampleFloat"
 	require.Contains(t, paramMap, exampleFloatName)
 	exampleFloat := paramMap[exampleFloatName]
