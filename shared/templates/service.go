@@ -25,14 +25,13 @@ type CallConfigFunctionResponse struct {
 // The data source for module service templates
 type ServiceDataSource struct {
 	// Public parameters
-	GlobalAdapterContainerName string
-	ModuleComposeProject       string
-	ModuleNetwork              string
-	ModuleConfigDir            string
-	ModuleLogDir               string
-	ModuleDataDir              string
-	HyperdriveDaemonUrl        string
-	HyperdriveJwtKeyFile       string
+	ModuleComposeProject string
+	ModuleNetwork        string
+	ModuleConfigDir      string
+	ModuleLogDir         string
+	ModuleDataDir        string
+	HyperdriveDaemonUrl  string
+	HyperdriveJwtKeyFile string
 
 	// Internal fields
 	hyperdriveSettings *modconfig.ModuleSettings
@@ -48,11 +47,10 @@ func NewServiceDataSource(
 	adapterSource *AdapterDataSource,
 ) *ServiceDataSource {
 	return &ServiceDataSource{
-		ModuleComposeProject:       adapterSource.ModuleComposeProject,
-		ModuleNetwork:              adapterSource.ModuleNetwork,
-		ModuleConfigDir:            adapterSource.ModuleConfigDir,
-		ModuleLogDir:               adapterSource.ModuleLogDir,
-		GlobalAdapterContainerName: adapterSource.AdapterContainerName,
+		ModuleComposeProject: adapterSource.ModuleComposeProject,
+		ModuleNetwork:        adapterSource.ModuleNetwork,
+		ModuleConfigDir:      adapterSource.ModuleConfigDir,
+		ModuleLogDir:         adapterSource.ModuleLogDir,
 		//ModuleDataDir:        adapterSource.ModuleDataDir, TODO!
 		//HyperdriveDaemonUrl:  hdSettings.DaemonUrl,
 		//HyperdriveJwtKeyFile: hdSettings.JwtKeyFile,
