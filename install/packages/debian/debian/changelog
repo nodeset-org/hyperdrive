@@ -1,3 +1,12 @@
+hyperdrive (1.2.1~dev) UNRELEASED; urgency=medium
+
+  * Updated Geth and Nimbus.
+  * Removed the Holesky network.
+  * `wallet init` no longer crashes during mnemonic generation.
+  * `stakewise wallet generate-keys` and `stakewise wallet recover-keys` will now restart the VC if an error occurs in the middle of the operation.
+
+ -- NodeSet Inc. <info@nodeset.io>  Tue, 29 Apr 2025 07:53:02 +0000
+
 hyperdrive (1.2.0) stable; urgency=medium
 
   * Updated Geth, Nethermind, Besu, Reth, Lighthouse, Lodestar, Nimbus, Prysm, Teku, and MEV-Boost.

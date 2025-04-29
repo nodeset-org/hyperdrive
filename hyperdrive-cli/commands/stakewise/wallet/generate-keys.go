@@ -63,7 +63,8 @@ func generateKeys(c *cli.Context) error {
 		}
 	}
 
-	fmt.Println("Note: key generation is an expensive process, this may take a long time! Progress will be printed as each key is generated.")
+	fmt.Println("Note: key generation is a long process, this may take a long time! Progress will be printed as each key is generated.")
+	fmt.Printf("%sDO NOT press Ctrl+C to exit the process, or your Validator Client will not be restarted! You will have to restart it manually to attest with the new keys!\n%s", terminal.ColorYellow, terminal.ColorReset)
 	fmt.Println()
 
 	// Generate the new keys
@@ -73,10 +74,14 @@ func generateKeys(c *cli.Context) error {
 	for i := uint64(0); i < count; i++ {
 		response, err := sw.Api.Wallet.GenerateKeys(1, false)
 		if err != nil {
-			return fmt.Errorf("error generating keys: %w", err)
+			fmt.Printf("%sError generating keys: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+			restartVCAfterGenerate(c, hd)
+			return nil
 		}
 		if len(response.Data.Pubkeys) == 0 {
-			return fmt.Errorf("server did not return any pubkeys")
+			fmt.Printf("%sServer did not return any pubkeys%s\n", terminal.ColorYellow, terminal.ColorReset)
+			restartVCAfterGenerate(c, hd)
+			return nil
 		}
 
 		elapsed := time.Since(latestTime)
@@ -91,7 +96,9 @@ func generateKeys(c *cli.Context) error {
 	// Get the list of available keys
 	response, err := sw.Api.Wallet.GetAvailableKeys(false)
 	if err != nil {
-		return fmt.Errorf("error getting available keys: %w", err)
+		fmt.Printf("%sError getting available keys: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+		restartVCAfterGenerate(c, hd)
+		return nil
 	}
 	data := response.Data
 	availableKeyMap := map[beacon.ValidatorPubkey]struct{}{}
@@ -136,30 +143,17 @@ func generateKeys(c *cli.Context) error {
 		fmt.Println()
 	}
 
-	// Restart the Stakewise Operator
-	/* TODO: possibly not needed with SW v2 now
-	if noRestart {
-		fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Stakewise Operator container at your earliest convenience in order to deposit your new keys once it's your turn. Failure to do so will prevent your validators from ever being activated.%s\n", terminal.ColorYellow, terminal.ColorReset)
-	} else {
-		fmt.Print("Restarting Stakewise Operator... ")
-		_, err = hd.Api.Service.RestartContainer(string(swconfig.ContainerID_StakewiseOperator))
-		if err != nil {
-			fmt.Println("error")
-			fmt.Printf("%sWARNING: error restarting stakewise operator: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
-			fmt.Println("Please restart your Stakewise Operator container in order to be able to deposit for your new keys,")
-		} else {
-			fmt.Println("done!")
-		}
-	}
-	fmt.Println()
-	*/
-
 	// Restart the VC
+	restartVCAfterGenerate(c, hd)
+	return nil
+}
+
+func restartVCAfterGenerate(c *cli.Context, hd *client.HyperdriveClient) {
 	if c.Bool(noRestartFlag.Name) {
 		fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Validator Client at your earliest convenience in order to attest with your new keys. Failure to do so will result in any new validators being offline and *losing ETH* until you restart it.%s\n", terminal.ColorYellow, terminal.ColorReset)
 	} else {
 		fmt.Print("Restarting Validator Client to load the new keys... ")
-		_, err = hd.Api.Service.RestartContainer(string(swconfig.ContainerID_StakewiseValidator))
+		_, err := hd.Api.Service.RestartContainer(string(swconfig.ContainerID_StakewiseValidator))
 		if err != nil {
 			fmt.Println("error")
 			fmt.Printf("%sWARNING: error restarting validator client: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
@@ -171,5 +165,4 @@ func generateKeys(c *cli.Context) error {
 			fmt.Println("It will start attesting for those validators automatically once they have been activated.")
 		}
 	}
-	return nil
 }

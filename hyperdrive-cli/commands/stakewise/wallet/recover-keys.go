@@ -109,7 +109,8 @@ func recoverKeys(c *cli.Context) error {
 	}
 
 	// Prompt for confirmation
-	fmt.Println("NOTE: Key recovering may take a long time. Progress will be printed after checking every 5 keys.")
+	fmt.Println("Note: Key recovering may take a long time. Progress will be printed after checking every 5 keys.")
+	fmt.Printf("%sDO NOT press Ctrl+C to exit the process, or your Validator Client will not be restarted! You will have to restart it manually to attest with any recovered keys!\n%s", terminal.ColorYellow, terminal.ColorReset)
 	if !(c.Bool(utils.YesFlag.Name) || utils.Confirm("Are you ready to begin key recovery?")) {
 		fmt.Println("Cancelled.")
 		return nil
@@ -128,7 +129,9 @@ func recoverKeys(c *cli.Context) error {
 		fmt.Printf("Searching index %d to %d...\n", startIndex, startIndex+singleRecoverSearchLimit-1)
 		response, err := sw.Api.Wallet.RecoverKeys(keysToRecover, startIndex, 1, singleRecoverSearchLimit, false)
 		if err != nil {
-			return fmt.Errorf("error recovering keys: %w", err)
+			fmt.Printf("%sError recovering keys: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+			restartVCAfterRecover(c, hd)
+			return nil
 		}
 		data := response.Data
 		if data.NotRegisteredWithNodeSet {
@@ -151,24 +154,27 @@ func recoverKeys(c *cli.Context) error {
 	fmt.Println("Key recovery complete.")
 	fmt.Println()
 
+	// Restart the VC
 	if keysRecovered {
-		// Restart the VC
-		if c.Bool(noRestartFlag.Name) {
-			fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Validator Client at your earliest convenience in order to attest with your recovered keys. Failure to do so will result in the validators being offline and *losing ETH* until you restart it.%s\n", terminal.ColorYellow, terminal.ColorReset)
+		restartVCAfterRecover(c, hd)
+	}
+	return nil
+}
+
+func restartVCAfterRecover(c *cli.Context, hd *client.HyperdriveClient) {
+	if c.Bool(noRestartFlag.Name) {
+		fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Validator Client at your earliest convenience in order to attest with your recovered keys. Failure to do so will result in the validators being offline and *losing ETH* until you restart it.%s\n", terminal.ColorYellow, terminal.ColorReset)
+	} else {
+		fmt.Print("Restarting Validator Client to load the recovered keys... ")
+		_, err := hd.Api.Service.RestartContainer(string(swconfig.ContainerID_StakewiseValidator))
+		if err != nil {
+			fmt.Println("error")
+			fmt.Printf("%sWARNING: error restarting validator client: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
+			fmt.Println("Please restart your Validator Client in order to attest with your recovered keys!")
 		} else {
-			fmt.Print("Restarting Validator Client to load the recovered keys... ")
-			_, err = hd.Api.Service.RestartContainer(string(swconfig.ContainerID_StakewiseValidator))
-			if err != nil {
-				fmt.Println("error")
-				fmt.Printf("%sWARNING: error restarting validator client: %s%s\n", terminal.ColorRed, err.Error(), terminal.ColorReset)
-				fmt.Println("Please restart your Validator Client in order to attest with your recovered keys!")
-			} else {
-				fmt.Println("done!")
-				fmt.Println("Your recovered keys are now loaded.")
-				fmt.Println("Your node can now attest for these validators.")
-			}
+			fmt.Println("done!")
+			fmt.Println("Your recovered keys are now loaded.")
+			fmt.Println("Your node can now attest for these validators.")
 		}
 	}
-
-	return nil
 }
