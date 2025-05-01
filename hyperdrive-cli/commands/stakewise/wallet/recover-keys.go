@@ -165,6 +165,12 @@ func restartVCAfterRecover(c *cli.Context, hd *client.HyperdriveClient) {
 	if c.Bool(noRestartFlag.Name) {
 		fmt.Printf("%sYou have automatic restarting turned off.\nPlease restart your Validator Client at your earliest convenience in order to attest with your recovered keys. Failure to do so will result in the validators being offline and *losing ETH* until you restart it.%s\n", terminal.ColorYellow, terminal.ColorReset)
 	} else {
+		if c.Bool(utils.YesFlag.Name) || utils.Confirm("Before restarting your Validator Client, we need to make sure that you HAVE NOT attested with any of the recovered keys in the last 15 minutes. If you have, you may be SLASHED for attesting with the same key twice.\n\nHave you attested with any of the recovered keys in the last 15 minutes?") {
+			fmt.Println("Cancelling Validator Client restart.")
+			fmt.Println("Please restart your Validator Client once you're sure it is safe to do so (15 minutes after your last attestation) in order to attest with your recovered keys. Failure to do so will result in the validators being offline and *losing ETH* until you restart it.")
+			return
+		}
+
 		fmt.Print("Restarting Validator Client to load the recovered keys... ")
 		_, err := hd.Api.Service.RestartContainer(string(swconfig.ContainerID_StakewiseValidator))
 		if err != nil {

@@ -138,10 +138,10 @@ func printPatchNotes() {
 	fmt.Println()
 
 	fmt.Printf("%s=== Pectra on Mainnet ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("The Pectra network upgrade is schedule for Mainnet on epoch 364032 (May 7 2025 - 10:05:11 AM UTC). This version includes clients that support it, except for Nethermind.")
+	fmt.Println("The Pectra network upgrade is schedule for Mainnet on epoch 364032 (May 7 2025 - 10:05:11 AM UTC). This version includes clients that support it.")
 	fmt.Println()
 
 	fmt.Printf("%s=== Holesky Deprecation ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("The Holesky testnet is no longer supported deprecated. If you were using it, please run `hyperdrive wallet purge` to remove all of your wallet and validator keys, then run`hyperdrive service config` and select Hoodi as your network.")
+	fmt.Println("The Holesky testnet is no longer included as a default network option. If you were using it, please run `hyperdrive wallet purge` to remove all of your wallet and validator keys, then run `hyperdrive service config` and select Hoodi as your network.")
 	fmt.Println()
 }
