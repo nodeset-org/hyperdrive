@@ -1,11 +1,13 @@
-hyperdrive (1.2.1~dev) UNRELEASED; urgency=medium
+hyperdrive (1.2.1) stable; urgency=medium
 
-  * Updated Geth and Nimbus.
-  * Removed the Holesky network.
+  * Updated Geth, Lighthouse, and Nimbus.
+  * Removed the Holesky network from the list of default options.
   * `wallet init` no longer crashes during mnemonic generation.
   * `stakewise wallet generate-keys` and `stakewise wallet recover-keys` will now restart the VC if an error occurs in the middle of the operation.
+  * `stakewise wallet recover-keys` will now ask if you've attested with the recovered keys in the last 15 minutes, to prevent accidental slashing.
+  * Added some optimizations that reduce Beacon Client overhead and deposit log scanning time when StakeWise requests new deposits.
 
- -- NodeSet Inc. <info@nodeset.io>  Tue, 29 Apr 2025 07:53:02 +0000
+ -- NodeSet Inc. <info@nodeset.io>  Thu, 01 May 2025 04:32:37 +0000
 
 hyperdrive (1.2.0) stable; urgency=medium
 
