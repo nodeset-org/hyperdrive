@@ -175,18 +175,6 @@ fi
 # Prysm startup
 if [ "$CLIENT" = "prysm" ]; then
 
-    # Grab the Hoodi genesis state if needed
-    if [ "$ETH_NETWORK" = "hoodi" ]; then
-        echo "Prysm is configured to use Hoodi, genesis state required."
-        if [ ! -f "/ethclient/hoodi-genesis.ssz" ]; then
-            echo "Downloading from Github..."
-            wget -q https://github.com/eth-clients/hoodi/raw/refs/heads/main/metadata/genesis.ssz -O /ethclient/hoodi-genesis.ssz
-            echo "Download complete."
-        else
-            echo "Genesis state already downloaded, continuing."
-        fi
-    fi
-
     CMD="$PERF_PREFIX /app/cmd/beacon-chain/beacon-chain \
         --accept-terms-of-use \
         --$ETH_NETWORK \
@@ -218,12 +206,12 @@ if [ "$CLIENT" = "prysm" ]; then
         CMD="$CMD --disable-monitoring"
     fi
 
-    if [ "$ETH_NETWORK" = "hoodi" ]; then
-        CMD="$CMD --genesis-state /ethclient/hoodi-genesis.ssz"
-    fi
-
     if [ ! -z "$CHECKPOINT_SYNC_URL" ]; then
         CMD="$CMD --checkpoint-sync-url=$CHECKPOINT_SYNC_URL --genesis-beacon-api-url=$CHECKPOINT_SYNC_URL"
+    elif [ "$ETH_NETWORK" = "hoodi" ]; then
+        # Prysm can't retrieve the genesis state for Hoodi automatically,
+        # so we use the Checkpointz provider they recommend in the official docs.
+        CMD="$CMD --genesis-beacon-api-url=https://hoodi.beaconstate.info"
     fi
 
     exec ${CMD}
