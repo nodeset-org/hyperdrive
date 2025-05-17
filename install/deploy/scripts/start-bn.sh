@@ -85,6 +85,7 @@ if [ "$CLIENT" = "lodestar" ]; then
         --rest.address 0.0.0.0 \
         --rest.port ${BN_API_PORT:-5052} \
         --jwt-secret /secrets/jwtsecret \
+        --serveHistoricalState \
         $BN_ADDITIONAL_FLAGS"
 
     if [ ! -z "$TTD_OVERRIDE" ]; then

@@ -1,3 +1,11 @@
+hyperdrive (1.2.2~dev) UNRELEASED; urgency=medium
+
+  * Updated Geth, Nethermind, Reth, Lodestar, Nimbus, and Prysm.
+  * Changing the Auto TX Gas Threshold now restarts the StakeWise Operator container.
+  * Prysm's start scripts no longer rely on external utilities and work in a pure POSIX environment.
+
+ -- NodeSet Inc. <info@nodeset.io>  Sat, 17 May 2025 07:25:46 +0000
+
 hyperdrive (1.2.1) stable; urgency=medium
 
   * Updated Geth, Lighthouse, and Nimbus.
