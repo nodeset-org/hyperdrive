@@ -73,6 +73,13 @@ func NewReviewPage(md *mainDisplay, oldConfig *client.GlobalConfig, newConfig *c
 			}
 		}
 
+		// TEMP: If the gas threshold is changed, make sure the SW operator is restarted
+		if newConfig.StakeWise.Enabled.Value {
+			if oldConfig.Hyperdrive.AutoTxGasThreshold.Value != newConfig.Hyperdrive.AutoTxGasThreshold.Value {
+				totalAffectedContainers[swconfig.ContainerID_StakewiseOperator] = true
+			}
+		}
+
 		// Print the list of containers to restart
 		if builder.String() == "" {
 			builder.WriteString("<No changes>")
