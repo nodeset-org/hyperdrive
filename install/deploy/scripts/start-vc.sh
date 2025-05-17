@@ -126,9 +126,9 @@ if [ "$CLIENT" = "prysm" ]; then
     mkdir -p /validators/prysm-non-hd/
 
     # Get rid of the protocol prefix
-    BN_RPC_ENDPOINT=$(echo $BN_RPC_ENDPOINT | sed -E 's/.*\:\/\/(.*)/\1/')
+    BN_RPC_ENDPOINT="${BN_RPC_ENDPOINT#*://}"
     if [ ! -z "$FALLBACK_BN_RPC_ENDPOINT" ]; then
-        FALLBACK_BN_RPC_ENDPOINT=$(echo $FALLBACK_BN_RPC_ENDPOINT | sed -E 's/.*\:\/\/(.*)/\1/')
+        FALLBACK_BN_RPC_ENDPOINT="${FALLBACK_BN_RPC_ENDPOINT#*://}"
     fi
 
     # Set up the CC + fallback string
