@@ -137,10 +137,6 @@ func printPatchNotes() {
 	fmt.Println("Reth will now preserve event logs and transaction receipts by default, which are required for the new StakeWise module. If you previously used Reth without this configuration manually enabled, you will need to resync your node to regenerate the pruned events. If you are using an external Reth client, please ensure that it is configured to preserve event logs from all contracts, not just the deposit contract logs. Also, there is a new configuration parameter called 'State Prune Distance' that lets you fine-tune how many blocks Reth keeps state in its cache for.")
 	fmt.Println()
 
-	fmt.Printf("%s=== Pectra on Mainnet ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("The Pectra network upgrade is schedule for Mainnet on epoch 364032 (May 7 2025 - 10:05:11 AM UTC). This version includes clients that support it.")
-	fmt.Println()
-
 	fmt.Printf("%s=== Holesky Deprecation ===%s\n", terminal.ColorGreen, terminal.ColorReset)
 	fmt.Println("The Holesky testnet is no longer included as a default network option. If you were using it, please run `hyperdrive wallet purge` to remove all of your wallet and validator keys, then run `hyperdrive service config` and select Hoodi as your network.")
 	fmt.Println()
