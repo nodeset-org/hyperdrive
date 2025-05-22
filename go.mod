@@ -4,6 +4,10 @@ go 1.24
 
 toolchain go1.24.2
 
+require github.com/rocket-pool/node-manager-core v0.5.2-0.20250430074613-76bcf6bb1be0
+
+replace github.com/rocket-pool/node-manager-core => github.com/nodeset-org/node-manager-core v0.6.0
+
 require (
 	github.com/alessio/shellescape v1.4.2
 	github.com/blang/semver/v4 v4.0.0
@@ -16,12 +20,11 @@ require (
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nodeset-org/hyperdrive-constellation v1.0.1
-	github.com/nodeset-org/hyperdrive-daemon v1.2.1
-	github.com/nodeset-org/hyperdrive-stakewise v1.2.1
+	github.com/nodeset-org/hyperdrive-daemon v1.2.2
+	github.com/nodeset-org/hyperdrive-stakewise v1.2.2
 	github.com/nodeset-org/osha v0.4.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
-	github.com/rocket-pool/node-manager-core v0.5.2-0.20250430074613-76bcf6bb1be0
 	github.com/rocket-pool/rocketpool-go/v2 v2.0.0-b2.0.20240709170030-c27aeb5fb99b
 	github.com/rocket-pool/smartnode/v2 v2.0.0-olddev.0.20240710181452-edcbd6208bdd
 	github.com/stretchr/testify v1.10.0
@@ -140,7 +143,7 @@ require (
 	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/nodeset-org/nodeset-client-go v1.3.0 // indirect
+	github.com/nodeset-org/nodeset-client-go v1.3.1 // indirect
 	github.com/nwaples/rardecode/v2 v2.0.0-beta.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
