@@ -3,10 +3,10 @@ package service
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 
+	"github.com/blang/semver/v4"
 	"github.com/nodeset-org/hyperdrive-daemon/shared"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/commands/nodeset"
@@ -119,7 +119,7 @@ func startService(c *cli.Context, startMode StartMode) error {
 	if enabledModules > 0 {
 		if !c.Bool(ignoreSlashTimerFlag.Name) {
 			// Do the client swap check
-			firstRun, err := checkForValidatorChange(hd, cfg)
+			firstRun, err := checkForValidatorChange(hd, cfg, oldVersion)
 			if err != nil {
 				fmt.Printf("%sWARNING: couldn't verify that the Validator Client containers can be safely restarted:\n\t%s\n", terminal.ColorYellow, err.Error())
 				fmt.Println("If you are changing to a different client, it may resubmit an attestation you have already submitted.")
@@ -300,7 +300,7 @@ func promptForPassword(c *cli.Context, hd *client.HyperdriveClient) (bool, error
 }
 
 // Check if any of the VCs has changed and force a wait for slashing protection, since all VCs are tied to the BN selection
-func checkForValidatorChange(hd *client.HyperdriveClient, cfg *client.GlobalConfig) (bool, error) {
+func checkForValidatorChange(hd *client.HyperdriveClient, cfg *client.GlobalConfig, oldHdVersion string) (bool, error) {
 	// Get all of the VCs belonging to the project
 	prefix := cfg.Hyperdrive.ProjectName.Value
 	vcs, err := hd.GetValidatorContainers(prefix + "_")
@@ -331,7 +331,7 @@ func checkForValidatorChange(hd *client.HyperdriveClient, cfg *client.GlobalConf
 	// Get the list of any VCs that can't be safely started yet
 	longestRemainingTime := time.Duration(0)
 	for _, vc := range vcs {
-		remainingTime, err := checkValidatorClient(hd, vc, newTagMap)
+		remainingTime, err := checkValidatorClient(hd, oldHdVersion, vc, newTagMap)
 		if err != nil {
 			return false, err
 		}
@@ -349,27 +349,35 @@ func checkForValidatorChange(hd *client.HyperdriveClient, cfg *client.GlobalConf
 	return false, nil
 }
 
-func checkValidatorClient(hd *client.HyperdriveClient, vcName string, newTagMap map[string]string) (time.Duration, error) {
+func checkValidatorClient(hd *client.HyperdriveClient, oldHdVersion string, vcName string, newTagMap map[string]string) (time.Duration, error) {
 	// Get the current and pending VC images
 	currentTag, err := hd.GetDockerImage(vcName)
 	if err != nil {
 		return 0, fmt.Errorf("error getting Docker image tag for [%s]: %w", vcName, err)
 	}
-	currentVcType, err := getDockerImageName(currentTag)
+	currentVcImageInfo, err := getDockerImageInfo(currentTag)
 	if err != nil {
 		return 0, fmt.Errorf("error parsing current Docker image tag [%s] for [%s]: %w", currentTag, vcName, err)
 	}
 	pendingTag := newTagMap[vcName]
-	pendingVcType, err := getDockerImageName(pendingTag)
+	pendingVcImageInfo, err := getDockerImageInfo(pendingTag)
 	if err != nil {
 		return 0, fmt.Errorf("error parsing pending Docker image tag [%s] for [%s]: %w", pendingTag, vcName, err)
 	}
 
 	// Compare the clients and warn if necessary
-	if currentVcType == pendingVcType {
-		fmt.Printf("Validator Client [%s] is still [%s] - no slashing prevention delay necessary.\n", vcName, currentVcType)
+	if currentVcImageInfo.Domain == pendingVcImageInfo.Domain &&
+		currentVcImageInfo.Vendor == pendingVcImageInfo.Vendor &&
+		currentVcImageInfo.Image == pendingVcImageInfo.Image {
+		// This is an update of the same client which uses the same slashing database, so no slashing prevention is necessary (same repo domain, same vendor, same image, same or different tag)
+		fmt.Printf("Validator Client [%s] is still [%s] - no slashing prevention delay necessary.\n", vcName, currentVcImageInfo)
 		return 0, nil
 	} else {
+		// Check if there's a special condition triggered by an HD upgrade that bypasses slashing protection
+		if !isSlashingProtectionRequiredAfterHdUpdate(oldHdVersion, currentVcImageInfo, pendingVcImageInfo) {
+			return 0, nil
+		}
+
 		validatorFinishTime, err := hd.GetDockerContainerShutdownTime(vcName)
 		if err != nil {
 			return 0, fmt.Errorf("error getting VC [%s] shutdown time: %w", vcName, err)
@@ -400,13 +408,44 @@ func checkValidatorClient(hd *client.HyperdriveClient, vcName string, newTagMap 
 
 		// If this VC has remaining time before it can be safely started, add it to the list
 		if remainingTime > 0 {
-			fmt.Printf("Validator Client [%s] has changed types from [%s] to [%s].\n", vcName, currentVcType, pendingVcType)
+			fmt.Printf("Validator Client [%s] has changed types from [%s] to [%s].\n", vcName, currentVcImageInfo, pendingVcImageInfo)
 			fmt.Printf("Only %s has elapsed since you stopped it.\n", time.Since(validatorFinishTime))
 		}
 
 		// This can't be safely started, return its info
 		return remainingTime, nil
 	}
+}
+
+// Checks if the slashing protection delay is actually necessary based on HD update info. Note that this prints details to the console as a side-effect.
+func isSlashingProtectionRequiredAfterHdUpdate(oldHdVersion string, oldVcInfo DockerImageInfo, newVcInfo DockerImageInfo) bool {
+	oldHdSemver, err := semver.Parse(oldHdVersion)
+	if err != nil {
+		fmt.Printf("%sWARNING: couldn't parse previous Hyperdrive version [%s]: %s; enforcing slashing protection!%s\n", terminal.ColorYellow, oldHdVersion, err.Error(), terminal.ColorReset)
+		return true
+	}
+
+	// The last version of HD to use the custom Prysm image was 1.2.2, so if the old version is that or earlier, we can skip the slashing protection if the VC was (and still is) Prysm.
+	prysmNativeImageHdVersion := semver.MustParse("1.2.2")
+
+	// The old version is newer than the trigger version, so ignore this check.
+	if oldHdSemver.GT(prysmNativeImageHdVersion) {
+		return true
+	}
+
+	// If the clients aren't going from custom Prysm to canon Prysm, enforce slashing protection.
+	if newVcInfo.Image != "prysm/validator" {
+		return true
+	}
+	if oldVcInfo.Image != "prysm" {
+		return true
+	}
+	if oldVcInfo.Vendor == "nodeset" && newVcInfo.Vendor == "offchainlabs" {
+		fmt.Printf("NOTE: you are upgrading from NodeSet v%s (with the old custom Prysm VC image) to the official Prysm VC image from Offchain Labs. The slashing protection delay is not required since you were previously using Prysm.\n\n", oldHdVersion)
+		return false
+	}
+
+	return true
 }
 
 func showSlashingDelay(remainingTime time.Duration) {
@@ -454,25 +493,4 @@ func getVcContainerTagParamMap(cfg *client.GlobalConfig, vcs []string) (map[stri
 	}
 
 	return containerTagMap, nil
-}
-
-// Extract the image name from a Docker image string
-func getDockerImageName(image string) (string, error) {
-	// Return the empty string if the validator didn't exist (probably because this is the first time starting it up)
-	if image == "" {
-		return "", nil
-	}
-
-	reg := regexp.MustCompile(dockerImageRegex)
-	matches := reg.FindStringSubmatch(image)
-	if matches == nil {
-		return "", fmt.Errorf("error parsing the Docker image string [%s]", image)
-	}
-	imageIndex := reg.SubexpIndex("image")
-	if imageIndex == -1 {
-		return "", fmt.Errorf("image name not found in Docker image [%s]", image)
-	}
-
-	imageName := matches[imageIndex]
-	return imageName, nil
 }

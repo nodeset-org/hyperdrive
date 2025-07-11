@@ -6,11 +6,12 @@ toolchain go1.24.2
 
 require github.com/rocket-pool/node-manager-core v0.5.2-0.20250430074613-76bcf6bb1be0
 
-replace github.com/rocket-pool/node-manager-core => github.com/nodeset-org/node-manager-core v0.6.0
+replace github.com/rocket-pool/node-manager-core => github.com/nodeset-org/node-manager-core v0.6.1-0.20250711075241-26032845ce5f
 
 require (
 	github.com/alessio/shellescape v1.4.2
 	github.com/blang/semver/v4 v4.0.0
+	github.com/distribution/reference v0.6.0
 	github.com/docker/docker v27.3.1+incompatible
 	github.com/dustin/go-humanize v1.0.1
 	github.com/ethereum/go-ethereum v1.15.8
@@ -20,8 +21,8 @@ require (
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nodeset-org/hyperdrive-constellation v1.0.1
-	github.com/nodeset-org/hyperdrive-daemon v1.2.2
-	github.com/nodeset-org/hyperdrive-stakewise v1.2.2
+	github.com/nodeset-org/hyperdrive-daemon v1.2.3-0.20250711075342-88499154bbc8
+	github.com/nodeset-org/hyperdrive-stakewise v1.2.3-0.20250711075508-ecf4e5bcb552
 	github.com/nodeset-org/osha v0.4.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
@@ -73,7 +74,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
-	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-events v0.0.0-20190806004212-e31b211e4f1c // indirect
