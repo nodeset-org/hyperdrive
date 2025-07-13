@@ -60,8 +60,11 @@ services:
       {{- else if eq .Hyperdrive.LocalBeaconClient.BeaconNode.String "prysm"}}
       - BN_RPC_PORT={{.Hyperdrive.LocalBeaconClient.Prysm.RpcPort}}
       - BN_P2P_QUIC_PORT={{.Hyperdrive.LocalBeaconClient.Prysm.P2pQuicPort}}
+      - BN_ENABLE_PRUNING={{.Hyperdrive.LocalBeaconClient.Prysm.EnablePruning}}
       {{- else if eq .Hyperdrive.LocalBeaconClient.BeaconNode.String "nimbus"}}
       - NIMBUS_PRUNING_MODE={{.Hyperdrive.LocalBeaconClient.Nimbus.PruningMode}}
+      {{- else if eq .Hyperdrive.LocalBeaconClient.BeaconNode.String "lodestar"}}
+      - BN_ENABLE_PRUNING={{.Hyperdrive.LocalBeaconClient.Lodestar.EnablePruning}}
       {{- else if eq .Hyperdrive.LocalBeaconClient.BeaconNode.String "lighthouse"}}
       - BN_P2P_QUIC_PORT={{.Hyperdrive.LocalBeaconClient.Lighthouse.P2pQuicPort}}
       {{- end}}

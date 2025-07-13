@@ -35,7 +35,6 @@ if [ "$CLIENT" = "lighthouse" ]; then
         --http \
         --http-address 0.0.0.0 \
         --http-port ${BN_API_PORT:-5052} \
-        --eth1-blocks-per-log-query 150 \
         --disable-upnp \
         --staking \
         --execution-jwt=/secrets/jwtsecret \
@@ -88,8 +87,8 @@ if [ "$CLIENT" = "lodestar" ]; then
         --serveHistoricalState \
         $BN_ADDITIONAL_FLAGS"
 
-    if [ ! -z "$TTD_OVERRIDE" ]; then
-        CMD="$CMD --terminal-total-difficulty-override $TTD_OVERRIDE"
+    if [ "$BN_ENABLE_PRUNING" = "true" ]; then
+        CMD="$CMD --chain.pruneHistory"
     fi
 
     if [ ! -z "$MEV_BOOST_URL" ]; then
@@ -192,6 +191,10 @@ if [ "$CLIENT" = "prysm" ]; then
         --jwt-secret=/secrets/jwtsecret \
         --enable-experimental-backfill \
         $BN_ADDITIONAL_FLAGS"
+
+    if [ "$BN_ENABLE_PRUNING" = "true" ]; then
+        CMD="$CMD --beacon-db-pruning"
+    fi
 
     if [ ! -z "$MEV_BOOST_URL" ]; then
         CMD="$CMD --http-mev-relay $MEV_BOOST_URL"

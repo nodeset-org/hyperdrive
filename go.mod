@@ -6,7 +6,7 @@ toolchain go1.24.2
 
 require github.com/rocket-pool/node-manager-core v0.5.2-0.20250430074613-76bcf6bb1be0
 
-replace github.com/rocket-pool/node-manager-core => github.com/nodeset-org/node-manager-core v0.6.1-0.20250711075241-26032845ce5f
+replace github.com/rocket-pool/node-manager-core => github.com/nodeset-org/node-manager-core v0.6.1-0.20250713072817-a7f2e1dcdcda
 
 require (
 	github.com/alessio/shellescape v1.4.2
@@ -21,8 +21,8 @@ require (
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nodeset-org/hyperdrive-constellation v1.0.1
-	github.com/nodeset-org/hyperdrive-daemon v1.2.3-0.20250711075342-88499154bbc8
-	github.com/nodeset-org/hyperdrive-stakewise v1.2.3-0.20250711075508-ecf4e5bcb552
+	github.com/nodeset-org/hyperdrive-daemon v1.2.3-0.20250713073600-9cc4b4bd4aba
+	github.com/nodeset-org/hyperdrive-stakewise v1.2.3-0.20250713074213-27ae190cf6e6
 	github.com/nodeset-org/osha v0.4.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE

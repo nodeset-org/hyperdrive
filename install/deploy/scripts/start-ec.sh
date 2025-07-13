@@ -138,14 +138,14 @@ if [ "$CLIENT" = "nethermind" ]; then
 
     CMD="$PERF_PREFIX $NETHERMIND_BINARY \
         --config $ETH_NETWORK \
-        --Sync.SnapSync true \
+        --Sync.SnapSync \
         --datadir /ethclient/nethermind \
-        --JsonRpc.Enabled true \
+        --JsonRpc.Enabled \
         --JsonRpc.Host 0.0.0.0 \
         --JsonRpc.Port ${EC_HTTP_PORT:-8545} \
         --JsonRpc.EnginePort ${EC_ENGINE_PORT:-8551} \
         --JsonRpc.EngineHost 0.0.0.0 \
-        --Init.WebSocketsEnabled true \
+        --Init.WebSocketsEnabled \
         --JsonRpc.WebSocketsPort ${EC_WS_PORT:-8546} \
         --JsonRpc.JwtSecretFile=/secrets/jwtsecret \
         --Pruning.FullPruningTrigger=VolumeFreeSpace \
@@ -168,7 +168,7 @@ if [ "$CLIENT" = "nethermind" ]; then
     CMD="$CMD --JsonRpc.AdditionalRpcUrls [\"http://127.0.0.1:7434|http|admin\"$HD_NETHERMIND_ADDITIONAL_URLS]"
 
     if [ ! -z "$ETHSTATS_LABEL" ] && [ ! -z "$ETHSTATS_LOGIN" ]; then
-        CMD="$CMD --EthStats.Enabled true --EthStats.Name $ETHSTATS_LABEL --EthStats.Secret $(echo $ETHSTATS_LOGIN | cut -d "@" -f1) --EthStats.Server $(echo $ETHSTATS_LOGIN | cut -d "@" -f2)"
+        CMD="$CMD --EthStats.Enabled --EthStats.Name $ETHSTATS_LABEL --EthStats.Secret $(echo $ETHSTATS_LOGIN | cut -d "@" -f1) --EthStats.Server $(echo $ETHSTATS_LOGIN | cut -d "@" -f2)"
     fi
 
     if [ ! -z "$EC_CACHE_SIZE" ]; then
@@ -180,7 +180,7 @@ if [ "$CLIENT" = "nethermind" ]; then
     fi
 
     if [ "$ENABLE_METRICS" = "true" ]; then
-        CMD="$CMD --Metrics.Enabled true --Metrics.ExposePort $EC_METRICS_PORT"
+        CMD="$CMD --Metrics.Enabled --Metrics.ExposePort $EC_METRICS_PORT"
     fi
 
     if [ ! -z "$EC_P2P_PORT" ]; then
