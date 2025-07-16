@@ -75,6 +75,15 @@ type DockerImageInfo struct {
 	Tag string
 }
 
+func (i DockerImageInfo) String() string {
+	return fmt.Sprintf("%s/%s/%s:%s", i.Domain, i.Vendor, i.Image, i.Tag)
+}
+
+func (i DockerImageInfo) StringWithoutTag() string {
+	// Return the image without the tag
+	return fmt.Sprintf("%s/%s/%s", i.Domain, i.Vendor, i.Image)
+}
+
 // Extract the image origin details from a Docker image string
 func getDockerImageInfo(fullImageName string) (DockerImageInfo, error) {
 	// Return the empty string if the image didn't exist (probably because this is the first time starting it up)

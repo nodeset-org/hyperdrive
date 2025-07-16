@@ -80,7 +80,7 @@ func resyncBeaconNode(c *cli.Context) error {
 
 	// Restart Hyperdrive
 	fmt.Printf("Rebuilding %s and restarting Hyperdrive...\n", beaconContainerName)
-	err = startService(c, StartMode_NoUpdate)
+	err = startService(c, StartMode_NoUpdate, nil)
 	if err != nil {
 		return fmt.Errorf("Error starting Hyperdrive: %s", err)
 	}

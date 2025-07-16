@@ -110,7 +110,7 @@ func installService(c *cli.Context) error {
 	} else if !c.Bool(installNoRestartFlag.Name) {
 		// Restart services
 		fmt.Println("Restarting Hyperdrive services...")
-		err = startService(c, StartMode_ForceUpdate)
+		err = startService(c, StartMode_ForceUpdate, nil)
 		if err != nil {
 			return fmt.Errorf("error restarting services: %w", err)
 		}
@@ -129,15 +129,11 @@ func printPatchNotes() {
 	fmt.Printf("%s=== Hyperdrive v%s ===%s\n\n", terminal.ColorGreen, shared.HyperdriveVersion, terminal.ColorReset)
 	fmt.Printf("Changes you should be aware of before starting:\n\n")
 
-	fmt.Printf("%s=== New StakeWise Module ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("The StakeWise module has been upgraded to support StakeWise's new v3 vaults, which dramatically improve the node operator experience. Deposits now happen automatically; all you need to do is generate keys in advance, and let it do the rest! Take a look at our documentation to get started: https://docs.nodeset.io/stakewise-integration/node-operator-guide-wip")
+	fmt.Printf("%s=== Prysm Official Image ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("Since its inception, Hyperdrive has used a custom Prysm image that was built from the official Prysm source code. Starting with Prysm v6.0.4, we can now use the official Prysm images directly! If you're using Prysm, you no longer need to use the \"nodeset\" custom Prysm image. Hyperdrive has switched to using the official Prysm images by default, which have image tags like \"https://gcr.io/offchainlabs/prysm/beacon-chain:v6.0.4\" and \"https://gcr.io/offchainlabs/prysm/validator:v6.0.4\".")
 	fmt.Println()
 
-	fmt.Printf("%s=== Reth Changes ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("Reth will now preserve event logs and transaction receipts by default, which are required for the new StakeWise module. If you previously used Reth without this configuration manually enabled, you will need to resync your node to regenerate the pruned events. If you are using an external Reth client, please ensure that it is configured to preserve event logs from all contracts, not just the deposit contract logs. Also, there is a new configuration parameter called 'State Prune Distance' that lets you fine-tune how many blocks Reth keeps state in its cache for.")
-	fmt.Println()
-
-	fmt.Printf("%s=== Holesky Deprecation ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("The Holesky testnet is no longer included as a default network option. If you were using it, please run `hyperdrive wallet purge` to remove all of your wallet and validator keys, then run `hyperdrive service config` and select Hoodi as your network.")
+	fmt.Printf("%s=== Pruning for Prysm and Lodestar ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("Prysm and Lodestar now have checkboxes for opt-in pruning in the `hyperdrive service config` command. Enabling this will delete the Beacon chain data that's older than 5 months, which is the same behavior that Nimbus has had for a while. If you don't do any manual historical queries on your node, you can enable this to save some disk space. Note that when you first enable this, pruning can take a while to run so it may be faster to resync your Beacon node after enabling it.")
 	fmt.Println()
 }

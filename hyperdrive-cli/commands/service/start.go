@@ -32,7 +32,9 @@ const (
 )
 
 // Start the Hyperdrive service
-func startService(c *cli.Context, startMode StartMode) error {
+// previousVersionOverride is only used by `service config` to pass in what the previous version was,
+// so slashing protection can properly assess what the pervious version was.
+func startService(c *cli.Context, startMode StartMode, previousVersionOverride *string) error {
 	// Get Hyperdrive client
 	hd, err := client.NewHyperdriveClientFromCtx(c)
 	if err != nil {
@@ -119,6 +121,9 @@ func startService(c *cli.Context, startMode StartMode) error {
 	if enabledModules > 0 {
 		if !c.Bool(ignoreSlashTimerFlag.Name) {
 			// Do the client swap check
+			if previousVersionOverride != nil {
+				oldVersion = *previousVersionOverride
+			}
 			firstRun, err := checkForValidatorChange(hd, cfg, oldVersion)
 			if err != nil {
 				fmt.Printf("%sWARNING: couldn't verify that the Validator Client containers can be safely restarted:\n\t%s\n", terminal.ColorYellow, err.Error())
@@ -370,7 +375,7 @@ func checkValidatorClient(hd *client.HyperdriveClient, oldHdVersion string, vcNa
 		currentVcImageInfo.Vendor == pendingVcImageInfo.Vendor &&
 		currentVcImageInfo.Image == pendingVcImageInfo.Image {
 		// This is an update of the same client which uses the same slashing database, so no slashing prevention is necessary (same repo domain, same vendor, same image, same or different tag)
-		fmt.Printf("Validator Client [%s] is still [%s] - no slashing prevention delay necessary.\n", vcName, currentVcImageInfo)
+		fmt.Printf("Validator Client [%s] is still [%s] - no slashing prevention delay necessary.\n", vcName, currentVcImageInfo.StringWithoutTag())
 		return 0, nil
 	} else {
 		// Check if there's a special condition triggered by an HD upgrade that bypasses slashing protection
@@ -408,7 +413,7 @@ func checkValidatorClient(hd *client.HyperdriveClient, oldHdVersion string, vcNa
 
 		// If this VC has remaining time before it can be safely started, add it to the list
 		if remainingTime > 0 {
-			fmt.Printf("Validator Client [%s] has changed types from [%s] to [%s].\n", vcName, currentVcImageInfo, pendingVcImageInfo)
+			fmt.Printf("Validator Client [%s] has changed types from [%s] to [%s].\n", vcName, currentVcImageInfo.StringWithoutTag(), pendingVcImageInfo.StringWithoutTag())
 			fmt.Printf("Only %s has elapsed since you stopped it.\n", time.Since(validatorFinishTime))
 		}
 

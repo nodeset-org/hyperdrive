@@ -188,7 +188,7 @@ if [ "$CLIENT" = "nethermind" ]; then
     fi
 
     if [ ! -z "$HD_NETHERMIND_PRUNE_MEM_SIZE" ]; then
-        CMD="$CMD --Pruning.CacheMb $HD_NETHERMIND_PRUNE_MEM_SIZE"
+        CMD="$CMD --Pruning.CacheMb $HD_NETHERMIND_PRUNE_MEM_SIZE --Pruning.DirtyCacheMb $(($HD_NETHERMIND_PRUNE_MEM_SIZE / 2))"
     fi
 
     exec ${CMD}

@@ -1,3 +1,12 @@
+hyperdrive (1.2.3~dev) UNRELEASED; urgency=medium
+
+  * Updated Geth, Nethermind, Besu, Reth, Lighthouse, Lodestar, Nimbus, Prysm, and Teku.
+  * Updated the StakeWise Operator.
+  * Migrated to using the canonical Prysm container image instead of the custom one.
+  * Added pruning support for Prysm and Lodestar.
+
+ -- NodeSet Inc. <info@nodeset.io>  Mon, 14 Jul 2025 06:19:01 +0000
+
 hyperdrive (1.2.2) stable; urgency=medium
 
   * Updated Geth, Nethermind, Reth, Lodestar, Nimbus, and Prysm.
