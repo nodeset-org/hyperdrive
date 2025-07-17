@@ -1,13 +1,13 @@
 package config
 
 import (
-	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/config/pbs"
 	"github.com/rocket-pool/node-manager-core/config"
 )
 
-const mevWarningID string = "step-mev-warning"
+const pbsWarningID string = "step-pbs-warning"
 
-func createMevWarningStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
+func createPbsWarningStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
 	helperText := mevWarning
 
 	show := func(modal *choiceModalLayout) {
@@ -16,15 +16,15 @@ func createMevWarningStep(wiz *wizard, currentStep int, totalSteps int) *choiceW
 	}
 
 	done := func(buttonIndex int, buttonLabel string) {
-		if wiz.md.Config.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
-			if wiz.md.Config.Hyperdrive.MevBoost.SelectionMode.Value == hdconfig.MevSelectionMode_All {
+		if wiz.md.Config.Hyperdrive.Pbs.Mode.Value == config.ClientMode_Local {
+			if wiz.md.Config.Hyperdrive.Pbs.LocalPbsClientConfig.RelaySelectionMode.Value == pbs.PbsRelaySelectionMode_All {
 				wiz.finishedModal.show()
 			} else {
-				wiz.localMevModal.show()
+				wiz.localPbsRelaySelectionModal.show()
 			}
 		} else {
 			if wiz.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_Local {
-				wiz.externalMevModal.show()
+				wiz.externalPbsModal.show()
 			} else {
 				wiz.finishedModal.show()
 			}
@@ -32,7 +32,7 @@ func createMevWarningStep(wiz *wizard, currentStep int, totalSteps int) *choiceW
 	}
 
 	back := func() {
-		wiz.mevModeModal.show()
+		wiz.pbsModeModal.show()
 	}
 
 	return newChoiceStep(
@@ -43,11 +43,11 @@ func createMevWarningStep(wiz *wizard, currentStep int, totalSteps int) *choiceW
 		[]string{"Continue"},
 		[]string{},
 		76,
-		"MEV-Boost Mode",
+		"PBS Client Mode",
 		DirectionalModalHorizontal,
 		show,
 		done,
 		back,
-		mevWarningID,
+		pbsWarningID,
 	)
 }

@@ -1,4 +1,4 @@
-hyperdrive (1.2.3~dev) UNRELEASED; urgency=medium
+hyperdrive (1.3.0~dev) UNRELEASED; urgency=medium
 
   * Updated Geth, Nethermind, Besu, Reth, Lighthouse, Lodestar, Nimbus, Prysm, and Teku.
   * Updated the StakeWise Operator.

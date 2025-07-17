@@ -11,6 +11,7 @@ import (
 	"github.com/alessio/shellescape"
 	"github.com/mitchellh/go-homedir"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/config/pbs"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
 	"github.com/rocket-pool/node-manager-core/config"
 )
@@ -126,9 +127,9 @@ func (c *HyperdriveClient) deployTemplates(cfg *GlobalConfig, hyperdriveDir stri
 		)
 	}
 
-	// Check if we are running the MEV-Boost container locally
-	if cfg.Hyperdrive.MevBoost.Enable.Value && cfg.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
-		toDeploy = append(toDeploy, config.ContainerID_MevBoost)
+	// Check if we are running the PBS client container locally
+	if cfg.Hyperdrive.Pbs.Enable.Value && cfg.Hyperdrive.Pbs.Mode.Value == config.ClientMode_Local {
+		toDeploy = append(toDeploy, pbs.ContainerID_Pbs)
 	}
 
 	// Deploy main containers

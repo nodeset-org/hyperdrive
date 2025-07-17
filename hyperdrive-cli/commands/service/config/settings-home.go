@@ -20,7 +20,7 @@ type settingsHome struct {
 	ecPage           *ExecutionConfigPage
 	fallbackPage     *FallbackConfigPage
 	bnPage           *BeaconConfigPage
-	mevBoostPage     *MevBoostConfigPage
+	pbsPage          *PbsConfigPage
 	metricsPage      *MetricsConfigPage
 	modulesPage      *ModulesPage
 	categoryList     *tview.List
@@ -46,7 +46,7 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 	home.ecPage = NewExecutionConfigPage(home)
 	home.bnPage = NewBeaconConfigPage(home)
 	home.fallbackPage = NewFallbackConfigPage(home)
-	home.mevBoostPage = NewMevBoostConfigPage(home)
+	home.pbsPage = NewPbsConfigPage(home)
 	home.metricsPage = NewMetricsConfigPage(home)
 	home.modulesPage = NewModulesPage(home)
 	settingsSubpages := []settingsPage{
@@ -55,7 +55,7 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 		home.ecPage,
 		home.bnPage,
 		home.fallbackPage,
-		home.mevBoostPage,
+		home.pbsPage,
 		home.metricsPage,
 		home.modulesPage,
 	}
@@ -69,8 +69,8 @@ func newSettingsHome(md *mainDisplay) *settingsHome {
 	homePage.content = home.content
 	md.pages.AddPage(homePage.id, home.content, true, false)
 
-	// Make the MEV-Boost warning
-	home.createMevWarningModal()
+	// Make the PBS warning
+	home.createPbsWarningModal()
 	return home
 }
 
@@ -82,10 +82,10 @@ func (home *settingsHome) createContent() {
 	// Create the category list
 	categoryList := tview.NewList().
 		SetChangedFunc(func(index int, mainText, secondaryText string, shortcut rune) {
-			// Disable MEV-Boost on unsupported networks
-			if mainText == home.mevBoostPage.page.title {
-				if !home.md.Config.Hyperdrive.MevBoost.HasRelays() {
-					layout.descriptionBox.SetText("MEV-Boost is not available on this network.")
+			// Disable PBS on unsupported networks
+			if mainText == home.pbsPage.page.title {
+				if !home.md.Config.Hyperdrive.Pbs.LocalPbsClientConfig.HasRelays(home.md.Config.Hyperdrive.GetEthNetworkName()) {
+					layout.descriptionBox.SetText("PBS clients are not available on this network.")
 					return
 				}
 			}
@@ -121,9 +121,9 @@ func (home *settingsHome) createContent() {
 		categoryList.AddItem(subpage.getPage().title, "", 0, nil)
 	}
 	categoryList.SetSelectedFunc(func(i int, s1, s2 string, r rune) {
-		// Disable MEV-Boost on unsupported networks
-		if home.settingsSubpages[i].getPage().title == home.mevBoostPage.page.title {
-			if !home.md.Config.Hyperdrive.MevBoost.HasRelays() {
+		// Disable PBS on unsupported networks
+		if home.settingsSubpages[i].getPage().title == home.pbsPage.page.title {
+			if !home.md.Config.Hyperdrive.Pbs.LocalPbsClientConfig.HasRelays(home.md.Config.Hyperdrive.GetEthNetworkName()) {
 				return
 			}
 		}
@@ -200,9 +200,9 @@ func (home *settingsHome) createFooter() (tview.Primitive, int) {
 		return event
 	})
 	saveButton.SetSelectedFunc(func() {
-		// Show the MEV-Boost warning modal first if applicable
-		if home.md.Config.Hyperdrive.MevBoost.Enable.Value && home.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_External {
-			home.showMevWarningModal()
+		// Show the PBS warning modal first if applicable
+		if home.md.Config.Hyperdrive.Pbs.Enable.Value && home.md.Config.Hyperdrive.ClientMode.Value == config.ClientMode_External {
+			home.showPbsWarningModal()
 		} else {
 			home.showReviewPage()
 		}
@@ -276,8 +276,8 @@ func (home *settingsHome) refresh() {
 		home.fallbackPage.layout.refresh()
 	}
 
-	if home.mevBoostPage != nil {
-		home.mevBoostPage.layout.refresh()
+	if home.pbsPage != nil {
+		home.pbsPage.layout.refresh()
 	}
 
 	if home.metricsPage != nil {
@@ -293,11 +293,11 @@ func (home *settingsHome) showReviewPage() {
 	home.md.setPage(reviewPage.page)
 }
 
-func (home *settingsHome) createMevWarningModal() {
+func (home *settingsHome) createPbsWarningModal() {
 	// Create the modal
 	modal := newChoiceModalLayout(
 		home.md.app,
-		"MEV-Boost",
+		"PBS Client",
 		76,
 		mevWarning,
 		[]string{"Ok"},
@@ -318,7 +318,7 @@ func (home *settingsHome) createMevWarningModal() {
 
 	page := newPage(
 		home.homePage,
-		"mev-warning-modal",
+		"pbs-warning-modal",
 		"",
 		"",
 		modal.borderGrid,
@@ -328,7 +328,7 @@ func (home *settingsHome) createMevWarningModal() {
 	home.warningModal = modal
 }
 
-func (home *settingsHome) showMevWarningModal() {
+func (home *settingsHome) showPbsWarningModal() {
 	home.md.setPage(home.warningModal.page)
 	home.warningModal.focus(0)
 }

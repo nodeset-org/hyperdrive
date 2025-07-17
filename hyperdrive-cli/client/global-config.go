@@ -243,26 +243,26 @@ func (c *GlobalConfig) Validate() []string {
 		errors = append(errors, "Auto TX Max Fee must be less than Auto TX Gas Threshold.")
 	}
 
-	// Ensure there's a MEV-boost URL
-	if c.Hyperdrive.MevBoost.Enable.Value {
-		// Disable MEV-boost on networks with no relays
-		if !c.Hyperdrive.MevBoost.HasRelays() {
-			c.Hyperdrive.MevBoost.Enable.Value = false
+	// Ensure there's a PBS client URL
+	if c.Hyperdrive.Pbs.Enable.Value {
+		// Disable PBS client support on networks with no relays
+		if !c.Hyperdrive.Pbs.LocalPbsClientConfig.HasRelays(c.Hyperdrive.GetEthNetworkName()) {
+			c.Hyperdrive.Pbs.Enable.Value = false
 		} else {
-			switch c.Hyperdrive.MevBoost.Mode.Value {
+			switch c.Hyperdrive.Pbs.Mode.Value {
 			case config.ClientMode_Local:
-				// In local MEV-boost mode, the user has to have at least one relay
-				relays := c.Hyperdrive.MevBoost.GetEnabledMevRelays()
-				if len(relays) == 0 && c.Hyperdrive.MevBoost.CustomRelays.Value == "" {
-					errors = append(errors, "You have MEV-boost enabled in local mode but don't have any profiles or relays enabled, and don't have any custom relays entered. Please select at least one profile or relay, or enter at least one custom relay, to use MEV-boost.")
+				// In local PBS client mode, the user has to have at least one relay
+				relays := c.Hyperdrive.Pbs.LocalPbsClientConfig.GetEnabledPbsRelays(c.Hyperdrive.GetEthNetworkName())
+				if len(relays) == 0 && c.Hyperdrive.Pbs.LocalPbsClientConfig.CustomRelays.Value == "" {
+					errors = append(errors, "You have PBS client support enabled in local mode but don't have any profiles or relays enabled, and don't have any custom relays entered. Please select at least one profile or relay, or enter at least one custom relay, to use a PBS client.")
 				}
 			case config.ClientMode_External:
-				// In external MEV-boost mode, the user has to have an external URL if they're running Docker mode
-				if c.Hyperdrive.IsLocalMode() && c.Hyperdrive.MevBoost.ExternalUrl.Value == "" {
-					errors = append(errors, "You have MEV-boost enabled in external mode but don't have a URL set. Please enter the external MEV-boost server URL to use it.")
+				// In external PBS client mode, the user has to have an external URL if they're running Docker mode
+				if c.Hyperdrive.IsLocalMode() && c.Hyperdrive.Pbs.ExternalPbsClientConfig.ExternalUrl.Value == "" {
+					errors = append(errors, "You have PBS client support enabled in external mode but don't have a URL set. Please enter the external PBS client URL to use it.")
 				}
 			default:
-				errors = append(errors, "You do not have a MEV-Boost mode configured. You must either select a mode in the `hyperdrive service config` UI, or disable MEV-Boost.")
+				errors = append(errors, "You do not have a PBS client mode configured. You must either select a mode in the `hyperdrive service config` UI, or disable PBS client support.")
 			}
 		}
 	}
@@ -301,8 +301,8 @@ func (c *GlobalConfig) Validate() []string {
 			portMap, errors = addAndCheckForDuplicate(portMap, c.Constellation.VcCommon.MetricsPort, errors)
 		}
 	}
-	if c.Hyperdrive.MevBoost.Enable.Value && c.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
-		_, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.MevBoost.Port, errors)
+	if c.Hyperdrive.Pbs.Enable.Value && c.Hyperdrive.Pbs.Mode.Value == config.ClientMode_Local {
+		_, errors = addAndCheckForDuplicate(portMap, c.Hyperdrive.Pbs.LocalPbsClientConfig.Port, errors)
 	}
 
 	return errors
