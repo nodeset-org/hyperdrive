@@ -152,10 +152,9 @@ func (configPage *PbsConfigPage) handleModeChanged() {
 				// Only show these to Docker users, not Hybrid users
 				configPage.layout.addFormItems(configPage.externalItems)
 			}
+			configPage.layout.refresh()
 		}
 	}
-
-	configPage.layout.refresh()
 }
 
 // Handle all of the form changes when the relay selection mode has changed
@@ -192,6 +191,8 @@ func (configPage *PbsConfigPage) handleRelaySelectionModeChanged() {
 	case pbs.PbsClient_MevBoost:
 		configPage.layout.addFormItems(configPage.mevBoostItems)
 	}
+
+	configPage.layout.refresh()
 }
 
 // Handle a bulk redraw request
