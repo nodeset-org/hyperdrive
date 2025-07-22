@@ -21,7 +21,7 @@ require (
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nodeset-org/hyperdrive-constellation v1.0.1
-	github.com/nodeset-org/hyperdrive-daemon v1.2.3-0.20250713073600-9cc4b4bd4aba
+	github.com/nodeset-org/hyperdrive-daemon v1.2.3-0.20250722064235-59dc49b432db
 	github.com/nodeset-org/hyperdrive-stakewise v1.2.3-0.20250713074213-27ae190cf6e6
 	github.com/nodeset-org/osha v0.4.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
@@ -36,7 +36,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-replace github.com/nodeset-org/hyperdrive-daemon => ../hyperdrive-daemon
+// replace github.com/nodeset-org/hyperdrive-daemon => ../hyperdrive-daemon
 
 require (
 	filippo.io/age v1.2.0 // indirect

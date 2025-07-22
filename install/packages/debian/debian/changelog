@@ -1,5 +1,6 @@
 hyperdrive (1.3.0~dev) UNRELEASED; urgency=medium
 
+  * Redesigned the MEV system so it now supports both Commit-Boost PBS and MEV-Boost.
   * Updated Geth, Nethermind, Besu, Reth, Lighthouse, Lodestar, Nimbus, Prysm, and Teku.
   * Updated the StakeWise Operator.
   * Migrated to using the canonical Prysm container image instead of the custom one.
