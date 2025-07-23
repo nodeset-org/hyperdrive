@@ -4,7 +4,7 @@
 
 # Commit-Boost
 if [ "$CLIENT" = "commitBoost" ]; then
-    # Common-Boost PBS doesn't accept command line argumnets, everything must be in the config file which is
+    # Commit-Boost PBS doesn't accept command line arguments, everything must be in the config file which is
     # specified by an environment variable.
     export CB_CONFIG="/cb_config.toml"
     if [ ! -f "$CB_CONFIG" ]; then

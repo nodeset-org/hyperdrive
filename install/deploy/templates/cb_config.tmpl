@@ -7,11 +7,16 @@ host = "0.0.0.0"
 port = 18550
 relay_check = true
 wait_all_registrations = true
-#rpc_url = "http://ec:8545"
 
 {{- range $relay := .Hyperdrive.Pbs.LocalPbsClientConfig.GetEnabledPbsRelays $networkName}}
 
 [[relays]]
 id = "{{$relay.ID}}"
 url = "{{index $relay.Urls $networkName}}"
+{{- end -}}
+{{- $customRelays := Split .Hyperdrive.Pbs.LocalPbsClientConfig.CustomRelays.Value "," -}}
+{{- range $customRelay := $customRelays}}
+
+[[relays]] 
+url = "{{$customRelay}}"
 {{- end -}}

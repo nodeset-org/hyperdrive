@@ -3,6 +3,8 @@ package template
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/alessio/shellescape"
@@ -27,7 +29,22 @@ func (t Template) Write(data interface{}) error {
 		_ = runtimeFile.Close()
 	}()
 
+	// Set up the supplemental functions
+	tmplFuncs := template.FuncMap{
+		// Splits a string by a separator
+		"Split": func(s string, sep string) []string {
+			if s == "" {
+				return nil
+			}
+			if sep == "" {
+				return []string{s}
+			}
+			return strings.Split(s, sep)
+		},
+	}
+
 	// Parse the template
+	template := template.New(filepath.Base(t.Src)).Funcs(tmplFuncs)
 	tmpl, err := template.ParseFiles(t.Src)
 	if err != nil {
 		return fmt.Errorf("Error reading template file %s: %w", shellescape.Quote(t.Src), err)
