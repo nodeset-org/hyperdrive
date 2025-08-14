@@ -260,19 +260,23 @@ if [ "$CLIENT" = "besu" ]; then
         --engine-rpc-port=${EC_ENGINE_PORT:-8551} \
         --engine-host-allowlist=* \
         --engine-jwt-secret=/secrets/jwtsecret \
-        --Xbonsai-full-flat-db-enabled=true \
         $EC_ADDITIONAL_FLAGS"
 
         # History mode
-        if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ]; then
-            CMD="$CMD \
-            --sync-mode=SNAP \
-            --data-storage-format=BONSAI"
-        elif [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
+        if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ] || [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
             CMD="$CMD \
             --sync-mode=SNAP \
             --data-storage-format=BONSAI \
-            --snapsync-synchronizer-pre-checkpoint-headers-only-enabled=false"
+            --Xbonsai-full-flat-db-enabled=true"
+
+            if [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
+                CMD="$CMD \
+                --snapsync-synchronizer-pre-checkpoint-headers-only-enabled=false"
+            fi
+
+            if [ ! -z "$BESU_MAX_BACK_LAYERS" ]; then
+                CMD="$CMD --bonsai-maximum-back-layers-to-load=$BESU_MAX_BACK_LAYERS"
+            fi
         elif [ "$EC_HISTORY_MODE_ARCHIVE" = "true" ]; then
             CMD="$CMD \
             --sync-mode=FULL \
@@ -289,10 +293,6 @@ if [ "$CLIENT" = "besu" ]; then
 
         if [ ! -z "$EC_P2P_PORT" ]; then
             CMD="$CMD --p2p-port=$EC_P2P_PORT"
-        fi
-
-        if [ ! -z "$BESU_MAX_BACK_LAYERS" ]; then
-            CMD="$CMD --bonsai-maximum-back-layers-to-load=$BESU_MAX_BACK_LAYERS"
         fi
 
         if [ "$BESU_JVM_HEAP_SIZE" -gt "0" ]; then

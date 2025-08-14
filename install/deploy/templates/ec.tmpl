@@ -40,7 +40,7 @@ services:
       - EC_HISTORY_MODE_POST_MERGE=true
       {{- else if eq .Hyperdrive.LocalExecutionClient.HistoryMode.String "full"}}
       - EC_HISTORY_MODE_FULL=true
-      {{- else if eq .Hyperdrive.LocalExecutionClient.HistoryMode.String "archive"}
+      {{- else if eq .Hyperdrive.LocalExecutionClient.HistoryMode.String "archive"}}
       - EC_HISTORY_MODE_ARCHIVE=true
       {{- end}}
       {{- /* Client-specific values */}}
