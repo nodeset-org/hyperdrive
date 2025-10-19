@@ -46,7 +46,14 @@ if [ "$CLIENT" = "geth" ]; then
     # Check for the prune flag and run that first if requested
     if [ -f "/ethclient/prune.lock" ]; then
 
-        $PERF_PREFIX /usr/local/bin/geth snapshot prune-state --$ETH_NETWORK --datadir /ethclient/geth ; rm /ethclient/prune.lock
+
+        if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ]; then
+            PRUNE_CMD="prune-history"
+        else
+            PRUNE_CMD="snapshot prune-state"
+        fi
+
+        $PERF_PREFIX /usr/local/bin/geth $PRUNE_CMD $GETH_NETWORK --datadir /ethclient/geth ; rm /ethclient/prune.lock
 
     # Run Geth normally
     else
@@ -168,6 +175,7 @@ if [ "$CLIENT" = "nethermind" ]; then
     if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ] || [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
         CMD="$CMD \
         --Sync.SnapSync \
+        --Pruning.Mode=Hybrid \
         --Pruning.FullPruningTrigger=VolumeFreeSpace \
         --Pruning.FullPruningThresholdMb=$HD_NETHERMIND_FULL_PRUNING_THRESHOLD_MB \
         --Pruning.FullPruningCompletionBehavior AlwaysShutdown \
@@ -267,8 +275,13 @@ if [ "$CLIENT" = "besu" ]; then
             CMD="$CMD \
             --sync-mode=SNAP \
             --data-storage-format=BONSAI \
-            --Xbonsai-full-flat-db-enabled=true"
+            --Xbonsai-full-flat-db-enabled=true \
+            --snapsync-server-enabled"
 
+            if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ]; then
+                CMD="$CMD \
+                --history-expiry-prune"
+            fi  
             if [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
                 CMD="$CMD \
                 --snapsync-synchronizer-pre-checkpoint-headers-only-enabled=false"
