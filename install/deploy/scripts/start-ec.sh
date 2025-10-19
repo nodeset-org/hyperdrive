@@ -275,7 +275,7 @@ if [ "$CLIENT" = "besu" ]; then
             fi
 
             if [ ! -z "$BESU_MAX_BACK_LAYERS" ]; then
-                CMD="$CMD --bonsai-maximum-back-layers-to-load=$BESU_MAX_BACK_LAYERS"
+                CMD="$CMD --bonsai-historical-block-limit=$BESU_MAX_BACK_LAYERS"
             fi
         elif [ "$EC_HISTORY_MODE_ARCHIVE" = "true" ]; then
             CMD="$CMD \

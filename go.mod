@@ -1,12 +1,12 @@
 module github.com/nodeset-org/hyperdrive
 
-go 1.24
+go 1.24.0
 
 toolchain go1.24.2
 
 require github.com/rocket-pool/node-manager-core v0.5.2-0.20250430074613-76bcf6bb1be0
 
-replace github.com/rocket-pool/node-manager-core => github.com/nodeset-org/node-manager-core v0.6.1-0.20250814045526-6b3b3fe9286e
+replace github.com/rocket-pool/node-manager-core => github.com/nodeset-org/node-manager-core v0.6.1-0.20251018180816-96b90669d5a4
 
 require (
 	github.com/alessio/shellescape v1.4.2
@@ -14,15 +14,15 @@ require (
 	github.com/distribution/reference v0.6.0
 	github.com/docker/docker v27.3.1+incompatible
 	github.com/dustin/go-humanize v1.0.1
-	github.com/ethereum/go-ethereum v1.15.8
+	github.com/ethereum/go-ethereum v1.16.5
 	github.com/fatih/color v1.17.0
 	github.com/gdamore/tcell/v2 v2.7.4
 	github.com/goccy/go-json v0.10.4
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nodeset-org/hyperdrive-constellation v1.0.1
-	github.com/nodeset-org/hyperdrive-daemon v1.2.3-0.20250814055007-2882708d54e4
-	github.com/nodeset-org/hyperdrive-stakewise v1.2.3-0.20250814060522-b4012439b80b
+	github.com/nodeset-org/hyperdrive-daemon v1.2.3-0.20251019184300-a867dcd97f86
+	github.com/nodeset-org/hyperdrive-stakewise v1.2.3-0.20251019184805-4aafbb66bb59
 	github.com/nodeset-org/osha v0.4.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
@@ -31,8 +31,8 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/tyler-smith/go-bip39 v1.1.0
 	github.com/urfave/cli/v2 v2.27.5
-	golang.org/x/sync v0.11.0
-	golang.org/x/term v0.29.0
+	golang.org/x/sync v0.12.0
+	golang.org/x/term v0.30.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -47,7 +47,7 @@ require (
 	github.com/Microsoft/hcsshim v0.12.5 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bits-and-blooms/bitset v1.17.0 // indirect
+	github.com/bits-and-blooms/bitset v1.20.0 // indirect
 	github.com/bodgit/plumbing v1.2.0 // indirect
 	github.com/bodgit/sevenzip v1.3.0 // indirect
 	github.com/bodgit/windows v1.0.0 // indirect
@@ -58,8 +58,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/compose-spec/compose-go/v2 v2.1.3 // indirect
 	github.com/connesc/cipherio v0.2.1 // indirect
-	github.com/consensys/bavard v0.1.22 // indirect
-	github.com/consensys/gnark-crypto v0.14.0 // indirect
+	github.com/consensys/gnark-crypto v0.18.0 // indirect
 	github.com/containerd/cgroups/v3 v3.0.3 // indirect
 	github.com/containerd/containerd v1.7.19 // indirect
 	github.com/containerd/containerd/api v1.7.19 // indirect
@@ -71,8 +70,8 @@ require (
 	github.com/containerd/ttrpc v1.2.5 // indirect
 	github.com/containerd/typeurl/v2 v2.2.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
+	github.com/crate-crypto/go-eth-kzg v1.4.0 // indirect
 	github.com/crate-crypto/go-ipa v0.0.0-20240724233137-53bbb0ceb27a // indirect
-	github.com/crate-crypto/go-kzg-4844 v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
@@ -82,10 +81,11 @@ require (
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
-	github.com/ethereum/c-kzg-4844 v1.0.2 // indirect
+	github.com/emicklei/dot v1.6.2 // indirect
+	github.com/ethereum/c-kzg-4844/v2 v2.1.3 // indirect
 	github.com/ethereum/go-verkle v0.2.2 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/ferranbt/fastssz v0.1.3 // indirect
+	github.com/ferranbt/fastssz v0.1.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/glendc/go-external-ip v0.1.0 // indirect
@@ -94,10 +94,10 @@ require (
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.0.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/golang/snappy v0.0.5-0.20220116011046-fa5810519dcb // indirect
+	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
@@ -123,7 +123,6 @@ require (
 	github.com/minio/highwayhash v1.0.3 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/patternmatcher v0.6.0 // indirect
@@ -169,7 +168,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
-	github.com/supranational/blst v0.3.14 // indirect
+	github.com/supranational/blst v0.3.16-0.20250831170142-f48500c1fdbe // indirect
 	github.com/therootcompany/xz v1.0.1 // indirect
 	github.com/thomaso-mirodin/intmath v0.0.0-20160323211736-5dc6d854e46e // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
@@ -195,11 +194,11 @@ require (
 	go.opentelemetry.io/otel/metric v1.28.0 // indirect
 	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	go4.org v0.0.0-20200411211856-f5505b9728dd // indirect
-	golang.org/x/crypto v0.35.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/exp v0.0.0-20240716160929-1d5bc16f04a8 // indirect
-	golang.org/x/net v0.36.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
 	google.golang.org/genproto v0.0.0-20240711142825-46eb208f015d // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240711142825-46eb208f015d // indirect
@@ -209,7 +208,6 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.2.1 // indirect
-	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
 replace github.com/rocket-pool/smartnode/v2 => github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20250130225832-4768ad9c2c82

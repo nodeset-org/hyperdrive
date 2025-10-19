@@ -105,9 +105,9 @@ func (configPage *ExecutionConfigPage) createContent() {
 			// Replace with the modified history mode parameter
 			historyModeItem := createParameterizedDropDown(&modifiedParam, configPage.layout.descriptionBox)
 			localEcItemsNoHistoryMode = append(localEcItemsNoHistoryMode, historyModeItem)
-			continue
+		} else {
+			localEcItemsNoHistoryMode = append(localEcItemsNoHistoryMode, item)
 		}
-		localEcItemsNoHistoryMode = append(localEcItemsNoHistoryMode, item)
 		localEcItems = append(localEcItems, item)
 	}
 	configPage.localEcItems = localEcItems
@@ -125,6 +125,7 @@ func (configPage *ExecutionConfigPage) createContent() {
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.clientModeDropdown, configPage.localEcDropdown, configPage.externalEcDropdown)
 	configPage.layout.mapParameterizedFormItems(configPage.localEcItems...)
+	configPage.layout.mapParameterizedFormItems(configPage.localEcItemsNoHistoryMode...)
 	configPage.layout.mapParameterizedFormItems(configPage.gethItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.nethermindItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.besuItems...)
