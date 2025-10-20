@@ -6,7 +6,7 @@ toolchain go1.24.2
 
 require github.com/rocket-pool/node-manager-core v0.5.2-0.20250430074613-76bcf6bb1be0
 
-replace github.com/rocket-pool/node-manager-core => github.com/nodeset-org/node-manager-core v0.6.1-0.20251018180816-96b90669d5a4
+replace github.com/rocket-pool/node-manager-core => github.com/nodeset-org/node-manager-core v0.6.1-0.20251020134607-548fce73442e
 
 require (
 	github.com/alessio/shellescape v1.4.2
@@ -21,8 +21,8 @@ require (
 	github.com/mholt/archiver/v4 v4.0.0-alpha.8
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nodeset-org/hyperdrive-constellation v1.0.1
-	github.com/nodeset-org/hyperdrive-daemon v1.2.3-0.20251019184300-a867dcd97f86
-	github.com/nodeset-org/hyperdrive-stakewise v1.2.3-0.20251019184805-4aafbb66bb59
+	github.com/nodeset-org/hyperdrive-daemon v1.2.3-0.20251020135050-6de08f31187d
+	github.com/nodeset-org/hyperdrive-stakewise v1.2.3-0.20251020191749-5de32af3d72a
 	github.com/nodeset-org/osha v0.4.0
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/rivo/tview v0.0.0-20230208211350-7dfff1ce7854 // DO NOT UPGRADE
@@ -211,3 +211,5 @@ require (
 )
 
 replace github.com/rocket-pool/smartnode/v2 => github.com/nodeset-org/rocketpool-smartnode/v2 v2.0.0-olddev.0.20250130225832-4768ad9c2c82
+
+replace github.com/tyler-smith/go-bip39 v1.1.0 => github.com/nodeset-org/go-bip39 v1.1.0

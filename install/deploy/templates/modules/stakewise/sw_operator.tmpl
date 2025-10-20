@@ -17,16 +17,18 @@ services:
       - {{.StakeWise.DataVolume}}:{{$module_dir}}/db/{{.StakeWiseResources.Vault}}
     command:
       - "src/main.py"
-      - "start-relayer"
+      - "start-api"
       - "--relayer-endpoint=http://{{.StakeWise.DaemonContainerName}}:{{.StakeWise.RelayPort}}"
+      - "--relayer-type=DEFAULT"
       - "--data-dir={{$module_dir}}"
       - "--database-dir={{$module_dir}}/db/{{.StakeWiseResources.Vault}}"
+      - "--deposit-data-file={{$module_dir}}/{{.StakeWise.DepositDataFile}}"
       - "--network={{.HyperdriveResources.EthNetworkName}}"
       - "--vault={{.StakeWiseResources.Vault}}"
       - "--execution-endpoints={{.Hyperdrive.GetEcHttpEndpointsWithFallback}}"
       - "--consensus-endpoints={{.Hyperdrive.GetBnHttpEndpointsWithFallback}}"
-      - "--wallet-file={{$module_dir}}/{{.StakeWise.WalletFilename}}"
-      - "--wallet-password-file={{$module_dir}}/{{.StakeWise.PasswordFilename}}"
+      - "--hot-wallet-file={{$module_dir}}/{{.StakeWise.WalletFilename}}"
+      - "--hot-wallet-password-file={{$module_dir}}/{{.StakeWise.PasswordFilename}}"
       {{- if .Hyperdrive.Metrics.EnableMetrics.Value}}
       - "--enable-metrics"
       {{end}}
