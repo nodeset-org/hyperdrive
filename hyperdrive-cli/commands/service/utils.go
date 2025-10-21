@@ -2,7 +2,9 @@ package service
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/distribution/reference"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/urfave/cli/v2"
@@ -14,7 +16,6 @@ const (
 	dataFolderVolumeName string = "/.hyperdrive/data"
 
 	PruneFreeSpaceRequired uint64 = 50 * 1024 * 1024 * 1024
-	dockerImageRegex       string = ".*/(?P<image>.*):.*"
 )
 
 // Get the compose file paths for a CLI context
@@ -55,4 +56,66 @@ func changeNetworks(c *cli.Context) error {
 	fmt.Println("done")
 
 	return nil
+}
+
+// A parsed breakdown of a Docker image string's components
+type DockerImageInfo struct {
+	// The domain for the repository that the image is pulled from, e.g. "docker.io" or "ghcr.io"
+	Domain string
+
+	// The vendor (owning organization the image is published under). Since Docker doesn't really have
+	// the concept of a vendor, this is everything in the repository name before the first '/'.
+	Vendor string
+
+	// The image name under the vendor. This is everything after the first '/' in the
+	// repository name.
+	Image string
+
+	// The tag of the image, AKA the "version" of it pulled from the repository for this image.
+	Tag string
+}
+
+func (i DockerImageInfo) String() string {
+	return fmt.Sprintf("%s/%s/%s:%s", i.Domain, i.Vendor, i.Image, i.Tag)
+}
+
+func (i DockerImageInfo) StringWithoutTag() string {
+	// Return the image without the tag
+	return fmt.Sprintf("%s/%s/%s", i.Domain, i.Vendor, i.Image)
+}
+
+// Extract the image origin details from a Docker image string
+func getDockerImageInfo(fullImageName string) (DockerImageInfo, error) {
+	// Return the empty string if the image didn't exist (probably because this is the first time starting it up)
+	if fullImageName == "" {
+		return DockerImageInfo{}, nil
+	}
+
+	// Parse the image string
+	namedRef, err := reference.ParseNormalizedNamed(fullImageName)
+	if err != nil {
+		return DockerImageInfo{}, fmt.Errorf("error parsing Docker image string [%s]: %w", fullImageName, err)
+	}
+
+	// Get the vendor and image name
+	repo := reference.Path(namedRef)
+	vendor, image, foundSlash := strings.Cut(repo, "/")
+	if !foundSlash {
+		return DockerImageInfo{}, fmt.Errorf("Docker image string [%s] does not contain a vendor/image format", fullImageName)
+	}
+
+	// Get the tag of the image
+	tag := ""
+	if tagged, ok := namedRef.(reference.Tagged); ok {
+		tag = tagged.Tag()
+	}
+
+	// Create the DockerImageInfo struct
+	imageInfo := DockerImageInfo{
+		Domain: reference.Domain(namedRef),
+		Vendor: vendor,
+		Image:  image,
+		Tag:    tag,
+	}
+	return imageInfo, nil
 }

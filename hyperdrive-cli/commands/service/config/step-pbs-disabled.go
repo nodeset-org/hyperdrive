@@ -1,9 +1,9 @@
 package config
 
-const mevDisabledID string = "step-mev-disabled"
+const pbsDisabledID string = "step-pbs-disabled"
 
-func createMevDisabledStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
-	helperText := mevDisabled
+func createPbsDisabledStep(wiz *wizard, currentStep int, totalSteps int) *choiceWizardStep {
+	helperText := pbsDisabled
 
 	show := func(modal *choiceModalLayout) {
 		wiz.md.setPage(modal.page)
@@ -11,7 +11,7 @@ func createMevDisabledStep(wiz *wizard, currentStep int, totalSteps int) *choice
 	}
 
 	done := func(buttonIndex int, buttonLabel string) {
-		wiz.md.Config.Hyperdrive.MevBoost.Enable.Value = false
+		wiz.md.Config.Hyperdrive.Pbs.Enable.Value = false
 		wiz.finishedModal.show()
 	}
 
@@ -27,11 +27,11 @@ func createMevDisabledStep(wiz *wizard, currentStep int, totalSteps int) *choice
 		[]string{"Continue"},
 		[]string{},
 		76,
-		"MEV-Boost Mode",
+		"PBS Client Mode",
 		DirectionalModalHorizontal,
 		show,
 		done,
 		back,
-		mevDisabledID,
+		pbsDisabledID,
 	)
 }

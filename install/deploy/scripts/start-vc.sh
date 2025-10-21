@@ -23,7 +23,7 @@ if [ "$CLIENT" = "lighthouse" ]; then
         CMD="$CMD --enable-doppelganger-protection"
     fi
 
-    if [ "$ENABLE_MEV_BOOST" = "true" ]; then
+    if [ "$ENABLE_PBS" = "true" ]; then
         CMD="$CMD --builder-proposals --prefer-builder-proposals"
     fi
 
@@ -65,7 +65,7 @@ if [ "$CLIENT" = "lodestar" ]; then
         CMD="$CMD --doppelgangerProtection"
     fi
 
-    if [ "$ENABLE_MEV_BOOST" = "true" ]; then
+    if [ "$ENABLE_PBS" = "true" ]; then
         CMD="$CMD --builder"
     fi
 
@@ -105,7 +105,7 @@ if [ "$CLIENT" = "nimbus" ]; then
         --block-monitor-type=event \
         $VC_ADDITIONAL_FLAGS"
 
-    if [ "$ENABLE_MEV_BOOST" = "true" ]; then
+    if [ "$ENABLE_PBS" = "true" ]; then
         CMD="$CMD --payload-builder"
     fi
 
@@ -146,7 +146,7 @@ if [ "$CLIENT" = "prysm" ]; then
         --suggested-fee-recipient $FEE_RECIPIENT \
         $VC_ADDITIONAL_FLAGS"
 
-    if [ "$ENABLE_MEV_BOOST" = "true" ]; then
+    if [ "$ENABLE_PBS" = "true" ]; then
         CMD="$CMD --enable-builder"
     fi
 
@@ -195,7 +195,7 @@ if [ "$CLIENT" = "teku" ]; then
         CMD="$CMD --doppelganger-detection-enabled"
     fi
 
-    if [ "$ENABLE_MEV_BOOST" = "true" ]; then
+    if [ "$ENABLE_PBS" = "true" ]; then
         CMD="$CMD --validators-builder-registration-default-enabled=true"
     fi
 

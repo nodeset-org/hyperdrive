@@ -36,11 +36,17 @@ services:
       - EXTERNAL_IP={{.ExternalIP}}
       - ENABLE_METRICS={{.Hyperdrive.Metrics.EnableMetrics}}
       - EC_METRICS_PORT={{.Hyperdrive.Metrics.EcMetricsPort}}
+      {{- if eq .Hyperdrive.LocalExecutionClient.HistoryMode.String "postMerge"}}
+      - EC_HISTORY_MODE_POST_MERGE=true
+      {{- else if eq .Hyperdrive.LocalExecutionClient.HistoryMode.String "full"}}
+      - EC_HISTORY_MODE_FULL=true
+      {{- else if eq .Hyperdrive.LocalExecutionClient.HistoryMode.String "archive"}}
+      - EC_HISTORY_MODE_ARCHIVE=true
+      {{- end}}
       {{- /* Client-specific values */}}
       {{- if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "besu"}}
       - BESU_MAX_BACK_LAYERS={{.Hyperdrive.LocalExecutionClient.Besu.MaxBackLayers}}
       - BESU_JVM_HEAP_SIZE={{.Hyperdrive.LocalExecutionClient.Besu.JvmHeapSize}}
-      - BESU_ARCHIVE_MODE={{.Hyperdrive.LocalExecutionClient.Besu.ArchiveMode}}
       {{- else if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "nethermind"}}
       - EC_CACHE_SIZE={{.Hyperdrive.LocalExecutionClient.Nethermind.CacheSize}}
       - HD_NETHERMIND_PRUNE_MEM_SIZE={{.Hyperdrive.LocalExecutionClient.Nethermind.PruneMemSize}}
@@ -50,7 +56,6 @@ services:
       - HD_NETHERMIND_FULL_PRUNING_THRESHOLD_MB={{.Hyperdrive.LocalExecutionClient.Nethermind.FullPruningThresholdMb}}
       {{- else if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "geth"}}
       - HD_GETH_EVM_TIMEOUT={{.Hyperdrive.LocalExecutionClient.Geth.EvmTimeout}}
-      - HD_GETH_ARCHIVE_MODE={{.Hyperdrive.LocalExecutionClient.Geth.ArchiveMode}}
       {{- else if eq .Hyperdrive.LocalExecutionClient.ExecutionClient.String "reth"}}
       - RETH_INBOUND_MAX_PEERS={{.Hyperdrive.LocalExecutionClient.Reth.MaxInboundPeers}}
       - RETH_OUTBOUND_MAX_PEERS={{.Hyperdrive.LocalExecutionClient.Reth.MaxOutboundPeers}}

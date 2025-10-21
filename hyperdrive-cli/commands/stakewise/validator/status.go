@@ -2,6 +2,8 @@ package validator
 
 import (
 	"fmt"
+	"slices"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	swapi "github.com/nodeset-org/hyperdrive-stakewise/shared/api"
@@ -91,6 +93,18 @@ func getStatus(c *cli.Context) error {
 		fmt.Println("You don't have any validators registered with StakeWise yet.")
 		return nil
 	}
+
+	// Sort by Beacon index
+	slices.SortStableFunc(totalInfo, func(a, b *swapi.ValidatorInfo) int {
+		if a.HasBeaconIndex && b.HasBeaconIndex {
+			return strings.Compare(a.Index, b.Index)
+		} else if a.HasBeaconIndex {
+			return -1 // a has index, b does not
+		} else if b.HasBeaconIndex {
+			return 1 // b has index, a does not
+		}
+		return 0 // neither has index
+	})
 
 	for _, validator := range totalInfo {
 		vault := vaultMap[validator.Pubkey]

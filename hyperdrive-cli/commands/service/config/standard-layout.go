@@ -103,7 +103,7 @@ func (layout *standardLayout) createForm(networkParam *config.Parameter[config.N
 
 // Refreshes all of the form items to show the current configured values
 func (layout *standardLayout) refresh() {
-	for i := 0; i < layout.form.GetFormItemCount(); i++ {
+	for i := range layout.form.GetFormItemCount() {
 		formItem := layout.form.GetFormItem(i)
 		param := layout.parameters[formItem].parameter
 

@@ -46,7 +46,14 @@ if [ "$CLIENT" = "geth" ]; then
     # Check for the prune flag and run that first if requested
     if [ -f "/ethclient/prune.lock" ]; then
 
-        $PERF_PREFIX /usr/local/bin/geth snapshot prune-state --$ETH_NETWORK --datadir /ethclient/geth ; rm /ethclient/prune.lock
+
+        if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ]; then
+            PRUNE_CMD="prune-history"
+        else
+            PRUNE_CMD="snapshot prune-state"
+        fi
+
+        $PERF_PREFIX /usr/local/bin/geth $PRUNE_CMD $GETH_NETWORK --datadir /ethclient/geth ; rm /ethclient/prune.lock
 
     # Run Geth normally
     else
@@ -70,6 +77,13 @@ if [ "$CLIENT" = "geth" ]; then
             --pprof \
             $EC_ADDITIONAL_FLAGS"
 
+        # History mode
+        if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ]; then
+            CMD="$CMD --history.chain postmerge"
+        elif [ "$EC_HISTORY_MODE_ARCHIVE" = "true" ]; then
+            CMD="$CMD --syncmode=full --state.scheme=path --history.state=0"
+        fi
+
         if [ ! -z "$ETHSTATS_LABEL" ] && [ ! -z "$ETHSTATS_LOGIN" ]; then
             CMD="$CMD --ethstats $ETHSTATS_LABEL:$ETHSTATS_LOGIN"
         fi
@@ -80,10 +94,6 @@ if [ "$CLIENT" = "geth" ]; then
 
         if [ ! -z "$HD_GETH_EVM_TIMEOUT" ]; then
             CMD="$CMD --rpc.evmtimeout ${HD_GETH_EVM_TIMEOUT}s"
-        fi
-
-        if [ "$HD_GETH_ARCHIVE_MODE" = "true" ]; then
-            CMD="$CMD --syncmode=full --gcmode=archive"
         fi
 
         if [ "$ENABLE_METRICS" = "true" ]; then
@@ -138,21 +148,15 @@ if [ "$CLIENT" = "nethermind" ]; then
 
     CMD="$PERF_PREFIX $NETHERMIND_BINARY \
         --config $ETH_NETWORK \
-        --Sync.SnapSync true \
         --datadir /ethclient/nethermind \
-        --JsonRpc.Enabled true \
+        --JsonRpc.Enabled \
         --JsonRpc.Host 0.0.0.0 \
         --JsonRpc.Port ${EC_HTTP_PORT:-8545} \
         --JsonRpc.EnginePort ${EC_ENGINE_PORT:-8551} \
         --JsonRpc.EngineHost 0.0.0.0 \
-        --Init.WebSocketsEnabled true \
+        --Init.WebSocketsEnabled \
         --JsonRpc.WebSocketsPort ${EC_WS_PORT:-8546} \
         --JsonRpc.JwtSecretFile=/secrets/jwtsecret \
-        --Pruning.FullPruningTrigger=VolumeFreeSpace \
-        --Pruning.FullPruningThresholdMb=$HD_NETHERMIND_FULL_PRUNING_THRESHOLD_MB \
-        --Pruning.FullPruningCompletionBehavior AlwaysShutdown \
-        --Pruning.FullPruningMaxDegreeOfParallelism 0 \
-        --Pruning.FullPruningMemoryBudgetMb=$HD_NETHERMIND_FULL_PRUNE_MEMORY_BUDGET \
         $EC_ADDITIONAL_FLAGS"
 
     # Add optional supplemental primary JSON-RPC modules
@@ -167,8 +171,40 @@ if [ "$CLIENT" = "nethermind" ]; then
     fi
     CMD="$CMD --JsonRpc.AdditionalRpcUrls [\"http://127.0.0.1:7434|http|admin\"$HD_NETHERMIND_ADDITIONAL_URLS]"
 
+    # History mode
+    if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ] || [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
+        CMD="$CMD \
+        --Sync.SnapSync \
+        --Pruning.Mode=Hybrid \
+        --Pruning.FullPruningTrigger=VolumeFreeSpace \
+        --Pruning.FullPruningThresholdMb=$HD_NETHERMIND_FULL_PRUNING_THRESHOLD_MB \
+        --Pruning.FullPruningCompletionBehavior AlwaysShutdown \
+        --Pruning.FullPruningMaxDegreeOfParallelism 0 \
+        --Pruning.FullPruningMemoryBudgetMb=$HD_NETHERMIND_FULL_PRUNE_MEMORY_BUDGET"
+
+        if [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
+            CMD="$CMD --Sync.AncientReceiptsBarrier=0 --Sync.AncientBodiesBarrier=0"
+        fi
+
+        if [ ! -z "$HD_NETHERMIND_PRUNE_MEM_SIZE" ]; then
+            CMD="$CMD \
+            --Pruning.CacheMb $HD_NETHERMIND_PRUNE_MEM_SIZE \
+            --Pruning.DirtyCacheMb $(($HD_NETHERMIND_PRUNE_MEM_SIZE / 2))"
+        fi
+    elif [ "$EC_HISTORY_MODE_ARCHIVE" = "true" ]; then
+        CMD="$CMD \
+        --Sync.FastSync=false \
+        --Sync.SnapSync=false \
+        --Sync.DownloadBodiesInFastSync=false \
+        --Sync.DownloadReceiptsInFastSync=false \
+        --Sync.AncientReceiptsBarrier=0 \
+        --Sync.AncientBodiesBarrier=0 \
+        --Receipt.TxLookupLimit=0 \
+        --Pruning.Mode=None"
+    fi
+
     if [ ! -z "$ETHSTATS_LABEL" ] && [ ! -z "$ETHSTATS_LOGIN" ]; then
-        CMD="$CMD --EthStats.Enabled true --EthStats.Name $ETHSTATS_LABEL --EthStats.Secret $(echo $ETHSTATS_LOGIN | cut -d "@" -f1) --EthStats.Server $(echo $ETHSTATS_LOGIN | cut -d "@" -f2)"
+        CMD="$CMD --EthStats.Enabled --EthStats.Name $ETHSTATS_LABEL --EthStats.Secret $(echo $ETHSTATS_LOGIN | cut -d "@" -f1) --EthStats.Server $(echo $ETHSTATS_LOGIN | cut -d "@" -f2)"
     fi
 
     if [ ! -z "$EC_CACHE_SIZE" ]; then
@@ -180,15 +216,11 @@ if [ "$CLIENT" = "nethermind" ]; then
     fi
 
     if [ "$ENABLE_METRICS" = "true" ]; then
-        CMD="$CMD --Metrics.Enabled true --Metrics.ExposePort $EC_METRICS_PORT"
+        CMD="$CMD --Metrics.Enabled --Metrics.ExposePort $EC_METRICS_PORT"
     fi
 
     if [ ! -z "$EC_P2P_PORT" ]; then
         CMD="$CMD --Network.DiscoveryPort $EC_P2P_PORT --Network.P2PPort $EC_P2P_PORT"
-    fi
-
-    if [ ! -z "$HD_NETHERMIND_PRUNE_MEM_SIZE" ]; then
-        CMD="$CMD --Pruning.CacheMb $HD_NETHERMIND_PRUNE_MEM_SIZE"
     fi
 
     exec ${CMD}
@@ -236,13 +268,32 @@ if [ "$CLIENT" = "besu" ]; then
         --engine-rpc-port=${EC_ENGINE_PORT:-8551} \
         --engine-host-allowlist=* \
         --engine-jwt-secret=/secrets/jwtsecret \
-        --Xbonsai-full-flat-db-enabled=true \
         $EC_ADDITIONAL_FLAGS"
 
-        if [ "$BESU_ARCHIVE_MODE" = "true" ]; then
-            CMD="$CMD --sync-mode=FULL --data-storage-format=FOREST"
-        else
-            CMD="$CMD --sync-mode=SNAP --data-storage-format=BONSAI"
+        # History mode
+        if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ] || [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
+            CMD="$CMD \
+            --sync-mode=SNAP \
+            --data-storage-format=BONSAI \
+            --Xbonsai-full-flat-db-enabled=true \
+            --snapsync-server-enabled"
+
+            if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ]; then
+                CMD="$CMD \
+                --history-expiry-prune"
+            fi  
+            if [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
+                CMD="$CMD \
+                --snapsync-synchronizer-pre-checkpoint-headers-only-enabled=false"
+            fi
+
+            if [ ! -z "$BESU_MAX_BACK_LAYERS" ]; then
+                CMD="$CMD --bonsai-historical-block-limit=$BESU_MAX_BACK_LAYERS"
+            fi
+        elif [ "$EC_HISTORY_MODE_ARCHIVE" = "true" ]; then
+            CMD="$CMD \
+            --sync-mode=FULL \
+            --data-storage-format=FOREST"
         fi
 
         if [ ! -z "$EC_MAX_PEERS" ]; then
@@ -255,10 +306,6 @@ if [ "$CLIENT" = "besu" ]; then
 
         if [ ! -z "$EC_P2P_PORT" ]; then
             CMD="$CMD --p2p-port=$EC_P2P_PORT"
-        fi
-
-        if [ ! -z "$BESU_MAX_BACK_LAYERS" ]; then
-            CMD="$CMD --bonsai-maximum-back-layers-to-load=$BESU_MAX_BACK_LAYERS"
         fi
 
         if [ "$BESU_JVM_HEAP_SIZE" -gt "0" ]; then
@@ -278,11 +325,6 @@ if [ "$CLIENT" = "reth" ]; then
     fi
 
     CMD="$PERF_PREFIX /usr/local/bin/reth node \
-        --prune.receipts.before ${DEPOSIT_CONTRACT_BLOCK:-0} \
-        --prune.transactionlookup.before ${DEPOSIT_CONTRACT_BLOCK:-0} \
-        --prune.accounthistory.distance ${RETH_STATE_PRUNE_DISTANCE:-10064} \
-        --prune.storagehistory.distance ${RETH_STATE_PRUNE_DISTANCE:-10064} \
-        --prune.senderrecovery.full \
         --chain $ETH_NETWORK \
         --datadir /ethclient/reth \
         --http \
@@ -299,6 +341,25 @@ if [ "$CLIENT" = "reth" ]; then
         --authrpc.port ${EC_ENGINE_PORT:-8551} \
         --authrpc.jwtsecret /secrets/jwtsecret \
         $EC_ADDITIONAL_FLAGS"
+
+    # History mode
+    if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ]; then
+        CMD="$CMD \
+        --prune.receipts.pre-merge \
+        --prune.bodies.pre-merge \
+        --prune.transactionlookup.distance ${RETH_STATE_PRUNE_DISTANCE:-10064} \
+        --prune.accounthistory.distance ${RETH_STATE_PRUNE_DISTANCE:-10064} \
+        --prune.storagehistory.distance ${RETH_STATE_PRUNE_DISTANCE:-10064} \
+        --prune.senderrecovery.full"
+    elif [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
+        CMD="$CMD \
+        --prune.receipts.before 0 \
+        --prune.bodies.before 0 \
+        --prune.transactionlookup.distance ${RETH_STATE_PRUNE_DISTANCE:-10064} \
+        --prune.accounthistory.distance ${RETH_STATE_PRUNE_DISTANCE:-10064} \
+        --prune.storagehistory.distance ${RETH_STATE_PRUNE_DISTANCE:-10064} \
+        --prune.senderrecovery.full"
+    fi
 
     if [ "$ENABLE_METRICS" = "true" ]; then
         CMD="$CMD --metrics 0.0.0.0:$EC_METRICS_PORT"

@@ -42,12 +42,13 @@ type wizard struct {
 	// Step 8 - Metrics
 	metricsModal *choiceWizardStep
 
-	// Step 9 - MEV Boost
-	mevModeModal     *choiceWizardStep
-	localMevModal    *checkBoxWizardStep
-	externalMevModal *textBoxWizardStep
-	mevWarningModal  *choiceWizardStep
-	mevDisabledModal *choiceWizardStep
+	// Step 9 - PBS
+	pbsModeModal                *choiceWizardStep
+	localPbsRelayModeModal      *choiceWizardStep
+	localPbsRelaySelectionModal *checkBoxWizardStep
+	externalPbsModal            *textBoxWizardStep
+	pbsWarningModal             *choiceWizardStep
+	pbsDisabledModal            *choiceWizardStep
 
 	// Done
 	finishedModal *choiceWizardStep
@@ -107,11 +108,12 @@ func newWizard(md *mainDisplay) *wizard {
 	stepCount++
 
 	// Step 9 - MEV Boost
-	wiz.mevModeModal = createMevModeStep(wiz, stepCount, totalSteps)
-	wiz.localMevModal = createLocalMevStep(wiz, stepCount, totalSteps)
-	wiz.externalMevModal = createExternalMevStep(wiz, stepCount, totalSteps)
-	wiz.mevWarningModal = createMevWarningStep(wiz, stepCount, totalSteps)
-	wiz.mevDisabledModal = createMevDisabledStep(wiz, stepCount, totalSteps)
+	wiz.pbsModeModal = createPbsModeStep(wiz, stepCount, totalSteps)
+	wiz.localPbsRelayModeModal = createPbsLocalRelayModeStep(wiz, stepCount, totalSteps)
+	wiz.localPbsRelaySelectionModal = createPbsLocalRelaySelectionStep(wiz, stepCount, totalSteps)
+	wiz.externalPbsModal = createPbsExternalStep(wiz, stepCount, totalSteps)
+	wiz.pbsWarningModal = createPbsWarningStep(wiz, stepCount, totalSteps)
+	wiz.pbsDisabledModal = createPbsDisabledStep(wiz, stepCount, totalSteps)
 	stepCount++
 
 	// Done

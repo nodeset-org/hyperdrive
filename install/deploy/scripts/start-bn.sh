@@ -35,7 +35,6 @@ if [ "$CLIENT" = "lighthouse" ]; then
         --http \
         --http-address 0.0.0.0 \
         --http-port ${BN_API_PORT:-5052} \
-        --eth1-blocks-per-log-query 150 \
         --disable-upnp \
         --staking \
         --execution-jwt=/secrets/jwtsecret \
@@ -49,8 +48,8 @@ if [ "$CLIENT" = "lighthouse" ]; then
         CMD="$CMD --execution-timeout-multiplier 2"
     fi
 
-    if [ ! -z "$MEV_BOOST_URL" ]; then
-        CMD="$CMD --builder $MEV_BOOST_URL"
+    if [ ! -z "$PBS_URL" ]; then
+        CMD="$CMD --builder $PBS_URL"
     fi
 
     if [ ! -z "$BN_MAX_PEERS" ]; then
@@ -88,12 +87,12 @@ if [ "$CLIENT" = "lodestar" ]; then
         --serveHistoricalState \
         $BN_ADDITIONAL_FLAGS"
 
-    if [ ! -z "$TTD_OVERRIDE" ]; then
-        CMD="$CMD --terminal-total-difficulty-override $TTD_OVERRIDE"
+    if [ "$BN_ENABLE_PRUNING" = "true" ]; then
+        CMD="$CMD --chain.pruneHistory"
     fi
 
-    if [ ! -z "$MEV_BOOST_URL" ]; then
-        CMD="$CMD --builder --builder.urls $MEV_BOOST_URL"
+    if [ ! -z "$PBS_URL" ]; then
+        CMD="$CMD --builder --builder.urls $PBS_URL"
     fi
 
     if [ ! -z "$BN_MAX_PEERS" ]; then
@@ -149,8 +148,8 @@ if [ "$CLIENT" = "nimbus" ]; then
         --jwt-secret=/secrets/jwtsecret \
         $BN_ADDITIONAL_FLAGS"
 
-    if [ ! -z "$MEV_BOOST_URL" ]; then
-        CMD="$CMD --payload-builder --payload-builder-url=$MEV_BOOST_URL"
+    if [ ! -z "$PBS_URL" ]; then
+        CMD="$CMD --payload-builder --payload-builder-url=$PBS_URL"
     fi
 
     if [ ! -z "$BN_MAX_PEERS" ]; then
@@ -193,8 +192,12 @@ if [ "$CLIENT" = "prysm" ]; then
         --enable-experimental-backfill \
         $BN_ADDITIONAL_FLAGS"
 
-    if [ ! -z "$MEV_BOOST_URL" ]; then
-        CMD="$CMD --http-mev-relay $MEV_BOOST_URL"
+    if [ "$BN_ENABLE_PRUNING" = "true" ]; then
+        CMD="$CMD --beacon-db-pruning"
+    fi
+
+    if [ ! -z "$PBS_URL" ]; then
+        CMD="$CMD --http-mev-relay $PBS_URL"
     fi
 
     if [ ! -z "$BN_MAX_PEERS" ]; then
@@ -242,8 +245,8 @@ if [ "$CLIENT" = "teku" ]; then
         CMD="$CMD --data-storage-mode=archive"
     fi
 
-    if [ ! -z "$MEV_BOOST_URL" ]; then
-        CMD="$CMD --builder-endpoint=$MEV_BOOST_URL"
+    if [ ! -z "$PBS_URL" ]; then
+        CMD="$CMD --builder-endpoint=$PBS_URL"
     fi
 
     if [ ! -z "$BN_MAX_PEERS" ]; then

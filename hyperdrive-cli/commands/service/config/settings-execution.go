@@ -8,19 +8,20 @@ import (
 
 // The page wrapper for the EC config
 type ExecutionConfigPage struct {
-	home               *settingsHome
-	page               *page
-	layout             *standardLayout
-	masterConfig       *client.GlobalConfig
-	clientModeDropdown *parameterizedFormItem
-	localEcDropdown    *parameterizedFormItem
-	externalEcDropdown *parameterizedFormItem
-	localEcItems       []*parameterizedFormItem
-	gethItems          []*parameterizedFormItem
-	nethermindItems    []*parameterizedFormItem
-	besuItems          []*parameterizedFormItem
-	rethItems          []*parameterizedFormItem
-	externalEcItems    []*parameterizedFormItem
+	home                      *settingsHome
+	page                      *page
+	layout                    *standardLayout
+	masterConfig              *client.GlobalConfig
+	clientModeDropdown        *parameterizedFormItem
+	localEcDropdown           *parameterizedFormItem
+	externalEcDropdown        *parameterizedFormItem
+	localEcItems              []*parameterizedFormItem
+	localEcItemsNoHistoryMode []*parameterizedFormItem // TEMP: version of local EC items without history mode (for Hoodi/Geth)
+	gethItems                 []*parameterizedFormItem
+	nethermindItems           []*parameterizedFormItem
+	besuItems                 []*parameterizedFormItem
+	rethItems                 []*parameterizedFormItem
+	externalEcItems           []*parameterizedFormItem
 }
 
 // Creates a new page for the Execution client settings
@@ -70,15 +71,47 @@ func (configPage *ExecutionConfigPage) createContent() {
 	configPage.rethItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.LocalExecutionClient.Reth.GetParameters(), configPage.layout.descriptionBox)
 	configPage.externalEcItems = createParameterizedFormItems(configPage.masterConfig.Hyperdrive.ExternalExecutionClient.GetParameters(), configPage.layout.descriptionBox)
 
+	// TEMP: create a version of the local EC items without the history mode (Geth needs this for Hoodi right now)
+	// This can be removed if/when Geth can use history mode on Hoodi without crashing
+	historyModeParam := configPage.masterConfig.Hyperdrive.LocalExecutionClient.HistoryMode
+	modifiedParam := config.Parameter[config.ExecutionClientHistoryMode]{
+		ParameterCommon: historyModeParam.GetCommon(),
+		Value:           historyModeParam.Value,
+		Default:         map[config.Network]config.ExecutionClientHistoryMode{},
+		Options:         []*config.ParameterOption[config.ExecutionClientHistoryMode]{},
+	}
+	for network, value := range historyModeParam.Default {
+		if value == config.ExecutionClientHistoryMode_PostMerge {
+			modifiedParam.Default[network] = config.ExecutionClientHistoryMode_Full
+		} else {
+			modifiedParam.Default[network] = value
+		}
+	}
+	for _, option := range historyModeParam.Options {
+		if option.Value == config.ExecutionClientHistoryMode_PostMerge {
+			continue
+		}
+		modifiedParam.Options = append(modifiedParam.Options, option)
+	}
+
 	// Take the client selections out since they're done explicitly
 	localEcItems := []*parameterizedFormItem{}
+	localEcItemsNoHistoryMode := []*parameterizedFormItem{}
 	for _, item := range configPage.localEcItems {
 		if item.parameter.GetCommon().ID == ids.EcID {
 			continue
 		}
+		if item.parameter.GetCommon().ID == ids.LocalEcHistoryModeID {
+			// Replace with the modified history mode parameter
+			historyModeItem := createParameterizedDropDown(&modifiedParam, configPage.layout.descriptionBox)
+			localEcItemsNoHistoryMode = append(localEcItemsNoHistoryMode, historyModeItem)
+		} else {
+			localEcItemsNoHistoryMode = append(localEcItemsNoHistoryMode, item)
+		}
 		localEcItems = append(localEcItems, item)
 	}
 	configPage.localEcItems = localEcItems
+	configPage.localEcItemsNoHistoryMode = localEcItemsNoHistoryMode
 
 	externalEcItems := []*parameterizedFormItem{}
 	for _, item := range configPage.externalEcItems {
@@ -92,6 +125,7 @@ func (configPage *ExecutionConfigPage) createContent() {
 	// Map the parameters to the form items in the layout
 	configPage.layout.mapParameterizedFormItems(configPage.clientModeDropdown, configPage.localEcDropdown, configPage.externalEcDropdown)
 	configPage.layout.mapParameterizedFormItems(configPage.localEcItems...)
+	configPage.layout.mapParameterizedFormItems(configPage.localEcItemsNoHistoryMode...)
 	configPage.layout.mapParameterizedFormItems(configPage.gethItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.nethermindItems...)
 	configPage.layout.mapParameterizedFormItems(configPage.besuItems...)
@@ -144,14 +178,19 @@ func (configPage *ExecutionConfigPage) handleEcModeChanged() {
 
 // Handle all of the form changes when the local EC has changed
 func (configPage *ExecutionConfigPage) handleLocalEcChanged() {
+	selectedEc := configPage.masterConfig.Hyperdrive.LocalExecutionClient.ExecutionClient.Value
 	configPage.layout.form.Clear(true)
 	configPage.layout.form.AddFormItem(configPage.clientModeDropdown.item)
 	configPage.layout.form.AddFormItem(configPage.localEcDropdown.item)
-	selectedEc := configPage.masterConfig.Hyperdrive.LocalExecutionClient.ExecutionClient.Value
 
 	switch selectedEc {
 	case config.ExecutionClient_Geth:
-		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.gethItems, nil)
+		// Handle the history mode for Hoodi since Geth can't do it
+		if configPage.masterConfig.Hyperdrive.Network.Value == config.Network_Hoodi {
+			configPage.layout.addFormItemsWithCommonParams(configPage.localEcItemsNoHistoryMode, configPage.gethItems, nil)
+		} else {
+			configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.gethItems, nil)
+		}
 	case config.ExecutionClient_Nethermind:
 		configPage.layout.addFormItemsWithCommonParams(configPage.localEcItems, configPage.nethermindItems, nil)
 	case config.ExecutionClient_Besu:

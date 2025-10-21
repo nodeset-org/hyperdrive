@@ -11,8 +11,13 @@ import (
 	"github.com/alessio/shellescape"
 	"github.com/mitchellh/go-homedir"
 	hdconfig "github.com/nodeset-org/hyperdrive-daemon/shared/config"
+	"github.com/nodeset-org/hyperdrive-daemon/shared/config/pbs"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client/template"
 	"github.com/rocket-pool/node-manager-core/config"
+)
+
+const (
+	cbConfigTemplateFilename string = "cb_config" + template.TemplateSuffix
 )
 
 // Build a docker compose command
@@ -126,9 +131,17 @@ func (c *HyperdriveClient) deployTemplates(cfg *GlobalConfig, hyperdriveDir stri
 		)
 	}
 
-	// Check if we are running the MEV-Boost container locally
-	if cfg.Hyperdrive.MevBoost.Enable.Value && cfg.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
-		toDeploy = append(toDeploy, config.ContainerID_MevBoost)
+	// Check if we are running the PBS client container locally
+	if cfg.Hyperdrive.Pbs.Enable.Value && cfg.Hyperdrive.Pbs.Mode.Value == config.ClientMode_Local {
+		toDeploy = append(toDeploy, pbs.ContainerID_Pbs)
+
+		// Deploy the Commit-Boost PBS config if needed
+		if cfg.Hyperdrive.Pbs.LocalPbsClientConfig.Client.Value == pbs.PbsClient_CommitBoost {
+			err := c.composeCommitBoostPbsConfig(cfg)
+			if err != nil {
+				return nil, fmt.Errorf("error composing Commit-Boost PBS config: %w", err)
+			}
+		}
 	}
 
 	// Deploy main containers
@@ -297,4 +310,23 @@ func (c *HyperdriveClient) composeModule(global *GlobalConfig, module hdconfig.I
 	}
 
 	return deployedContainers, nil
+}
+
+// Compose the Commit-Boost PBS config
+func (c *HyperdriveClient) composeCommitBoostPbsConfig(cfg *GlobalConfig) error {
+	// Make sure the PBS config folder exists
+	commitBoostPbsConfigPath := cfg.Hyperdrive.GetPbsConfigPath()
+	err := os.MkdirAll(commitBoostPbsConfigPath, 0755)
+	if err != nil {
+		return fmt.Errorf("error creating PBS config folder [%s]: %w", commitBoostPbsConfigPath, err)
+	}
+
+	// Load the template
+	t := template.Template{
+		Src: filepath.Join(c.Context.TemplatesDir, cbConfigTemplateFilename),
+		Dst: filepath.Join(commitBoostPbsConfigPath, cfg.Hyperdrive.Pbs.LocalPbsClientConfig.CommitBoostPbsConfig.GetCommitBoostConfigFilename()),
+	}
+
+	// Write the template
+	return t.Write(cfg)
 }

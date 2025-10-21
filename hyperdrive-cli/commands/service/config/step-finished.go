@@ -34,10 +34,10 @@ func createFinishedStep(wiz *wizard, currentStep int, totalSteps int) *choiceWiz
 
 	back := func() {
 		// Disabled network support
-		if wiz.md.Config.Hyperdrive.MevBoost.HasRelays() {
-			wiz.mevModeModal.show()
+		if wiz.md.Config.Hyperdrive.Pbs.LocalPbsClientConfig.HasRelays(wiz.md.Config.Hyperdrive.GetEthNetworkName()) {
+			wiz.pbsModeModal.show()
 		} else {
-			wiz.mevDisabledModal.show()
+			wiz.pbsDisabledModal.show()
 		}
 	}
 

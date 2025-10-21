@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 
+	"github.com/nodeset-org/hyperdrive-daemon/shared/config/pbs"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/client"
 	"github.com/nodeset-org/hyperdrive/hyperdrive-cli/utils"
 	"github.com/rocket-pool/node-manager-core/config"
@@ -115,16 +116,23 @@ func serviceVersion(c *cli.Context) error {
 		return fmt.Errorf("unknown client mode [%v]", clientMode)
 	}
 
-	// MEV-Boost
-	var mevBoostString string
-	if cfg.Hyperdrive.MevBoost.Enable.Value {
-		if cfg.Hyperdrive.MevBoost.Mode.Value == config.ClientMode_Local {
-			mevBoostString = fmt.Sprintf("Enabled (Local Mode)\n\tImage: %s", cfg.Hyperdrive.MevBoost.ContainerTag.Value)
+	// PBS
+	var pbsClientString string
+	if cfg.Hyperdrive.Pbs.Enable.Value {
+		if cfg.Hyperdrive.Pbs.Mode.Value == config.ClientMode_Local {
+			switch cfg.Hyperdrive.Pbs.LocalPbsClientConfig.Client.Value {
+			case pbs.PbsClient_CommitBoost:
+				pbsClientString = fmt.Sprintf("Enabled (Local Mode)\n\tImage: %s", cfg.Hyperdrive.Pbs.LocalPbsClientConfig.CommitBoostPbsConfig.ContainerTag.Value)
+			case pbs.PbsClient_MevBoost:
+				pbsClientString = fmt.Sprintf("Enabled (Local Mode)\n\tImage: %s", cfg.Hyperdrive.Pbs.LocalPbsClientConfig.MevBoostConfig.ContainerTag.Value)
+			default:
+				pbsClientString = "Enabled (Local Mode)\n\tUnknown PBS client"
+			}
 		} else {
-			mevBoostString = "Enabled (External Mode)"
+			pbsClientString = "Enabled (External Mode)"
 		}
 	} else {
-		mevBoostString = "Disabled"
+		pbsClientString = "Disabled"
 	}
 
 	// StakeWise
@@ -177,7 +185,7 @@ func serviceVersion(c *cli.Context) error {
 	fmt.Printf("Daemon version: %s\n", serviceVersion)
 	fmt.Printf("Selected Execution Client: %s\n", executionClientString)
 	fmt.Printf("Selected Beacon Node: %s\n", beaconNodeString)
-	fmt.Printf("MEV-Boost client: %s\n", mevBoostString)
+	fmt.Printf("MEV-Boost client: %s\n", pbsClientString)
 
 	// Print module info
 	if stakeWiseVersion != "" || constellationVersion != "" {

@@ -122,7 +122,7 @@ install() {
             # Install OS dependencies
             progress 1 "Installing OS dependencies..."
             { apt-get -y update || fail "Could not update OS package definitions."; } >&2
-            { apt-get -y install apt-transport-https ca-certificates curl gnupg gnupg-agent lsb-release software-properties-common chrony || fail "Could not install OS packages."; } >&2
+            { apt-get -y install apt-transport-https ca-certificates curl gnupg gnupg-agent lsb-release chrony || fail "Could not install OS packages."; } >&2
 
             # Check for existing Docker installation
             progress 2 "Checking if Docker is installed..."
