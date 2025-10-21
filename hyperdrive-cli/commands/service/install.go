@@ -129,11 +129,23 @@ func printPatchNotes() {
 	fmt.Printf("%s=== Hyperdrive v%s ===%s\n\n", terminal.ColorGreen, shared.HyperdriveVersion, terminal.ColorReset)
 	fmt.Printf("Changes you should be aware of before starting:\n\n")
 
+	fmt.Printf("%s=== Commit-Boost Support ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("The MEV-Boost Docker container and TUI config section have been replaced by the more general 'PBS' (Proposer-Builder Separation) term. As part of this, Hyperdrive now supports Commit-Boost's PBS client. This is an alternative to MEV-Boost that's built by the non-profit Commit-Boost team and has some extra features that are helpful for advanced users, like choosing different relays on a per-validator basis. Hyperdrive now uses Commit-Boost by default for the sake of client diversity.")
+	fmt.Println()
+
 	fmt.Printf("%s=== Prysm Official Image ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("Since its inception, Hyperdrive has used a custom Prysm image that was built from the official Prysm source code. Starting with Prysm v6.0.4, we can now use the official Prysm images directly! If you're using Prysm, you no longer need to use the \"nodeset\" custom Prysm image. Hyperdrive has switched to using the official Prysm images by default, which have image tags like \"https://gcr.io/offchainlabs/prysm/beacon-chain:v6.0.4\" and \"https://gcr.io/offchainlabs/prysm/validator:v6.0.4\".")
+	fmt.Println("Since its inception, Hyperdrive has used a custom Prysm image that was built from the official Prysm source code. Starting with Prysm v6.0.4, we can now use the official Prysm images directly! If you're using Prysm, you no longer need to use the \"nodeset\" custom Prysm image. Hyperdrive has switched to using the official Prysm images by default, which have image tags like \"https://gcr.io/offchainlabs/prysm/beacon-chain:v6.1.2\" and \"https://gcr.io/offchainlabs/prysm/validator:v6.1.2\".")
 	fmt.Println()
 
 	fmt.Printf("%s=== Pruning for Prysm and Lodestar ===%s\n", terminal.ColorGreen, terminal.ColorReset)
 	fmt.Println("Prysm and Lodestar now have checkboxes for opt-in pruning in the `hyperdrive service config` command. Enabling this will delete the Beacon chain data that's older than 5 months, which is the same behavior that Nimbus has had for a while. If you don't do any manual historical queries on your node, you can enable this to save some disk space. Note that when you first enable this, pruning can take a while to run so it may be faster to resync your Beacon node after enabling it.")
+	fmt.Println()
+
+	fmt.Printf("%s=== EC History Mode ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("You can now choose the way your Execution Client preserves data with the new History Mode setting in `hyperdrive service config`. You can choose between Post-Merge (which only keeps the data necessary for consensus), Full Node (which keeps all recent data but prunes old state), or Archive (which keeps all data forever). Note that changing this setting will require a resync of your Execution Client.")
+	fmt.Println()
+
+	fmt.Printf("%s=== Fusaka on Hoodi ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("The Fusaka network upgrade is schedule for Hoodi on 2025-10-28 18:53:12 UTC. This version of Hyperdrive is ready to go for it. Note that this is NOT ready for Fusaka on Mainnet yet.")
 	fmt.Println()
 }
