@@ -145,7 +145,7 @@ func printPatchNotes() {
 	fmt.Println("You can now choose the way your Execution Client preserves data with the new History Mode setting in `hyperdrive service config`. You can choose between Post-Merge (which only keeps the data necessary for consensus), Full Node (which keeps all recent data but prunes old state), or Archive (which keeps all data forever). Note that changing this setting will require a resync of your Execution Client.")
 	fmt.Println()
 
-	fmt.Printf("%s=== Fusaka on Hoodi ===%s\n", terminal.ColorGreen, terminal.ColorReset)
-	fmt.Println("The Fusaka network upgrade is schedule for Hoodi on 2025-10-28 18:53:12 UTC. This version of Hyperdrive is ready to go for it. Note that this is NOT ready for Fusaka on Mainnet yet.")
+	fmt.Printf("%s=== Fusaka on Mainnet ===%s\n", terminal.ColorGreen, terminal.ColorReset)
+	fmt.Println("The Fusaka network upgrade is schedule for Mainnet on 2025-12-03 21:49:11 UTC. This version of Hyperdrive is ready to go for it.")
 	fmt.Println()
 }
