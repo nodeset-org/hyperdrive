@@ -26,7 +26,7 @@ No Compensation
 I agree that I will not receive monetary compensation for my Contributions and that the Project may use my Contributions under the terms set forth herein.
 
 Governing Law
-This Agreement is governed by the laws of [State/Country], without regard to conflict of law rules.
+This Agreement is governed by the laws of Delaware, USA, without regard to conflict of law rules.
 
 Execution
 By submitting a Contribution to the Project, I accept and agree to the terms of this Agreement.
