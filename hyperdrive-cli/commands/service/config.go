@@ -135,6 +135,14 @@ func configureService(c *cli.Context) error {
 				fmt.Fprintf(os.Stderr, "Warning: couldn't check running containers: %s\n", err.Error())
 				runningContainers = map[string]bool{}
 			}
+
+			// Let's reduce potential downtime by pulling the new containers before restarting
+			fmt.Println("Pulling potential new container images...")
+			err = hd.PullImages(getComposeFiles(c))
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: couldn't pul new images for updated containers: %s\n", err.Error())
+			}
+
 			for _, container := range md.ContainersToRestart {
 				fullName := fmt.Sprintf("%s_%s", prefix, container)
 				if !runningContainers[fullName] {

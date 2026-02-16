@@ -192,6 +192,15 @@ func (c *HyperdriveClient) StopService(composeFiles []string) error {
 	return printOutput(cmd)
 }
 
+// Pull new container images
+func (c *HyperdriveClient) PullImages(composeFiles []string) error {
+	cmd, err := c.compose(composeFiles, "pull -q")
+	if err != nil {
+		return err
+	}
+	return printOutput(cmd)
+}
+
 // Stop the Hyperdrive service, shutting it down and removing the Docker artifacts
 func (c *HyperdriveClient) DownService(composeFiles []string, includeVolumes bool) error {
 	args := "down"
