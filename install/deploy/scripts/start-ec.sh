@@ -252,7 +252,6 @@ if [ "$CLIENT" = "besu" ]; then
         CMD="$PERF_PREFIX /opt/besu/bin/besu \
         --network=$ETH_NETWORK \
         --data-path=/ethclient/besu \
-        --fast-sync-min-peers=3 \
         --rpc-http-enabled \
         --rpc-http-host=0.0.0.0 \
         --rpc-http-port=${EC_HTTP_PORT:-8545} \
@@ -278,10 +277,6 @@ if [ "$CLIENT" = "besu" ]; then
             --Xbonsai-full-flat-db-enabled=true \
             --snapsync-server-enabled"
 
-            if [ "$EC_HISTORY_MODE_POST_MERGE" = "true" ]; then
-                CMD="$CMD \
-                --history-expiry-prune"
-            fi  
             if [ "$EC_HISTORY_MODE_FULL" = "true" ]; then
                 CMD="$CMD \
                 --snapsync-synchronizer-pre-checkpoint-headers-only-enabled=false"
