@@ -4,15 +4,24 @@
 
 # Commit-Boost
 if [ "$CLIENT" = "commitBoost" ]; then
-    # Commit-Boost PBS doesn't accept command line arguments, everything must be in the config file which is
-    # specified by an environment variable.
+    # Commit-Boost PBS takes its settings from the config file named by CB_CONFIG,
+    # not from command-line flags.
     export CB_CONFIG="/cb_config.toml"
     if [ ! -f "$CB_CONFIG" ]; then
         echo "Commit-Boost config file not found at $CB_CONFIG. Please ensure the config file is correctly mounted."
         exit 1
     fi
-    CMD="/usr/local/bin/commit-boost-pbs"
-    exec ${CMD}
+    # v0.10.0 unified the CLI, PBS, and signer into `commit-boost` with subcommands
+    # (Commit-Boost/commit-boost-client#425). v0.9.x images still ship the
+    # standalone commit-boost-pbs binary, which is what the default tag uses.
+    if [ -x /usr/local/bin/commit-boost ]; then
+        exec /usr/local/bin/commit-boost pbs
+    elif [ -x /usr/local/bin/commit-boost-pbs ]; then
+        exec /usr/local/bin/commit-boost-pbs
+    else
+        echo "Commit-Boost PBS binary not found (tried /usr/local/bin/commit-boost and /usr/local/bin/commit-boost-pbs)."
+        exit 127
+    fi
 fi
 
 
@@ -23,6 +32,6 @@ if [ "$CLIENT" = "mevBoost" ]; then
         -addr 0.0.0.0:$PBS_PORT \
         -relay-check \
         -relays $PBS_RELAYS"
-    
+
     exec ${CMD}
 fi
